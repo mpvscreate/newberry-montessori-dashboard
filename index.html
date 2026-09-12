@@ -2202,11 +2202,12 @@ function persist(){
   syncToSupabase();
   scheduleAutoSave();
   updateSaveStatus();
-  if(!saveOK && !fileHandle && !_saveWarned){
+  const cloudOK = _sb && _lastSyncAt;
+  if(!saveOK && !fileHandle && !cloudOK && !_saveWarned){
     _saveWarned = true;
     try{ toast("⚠ This browser is NOT saving your changes. Set up auto-save to a file, or download a backup.", "Fix it", connectDataFile, 12000); }catch(_){ }
   }
-  if(saveOK || fileHandle) _saveWarned = false;
+  if(saveOK || fileHandle || cloudOK) _saveWarned = false;
 }
 function debouncedPersist(flashEl){
   clearTimeout(_persistTimer);
@@ -2228,15 +2229,17 @@ function flashSaved(el){
 function updateSaveStatus(){
   const el = document.getElementById('saveStatus');
   const banner = document.getElementById('storageBanner');
+  const cloudOK = _sb && _lastSyncAt;
   if(el){
     el.classList.add("ic-btn");
     if(fileHandle){
       if(fileSaveOK){ el.innerHTML = ic('check') + " Auto-saving"; el.className = "text-btn ic-btn save-ok"; el.title = "Auto-saving to your connected data file."; }
       else{ el.innerHTML = ic('alert') + " File save failed"; el.className = "text-btn ic-btn save-bad"; el.title = "Couldn't write to the connected file — reconnect via Overview."; }
     } else if(saveOK){ el.innerHTML = ic('check') + " Saved"; el.className = "text-btn ic-btn save-ok"; el.title = "Saved in this browser. Click to download a backup."; }
+    else if(cloudOK){ el.innerHTML = ic('check') + " Cloud saved"; el.className = "text-btn ic-btn save-ok"; el.title = "Browser storage unavailable but data is saved to the cloud."; }
     else{ el.innerHTML = ic('alert') + " Not saved"; el.className = "text-btn ic-btn save-bad"; el.title = "Browser storage unavailable — connect a file via Overview to save."; }
   }
-  if(banner){ banner.style.display = (!fileHandle && !saveOK) ? "flex" : "none"; }
+  if(banner){ banner.style.display = (!fileHandle && !saveOK && !cloudOK) ? "flex" : "none"; }
 }
 function probeStorage(){
   try{ const k = "__nb_probe__"; localStorage.setItem(k, "1"); saveOK = (localStorage.getItem(k) === "1"); localStorage.removeItem(k); }
@@ -2304,6 +2307,7 @@ async function loadFromSupabase(){
       }
     }
     updateSyncStatus('ok', '☁ Synced');
+    updateSaveStatus();
   }catch(e){
     console.warn('Supabase load error:', e);
     updateSyncStatus('err', '☁ Error');
@@ -2323,7 +2327,7 @@ function syncToSupabase(){
         updated_by: 'browser-' + (navigator.userAgent.slice(0,30))
       });
       if(error){ console.warn('Supabase save:', error); updateSyncStatus('err', '☁ Error'); }
-      else{ _lastSyncAt = new Date(now).getTime(); updateSyncStatus('ok', '☁ Synced'); }
+      else{ _lastSyncAt = new Date(now).getTime(); updateSyncStatus('ok', '☁ Synced'); updateSaveStatus(); }
     }catch(e){
       console.warn('Supabase sync error:', e);
       updateSyncStatus('err', '☁ Error');
@@ -3790,7 +3794,8 @@ document.addEventListener('visibilitychange', () => {
 });
 window.addEventListener('beforeunload', e => {
   flushPersist();
-  if(!fileHandle && !saveOK){ e.preventDefault(); e.returnValue = "Your changes are NOT being saved. Set up auto-save to a file or download a Backup before leaving."; return e.returnValue; }
+  const cloudOK = _sb && _lastSyncAt;
+  if(!fileHandle && !saveOK && !cloudOK){ e.preventDefault(); e.returnValue = "Your changes are NOT being saved. Set up auto-save to a file or download a Backup before leaving."; return e.returnValue; }
 });
 
 /* ============ KEYBOARD SHORTCUTS ============ */
