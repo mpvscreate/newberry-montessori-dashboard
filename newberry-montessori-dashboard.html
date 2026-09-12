@@ -3130,15 +3130,51 @@ function toggleComplete(planeId, catId, subId, idx, checked, el){
   if(tr){ tr.classList.toggle('complete', checked); const sel = tr.querySelector('.status-select'); if(sel){ sel.value = item.status; sel.className = "status-select " + statusCls(item.status); } const due = tr.querySelector('.col-due'); if(due) due.classList.toggle('overdue', isOverdue(item)); }
   persist(); softRefresh(planeId, catId); refreshVisibility(subId);
 }
-function addRow(planeId, catId, subId){ findSubfolder(planeId, catId, subId).items.push(sampleItem()); saveState(); }
+function rebuildTbody(planeId, catId, subId){
+  const tbody = document.getElementById('tbody-' + subId);
+  if(!tbody) return false;
+  const sf = findSubfolder(planeId, catId, subId);
+  const isFurniture = catId === 'furniture';
+  const colCount = isFurniture ? 14 : 12;
+  tbody.innerHTML = '';
+  const isSorted = !!sortState[subId];
+  const grouped = !isSorted && shouldGroup(sf.items);
+  const indices = isSorted ? sortedIndices(sf.items, subId) : sf.items.map((_,i) => i);
+  let lastGroup = null;
+  indices.forEach(idx => {
+    const row = sf.items[idx];
+    const grp = groupKeyOf(row);
+    if(grouped && grp !== lastGroup){
+      lastGroup = grp;
+      const count = sf.items.filter(x => groupKeyOf(x) === grp).length;
+      const gr = document.createElement('tr');
+      gr.className = 'group-row';
+      gr.dataset.group = grp;
+      const collapsed = !!collapsedGroups[subId + '::' + grp];
+      gr.innerHTML = `<td colspan="${colCount}"><button class="group-toggle" data-sub="${subId}" data-group="${esc(grp)}" aria-label="Toggle group" onclick="toggleGroupFromBtn(this)">${collapsed ? ic('chevronRight') : ic('chevronDown')}</button><span class="group-name">${esc(grp || 'Other')}</span><span class="group-count">${count} item${count===1?'':'s'}</span></td>`;
+      tbody.appendChild(gr);
+    }
+    tbody.appendChild(buildRow(planeId, catId, subId, row, idx, sf.items.length, isFurniture, grouped ? grp : ''));
+  });
+  setTimeout(() => refreshVisibility(subId), 0);
+  softRefresh(planeId, catId);
+  return true;
+}
+function lightSave(planeId, catId, subId){
+  pushUndo();
+  persist();
+  syncToSupabase();
+  rebuildTbody(planeId, catId, subId);
+}
+function addRow(planeId, catId, subId){ findSubfolder(planeId, catId, subId).items.push(sampleItem()); lightSave(planeId, catId, subId); }
 function deleteRow(planeId, catId, subId, idx){
   const sf = findSubfolder(planeId, catId, subId);
   const [removed] = sf.items.splice(idx, 1);
-  saveState();
+  lightSave(planeId, catId, subId);
   toast("Item deleted.", "Undo", () => {
     const s = findSubfolder(planeId, catId, subId);
     s.items.splice(Math.min(idx, s.items.length), 0, removed);
-    saveState();
+    lightSave(planeId, catId, subId);
   }, 6000);
 }
 function moveRow(planeId, catId, subId, idx, dir){
@@ -3146,7 +3182,7 @@ function moveRow(planeId, catId, subId, idx, dir){
   const ni = idx + dir;
   if(ni < 0 || ni >= items.length) return;
   [items[idx], items[ni]] = [items[ni], items[idx]];
-  saveState();
+  lightSave(planeId, catId, subId);
 }
 
 /* ============ DRAG TO REORDER ============ */
@@ -3162,7 +3198,7 @@ function rowDrop(e, planeId, catId, subId, idx){
   const [m] = items.splice(from, 1);
   items.splice(idx, 0, m);
   delete sortState[subId];
-  saveState();
+  lightSave(planeId, catId, subId);
 }
 function sfDragStart(e, subId){ dragCtx = { type:"sf", subId }; e.dataTransfer.effectAllowed = "move"; try{ e.dataTransfer.setData("text/plain", subId); }catch(_){} const block = document.getElementById('sf-block-'+subId); if(block) block.classList.add('sf-dragging'); }
 function dropSubfolder(e, planeId, catId, targetSubId){
