@@ -373,6 +373,9 @@
   .drag-handle{ cursor:grab; color:var(--text-muted); font-size:13px; padding:0 4px; user-select:none; line-height:1; transition:color .15s ease; }
   .drag-handle:hover{ color:var(--text); }
   .drag-handle:active{ cursor:grabbing; }
+  .row-move-btn{ display:none; background:none; border:1px solid var(--border); cursor:pointer; color:var(--text-muted); padding:2px 4px; border-radius:4px; line-height:1; }
+  .row-move-btn:hover{ color:var(--text); background:var(--hover-bg); }
+  .row-move-btn .ic{ width:14px; height:14px; }
   tr.item-row.dragging{ opacity:.4; }
   tr.item-row.drop-target > td{ box-shadow:inset 0 2px 0 var(--asparagus-green); background:var(--active-tint); transition:background .12s ease; }
   .subfolder-block.sf-drop-target{ box-shadow:0 0 0 2px var(--asparagus-green); background:var(--active-tint); transition:box-shadow .15s ease, background .15s ease; }
@@ -502,6 +505,8 @@
     .mobile-nav button .ic{width:20px; height:20px;}
     .mobile-nav button.active{color:var(--asparagus-green);}
     .mobile-nav button:hover{color:var(--text);}
+    .drag-handle{display:none;}
+    .row-move-btn{display:inline-flex; align-items:center; justify-content:center;}
   }
 </style>
 </head>
@@ -602,8 +607,8 @@
   <div class="ref-dialog">
     <div class="ref-head"><h3 id="bulkAddTitle">Quick add items</h3><button onclick="closeBulkAdd()" aria-label="Close"><svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg></button></div>
     <div class="ref-body">
-      <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 10px;">One item per line — each becomes a new row (qty 1, not started). You can add a spec after a comma: <em>Item, spec</em>.</p>
-      <textarea id="bulkAddArea" class="bulk-add-area" placeholder="Pink Tower&#10;Brown Stair&#10;Red Rods, complete set"></textarea>
+      <p style="font-size:12.5px;color:var(--text-muted);margin:0 0 10px;">One item per line, or paste a CSV/spreadsheet with headers. Recognised columns: <em>Item, Spec, Qty, Unit Cost, Vendor, Due, Priority, Status, Notes</em>.</p>
+      <textarea id="bulkAddArea" class="bulk-add-area" placeholder="Pink Tower&#10;Brown Stair, complete set&#10;&#10;— or paste CSV / spreadsheet data —&#10;Item&#9;Qty&#9;Unit Cost&#9;Vendor&#10;Pink Tower&#9;1&#9;850&#9;Gonzagarredi"></textarea>
       <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:12px;">
         <button class="btn btn-ghost" onclick="closeBulkAdd()">Cancel</button>
         <button class="btn btn-primary" onclick="submitBulkAdd()">Add items</button>
@@ -2978,6 +2983,8 @@ function buildRow(planeId, catId, subId, row, idx, count, isFurniture, grp){
       <div class="row-actions">
         ${row.lastModified ? `<span class="row-modified" title="${new Date(row.lastModified).toLocaleString()}">${relTime(row.lastModified)}</span>` : ''}
         <span class="drag-handle" draggable="true" title="Drag to reorder" aria-label="Drag to reorder" ondragstart="rowDragStart(event,'${subId}',${idx})" ondragend="dragEnd()">${ic('grip')}</span>
+        <button class="row-move-btn" title="Move up" aria-label="Move up" onclick="moveRow('${planeId}','${catId}','${subId}',${idx},-1)">${ic('chevronUp')}</button>
+        <button class="row-move-btn" title="Move down" aria-label="Move down" onclick="moveRow('${planeId}','${catId}','${subId}',${idx},1)">${ic('chevronDown')}</button>
         <button class="row-delete" title="Delete" aria-label="Delete row" onclick="deleteRow('${planeId}','${catId}','${subId}',${idx})">${ic('x')}</button>
       </div>
     </td>
@@ -3243,16 +3250,78 @@ function locateSub(subId){ for(const p of state) for(const c of p.categories){ c
 /* ============ QUICK BULK ADD ============ */
 function openBulkAdd(planeId, catId, subId){ bulkAddCtx = { planeId, catId, subId }; document.getElementById('bulkAddArea').value = ""; document.getElementById('bulkAddModal').style.display = "flex"; setTimeout(() => document.getElementById('bulkAddArea').focus(), 30); }
 function closeBulkAdd(){ document.getElementById('bulkAddModal').style.display = "none"; bulkAddCtx = null; }
+function detectCSV(lines){
+  if(lines.length < 2) return null;
+  const hasTab = lines[0].includes('\t');
+  const sep = hasTab ? '\t' : ',';
+  const cols = lines[0].split(sep).map(c => c.trim().toLowerCase().replace(/[^a-z ]/g,''));
+  const known = ['item','spec','qty','unit cost','unitcost','vendor','due','priority','status','notes','name','description','quantity','cost','price','unit price'];
+  const matchCount = cols.filter(c => known.includes(c)).length;
+  if(matchCount < 1) return null;
+  const map = {};
+  cols.forEach((c, i) => {
+    if(c === 'item' || c === 'name') map.item = i;
+    else if(c === 'spec' || c === 'description') map.spec = i;
+    else if(c === 'qty' || c === 'quantity') map.qty = i;
+    else if(c === 'unit cost' || c === 'unitcost' || c === 'cost' || c === 'price' || c === 'unit price') map.unitCost = i;
+    else if(c === 'vendor') map.vendor = i;
+    else if(c === 'due') map.due = i;
+    else if(c === 'priority') map.priority = i;
+    else if(c === 'status') map.status = i;
+    else if(c === 'notes') map.notes = i;
+  });
+  if(map.item === undefined) map.item = 0;
+  return { sep, map };
+}
+function parseStatusValue(v){
+  if(!v) return 'not-started';
+  const s = v.toLowerCase().replace(/[^a-z]/g,'');
+  if(s === 'complete' || s === 'done' || s === 'completed') return 'complete';
+  if(s === 'ordered') return 'ordered';
+  if(s === 'inprogress' || s === 'progress' || s === 'wip') return 'in-progress';
+  return 'not-started';
+}
+function parsePriorityValue(v){
+  if(!v) return 'medium';
+  const s = v.toLowerCase().trim();
+  if(s === 'high' || s === 'urgent') return 'high';
+  if(s === 'low') return 'low';
+  return 'medium';
+}
 function submitBulkAdd(){
   if(!bulkAddCtx) return;
-  const lines = document.getElementById('bulkAddArea').value.split("\n").map(l => l.trim()).filter(Boolean);
+  const raw = document.getElementById('bulkAddArea').value;
+  const lines = raw.split("\n").map(l => l.trim()).filter(Boolean);
   if(!lines.length){ closeBulkAdd(); return; }
   const sf = findSubfolder(bulkAddCtx.planeId, bulkAddCtx.catId, bulkAddCtx.subId);
-  lines.forEach(line => { const parts = line.split(","); const name = parts.shift().trim(); sf.items.push(I(name, parts.join(",").trim(), 1, 0, "medium", "not-started")); });
-  const n = lines.length;
+  const csv = detectCSV(lines);
+  let n = 0;
+  if(csv){
+    const { sep, map } = csv;
+    for(let i = 1; i < lines.length; i++){
+      const cols = lines[i].split(sep).map(c => c.trim());
+      const name = cols[map.item] || '';
+      if(!name) continue;
+      const item = I(
+        name,
+        map.spec !== undefined ? (cols[map.spec]||'') : '',
+        map.qty !== undefined ? (parseFloat(cols[map.qty])||0) : 1,
+        map.unitCost !== undefined ? (parseFloat(cols[map.unitCost])||0) : 0,
+        map.priority !== undefined ? parsePriorityValue(cols[map.priority]) : 'medium',
+        map.status !== undefined ? parseStatusValue(cols[map.status]) : 'not-started'
+      );
+      if(map.vendor !== undefined) item.vendor = cols[map.vendor]||'';
+      if(map.due !== undefined) item.due = cols[map.due]||'';
+      if(map.notes !== undefined) item.notes = cols[map.notes]||'';
+      sf.items.push(item);
+      n++;
+    }
+  } else {
+    lines.forEach(line => { const parts = line.split(","); const name = parts.shift().trim(); if(!name) return; sf.items.push(I(name, parts.join(",").trim(), 1, 0, "medium", "not-started")); n++; });
+  }
   closeBulkAdd();
-  saveState();
-  toast(`Added ${n} item${n===1?'':'s'}.`);
+  if(n) saveState();
+  toast(`Added ${n} item${n===1?'':'s'}${csv?' from CSV':''}.`);
 }
 
 /* ============ TOAST ============ */
