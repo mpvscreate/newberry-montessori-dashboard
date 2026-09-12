@@ -1,0 +1,17 @@
+{
+  "name": "Newberry Montessori Dashboard",
+  "short_name": "Newberry",
+  "description": "Classroom setup tracking dashboard for Newberry House Montessori",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#fffdee",
+  "theme_color": "#1f3d1d",
+  "orientation": "any",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

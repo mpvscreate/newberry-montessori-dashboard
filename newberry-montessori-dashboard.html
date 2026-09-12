@@ -7,7 +7,8 @@
 <meta name="description" content="Newberry House classroom setup dashboard">
 <meta name="theme-color" content="#1f3d1d">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" type="image/svg+xml" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Newberry">
@@ -98,11 +99,12 @@
   .sidebar-link{
     display:block; width:100%; text-align:left; background:none; border:none; cursor:pointer;
     padding:9px 10px; border-radius:8px; margin-bottom:2px; color:var(--text); font-size:13px; font-weight:600;
+    transition:background .15s ease, color .15s ease;
   }
   .sidebar-link:hover{background:var(--hover-bg);}
   .sidebar-link.active{background:var(--asparagus-green); color:var(--ivory);}
 
-  .plane-link{width:100%; text-align:left; background:none; border:none; cursor:pointer; padding:9px 10px; border-radius:8px; margin-bottom:2px;}
+  .plane-link{width:100%; text-align:left; background:none; border:none; cursor:pointer; padding:9px 10px; border-radius:8px; margin-bottom:2px; transition:background .15s ease, box-shadow .15s ease;}
   .plane-link:hover{background:var(--hover-bg);}
   .plane-link.active{background:var(--active-tint); box-shadow:inset 2px 0 0 var(--asparagus-green);}
   .plane-link-name{font-size:12.5px; font-weight:700; color:var(--text); display:block;}
@@ -110,7 +112,8 @@
   .mini-progress{display:block; height:4px; background:var(--border); border-radius:20px; overflow:hidden; margin-top:6px;}
   .mini-progress-fill{display:block; height:100%; background:var(--asparagus-green); border-radius:20px;}
 
-  main.content{flex:1; min-width:0; padding:24px 28px 80px;}
+  main.content{flex:1; min-width:0; padding:24px 28px 80px; animation:fadeIn .2s ease;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 
   .overview-head{margin-bottom:18px;}
   .overview-head p{font-size:13px; color:var(--text-muted); margin:6px 0 0; max-width:640px;}
@@ -133,6 +136,13 @@
   .plane-card-count strong{color:var(--text); font-family:'Trebuchet MS',sans-serif;}
   .plane-card-bar{height:6px; background:var(--border); border-radius:20px; overflow:hidden; margin-top:10px;}
   .plane-card-bar span{display:block; height:100%; background:var(--asparagus-green); border-radius:20px;}
+  .plane-card-top{display:flex; align-items:flex-start; justify-content:space-between; gap:12px;}
+  .plane-card-info{flex:1; min-width:0;}
+  .plane-card-donut{flex-shrink:0; position:relative; width:52px; height:52px;}
+  .plane-card-donut svg{width:52px; height:52px; transform:rotate(-90deg);}
+  .plane-card-donut .donut-track{fill:none; stroke:var(--border); stroke-width:5;}
+  .plane-card-donut .donut-fill{fill:none; stroke:var(--asparagus-green); stroke-width:5; stroke-linecap:round; transition:stroke-dashoffset .5s ease;}
+  .plane-card-donut .donut-pct{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--text);}
   .plane-card-foot{display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-top:8px;}
 
   .breadcrumb{font-size:12px; color:var(--text-muted); margin-bottom:10px;}
@@ -143,11 +153,11 @@
   .plane-header-stats{display:flex; align-items:center; gap:18px; flex-wrap:wrap;}
   .phs-item{text-align:right; font-size:10.5px; color:var(--text-muted);}
   .phs-item strong{display:block; font-size:15px; color:var(--text); font-family:'Trebuchet MS',sans-serif;}
-  .link-btn{background:none; border:1px solid var(--border); color:var(--text-muted); font-size:11.5px; font-weight:600; padding:6px 11px; border-radius:8px; cursor:pointer;}
+  .link-btn{background:none; border:1px solid var(--border); color:var(--text-muted); font-size:11.5px; font-weight:600; padding:6px 11px; border-radius:8px; cursor:pointer; transition:background .15s ease, color .15s ease, border-color .15s ease;}
   .link-btn:hover{background:var(--hover-bg); color:var(--text);}
 
   .cat-tabs{display:flex; gap:2px; border-bottom:1px solid var(--border); margin-bottom:14px; overflow-x:auto;}
-  .cat-tab-btn{background:none; border:none; cursor:pointer; font-weight:600; font-size:13.5px; color:var(--text-muted); padding:10px 16px; border-bottom:2px solid transparent; white-space:nowrap;}
+  .cat-tab-btn{background:none; border:none; cursor:pointer; font-weight:600; font-size:13.5px; color:var(--text-muted); padding:10px 16px; border-bottom:2px solid transparent; white-space:nowrap; transition:color .15s ease, border-color .15s ease;}
   .cat-tab-btn:hover{color:var(--text);}
   .cat-tab-btn.active{color:var(--text); border-bottom-color:var(--asparagus-green);}
 
@@ -172,7 +182,7 @@
   .btn{font-weight:600; font-size:12.5px; border-radius:8px; padding:7px 13px; border:1px solid transparent; cursor:pointer;}
   .btn-primary{background:var(--asparagus-green); color:var(--ivory);}
   .btn-primary:hover{filter:brightness(1.06);}
-  .btn-ghost{background:var(--surface); color:var(--text); border-color:var(--border);}
+  .btn-ghost{background:var(--surface); color:var(--text); border-color:var(--border); transition:background .15s ease;}
   .btn-ghost:hover{background:var(--hover-bg);}
   .btn-danger{background:none; color:var(--danger); border-color:var(--border); font-size:11.5px; padding:6px 11px;}
   .btn-danger:hover{background:var(--hover-bg);}
@@ -216,6 +226,7 @@
   .cmd-kbd{display:inline-flex;align-items:center;gap:3px;font-size:10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-family:inherit;}
   tbody td{padding:8px 12px; font-size:13px; border-bottom:1px solid var(--border); vertical-align:middle;}
   tbody tr:last-child td{border-bottom:none;}
+  tbody tr{transition:background .12s ease;}
   tbody tr:hover{background:var(--hover-bg);}
   tbody tr.complete td{color:var(--text-muted);}
   tbody tr.complete td.col-item{text-decoration:line-through; opacity:.65;}
@@ -254,6 +265,7 @@
   .row-move:hover{color:var(--text); background:var(--hover-bg);}
   .row-delete{background:none; border:none; cursor:pointer; color:var(--text-muted); font-size:13px; padding:4px 6px; border-radius:6px;}
   .row-delete:hover{color:var(--danger); background:var(--hover-bg);}
+  .row-modified{font-size:9px; color:var(--text-muted); opacity:.6; white-space:nowrap;}
 
   .add-row-bar{padding:10px 12px; border-top:1px dashed var(--border); background:var(--bg);}
   .add-row-btn{background:none; border:1px dashed var(--asparagus-green); color:var(--asparagus-green); font-weight:600; font-size:12.5px; border-radius:8px; padding:7px 13px; cursor:pointer; width:100%; text-align:left;}
@@ -351,11 +363,15 @@
   td.col-due.overdue::after{ content:" ⚠"; color:var(--danger); }
 
   /* Drag to reorder */
-  .drag-handle{ cursor:grab; color:var(--text-muted); font-size:13px; padding:0 4px; user-select:none; line-height:1; }
+  .drag-handle{ cursor:grab; color:var(--text-muted); font-size:13px; padding:0 4px; user-select:none; line-height:1; transition:color .15s ease; }
+  .drag-handle:hover{ color:var(--text); }
   .drag-handle:active{ cursor:grabbing; }
-  tr.item-row.drop-target > td{ box-shadow:inset 0 2px 0 var(--asparagus-green); }
-  .subfolder-block.sf-drop-target{ box-shadow:0 0 0 2px var(--asparagus-green); }
-  .sf-drag-handle{ cursor:grab; color:var(--text-muted); font-size:13px; padding:2px 4px; }
+  tr.item-row.dragging{ opacity:.4; }
+  tr.item-row.drop-target > td{ box-shadow:inset 0 2px 0 var(--asparagus-green); background:var(--active-tint); transition:background .12s ease; }
+  .subfolder-block.sf-drop-target{ box-shadow:0 0 0 2px var(--asparagus-green); background:var(--active-tint); transition:box-shadow .15s ease, background .15s ease; }
+  .subfolder-block.sf-dragging{ opacity:.4; }
+  .sf-drag-handle{ cursor:grab; color:var(--text-muted); font-size:13px; padding:2px 4px; transition:color .15s ease; }
+  .sf-drag-handle:hover{ color:var(--text); }
 
   /* Collapsible sub-group header rows */
   tr.group-row > td{ background:var(--active-tint); padding:6px 12px; }
@@ -416,6 +432,14 @@
     input.cell-input, td .priority-select, td .status-select, td .ref-btn{ width:auto !important; max-width:62%; }
   }
 
+  .budget-panel{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px 20px; box-shadow:var(--shadow); margin-top:20px;}
+  .budget-panel h3{font-size:15px; margin-bottom:14px;}
+  .budget-row{display:flex; align-items:center; gap:12px; margin-bottom:10px;}
+  .budget-label{font-size:12px; font-weight:600; color:var(--text); width:140px; flex-shrink:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;}
+  .budget-bar-track{flex:1; height:18px; background:var(--bg); border-radius:6px; overflow:hidden; position:relative;}
+  .budget-bar-fill{height:100%; border-radius:6px; transition:width .4s ease;}
+  .budget-amount{font-size:12px; font-weight:600; color:var(--text); width:100px; text-align:right; flex-shrink:0;}
+  .budget-bar-pct{position:absolute; right:6px; top:50%; transform:translateY(-50%); font-size:9px; font-weight:700; color:var(--text-muted);}
   footer.appfooter{text-align:center; font-size:12px; color:var(--text-muted); padding:20px;}
 
   /* Print report */
@@ -437,13 +461,27 @@
     body{background:#fff;}
   }
 
+  .mobile-nav{display:none;}
   @media (max-width:860px){
     .app-shell{flex-direction:column;}
     nav.sidebar{width:100%; height:auto; position:sticky; top:55px; display:flex; overflow-x:auto; gap:4px; padding:10px 12px; white-space:nowrap;}
     .sidebar-section-title{display:none;}
     .plane-link{width:auto; min-width:150px;}
     .global-search input{width:130px;}
-    main.content{padding:18px 14px 60px;}
+    main.content{padding:18px 14px 80px;}
+    .mobile-nav{
+      display:flex; position:fixed; bottom:0; left:0; right:0; z-index:50;
+      background:var(--surface); border-top:1px solid var(--border); box-shadow:0 -2px 8px rgba(20,30,20,0.08);
+      justify-content:space-around; padding:6px 0 env(safe-area-inset-bottom, 6px);
+    }
+    .mobile-nav button{
+      display:flex; flex-direction:column; align-items:center; gap:2px;
+      background:none; border:none; color:var(--text-muted); font-size:10px; font-weight:600; cursor:pointer; padding:6px 12px; border-radius:8px;
+      transition:color .15s ease;
+    }
+    .mobile-nav button .ic{width:20px; height:20px;}
+    .mobile-nav button.active{color:var(--asparagus-green);}
+    .mobile-nav button:hover{color:var(--text);}
   }
 </style>
 </head>
@@ -610,7 +648,7 @@ function ic(name){ return ICONS[name] || ""; }
 
 /* Item + subfolder builders */
 function I(item, spec, qty, unitCost, priority, status){
-  return { item, spec:spec||"", qty:qty||0, unitCost:unitCost||0, vendor:"", due:"", priority:priority||"medium", status:status||"not-started", notes:"", dims:null, media:[] };
+  return { item, spec:spec||"", qty:qty||0, unitCost:unitCost||0, vendor:"", due:"", priority:priority||"medium", status:status||"not-started", notes:"", dims:null, media:[], lastModified:null };
 }
 function SF(label, items){ return { id: uid("sf"), label, items: items||[] }; }
 function sampleItem(){ return I("New item — click to edit","",1,0,"medium","not-started"); }
@@ -2009,6 +2047,34 @@ let fileHandle = null;      /* File System Access handle for auto-save-to-file *
 let autoSaveTimer = null;
 let fileSaveOK = true;
 let _persistTimer = null;
+const _undoStack = [];
+const _redoStack = [];
+const UNDO_LIMIT = 30;
+let _undoLock = false;
+function pushUndo(){
+  if(_undoLock) return;
+  _undoStack.push(JSON.stringify(state));
+  if(_undoStack.length > UNDO_LIMIT) _undoStack.shift();
+  _redoStack.length = 0;
+}
+function undo(){
+  if(!_undoStack.length){ toast("Nothing to undo."); return; }
+  _redoStack.push(JSON.stringify(state));
+  _undoLock = true;
+  state = JSON.parse(_undoStack.pop());
+  persist(); render();
+  _undoLock = false;
+  toast("Undone.", "Redo", redo, 4000);
+}
+function redo(){
+  if(!_redoStack.length){ toast("Nothing to redo."); return; }
+  _undoStack.push(JSON.stringify(state));
+  _undoLock = true;
+  state = JSON.parse(_redoStack.pop());
+  persist(); render();
+  _undoLock = false;
+  toast("Redone.", "Undo", undo, 4000);
+}
 
 /* Repair the shape of a loaded state so a malformed save can never blank the whole app.
    Returns null only if the data is unusable (→ caller falls back to fresh sample data). */
@@ -2161,7 +2227,7 @@ function probeStorage(){
   catch(e){ saveOK = false; }
   updateSaveStatus();
 }
-function saveState(){ persist(); render(); }
+function saveState(){ pushUndo(); persist(); render(); }
 function findPlane(id){ return state.find(p => p.id === id); }
 function findCategory(planeId, catId){ return findPlane(planeId).categories.find(c => c.id === catId); }
 function findSubfolder(planeId, catId, subId){ return findCategory(planeId, catId).subfolders.find(s => s.id === subId); }
@@ -2199,6 +2265,7 @@ function render(){
   else if(currentView === "procurement") renderProcurement();
   else renderPlaneDetail(currentView);
   window.scrollTo(0, sy);
+  if(typeof updateMobileNav === 'function') updateMobileNav();
 }
 function renderSidebar(){
   const nav = document.getElementById("sidebar");
@@ -2275,16 +2342,42 @@ function renderOverview(){
     const card = document.createElement("div");
     card.className = "plane-card";
     card.onclick = () => { currentView = p.id; render(); };
+    const circ = 2 * Math.PI * 20;
+    const offset = circ - (circ * s.pct / 100);
     card.innerHTML = `
-      <h3>${esc(p.label)}</h3>
-      <div class="plane-card-age">${esc(p.age)}</div>
-      <div class="plane-card-count"><strong>${s.total}</strong> items · ${p.categories.length} categories</div>
+      <div class="plane-card-top">
+        <div class="plane-card-info">
+          <h3>${esc(p.label)}</h3>
+          <div class="plane-card-age">${esc(p.age)}</div>
+          <div class="plane-card-count"><strong>${s.total}</strong> items · ${p.categories.length} categories</div>
+        </div>
+        <div class="plane-card-donut">
+          <svg viewBox="0 0 48 48"><circle class="donut-track" cx="24" cy="24" r="20"/><circle class="donut-fill" cx="24" cy="24" r="20" stroke-dasharray="${circ}" stroke-dashoffset="${offset}"/></svg>
+          <span class="donut-pct">${s.pct}%</span>
+        </div>
+      </div>
       <div class="plane-card-bar"><span style="width:${s.pct}%"></span></div>
-      <div class="plane-card-foot"><span>${s.complete}/${s.total} ready · ${s.pct}%</span><span class="cost-col">${fmtMoney(s.cost)}</span></div>
+      <div class="plane-card-foot"><span>${s.complete}/${s.total} ready</span><span class="cost-col">${fmtMoney(s.cost)}</span></div>
     `;
     grid.appendChild(card);
   });
   main.appendChild(grid);
+
+  const budgetPanel = document.createElement("div");
+  budgetPanel.className = "budget-panel cost-col";
+  const planesCosts = state.map(p => ({ label: p.label, cost: planeStats(p).cost }));
+  const maxCost = Math.max(...planesCosts.map(pc => pc.cost), 1);
+  const colors = ['#7da24b','#5a8a3a','#c98a3e','#1f3d1d','#775d2f','#b3452f','#6b7fbf','#4d8a6a'];
+  budgetPanel.innerHTML = `<h3>Budget Breakdown</h3>` + planesCosts.map((pc, i) => {
+    const pct = Math.round(pc.cost / maxCost * 100);
+    return `<div class="budget-row">
+      <span class="budget-label">${esc(pc.label)}</span>
+      <div class="budget-bar-track"><div class="budget-bar-fill" style="width:${pct}%;background:${colors[i % colors.length]}"></div>${pct > 15 ? `<span class="budget-bar-pct">${pct}%</span>` : ''}</div>
+      <span class="budget-amount">${fmtMoney(pc.cost)}</span>
+    </div>`;
+  }).join('');
+  main.appendChild(budgetPanel);
+
   updateCostsToggleLabel(); updateVendorToggleLabel();
 }
 
@@ -2761,6 +2854,7 @@ function buildRow(planeId, catId, subId, row, idx, count, isFurniture, grp){
     <td data-label="Notes" contenteditable="true" onblur="updateField('${planeId}','${catId}','${subId}',${idx},'notes', this.innerText)">${esc(row.notes||"")}</td>
     <td class="col-actions" data-label="">
       <div class="row-actions">
+        ${row.lastModified ? `<span class="row-modified" title="${new Date(row.lastModified).toLocaleString()}">${relTime(row.lastModified)}</span>` : ''}
         <span class="drag-handle" draggable="true" title="Drag to reorder" aria-label="Drag to reorder" ondragstart="rowDragStart(event,'${subId}',${idx})" ondragend="dragEnd()">${ic('grip')}</span>
         <button class="row-delete" title="Delete" aria-label="Delete row" onclick="deleteRow('${planeId}','${catId}','${subId}',${idx})">${ic('x')}</button>
       </div>
@@ -2844,37 +2938,54 @@ function softRefresh(planeId, catId){
   });
   renderSidebar();
 }
+function stampModified(item){ item.lastModified = new Date().toISOString(); }
+function relTime(iso){
+  if(!iso) return '';
+  const ms = Date.now() - new Date(iso).getTime();
+  const s = Math.floor(ms/1000), m = Math.floor(s/60), h = Math.floor(m/60), d = Math.floor(h/24);
+  if(d > 30) return new Date(iso).toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+  if(d > 0) return d + 'd ago';
+  if(h > 0) return h + 'h ago';
+  if(m > 0) return m + 'm ago';
+  return 'just now';
+}
 function updateField(planeId, catId, subId, idx, field, value, el){
+  pushUndo();
   const item = findSubfolder(planeId, catId, subId).items[idx];
-  item[field] = value;
+  item[field] = value; stampModified(item);
   persist();
   flashSaved(el);
   if(field === "due" && el){ const td = el.closest('td'); if(td) td.classList.toggle('overdue', isOverdue(item)); softRefresh(planeId, catId); }
 }
 function updateNumField(planeId, catId, subId, idx, field, value, el){
+  pushUndo();
   const item = findSubfolder(planeId, catId, subId).items[idx];
-  item[field] = Number(value) || 0;
+  item[field] = Number(value) || 0; stampModified(item);
   /* Update the UI first so the total always recalculates, even if saving fails. */
   if(el){ const tr = el.closest('tr'); const tc = tr && tr.querySelector('.col-total'); if(tc) tc.textContent = fmtMoney((Number(item.qty)||0)*(Number(item.unitCost)||0)); }
   try{ softRefresh(planeId, catId); }catch(e){}
   debouncedPersist(el);
 }
 function updateStatus(planeId, catId, subId, idx, el){
+  pushUndo();
   const item = findSubfolder(planeId, catId, subId).items[idx];
-  item.status = el.value;
+  item.status = el.value; stampModified(item);
   el.className = "status-select " + statusCls(el.value);
   const tr = el.closest('tr');
   if(tr){ tr.classList.toggle('complete', el.value === "complete"); const cb = tr.querySelector('.row-check'); if(cb) cb.checked = el.value === "complete"; const due = tr.querySelector('.col-due'); if(due) due.classList.toggle('overdue', isOverdue(item)); }
   persist(); flashSaved(el); softRefresh(planeId, catId); refreshVisibility(subId);
 }
 function updateBuildStage(planeId, catId, subId, idx, el){
-  findSubfolder(planeId, catId, subId).items[idx].buildStage = el.value;
+  pushUndo();
+  const _bsItem = findSubfolder(planeId, catId, subId).items[idx];
+  _bsItem.buildStage = el.value; stampModified(_bsItem);
   el.className = "build-select " + buildStageCls(el.value);
   persist(); flashSaved(el);
 }
 function toggleComplete(planeId, catId, subId, idx, checked, el){
+  pushUndo();
   const item = findSubfolder(planeId, catId, subId).items[idx];
-  item.status = checked ? "complete" : "not-started";
+  item.status = checked ? "complete" : "not-started"; stampModified(item);
   const tr = el ? el.closest('tr') : null;
   if(tr){ tr.classList.toggle('complete', checked); const sel = tr.querySelector('.status-select'); if(sel){ sel.value = item.status; sel.className = "status-select " + statusCls(item.status); } const due = tr.querySelector('.col-due'); if(due) due.classList.toggle('overdue', isOverdue(item)); }
   persist(); softRefresh(planeId, catId); refreshVisibility(subId);
@@ -2899,7 +3010,7 @@ function moveRow(planeId, catId, subId, idx, dir){
 }
 
 /* ============ DRAG TO REORDER ============ */
-function rowDragStart(e, subId, idx){ dragCtx = { type:"row", subId, from:idx }; e.dataTransfer.effectAllowed = "move"; try{ e.dataTransfer.setData("text/plain", String(idx)); }catch(_){} e.stopPropagation(); }
+function rowDragStart(e, subId, idx){ dragCtx = { type:"row", subId, from:idx }; e.dataTransfer.effectAllowed = "move"; try{ e.dataTransfer.setData("text/plain", String(idx)); }catch(_){} const tr = e.target.closest('tr'); if(tr) tr.classList.add('dragging'); e.stopPropagation(); }
 function rowDragOver(e){ if(dragCtx && dragCtx.type === "row"){ e.preventDefault(); e.currentTarget.classList.add('drop-target'); } }
 function rowDrop(e, planeId, catId, subId, idx){
   e.currentTarget.classList.remove('drop-target');
@@ -2913,7 +3024,7 @@ function rowDrop(e, planeId, catId, subId, idx){
   delete sortState[subId];
   saveState();
 }
-function sfDragStart(e, subId){ dragCtx = { type:"sf", subId }; e.dataTransfer.effectAllowed = "move"; try{ e.dataTransfer.setData("text/plain", subId); }catch(_){} }
+function sfDragStart(e, subId){ dragCtx = { type:"sf", subId }; e.dataTransfer.effectAllowed = "move"; try{ e.dataTransfer.setData("text/plain", subId); }catch(_){} const block = document.getElementById('sf-block-'+subId); if(block) block.classList.add('sf-dragging'); }
 function dropSubfolder(e, planeId, catId, targetSubId){
   e.preventDefault();
   if(!dragCtx || dragCtx.type !== "sf") return;
@@ -2926,7 +3037,7 @@ function dropSubfolder(e, planeId, catId, targetSubId){
   cat.subfolders.splice(to, 0, m);
   saveState();
 }
-function dragEnd(){ document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target')); document.querySelectorAll('.sf-drop-target').forEach(el => el.classList.remove('sf-drop-target')); dragCtx = null; }
+function dragEnd(){ document.querySelectorAll('.drop-target').forEach(el => el.classList.remove('drop-target')); document.querySelectorAll('.sf-drop-target').forEach(el => el.classList.remove('sf-drop-target')); document.querySelectorAll('.dragging').forEach(el => el.classList.remove('dragging')); document.querySelectorAll('.sf-dragging').forEach(el => el.classList.remove('sf-dragging')); dragCtx = null; }
 
 /* ============ GROUPING ============ */
 function toggleGroupFromBtn(btn){ const k = btn.dataset.sub + "::" + btn.dataset.group; collapsedGroups[k] = !collapsedGroups[k]; refreshVisibility(btn.dataset.sub); }
@@ -3576,6 +3687,22 @@ window.addEventListener('beforeunload', e => {
   if(!fileHandle && !saveOK){ e.preventDefault(); e.returnValue = "Your changes are NOT being saved. Set up auto-save to a file or download a Backup before leaving."; return e.returnValue; }
 });
 
+/* ============ KEYBOARD SHORTCUTS ============ */
+function isEditing(){ const ae = document.activeElement; return ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.tagName === 'SELECT' || ae.isContentEditable); }
+document.addEventListener('keydown', function(e){
+  if(isEditing() || e.ctrlKey || e.metaKey || e.altKey) return;
+  if(document.getElementById('cmdPalette').style.display === 'flex') return;
+  if(e.key === 'g'){ e.preventDefault(); currentView = 'overview'; render(); return; }
+  if(e.key === 'p'){ e.preventDefault(); currentView = 'procurement'; render(); return; }
+  if(e.key === '/' || e.key === 'f'){ e.preventDefault(); const si = document.getElementById('globalSearch'); if(si){ si.focus(); si.select(); } return; }
+  if(e.key >= '1' && e.key <= '9'){
+    const idx = parseInt(e.key) - 1;
+    if(idx < state.length){ e.preventDefault(); currentView = state[idx].id; render(); }
+    return;
+  }
+  if(e.key === '?'){ e.preventDefault(); openCmdPalette(); return; }
+});
+
 /* ============ COMMAND PALETTE (Ctrl+K / Cmd+K) ============ */
 let cmdActive = -1;
 function buildCmdEntries(){
@@ -3597,6 +3724,8 @@ function buildCmdEntries(){
     }));
   });
   entries.push({label:'Toggle dark mode', hint:'Switch theme', type:'action', action:()=>toggleTheme()});
+  entries.push({label:'Undo', hint:'Ctrl+Z', type:'action', action:()=>undo()});
+  entries.push({label:'Redo', hint:'Ctrl+Y', type:'action', action:()=>redo()});
   entries.push({label:'Export all (CSV)', hint:'Download full export', type:'action', action:()=>exportAllCSV()});
   entries.push({label:'Backup (download)', hint:'Save a backup file', type:'action', action:()=>backupData()});
   entries.push({label:'Print report', hint:'Generate printable report', type:'action', action:()=>printReport()});
@@ -3648,6 +3777,8 @@ document.addEventListener('keydown', function(e){
     if(pal.style.display === 'flex') closeCmdPalette(); else openCmdPalette();
     return;
   }
+  if((e.ctrlKey || e.metaKey) && e.key === 'z' && !e.shiftKey){ if(!isEditing()){ e.preventDefault(); undo(); return; } }
+  if((e.ctrlKey || e.metaKey) && (e.key === 'y' || (e.key === 'z' && e.shiftKey))){ if(!isEditing()){ e.preventDefault(); redo(); return; } }
   if(document.getElementById('cmdPalette').style.display !== 'flex') return;
   const inp = document.getElementById('cmdInput');
   const items = document.querySelectorAll('#cmdResults .cmd-item');
@@ -3725,6 +3856,25 @@ setTimeout(function(){
 /* Register the offline service worker when hosted (skips harmlessly on file://). */
 if('serviceWorker' in navigator && location.protocol.indexOf('http') === 0){
   window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
+</script>
+
+<nav class="mobile-nav" id="mobileNav">
+  <button onclick="currentView='overview';render();updateMobileNav();" id="mnOverview" title="Overview">
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l9-8 9 8"/><path d="M5 10v9a1 1 0 001 1h4v-5h4v5h4a1 1 0 001-1v-9"/></svg><span>Overview</span></button>
+  <button onclick="currentView='procurement';render();updateMobileNav();" id="mnProcure" title="Procurement">
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 01-8 0"/></svg><span>Procure</span></button>
+  <button onclick="document.getElementById('globalSearch').focus();" id="mnSearch" title="Search">
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg><span>Search</span></button>
+  <button onclick="openCmdPalette();" id="mnCmd" title="Commands">
+    <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Menu</span></button>
+</nav>
+
+<script>
+function updateMobileNav(){
+  document.querySelectorAll('#mobileNav button').forEach(b => b.classList.remove('active'));
+  if(currentView === 'overview') document.getElementById('mnOverview')?.classList.add('active');
+  else if(currentView === 'procurement') document.getElementById('mnProcure')?.classList.add('active');
 }
 </script>
 </body>
