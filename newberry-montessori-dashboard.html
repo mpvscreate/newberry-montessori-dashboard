@@ -2202,12 +2202,11 @@ function persist(){
   syncToSupabase();
   scheduleAutoSave();
   updateSaveStatus();
-  const cloudOK = _sb && _lastSyncAt;
-  if(!saveOK && !fileHandle && !cloudOK && !_saveWarned){
+  if(!saveOK && !fileHandle && !_sb && !_saveWarned){
     _saveWarned = true;
     try{ toast("⚠ This browser is NOT saving your changes. Set up auto-save to a file, or download a backup.", "Fix it", connectDataFile, 12000); }catch(_){ }
   }
-  if(saveOK || fileHandle || cloudOK) _saveWarned = false;
+  if(saveOK || fileHandle || _sb) _saveWarned = false;
 }
 function debouncedPersist(flashEl){
   clearTimeout(_persistTimer);
@@ -2296,6 +2295,7 @@ async function loadFromSupabase(){
       const remoteState = typeof data.state === 'string' ? JSON.parse(data.state) : data.state;
       const norm = normalizeState(remoteState);
       if(norm){
+        _lastSyncAt = data.updated_at ? new Date(data.updated_at).getTime() : Date.now();
         const localStr = JSON.stringify(state);
         const remoteStr = JSON.stringify(norm);
         if(localStr !== remoteStr){
@@ -2303,7 +2303,6 @@ async function loadFromSupabase(){
           persist();
           render();
         }
-        _lastSyncAt = data.updated_at ? new Date(data.updated_at).getTime() : Date.now();
       }
     }
     updateSyncStatus('ok', '☁ Synced');
@@ -3794,8 +3793,7 @@ document.addEventListener('visibilitychange', () => {
 });
 window.addEventListener('beforeunload', e => {
   flushPersist();
-  const cloudOK = _sb && _lastSyncAt;
-  if(!fileHandle && !saveOK && !cloudOK){ e.preventDefault(); e.returnValue = "Your changes are NOT being saved. Set up auto-save to a file or download a Backup before leaving."; return e.returnValue; }
+  if(!fileHandle && !saveOK && !_sb){ e.preventDefault(); e.returnValue = "Your changes are NOT being saved. Set up auto-save to a file or download a Backup before leaving."; return e.returnValue; }
 });
 
 /* ============ KEYBOARD SHORTCUTS ============ */
