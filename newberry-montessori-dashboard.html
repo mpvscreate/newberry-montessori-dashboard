@@ -461,11 +461,24 @@
   #printRoot table.print-table{width:100%; border-collapse:collapse; margin-bottom:8px; font-size:10px;}
   #printRoot table.print-table th{background:#eee; text-align:left; padding:4px 6px; border:1px solid #bbb; font-size:9px; text-transform:uppercase;}
   #printRoot table.print-table td{padding:4px 6px; border:1px solid #ccc; vertical-align:top;}
+  #printRoot .print-toc{margin:14px 0 8px; padding:12px 16px; border:1px solid #ccc; border-radius:6px; background:#f9f9f5;}
+  #printRoot .print-toc-title{font-size:14px; margin:0 0 6px; border:none; padding:0;}
+  #printRoot .print-toc ol{margin:0; padding-left:20px;}
+  #printRoot .print-toc li{font-size:12px; margin-bottom:3px; line-height:1.5;}
+  #printRoot .print-toc a{color:#1f3d1d; text-decoration:none; font-weight:600;}
+  #printRoot .print-toc .print-toc-detail{font-weight:400; font-size:10px; color:#666;}
+  #printRoot .print-plane-section + .print-plane-section{page-break-before:always;}
+  #printRoot table.print-table{page-break-inside:auto;}
+  #printRoot table.print-table thead{display:table-header-group;}
+  #printRoot table.print-table tr{page-break-inside:avoid;}
 
   @media print{
-    header.topbar, nav.sidebar, main.content, footer.appfooter{display:none !important;}
+    header.topbar, nav.sidebar, main.content, footer.appfooter, .mobile-nav, .storage-banner, #cmdPalette{display:none !important;}
     #printRoot{display:block !important; color:#000;}
-    body{background:#fff;}
+    body{background:#fff; margin:0; padding:0;}
+    #printRoot .print-toc{page-break-after:always; background:#f9f9f5 !important; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
+    #printRoot .print-plane-section + .print-plane-section{page-break-before:always;}
+    #printRoot table.print-table th{background:#eee !important; -webkit-print-color-adjust:exact; print-color-adjust:exact;}
   }
 
   .mobile-nav{display:none;}
@@ -3635,12 +3648,19 @@ function disconnectDataFile(){ fileHandle = null; updateSaveStatus(); toast("Aut
 function buildPrintReport(){
   const root = document.getElementById("printRoot");
   const o = overallStats();
+  let toc = '<div class="print-toc"><h2 class="print-toc-title">Contents</h2><ol>';
+  state.forEach((p, idx) => {
+    const ps = planeStats(p);
+    toc += `<li><a href="#print-plane-${idx}">${esc(p.label)}</a> <span class="print-toc-detail">${esc(p.age)} · ${ps.complete}/${ps.total} ready (${ps.pct}%) · ${fmtMoney(ps.cost)}</span></li>`;
+  });
+  toc += '</ol></div>';
   let html = `<h1>Classroom Setup — Newberry House</h1>
     <div class="print-meta">Full project report · Generated ${new Date().toLocaleDateString()} · Currency ZAR (R)</div>
     <div class="print-sub"><b>Overall:</b> ${o.complete}/${o.total} items ready (${o.pct}%) · Est. total ${fmtMoney(o.cost)}</div>`;
-  state.forEach(p => {
+  html += toc;
+  state.forEach((p, idx) => {
     const ps = planeStats(p);
-    html += `<h2>${esc(p.label)} <span>(${esc(p.age)})</span></h2>
+    html += `<div class="print-plane-section"><h2 id="print-plane-${idx}">${esc(p.label)} <span>(${esc(p.age)})</span></h2>
       <div class="print-sub">Ready ${ps.complete}/${ps.total} · ${ps.pct}% · Est. ${fmtMoney(ps.cost)}</div>`;
     p.categories.forEach(c => {
       html += `<h3>${esc(c.label)}</h3>`;
@@ -3659,6 +3679,7 @@ function buildPrintReport(){
         html += `</tbody></table>`;
       });
     });
+    html += `</div>`;
   });
   root.innerHTML = html;
 }
