@@ -3350,7 +3350,7 @@ async function backupData(){
 function triggerRestore(){ document.getElementById('restoreFile').click(); }
 async function applyRestoreData(data){
   state = data.state;
-  if(data.contentVersion) localStorage.setItem(CONTENT_VERSION_KEY, String(data.contentVersion));
+  try{ if(data.contentVersion) localStorage.setItem(CONTENT_VERSION_KEY, String(data.contentVersion)); }catch(e){}
   if(Array.isArray(data.media)){ for(const rec of data.media){ try{ await mediaPut(rec); }catch(e){} } }
   persist();
   currentView = "overview";
@@ -3528,7 +3528,7 @@ function applyTheme(theme){
 function toggleTheme(){
   const current = document.documentElement.getAttribute('data-theme') || 'light';
   const next = current === 'dark' ? 'light' : 'dark';
-  localStorage.setItem('newberry_theme', next);
+  try{ localStorage.setItem('newberry_theme', next); }catch(e){}
   applyTheme(next);
 }
 function updateCostsToggleLabel(){
@@ -3542,7 +3542,7 @@ function applyCostsVisibility(hidden){
 }
 function toggleCosts(){
   const hidden = !document.body.classList.contains('hide-costs');
-  localStorage.setItem('newberry_hide_costs', hidden ? '1' : '0');
+  try{ localStorage.setItem('newberry_hide_costs', hidden ? '1' : '0'); }catch(e){}
   applyCostsVisibility(hidden);
 }
 /* Vendor visibility is driven per-subfolder by sf.vendorHidden (single source of truth).
