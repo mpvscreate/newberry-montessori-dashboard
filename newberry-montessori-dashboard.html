@@ -49,6 +49,9 @@
     --shadow:0 1px 2px rgba(0,0,0,0.3);
     --shadow-md:0 3px 12px rgba(0,0,0,0.35);
   }
+  html[data-theme="dark"] .storage-banner{ background:#2a2210; color:#d4b96a; border-bottom-color:#3d3218; }
+  html[data-theme="dark"] .storage-banner .btn-ghost{ background:rgba(212,185,106,0.1); color:#d4b96a; border-color:rgba(212,185,106,0.25); }
+  html[data-theme="dark"] .storage-banner .btn-primary{ background:#d4b96a; color:#1a1508; }
 
   *{box-sizing:border-box;}
   html,body{margin:0;padding:0;}
@@ -77,13 +80,12 @@
   }
   .text-btn:hover{background:rgba(255,253,238,0.2);}
   .text-btn.save-ok{ background:rgba(125,162,75,0.4); border-color:rgba(125,162,75,0.7); }
-  .text-btn.save-bad{ background:var(--danger); border-color:var(--danger); color:#fff; animation:savepulse 1.4s ease-in-out infinite; }
-  @keyframes savepulse{ 0%,100%{ opacity:1; } 50%{ opacity:.6; } }
+  .text-btn.save-bad{ background:#b8860b; border-color:#b8860b; color:#fff; }
 
-  .storage-banner{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; background:var(--danger); color:#fff; padding:11px 20px; position:sticky; top:55px; z-index:35; font-size:13px; font-weight:600; }
+  .storage-banner{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; background:#f5e6c8; color:#5a3e1b; padding:11px 20px; position:sticky; top:55px; z-index:35; font-size:13px; font-weight:500; border-bottom:1px solid #dcc89a; }
   .storage-banner .sb-actions{ display:flex; gap:8px; flex-wrap:wrap; }
-  .storage-banner .btn-ghost{ background:rgba(255,255,255,0.15); color:#fff; border-color:rgba(255,255,255,0.5); }
-  .storage-banner .btn-primary{ background:#fff; color:var(--danger); }
+  .storage-banner .btn-ghost{ background:rgba(90,62,27,0.08); color:#5a3e1b; border-color:rgba(90,62,27,0.25); }
+  .storage-banner .btn-primary{ background:#5a3e1b; color:#fff; }
 
 
   .app-shell{display:flex; align-items:flex-start;}
@@ -464,7 +466,7 @@
 </header>
 
 <div id="storageBanner" class="storage-banner" style="display:none;">
-  <span class="sb-msg">⚠ This browser isn't saving your changes. Set up auto-save to a file so nothing is lost.</span>
+  <span class="sb-msg">💡 Your browser's storage is unavailable. Connect a file to keep your changes safe.</span>
   <span class="sb-actions">
     <button class="btn btn-primary" onclick="connectDataFile()">Auto-save to a file</button>
     <button class="btn btn-ghost" onclick="openDataFile()">Open data file</button>
@@ -2150,7 +2152,7 @@ function updateSaveStatus(){
       if(fileSaveOK){ el.innerHTML = ic('check') + " Auto-saving"; el.className = "text-btn ic-btn save-ok"; el.title = "Auto-saving to your connected data file."; }
       else{ el.innerHTML = ic('alert') + " File save failed"; el.className = "text-btn ic-btn save-bad"; el.title = "Couldn't write to the connected file — reconnect via Overview."; }
     } else if(saveOK){ el.innerHTML = ic('check') + " Saved"; el.className = "text-btn ic-btn save-ok"; el.title = "Saved in this browser. Click to download a backup."; }
-    else{ el.innerHTML = ic('alert') + " Not saving"; el.className = "text-btn ic-btn save-bad"; el.title = "Browser storage is blocked. Set up auto-save to a file (Overview)."; }
+    else{ el.innerHTML = ic('alert') + " Not saved"; el.className = "text-btn ic-btn save-bad"; el.title = "Browser storage unavailable — connect a file via Overview to save."; }
   }
   if(banner){ banner.style.display = (!fileHandle && !saveOK) ? "flex" : "none"; }
 }
