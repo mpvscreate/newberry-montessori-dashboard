@@ -469,6 +469,7 @@
     <button class="btn btn-primary" onclick="connectDataFile()">Auto-save to a file</button>
     <button class="btn btn-ghost" onclick="openDataFile()">Open data file</button>
     <button class="btn btn-ghost" onclick="backupData()">Download backup</button>
+    <button class="btn btn-ghost" onclick="document.getElementById('storageBanner').style.display='none'" title="Dismiss">✕</button>
   </span>
 </div>
 
@@ -3696,15 +3697,16 @@ window.addEventListener('unhandledrejection', function(e){ if(typeof rendered ==
 
 applyTheme(localStorage.getItem('newberry_theme') || 'light');
 applyCostsVisibility(localStorage.getItem('newberry_hide_costs') === '1');
+probeStorage();
 try{
   state = loadState();
+  if(saveOK) persist();
   render();
 }catch(err){
   console.error("Dashboard failed to render:", err);
   try{ renderRecovery(err); }catch(_){}
   showBootError(err, 'caught during loadState/render');
 }
-probeStorage();
 /* If the app rendered nothing (silent empty), try once more to self-heal; if it still fails, surface why. */
 function rendered(){ return !!(document.querySelector('#sidebar .sidebar-link') || document.querySelector('#sidebar .plane-link') || document.querySelector('#mainContent > *')); }
 setTimeout(function(){
