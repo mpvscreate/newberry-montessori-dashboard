@@ -82,6 +82,13 @@
   .text-btn:hover{background:rgba(255,253,238,0.2);}
   .text-btn.save-ok{ background:rgba(125,162,75,0.4); border-color:rgba(125,162,75,0.7); }
   .text-btn.save-bad{ background:#b8860b; border-color:#b8860b; color:#fff; }
+  .sync-indicator{ font-size:0.75rem; padding:2px 8px; border-radius:4px; cursor:default; }
+  .sync-indicator.sync-ok{ background:rgba(100,180,255,0.3); border-color:rgba(100,180,255,0.6); color:#1a5276; }
+  .sync-indicator.sync-off{ background:rgba(180,180,180,0.3); border-color:rgba(180,180,180,0.5); color:#555; }
+  .sync-indicator.sync-err{ background:rgba(200,100,100,0.3); border-color:rgba(200,100,100,0.5); color:#8b0000; }
+  html[data-theme="dark"] .sync-indicator.sync-ok{ background:rgba(100,180,255,0.15); color:#7ec8e3; }
+  html[data-theme="dark"] .sync-indicator.sync-off{ color:#aaa; }
+  html[data-theme="dark"] .sync-indicator.sync-err{ color:#e6a0a0; }
 
   .storage-banner{ display:flex; align-items:center; justify-content:space-between; gap:14px; flex-wrap:wrap; background:#f5e6c8; color:#5a3e1b; padding:11px 20px; position:sticky; top:55px; z-index:35; font-size:13px; font-weight:500; border-bottom:1px solid #dcc89a; }
   .storage-banner .sb-actions{ display:flex; gap:8px; flex-wrap:wrap; }
@@ -498,6 +505,7 @@
       <input type="text" id="globalSearch" placeholder="Search all planes..." oninput="onGlobalSearch(this.value)">
     </div>
     <button class="text-btn" id="saveStatus" onclick="backupData()" title="Save status">✓ Saved</button>
+    <span class="text-btn sync-indicator" id="syncStatus" title="Cloud sync status">☁ Offline</span>
     <button class="text-btn" onclick="printReport()">Report / Print</button>
     <button class="text-btn" id="themeToggleBtn" onclick="toggleTheme()">Dark mode</button>
   </div>
@@ -591,8 +599,15 @@
   </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script>
 /* ============ CONFIG ============ */
+const SUPABASE_URL = 'https://flugwtlcpvjlnxmeszyp.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZsdWd3dGxjcHZqbG54bWVzenlwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgwNDkwMDQsImV4cCI6MjEwMzYyNTAwNH0.-hxtRpviVuikHPxjTwmB1X-OknGTdz-9GJGE6b2Z1ag';
+let _sb = null;
+let _syncTimer = null;
+let _syncLock = false;
+let _lastSyncAt = null;
 const PLANE_DEFS = [
   { id:"toddler", label:"Toddler Classroom", age:"18 months – 3 years" },
   { id:"pre-primary", label:"Pre-Primary", age:"3 – 6 years" },
@@ -2184,6 +2199,7 @@ function persist(){
     localStorage.setItem(STORAGE_KEY, json);
     saveOK = (localStorage.getItem(STORAGE_KEY) === json);  /* verify it actually stuck */
   }catch(e){ saveOK = false; }
+  syncToSupabase();
   scheduleAutoSave();
   updateSaveStatus();
   if(!saveOK && !fileHandle && !_saveWarned){
@@ -2227,7 +2243,97 @@ function probeStorage(){
   catch(e){ saveOK = false; }
   updateSaveStatus();
 }
-function saveState(){ pushUndo(); persist(); render(); }
+/* ============ SUPABASE SYNC ============ */
+function initSupabase(){
+  try{
+    if(typeof supabase === 'undefined' || !supabase.createClient) return;
+    _sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    updateSyncStatus('ok', '☁ Connected');
+    _sb.channel('dashboard_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'dashboard_state' }, payload => {
+        if(_syncLock) return;
+        const row = payload.new;
+        if(!row || !row.state) return;
+        const remote = row.updated_at ? new Date(row.updated_at).getTime() : 0;
+        if(_lastSyncAt && remote <= _lastSyncAt) return;
+        _syncLock = true;
+        try{
+          const remoteState = typeof row.state === 'string' ? JSON.parse(row.state) : row.state;
+          const norm = normalizeState(remoteState);
+          if(norm){
+            state = norm;
+            persist();
+            render();
+            updateSyncStatus('ok', '☁ Synced');
+            toast('Dashboard updated from another user.');
+          }
+        }catch(e){ console.warn('Realtime sync error:', e); }
+        _syncLock = false;
+      })
+      .subscribe();
+    loadFromSupabase();
+  }catch(e){
+    console.warn('Supabase init failed:', e);
+    updateSyncStatus('off', '☁ Offline');
+  }
+}
+function updateSyncStatus(cls, text){
+  const el = document.getElementById('syncStatus');
+  if(!el) return;
+  el.className = 'text-btn sync-indicator sync-' + cls;
+  el.textContent = text;
+  el.title = cls === 'ok' ? 'Real-time sync active' : cls === 'err' ? 'Sync error — retrying' : 'Cloud sync unavailable';
+}
+async function loadFromSupabase(){
+  if(!_sb) return;
+  try{
+    const { data, error } = await _sb.from('dashboard_state').select('*').eq('id', 'main').single();
+    if(error){ if(error.code !== 'PGRST116') console.warn('Supabase load:', error); return; }
+    if(data && data.state){
+      const remoteState = typeof data.state === 'string' ? JSON.parse(data.state) : data.state;
+      const norm = normalizeState(remoteState);
+      if(norm){
+        const localStr = JSON.stringify(state);
+        const remoteStr = JSON.stringify(norm);
+        if(localStr !== remoteStr){
+          state = norm;
+          persist();
+          render();
+        }
+        _lastSyncAt = data.updated_at ? new Date(data.updated_at).getTime() : Date.now();
+      }
+    }
+    updateSyncStatus('ok', '☁ Synced');
+  }catch(e){
+    console.warn('Supabase load error:', e);
+    updateSyncStatus('err', '☁ Error');
+  }
+}
+function syncToSupabase(){
+  if(!_sb || _syncLock) return;
+  clearTimeout(_syncTimer);
+  _syncTimer = setTimeout(async () => {
+    _syncLock = true;
+    try{
+      const now = new Date().toISOString();
+      const { error } = await _sb.from('dashboard_state').upsert({
+        id: 'main',
+        state: state,
+        updated_at: now,
+        updated_by: 'browser-' + (navigator.userAgent.slice(0,30))
+      });
+      if(error){ console.warn('Supabase save:', error); updateSyncStatus('err', '☁ Error'); }
+      else{ _lastSyncAt = new Date(now).getTime(); updateSyncStatus('ok', '☁ Synced'); }
+    }catch(e){
+      console.warn('Supabase sync error:', e);
+      updateSyncStatus('err', '☁ Error');
+    }
+    _syncLock = false;
+  }, 2000);
+}
+/* ============ END SUPABASE SYNC ============ */
+
+function saveState(){ pushUndo(); persist(); syncToSupabase(); render(); }
 function findPlane(id){ return state.find(p => p.id === id); }
 function findCategory(planeId, catId){ return findPlane(planeId).categories.find(c => c.id === catId); }
 function findSubfolder(planeId, catId, subId){ return findCategory(planeId, catId).subfolders.find(s => s.id === subId); }
@@ -3835,6 +3941,7 @@ try{
   state = loadState();
   if(saveOK) persist();
   render();
+  initSupabase();
 }catch(err){
   console.error("Dashboard failed to render:", err);
   try{ renderRecovery(err); }catch(_){}
