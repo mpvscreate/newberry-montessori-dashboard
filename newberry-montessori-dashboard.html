@@ -185,6 +185,33 @@
   th.sortable:hover{color:var(--text);}
   .sort-arrow{font-size:9px;margin-left:2px;opacity:.35;}
   th.sorted .sort-arrow{opacity:1;color:var(--asparagus-green);}
+
+  /* Cell-edit save flash */
+  @keyframes cellSaved{0%{box-shadow:inset 0 0 0 1.5px var(--asparagus-green);}100%{box-shadow:none;}}
+  td.cell-saved{animation:cellSaved .6s ease-out forwards;}
+  @keyframes inputSaved{0%{box-shadow:inset 0 0 0 1.5px var(--asparagus-green);border-radius:6px;}100%{box-shadow:none;}}
+  .input-saved{animation:inputSaved .6s ease-out forwards;}
+
+  /* Sticky subfolder headers */
+  .subfolder-header.stuck{position:sticky;top:55px;z-index:12;background:var(--surface);box-shadow:0 2px 6px rgba(20,30,20,0.08);border-bottom:1px solid var(--border);}
+  @media (max-width:860px){.subfolder-header.stuck{top:55px;}}
+
+  /* Command palette */
+  .cmd-overlay{position:fixed;inset:0;z-index:200;background:rgba(20,30,20,0.45);display:flex;align-items:flex-start;justify-content:center;padding-top:min(18vh,140px);}
+  .cmd-dialog{background:var(--surface);border:1px solid var(--border);border-radius:14px;box-shadow:var(--shadow-md);width:min(560px,92vw);max-height:min(420px,70vh);display:flex;flex-direction:column;overflow:hidden;}
+  .cmd-input-wrap{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--border);}
+  .cmd-input-wrap svg{flex-shrink:0;color:var(--text-muted);}
+  .cmd-input{flex:1;border:none;background:transparent;font-size:15px;color:var(--text);outline:none;font-family:inherit;}
+  .cmd-input::placeholder{color:var(--text-muted);}
+  .cmd-results{flex:1;overflow-y:auto;padding:6px;}
+  .cmd-item{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text);}
+  .cmd-item:hover,.cmd-item.active{background:var(--active-tint);}
+  .cmd-item-icon{color:var(--text-muted);font-size:14px;flex-shrink:0;width:20px;text-align:center;}
+  .cmd-item-label{font-weight:600;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .cmd-item-hint{font-size:11px;color:var(--text-muted);white-space:nowrap;}
+  .cmd-item-type{font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);background:var(--bg);padding:2px 7px;border-radius:4px;flex-shrink:0;}
+  .cmd-footer{display:flex;align-items:center;gap:14px;padding:8px 14px;border-top:1px solid var(--border);font-size:11px;color:var(--text-muted);}
+  .cmd-kbd{display:inline-flex;align-items:center;gap:3px;font-size:10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-family:inherit;}
   tbody td{padding:8px 12px; font-size:13px; border-bottom:1px solid var(--border); vertical-align:middle;}
   tbody tr:last-child td{border-bottom:none;}
   tbody tr:hover{background:var(--hover-bg);}
@@ -491,6 +518,21 @@
 <div id="lightbox" class="lightbox" style="display:none;" onclick="closeLightbox()"><img id="lightboxImg" alt=""></div>
 
 <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+<div id="cmdPalette" class="cmd-overlay" style="display:none;" onclick="if(event.target===this)closeCmdPalette()">
+  <div class="cmd-dialog" role="dialog" aria-label="Command palette">
+    <div class="cmd-input-wrap">
+      <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4-4"/></svg>
+      <input class="cmd-input" id="cmdInput" type="text" placeholder="Jump to plane, subfolder, item, or action..." autocomplete="off">
+    </div>
+    <div class="cmd-results" id="cmdResults"></div>
+    <div class="cmd-footer">
+      <span><span class="cmd-kbd">↑↓</span> navigate</span>
+      <span><span class="cmd-kbd">↵</span> open</span>
+      <span><span class="cmd-kbd">esc</span> close</span>
+    </div>
+  </div>
+</div>
 <input id="restoreFile" type="file" accept="application/json,.json" hidden onchange="restoreData(this.files)">
 
 <div id="bulkAddModal" class="ref-modal" style="display:none;">
@@ -2081,12 +2123,22 @@ function persist(){
   }
   if(saveOK || fileHandle) _saveWarned = false;
 }
-function debouncedPersist(){
+function debouncedPersist(flashEl){
   clearTimeout(_persistTimer);
-  _persistTimer = setTimeout(persist, 300);
+  _persistTimer = setTimeout(() => { persist(); if(flashEl) flashSaved(flashEl); }, 300);
 }
 function flushPersist(){
   if(_persistTimer){ clearTimeout(_persistTimer); _persistTimer = null; persist(); }
+}
+function flashSaved(el){
+  if(!el) return;
+  const isInput = el.tagName === 'INPUT' || el.tagName === 'SELECT' || el.tagName === 'TEXTAREA';
+  const target = isInput ? el : el.closest('td') || el;
+  const cls = isInput ? 'input-saved' : 'cell-saved';
+  target.classList.remove(cls);
+  void target.offsetWidth;
+  target.classList.add(cls);
+  target.addEventListener('animationend', () => target.classList.remove(cls), {once:true});
 }
 function updateSaveStatus(){
   const el = document.getElementById('saveStatus');
@@ -2494,7 +2546,7 @@ function buildSubfolderBlock(planeId, catId, sf, index, count){
   wrap.ondrop = (e) => { wrap.classList.remove('sf-drop-target'); if(dragCtx && dragCtx.type === 'sf') dropSubfolder(e, planeId, catId, sf.id); };
 
   const header = document.createElement("div");
-  header.className = "subfolder-header";
+  header.className = "subfolder-header stuck";
   header.innerHTML = `
     <div class="subfolder-title-wrap">
       <span class="sf-drag-handle" draggable="true" title="Drag to reorder folder" aria-label="Drag to reorder folder" ondragstart="sfDragStart(event,'${sf.id}')" ondragend="dragEnd()">${ic('grip')}</span>
@@ -2793,6 +2845,7 @@ function updateField(planeId, catId, subId, idx, field, value, el){
   const item = findSubfolder(planeId, catId, subId).items[idx];
   item[field] = value;
   persist();
+  flashSaved(el);
   if(field === "due" && el){ const td = el.closest('td'); if(td) td.classList.toggle('overdue', isOverdue(item)); softRefresh(planeId, catId); }
 }
 function updateNumField(planeId, catId, subId, idx, field, value, el){
@@ -2801,7 +2854,7 @@ function updateNumField(planeId, catId, subId, idx, field, value, el){
   /* Update the UI first so the total always recalculates, even if saving fails. */
   if(el){ const tr = el.closest('tr'); const tc = tr && tr.querySelector('.col-total'); if(tc) tc.textContent = fmtMoney((Number(item.qty)||0)*(Number(item.unitCost)||0)); }
   try{ softRefresh(planeId, catId); }catch(e){}
-  debouncedPersist();
+  debouncedPersist(el);
 }
 function updateStatus(planeId, catId, subId, idx, el){
   const item = findSubfolder(planeId, catId, subId).items[idx];
@@ -2809,12 +2862,12 @@ function updateStatus(planeId, catId, subId, idx, el){
   el.className = "status-select " + statusCls(el.value);
   const tr = el.closest('tr');
   if(tr){ tr.classList.toggle('complete', el.value === "complete"); const cb = tr.querySelector('.row-check'); if(cb) cb.checked = el.value === "complete"; const due = tr.querySelector('.col-due'); if(due) due.classList.toggle('overdue', isOverdue(item)); }
-  persist(); softRefresh(planeId, catId); refreshVisibility(subId);
+  persist(); flashSaved(el); softRefresh(planeId, catId); refreshVisibility(subId);
 }
 function updateBuildStage(planeId, catId, subId, idx, el){
   findSubfolder(planeId, catId, subId).items[idx].buildStage = el.value;
   el.className = "build-select " + buildStageCls(el.value);
-  persist();
+  persist(); flashSaved(el);
 }
 function toggleComplete(planeId, catId, subId, idx, checked, el){
   const item = findSubfolder(planeId, catId, subId).items[idx];
@@ -3075,7 +3128,7 @@ function renderRefCuts(){
     <button class="btn btn-ghost ic-btn" onclick="addPart()">${ic('plus')} Add part</button>`;
 }
 function addPart(){ const item = curRefItem(); if(!item) return; ensureRefFields(item); item.parts.push({ name:"", material:"", qty:1, l:"", w:"", t:"" }); persist(); renderRefCuts(); }
-function updatePart(i, field, val){ const item = curRefItem(); if(!item || !item.parts[i]) return; item.parts[i][field] = (field==='name'||field==='material') ? val : (val===''?'':Number(val)||0); debouncedPersist(); }
+function updatePart(i, field, val, el){ const item = curRefItem(); if(!item || !item.parts[i]) return; item.parts[i][field] = (field==='name'||field==='material') ? val : (val===''?'':Number(val)||0); debouncedPersist(el); }
 function deletePart(i){ const item = curRefItem(); if(!item) return; item.parts.splice(i,1); persist(); renderRefCuts(); }
 function closeReference(){
   document.getElementById('refModal').style.display = 'none';
@@ -3519,6 +3572,88 @@ window.addEventListener('beforeunload', e => {
   flushPersist();
   if(!fileHandle && !saveOK){ e.preventDefault(); e.returnValue = "Your changes are NOT being saved. Set up auto-save to a file or download a Backup before leaving."; return e.returnValue; }
 });
+
+/* ============ COMMAND PALETTE (Ctrl+K / Cmd+K) ============ */
+let cmdActive = -1;
+function buildCmdEntries(){
+  const entries = [];
+  entries.push({label:'Overview', hint:'Dashboard home', type:'view', action:()=>{currentView='overview';render();}});
+  entries.push({label:'Procurement', hint:'All items across planes', type:'view', action:()=>{currentView='procurement';render();}});
+  if(state) state.forEach(p => {
+    entries.push({label:p.label, hint:p.age, type:'plane', action:()=>{currentView=p.id;render();}});
+    p.categories.forEach(c => c.subfolders.forEach(sf => {
+      entries.push({label:sf.label, hint:`${p.label} › ${c.label}`, type:'folder', action:()=>{
+        currentView=p.id; activeCategoryByPlane[p.id]=c.id; collapsedSubfolders[sf.id]=false; render();
+        setTimeout(()=>{const el=document.getElementById(`sf-block-${sf.id}`);if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},60);
+      }});
+      sf.items.forEach((it,idx) => {
+        entries.push({label:it.item, hint:`${sf.label} · ${statusLabel(it.status)}`, type:'item', action:()=>{
+          openItemLocation(p.id, c.id, sf.id);
+        }});
+      });
+    }));
+  });
+  entries.push({label:'Toggle dark mode', hint:'Switch theme', type:'action', action:()=>toggleTheme()});
+  entries.push({label:'Export all (CSV)', hint:'Download full export', type:'action', action:()=>exportAllCSV()});
+  entries.push({label:'Backup (download)', hint:'Save a backup file', type:'action', action:()=>backupData()});
+  entries.push({label:'Print report', hint:'Generate printable report', type:'action', action:()=>printReport()});
+  entries.push({label:'Hide costs', hint:'Toggle cost columns', type:'action', action:()=>toggleCosts()});
+  return entries;
+}
+function fuzzyMatch(q, text){
+  q = q.toLowerCase(); text = text.toLowerCase();
+  if(text.includes(q)) return true;
+  let qi = 0;
+  for(let i = 0; i < text.length && qi < q.length; i++){ if(text[i] === q[qi]) qi++; }
+  return qi === q.length;
+}
+function openCmdPalette(){
+  const el = document.getElementById('cmdPalette');
+  el.style.display = 'flex';
+  const inp = document.getElementById('cmdInput');
+  inp.value = '';
+  cmdActive = -1;
+  renderCmdResults('');
+  setTimeout(() => inp.focus(), 30);
+}
+function closeCmdPalette(){
+  document.getElementById('cmdPalette').style.display = 'none';
+}
+function renderCmdResults(q){
+  const container = document.getElementById('cmdResults');
+  const entries = buildCmdEntries();
+  const filtered = q ? entries.filter(e => fuzzyMatch(q, e.label) || fuzzyMatch(q, e.hint)) : entries.slice(0, 20);
+  const show = filtered.slice(0, 30);
+  container.innerHTML = '';
+  if(show.length === 0){
+    container.innerHTML = '<div style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;">No results</div>';
+    return;
+  }
+  show.forEach((e, i) => {
+    const div = document.createElement('div');
+    div.className = 'cmd-item' + (i === cmdActive ? ' active' : '');
+    const iconMap = {view:'◎',plane:'▦',folder:'▤',item:'·',action:'⚡'};
+    div.innerHTML = `<span class="cmd-item-icon">${iconMap[e.type]||'·'}</span><span class="cmd-item-label">${esc(e.label)}</span><span class="cmd-item-hint">${esc(e.hint)}</span><span class="cmd-item-type">${esc(e.type)}</span>`;
+    div.onclick = () => { closeCmdPalette(); e.action(); };
+    container.appendChild(div);
+  });
+}
+document.addEventListener('keydown', function(e){
+  if((e.ctrlKey || e.metaKey) && e.key === 'k'){
+    e.preventDefault();
+    const pal = document.getElementById('cmdPalette');
+    if(pal.style.display === 'flex') closeCmdPalette(); else openCmdPalette();
+    return;
+  }
+  if(document.getElementById('cmdPalette').style.display !== 'flex') return;
+  const inp = document.getElementById('cmdInput');
+  const items = document.querySelectorAll('#cmdResults .cmd-item');
+  if(e.key === 'Escape'){ e.preventDefault(); closeCmdPalette(); return; }
+  if(e.key === 'ArrowDown'){ e.preventDefault(); cmdActive = Math.min(cmdActive+1, items.length-1); items.forEach((el,i)=>el.classList.toggle('active',i===cmdActive)); if(items[cmdActive]) items[cmdActive].scrollIntoView({block:'nearest'}); return; }
+  if(e.key === 'ArrowUp'){ e.preventDefault(); cmdActive = Math.max(cmdActive-1, 0); items.forEach((el,i)=>el.classList.toggle('active',i===cmdActive)); if(items[cmdActive]) items[cmdActive].scrollIntoView({block:'nearest'}); return; }
+  if(e.key === 'Enter'){ e.preventDefault(); if(items[cmdActive]) items[cmdActive].click(); else if(items[0]) items[0].click(); return; }
+});
+document.getElementById('cmdInput').addEventListener('input', function(){ cmdActive = -1; renderCmdResults(this.value); });
 
 function downloadRawData(){ downloadFile(localStorage.getItem(STORAGE_KEY) || "[]", "newberry-raw-data.json", "application/json"); }
 function renderRecovery(err){
