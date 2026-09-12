@@ -681,7 +681,7 @@ function ic(name){ return ICONS[name] || ""; }
 
 /* Item + subfolder builders */
 function I(item, spec, qty, unitCost, priority, status){
-  return { item, spec:spec||"", qty:qty||0, unitCost:unitCost||0, vendor:"", due:"", priority:priority||"medium", status:status||"not-started", notes:"", dims:null, media:[], lastModified:null };
+  return { item, spec:spec||"", qty:qty||0, unitCost:unitCost||0, vendor:"", owner:"", due:"", priority:priority||"medium", status:status||"not-started", notes:"", dims:null, media:[], lastModified:null };
 }
 function SF(label, items){ return { id: uid("sf"), label, items: items||[] }; }
 function sampleItem(){ return I("New item — click to edit","",1,0,"medium","not-started"); }
@@ -2074,7 +2074,7 @@ let dragCtx = null;       /* {type, subId, from} */
 let lastDeleted = null;
 let toastTimer = null;
 let bulkAddCtx = null;
-let procFilters = { q:"", status:"outstanding", plane:"", category:"" };
+let procFilters = { q:"", status:"outstanding", plane:"", category:"", owner:"" };
 let sortState = {};       /* subId|'__proc' -> {col, dir:'asc'|'desc'} */
 let fileHandle = null;      /* File System Access handle for auto-save-to-file */
 let autoSaveTimer = null;
@@ -2560,8 +2560,14 @@ function procMatches(it){
   const f = procFilters;
   if(f.status === "outstanding"){ if(it.status === "complete") return false; }
   else if(f.status){ if(it.status !== f.status) return false; }
-  if(f.q){ const hay = [it.item, it.spec, it.vendor, dimsSummary(it), it.notes].join(" ").toLowerCase(); if(!hay.includes(f.q.toLowerCase())) return false; }
+  if(f.owner){ if((it.owner||"").toLowerCase() !== f.owner.toLowerCase()) return false; }
+  if(f.q){ const hay = [it.item, it.spec, it.vendor, it.owner, dimsSummary(it), it.notes].join(" ").toLowerCase(); if(!hay.includes(f.q.toLowerCase())) return false; }
   return true;
+}
+function procOwnerList(){
+  const owners = new Set();
+  state.forEach(p => p.categories.forEach(c => c.subfolders.forEach(sf => sf.items.forEach(it => { if(it.owner) owners.add(it.owner); }))));
+  return [...owners].sort((a,b) => a.localeCompare(b));
 }
 function renderProcurement(){
   const main = document.getElementById("mainContent");
@@ -2620,6 +2626,7 @@ function renderProcurement(){
       <option value="outstanding" ${procFilters.status==='outstanding'?'selected':''}>Outstanding (not complete)</option>
       ${STATUSES.map(x=>`<option value="${x.v}" ${procFilters.status===x.v?'selected':''}>${x.label}</option>`).join("")}
     </select>
+    <select class="filter-select" onchange="procSet('owner', this.value)"><option value="">All owners</option>${procOwnerList().map(o=>`<option value="${esc(o)}" ${procFilters.owner===o?'selected':''}>${esc(o)}</option>`).join("")}</select>
     <button class="btn btn-ghost" onclick="exportProcurementCSV()">Export list (CSV)</button>`;
   main.appendChild(controls);
 
@@ -2647,6 +2654,7 @@ function renderProcurement(){
   table.innerHTML = `<thead><tr>
     ${sortTh(pk,'item','Item','','min-width:180px')}${sortTh(pk,'plane','Plane','','')}${sortTh(pk,'category','Category','','')}${sortTh(pk,'subfolder','Subfolder','','')}
     ${sortTh(pk,'vendor','Vendor','vendor-col','width:130px')}
+    ${sortTh(pk,'owner','Owner','','width:110px')}
     ${sortTh(pk,'qty','Qty','','width:50px')}${sortTh(pk,'total','Total (R)','cost-col','width:100px')}
     ${sortTh(pk,'status','Status','','width:130px')}</tr></thead><tbody></tbody>`;
   const tbody = table.querySelector("tbody");
@@ -2660,6 +2668,7 @@ function renderProcurement(){
       <td data-label="Category">${esc(r.c.label)}</td>
       <td data-label="Subfolder">${esc(r.sf.label)}</td>
       <td class="vendor-col" data-label="Vendor">${esc(r.it.vendor||"")}</td>
+      <td data-label="Owner">${esc(r.it.owner||"")}</td>
       <td data-label="Qty">${esc(r.it.qty)}</td>
       <td class="cost-col" data-label="Total">${fmtMoney(tot)}</td>
       <td data-label="Status"><select class="status-select ${statusCls(r.it.status)}" onchange="procSetStatus('${r.p.id}','${r.c.id}','${r.sf.id}',${r.idx}, this.value)">${STATUSES.map(x=>`<option value="${x.v}" ${x.v===r.it.status?'selected':''}>${x.label}</option>`).join("")}</select></td>`;
@@ -2671,9 +2680,9 @@ function renderProcurement(){
 }
 function procSet(key, val){ procFilters[key] = val; render(); }
 function setProcPreset(kind){
-  if(kind === "outstanding") procFilters = { q:"", status:"outstanding", plane:"", category:"" };
-  else if(kind === "ordered") procFilters = { q:"", status:"ordered", plane:"", category:"" };
-  else procFilters = { q:"", status:"", plane:"", category:"" };
+  if(kind === "outstanding") procFilters = { q:"", status:"outstanding", plane:"", category:"", owner:"" };
+  else if(kind === "ordered") procFilters = { q:"", status:"ordered", plane:"", category:"", owner:"" };
+  else procFilters = { q:"", status:"", plane:"", category:"", owner:"" };
   render();
 }
 function procSetStatus(planeId, catId, subId, idx, val){
@@ -2682,11 +2691,11 @@ function procSetStatus(planeId, catId, subId, idx, val){
   renderProcurement();
 }
 function exportProcurementCSV(){
-  const header = ["Item","Plane","Category","Subfolder","Qty","Unit Cost (R)","Total (R)","Vendor","Dimensions","Due Date","Status","Notes"];
+  const header = ["Item","Plane","Category","Subfolder","Qty","Unit Cost (R)","Total (R)","Vendor","Owner","Dimensions","Due Date","Status","Notes"];
   const rows = [];
   state.forEach(p => { if(procFilters.plane && p.id !== procFilters.plane) return;
     p.categories.forEach(c => { if(procFilters.category && c.id !== procFilters.category) return;
-      c.subfolders.forEach(sf => sf.items.forEach(it => { if(procMatches(it)) rows.push([it.item, p.label, c.label, sf.label, it.qty, it.unitCost, (Number(it.qty)||0)*(Number(it.unitCost)||0), it.vendor||"", dimsSummary(it), it.due, statusLabel(it.status), it.notes]); }));
+      c.subfolders.forEach(sf => sf.items.forEach(it => { if(procMatches(it)) rows.push([it.item, p.label, c.label, sf.label, it.qty, it.unitCost, (Number(it.qty)||0)*(Number(it.unitCost)||0), it.vendor||"", it.owner||"", dimsSummary(it), it.due, statusLabel(it.status), it.notes]); }));
     });
   });
   const csv = header.join(",") + "\n" + rows.map(r => r.map(csvCell).join(",")).join("\n");
@@ -2883,29 +2892,30 @@ function sortTh(key, col, label, cls, style){
   const active = s && s.col === col;
   const arrow = active ? (s.dir === 'asc' ? ' ▲' : ' ▼') : '';
   const sc = ((cls||'') + ' sortable' + (active ? ' sorted' : '')).trim();
-  return '<th class="'+sc+'"'+(style?' style="'+style+'"':'')+' onclick="toggleSort(\''+key+'\',\''+col+'\')">'+label+arrow+'</th>';
+  return '<th scope="col" class="'+sc+'"'+(style?' style="'+style+'"':'')+' onclick="toggleSort(\''+key+'\',\''+col+'\')">'+label+arrow+'</th>';
 }
 function buildTable(planeId, catId, sf){
   const wrap = document.createElement("div");
   wrap.className = "table-scroll";
   const isFurniture = catId === "furniture";
-  const colCount = isFurniture ? 13 : 11;
+  const colCount = isFurniture ? 14 : 12;
   const table = document.createElement("table");
   table.innerHTML = `
     <thead>
       <tr>
-        <th class="sticky-col sc-check"></th>
+        <th scope="col" class="sticky-col sc-check"></th>
         ${sortTh(sf.id,'item','Item','sticky-col sc-item','')}
         ${sortTh(sf.id,'spec','Spec / Description','','min-width:180px')}
         ${sortTh(sf.id,'qty','Qty','','width:60px')}
         ${sortTh(sf.id,'unitCost','Unit Cost (R)','cost-col','width:100px')}
         ${sortTh(sf.id,'total','Total (R)','cost-col','width:100px')}
         ${sortTh(sf.id,'vendor','Vendor','vendor-col','width:130px')}
-        ${isFurniture ? '<th style="width:180px;">Reference (dims &amp; media)</th>'+sortTh(sf.id,'buildStage','Build','','width:120px') : ''}
+        ${sortTh(sf.id,'owner','Owner','','width:120px')}
+        ${isFurniture ? '<th scope="col" style="width:180px;">Reference (dims &amp; media)</th>'+sortTh(sf.id,'buildStage','Build','','width:120px') : ''}
         ${sortTh(sf.id,'due','Due Date','','width:140px')}
         ${sortTh(sf.id,'status','Status','','width:120px')}
         ${sortTh(sf.id,'notes','Notes','','min-width:160px')}
-        <th style="width:90px;"></th>
+        <th scope="col" style="width:90px;"></th>
       </tr>
     </thead>
     <tbody id="tbody-${sf.id}"></tbody>
@@ -2970,6 +2980,7 @@ function buildRow(planeId, catId, subId, row, idx, count, isFurniture, grp){
     <td class="col-cost cost-col" data-label="Unit cost"><input class="cell-input" type="number" min="0" step="0.01" value="${esc(row.unitCost)}" oninput="updateNumField('${planeId}','${catId}','${subId}',${idx},'unitCost', this.value, this)"></td>
     <td class="cost-col col-total" data-label="Total">${fmtMoney(total)}</td>
     <td class="vendor-col col-vendor" data-label="Vendor"><input class="cell-input" type="text" value="${esc(row.vendor||"")}" placeholder="—" onblur="updateField('${planeId}','${catId}','${subId}',${idx},'vendor', this.value, this)"></td>
+    <td data-label="Owner"><input class="cell-input" type="text" value="${esc(row.owner||"")}" placeholder="—" onblur="updateField('${planeId}','${catId}','${subId}',${idx},'owner', this.value, this)"></td>
     ${isFurniture ? `<td class="col-ref" data-label="Reference"><button class="ref-btn" onclick="openReference('${planeId}','${catId}','${subId}',${idx})">${refBtnLabel(row)}</button></td>
     <td data-label="Build"><select class="build-select ${buildStageCls(row.buildStage||'not-started')}" aria-label="Build stage" onchange="updateBuildStage('${planeId}','${catId}','${subId}',${idx}, this)">${BUILD_STAGES.map(s=>`<option value="${s.v}" ${(row.buildStage||'not-started')===s.v?'selected':''}>${s.label}</option>`).join('')}</select></td>` : ''}
     <td class="col-due${overdueCls}" data-label="Due"><input class="cell-input" type="date" value="${esc(row.due||"")}" onblur="updateField('${planeId}','${catId}','${subId}',${idx},'due', this.value, this)"></td>
@@ -3255,7 +3266,7 @@ function detectCSV(lines){
   const hasTab = lines[0].includes('\t');
   const sep = hasTab ? '\t' : ',';
   const cols = lines[0].split(sep).map(c => c.trim().toLowerCase().replace(/[^a-z ]/g,''));
-  const known = ['item','spec','qty','unit cost','unitcost','vendor','due','priority','status','notes','name','description','quantity','cost','price','unit price'];
+  const known = ['item','spec','qty','unit cost','unitcost','vendor','owner','assignee','responsible','due','priority','status','notes','name','description','quantity','cost','price','unit price'];
   const matchCount = cols.filter(c => known.includes(c)).length;
   if(matchCount < 1) return null;
   const map = {};
@@ -3265,6 +3276,7 @@ function detectCSV(lines){
     else if(c === 'qty' || c === 'quantity') map.qty = i;
     else if(c === 'unit cost' || c === 'unitcost' || c === 'cost' || c === 'price' || c === 'unit price') map.unitCost = i;
     else if(c === 'vendor') map.vendor = i;
+    else if(c === 'owner' || c === 'assignee' || c === 'responsible') map.owner = i;
     else if(c === 'due') map.due = i;
     else if(c === 'priority') map.priority = i;
     else if(c === 'status') map.status = i;
@@ -3311,6 +3323,7 @@ function submitBulkAdd(){
         map.status !== undefined ? parseStatusValue(cols[map.status]) : 'not-started'
       );
       if(map.vendor !== undefined) item.vendor = cols[map.vendor]||'';
+      if(map.owner !== undefined) item.owner = cols[map.owner]||'';
       if(map.due !== undefined) item.due = cols[map.due]||'';
       if(map.notes !== undefined) item.notes = cols[map.notes]||'';
       sf.items.push(item);
@@ -3349,16 +3362,16 @@ function exportCSV(planeId, catId, subId){
   const plane = findPlane(planeId);
   const cat = findCategory(planeId, catId);
   const sf = findSubfolder(planeId, catId, subId);
-  const header = ["Item","Spec/Description","Qty","Unit Cost (R)","Total (R)","Vendor","Dimensions","Due Date","Status","Notes"];
-  const rows = sf.items.map(i => [i.item, i.spec, i.qty, i.unitCost, (Number(i.qty)||0)*(Number(i.unitCost)||0), i.vendor||"", dimsSummary(i), i.due, statusLabel(i.status), i.notes]);
+  const header = ["Item","Spec/Description","Qty","Unit Cost (R)","Total (R)","Vendor","Owner","Dimensions","Due Date","Status","Notes"];
+  const rows = sf.items.map(i => [i.item, i.spec, i.qty, i.unitCost, (Number(i.qty)||0)*(Number(i.unitCost)||0), i.vendor||"", i.owner||"", dimsSummary(i), i.due, statusLabel(i.status), i.notes]);
   let csv = header.join(",") + "\n" + rows.map(r => r.map(csvCell).join(",")).join("\n");
   downloadFile(csv, `${plane.label}-${cat.label}-${sf.label}.csv`.replace(/\s+/g,'-'), "text/csv");
 }
 function exportAllCSV(){
-  const header = ["Plane","Age","Category","Subfolder","Item","Spec/Description","Qty","Unit Cost (R)","Total (R)","Vendor","Dimensions","Photos","Due Date","Status","Notes"];
+  const header = ["Plane","Age","Category","Subfolder","Item","Spec/Description","Qty","Unit Cost (R)","Total (R)","Vendor","Owner","Dimensions","Photos","Due Date","Status","Notes"];
   const rows = [];
   state.forEach(p => p.categories.forEach(c => c.subfolders.forEach(sf => sf.items.forEach(i => {
-    rows.push([p.label, p.age, c.label, sf.label, i.item, i.spec, i.qty, i.unitCost, (Number(i.qty)||0)*(Number(i.unitCost)||0), i.vendor||"", dimsSummary(i), (i.media||[]).length, i.due, statusLabel(i.status), i.notes]);
+    rows.push([p.label, p.age, c.label, sf.label, i.item, i.spec, i.qty, i.unitCost, (Number(i.qty)||0)*(Number(i.unitCost)||0), i.vendor||"", i.owner||"", dimsSummary(i), (i.media||[]).length, i.due, statusLabel(i.status), i.notes]);
   }))));
   let csv = header.join(",") + "\n" + rows.map(r => r.map(csvCell).join(",")).join("\n");
   downloadFile(csv, "Newberry-Montessori-Full-List.csv", "text/csv");
@@ -3736,12 +3749,12 @@ function buildPrintReport(){
       c.subfolders.forEach(sf => {
         html += `<h4>${esc(sf.label)}</h4>
           <table class="print-table"><thead><tr>
-          <th>Item</th><th>Spec</th><th>Qty</th><th>Unit (R)</th><th>Total (R)</th><th>Vendor</th><th>Dimensions</th><th>Photos</th><th>Due</th><th>Status</th><th>Notes</th>
+          <th>Item</th><th>Spec</th><th>Qty</th><th>Unit (R)</th><th>Total (R)</th><th>Vendor</th><th>Owner</th><th>Dimensions</th><th>Photos</th><th>Due</th><th>Status</th><th>Notes</th>
           </tr></thead><tbody>`;
         sf.items.forEach(i => {
           const tot = (Number(i.qty)||0)*(Number(i.unitCost)||0);
           html += `<tr>
-            <td>${esc(i.item)}</td><td>${esc(i.spec)}</td><td>${esc(i.qty)}</td><td>${esc(i.unitCost)}</td><td>${esc(tot)}</td><td>${esc(i.vendor||"")}</td>
+            <td>${esc(i.item)}</td><td>${esc(i.spec)}</td><td>${esc(i.qty)}</td><td>${esc(i.unitCost)}</td><td>${esc(tot)}</td><td>${esc(i.vendor||"")}</td><td>${esc(i.owner||"")}</td>
             <td>${esc(dimsSummary(i))}</td><td>${esc((i.media||[]).length || "")}</td><td>${esc(i.due)}</td><td>${esc(statusLabel(i.status))}</td><td>${esc(i.notes)}</td>
           </tr>`;
         });
