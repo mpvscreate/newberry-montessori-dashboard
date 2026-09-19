@@ -88,9 +88,219 @@ html { height: 100%; }
 
 #app {
   width: 100%;
-  max-width: 640px;
+  max-width: 720px;
   padding: 24px 0 40px;
 }
+
+/* ===== DASHBOARD VIEW ===== */
+.dash-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  gap: 12px;
+}
+.dash-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  margin: 0;
+}
+.dash-subtitle {
+  font-size: 14px;
+  color: var(--text-2);
+  margin: 4px 0 0;
+}
+.dash-actions {
+  display: flex;
+  gap: 8px;
+  flex-shrink: 0;
+}
+.dash-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: 100px;
+  border: none;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.dash-btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+.dash-btn-primary:hover { filter: brightness(1.1); }
+.dash-btn-primary:active { transform: scale(0.97); }
+
+/* Team cards grid */
+.teams-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 16px;
+}
+.team-card {
+  background: var(--card);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.15s;
+}
+.team-card:hover {
+  box-shadow: var(--shadow-hover);
+  transform: translateY(-2px);
+}
+.team-card:active { transform: translateY(0) scale(0.99); }
+.team-card-banner {
+  height: 100px;
+  position: relative;
+  overflow: hidden;
+}
+.team-card-banner img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+.team-card-banner-placeholder {
+  width: 100%; height: 100%;
+}
+.team-card-member-count {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  padding: 3px 10px;
+  border-radius: 100px;
+}
+.team-card-avatars {
+  position: absolute;
+  bottom: 8px;
+  left: 12px;
+  display: flex;
+}
+.team-card-avatar {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  border: 2px solid var(--card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: #fff;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.team-card-avatar + .team-card-avatar { margin-left: -8px; }
+.team-card-avatar img { width: 100%; height: 100%; object-fit: cover; }
+.team-card-body { padding: 14px 18px 16px; }
+.team-card-name {
+  font-size: 16px;
+  font-weight: 700;
+  margin: 0 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.team-card-color {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.team-card-desc {
+  font-size: 13px;
+  color: var(--text-2);
+  margin: 0 0 10px;
+  line-height: 1.4;
+}
+.team-card-tags {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+}
+.team-card-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 10px;
+  border-radius: 100px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.team-card-delete {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  opacity: 0;
+  transition: all 0.2s;
+  z-index: 3;
+}
+.team-card-delete svg { width: 13px; height: 13px; }
+.team-card:hover .team-card-delete { opacity: 1; }
+.team-card-delete:hover { background: var(--red); }
+
+/* Add team card */
+.team-card-add {
+  background: var(--card);
+  border-radius: var(--radius);
+  border: 2px dashed var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 200px;
+  cursor: pointer;
+  transition: all 0.2s;
+  gap: 8px;
+  color: var(--text-2);
+  font-size: 14px;
+  font-weight: 500;
+}
+.team-card-add svg { width: 32px; height: 32px; }
+.team-card-add:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-soft);
+}
+
+/* ===== DETAIL VIEW ===== */
+.detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border-radius: 100px;
+  border: none;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  margin-bottom: 16px;
+}
+.detail-back:hover { background: rgba(0,122,255,0.15); }
+.detail-back svg { width: 15px; height: 15px; }
 
 /* Card shell */
 .roster-card {
@@ -98,9 +308,10 @@ html { height: 100%; }
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   overflow: hidden;
+  border: 1.5px solid transparent;
 }
 
-/* Hero header — cover image with floating text */
+/* Hero header */
 .hero {
   position: relative;
   width: 100%;
@@ -111,24 +322,14 @@ html { height: 100%; }
 .hero-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
 }
 .hero-bg img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
+  width: 100%; height: 100%; object-fit: cover; display: block;
 }
 .hero-fade {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0,0,0,0) 0%,
-    rgba(0,0,0,0.02) 30%,
-    rgba(0,0,0,0.35) 65%,
-    rgba(0,0,0,0.75) 100%
-  );
+  background: linear-gradient(to bottom, rgba(0,0,0,0) 0%, rgba(0,0,0,0.02) 30%, rgba(0,0,0,0.35) 65%, rgba(0,0,0,0.75) 100%);
   pointer-events: none;
 }
 .hero-content {
@@ -175,7 +376,6 @@ html { height: 100%; }
   -webkit-backdrop-filter: blur(8px);
   padding: 4px 14px;
   border-radius: 100px;
-  letter-spacing: 0.02em;
 }
 .hero-edit-cover {
   position: absolute;
@@ -214,9 +414,7 @@ html { height: 100%; }
 .hero.repositioning .hero-edit-cover { opacity: 0; pointer-events: none; }
 .reposition-bar {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 0; left: 0; right: 0;
   display: flex;
   align-items: center;
   gap: 12px;
@@ -231,27 +429,22 @@ html { height: 100%; }
 }
 .reposition-bar span { white-space: nowrap; flex-shrink: 0; }
 .zoom-slider {
-  -webkit-appearance: none;
-  appearance: none;
-  flex: 1;
-  height: 4px;
+  -webkit-appearance: none; appearance: none;
+  flex: 1; height: 4px;
   border-radius: 2px;
   background: rgba(255,255,255,0.25);
-  outline: none;
-  cursor: pointer;
+  outline: none; cursor: pointer;
 }
 .zoom-slider::-webkit-slider-thumb {
   -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
+  width: 16px; height: 16px;
   border-radius: 50%;
   background: #fff;
   cursor: pointer;
   box-shadow: 0 1px 4px rgba(0,0,0,0.3);
 }
 .zoom-slider::-moz-range-thumb {
-  width: 16px;
-  height: 16px;
+  width: 16px; height: 16px;
   border-radius: 50%;
   background: #fff;
   cursor: pointer;
@@ -274,8 +467,7 @@ html { height: 100%; }
 .reposition-done:hover { filter: brightness(1.15); }
 .reposition-hint {
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 50%; left: 50%;
   transform: translate(-50%, -50%);
   color: rgba(255,255,255,0.8);
   font-size: 14px;
@@ -284,11 +476,9 @@ html { height: 100%; }
   pointer-events: none;
   z-index: 8;
 }
-
 .hero-upload-hint {
   position: absolute;
-  top: 20px;
-  right: 28px;
+  top: 20px; right: 28px;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -315,7 +505,7 @@ html { height: 100%; }
 .editable-dark:hover { background: var(--accent-soft); }
 .editable-dark:focus { background: var(--accent-soft); }
 
-/* Toolbar row */
+/* Toolbar */
 .toolbar {
   display: flex;
   align-items: center;
@@ -343,291 +533,6 @@ html { height: 100%; }
 .toolbar-btn.active { background: var(--accent); color: #fff; }
 .toolbar-btn svg { width: 13px; height: 13px; }
 
-/* Member rows */
-.members-list { padding: 0; }
-
-.member-row {
-  display: flex;
-  gap: 14px;
-  padding: 18px 28px;
-  border-bottom: 0.5px solid var(--border);
-  align-items: flex-start;
-  transition: background 0.15s, box-shadow 0.15s;
-  position: relative;
-}
-.member-row:last-child { border-bottom: none; }
-.member-row:hover { background: var(--accent-soft); }
-
-/* Drag handle */
-.drag-handle {
-  width: 18px;
-  flex-shrink: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: grab;
-  color: var(--text-3);
-  padding-top: 16px;
-  transition: color 0.15s;
-  touch-action: none;
-}
-.drag-handle:hover { color: var(--text-2); }
-.drag-handle:active { cursor: grabbing; }
-.drag-handle svg { width: 14px; height: 18px; }
-
-.member-row.dragging {
-  opacity: 0.85;
-  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
-  z-index: 100;
-  background: var(--card);
-}
-.member-row.drag-over-top { box-shadow: inset 0 2px 0 var(--accent); }
-.member-row.drag-over-bottom { box-shadow: inset 0 -2px 0 var(--accent); }
-
-/* Photo */
-.avatar {
-  width: 52px;
-  height: 52px;
-  border-radius: 50%;
-  background: var(--bg);
-  overflow: hidden;
-  flex-shrink: 0;
-  position: relative;
-  margin-top: 2px;
-}
-.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.avatar-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-.avatar-placeholder svg { width: 24px; height: 24px; color: var(--text-3); }
-.avatar-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.35);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.2s;
-  cursor: pointer;
-}
-.avatar-overlay svg { width: 18px; height: 18px; color: #fff; }
-.avatar:hover .avatar-overlay { opacity: 1; }
-
-/* Member content */
-.member-body {
-  flex: 1;
-  min-width: 0;
-}
-
-.member-top {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.member-name {
-  font-size: 16px;
-  font-weight: 600;
-  line-height: 1.3;
-  margin: 0;
-  outline: none;
-}
-
-.role-tag {
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--accent);
-  background: var(--accent-soft);
-  padding: 2px 10px;
-  border-radius: 100px;
-  white-space: nowrap;
-  outline: none;
-  line-height: 1.4;
-}
-
-.status-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  flex-shrink: 0;
-  margin-left: auto;
-}
-.status-active { background: var(--green); }
-.status-away { background: var(--amber); }
-.status-busy { background: var(--red); }
-
-@keyframes pulse-green {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(52,199,89,0.4); }
-  50% { box-shadow: 0 0 0 4px rgba(52,199,89,0); }
-}
-.status-active { animation: pulse-green 2.5s ease-in-out infinite; }
-
-.status-wrap {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  margin-left: auto;
-  cursor: default;
-  position: relative;
-  flex-shrink: 0;
-}
-.status-label {
-  font-size: 12px;
-  color: var(--text-2);
-}
-
-/* Tasks */
-.member-tasks {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 5px;
-  margin-top: 8px;
-}
-.task-chip {
-  font-size: 12px;
-  padding: 2px 10px;
-  border-radius: 100px;
-  background: var(--bg);
-  color: var(--text-1);
-  line-height: 1.4;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-}
-.chip-x {
-  width: 14px; height: 14px;
-  border-radius: 50%;
-  border: none;
-  background: var(--text-3);
-  color: var(--card);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  font-size: 10px;
-  line-height: 1;
-  transition: background 0.15s;
-}
-.chip-x:hover { background: var(--red); }
-
-.task-add {
-  font-size: 12px;
-  padding: 2px 10px;
-  border-radius: 100px;
-  border: 1.5px dashed var(--text-3);
-  background: transparent;
-  color: var(--text-2);
-  cursor: pointer;
-  font-family: var(--font);
-  transition: all 0.15s;
-  line-height: 1.4;
-}
-.task-add:hover { border-color: var(--accent); color: var(--accent); }
-
-.task-input {
-  font-size: 12px;
-  padding: 3px 10px;
-  border: 1.5px solid var(--accent);
-  border-radius: var(--radius-xs);
-  background: var(--card);
-  color: var(--text-1);
-  font-family: var(--font);
-  outline: none;
-  width: 140px;
-}
-
-/* Contact row — collapsible */
-.member-contact {
-  display: flex;
-  gap: 14px;
-  margin-top: 6px;
-  flex-wrap: wrap;
-  overflow: hidden;
-  max-height: 0;
-  opacity: 0;
-  transition: max-height 0.3s ease, opacity 0.25s ease, margin 0.3s ease;
-  margin-top: 0;
-}
-.member-contact.show {
-  max-height: 60px;
-  opacity: 1;
-  margin-top: 6px;
-}
-.contact-item {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 12px;
-  color: var(--text-2);
-}
-.contact-item svg { width: 12px; height: 12px; flex-shrink: 0; }
-.contact-val {
-  outline: none;
-  color: var(--text-2);
-}
-.contact-val:focus { color: var(--text-1); }
-
-/* Member row delete */
-.row-delete {
-  position: absolute;
-  top: 18px;
-  right: 12px;
-  width: 24px; height: 24px;
-  border-radius: 50%;
-  border: none;
-  background: transparent;
-  color: var(--text-3);
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  opacity: 0;
-  transition: all 0.15s;
-}
-.row-delete svg { width: 14px; height: 14px; }
-.member-row:hover .row-delete { opacity: 1; }
-.row-delete:hover { background: rgba(255,59,48,0.1); color: var(--red); }
-
-/* Status dropdown */
-.status-menu {
-  position: absolute;
-  top: calc(100% + 4px);
-  right: 0;
-  background: var(--card);
-  border-radius: var(--radius-sm);
-  box-shadow: 0 8px 30px rgba(0,0,0,0.18);
-  border: 0.5px solid var(--border);
-  padding: 4px;
-  z-index: 50;
-  min-width: 130px;
-}
-.status-opt {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 12px;
-  border-radius: var(--radius-xs);
-  cursor: pointer;
-  font-size: 13px;
-  color: var(--text-1);
-  border: none;
-  background: none;
-  width: 100%;
-  font-family: var(--font);
-  text-align: left;
-  transition: background 0.12s;
-}
-.status-opt:hover { background: var(--accent-soft); }
-
 /* Project tags bar */
 .tags-bar {
   display: flex;
@@ -648,7 +553,6 @@ html { height: 100%; }
   font-size: 12px;
   font-weight: 600;
   white-space: nowrap;
-  transition: background 0.15s;
   line-height: 1.3;
 }
 .project-tag .tag-x {
@@ -679,10 +583,8 @@ html { height: 100%; }
   align-items: center;
   justify-content: center;
   padding: 0;
-  font-size: 16px;
   transition: all 0.15s;
   flex-shrink: 0;
-  position: relative;
 }
 .tag-add:hover { border-color: var(--accent); color: var(--accent); }
 .tag-add svg { width: 14px; height: 14px; }
@@ -745,7 +647,474 @@ html { height: 100%; }
   flex-shrink: 0;
 }
 
-/* Card footer */
+/* Detail tabs */
+.detail-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 0.5px solid var(--border);
+  padding: 0 28px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+.detail-tabs::-webkit-scrollbar { display: none; }
+.detail-tab {
+  padding: 12px 18px;
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 600;
+  border: none;
+  background: none;
+  color: var(--text-2);
+  cursor: pointer;
+  white-space: nowrap;
+  position: relative;
+  transition: color 0.15s;
+}
+.detail-tab:hover { color: var(--text-1); }
+.detail-tab.active { color: var(--accent); }
+.detail-tab.active::after {
+  content: '';
+  position: absolute;
+  bottom: -0.5px;
+  left: 12px;
+  right: 12px;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--accent);
+}
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
+/* Checklist panel */
+.checklist-panel { padding: 16px 28px 20px; }
+.checklist-section {
+  margin-bottom: 20px;
+}
+.checklist-section:last-child { margin-bottom: 0; }
+.checklist-section-title {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-2);
+  margin: 0 0 10px;
+}
+.checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 0.5px solid var(--border);
+}
+.checklist-item:last-child { border-bottom: none; }
+.checklist-cb {
+  width: 20px; height: 20px;
+  border-radius: 6px;
+  border: 2px solid var(--text-3);
+  background: none;
+  cursor: pointer;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  margin-top: 1px;
+  transition: all 0.15s;
+  color: transparent;
+}
+.checklist-cb:hover { border-color: var(--accent); }
+.checklist-cb.checked {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.checklist-cb svg { width: 12px; height: 12px; }
+.checklist-label {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--text-1);
+  outline: none;
+}
+.checklist-label.done {
+  text-decoration: line-through;
+  color: var(--text-2);
+}
+.checklist-delete {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  opacity: 0;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.checklist-delete svg { width: 12px; height: 12px; }
+.checklist-item:hover .checklist-delete { opacity: 1; }
+.checklist-delete:hover { background: rgba(255,59,48,0.1); color: var(--red); }
+.checklist-add {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 0;
+  color: var(--text-2);
+  font-family: var(--font);
+  font-size: 13px;
+  font-weight: 500;
+  border: none;
+  background: none;
+  cursor: pointer;
+  transition: color 0.15s;
+  width: 100%;
+}
+.checklist-add:hover { color: var(--accent); }
+.checklist-add svg { width: 14px; height: 14px; }
+.checklist-input {
+  flex: 1;
+  font-size: 14px;
+  padding: 6px 10px;
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius-xs);
+  background: var(--card);
+  color: var(--text-1);
+  font-family: var(--font);
+  outline: none;
+}
+.checklist-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.checklist-progress-bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+  overflow: hidden;
+}
+.checklist-progress-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+.checklist-progress-text {
+  font-size: 12px;
+  color: var(--text-2);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+@media (max-width: 500px) {
+  .detail-tabs { padding: 0 20px; }
+  .detail-tab { padding: 10px 14px; font-size: 12px; }
+  .checklist-panel { padding: 14px 20px 16px; }
+}
+
+/* Member rows */
+.members-list { padding: 0; }
+.member-row {
+  display: flex;
+  gap: 14px;
+  padding: 18px 28px;
+  border-bottom: 0.5px solid var(--border);
+  align-items: flex-start;
+  transition: background 0.15s, box-shadow 0.15s;
+  position: relative;
+}
+.member-row:last-child { border-bottom: none; }
+.member-row:hover { background: var(--accent-soft); }
+.member-row-accent {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+}
+
+.drag-handle {
+  width: 18px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  color: var(--text-3);
+  padding-top: 16px;
+  transition: color 0.15s;
+  touch-action: none;
+}
+.drag-handle:hover { color: var(--text-2); }
+.drag-handle:active { cursor: grabbing; }
+.drag-handle svg { width: 14px; height: 18px; }
+.member-row.dragging {
+  opacity: 0.85;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  z-index: 100;
+  background: var(--card);
+}
+.member-row.drag-over-top { box-shadow: inset 0 2px 0 var(--accent); }
+.member-row.drag-over-bottom { box-shadow: inset 0 -2px 0 var(--accent); }
+
+/* Photo */
+.avatar {
+  width: 52px; height: 52px;
+  border-radius: 50%;
+  background: var(--bg);
+  overflow: hidden;
+  flex-shrink: 0;
+  position: relative;
+  margin-top: 2px;
+}
+.avatar-initials {
+  width: 100%; height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #fff;
+}
+
+/* Member content */
+.member-body { flex: 1; min-width: 0; }
+.member-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.member-name {
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.3;
+  margin: 0;
+  outline: none;
+}
+.role-tag {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 2px 10px;
+  border-radius: 100px;
+  white-space: nowrap;
+  outline: none;
+  line-height: 1.4;
+}
+.status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 11px;
+  font-weight: 600;
+  flex-shrink: 0;
+  margin-left: auto;
+  cursor: default;
+  position: relative;
+}
+.status-pill-active {
+  background: rgba(52,199,89,0.15);
+  color: var(--green);
+}
+.status-pill-away {
+  background: rgba(255,159,10,0.15);
+  color: var(--amber);
+}
+.status-pill-busy {
+  background: rgba(255,59,48,0.15);
+  color: var(--red);
+}
+.status-pill-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.status-pill-active .status-pill-dot { background: var(--green); }
+.status-pill-away .status-pill-dot { background: var(--amber); }
+.status-pill-busy .status-pill-dot { background: var(--red); }
+
+/* Tasks */
+.member-tasks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin-top: 8px;
+}
+.task-chip {
+  font-size: 12px;
+  padding: 2px 10px;
+  border-radius: 100px;
+  background: var(--bg);
+  color: var(--text-1);
+  line-height: 1.4;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.chip-x {
+  width: 14px; height: 14px;
+  border-radius: 50%;
+  border: none;
+  background: var(--text-3);
+  color: var(--card);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 10px;
+  line-height: 1;
+  transition: background 0.15s;
+}
+.chip-x:hover { background: var(--red); }
+.task-add {
+  font-size: 12px;
+  padding: 2px 10px;
+  border-radius: 100px;
+  border: 1.5px dashed var(--text-3);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  font-family: var(--font);
+  transition: all 0.15s;
+  line-height: 1.4;
+}
+.task-add:hover { border-color: var(--accent); color: var(--accent); }
+.task-input {
+  font-size: 12px;
+  padding: 3px 10px;
+  border: 1.5px solid var(--accent);
+  border-radius: var(--radius-xs);
+  background: var(--card);
+  color: var(--text-1);
+  font-family: var(--font);
+  outline: none;
+  width: 140px;
+}
+
+/* Contact row */
+.member-contact {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.25s ease, margin 0.3s ease;
+  margin-top: 0;
+}
+.member-contact.show {
+  max-height: 60px;
+  opacity: 1;
+  margin-top: 6px;
+}
+.contact-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  color: var(--text-2);
+}
+.contact-item svg { width: 12px; height: 12px; flex-shrink: 0; }
+.contact-val { outline: none; color: var(--text-2); }
+.contact-val:focus { color: var(--text-1); }
+
+/* Row delete */
+.row-delete {
+  position: absolute;
+  top: 18px; right: 12px;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-3);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  opacity: 0;
+  transition: all 0.15s;
+}
+.row-delete svg { width: 14px; height: 14px; }
+.member-row:hover .row-delete { opacity: 1; }
+.row-delete:hover { background: rgba(255,59,48,0.1); color: var(--red); }
+
+/* Status dropdown */
+.status-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  right: 0;
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+  border: 0.5px solid var(--border);
+  padding: 4px;
+  z-index: 50;
+  min-width: 130px;
+}
+.status-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-1);
+  border: none;
+  background: none;
+  width: 100%;
+  font-family: var(--font);
+  text-align: left;
+  transition: background 0.12s;
+}
+.status-opt:hover { background: var(--accent-soft); }
+
+/* Branded footer strip */
+.card-brand {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 28px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 600;
+}
+.card-brand-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.card-brand-icon {
+  width: 22px; height: 22px;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+}
+.card-brand-right {
+  font-size: 11px;
+  font-weight: 500;
+  opacity: 0.7;
+}
+
+/* Footer */
 .card-footer {
   display: flex;
   gap: 8px;
@@ -754,7 +1123,7 @@ html { height: 100%; }
   flex-wrap: wrap;
 }
 
-/* Add member row */
+/* Add member */
 .add-row {
   display: flex;
   align-items: center;
@@ -851,6 +1220,9 @@ html { height: 100%; }
   .toolbar { padding: 8px 20px; }
   .tags-bar { padding: 10px 20px; gap: 6px; }
   .drag-handle { width: 14px; }
+  .teams-grid { grid-template-columns: 1fr; }
+  .dash-header { flex-direction: column; align-items: flex-start; }
+  .dash-title { font-size: 24px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -863,51 +1235,60 @@ html { height: 100%; }
 
 <script type="application/json" id="app-data">
 {
-  "project": {
-    "name": "Project Name",
-    "description": "Team roles and responsibilities",
-    "tags": ["Team Coordination", "Assembly", "Design System"]
-  },
-  "members": [
+  "teams": [
     {
-      "id": "m1",
-      "name": "Alex Morgan",
-      "role": "Project Lead",
-      "tasks": ["Strategic planning", "Stakeholder management", "Team coordination"],
-      "email": "alex@example.com",
-      "phone": "+1 555 0101",
-      "status": "active",
-      "photo": null
+      "id": "t1",
+      "name": "Facilities",
+      "description": "Building maintenance, safety, grounds",
+      "color": "#34C759",
+      "gradient": "linear-gradient(135deg, #0a2e1a 0%, #1a5c32 35%, #34C759 100%)",
+      "tags": ["Renovation", "Fire Safety", "Building Maintenance"],
+      "coverPhoto": null,
+      "coverPos": null,
+      "coverZoom": null,
+      "pm": [],
+      "facilities": [],
+      "members": [
+        { "id": "m1", "name": "Alex Morgan", "role": "Project Lead", "tasks": ["Strategic planning", "Stakeholder management"], "email": "alex@example.com", "phone": "+1 555 0101", "status": "active" },
+        { "id": "m2", "name": "Sam Rivera", "role": "Maintenance Lead", "tasks": ["Building inspections", "Vendor coordination"], "email": "sam@example.com", "phone": "+1 555 0102", "status": "active" },
+        { "id": "m3", "name": "Jordan Lee", "role": "Grounds Keeper", "tasks": ["Landscaping", "Playground safety"], "email": "jordan@example.com", "phone": "+1 555 0103", "status": "away" },
+        { "id": "m4", "name": "Taylor Chen", "role": "Safety Officer", "tasks": ["Fire drills", "Compliance audits"], "email": "taylor@example.com", "phone": "+1 555 0104", "status": "active" }
+      ]
     },
     {
-      "id": "m2",
-      "name": "Sam Rivera",
-      "role": "Lead Designer",
-      "tasks": ["UI/UX design", "Prototyping", "Design system"],
-      "email": "sam@example.com",
-      "phone": "+1 555 0102",
-      "status": "active",
-      "photo": null
+      "id": "t2",
+      "name": "Curriculum",
+      "description": "Lesson planning, materials, assessments",
+      "color": "#0A84FF",
+      "gradient": "linear-gradient(135deg, #0a1a3e 0%, #1a4c8e 35%, #0A84FF 100%)",
+      "tags": ["Classroom Setup", "Curriculum Planning"],
+      "coverPhoto": null,
+      "coverPos": null,
+      "coverZoom": null,
+      "pm": [],
+      "facilities": [],
+      "members": [
+        { "id": "m5", "name": "Kim Park", "role": "Curriculum Director", "tasks": ["Standards alignment", "Teacher support"], "email": "kim@example.com", "phone": "+1 555 0201", "status": "active" },
+        { "id": "m6", "name": "Lisa Martinez", "role": "Lead Teacher", "tasks": ["Lesson planning", "Materials ordering"], "email": "lisa@example.com", "phone": "+1 555 0202", "status": "active" },
+        { "id": "m7", "name": "Ryan James", "role": "Montessori Guide", "tasks": ["Student assessments", "Parent conferences"], "email": "ryan@example.com", "phone": "+1 555 0203", "status": "active" }
+      ]
     },
     {
-      "id": "m3",
-      "name": "Jordan Lee",
-      "role": "Developer",
-      "tasks": ["Frontend build", "API integration", "Code review"],
-      "email": "jordan@example.com",
-      "phone": "+1 555 0103",
-      "status": "away",
-      "photo": null
-    },
-    {
-      "id": "m4",
-      "name": "Taylor Chen",
-      "role": "QA Lead",
-      "tasks": ["Test planning", "Automation", "Bug triage"],
-      "email": "taylor@example.com",
-      "phone": "+1 555 0104",
-      "status": "active",
-      "photo": null
+      "id": "t3",
+      "name": "Admin",
+      "description": "Finance, HR, enrollment, compliance",
+      "color": "#FF6B35",
+      "gradient": "linear-gradient(135deg, #2e0e05 0%, #8c2e0a 35%, #FF6B35 100%)",
+      "tags": ["Budget & Finance", "Safety & Compliance"],
+      "coverPhoto": null,
+      "coverPos": null,
+      "coverZoom": null,
+      "pm": [],
+      "facilities": [],
+      "members": [
+        { "id": "m8", "name": "Nina Williams", "role": "Office Manager", "tasks": ["Enrollment", "Scheduling"], "email": "nina@example.com", "phone": "+1 555 0301", "status": "active" },
+        { "id": "m9", "name": "Derek Price", "role": "Finance Lead", "tasks": ["Budget tracking", "Grant management"], "email": "derek@example.com", "phone": "+1 555 0302", "status": "busy" }
+      ]
     }
   ]
 }
@@ -922,12 +1303,15 @@ html { height: 100%; }
 (function() {
   'use strict';
 
-  var DEBOUNCE = 1000, PHOTO_SIZE = 200, PHOTO_Q = 0.75, STORAGE_KEY = 'teams-2-data';
+  var DEBOUNCE = 1000, STORAGE_KEY = 'teams-2-data';
   var state, artifact, downloads, canEdit = true, saveTimer, saving = false, openMenu = null;
   var showContacts = false;
   var dragSrcIndex = null;
   var repositioning = false;
   var tagDropdownOpen = false;
+  var currentView = 'dashboard';
+  var activeTeamId = null;
+  var activeTab = 'team';
 
   var TAG_PRESETS = {
     'Facilities': [
@@ -950,6 +1334,65 @@ html { height: 100%; }
     ]
   };
 
+  var TAB_PRESETS = {
+    pm: {
+      'Planning & Scheduling': [
+        'Define project scope & objectives',
+        'Create work breakdown structure',
+        'Set milestones & deadlines',
+        'Assign roles & responsibilities',
+        'Develop project timeline'
+      ],
+      'Budget & Procurement': [
+        'Establish project budget',
+        'Identify procurement needs',
+        'Request & review vendor quotes',
+        'Track expenditures vs budget',
+        'Process purchase orders'
+      ],
+      'Communication & Reporting': [
+        'Schedule stakeholder meetings',
+        'Send weekly status updates',
+        'Document meeting minutes',
+        'Update risk register',
+        'Prepare closeout report'
+      ]
+    },
+    facilities: {
+      'Building & Grounds': [
+        'Inspect HVAC systems',
+        'Check fire extinguishers & alarms',
+        'Review lighting & electrical',
+        'Inspect plumbing fixtures',
+        'Walk grounds & parking areas'
+      ],
+      'Safety & Compliance': [
+        'Schedule fire drill',
+        'Update emergency evacuation plan',
+        'Verify ADA compliance',
+        'Inspect playground equipment',
+        'Review security camera footage'
+      ],
+      'Maintenance & Repairs': [
+        'Process work order requests',
+        'Schedule preventive maintenance',
+        'Coordinate vendor service visits',
+        'Inspect roof & exterior walls',
+        'Test backup generator'
+      ]
+    }
+  };
+
+  var TEAM_COLORS = [
+    { color: '#34C759', gradient: 'linear-gradient(135deg, #0a2e1a 0%, #1a5c32 35%, #34C759 100%)' },
+    { color: '#0A84FF', gradient: 'linear-gradient(135deg, #0a1a3e 0%, #1a4c8e 35%, #0A84FF 100%)' },
+    { color: '#FF6B35', gradient: 'linear-gradient(135deg, #2e0e05 0%, #8c2e0a 35%, #FF6B35 100%)' },
+    { color: '#AF52DE', gradient: 'linear-gradient(135deg, #1a0a2e 0%, #5c2a8e 35%, #AF52DE 100%)' },
+    { color: '#FF2D55', gradient: 'linear-gradient(135deg, #2e0a14 0%, #8e1a3a 35%, #FF2D55 100%)' },
+    { color: '#30D158', gradient: 'linear-gradient(135deg, #062e14 0%, #1a7a3e 35%, #30D158 100%)' },
+    { color: '#FF9F0A', gradient: 'linear-gradient(135deg, #2e1a02 0%, #8e5a06 35%, #FF9F0A 100%)' }
+  ];
+
   var IC = {
     person: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg>',
     camera: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>',
@@ -964,53 +1407,407 @@ html { height: 100%; }
     grip: '<svg viewBox="0 0 14 18" fill="currentColor"><circle cx="4" cy="3" r="1.5"/><circle cx="10" cy="3" r="1.5"/><circle cx="4" cy="9" r="1.5"/><circle cx="10" cy="9" r="1.5"/><circle cx="4" cy="15" r="1.5"/><circle cx="10" cy="15" r="1.5"/></svg>',
     contact: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>',
     move: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 9l-3 3 3 3"/><path d="M9 5l3-3 3 3"/><path d="M15 19l-3 3-3-3"/><path d="M19 9l3 3-3 3"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>',
-    zoomIn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>'
+    zoomIn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>',
+    back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"/></svg>'
   };
 
   function el(tag, cls) { var e = document.createElement(tag); if (cls) e.className = cls; return e; }
-  function uid() { return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
+  function uid() { return 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
   function showToast(msg) { var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('visible'); setTimeout(function() { t.classList.remove('visible'); }, 2600); }
   function showSaving(on) { document.getElementById('save-pill').classList.toggle('active', on); }
 
+  function getTeam(id) { return state.teams.find(function(t) { return t.id === id; }); }
+
+  function getInitials(name) {
+    var parts = name.split(/\s+/);
+    if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    return name.substring(0, 2).toUpperCase();
+  }
+
+  // ===== ROUTING =====
   function render() {
     var app = document.getElementById('app');
     app.innerHTML = '';
+    if (currentView === 'detail' && activeTeamId) {
+      renderDetail(app);
+    } else {
+      renderDashboard(app);
+    }
+  }
+
+  function openTeam(id) {
+    activeTeamId = id;
+    currentView = 'detail';
+    activeTab = 'team';
+    showContacts = false;
+    repositioning = false;
+    render();
+    window.scrollTo(0, 0);
+  }
+
+  function goBack() {
+    currentView = 'dashboard';
+    activeTeamId = null;
+    repositioning = false;
+    closeTagDropdown();
+    closeMenus();
+    render();
+    window.scrollTo(0, 0);
+  }
+
+  // ===== DASHBOARD VIEW =====
+  function renderDashboard(app) {
+    var header = el('div', 'dash-header');
+    var left = el('div');
+    var title = el('h1', 'dash-title');
+    title.textContent = 'Teams';
+    left.appendChild(title);
+    var sub = el('p', 'dash-subtitle');
+    var totalMembers = 0;
+    state.teams.forEach(function(t) { totalMembers += t.members.length; });
+    sub.textContent = state.teams.length + ' team' + (state.teams.length !== 1 ? 's' : '') + ' · ' + totalMembers + ' member' + (totalMembers !== 1 ? 's' : '');
+    left.appendChild(sub);
+    header.appendChild(left);
+
+    var actions = el('div', 'dash-actions');
+    var addBtn = el('button', 'dash-btn dash-btn-primary');
+    addBtn.innerHTML = IC.plus + ' New team';
+    addBtn.addEventListener('click', addTeam);
+    actions.appendChild(addBtn);
+    header.appendChild(actions);
+    app.appendChild(header);
+
+    var grid = el('div', 'teams-grid');
+    state.teams.forEach(function(team) {
+      grid.appendChild(renderTeamCard(team));
+    });
+
+    var addCard = el('div', 'team-card-add');
+    addCard.innerHTML = IC.plus + '<span>Create new team</span>';
+    addCard.addEventListener('click', addTeam);
+    grid.appendChild(addCard);
+
+    app.appendChild(grid);
+  }
+
+  function renderTeamCard(team) {
+    var card = el('div', 'team-card');
+    card.addEventListener('click', function(e) {
+      if (e.target.closest('.team-card-delete')) return;
+      openTeam(team.id);
+    });
+
+    var banner = el('div', 'team-card-banner');
+    if (team.coverPhoto) {
+      var img = el('img'); img.src = team.coverPhoto; img.alt = ''; img.draggable = false;
+      if (team.coverPos) img.style.objectPosition = team.coverPos.x + '% ' + team.coverPos.y + '%';
+      if (team.coverZoom && team.coverZoom > 1) img.style.transform = 'scale(' + team.coverZoom + ')';
+      banner.appendChild(img);
+    } else {
+      var ph = el('div', 'team-card-banner-placeholder');
+      ph.style.background = team.gradient || 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)';
+      banner.appendChild(ph);
+    }
+
+    // Member count badge
+    var countBadge = el('span', 'team-card-member-count');
+    countBadge.textContent = team.members.length + ' member' + (team.members.length !== 1 ? 's' : '');
+    banner.appendChild(countBadge);
+
+    // Avatar stack
+    var avatars = el('div', 'team-card-avatars');
+    var shown = Math.min(team.members.length, 3);
+    for (var i = 0; i < shown; i++) {
+      var m = team.members[i];
+      var av = el('div', 'team-card-avatar');
+      av.style.background = getAvatarColor(i);
+      av.textContent = getInitials(m.name);
+      avatars.appendChild(av);
+    }
+    if (team.members.length > 3) {
+      var extra = el('div', 'team-card-avatar');
+      extra.style.background = 'rgba(255,255,255,0.2)';
+      extra.style.fontSize = '10px';
+      extra.textContent = '+' + (team.members.length - 3);
+      avatars.appendChild(extra);
+    }
+    banner.appendChild(avatars);
+
+    // Delete button
+    if (canEdit) {
+      var del = el('button', 'team-card-delete');
+      del.innerHTML = IC.trash;
+      del.title = 'Delete team';
+      del.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (!confirm('Delete team "' + team.name + '"? This cannot be undone.')) return;
+        state.teams = state.teams.filter(function(t) { return t.id !== team.id; });
+        render(); schedulePublish();
+      });
+      banner.appendChild(del);
+    }
+
+    card.appendChild(banner);
+
+    var body = el('div', 'team-card-body');
+    var nameRow = el('h3', 'team-card-name');
+    var dot = el('span', 'team-card-color');
+    dot.style.background = team.color || '#888';
+    nameRow.appendChild(dot);
+    nameRow.appendChild(document.createTextNode(team.name));
+    body.appendChild(nameRow);
+
+    var desc = el('p', 'team-card-desc');
+    desc.textContent = team.description || 'No description';
+    body.appendChild(desc);
+
+    if (team.tags && team.tags.length) {
+      var tags = el('div', 'team-card-tags');
+      team.tags.slice(0, 3).forEach(function(t) {
+        var tag = el('span', 'team-card-tag');
+        tag.textContent = t;
+        tags.appendChild(tag);
+      });
+      if (team.tags.length > 3) {
+        var more = el('span', 'team-card-tag');
+        more.textContent = '+' + (team.tags.length - 3);
+        more.style.opacity = '0.6';
+        tags.appendChild(more);
+      }
+      body.appendChild(tags);
+    }
+
+    card.appendChild(body);
+    return card;
+  }
+
+  function getAvatarColor(idx) {
+    var colors = ['#34C759', '#0A84FF', '#FF9F0A', '#AF52DE', '#FF2D55', '#30D158', '#5E5CE6'];
+    return colors[idx % colors.length];
+  }
+
+  function addTeam() {
+    var ci = state.teams.length % TEAM_COLORS.length;
+    var tc = TEAM_COLORS[ci];
+    var team = {
+      id: uid(),
+      name: 'New Team',
+      description: 'Team roles and responsibilities',
+      color: tc.color,
+      gradient: tc.gradient,
+      tags: [],
+      coverPhoto: null,
+      coverPos: null,
+      coverZoom: null,
+      pm: [],
+      facilities: [],
+      members: []
+    };
+    state.teams.push(team);
+    schedulePublish();
+    openTeam(team.id);
+  }
+
+  // ===== DETAIL VIEW =====
+  function renderDetail(app) {
+    var team = getTeam(activeTeamId);
+    if (!team) { goBack(); return; }
+
+    var backBtn = el('button', 'detail-back');
+    backBtn.innerHTML = IC.back + ' All teams';
+    backBtn.addEventListener('click', goBack);
+    app.appendChild(backBtn);
 
     var card = el('div', 'roster-card');
     card.id = 'roster';
-    card.appendChild(renderHero());
-    card.appendChild(renderTagBar());
-    card.appendChild(renderToolbar());
-    card.appendChild(renderMembers());
+    var tc = team.color || 'var(--accent)';
+    card.style.borderColor = tc + '33';
+    card.style.boxShadow = '0 2px 20px ' + tc + '1A, 0 0 1px rgba(0,0,0,0.08)';
+    card.appendChild(renderHero(team));
+    card.appendChild(renderTagBar(team));
 
+    // Tab bar
+    var tabs = el('div', 'detail-tabs');
+    var tabDefs = [
+      { key: 'team', label: 'Team' },
+      { key: 'pm', label: 'Project Management' },
+      { key: 'facilities', label: 'Facilities' }
+    ];
+    tabDefs.forEach(function(td) {
+      var tab = el('button', 'detail-tab' + (activeTab === td.key ? ' active' : ''));
+      tab.textContent = td.label;
+      tab.addEventListener('click', function() {
+        activeTab = td.key;
+        render();
+      });
+      tabs.appendChild(tab);
+    });
+    card.appendChild(tabs);
+
+    // Team tab content
+    var teamContent = el('div', 'tab-content' + (activeTab === 'team' ? ' active' : ''));
+    teamContent.appendChild(renderToolbar(team));
+    teamContent.appendChild(renderMembers(team));
     if (canEdit) {
       var addBtn = el('button', 'add-row');
       addBtn.innerHTML = IC.plus + ' Add team member';
-      addBtn.addEventListener('click', addMember);
-      card.appendChild(addBtn);
+      addBtn.addEventListener('click', function() { addMember(team); });
+      teamContent.appendChild(addBtn);
     }
+    card.appendChild(teamContent);
 
-    card.appendChild(renderFooter());
+    // PM tab content
+    var pmContent = el('div', 'tab-content' + (activeTab === 'pm' ? ' active' : ''));
+    pmContent.appendChild(renderChecklist(team, 'pm'));
+    card.appendChild(pmContent);
+
+    // Facilities tab content
+    var facContent = el('div', 'tab-content' + (activeTab === 'facilities' ? ' active' : ''));
+    facContent.appendChild(renderChecklist(team, 'facilities'));
+    card.appendChild(facContent);
+
+    card.appendChild(renderFooter(team));
     app.appendChild(card);
   }
 
-  // --- Hero header ---
-  function applyCoverTransform(img) {
-    var pos = state.project.coverPos || { x: 50, y: 50 };
-    var zoom = state.project.coverZoom || 1;
+  // --- Checklist ---
+  function ensureChecklist(team, key) {
+    if (!team[key] || !team[key].length) {
+      var presets = TAB_PRESETS[key];
+      team[key] = [];
+      Object.keys(presets).forEach(function(section) {
+        presets[section].forEach(function(label) {
+          team[key].push({ id: uid(), text: label, done: false, section: section });
+        });
+      });
+      schedulePublish();
+    }
+  }
+
+  function renderChecklist(team, key) {
+    ensureChecklist(team, key);
+    var items = team[key];
+    var panel = el('div', 'checklist-panel');
+
+    // Progress bar
+    var doneCount = items.filter(function(i) { return i.done; }).length;
+    var total = items.length;
+    var pct = total ? Math.round((doneCount / total) * 100) : 0;
+    var prog = el('div', 'checklist-progress');
+    var bar = el('div', 'checklist-progress-bar');
+    var fill = el('div', 'checklist-progress-fill');
+    fill.style.width = pct + '%';
+    if (pct === 100) fill.style.background = 'var(--green)';
+    bar.appendChild(fill);
+    prog.appendChild(bar);
+    var progText = el('span', 'checklist-progress-text');
+    progText.textContent = doneCount + '/' + total + ' complete';
+    prog.appendChild(progText);
+    panel.appendChild(prog);
+
+    // Group by section
+    var sections = {};
+    var sectionOrder = [];
+    items.forEach(function(item) {
+      var s = item.section || 'General';
+      if (!sections[s]) { sections[s] = []; sectionOrder.push(s); }
+      sections[s].push(item);
+    });
+
+    sectionOrder.forEach(function(sName) {
+      var sec = el('div', 'checklist-section');
+      var title = el('h4', 'checklist-section-title');
+      title.textContent = sName;
+      sec.appendChild(title);
+
+      sections[sName].forEach(function(item) {
+        var row = el('div', 'checklist-item');
+
+        var cb = el('button', 'checklist-cb' + (item.done ? ' checked' : ''));
+        cb.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>';
+        cb.addEventListener('click', function() {
+          item.done = !item.done;
+          render(); schedulePublish();
+        });
+        row.appendChild(cb);
+
+        var label = el('span', 'checklist-label' + (item.done ? ' done' : ''));
+        label.textContent = item.text;
+        if (canEdit) {
+          label.contentEditable = 'plaintext-only'; label.spellcheck = false;
+          label.addEventListener('blur', function() {
+            var v = label.textContent.trim();
+            if (v && v !== item.text) { item.text = v; schedulePublish(); }
+            else label.textContent = item.text;
+          });
+          label.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); label.blur(); } });
+        }
+        row.appendChild(label);
+
+        if (canEdit) {
+          var del = el('button', 'checklist-delete');
+          del.innerHTML = IC.x;
+          del.addEventListener('click', function() {
+            team[key] = team[key].filter(function(i) { return i.id !== item.id; });
+            render(); schedulePublish();
+          });
+          row.appendChild(del);
+        }
+
+        sec.appendChild(row);
+      });
+
+      panel.appendChild(sec);
+    });
+
+    // Add item button
+    if (canEdit) {
+      var addBtn = el('button', 'checklist-add');
+      addBtn.innerHTML = IC.plus + ' Add item';
+      addBtn.addEventListener('click', function() {
+        addBtn.hidden = true;
+        var input = el('input', 'checklist-input');
+        input.type = 'text'; input.placeholder = 'New checklist item…';
+        panel.appendChild(input); input.focus();
+        function commit() {
+          var v = input.value.trim();
+          if (v) {
+            var lastSection = sectionOrder.length ? sectionOrder[sectionOrder.length - 1] : 'General';
+            team[key].push({ id: uid(), text: v, done: false, section: lastSection });
+            schedulePublish();
+          }
+          render();
+        }
+        input.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') { e.preventDefault(); commit(); }
+          if (e.key === 'Escape') { input.remove(); addBtn.hidden = false; }
+        });
+        input.addEventListener('blur', commit);
+      });
+      panel.appendChild(addBtn);
+    }
+
+    return panel;
+  }
+
+  // --- Hero ---
+  function applyCoverTransform(img, team) {
+    var pos = team.coverPos || { x: 50, y: 50 };
+    var zoom = team.coverZoom || 1;
     img.style.objectPosition = pos.x + '% ' + pos.y + '%';
     img.style.transform = 'scale(' + zoom + ')';
   }
 
-  function renderHero() {
+  function renderHero(team) {
     var hero = el('div', 'hero');
     if (repositioning) hero.classList.add('repositioning');
 
     var bg = el('div', 'hero-bg');
+    bg.style.background = team.gradient || 'linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)';
     var coverImg = null;
-    if (state.project.coverPhoto) {
-      coverImg = el('img'); coverImg.src = state.project.coverPhoto; coverImg.alt = ''; coverImg.draggable = false;
-      applyCoverTransform(coverImg);
+    if (team.coverPhoto) {
+      coverImg = el('img'); coverImg.src = team.coverPhoto; coverImg.alt = ''; coverImg.draggable = false;
+      applyCoverTransform(coverImg, team);
       bg.appendChild(coverImg);
     }
     hero.appendChild(bg);
@@ -1018,32 +1815,30 @@ html { height: 100%; }
     var fade = el('div', 'hero-fade');
     hero.appendChild(fade);
 
-    if (canEdit && !state.project.coverPhoto) {
+    if (canEdit && !team.coverPhoto) {
       var hint = el('div', 'hero-upload-hint');
       hint.innerHTML = IC.image + '<span>Add cover image</span>';
       hero.appendChild(hint);
       hero.style.cursor = 'pointer';
       hero.addEventListener('click', function(e) {
         if (e.target.closest('.cover-btn') || e.target.closest('[contenteditable]')) return;
-        pickCoverPhoto();
+        pickCoverPhoto(team);
       });
     }
 
     if (canEdit && !repositioning) {
       var btns = el('div', 'hero-edit-cover');
       var changeBtn = el('button', 'cover-btn'); changeBtn.innerHTML = IC.camera; changeBtn.title = 'Change cover';
-      changeBtn.addEventListener('click', function(e) { e.stopPropagation(); pickCoverPhoto(); });
+      changeBtn.addEventListener('click', function(e) { e.stopPropagation(); pickCoverPhoto(team); });
       btns.appendChild(changeBtn);
-      if (state.project.coverPhoto) {
+      if (team.coverPhoto) {
         var moveBtn = el('button', 'cover-btn'); moveBtn.innerHTML = IC.move; moveBtn.title = 'Reposition';
         moveBtn.addEventListener('click', function(e) { e.stopPropagation(); repositioning = true; render(); });
         btns.appendChild(moveBtn);
         var rmBtn = el('button', 'cover-btn remove'); rmBtn.innerHTML = IC.x; rmBtn.title = 'Remove cover';
         rmBtn.addEventListener('click', function(e) {
           e.stopPropagation();
-          state.project.coverPhoto = null;
-          state.project.coverPos = null;
-          state.project.coverZoom = null;
+          team.coverPhoto = null; team.coverPos = null; team.coverZoom = null;
           render(); schedulePublish();
         });
         btns.appendChild(rmBtn);
@@ -1051,20 +1846,19 @@ html { height: 100%; }
       hero.appendChild(btns);
     }
 
-    // Reposition mode UI
+    // Reposition mode
     if (repositioning && coverImg) {
       var dragHint = el('div', 'reposition-hint');
       dragHint.textContent = 'Drag to reposition';
       hero.appendChild(dragHint);
 
-      // Drag to pan
       var dragging = false, startX, startY, startPos;
       function onPointerDown(e) {
         if (e.target.closest('.reposition-bar')) return;
         dragging = true;
         startX = e.clientX || e.touches[0].clientX;
         startY = e.clientY || e.touches[0].clientY;
-        startPos = { x: (state.project.coverPos || { x: 50, y: 50 }).x, y: (state.project.coverPos || { x: 50, y: 50 }).y };
+        startPos = { x: (team.coverPos || { x: 50, y: 50 }).x, y: (team.coverPos || { x: 50, y: 50 }).y };
         hero.style.cursor = 'grabbing';
         dragHint.style.opacity = '0';
       }
@@ -1074,21 +1868,17 @@ html { height: 100%; }
         var cx = e.clientX || e.touches[0].clientX;
         var cy = e.clientY || e.touches[0].clientY;
         var rect = hero.getBoundingClientRect();
-        var zoom = state.project.coverZoom || 1;
+        var zoom = team.coverZoom || 1;
         var dx = ((cx - startX) / rect.width) * 100 / zoom;
         var dy = ((cy - startY) / rect.height) * 100 / zoom;
         var nx = Math.max(0, Math.min(100, startPos.x - dx));
         var ny = Math.max(0, Math.min(100, startPos.y - dy));
-        if (!state.project.coverPos) state.project.coverPos = { x: 50, y: 50 };
-        state.project.coverPos.x = Math.round(nx * 10) / 10;
-        state.project.coverPos.y = Math.round(ny * 10) / 10;
-        applyCoverTransform(coverImg);
+        if (!team.coverPos) team.coverPos = { x: 50, y: 50 };
+        team.coverPos.x = Math.round(nx * 10) / 10;
+        team.coverPos.y = Math.round(ny * 10) / 10;
+        applyCoverTransform(coverImg, team);
       }
-      function onPointerUp() {
-        if (!dragging) return;
-        dragging = false;
-        hero.style.cursor = 'grab';
-      }
+      function onPointerUp() { if (!dragging) return; dragging = false; hero.style.cursor = 'grab'; }
       hero.addEventListener('mousedown', onPointerDown);
       hero.addEventListener('touchstart', onPointerDown, { passive: true });
       document.addEventListener('mousemove', onPointerMove);
@@ -1096,31 +1886,23 @@ html { height: 100%; }
       document.addEventListener('mouseup', onPointerUp);
       document.addEventListener('touchend', onPointerUp);
 
-      // Bottom bar with zoom slider + done
       var bar = el('div', 'reposition-bar');
-
       var zoomLabel = el('span'); zoomLabel.innerHTML = IC.zoomIn;
       zoomLabel.querySelector('svg').style.cssText = 'width:14px;height:14px;vertical-align:middle;';
       bar.appendChild(zoomLabel);
-
       var slider = el('input', 'zoom-slider');
       slider.type = 'range'; slider.min = '1'; slider.max = '2.5'; slider.step = '0.05';
-      slider.value = String(state.project.coverZoom || 1);
+      slider.value = String(team.coverZoom || 1);
       slider.addEventListener('input', function() {
-        state.project.coverZoom = parseFloat(slider.value);
-        applyCoverTransform(coverImg);
-      });
-      bar.appendChild(slider);
-
-      var pctLabel = el('span');
-      pctLabel.style.minWidth = '36px';
-      pctLabel.style.textAlign = 'right';
-      pctLabel.textContent = Math.round((state.project.coverZoom || 1) * 100) + '%';
-      slider.addEventListener('input', function() {
+        team.coverZoom = parseFloat(slider.value);
+        applyCoverTransform(coverImg, team);
         pctLabel.textContent = Math.round(parseFloat(slider.value) * 100) + '%';
       });
+      bar.appendChild(slider);
+      var pctLabel = el('span');
+      pctLabel.style.cssText = 'min-width:36px;text-align:right;';
+      pctLabel.textContent = Math.round((team.coverZoom || 1) * 100) + '%';
       bar.appendChild(pctLabel);
-
       var doneBtn = el('button', 'reposition-done');
       doneBtn.textContent = 'Done';
       doneBtn.addEventListener('click', function(e) {
@@ -1133,34 +1915,30 @@ html { height: 100%; }
         render(); schedulePublish();
       });
       bar.appendChild(doneBtn);
-
       hero.appendChild(bar);
     }
 
     var content = el('div', 'hero-content');
-
     var title = el('h1', 'hero-title' + (canEdit ? ' editable' : ''));
-    title.textContent = state.project.name;
+    title.textContent = team.name;
     if (canEdit) {
-      title.contentEditable = 'plaintext-only';
-      title.spellcheck = false;
+      title.contentEditable = 'plaintext-only'; title.spellcheck = false;
       title.addEventListener('blur', function() {
         var v = title.textContent.trim();
-        if (v && v !== state.project.name) { state.project.name = v; schedulePublish(); }
-        else title.textContent = state.project.name;
+        if (v && v !== team.name) { team.name = v; schedulePublish(); }
+        else title.textContent = team.name;
       });
       title.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); title.blur(); } });
     }
     content.appendChild(title);
 
     var sub = el('p', 'hero-subtitle' + (canEdit ? ' editable' : ''));
-    sub.textContent = state.project.description;
+    sub.textContent = team.description;
     if (canEdit) {
-      sub.contentEditable = 'plaintext-only';
-      sub.spellcheck = false;
+      sub.contentEditable = 'plaintext-only'; sub.spellcheck = false;
       sub.addEventListener('blur', function() {
         var v = sub.textContent.trim();
-        if (v !== state.project.description) { state.project.description = v; schedulePublish(); }
+        if (v !== team.description) { team.description = v; schedulePublish(); }
       });
       sub.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); sub.blur(); } });
     }
@@ -1168,7 +1946,7 @@ html { height: 100%; }
 
     var meta = el('div', 'hero-meta');
     var count = el('span', 'member-count');
-    var n = state.members.length;
+    var n = team.members.length;
     count.textContent = n + ' team member' + (n !== 1 ? 's' : '');
     meta.appendChild(count);
     content.appendChild(meta);
@@ -1177,7 +1955,7 @@ html { height: 100%; }
     return hero;
   }
 
-  function pickCoverPhoto() {
+  function pickCoverPhoto(team) {
     var input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
     input.onchange = function(e) {
       var file = e.target.files[0]; if (!file) return;
@@ -1185,17 +1963,13 @@ html { height: 100%; }
       reader.onload = function(ev) {
         var img = new Image();
         img.onload = function() {
-          var MAX = 1200;
-          var w = img.width, h = img.height;
-          if (w > MAX || h > MAX) {
-            var s = MAX / Math.max(w, h);
-            w = Math.round(w * s); h = Math.round(h * s);
-          }
+          var MAX = 1200, w = img.width, h = img.height;
+          if (w > MAX || h > MAX) { var s = MAX / Math.max(w, h); w = Math.round(w * s); h = Math.round(h * s); }
           var c = document.createElement('canvas'); c.width = w; c.height = h;
           c.getContext('2d').drawImage(img, 0, 0, w, h);
-          state.project.coverPhoto = c.toDataURL('image/jpeg', 0.82);
-          state.project.coverPos = { x: 50, y: 50 };
-          state.project.coverZoom = 1;
+          team.coverPhoto = c.toDataURL('image/jpeg', 0.82);
+          team.coverPos = { x: 50, y: 50 };
+          team.coverZoom = 1;
           repositioning = true;
           render(); schedulePublish();
         };
@@ -1207,317 +1981,185 @@ html { height: 100%; }
   }
 
   // --- Tag bar ---
-  function renderTagBar() {
+  function renderTagBar(team) {
     var bar = el('div', 'tags-bar');
-    var tags = state.project.tags || [];
-
+    var tags = team.tags || [];
     tags.forEach(function(t, i) {
       var tag = el('span', 'project-tag');
       tag.textContent = t;
       if (canEdit) {
         var x = el('button', 'tag-x'); x.innerHTML = '&times;';
-        x.addEventListener('click', function(e) {
-          e.stopPropagation();
-          state.project.tags.splice(i, 1);
-          render(); schedulePublish();
-        });
+        x.addEventListener('click', function(e) { e.stopPropagation(); team.tags.splice(i, 1); render(); schedulePublish(); });
         tag.appendChild(x);
       }
       bar.appendChild(tag);
     });
-
     if (canEdit) {
       var addWrap = el('div');
       addWrap.style.cssText = 'position:relative;display:inline-flex;';
-
       var addBtn = el('button', 'tag-add');
       addBtn.innerHTML = IC.plus;
       addBtn.addEventListener('click', function(e) {
         e.stopPropagation();
         if (tagDropdownOpen) { closeTagDropdown(); return; }
-        openTagDropdown(addWrap);
+        openTagDropdown(addWrap, team);
       });
       addWrap.appendChild(addBtn);
       bar.appendChild(addWrap);
     }
-
     return bar;
   }
 
-  function openTagDropdown(wrap) {
-    closeMenus();
-    tagDropdownOpen = true;
-
+  function openTagDropdown(wrap, team) {
+    closeMenus(); tagDropdownOpen = true;
     var dd = el('div', 'tag-dropdown');
-    var currentTags = state.project.tags || [];
-
+    var currentTags = team.tags || [];
     var search = el('input', 'tag-dropdown-search');
-    search.type = 'text';
-    search.placeholder = 'Search or type custom…';
+    search.type = 'text'; search.placeholder = 'Search or type custom…';
     dd.appendChild(search);
-
-    var listWrap = el('div');
-    dd.appendChild(listWrap);
-
+    var listWrap = el('div'); dd.appendChild(listWrap);
     function buildList(query) {
       listWrap.innerHTML = '';
       var q = (query || '').toLowerCase().trim();
       var hasMatch = false;
-
       Object.keys(TAG_PRESETS).forEach(function(section) {
-        var items = TAG_PRESETS[section].filter(function(t) {
-          return !q || t.toLowerCase().indexOf(q) !== -1;
-        });
-        if (items.length === 0) return;
-
-        var label = el('div', 'tag-section-label');
-        label.textContent = section;
-        listWrap.appendChild(label);
-
+        var items = TAG_PRESETS[section].filter(function(t) { return !q || t.toLowerCase().indexOf(q) !== -1; });
+        if (!items.length) return;
+        var label = el('div', 'tag-section-label'); label.textContent = section; listWrap.appendChild(label);
         items.forEach(function(t) {
           hasMatch = true;
           var opt = el('button', 'tag-opt');
           var dot = el('span', 'tag-opt-dot');
           var txt = el('span'); txt.textContent = t;
           opt.append(dot, txt);
-
-          if (currentTags.indexOf(t) !== -1) {
-            opt.classList.add('disabled');
-            txt.textContent = t + ' ✓';
-          } else {
-            opt.addEventListener('click', function(e) {
-              e.stopPropagation();
-              addTag(t);
-              closeTagDropdown();
-            });
-          }
+          if (currentTags.indexOf(t) !== -1) { opt.classList.add('disabled'); txt.textContent = t + ' ✓'; }
+          else { opt.addEventListener('click', function(e) { e.stopPropagation(); addTagToTeam(team, t); closeTagDropdown(); }); }
           listWrap.appendChild(opt);
         });
       });
-
-      if (q && !hasMatch) {
-        var customLabel = el('div', 'tag-section-label');
-        customLabel.textContent = 'Custom';
-        listWrap.appendChild(customLabel);
-      }
-
+      if (q && !hasMatch) { var cl = el('div', 'tag-section-label'); cl.textContent = 'Custom'; listWrap.appendChild(cl); }
       if (q) {
         var exactExists = false;
-        Object.keys(TAG_PRESETS).forEach(function(s) {
-          TAG_PRESETS[s].forEach(function(t) {
-            if (t.toLowerCase() === q) exactExists = true;
-          });
-        });
-        if (!exactExists && currentTags.map(function(t){ return t.toLowerCase(); }).indexOf(q) === -1) {
-          var customOpt = el('button', 'tag-opt');
-          var customDot = el('span', 'tag-opt-dot');
-          customDot.style.background = 'var(--green)';
-          var customTxt = el('span');
-          customTxt.textContent = 'Add "' + query.trim() + '"';
-          customOpt.append(customDot, customTxt);
-          customOpt.addEventListener('click', function(e) {
-            e.stopPropagation();
-            addTag(query.trim());
-            closeTagDropdown();
-          });
-          listWrap.appendChild(customOpt);
+        Object.keys(TAG_PRESETS).forEach(function(s) { TAG_PRESETS[s].forEach(function(t) { if (t.toLowerCase() === q) exactExists = true; }); });
+        if (!exactExists && currentTags.map(function(t) { return t.toLowerCase(); }).indexOf(q) === -1) {
+          var co = el('button', 'tag-opt');
+          var cd = el('span', 'tag-opt-dot'); cd.style.background = 'var(--green)';
+          var ct = el('span'); ct.textContent = 'Add "' + query.trim() + '"';
+          co.append(cd, ct);
+          co.addEventListener('click', function(e) { e.stopPropagation(); addTagToTeam(team, query.trim()); closeTagDropdown(); });
+          listWrap.appendChild(co);
         }
       }
     }
-
     buildList('');
-
     search.addEventListener('input', function() { buildList(search.value); });
     search.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') {
-        e.preventDefault();
-        var v = search.value.trim();
-        if (v && (state.project.tags || []).indexOf(v) === -1) {
-          addTag(v);
-          closeTagDropdown();
-        }
-      }
-      if (e.key === 'Escape') { closeTagDropdown(); }
+      if (e.key === 'Enter') { e.preventDefault(); var v = search.value.trim(); if (v && (team.tags || []).indexOf(v) === -1) { addTagToTeam(team, v); closeTagDropdown(); } }
+      if (e.key === 'Escape') closeTagDropdown();
     });
-
     document.body.appendChild(dd);
-    var btnRect = wrap.getBoundingClientRect();
-    dd.style.position = 'fixed';
-    dd.style.top = (btnRect.bottom + 6) + 'px';
-    dd.style.left = Math.min(btnRect.left, window.innerWidth - 230) + 'px';
+    var r = wrap.getBoundingClientRect();
+    dd.style.top = (r.bottom + 6) + 'px';
+    dd.style.left = Math.min(r.left, window.innerWidth - 230) + 'px';
     setTimeout(function() { search.focus(); }, 10);
-
-    function outsideHandler(e) {
-      if (dd.contains(e.target) || wrap.contains(e.target)) return;
-      closeTagDropdown();
-      document.removeEventListener('mousedown', outsideHandler);
-    }
-    setTimeout(function() {
-      document.addEventListener('mousedown', outsideHandler);
-    }, 50);
+    function outside(e) { if (dd.contains(e.target) || wrap.contains(e.target)) return; closeTagDropdown(); document.removeEventListener('mousedown', outside); }
+    setTimeout(function() { document.addEventListener('mousedown', outside); }, 50);
   }
 
-  function closeTagDropdown() {
-    tagDropdownOpen = false;
-    document.querySelectorAll('.tag-dropdown').forEach(function(d) { d.remove(); });
-  }
-
-  function addTag(name) {
-    if (!state.project.tags) state.project.tags = [];
-    if (state.project.tags.indexOf(name) === -1) {
-      state.project.tags.push(name);
-      render(); schedulePublish();
-    }
-  }
+  function closeTagDropdown() { tagDropdownOpen = false; document.querySelectorAll('.tag-dropdown').forEach(function(d) { d.remove(); }); }
+  function addTagToTeam(team, name) { if (!team.tags) team.tags = []; if (team.tags.indexOf(name) === -1) { team.tags.push(name); render(); schedulePublish(); } }
 
   // --- Toolbar ---
-  function renderToolbar() {
+  function renderToolbar(team) {
     var bar = el('div', 'toolbar');
-
     var contactBtn = el('button', 'toolbar-btn' + (showContacts ? ' active' : ''));
     contactBtn.innerHTML = IC.contact + (showContacts ? ' Hide contacts' : ' Show contacts');
     contactBtn.addEventListener('click', function() {
       showContacts = !showContacts;
-      document.querySelectorAll('.member-contact').forEach(function(c) {
-        c.classList.toggle('show', showContacts);
-      });
+      document.querySelectorAll('.member-contact').forEach(function(c) { c.classList.toggle('show', showContacts); });
       contactBtn.className = 'toolbar-btn' + (showContacts ? ' active' : '');
       contactBtn.innerHTML = IC.contact + (showContacts ? ' Hide contacts' : ' Show contacts');
     });
     bar.appendChild(contactBtn);
-
     return bar;
   }
 
-  function renderMembers() {
+  // --- Members ---
+  function renderMembers(team) {
     var list = el('div', 'members-list');
-
-    if (state.members.length === 0) {
+    if (!team.members.length) {
       var empty = el('div');
       empty.style.cssText = 'padding:40px 28px;text-align:center;color:var(--text-2);font-size:14px;';
       empty.textContent = canEdit ? 'Add your first team member below' : 'No team members added yet';
       list.appendChild(empty);
       return list;
     }
-
-    state.members.forEach(function(m, i) { list.appendChild(renderRow(m, i)); });
+    team.members.forEach(function(m, i) { list.appendChild(renderRow(team, m, i)); });
     return list;
   }
 
-  function renderRow(m, idx) {
+  function renderRow(team, m, idx) {
     var row = el('div', 'member-row');
     row.dataset.idx = idx;
 
-    // Drag handle
+    var accent = el('div', 'member-row-accent');
+    accent.style.background = team.color || 'var(--accent)';
+    row.appendChild(accent);
+
     if (canEdit) {
       var handle = el('div', 'drag-handle');
       handle.innerHTML = IC.grip;
       handle.draggable = true;
-      handle.addEventListener('dragstart', function(e) {
-        dragSrcIndex = idx;
-        row.classList.add('dragging');
-        e.dataTransfer.effectAllowed = 'move';
-        e.dataTransfer.setData('text/plain', idx);
-      });
-      handle.addEventListener('dragend', function() {
-        row.classList.remove('dragging');
-        dragSrcIndex = null;
-        document.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(function(r) {
-          r.classList.remove('drag-over-top', 'drag-over-bottom');
-        });
-      });
-      row.addEventListener('dragover', function(e) {
-        e.preventDefault();
-        e.dataTransfer.dropEffect = 'move';
-        var rect = row.getBoundingClientRect();
-        var mid = rect.top + rect.height / 2;
-        row.classList.toggle('drag-over-top', e.clientY < mid);
-        row.classList.toggle('drag-over-bottom', e.clientY >= mid);
-      });
-      row.addEventListener('dragleave', function() {
-        row.classList.remove('drag-over-top', 'drag-over-bottom');
-      });
+      handle.addEventListener('dragstart', function(e) { dragSrcIndex = idx; row.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', idx); });
+      handle.addEventListener('dragend', function() { row.classList.remove('dragging'); dragSrcIndex = null; document.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(function(r) { r.classList.remove('drag-over-top', 'drag-over-bottom'); }); });
+      row.addEventListener('dragover', function(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; var rect = row.getBoundingClientRect(); var mid = rect.top + rect.height / 2; row.classList.toggle('drag-over-top', e.clientY < mid); row.classList.toggle('drag-over-bottom', e.clientY >= mid); });
+      row.addEventListener('dragleave', function() { row.classList.remove('drag-over-top', 'drag-over-bottom'); });
       row.addEventListener('drop', function(e) {
-        e.preventDefault();
-        row.classList.remove('drag-over-top', 'drag-over-bottom');
-        var from = dragSrcIndex;
-        var to = idx;
+        e.preventDefault(); row.classList.remove('drag-over-top', 'drag-over-bottom');
+        var from = dragSrcIndex, to = idx;
         if (from === null || from === to) return;
         var rect = row.getBoundingClientRect();
-        if (e.clientY >= rect.top + rect.height / 2 && to < state.members.length - 1) to++;
-        var item = state.members.splice(from, 1)[0];
+        if (e.clientY >= rect.top + rect.height / 2 && to < team.members.length - 1) to++;
+        var item = team.members.splice(from, 1)[0];
         if (to > from) to--;
-        state.members.splice(to, 0, item);
+        team.members.splice(to, 0, item);
         render(); schedulePublish();
       });
-      // Touch drag support
-      var touchY = 0, touchStartIdx = idx, touchClone = null;
-      handle.addEventListener('touchstart', function(e) {
-        touchY = e.touches[0].clientY;
-        touchStartIdx = idx;
-      }, { passive: true });
+      // Touch drag
+      var touchStartIdx = idx;
+      handle.addEventListener('touchstart', function(e) { touchStartIdx = idx; }, { passive: true });
       handle.addEventListener('touchmove', function(e) {
-        e.preventDefault();
-        var cy = e.touches[0].clientY;
-        var rows = document.querySelectorAll('.member-row');
-        rows.forEach(function(r, ri) {
+        e.preventDefault(); var cy = e.touches[0].clientY;
+        document.querySelectorAll('.member-row').forEach(function(r, ri) {
           var rect = r.getBoundingClientRect();
-          if (cy > rect.top && cy < rect.bottom && ri !== touchStartIdx) {
-            r.classList.add(cy < rect.top + rect.height / 2 ? 'drag-over-top' : 'drag-over-bottom');
-          } else {
-            r.classList.remove('drag-over-top', 'drag-over-bottom');
-          }
+          if (cy > rect.top && cy < rect.bottom && ri !== touchStartIdx) r.classList.add(cy < rect.top + rect.height / 2 ? 'drag-over-top' : 'drag-over-bottom');
+          else r.classList.remove('drag-over-top', 'drag-over-bottom');
         });
       }, { passive: false });
       handle.addEventListener('touchend', function(e) {
-        var cy = e.changedTouches[0].clientY;
-        var rows = document.querySelectorAll('.member-row');
-        var targetIdx = -1;
-        rows.forEach(function(r, ri) {
-          r.classList.remove('drag-over-top', 'drag-over-bottom');
-          var rect = r.getBoundingClientRect();
-          if (cy > rect.top && cy < rect.bottom) targetIdx = ri;
-        });
-        if (targetIdx >= 0 && targetIdx !== touchStartIdx) {
-          var item = state.members.splice(touchStartIdx, 1)[0];
-          state.members.splice(targetIdx, 0, item);
-          render(); schedulePublish();
-        }
+        var cy = e.changedTouches[0].clientY; var targetIdx = -1;
+        document.querySelectorAll('.member-row').forEach(function(r, ri) { r.classList.remove('drag-over-top', 'drag-over-bottom'); var rect = r.getBoundingClientRect(); if (cy > rect.top && cy < rect.bottom) targetIdx = ri; });
+        if (targetIdx >= 0 && targetIdx !== touchStartIdx) { var item = team.members.splice(touchStartIdx, 1)[0]; team.members.splice(targetIdx, 0, item); render(); schedulePublish(); }
       });
       row.appendChild(handle);
     }
 
     // Avatar
     var av = el('div', 'avatar');
-    if (m.photo) {
-      var img = el('img'); img.src = m.photo; img.alt = m.name; img.draggable = false;
-      av.appendChild(img);
-    } else {
-      var ph = el('div', 'avatar-placeholder'); ph.innerHTML = IC.person;
-      av.appendChild(ph);
-    }
-    if (canEdit) {
-      var ov = el('div', 'avatar-overlay'); ov.innerHTML = IC.camera;
-      ov.addEventListener('click', function() { pickPhoto(m.id); });
-      av.appendChild(ov);
-    }
+    av.style.background = getAvatarColor(idx);
+    var initDiv = el('div', 'avatar-initials');
+    initDiv.textContent = getInitials(m.name);
+    av.appendChild(initDiv);
     row.appendChild(av);
 
-    // Body
     var body = el('div', 'member-body');
-
-    // Top line
     var top = el('div', 'member-top');
 
     var name = el('span', 'member-name' + (canEdit ? ' editable-dark' : ''));
     name.textContent = m.name;
     if (canEdit) {
       name.contentEditable = 'plaintext-only'; name.spellcheck = false;
-      name.addEventListener('blur', function() {
-        var v = name.textContent.trim();
-        if (v && v !== m.name) { m.name = v; schedulePublish(); }
-        else name.textContent = m.name;
-      });
+      name.addEventListener('blur', function() { var v = name.textContent.trim(); if (v && v !== m.name) { m.name = v; schedulePublish(); } else name.textContent = m.name; });
       name.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); name.blur(); } });
     }
     top.appendChild(name);
@@ -1526,26 +2168,17 @@ html { height: 100%; }
     role.textContent = m.role;
     if (canEdit) {
       role.contentEditable = 'plaintext-only'; role.spellcheck = false;
-      role.addEventListener('blur', function() {
-        var v = role.textContent.trim();
-        if (v && v !== m.role) { m.role = v; schedulePublish(); }
-        else role.textContent = m.role;
-      });
+      role.addEventListener('blur', function() { var v = role.textContent.trim(); if (v && v !== m.role) { m.role = v; schedulePublish(); } else role.textContent = m.role; });
       role.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); role.blur(); } });
     }
     top.appendChild(role);
 
-    // Status
-    var sw = el('div', 'status-wrap');
-    var dot = el('span', 'status-dot status-' + m.status);
-    dot.style.animation = m.status === 'active' ? '' : 'none';
-    var sl = el('span', 'status-label');
+    var sw = el('div', 'status-pill status-pill-' + m.status);
+    var dot = el('span', 'status-pill-dot');
+    var sl = el('span');
     sl.textContent = m.status.charAt(0).toUpperCase() + m.status.slice(1);
     sw.append(dot, sl);
-    if (canEdit) {
-      sw.style.cursor = 'pointer';
-      sw.addEventListener('click', function(e) { e.stopPropagation(); toggleStatus(sw, m); });
-    }
+    if (canEdit) { sw.style.cursor = 'pointer'; sw.addEventListener('click', function(e) { e.stopPropagation(); toggleStatus(sw, m); }); }
     top.appendChild(sw);
     body.appendChild(top);
 
@@ -1553,94 +2186,85 @@ html { height: 100%; }
     if ((m.tasks && m.tasks.length) || canEdit) {
       var chips = el('div', 'member-tasks');
       (m.tasks || []).forEach(function(t, i) {
-        var chip = el('span', 'task-chip');
-        chip.textContent = t;
-        if (canEdit) {
-          var x = el('button', 'chip-x'); x.innerHTML = '&times;';
-          x.addEventListener('click', function() { m.tasks.splice(i, 1); render(); schedulePublish(); });
-          chip.appendChild(x);
-        }
+        var chip = el('span', 'task-chip'); chip.textContent = t;
+        if (canEdit) { var x = el('button', 'chip-x'); x.innerHTML = '&times;'; x.addEventListener('click', function() { m.tasks.splice(i, 1); render(); schedulePublish(); }); chip.appendChild(x); }
         chips.appendChild(chip);
       });
-      if (canEdit) {
-        var addC = el('button', 'task-add'); addC.textContent = '+';
-        addC.addEventListener('click', function() { showTaskInput(chips, addC, m); });
-        chips.appendChild(addC);
-      }
+      if (canEdit) { var addC = el('button', 'task-add'); addC.textContent = '+'; addC.addEventListener('click', function() { showTaskInput(chips, addC, m); }); chips.appendChild(addC); }
       body.appendChild(chips);
     }
 
-    // Contact (collapsible)
+    // Contact
     if (m.email || m.phone || canEdit) {
       var contact = el('div', 'member-contact' + (showContacts ? ' show' : ''));
-
-      var emailItem = el('span', 'contact-item');
-      emailItem.innerHTML = IC.mail;
+      var emailItem = el('span', 'contact-item'); emailItem.innerHTML = IC.mail;
       var emailVal = el('span', 'contact-val' + (canEdit ? ' editable-dark' : ''));
       emailVal.textContent = m.email || (canEdit ? 'email' : '');
       if (!m.email) emailVal.style.opacity = '0.4';
       if (canEdit) {
         emailVal.contentEditable = 'plaintext-only'; emailVal.spellcheck = false;
         emailVal.addEventListener('focus', function() { emailVal.style.opacity = '1'; if (!m.email) emailVal.textContent = ''; });
-        emailVal.addEventListener('blur', function() {
-          var v = emailVal.textContent.trim();
-          if (v !== (m.email || '')) { m.email = v; schedulePublish(); }
-          if (!v) { emailVal.textContent = 'email'; emailVal.style.opacity = '0.4'; }
-        });
+        emailVal.addEventListener('blur', function() { var v = emailVal.textContent.trim(); if (v !== (m.email || '')) { m.email = v; schedulePublish(); } if (!v) { emailVal.textContent = 'email'; emailVal.style.opacity = '0.4'; } });
         emailVal.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); emailVal.blur(); } });
       }
       emailItem.appendChild(emailVal);
       if (m.email || canEdit) contact.appendChild(emailItem);
 
-      var phoneItem = el('span', 'contact-item');
-      phoneItem.innerHTML = IC.phone;
+      var phoneItem = el('span', 'contact-item'); phoneItem.innerHTML = IC.phone;
       var phoneVal = el('span', 'contact-val' + (canEdit ? ' editable-dark' : ''));
       phoneVal.textContent = m.phone || (canEdit ? 'phone' : '');
       if (!m.phone) phoneVal.style.opacity = '0.4';
       if (canEdit) {
         phoneVal.contentEditable = 'plaintext-only'; phoneVal.spellcheck = false;
         phoneVal.addEventListener('focus', function() { phoneVal.style.opacity = '1'; if (!m.phone) phoneVal.textContent = ''; });
-        phoneVal.addEventListener('blur', function() {
-          var v = phoneVal.textContent.trim();
-          if (v !== (m.phone || '')) { m.phone = v; schedulePublish(); }
-          if (!v) { phoneVal.textContent = 'phone'; phoneVal.style.opacity = '0.4'; }
-        });
+        phoneVal.addEventListener('blur', function() { var v = phoneVal.textContent.trim(); if (v !== (m.phone || '')) { m.phone = v; schedulePublish(); } if (!v) { phoneVal.textContent = 'phone'; phoneVal.style.opacity = '0.4'; } });
         phoneVal.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); phoneVal.blur(); } });
       }
       phoneItem.appendChild(phoneVal);
       if (m.phone || canEdit) contact.appendChild(phoneItem);
-
       body.appendChild(contact);
     }
 
     row.appendChild(body);
-
-    // Delete button
     if (canEdit) {
-      var del = el('button', 'row-delete');
-      del.innerHTML = IC.x;
-      del.title = 'Remove';
-      del.addEventListener('click', function() { deleteMember(m.id); });
+      var del = el('button', 'row-delete'); del.innerHTML = IC.x; del.title = 'Remove';
+      del.addEventListener('click', function() { deleteMember(team, m.id); });
       row.appendChild(del);
     }
-
     return row;
   }
 
-  function renderFooter() {
-    var footer = el('div', 'card-footer');
+  function renderFooter(team) {
+    var wrap = document.createDocumentFragment();
 
+    // Branded footer strip
+    var brand = el('div', 'card-brand');
+    brand.style.background = team.gradient || team.color || 'var(--accent)';
+    var left = el('div', 'card-brand-left');
+    var icon = el('div', 'card-brand-icon');
+    icon.textContent = 'T';
+    left.appendChild(icon);
+    var bname = el('span');
+    bname.textContent = team.name;
+    left.appendChild(bname);
+    brand.appendChild(left);
+    var right = el('div', 'card-brand-right');
+    var n = team.members.length;
+    right.textContent = n + ' member' + (n !== 1 ? 's' : '') + (team.tags && team.tags.length ? ' · ' + team.tags.length + ' tag' + (team.tags.length !== 1 ? 's' : '') : '');
+    brand.appendChild(right);
+    wrap.appendChild(brand);
+
+    var footer = el('div', 'card-footer');
     var shareBtn = el('button', 'btn btn-secondary');
     shareBtn.innerHTML = IC.share + ' Copy Link';
     shareBtn.addEventListener('click', copyLink);
     footer.appendChild(shareBtn);
-
     var expBtn = el('button', 'btn btn-primary');
     expBtn.innerHTML = IC.download + ' Export Image';
-    expBtn.addEventListener('click', exportRoster);
+    expBtn.addEventListener('click', function() { exportRoster(team); });
     footer.appendChild(expBtn);
-
-    return footer;
+    wrap.appendChild(footer);
+    return wrap;
   }
 
   // --- Task input ---
@@ -1649,15 +2273,8 @@ html { height: 100%; }
     var input = el('input', 'task-input');
     input.type = 'text'; input.placeholder = 'Task name…';
     container.appendChild(input); input.focus();
-    function commit() {
-      var v = input.value.trim();
-      if (v) { if (!member.tasks) member.tasks = []; member.tasks.push(v); schedulePublish(); }
-      render();
-    }
-    input.addEventListener('keydown', function(e) {
-      if (e.key === 'Enter') { e.preventDefault(); commit(); }
-      if (e.key === 'Escape') { input.remove(); addBtn.hidden = false; }
-    });
+    function commit() { var v = input.value.trim(); if (v) { if (!member.tasks) member.tasks = []; member.tasks.push(v); schedulePublish(); } render(); }
+    input.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); commit(); } if (e.key === 'Escape') { input.remove(); addBtn.hidden = false; } });
     input.addEventListener('blur', commit);
   }
 
@@ -1680,65 +2297,31 @@ html { height: 100%; }
   function closeMenus() { if (openMenu) { openMenu.remove(); openMenu = null; } }
 
   // --- Add / Delete ---
-  function addMember() {
-    state.members.push({ id: uid(), name: 'New Member', role: 'Role', tasks: [], email: '', phone: '', status: 'active', photo: null });
+  function addMember(team) {
+    team.members.push({ id: uid(), name: 'New Member', role: 'Role', tasks: [], email: '', phone: '', status: 'active' });
     render(); schedulePublish();
   }
-  function deleteMember(id) {
-    var m = state.members.find(function(x) { return x.id === id; });
+  function deleteMember(team, id) {
+    var m = team.members.find(function(x) { return x.id === id; });
     if (!m || !confirm('Remove ' + m.name + '?')) return;
-    state.members = state.members.filter(function(x) { return x.id !== id; });
+    team.members = team.members.filter(function(x) { return x.id !== id; });
     render(); schedulePublish();
-  }
-
-  // --- Photo ---
-  function pickPhoto(memberId) {
-    var input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
-    input.onchange = function(e) {
-      var file = e.target.files[0]; if (!file) return;
-      var reader = new FileReader();
-      reader.onload = function(ev) {
-        var img = new Image();
-        img.onload = function() {
-          var c = document.createElement('canvas'); c.width = PHOTO_SIZE; c.height = PHOTO_SIZE;
-          var ctx = c.getContext('2d');
-          var s = Math.min(img.width, img.height);
-          ctx.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, PHOTO_SIZE, PHOTO_SIZE);
-          var m = state.members.find(function(x) { return x.id === memberId; });
-          if (m) { m.photo = c.toDataURL('image/jpeg', PHOTO_Q); render(); schedulePublish(); }
-        };
-        img.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    };
-    input.click();
   }
 
   // --- Export ---
-  function exportRoster() {
+  function exportRoster(team) {
     if (typeof html2canvas === 'undefined') { showToast('Export not available'); return; }
     var roster = document.getElementById('roster');
     if (!roster) return;
-
     var bg = getComputedStyle(document.documentElement).getPropertyValue('--card').trim();
     html2canvas(roster, { backgroundColor: bg, scale: 2, logging: false, useCORS: true }).then(function(canvas) {
-      canvas.toBlob(function(blob) {
-        saveBlob(blob, (state.project.name || 'team').replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase() + '-roles.png');
-      }, 'image/png');
+      canvas.toBlob(function(blob) { saveBlob(blob, (team.name || 'team').replace(/[^a-zA-Z0-9]+/g, '-').toLowerCase() + '-roles.png'); }, 'image/png');
     }).catch(function() { showToast('Export failed'); });
   }
 
   function saveBlob(blob, filename) {
-    if (downloads) {
-      downloads.save({ filename: filename, data: blob }).then(function() {
-        showToast('Image exported!');
-      }).catch(function(e) {
-        if (e && e.code === 'declined') return;
-        nativeDownload(blob, filename);
-      });
-    } else {
-      nativeDownload(blob, filename);
-    }
+    if (downloads) { downloads.save({ filename: filename, data: blob }).then(function() { showToast('Image exported!'); }).catch(function(e) { if (e && e.code === 'declined') return; nativeDownload(blob, filename); }); }
+    else { nativeDownload(blob, filename); }
   }
 
   function nativeDownload(blob, filename) {
@@ -1754,16 +2337,13 @@ html { height: 100%; }
   function copyLink() {
     var url = window.location.href;
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(url).then(function() {
-        showToast('Link copied — paste in WhatsApp to share');
-      }).catch(fallback);
+      navigator.clipboard.writeText(url).then(function() { showToast('Link copied'); }).catch(fallback);
     } else { fallback(); }
     function fallback() {
       var ta = document.createElement('textarea'); ta.value = url;
       ta.style.cssText = 'position:fixed;opacity:0';
       document.body.appendChild(ta); ta.select();
-      try { document.execCommand('copy'); showToast('Link copied!'); }
-      catch(e) { showToast('Copy the URL from the address bar'); }
+      try { document.execCommand('copy'); showToast('Link copied!'); } catch(e) { showToast('Copy the URL from the address bar'); }
       ta.remove();
     }
   }
@@ -1774,9 +2354,7 @@ html { height: 100%; }
   function saveState() {
     if (saving) return;
     saving = true; showSaving(true);
-
     try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
-
     if (artifact) {
       try {
         var clone = document.documentElement.cloneNode(true);
@@ -1788,7 +2366,6 @@ html { height: 100%; }
         artifact.publish(html).then(done).catch(done);
       } catch(e) { done(); }
     } else { done(); }
-
     function done() { saving = false; showSaving(false); showToast('Saved'); }
   }
 
@@ -1797,7 +2374,14 @@ html { height: 100%; }
     var defaults = JSON.parse(document.getElementById('app-data').textContent);
     try {
       var stored = localStorage.getItem(STORAGE_KEY);
-      if (stored) return JSON.parse(stored);
+      if (stored) {
+        var parsed = JSON.parse(stored);
+        if (parsed.teams) return parsed;
+        // Migrate old single-team format
+        if (parsed.project || parsed.members) {
+          return { teams: [{ id: uid(), name: parsed.project ? parsed.project.name : 'My Team', description: parsed.project ? parsed.project.description : '', color: '#2d7a3a', gradient: 'linear-gradient(135deg, #1a3a2a 0%, #2d7a3a 100%)', tags: parsed.project ? (parsed.project.tags || []) : [], coverPhoto: parsed.project ? parsed.project.coverPhoto || null : null, coverPos: parsed.project ? parsed.project.coverPos || null : null, coverZoom: parsed.project ? parsed.project.coverZoom || null : null, members: parsed.members || [] }] };
+        }
+      }
     } catch(e) {}
     return defaults;
   }
@@ -1821,6 +2405,7 @@ html { height: 100%; }
   } else {
     start({});
   }
+
   if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').catch(function() {});
   }
