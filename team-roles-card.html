@@ -198,6 +198,86 @@ html { height: 100%; }
 .hero:hover .cover-btn { opacity: 1; }
 .cover-btn:hover { background: rgba(0,0,0,0.65); }
 .cover-btn.remove:hover { background: var(--red); }
+
+/* Reposition mode */
+.hero.repositioning { cursor: grab; }
+.hero.repositioning:active { cursor: grabbing; }
+.hero.repositioning .hero-fade { opacity: 0.3; }
+.hero.repositioning .hero-content { opacity: 0; pointer-events: none; }
+.hero.repositioning .hero-edit-cover { opacity: 0; pointer-events: none; }
+.reposition-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  background: rgba(0,0,0,0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  z-index: 10;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 500;
+}
+.reposition-bar span { white-space: nowrap; flex-shrink: 0; }
+.zoom-slider {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: rgba(255,255,255,0.25);
+  outline: none;
+  cursor: pointer;
+}
+.zoom-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+.zoom-slider::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #fff;
+  cursor: pointer;
+  border: none;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+.reposition-done {
+  padding: 5px 16px;
+  border-radius: 100px;
+  border: none;
+  background: var(--accent);
+  color: #fff;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: filter 0.15s;
+}
+.reposition-done:hover { filter: brightness(1.15); }
+.reposition-hint {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  color: rgba(255,255,255,0.8);
+  font-size: 14px;
+  font-weight: 600;
+  text-shadow: 0 1px 6px rgba(0,0,0,0.5);
+  pointer-events: none;
+  z-index: 8;
+}
+
 .hero-upload-hint {
   position: absolute;
   top: 20px;
@@ -720,6 +800,7 @@ html { height: 100%; }
   var state, artifact, downloads, canEdit = true, saveTimer, saving = false, openMenu = null;
   var showContacts = false;
   var dragSrcIndex = null;
+  var repositioning = false;
 
   var IC = {
     person: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg>',
@@ -733,7 +814,9 @@ html { height: 100%; }
     phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.88.37 1.75.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c1.06.33 1.93.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
     image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>',
     grip: '<svg viewBox="0 0 14 18" fill="currentColor"><circle cx="4" cy="3" r="1.5"/><circle cx="10" cy="3" r="1.5"/><circle cx="4" cy="9" r="1.5"/><circle cx="10" cy="9" r="1.5"/><circle cx="4" cy="15" r="1.5"/><circle cx="10" cy="15" r="1.5"/></svg>',
-    contact: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>'
+    contact: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>',
+    move: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 9l-3 3 3 3"/><path d="M9 5l3-3 3 3"/><path d="M15 19l-3 3-3-3"/><path d="M19 9l3 3-3 3"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>',
+    zoomIn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>'
   };
 
   function el(tag, cls) { var e = document.createElement(tag); if (cls) e.className = cls; return e; }
@@ -763,13 +846,23 @@ html { height: 100%; }
   }
 
   // --- Hero header ---
+  function applyCoverTransform(img) {
+    var pos = state.project.coverPos || { x: 50, y: 50 };
+    var zoom = state.project.coverZoom || 1;
+    img.style.objectPosition = pos.x + '% ' + pos.y + '%';
+    img.style.transform = 'scale(' + zoom + ')';
+  }
+
   function renderHero() {
     var hero = el('div', 'hero');
+    if (repositioning) hero.classList.add('repositioning');
 
     var bg = el('div', 'hero-bg');
+    var coverImg = null;
     if (state.project.coverPhoto) {
-      var img = el('img'); img.src = state.project.coverPhoto; img.alt = ''; img.draggable = false;
-      bg.appendChild(img);
+      coverImg = el('img'); coverImg.src = state.project.coverPhoto; coverImg.alt = ''; coverImg.draggable = false;
+      applyCoverTransform(coverImg);
+      bg.appendChild(coverImg);
     }
     hero.appendChild(bg);
 
@@ -787,17 +880,112 @@ html { height: 100%; }
       });
     }
 
-    if (canEdit) {
+    if (canEdit && !repositioning) {
       var btns = el('div', 'hero-edit-cover');
       var changeBtn = el('button', 'cover-btn'); changeBtn.innerHTML = IC.camera; changeBtn.title = 'Change cover';
       changeBtn.addEventListener('click', function(e) { e.stopPropagation(); pickCoverPhoto(); });
       btns.appendChild(changeBtn);
       if (state.project.coverPhoto) {
+        var moveBtn = el('button', 'cover-btn'); moveBtn.innerHTML = IC.move; moveBtn.title = 'Reposition';
+        moveBtn.addEventListener('click', function(e) { e.stopPropagation(); repositioning = true; render(); });
+        btns.appendChild(moveBtn);
         var rmBtn = el('button', 'cover-btn remove'); rmBtn.innerHTML = IC.x; rmBtn.title = 'Remove cover';
-        rmBtn.addEventListener('click', function(e) { e.stopPropagation(); state.project.coverPhoto = null; render(); schedulePublish(); });
+        rmBtn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          state.project.coverPhoto = null;
+          state.project.coverPos = null;
+          state.project.coverZoom = null;
+          render(); schedulePublish();
+        });
         btns.appendChild(rmBtn);
       }
       hero.appendChild(btns);
+    }
+
+    // Reposition mode UI
+    if (repositioning && coverImg) {
+      var dragHint = el('div', 'reposition-hint');
+      dragHint.textContent = 'Drag to reposition';
+      hero.appendChild(dragHint);
+
+      // Drag to pan
+      var dragging = false, startX, startY, startPos;
+      function onPointerDown(e) {
+        if (e.target.closest('.reposition-bar')) return;
+        dragging = true;
+        startX = e.clientX || e.touches[0].clientX;
+        startY = e.clientY || e.touches[0].clientY;
+        startPos = { x: (state.project.coverPos || { x: 50, y: 50 }).x, y: (state.project.coverPos || { x: 50, y: 50 }).y };
+        hero.style.cursor = 'grabbing';
+        dragHint.style.opacity = '0';
+      }
+      function onPointerMove(e) {
+        if (!dragging) return;
+        e.preventDefault();
+        var cx = e.clientX || e.touches[0].clientX;
+        var cy = e.clientY || e.touches[0].clientY;
+        var rect = hero.getBoundingClientRect();
+        var zoom = state.project.coverZoom || 1;
+        var dx = ((cx - startX) / rect.width) * 100 / zoom;
+        var dy = ((cy - startY) / rect.height) * 100 / zoom;
+        var nx = Math.max(0, Math.min(100, startPos.x - dx));
+        var ny = Math.max(0, Math.min(100, startPos.y - dy));
+        if (!state.project.coverPos) state.project.coverPos = { x: 50, y: 50 };
+        state.project.coverPos.x = Math.round(nx * 10) / 10;
+        state.project.coverPos.y = Math.round(ny * 10) / 10;
+        applyCoverTransform(coverImg);
+      }
+      function onPointerUp() {
+        if (!dragging) return;
+        dragging = false;
+        hero.style.cursor = 'grab';
+      }
+      hero.addEventListener('mousedown', onPointerDown);
+      hero.addEventListener('touchstart', onPointerDown, { passive: true });
+      document.addEventListener('mousemove', onPointerMove);
+      document.addEventListener('touchmove', onPointerMove, { passive: false });
+      document.addEventListener('mouseup', onPointerUp);
+      document.addEventListener('touchend', onPointerUp);
+
+      // Bottom bar with zoom slider + done
+      var bar = el('div', 'reposition-bar');
+
+      var zoomLabel = el('span'); zoomLabel.innerHTML = IC.zoomIn;
+      zoomLabel.querySelector('svg').style.cssText = 'width:14px;height:14px;vertical-align:middle;';
+      bar.appendChild(zoomLabel);
+
+      var slider = el('input', 'zoom-slider');
+      slider.type = 'range'; slider.min = '1'; slider.max = '2.5'; slider.step = '0.05';
+      slider.value = String(state.project.coverZoom || 1);
+      slider.addEventListener('input', function() {
+        state.project.coverZoom = parseFloat(slider.value);
+        applyCoverTransform(coverImg);
+      });
+      bar.appendChild(slider);
+
+      var pctLabel = el('span');
+      pctLabel.style.minWidth = '36px';
+      pctLabel.style.textAlign = 'right';
+      pctLabel.textContent = Math.round((state.project.coverZoom || 1) * 100) + '%';
+      slider.addEventListener('input', function() {
+        pctLabel.textContent = Math.round(parseFloat(slider.value) * 100) + '%';
+      });
+      bar.appendChild(pctLabel);
+
+      var doneBtn = el('button', 'reposition-done');
+      doneBtn.textContent = 'Done';
+      doneBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        repositioning = false;
+        document.removeEventListener('mousemove', onPointerMove);
+        document.removeEventListener('touchmove', onPointerMove);
+        document.removeEventListener('mouseup', onPointerUp);
+        document.removeEventListener('touchend', onPointerUp);
+        render(); schedulePublish();
+      });
+      bar.appendChild(doneBtn);
+
+      hero.appendChild(bar);
     }
 
     var content = el('div', 'hero-content');
@@ -848,13 +1036,18 @@ html { height: 100%; }
       reader.onload = function(ev) {
         var img = new Image();
         img.onload = function() {
-          var W = 640, H = 360;
-          var c = document.createElement('canvas'); c.width = W; c.height = H;
-          var ctx = c.getContext('2d');
-          var scale = Math.max(W / img.width, H / img.height);
-          var sw = W / scale, sh = H / scale;
-          ctx.drawImage(img, (img.width - sw) / 2, (img.height - sh) / 2, sw, sh, 0, 0, W, H);
-          state.project.coverPhoto = c.toDataURL('image/jpeg', 0.8);
+          var MAX = 1200;
+          var w = img.width, h = img.height;
+          if (w > MAX || h > MAX) {
+            var s = MAX / Math.max(w, h);
+            w = Math.round(w * s); h = Math.round(h * s);
+          }
+          var c = document.createElement('canvas'); c.width = w; c.height = h;
+          c.getContext('2d').drawImage(img, 0, 0, w, h);
+          state.project.coverPhoto = c.toDataURL('image/jpeg', 0.82);
+          state.project.coverPos = { x: 50, y: 50 };
+          state.project.coverZoom = 1;
+          repositioning = true;
           render(); schedulePublish();
         };
         img.src = ev.target.result;
