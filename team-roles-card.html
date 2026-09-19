@@ -621,6 +621,123 @@ html { height: 100%; }
 }
 .status-opt:hover { background: var(--accent-soft); }
 
+/* Project tags bar */
+.tags-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 28px;
+  border-bottom: 0.5px solid var(--border);
+  flex-wrap: wrap;
+}
+.project-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 100px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: background 0.15s;
+  line-height: 1.3;
+}
+.project-tag .tag-x {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0.5;
+  transition: all 0.15s;
+}
+.project-tag .tag-x:hover { opacity: 1; background: rgba(0,122,255,0.15); }
+.tag-add {
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  border: 1.5px dashed var(--text-3);
+  background: transparent;
+  color: var(--text-2);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  font-size: 16px;
+  transition: all 0.15s;
+  flex-shrink: 0;
+  position: relative;
+}
+.tag-add:hover { border-color: var(--accent); color: var(--accent); }
+.tag-add svg { width: 14px; height: 14px; }
+.tag-dropdown {
+  position: fixed;
+  background: var(--card);
+  border-radius: var(--radius-sm);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+  border: 0.5px solid var(--border);
+  padding: 6px;
+  z-index: 200;
+  min-width: 220px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+.tag-dropdown-search {
+  width: 100%;
+  padding: 7px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xs);
+  background: var(--bg);
+  color: var(--text-1);
+  font-family: var(--font);
+  font-size: 13px;
+  outline: none;
+  margin-bottom: 4px;
+}
+.tag-dropdown-search:focus { border-color: var(--accent); }
+.tag-dropdown-search::placeholder { color: var(--text-3); }
+.tag-section-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-2);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 8px 10px 4px;
+}
+.tag-opt {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 10px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  font-size: 13px;
+  color: var(--text-1);
+  border: none;
+  background: none;
+  width: 100%;
+  font-family: var(--font);
+  text-align: left;
+  transition: background 0.12s;
+}
+.tag-opt:hover { background: var(--accent-soft); }
+.tag-opt.disabled { opacity: 0.35; pointer-events: none; }
+.tag-opt .tag-opt-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
 /* Card footer */
 .card-footer {
   display: flex;
@@ -725,6 +842,7 @@ html { height: 100%; }
   .card-footer { padding: 12px 20px 16px; }
   .member-contact { gap: 10px; }
   .toolbar { padding: 8px 20px; }
+  .tags-bar { padding: 10px 20px; gap: 6px; }
   .drag-handle { width: 14px; }
 }
 
@@ -740,7 +858,8 @@ html { height: 100%; }
 {
   "project": {
     "name": "Project Name",
-    "description": "Team roles and responsibilities"
+    "description": "Team roles and responsibilities",
+    "tags": ["Team Coordination", "Assembly", "Design System"]
   },
   "members": [
     {
@@ -801,6 +920,28 @@ html { height: 100%; }
   var showContacts = false;
   var dragSrcIndex = null;
   var repositioning = false;
+  var tagDropdownOpen = false;
+
+  var TAG_PRESETS = {
+    'Facilities': [
+      'Building Maintenance', 'Safety & Compliance', 'HVAC & Climate',
+      'Plumbing', 'Electrical', 'Landscaping & Grounds',
+      'Custodial', 'Pest Control', 'Security Systems',
+      'Renovation', 'Space Planning', 'Furniture & Fixtures',
+      'Energy Management', 'Fire Safety', 'ADA Compliance'
+    ],
+    'Project Management': [
+      'Team Coordination', 'Scheduling', 'Budget & Finance',
+      'Procurement', 'Vendor Management', 'Quality Assurance',
+      'Risk Management', 'Stakeholder Comms', 'Documentation',
+      'Training & Development', 'Emergency Planning'
+    ],
+    'Education': [
+      'Classroom Setup', 'Curriculum Planning', 'Assembly',
+      'Playground Equipment', 'Parent Communication',
+      'Student Safety', 'Design System', 'IT & Technology'
+    ]
+  };
 
   var IC = {
     person: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg>',
@@ -831,6 +972,7 @@ html { height: 100%; }
     var card = el('div', 'roster-card');
     card.id = 'roster';
     card.appendChild(renderHero());
+    card.appendChild(renderTagBar());
     card.appendChild(renderToolbar());
     card.appendChild(renderMembers());
 
@@ -1055,6 +1197,170 @@ html { height: 100%; }
       reader.readAsDataURL(file);
     };
     input.click();
+  }
+
+  // --- Tag bar ---
+  function renderTagBar() {
+    var bar = el('div', 'tags-bar');
+    var tags = state.project.tags || [];
+
+    tags.forEach(function(t, i) {
+      var tag = el('span', 'project-tag');
+      tag.textContent = t;
+      if (canEdit) {
+        var x = el('button', 'tag-x'); x.innerHTML = '&times;';
+        x.addEventListener('click', function(e) {
+          e.stopPropagation();
+          state.project.tags.splice(i, 1);
+          render(); schedulePublish();
+        });
+        tag.appendChild(x);
+      }
+      bar.appendChild(tag);
+    });
+
+    if (canEdit) {
+      var addWrap = el('div');
+      addWrap.style.cssText = 'position:relative;display:inline-flex;';
+
+      var addBtn = el('button', 'tag-add');
+      addBtn.innerHTML = IC.plus;
+      addBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (tagDropdownOpen) { closeTagDropdown(); return; }
+        openTagDropdown(addWrap);
+      });
+      addWrap.appendChild(addBtn);
+      bar.appendChild(addWrap);
+    }
+
+    return bar;
+  }
+
+  function openTagDropdown(wrap) {
+    closeMenus();
+    tagDropdownOpen = true;
+
+    var dd = el('div', 'tag-dropdown');
+    var currentTags = state.project.tags || [];
+
+    var search = el('input', 'tag-dropdown-search');
+    search.type = 'text';
+    search.placeholder = 'Search or type custom…';
+    dd.appendChild(search);
+
+    var listWrap = el('div');
+    dd.appendChild(listWrap);
+
+    function buildList(query) {
+      listWrap.innerHTML = '';
+      var q = (query || '').toLowerCase().trim();
+      var hasMatch = false;
+
+      Object.keys(TAG_PRESETS).forEach(function(section) {
+        var items = TAG_PRESETS[section].filter(function(t) {
+          return !q || t.toLowerCase().indexOf(q) !== -1;
+        });
+        if (items.length === 0) return;
+
+        var label = el('div', 'tag-section-label');
+        label.textContent = section;
+        listWrap.appendChild(label);
+
+        items.forEach(function(t) {
+          hasMatch = true;
+          var opt = el('button', 'tag-opt');
+          var dot = el('span', 'tag-opt-dot');
+          var txt = el('span'); txt.textContent = t;
+          opt.append(dot, txt);
+
+          if (currentTags.indexOf(t) !== -1) {
+            opt.classList.add('disabled');
+            txt.textContent = t + ' ✓';
+          } else {
+            opt.addEventListener('click', function(e) {
+              e.stopPropagation();
+              addTag(t);
+              closeTagDropdown();
+            });
+          }
+          listWrap.appendChild(opt);
+        });
+      });
+
+      if (q && !hasMatch) {
+        var customLabel = el('div', 'tag-section-label');
+        customLabel.textContent = 'Custom';
+        listWrap.appendChild(customLabel);
+      }
+
+      if (q) {
+        var exactExists = false;
+        Object.keys(TAG_PRESETS).forEach(function(s) {
+          TAG_PRESETS[s].forEach(function(t) {
+            if (t.toLowerCase() === q) exactExists = true;
+          });
+        });
+        if (!exactExists && currentTags.map(function(t){ return t.toLowerCase(); }).indexOf(q) === -1) {
+          var customOpt = el('button', 'tag-opt');
+          var customDot = el('span', 'tag-opt-dot');
+          customDot.style.background = 'var(--green)';
+          var customTxt = el('span');
+          customTxt.textContent = 'Add "' + query.trim() + '"';
+          customOpt.append(customDot, customTxt);
+          customOpt.addEventListener('click', function(e) {
+            e.stopPropagation();
+            addTag(query.trim());
+            closeTagDropdown();
+          });
+          listWrap.appendChild(customOpt);
+        }
+      }
+    }
+
+    buildList('');
+
+    search.addEventListener('input', function() { buildList(search.value); });
+    search.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        var v = search.value.trim();
+        if (v && (state.project.tags || []).indexOf(v) === -1) {
+          addTag(v);
+          closeTagDropdown();
+        }
+      }
+      if (e.key === 'Escape') { closeTagDropdown(); }
+    });
+
+    document.body.appendChild(dd);
+    var btnRect = wrap.getBoundingClientRect();
+    dd.style.position = 'fixed';
+    dd.style.top = (btnRect.bottom + 6) + 'px';
+    dd.style.left = Math.min(btnRect.left, window.innerWidth - 230) + 'px';
+    setTimeout(function() { search.focus(); }, 10);
+
+    function outsideHandler(e) {
+      if (dd.contains(e.target) || wrap.contains(e.target)) return;
+      closeTagDropdown();
+      document.removeEventListener('mousedown', outsideHandler);
+    }
+    setTimeout(function() {
+      document.addEventListener('mousedown', outsideHandler);
+    }, 50);
+  }
+
+  function closeTagDropdown() {
+    tagDropdownOpen = false;
+    document.querySelectorAll('.tag-dropdown').forEach(function(d) { d.remove(); });
+  }
+
+  function addTag(name) {
+    if (!state.project.tags) state.project.tags = [];
+    if (state.project.tags.indexOf(name) === -1) {
+      state.project.tags.push(name);
+      render(); schedulePublish();
+    }
   }
 
   // --- Toolbar ---
