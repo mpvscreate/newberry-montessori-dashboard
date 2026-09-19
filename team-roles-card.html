@@ -1,4 +1,5 @@
 <title>Team Roles</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
 <style>
 :root {
@@ -559,8 +560,8 @@ html { height: 100%; }
 (function() {
   'use strict';
 
-  var DEBOUNCE = 2000, PHOTO_SIZE = 200, PHOTO_Q = 0.75;
-  var state, artifact, downloads, canEdit = false, saveTimer, saving = false, openMenu = null;
+  var DEBOUNCE = 1000, PHOTO_SIZE = 200, PHOTO_Q = 0.75, STORAGE_KEY = 'team-roles-data';
+  var state, artifact, downloads, canEdit = true, saveTimer, saving = false, openMenu = null;
 
   var IC = {
     person: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg>',
@@ -902,11 +903,20 @@ html { height: 100%; }
         showToast('Image exported!');
       }).catch(function(e) {
         if (e && e.code === 'declined') return;
-        showToast('Could not save file');
+        nativeDownload(blob, filename);
       });
     } else {
-      showToast('Export not available in this view');
+      nativeDownload(blob, filename);
     }
+  }
+
+  function nativeDownload(blob, filename) {
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement('a');
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click();
+    setTimeout(function() { a.remove(); URL.revokeObjectURL(url); }, 100);
+    showToast('Image exported!');
   }
 
   // --- Share ---
@@ -927,33 +937,49 @@ html { height: 100%; }
     }
   }
 
-  // --- Publish ---
-  function schedulePublish() { clearTimeout(saveTimer); saveTimer = setTimeout(publishState, DEBOUNCE); }
+  // --- Save ---
+  function schedulePublish() { clearTimeout(saveTimer); saveTimer = setTimeout(saveState, DEBOUNCE); }
 
-  function publishState() {
-    if (!artifact || saving) return;
+  function saveState() {
+    if (saving) return;
     saving = true; showSaving(true);
-    try {
-      var clone = document.documentElement.cloneNode(true);
-      var a = clone.querySelector('#app'); if (a) a.innerHTML = '';
-      var d = clone.querySelector('#app-data'); if (d) d.textContent = JSON.stringify(state);
-      var t = clone.querySelector('#toast'); if (t) t.classList.remove('visible');
-      var p = clone.querySelector('#save-pill'); if (p) p.classList.remove('active');
-      var html = '<!doctype html>\n' + clone.outerHTML;
-      artifact.publish(html).then(function() { saving = false; showSaving(false); }).catch(function() { saving = false; showSaving(false); });
-    } catch(e) { saving = false; showSaving(false); }
+
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch(e) {}
+
+    if (artifact) {
+      try {
+        var clone = document.documentElement.cloneNode(true);
+        var a = clone.querySelector('#app'); if (a) a.innerHTML = '';
+        var d = clone.querySelector('#app-data'); if (d) d.textContent = JSON.stringify(state);
+        var t = clone.querySelector('#toast'); if (t) t.classList.remove('visible');
+        var p = clone.querySelector('#save-pill'); if (p) p.classList.remove('active');
+        var html = '<!doctype html>\n' + clone.outerHTML;
+        artifact.publish(html).then(done).catch(done);
+      } catch(e) { done(); }
+    } else { done(); }
+
+    function done() { saving = false; showSaving(false); showToast('Saved'); }
   }
 
   // --- Init ---
+  function loadState() {
+    var defaults = JSON.parse(document.getElementById('app-data').textContent);
+    try {
+      var stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) return JSON.parse(stored);
+    } catch(e) {}
+    return defaults;
+  }
+
   function start(hotData) {
-    state = (hotData && hotData.state) || JSON.parse(document.getElementById('app-data').textContent);
+    state = (hotData && hotData.state) || loadState();
     render();
     initCaps();
   }
 
   function initCaps() {
     if (!window.claude) return;
-    claude.use('artifact').then(function(a) { artifact = a; if (a) { canEdit = true; render(); } }).catch(function() {});
+    claude.use('artifact').then(function(a) { artifact = a; }).catch(function() {});
     claude.use('downloads').then(function(d) { downloads = d; }).catch(function() {});
   }
 
