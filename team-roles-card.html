@@ -1,6 +1,6 @@
 <title>Team Roles</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
 <style>
 :root {
   --bg: #F2F2F7;
@@ -22,6 +22,8 @@
   --radius-sm: 14px;
   --radius-xs: 8px;
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --hero-text: #FFFFFF;
+  --hero-sub: rgba(255,255,255,0.75);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -91,62 +93,98 @@ html { height: 100%; }
   overflow: hidden;
 }
 
-/* Cover photo */
-.cover-photo {
+/* Hero header — cover image with floating text */
+.hero {
   position: relative;
   width: 100%;
-  height: 200px;
-  background: linear-gradient(135deg, var(--accent-soft) 0%, var(--bg) 100%);
+  min-height: 220px;
   overflow: hidden;
-  cursor: pointer;
+  cursor: default;
 }
-.cover-photo img {
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+}
+.hero-bg img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
-.cover-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: var(--text-3);
-  transition: color 0.2s;
-}
-.cover-photo:hover .cover-placeholder { color: var(--accent); }
-.cover-placeholder svg { width: 32px; height: 32px; }
-.cover-placeholder span {
-  font-size: 13px;
-  font-weight: 500;
-}
-.cover-overlay {
+.hero-fade {
   position: absolute;
   inset: 0;
-  background: rgba(0,0,0,0.3);
+  background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,0) 0%,
+    rgba(0,0,0,0.02) 30%,
+    rgba(0,0,0,0.35) 65%,
+    rgba(0,0,0,0.75) 100%
+  );
+  pointer-events: none;
+}
+.hero-content {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  min-height: 220px;
+  padding: 0 28px 22px;
+}
+.hero-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  margin: 0;
+  color: var(--hero-text);
+  outline: none;
+  text-shadow: 0 1px 8px rgba(0,0,0,0.3);
+}
+.hero-subtitle {
+  font-size: 14px;
+  color: var(--hero-sub);
+  margin: 6px 0 0;
+  line-height: 1.4;
+  outline: none;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.3);
+}
+.hero-meta {
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  opacity: 0;
-  transition: opacity 0.25s;
-  color: #fff;
-  font-size: 13px;
-  font-weight: 500;
+  gap: 10px;
+  margin-top: 12px;
+  flex-wrap: wrap;
 }
-.cover-overlay svg { width: 20px; height: 20px; }
-.cover-photo:hover .cover-overlay { opacity: 1; }
-.cover-remove {
+.member-count {
+  display: inline-block;
+  font-size: 12px;
+  font-weight: 600;
+  color: #fff;
+  background: rgba(255,255,255,0.18);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  padding: 4px 14px;
+  border-radius: 100px;
+  letter-spacing: 0.02em;
+}
+.hero-edit-cover {
   position: absolute;
-  top: 10px;
-  right: 10px;
-  width: 28px; height: 28px;
+  top: 14px;
+  right: 14px;
+  display: flex;
+  gap: 6px;
+  z-index: 5;
+}
+.cover-btn {
+  width: 32px; height: 32px;
   border-radius: 50%;
   border: none;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.45);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
   color: #fff;
   cursor: pointer;
   display: flex;
@@ -155,48 +193,27 @@ html { height: 100%; }
   padding: 0;
   opacity: 0;
   transition: all 0.2s;
-  z-index: 2;
 }
-.cover-remove svg { width: 14px; height: 14px; }
-.cover-photo:hover .cover-remove { opacity: 1; }
-.cover-remove:hover { background: var(--red); }
-
-/* Card header */
-.card-header {
-  padding: 24px 28px 24px;
-  text-align: center;
-  border-bottom: 0.5px solid var(--border);
+.cover-btn svg { width: 15px; height: 15px; }
+.hero:hover .cover-btn { opacity: 1; }
+.cover-btn:hover { background: rgba(0,0,0,0.65); }
+.cover-btn.remove:hover { background: var(--red); }
+.hero-upload-hint {
+  position: absolute;
+  top: 20px;
+  right: 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  color: rgba(255,255,255,0.3);
+  transition: color 0.2s;
+  pointer-events: none;
+  z-index: 3;
 }
-
-.card-title {
-  font-size: 26px;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  line-height: 1.15;
-  margin: 0;
-  outline: none;
-  text-wrap: balance;
-}
-
-.card-subtitle {
-  font-size: 15px;
-  color: var(--text-2);
-  margin: 6px 0 0;
-  line-height: 1.4;
-  outline: none;
-}
-
-.member-count {
-  display: inline-block;
-  margin-top: 12px;
-  font-size: 12px;
-  font-weight: 600;
-  color: var(--accent);
-  background: var(--accent-soft);
-  padding: 3px 12px;
-  border-radius: 100px;
-  letter-spacing: 0.02em;
-}
+.hero:hover .hero-upload-hint { color: rgba(255,255,255,0.7); }
+.hero-upload-hint svg { width: 28px; height: 28px; }
+.hero-upload-hint span { font-size: 12px; font-weight: 500; }
 
 /* Editable fields */
 .editable {
@@ -206,8 +223,38 @@ html { height: 100%; }
   transition: background 0.2s;
   cursor: text;
 }
-.editable:hover { background: var(--accent-soft); }
-.editable:focus { background: var(--accent-soft); }
+.editable:hover { background: rgba(255,255,255,0.1); }
+.editable:focus { background: rgba(255,255,255,0.15); }
+.editable-dark:hover { background: var(--accent-soft); }
+.editable-dark:focus { background: var(--accent-soft); }
+
+/* Toolbar row */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 28px;
+  border-bottom: 0.5px solid var(--border);
+}
+.toolbar-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 14px;
+  border-radius: 100px;
+  border: none;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.toolbar-btn:hover { background: rgba(0,122,255,0.15); }
+.toolbar-btn.active { background: var(--accent); color: #fff; }
+.toolbar-btn svg { width: 13px; height: 13px; }
 
 /* Member rows */
 .members-list { padding: 0; }
@@ -218,11 +265,37 @@ html { height: 100%; }
   padding: 18px 28px;
   border-bottom: 0.5px solid var(--border);
   align-items: flex-start;
-  transition: background 0.15s;
+  transition: background 0.15s, box-shadow 0.15s;
   position: relative;
 }
 .member-row:last-child { border-bottom: none; }
 .member-row:hover { background: var(--accent-soft); }
+
+/* Drag handle */
+.drag-handle {
+  width: 18px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: grab;
+  color: var(--text-3);
+  padding-top: 16px;
+  transition: color 0.15s;
+  touch-action: none;
+}
+.drag-handle:hover { color: var(--text-2); }
+.drag-handle:active { cursor: grabbing; }
+.drag-handle svg { width: 14px; height: 18px; }
+
+.member-row.dragging {
+  opacity: 0.85;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.2);
+  z-index: 100;
+  background: var(--card);
+}
+.member-row.drag-over-top { box-shadow: inset 0 2px 0 var(--accent); }
+.member-row.drag-over-bottom { box-shadow: inset 0 -2px 0 var(--accent); }
 
 /* Photo */
 .avatar {
@@ -384,12 +457,22 @@ html { height: 100%; }
   width: 140px;
 }
 
-/* Contact row */
+/* Contact row — collapsible */
 .member-contact {
   display: flex;
   gap: 14px;
   margin-top: 6px;
   flex-wrap: wrap;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 0.3s ease, opacity 0.25s ease, margin 0.3s ease;
+  margin-top: 0;
+}
+.member-contact.show {
+  max-height: 60px;
+  opacity: 1;
+  margin-top: 6px;
 }
 .contact-item {
   display: inline-flex;
@@ -554,13 +637,15 @@ html { height: 100%; }
 
 /* Responsive */
 @media (max-width: 500px) {
-  .cover-photo { height: 160px; }
-  .card-header { padding: 20px 20px 16px; }
-  .card-title { font-size: 22px; }
-  .member-row { padding: 14px 20px; gap: 12px; }
+  .hero { min-height: 180px; }
+  .hero-content { min-height: 180px; padding: 0 20px 18px; }
+  .hero-title { font-size: 24px; }
+  .member-row { padding: 14px 20px; gap: 10px; }
   .avatar { width: 44px; height: 44px; }
   .card-footer { padding: 12px 20px 16px; }
   .member-contact { gap: 10px; }
+  .toolbar { padding: 8px 20px; }
+  .drag-handle { width: 14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -633,6 +718,8 @@ html { height: 100%; }
 
   var DEBOUNCE = 1000, PHOTO_SIZE = 200, PHOTO_Q = 0.75, STORAGE_KEY = 'team-roles-data';
   var state, artifact, downloads, canEdit = true, saveTimer, saving = false, openMenu = null;
+  var showContacts = false;
+  var dragSrcIndex = null;
 
   var IC = {
     person: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="8" r="4"/><path d="M4 21v-1a6 6 0 0 1 12 0v1"/></svg>',
@@ -644,7 +731,9 @@ html { height: 100%; }
     trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/></svg>',
     mail: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>',
     phone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.13.88.37 1.75.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c1.06.33 1.93.57 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
-    image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>'
+    image: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>',
+    grip: '<svg viewBox="0 0 14 18" fill="currentColor"><circle cx="4" cy="3" r="1.5"/><circle cx="10" cy="3" r="1.5"/><circle cx="4" cy="9" r="1.5"/><circle cx="10" cy="9" r="1.5"/><circle cx="4" cy="15" r="1.5"/><circle cx="10" cy="15" r="1.5"/></svg>',
+    contact: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>'
   };
 
   function el(tag, cls) { var e = document.createElement(tag); if (cls) e.className = cls; return e; }
@@ -658,8 +747,8 @@ html { height: 100%; }
 
     var card = el('div', 'roster-card');
     card.id = 'roster';
-    card.appendChild(renderCover());
-    card.appendChild(renderHeader());
+    card.appendChild(renderHero());
+    card.appendChild(renderToolbar());
     card.appendChild(renderMembers());
 
     if (canEdit) {
@@ -673,26 +762,82 @@ html { height: 100%; }
     app.appendChild(card);
   }
 
-  function renderCover() {
-    var wrap = el('div', 'cover-photo');
+  // --- Hero header ---
+  function renderHero() {
+    var hero = el('div', 'hero');
+
+    var bg = el('div', 'hero-bg');
     if (state.project.coverPhoto) {
-      var img = el('img'); img.src = state.project.coverPhoto; img.alt = state.project.name + ' cover'; img.draggable = false;
-      wrap.appendChild(img);
-      if (canEdit) {
-        var ov = el('div', 'cover-overlay'); ov.innerHTML = IC.camera + '<span>Change cover</span>';
-        wrap.appendChild(ov);
-        var rm = el('button', 'cover-remove'); rm.innerHTML = IC.x; rm.title = 'Remove cover';
-        rm.addEventListener('click', function(e) { e.stopPropagation(); state.project.coverPhoto = null; render(); schedulePublish(); });
-        wrap.appendChild(rm);
-      }
-    } else {
-      var ph = el('div', 'cover-placeholder');
-      ph.innerHTML = IC.image + '<span>' + (canEdit ? 'Add project cover' : '') + '</span>';
-      wrap.appendChild(ph);
+      var img = el('img'); img.src = state.project.coverPhoto; img.alt = ''; img.draggable = false;
+      bg.appendChild(img);
     }
-    if (canEdit) wrap.addEventListener('click', function(e) { if (e.target.closest('.cover-remove')) return; pickCoverPhoto(); });
-    else if (!state.project.coverPhoto) wrap.style.display = 'none';
-    return wrap;
+    hero.appendChild(bg);
+
+    var fade = el('div', 'hero-fade');
+    hero.appendChild(fade);
+
+    if (canEdit && !state.project.coverPhoto) {
+      var hint = el('div', 'hero-upload-hint');
+      hint.innerHTML = IC.image + '<span>Add cover image</span>';
+      hero.appendChild(hint);
+      hero.style.cursor = 'pointer';
+      hero.addEventListener('click', function(e) {
+        if (e.target.closest('.cover-btn') || e.target.closest('[contenteditable]')) return;
+        pickCoverPhoto();
+      });
+    }
+
+    if (canEdit) {
+      var btns = el('div', 'hero-edit-cover');
+      var changeBtn = el('button', 'cover-btn'); changeBtn.innerHTML = IC.camera; changeBtn.title = 'Change cover';
+      changeBtn.addEventListener('click', function(e) { e.stopPropagation(); pickCoverPhoto(); });
+      btns.appendChild(changeBtn);
+      if (state.project.coverPhoto) {
+        var rmBtn = el('button', 'cover-btn remove'); rmBtn.innerHTML = IC.x; rmBtn.title = 'Remove cover';
+        rmBtn.addEventListener('click', function(e) { e.stopPropagation(); state.project.coverPhoto = null; render(); schedulePublish(); });
+        btns.appendChild(rmBtn);
+      }
+      hero.appendChild(btns);
+    }
+
+    var content = el('div', 'hero-content');
+
+    var title = el('h1', 'hero-title' + (canEdit ? ' editable' : ''));
+    title.textContent = state.project.name;
+    if (canEdit) {
+      title.contentEditable = 'plaintext-only';
+      title.spellcheck = false;
+      title.addEventListener('blur', function() {
+        var v = title.textContent.trim();
+        if (v && v !== state.project.name) { state.project.name = v; schedulePublish(); }
+        else title.textContent = state.project.name;
+      });
+      title.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); title.blur(); } });
+    }
+    content.appendChild(title);
+
+    var sub = el('p', 'hero-subtitle' + (canEdit ? ' editable' : ''));
+    sub.textContent = state.project.description;
+    if (canEdit) {
+      sub.contentEditable = 'plaintext-only';
+      sub.spellcheck = false;
+      sub.addEventListener('blur', function() {
+        var v = sub.textContent.trim();
+        if (v !== state.project.description) { state.project.description = v; schedulePublish(); }
+      });
+      sub.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); sub.blur(); } });
+    }
+    content.appendChild(sub);
+
+    var meta = el('div', 'hero-meta');
+    var count = el('span', 'member-count');
+    var n = state.members.length;
+    count.textContent = n + ' team member' + (n !== 1 ? 's' : '');
+    meta.appendChild(count);
+    content.appendChild(meta);
+
+    hero.appendChild(content);
+    return hero;
   }
 
   function pickCoverPhoto() {
@@ -703,7 +848,7 @@ html { height: 100%; }
       reader.onload = function(ev) {
         var img = new Image();
         img.onload = function() {
-          var W = 640, H = 320;
+          var W = 640, H = 360;
           var c = document.createElement('canvas'); c.width = W; c.height = H;
           var ctx = c.getContext('2d');
           var scale = Math.max(W / img.width, H / img.height);
@@ -719,42 +864,23 @@ html { height: 100%; }
     input.click();
   }
 
-  function renderHeader() {
-    var hdr = el('div', 'card-header');
+  // --- Toolbar ---
+  function renderToolbar() {
+    var bar = el('div', 'toolbar');
 
-    var title = el('h1', 'card-title' + (canEdit ? ' editable' : ''));
-    title.textContent = state.project.name;
-    if (canEdit) {
-      title.contentEditable = 'plaintext-only';
-      title.spellcheck = false;
-      title.addEventListener('blur', function() {
-        var v = title.textContent.trim();
-        if (v && v !== state.project.name) { state.project.name = v; schedulePublish(); }
-        else title.textContent = state.project.name;
+    var contactBtn = el('button', 'toolbar-btn' + (showContacts ? ' active' : ''));
+    contactBtn.innerHTML = IC.contact + (showContacts ? ' Hide contacts' : ' Show contacts');
+    contactBtn.addEventListener('click', function() {
+      showContacts = !showContacts;
+      document.querySelectorAll('.member-contact').forEach(function(c) {
+        c.classList.toggle('show', showContacts);
       });
-      title.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); title.blur(); } });
-    }
-    hdr.appendChild(title);
+      contactBtn.className = 'toolbar-btn' + (showContacts ? ' active' : '');
+      contactBtn.innerHTML = IC.contact + (showContacts ? ' Hide contacts' : ' Show contacts');
+    });
+    bar.appendChild(contactBtn);
 
-    var sub = el('p', 'card-subtitle' + (canEdit ? ' editable' : ''));
-    sub.textContent = state.project.description;
-    if (canEdit) {
-      sub.contentEditable = 'plaintext-only';
-      sub.spellcheck = false;
-      sub.addEventListener('blur', function() {
-        var v = sub.textContent.trim();
-        if (v !== state.project.description) { state.project.description = v; schedulePublish(); }
-      });
-      sub.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); sub.blur(); } });
-    }
-    hdr.appendChild(sub);
-
-    var count = el('span', 'member-count');
-    var n = state.members.length;
-    count.textContent = n + ' team member' + (n !== 1 ? 's' : '');
-    hdr.appendChild(count);
-
-    return hdr;
+    return bar;
   }
 
   function renderMembers() {
@@ -768,12 +894,92 @@ html { height: 100%; }
       return list;
     }
 
-    state.members.forEach(function(m) { list.appendChild(renderRow(m)); });
+    state.members.forEach(function(m, i) { list.appendChild(renderRow(m, i)); });
     return list;
   }
 
-  function renderRow(m) {
+  function renderRow(m, idx) {
     var row = el('div', 'member-row');
+    row.dataset.idx = idx;
+
+    // Drag handle
+    if (canEdit) {
+      var handle = el('div', 'drag-handle');
+      handle.innerHTML = IC.grip;
+      handle.draggable = true;
+      handle.addEventListener('dragstart', function(e) {
+        dragSrcIndex = idx;
+        row.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', idx);
+      });
+      handle.addEventListener('dragend', function() {
+        row.classList.remove('dragging');
+        dragSrcIndex = null;
+        document.querySelectorAll('.drag-over-top,.drag-over-bottom').forEach(function(r) {
+          r.classList.remove('drag-over-top', 'drag-over-bottom');
+        });
+      });
+      row.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        var rect = row.getBoundingClientRect();
+        var mid = rect.top + rect.height / 2;
+        row.classList.toggle('drag-over-top', e.clientY < mid);
+        row.classList.toggle('drag-over-bottom', e.clientY >= mid);
+      });
+      row.addEventListener('dragleave', function() {
+        row.classList.remove('drag-over-top', 'drag-over-bottom');
+      });
+      row.addEventListener('drop', function(e) {
+        e.preventDefault();
+        row.classList.remove('drag-over-top', 'drag-over-bottom');
+        var from = dragSrcIndex;
+        var to = idx;
+        if (from === null || from === to) return;
+        var rect = row.getBoundingClientRect();
+        if (e.clientY >= rect.top + rect.height / 2 && to < state.members.length - 1) to++;
+        var item = state.members.splice(from, 1)[0];
+        if (to > from) to--;
+        state.members.splice(to, 0, item);
+        render(); schedulePublish();
+      });
+      // Touch drag support
+      var touchY = 0, touchStartIdx = idx, touchClone = null;
+      handle.addEventListener('touchstart', function(e) {
+        touchY = e.touches[0].clientY;
+        touchStartIdx = idx;
+      }, { passive: true });
+      handle.addEventListener('touchmove', function(e) {
+        e.preventDefault();
+        var cy = e.touches[0].clientY;
+        var rows = document.querySelectorAll('.member-row');
+        rows.forEach(function(r, ri) {
+          var rect = r.getBoundingClientRect();
+          if (cy > rect.top && cy < rect.bottom && ri !== touchStartIdx) {
+            r.classList.add(cy < rect.top + rect.height / 2 ? 'drag-over-top' : 'drag-over-bottom');
+          } else {
+            r.classList.remove('drag-over-top', 'drag-over-bottom');
+          }
+        });
+      }, { passive: false });
+      handle.addEventListener('touchend', function(e) {
+        var cy = e.changedTouches[0].clientY;
+        var rows = document.querySelectorAll('.member-row');
+        var targetIdx = -1;
+        rows.forEach(function(r, ri) {
+          r.classList.remove('drag-over-top', 'drag-over-bottom');
+          var rect = r.getBoundingClientRect();
+          if (cy > rect.top && cy < rect.bottom) targetIdx = ri;
+        });
+        if (targetIdx >= 0 && targetIdx !== touchStartIdx) {
+          var item = state.members.splice(touchStartIdx, 1)[0];
+          state.members.splice(targetIdx, 0, item);
+          render(); schedulePublish();
+        }
+      });
+      row.appendChild(handle);
+    }
 
     // Avatar
     var av = el('div', 'avatar');
@@ -794,10 +1000,10 @@ html { height: 100%; }
     // Body
     var body = el('div', 'member-body');
 
-    // Top line: name + role + status
+    // Top line
     var top = el('div', 'member-top');
 
-    var name = el('span', 'member-name' + (canEdit ? ' editable' : ''));
+    var name = el('span', 'member-name' + (canEdit ? ' editable-dark' : ''));
     name.textContent = m.name;
     if (canEdit) {
       name.contentEditable = 'plaintext-only'; name.spellcheck = false;
@@ -810,7 +1016,7 @@ html { height: 100%; }
     }
     top.appendChild(name);
 
-    var role = el('span', 'role-tag' + (canEdit ? ' editable' : ''));
+    var role = el('span', 'role-tag' + (canEdit ? ' editable-dark' : ''));
     role.textContent = m.role;
     if (canEdit) {
       role.contentEditable = 'plaintext-only'; role.spellcheck = false;
@@ -858,13 +1064,13 @@ html { height: 100%; }
       body.appendChild(chips);
     }
 
-    // Contact
+    // Contact (collapsible)
     if (m.email || m.phone || canEdit) {
-      var contact = el('div', 'member-contact');
+      var contact = el('div', 'member-contact' + (showContacts ? ' show' : ''));
 
       var emailItem = el('span', 'contact-item');
       emailItem.innerHTML = IC.mail;
-      var emailVal = el('span', 'contact-val' + (canEdit ? ' editable' : ''));
+      var emailVal = el('span', 'contact-val' + (canEdit ? ' editable-dark' : ''));
       emailVal.textContent = m.email || (canEdit ? 'email' : '');
       if (!m.email) emailVal.style.opacity = '0.4';
       if (canEdit) {
@@ -882,7 +1088,7 @@ html { height: 100%; }
 
       var phoneItem = el('span', 'contact-item');
       phoneItem.innerHTML = IC.phone;
-      var phoneVal = el('span', 'contact-val' + (canEdit ? ' editable' : ''));
+      var phoneVal = el('span', 'contact-val' + (canEdit ? ' editable-dark' : ''));
       phoneVal.textContent = m.phone || (canEdit ? 'phone' : '');
       if (!m.phone) phoneVal.style.opacity = '0.4';
       if (canEdit) {
