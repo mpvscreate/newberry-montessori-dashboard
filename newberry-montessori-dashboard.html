@@ -130,6 +130,18 @@
   .rollup-stats{display:flex; gap:26px; flex-wrap:wrap;}
   .rollup-stat .n{font-family:'Trebuchet MS',sans-serif; font-size:24px; font-weight:700; color:var(--text); line-height:1;}
   .rollup-stat .l{font-size:11px; color:var(--text-muted); margin-top:4px; text-transform:uppercase; letter-spacing:.04em;}
+  .overdue-stat .n{color:#c0392b;}
+  .owner-breakdown{margin-top:18px; padding:16px 20px; background:var(--surface); border:1px solid var(--border); border-radius:10px;}
+  .owner-breakdown h3{margin:0 0 10px; font-size:15px; color:var(--text);}
+  .owner-breakdown table{width:100%; border-collapse:collapse; font-size:13px;}
+  .owner-breakdown th{text-align:left; padding:4px 8px; border-bottom:2px solid var(--border); color:var(--text-muted); font-weight:600; font-size:11px; text-transform:uppercase;}
+  .owner-breakdown td{padding:4px 8px; border-bottom:1px solid var(--border);}
+  .owner-breakdown .ob-bar{display:inline-block; height:8px; border-radius:4px; background:var(--brand);}
+  .vendor-costs{margin-top:18px; padding:16px 20px; background:var(--surface); border:1px solid var(--border); border-radius:10px;}
+  .vendor-costs h3{margin:0 0 10px; font-size:15px; color:var(--text);}
+  .vendor-costs table{width:100%; border-collapse:collapse; font-size:13px;}
+  .vendor-costs th{text-align:left; padding:4px 8px; border-bottom:2px solid var(--border); color:var(--text-muted); font-weight:600; font-size:11px; text-transform:uppercase;}
+  .vendor-costs td{padding:4px 8px; border-bottom:1px solid var(--border);}
   .rollup-actions{display:flex; gap:8px; flex-wrap:wrap;}
   .progress-track{height:9px; background:var(--border); border-radius:20px; overflow:hidden; margin-top:16px;}
   .progress-fill{height:100%; background:linear-gradient(90deg, var(--asparagus-green), var(--pakistan-green)); border-radius:20px; transition:width .35s ease;}
@@ -2281,11 +2293,17 @@ function initSupabase(){
           const remoteState = typeof row.state === 'string' ? JSON.parse(row.state) : row.state;
           const norm = normalizeState(remoteState);
           if(norm){
-            state = norm;
+            const { merged, conflicts } = mergeStates(state, norm);
+            state = merged;
             persist();
             render();
             updateSyncStatus('ok', '☁ Synced');
-            toast('Dashboard updated from another user.');
+            if(conflicts > 0){
+              toast(`Synced: kept ${conflicts} local edit${conflicts===1?'':'s'}, merged remote changes.`);
+              syncToSupabase();
+            } else {
+              toast('Dashboard updated from another user.');
+            }
           }
         }catch(e){ console.warn('Realtime sync error:', e); }
         _syncLock = false;
@@ -2304,6 +2322,28 @@ function updateSyncStatus(cls, text){
   el.textContent = text;
   el.title = cls === 'ok' ? 'Real-time sync active' : cls === 'err' ? 'Sync error — retrying' : 'Cloud sync unavailable';
 }
+function mergeStates(local, remote){
+  const localIndex = {};
+  local.forEach(p => p.categories.forEach(c => c.subfolders.forEach(sf => sf.items.forEach(it => {
+    if(it.item) localIndex[p.id + '/' + c.id + '/' + sf.id + '/' + it.item] = it;
+  }))));
+  let conflicts = 0;
+  remote.forEach(p => p.categories.forEach(c => c.subfolders.forEach(sf => {
+    sf.items.forEach((rit, i) => {
+      const key = p.id + '/' + c.id + '/' + sf.id + '/' + rit.item;
+      const lit = localIndex[key];
+      if(lit){
+        const lt = lit.lastModified ? new Date(lit.lastModified).getTime() : 0;
+        const rt = rit.lastModified ? new Date(rit.lastModified).getTime() : 0;
+        if(lt > rt){
+          sf.items[i] = lit;
+          conflicts++;
+        }
+      }
+    });
+  })));
+  return { merged: remote, conflicts };
+}
 async function loadFromSupabase(){
   if(!_sb) return;
   try{
@@ -2317,9 +2357,14 @@ async function loadFromSupabase(){
         const localStr = JSON.stringify(state);
         const remoteStr = JSON.stringify(norm);
         if(localStr !== remoteStr){
-          state = norm;
+          const { merged, conflicts } = mergeStates(state, norm);
+          state = merged;
           persist();
           render();
+          if(conflicts > 0){
+            toast(`Merged ${conflicts} locally-modified item${conflicts===1?'':'s'} into cloud state.`);
+            syncToSupabase();
+          }
         }
       }
     }
@@ -2434,6 +2479,8 @@ function renderOverview(){
   main.appendChild(head);
 
   const o = overallStats();
+  let overdueCount = 0;
+  state.forEach(p => p.categories.forEach(c => c.subfolders.forEach(sf => sf.items.forEach(it => { if(isOverdue(it)) overdueCount++; }))));
   const rollup = document.createElement("div");
   rollup.className = "rollup-card";
   rollup.innerHTML = `
@@ -2442,6 +2489,7 @@ function renderOverview(){
         <div class="rollup-stat"><div class="n">${o.total}</div><div class="l">Total items</div></div>
         <div class="rollup-stat"><div class="n">${o.complete}</div><div class="l">Ready</div></div>
         <div class="rollup-stat"><div class="n">${o.pct}%</div><div class="l">Complete</div></div>
+        ${overdueCount ? `<div class="rollup-stat overdue-stat"><div class="n">${overdueCount}</div><div class="l">Overdue</div></div>` : ''}
         <div class="rollup-stat cost-col"><div class="n">${fmtMoney(o.cost)}</div><div class="l">Est. total cost</div></div>
       </div>
       <div class="rollup-actions">
@@ -2505,6 +2553,53 @@ function renderOverview(){
   }).join('');
   main.appendChild(budgetPanel);
 
+  const ownerMap = {};
+  state.forEach(p => p.categories.forEach(c => c.subfolders.forEach(sf => sf.items.forEach(it => {
+    const ow = it.owner || '(unassigned)';
+    if(!ownerMap[ow]) ownerMap[ow] = { total:0, complete:0, cost:0, overdue:0 };
+    ownerMap[ow].total++;
+    if(it.status === 'complete') ownerMap[ow].complete++;
+    ownerMap[ow].cost += (Number(it.qty)||0)*(Number(it.unitCost)||0);
+    if(isOverdue(it)) ownerMap[ow].overdue++;
+  }))));
+  const ownerEntries = Object.entries(ownerMap).sort((a,b) => b[1].total - a[1].total);
+  if(ownerEntries.length > 1 || (ownerEntries.length === 1 && ownerEntries[0][0] !== '(unassigned)')){
+    const ownerPanel = document.createElement("div");
+    ownerPanel.className = "owner-breakdown";
+    const maxOwnerTotal = Math.max(...ownerEntries.map(e => e[1].total), 1);
+    ownerPanel.innerHTML = `<h3>Progress by Owner</h3>
+      <div class="table-scroll"><table><thead><tr><th scope="col">Owner</th><th scope="col">Items</th><th scope="col">Done</th><th scope="col">%</th><th scope="col">Progress</th><th scope="col" class="cost-col">Cost</th>${overdueCount ? '<th scope="col">Overdue</th>' : ''}</tr></thead><tbody>` +
+      ownerEntries.map(([ow, s]) => {
+        const pct = s.total ? Math.round(s.complete/s.total*100) : 0;
+        const barW = Math.round(s.total / maxOwnerTotal * 100);
+        return `<tr><td><strong>${esc(ow)}</strong></td><td>${s.total}</td><td>${s.complete}</td><td>${pct}%</td>
+          <td><div style="display:flex;align-items:center;gap:6px;"><div class="ob-bar" style="width:${barW}%;min-width:4px;"></div></div></td>
+          <td class="cost-col">${fmtMoney(s.cost)}</td>${overdueCount ? `<td>${s.overdue || ''}</td>` : ''}</tr>`;
+      }).join('') + `</tbody></table></div>`;
+    main.appendChild(ownerPanel);
+  }
+
+  const vendorMap = {};
+  state.forEach(p => p.categories.forEach(c => c.subfolders.forEach(sf => sf.items.forEach(it => {
+    const v = it.vendor || '(no vendor)';
+    if(!vendorMap[v]) vendorMap[v] = { total:0, cost:0, complete:0 };
+    vendorMap[v].total++;
+    vendorMap[v].cost += (Number(it.qty)||0)*(Number(it.unitCost)||0);
+    if(it.status === 'complete') vendorMap[v].complete++;
+  }))));
+  const vendorEntries = Object.entries(vendorMap).filter(([v]) => v !== '(no vendor)').sort((a,b) => b[1].cost - a[1].cost);
+  if(vendorEntries.length > 0){
+    const vendorPanel = document.createElement("div");
+    vendorPanel.className = "vendor-costs cost-col";
+    vendorPanel.innerHTML = `<h3>Costs by Vendor</h3>
+      <div class="table-scroll"><table><thead><tr><th scope="col">Vendor</th><th scope="col">Items</th><th scope="col">Done</th><th scope="col">Cost</th><th scope="col">Share</th></tr></thead><tbody>` +
+      vendorEntries.map(([v, s]) => {
+        const share = o.cost ? Math.round(s.cost/o.cost*100) : 0;
+        return `<tr><td><strong>${esc(v)}</strong></td><td>${s.total}</td><td>${s.complete}</td><td>${fmtMoney(s.cost)}</td><td>${share}%</td></tr>`;
+      }).join('') + `</tbody></table></div>`;
+    main.appendChild(vendorPanel);
+  }
+
   updateCostsToggleLabel(); updateVendorToggleLabel();
 }
 
@@ -2559,6 +2654,8 @@ function openItemLocation(planeId, catId, subId){
 function procMatches(it){
   const f = procFilters;
   if(f.status === "outstanding"){ if(it.status === "complete") return false; }
+  else if(f.status === "overdue"){ if(!isOverdue(it)) return false; }
+  else if(f.status === "dueThisWeek"){ if(!isDueThisWeek(it)) return false; }
   else if(f.status){ if(it.status !== f.status) return false; }
   if(f.owner){ if((it.owner||"").toLowerCase() !== f.owner.toLowerCase()) return false; }
   if(f.q){ const hay = [it.item, it.spec, it.vendor, it.owner, dimsSummary(it), it.notes].join(" ").toLowerCase(); if(!hay.includes(f.q.toLowerCase())) return false; }
@@ -2589,6 +2686,7 @@ function renderProcurement(){
         case 'category': va=(a.c.label||'').toLowerCase(); vb=(b.c.label||'').toLowerCase(); break;
         case 'subfolder': va=(a.sf.label||'').toLowerCase(); vb=(b.sf.label||'').toLowerCase(); break;
         case 'vendor': va=(a.it.vendor||'').toLowerCase(); vb=(b.it.vendor||'').toLowerCase(); break;
+        case 'owner': va=(a.it.owner||'').toLowerCase(); vb=(b.it.owner||'').toLowerCase(); break;
         case 'qty': va=Number(a.it.qty)||0; vb=Number(b.it.qty)||0; break;
         case 'total': va=(Number(a.it.qty)||0)*(Number(a.it.unitCost)||0); vb=(Number(b.it.qty)||0)*(Number(b.it.unitCost)||0); break;
         case 'status': va=STATUSES.findIndex(s=>s.v===a.it.status); vb=STATUSES.findIndex(s=>s.v===b.it.status); break;
@@ -2612,6 +2710,8 @@ function renderProcurement(){
   presets.innerHTML = `
     <button class="link-btn" onclick="setProcPreset('outstanding')">Outstanding (not complete)</button>
     <button class="link-btn" onclick="setProcPreset('ordered')">On order</button>
+    <button class="link-btn" onclick="setProcPreset('overdue')">Overdue</button>
+    <button class="link-btn" onclick="setProcPreset('dueThisWeek')">Due this week</button>
     <button class="link-btn" onclick="setProcPreset('reset')">Show everything</button>`;
   main.appendChild(presets);
 
@@ -2624,6 +2724,8 @@ function renderProcurement(){
     <select class="filter-select" onchange="procSet('status', this.value)">
       <option value="" ${procFilters.status===''?'selected':''}>All statuses</option>
       <option value="outstanding" ${procFilters.status==='outstanding'?'selected':''}>Outstanding (not complete)</option>
+      <option value="overdue" ${procFilters.status==='overdue'?'selected':''}>Overdue</option>
+      <option value="dueThisWeek" ${procFilters.status==='dueThisWeek'?'selected':''}>Due this week</option>
       ${STATUSES.map(x=>`<option value="${x.v}" ${procFilters.status===x.v?'selected':''}>${x.label}</option>`).join("")}
     </select>
     <select class="filter-select" onchange="procSet('owner', this.value)"><option value="">All owners</option>${procOwnerList().map(o=>`<option value="${esc(o)}" ${procFilters.owner===o?'selected':''}>${esc(o)}</option>`).join("")}</select>
@@ -2682,8 +2784,17 @@ function procSet(key, val){ procFilters[key] = val; render(); }
 function setProcPreset(kind){
   if(kind === "outstanding") procFilters = { q:"", status:"outstanding", plane:"", category:"", owner:"" };
   else if(kind === "ordered") procFilters = { q:"", status:"ordered", plane:"", category:"", owner:"" };
+  else if(kind === "overdue") procFilters = { q:"", status:"overdue", plane:"", category:"", owner:"" };
+  else if(kind === "dueThisWeek") procFilters = { q:"", status:"dueThisWeek", plane:"", category:"", owner:"" };
   else procFilters = { q:"", status:"", plane:"", category:"", owner:"" };
   render();
+}
+function isDueThisWeek(item){
+  if(!item.due || item.status === "complete") return false;
+  const d = new Date(item.due + "T00:00:00");
+  const today = new Date(); today.setHours(0,0,0,0);
+  const endOfWeek = new Date(today); endOfWeek.setDate(endOfWeek.getDate() + (7 - endOfWeek.getDay()));
+  return d >= today && d <= endOfWeek;
 }
 function procSetStatus(planeId, catId, subId, idx, val){
   findSubfolder(planeId, catId, subId).items[idx].status = val;
@@ -2817,6 +2928,7 @@ function buildBulkBar(planeId, catId, sf){
     <button class="link-btn" onclick="bulkSelectAll('${planeId}','${catId}','${sf.id}',true)">All</button>
     <button class="link-btn" onclick="bulkSelectAll('${planeId}','${catId}','${sf.id}',false)">None</button>
     <select onchange="bulkSetStatus('${sf.id}', this.value); this.selectedIndex=0;"><option value="">Set status…</option>${STATUSES.map(x=>`<option value="${x.v}">${x.label}</option>`).join("")}</select>
+    <select onchange="bulkSetOwner('${sf.id}', this.value); this.selectedIndex=0;"><option value="">Set owner…</option>${procOwnerList().map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join("")}<option value="__new__">+ New owner…</option></select>
     <select onchange="bulkMove('${sf.id}', this.value); this.selectedIndex=0;"><option value="">Move to…</option>${dests.map(d=>`<option value="${d.id}">${esc(d.label)}</option>`).join("")}</select>
     <button class="btn-danger" onclick="bulkDelete('${sf.id}')">Delete selected</button>`;
   return div;
@@ -3271,6 +3383,14 @@ function bulkSelectAll(planeId, catId, subId, all){
 }
 function selectedItems(subId){ return [...(selection[subId] || [])]; }
 function bulkSetStatus(subId, val){ if(!val) return; const its = selectedItems(subId); if(!its.length) return; its.forEach(it => it.status = val); saveState(); }
+function bulkSetOwner(subId, val){
+  if(!val) return;
+  const its = selectedItems(subId);
+  if(!its.length) return;
+  if(val === '__new__'){ val = prompt('Enter new owner name:'); if(!val) return; }
+  its.forEach(it => { it.owner = val; stampModified(it); });
+  saveState();
+}
 function bulkDelete(subId){
   const its = selectedItems(subId);
   if(!its.length){ toast("No rows selected."); return; }
