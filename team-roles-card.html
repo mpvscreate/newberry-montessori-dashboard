@@ -10,65 +10,65 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap">
 <style>
 :root {
-  --bg: #F2F2F7;
+  --bg: #F5F5F8;
   --card: #FFFFFF;
-  --text-1: #1C1C1E;
-  --text-2: #8E8E93;
-  --text-3: #C7C7CC;
-  --accent: #007AFF;
-  --accent-soft: rgba(0,122,255,0.08);
-  --green: #34C759;
-  --amber: #FF9F0A;
-  --red: #FF3B30;
-  --border: #E5E5EA;
-  --glass: rgba(242,242,247,0.72);
-  --glass-border: rgba(0,0,0,0.06);
-  --shadow: 0 2px 20px rgba(0,0,0,0.06), 0 0 1px rgba(0,0,0,0.08);
-  --shadow-hover: 0 4px 24px rgba(0,0,0,0.1), 0 0 1px rgba(0,0,0,0.08);
+  --text-1: #2C2C2E;
+  --text-2: #86868B;
+  --text-3: #C5C5CA;
+  --accent: #3478F6;
+  --accent-soft: rgba(52,120,246,0.07);
+  --green: #30B856;
+  --amber: #F0960A;
+  --red: #E8372D;
+  --border: #E8E8ED;
+  --glass: rgba(245,245,248,0.72);
+  --glass-border: rgba(0,0,0,0.04);
+  --shadow: 0 1px 12px rgba(0,0,0,0.04), 0 0 1px rgba(0,0,0,0.06);
+  --shadow-hover: 0 3px 18px rgba(0,0,0,0.07), 0 0 1px rgba(0,0,0,0.06);
   --radius: 24px;
   --radius-sm: 14px;
   --radius-xs: 8px;
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
   --hero-text: #FFFFFF;
-  --hero-sub: rgba(255,255,255,0.75);
+  --hero-sub: rgba(255,255,255,0.8);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #000000;
-    --card: #1C1C1E;
-    --text-1: #F5F5F7;
-    --text-2: #98989D;
+    --bg: #111113;
+    --card: #1E1E20;
+    --text-1: #EDEDF0;
+    --text-2: #9A9AA0;
     --text-3: #48484A;
-    --accent: #0A84FF;
-    --accent-soft: rgba(10,132,255,0.14);
-    --green: #30D158;
-    --amber: #FFD60A;
-    --red: #FF453A;
-    --border: #2C2C2E;
-    --glass: rgba(0,0,0,0.72);
-    --glass-border: rgba(255,255,255,0.08);
-    --shadow: 0 2px 20px rgba(0,0,0,0.4), 0 0 1px rgba(0,0,0,0.3);
-    --shadow-hover: 0 4px 24px rgba(0,0,0,0.5), 0 0 1px rgba(0,0,0,0.3);
+    --accent: #4A9CFF;
+    --accent-soft: rgba(74,156,255,0.12);
+    --green: #34D16A;
+    --amber: #FFD044;
+    --red: #FF5E56;
+    --border: #2A2A2C;
+    --glass: rgba(17,17,19,0.72);
+    --glass-border: rgba(255,255,255,0.06);
+    --shadow: 0 2px 16px rgba(0,0,0,0.3), 0 0 1px rgba(0,0,0,0.2);
+    --shadow-hover: 0 4px 20px rgba(0,0,0,0.4), 0 0 1px rgba(0,0,0,0.2);
   }
 }
 
 :root[data-theme="dark"] {
-  --bg: #000000;
-  --card: #1C1C1E;
-  --text-1: #F5F5F7;
-  --text-2: #98989D;
+  --bg: #111113;
+  --card: #1E1E20;
+  --text-1: #EDEDF0;
+  --text-2: #9A9AA0;
   --text-3: #48484A;
-  --accent: #0A84FF;
-  --accent-soft: rgba(10,132,255,0.14);
-  --green: #30D158;
-  --amber: #FFD60A;
-  --red: #FF453A;
-  --border: #2C2C2E;
-  --glass: rgba(0,0,0,0.72);
-  --glass-border: rgba(255,255,255,0.08);
-  --shadow: 0 2px 20px rgba(0,0,0,0.4), 0 0 1px rgba(0,0,0,0.3);
-  --shadow-hover: 0 4px 24px rgba(0,0,0,0.5), 0 0 1px rgba(0,0,0,0.3);
+  --accent: #4A9CFF;
+  --accent-soft: rgba(74,156,255,0.12);
+  --green: #34D16A;
+  --amber: #FFD044;
+  --red: #FF5E56;
+  --border: #2A2A2C;
+  --glass: rgba(17,17,19,0.72);
+  --glass-border: rgba(255,255,255,0.06);
+  --shadow: 0 2px 16px rgba(0,0,0,0.3), 0 0 1px rgba(0,0,0,0.2);
+  --shadow-hover: 0 4px 20px rgba(0,0,0,0.4), 0 0 1px rgba(0,0,0,0.2);
 }
 
 body {
@@ -111,7 +111,7 @@ html { height: 100%; }
 .hero-bg {
   position: absolute;
   inset: 0;
-  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+  background: linear-gradient(135deg, #2d3047 0%, #1f3058 50%, #1e4976 100%);
 }
 .hero-bg img {
   width: 100%;
@@ -126,8 +126,8 @@ html { height: 100%; }
     to bottom,
     rgba(0,0,0,0) 0%,
     rgba(0,0,0,0.02) 30%,
-    rgba(0,0,0,0.35) 65%,
-    rgba(0,0,0,0.75) 100%
+    rgba(0,0,0,0.3) 65%,
+    rgba(0,0,0,0.65) 100%
   );
   pointer-events: none;
 }
@@ -395,29 +395,17 @@ html { height: 100%; }
   position: relative;
   margin-top: 2px;
 }
-.avatar img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.avatar-placeholder {
+.avatar-initials {
   width: 100%;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
+  font-weight: 600;
+  font-size: 18px;
+  color: #fff;
+  letter-spacing: 0.02em;
 }
-.avatar-placeholder svg { width: 24px; height: 24px; color: var(--text-3); }
-.avatar-overlay {
-  position: absolute;
-  inset: 0;
-  background: rgba(0,0,0,0.35);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity 0.2s;
-  cursor: pointer;
-}
-.avatar-overlay svg { width: 18px; height: 18px; color: #fff; }
-.avatar:hover .avatar-overlay { opacity: 1; }
 
 /* Member content */
 .member-body {
@@ -441,11 +429,11 @@ html { height: 100%; }
 }
 
 .role-tag {
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 600;
   color: var(--accent);
   background: var(--accent-soft);
-  padding: 2px 10px;
+  padding: 3px 11px;
   border-radius: 100px;
   white-space: nowrap;
   outline: none;
@@ -453,8 +441,8 @@ html { height: 100%; }
 }
 
 .status-dot {
-  width: 7px;
-  height: 7px;
+  width: 8px;
+  height: 8px;
   border-radius: 50%;
   flex-shrink: 0;
   margin-left: auto;
@@ -491,8 +479,8 @@ html { height: 100%; }
   margin-top: 8px;
 }
 .task-chip {
-  font-size: 12px;
-  padding: 2px 10px;
+  font-size: 12.5px;
+  padding: 3px 11px;
   border-radius: 100px;
   background: var(--bg);
   color: var(--text-1);
@@ -564,8 +552,8 @@ html { height: 100%; }
 .contact-item {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 12px;
+  gap: 5px;
+  font-size: 13px;
   color: var(--text-2);
 }
 .contact-item svg { width: 12px; height: 12px; flex-shrink: 0; }
@@ -839,6 +827,25 @@ html { height: 100%; }
 }
 .save-pill.active { opacity: 1; }
 
+/* Theme toggle */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: none;
+  background: var(--accent-soft);
+  color: var(--accent);
+  cursor: pointer;
+  padding: 0;
+  margin-left: auto;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.theme-toggle:hover { background: rgba(52,120,246,0.15); }
+.theme-toggle svg { width: 16px; height: 16px; }
+
 /* Responsive */
 @media (max-width: 500px) {
   .hero { min-height: 180px; }
@@ -922,7 +929,7 @@ html { height: 100%; }
 (function() {
   'use strict';
 
-  var DEBOUNCE = 1000, PHOTO_SIZE = 200, PHOTO_Q = 0.75, STORAGE_KEY = 'team-roles-data';
+  var DEBOUNCE = 1000, STORAGE_KEY = 'team-roles-data';
   var state, artifact, downloads, canEdit = true, saveTimer, saving = false, openMenu = null;
   var showContacts = false;
   var dragSrcIndex = null;
@@ -964,13 +971,30 @@ html { height: 100%; }
     grip: '<svg viewBox="0 0 14 18" fill="currentColor"><circle cx="4" cy="3" r="1.5"/><circle cx="10" cy="3" r="1.5"/><circle cx="4" cy="9" r="1.5"/><circle cx="10" cy="9" r="1.5"/><circle cx="4" cy="15" r="1.5"/><circle cx="10" cy="15" r="1.5"/></svg>',
     contact: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="M22 7l-10 7L2 7"/></svg>',
     move: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M5 9l-3 3 3 3"/><path d="M9 5l3-3 3 3"/><path d="M15 19l-3 3-3-3"/><path d="M19 9l3 3-3 3"/><line x1="2" y1="12" x2="22" y2="12"/><line x1="12" y1="2" x2="12" y2="22"/></svg>',
-    zoomIn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>'
+    zoomIn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/><line x1="11" y1="8" x2="11" y2="14"/><line x1="8" y1="11" x2="14" y2="11"/></svg>',
+    sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>',
+    moon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>'
   };
 
   function el(tag, cls) { var e = document.createElement(tag); if (cls) e.className = cls; return e; }
   function uid() { return 'm' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6); }
   function showToast(msg) { var t = document.getElementById('toast'); t.textContent = msg; t.classList.add('visible'); setTimeout(function() { t.classList.remove('visible'); }, 2600); }
   function showSaving(on) { document.getElementById('save-pill').classList.toggle('active', on); }
+
+  var AVATAR_COLORS = [
+    '#5856D6','#AF52DE','#FF2D55','#FF6B35','#34C759',
+    '#007AFF','#30B0C7','#A2845E','#FF3B30','#5AC8FA'
+  ];
+  function getInitials(name) {
+    var parts = (name || '').trim().split(/\s+/);
+    if (parts.length >= 2) return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    return (parts[0] || '?').substring(0, 2).toUpperCase();
+  }
+  function getAvatarColor(name) {
+    var h = 0;
+    for (var i = 0; i < (name || '').length; i++) h = name.charCodeAt(i) + ((h << 5) - h);
+    return AVATAR_COLORS[Math.abs(h) % AVATAR_COLORS.length];
+  }
 
   function render() {
     var app = document.getElementById('app');
@@ -1371,6 +1395,33 @@ html { height: 100%; }
   }
 
   // --- Toolbar ---
+  function getTheme() {
+    return document.documentElement.getAttribute('data-theme') || '';
+  }
+
+  function isDark() {
+    var t = getTheme();
+    if (t === 'dark') return true;
+    if (t === 'light') return false;
+    return window.matchMedia('(prefers-color-scheme: dark)').matches;
+  }
+
+  function toggleTheme() {
+    var next = isDark() ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    try { localStorage.setItem('team-roles-theme', next); } catch(e) {}
+    render();
+  }
+
+  function applyStoredTheme() {
+    try {
+      var t = localStorage.getItem('team-roles-theme');
+      if (t === 'light' || t === 'dark') {
+        document.documentElement.setAttribute('data-theme', t);
+      }
+    } catch(e) {}
+  }
+
   function renderToolbar() {
     var bar = el('div', 'toolbar');
 
@@ -1385,6 +1436,12 @@ html { height: 100%; }
       contactBtn.innerHTML = IC.contact + (showContacts ? ' Hide contacts' : ' Show contacts');
     });
     bar.appendChild(contactBtn);
+
+    var themeBtn = el('button', 'theme-toggle');
+    themeBtn.innerHTML = isDark() ? IC.sun : IC.moon;
+    themeBtn.title = isDark() ? 'Switch to light mode' : 'Switch to dark mode';
+    themeBtn.addEventListener('click', toggleTheme);
+    bar.appendChild(themeBtn);
 
     return bar;
   }
@@ -1487,20 +1544,13 @@ html { height: 100%; }
       row.appendChild(handle);
     }
 
-    // Avatar
+    // Avatar (initials)
     var av = el('div', 'avatar');
-    if (m.photo) {
-      var img = el('img'); img.src = m.photo; img.alt = m.name; img.draggable = false;
-      av.appendChild(img);
-    } else {
-      var ph = el('div', 'avatar-placeholder'); ph.innerHTML = IC.person;
-      av.appendChild(ph);
-    }
-    if (canEdit) {
-      var ov = el('div', 'avatar-overlay'); ov.innerHTML = IC.camera;
-      ov.addEventListener('click', function() { pickPhoto(m.id); });
-      av.appendChild(ov);
-    }
+    var initials = getInitials(m.name);
+    av.style.background = getAvatarColor(m.name);
+    var ini = el('div', 'avatar-initials');
+    ini.textContent = initials;
+    av.appendChild(ini);
     row.appendChild(av);
 
     // Body
@@ -1692,28 +1742,6 @@ html { height: 100%; }
   }
 
   // --- Photo ---
-  function pickPhoto(memberId) {
-    var input = document.createElement('input'); input.type = 'file'; input.accept = 'image/*';
-    input.onchange = function(e) {
-      var file = e.target.files[0]; if (!file) return;
-      var reader = new FileReader();
-      reader.onload = function(ev) {
-        var img = new Image();
-        img.onload = function() {
-          var c = document.createElement('canvas'); c.width = PHOTO_SIZE; c.height = PHOTO_SIZE;
-          var ctx = c.getContext('2d');
-          var s = Math.min(img.width, img.height);
-          ctx.drawImage(img, (img.width - s) / 2, (img.height - s) / 2, s, s, 0, 0, PHOTO_SIZE, PHOTO_SIZE);
-          var m = state.members.find(function(x) { return x.id === memberId; });
-          if (m) { m.photo = c.toDataURL('image/jpeg', PHOTO_Q); render(); schedulePublish(); }
-        };
-        img.src = ev.target.result;
-      };
-      reader.readAsDataURL(file);
-    };
-    input.click();
-  }
-
   // --- Export ---
   function exportRoster() {
     if (typeof html2canvas === 'undefined') { showToast('Export not available'); return; }
@@ -1803,6 +1831,7 @@ html { height: 100%; }
   }
 
   function start(hotData) {
+    applyStoredTheme();
     state = (hotData && hotData.state) || loadState();
     render();
     initCaps();
