@@ -1,0 +1,2345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Newberry House — Science Inventory Manager</title>
+<style>
+/* ============================================================
+   NEWBERRY HOUSE SCIENCE INVENTORY MANAGER
+   ============================================================ */
+
+:root{
+  --pakistan-green:#1f3d1d;
+  --asparagus:#7da24b;
+  --field-drab:#775d2f;
+  --dun:#d1c7a3;
+  --ivory:#fffdee;
+  --platinum:#e0e1de;
+
+  --bg:#f5f4ee;
+  --bg-elevated:#ffffff;
+  --bg-sunken:#ecece3;
+  --surface-border:#d8d6c9;
+  --text-primary:#1c2418;
+  --text-secondary:#5a5c4f;
+  --text-muted:#8a8c7c;
+  --accent:var(--asparagus);
+  --accent-strong:var(--pakistan-green);
+  --header-grad-start:var(--pakistan-green);
+  --header-grad-end:var(--asparagus);
+
+  --danger:#a3402e;
+  --danger-bg:#fbe9e4;
+  --warn:#9a7415;
+  --warn-bg:#fbf1d8;
+  --ok:#3f7d3a;
+  --ok-bg:#e8f3e3;
+
+  --radius-sm:6px;
+  --radius-md:10px;
+  --radius-lg:14px;
+
+  --shadow-sm:0 1px 2px rgba(20,30,15,0.06);
+  --shadow-md:0 4px 14px rgba(20,30,15,0.08);
+  --shadow-lg:0 10px 30px rgba(20,30,15,0.14);
+
+  --font-head:'Trebuchet MS','Trebuchet','Lucida Grande',sans-serif;
+  --font-body:'Noto Sans','Segoe UI',Arial,sans-serif;
+
+  --focus-ring:0 0 0 3px rgba(125,162,75,0.45);
+  --glow-accent:rgba(125,162,75,0.22);
+
+  --card-eq:#2e5c1a;
+  --card-chem:#1a3d5c;
+  --card-warn:#5c3a0a;
+  --card-alert:#5c1a1a;
+}
+
+[data-theme="dark"]{
+  --bg:#0d1109;
+  --bg-elevated:#141c10;
+  --bg-sunken:#090d07;
+  --surface-border:#263020;
+  --text-primary:#eef1e6;
+  --text-secondary:#b7bda8;
+  --text-muted:#717a62;
+  --accent:#93c25f;
+  --accent-strong:#9fd368;
+  --header-grad-start:#091208;
+  --header-grad-end:#2e4d1c;
+
+  --danger:#e2796a;
+  --danger-bg:#2e1814;
+  --warn:#e3b94f;
+  --warn-bg:#2e2610;
+  --ok:#7fd073;
+  --ok-bg:#0f2a13;
+
+  --shadow-sm:0 1px 3px rgba(0,0,0,0.4);
+  --shadow-md:0 4px 18px rgba(0,0,0,0.5);
+  --shadow-lg:0 12px 36px rgba(0,0,0,0.65);
+
+  --focus-ring:0 0 0 3px rgba(147,194,95,0.5);
+  --glow-accent:rgba(147,194,95,0.28);
+
+  --card-eq:#163310;
+  --card-chem:#0e2438;
+  --card-warn:#38260a;
+  --card-alert:#381010;
+}
+
+*,*::before,*::after{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;
+  font-family:var(--font-body);
+  background:var(--bg);
+  color:var(--text-primary);
+  line-height:1.5;
+  transition:background .25s ease,color .25s ease;
+  -webkit-font-smoothing:antialiased;
+}
+h1,h2,h3,h4{font-family:var(--font-head);font-weight:700;margin:0;}
+button{font-family:var(--font-body);}
+input,select,textarea{font-family:var(--font-body);}
+:focus-visible{outline:none;box-shadow:var(--focus-ring);border-radius:4px;}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms!important;transition-duration:.001ms!important;}}
+
+a{color:var(--accent-strong);}
+[data-theme="dark"] a{color:var(--accent);}
+
+/* ============== LAYOUT SHELL ============== */
+.app{min-height:100vh;display:flex;flex-direction:column;}
+
+/* ============== TOP HEADER ============== */
+header.topbar{
+  position:sticky;top:0;z-index:50;
+  background:linear-gradient(160deg,var(--header-grad-start) 0%,var(--header-grad-end) 100%);
+  color:var(--ivory);
+  box-shadow:var(--shadow-md);
+  border-bottom:1px solid rgba(255,253,238,0.08);
+}
+.topbar-inner{
+  max-width:1400px;margin:0 auto;
+  display:flex;align-items:center;gap:14px;
+  padding:13px 20px;
+}
+.brand-mark{
+  width:42px;height:42px;flex:0 0 auto;
+  border-radius:12px;
+  background:linear-gradient(135deg,rgba(255,253,238,0.22) 0%,rgba(255,253,238,0.06) 100%);
+  border:1.5px solid rgba(255,253,238,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-head);font-weight:700;font-size:17px;
+  color:var(--ivory);
+  box-shadow:0 2px 8px rgba(0,0,0,0.25);
+  letter-spacing:-.5px;
+}
+.brand-text{flex:1;min-width:0;}
+.brand-text h1{font-size:18px;letter-spacing:-.1px;color:var(--ivory);}
+.brand-text .subtitle{font-size:12px;color:rgba(255,253,238,0.72);margin-top:1px;}
+
+.topbar-actions{display:flex;align-items:center;gap:8px;}
+.icon-btn{
+  width:36px;height:36px;border-radius:9px;
+  border:1px solid rgba(255,253,238,0.22);
+  background:rgba(255,253,238,0.07);
+  color:var(--ivory);
+  display:flex;align-items:center;justify-content:center;
+  cursor:pointer;transition:background .15s ease,transform .1s ease,border-color .15s ease;
+}
+.icon-btn:hover{background:rgba(255,253,238,0.18);border-color:rgba(255,253,238,0.4);}
+.icon-btn:active{transform:scale(0.93);}
+.icon-btn svg{width:17px;height:17px;}
+
+/* ============== STICKY SEARCH ============== */
+.search-bar-wrap{
+  position:sticky;top:72px;z-index:40;
+  background:var(--bg);
+  border-bottom:1px solid var(--surface-border);
+  padding:10px 20px;
+}
+@media (max-width:640px){.search-bar-wrap{top:64px;}}
+.search-bar-inner{max-width:1400px;margin:0 auto;display:flex;gap:10px;align-items:center;}
+.search-field{
+  flex:1;position:relative;display:flex;align-items:center;
+}
+.search-field svg{position:absolute;left:12px;width:16px;height:16px;color:var(--text-muted);pointer-events:none;}
+.search-field input{
+  width:100%;
+  padding:10px 36px 10px 36px;
+  border-radius:var(--radius-md);
+  border:1px solid var(--surface-border);
+  background:var(--bg-elevated);
+  color:var(--text-primary);
+  font-size:14px;
+  transition:border-color .2s ease,box-shadow .2s ease;
+}
+.search-field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow-accent);}
+.search-field input::placeholder{color:var(--text-muted);}
+.search-clear{
+  position:absolute;right:10px;width:20px;height:20px;
+  border:none;background:none;cursor:pointer;
+  color:var(--text-muted);display:flex;align-items:center;justify-content:center;
+  border-radius:4px;
+}
+.search-clear:hover{color:var(--text-primary);}
+.search-clear svg{width:14px;height:14px;}
+.search-results-count{font-size:12.5px;color:var(--text-muted);white-space:nowrap;}
+
+/* ============== MAIN CONTENT ============== */
+main{flex:1;max-width:1400px;width:100%;margin:0 auto;padding:18px 20px 60px;}
+
+/* ============== DASHBOARD CARDS ============== */
+.dashboard{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(175px,1fr));
+  gap:12px;
+  margin-bottom:24px;
+}
+.dash-card{
+  background:var(--bg-elevated);
+  border:1px solid var(--surface-border);
+  border-radius:var(--radius-lg);
+  padding:16px 16px 14px;
+  box-shadow:var(--shadow-sm);
+  position:relative;
+  overflow:hidden;
+}
+.dash-card::before{
+  content:"";
+  position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--surface-border);
+  border-radius:var(--radius-lg) var(--radius-lg) 0 0;
+  transition:background .2s ease;
+}
+.dash-card-clickable{
+  cursor:pointer;
+  transition:border-color .18s ease,transform .12s ease,box-shadow .18s ease;
+}
+.dash-card-clickable:hover{
+  border-color:var(--accent);
+  box-shadow:var(--shadow-md),0 0 0 1px var(--glow-accent);
+  transform:translateY(-3px);
+}
+.dash-card-clickable:hover::before{background:var(--accent);}
+.dash-card-clickable:active{transform:translateY(0) scale(0.985);box-shadow:var(--shadow-sm);}
+.dash-card .dash-label{font-size:11px;text-transform:uppercase;letter-spacing:.7px;color:var(--text-muted);font-weight:700;}
+.dash-card .dash-value{font-family:var(--font-head);font-size:32px;margin-top:7px;color:var(--text-primary);line-height:1;}
+.dash-card.alert .dash-value{color:var(--danger);}
+.dash-card.alert::before{background:var(--danger);}
+.dash-card.warn .dash-value{color:var(--warn);}
+.dash-card.warn::before{background:var(--warn);}
+.dash-card .dash-sub{font-size:11.5px;color:var(--text-muted);margin-top:5px;}
+.dash-card .dash-icon{
+  position:absolute;right:14px;top:16px;
+  opacity:.1;
+  width:34px;height:34px;
+}
+
+/* ============== SECTION (collapsible) ============== */
+.section{
+  background:var(--bg-elevated);
+  border:1px solid var(--surface-border);
+  border-radius:var(--radius-lg);
+  margin-bottom:16px;
+  overflow:hidden;
+  box-shadow:var(--shadow-sm);
+}
+.section-header{
+  display:flex;align-items:center;gap:12px;
+  padding:16px 18px;
+  cursor:pointer;
+  user-select:none;
+  background:var(--bg-elevated);
+}
+.section-header:hover{background:var(--bg-sunken);}
+.section-header .chevron{
+  width:20px;height:20px;flex:0 0 auto;
+  color:var(--text-secondary);
+  transition:transform .2s ease;
+}
+.section.collapsed .chevron{transform:rotate(-90deg);}
+.section-header h2{font-size:16.5px;color:var(--text-primary);}
+.section-header .section-meta{font-size:12px;color:var(--text-muted);margin-left:auto;margin-right:6px;white-space:nowrap;}
+.section-body{
+  border-top:1px solid var(--surface-border);
+  padding:16px 18px 20px;
+  max-height:8000px;
+  overflow:hidden;
+  opacity:1;
+  transition:max-height .35s ease,opacity .2s ease,padding .3s ease,border-color .3s ease;
+}
+.section.collapsed .section-body{max-height:0;opacity:0;padding-top:0;padding-bottom:0;border-color:transparent;pointer-events:none;}
+.section-icon{width:18px;height:18px;color:var(--accent-strong);flex:0 0 auto;}
+[data-theme="dark"] .section-icon{color:var(--accent);}
+
+.subsection{
+  border:1px solid var(--surface-border);
+  border-radius:var(--radius-md);
+  margin-bottom:10px;
+  overflow:hidden;
+}
+.subsection-header{
+  display:flex;align-items:center;gap:10px;
+  padding:11px 14px;cursor:pointer;user-select:none;
+  background:var(--bg-sunken);
+}
+.subsection-header h3{font-size:14px;color:var(--text-primary);}
+.subsection-header .chevron{width:16px;height:16px;color:var(--text-secondary);transition:transform .2s ease;}
+.subsection.collapsed .chevron{transform:rotate(-90deg);}
+.subsection-body{
+  padding:14px;border-top:1px solid var(--surface-border);
+  max-height:4000px;overflow:hidden;opacity:1;
+  transition:max-height .3s ease,opacity .18s ease,padding .25s ease,border-color .25s ease;
+}
+.subsection.collapsed .subsection-body{max-height:0;opacity:0;padding-top:0;padding-bottom:0;border-color:transparent;pointer-events:none;}
+.subsection-header .subsection-meta{margin-left:auto;font-size:11.5px;color:var(--text-muted);}
+
+/* ============== BUTTONS ============== */
+.btn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:9px 14px;
+  border-radius:var(--radius-sm);
+  border:1px solid var(--surface-border);
+  background:var(--bg-elevated);
+  color:var(--text-primary);
+  font-size:13.5px;font-weight:600;
+  cursor:pointer;
+  transition:background .15s ease,border-color .15s ease,transform .1s ease;
+  white-space:nowrap;
+}
+.btn svg{width:15px;height:15px;}
+.btn:hover{background:var(--bg-sunken);box-shadow:var(--shadow-sm);}
+.btn:active{transform:scale(0.97);box-shadow:none;}
+.btn-primary{background:var(--accent-strong);border-color:var(--accent-strong);color:var(--ivory);}
+.btn-primary:hover{background:var(--header-grad-end);box-shadow:0 2px 10px var(--glow-accent);}
+.btn-danger{color:var(--danger);border-color:var(--danger);background:transparent;}
+.btn-danger:hover{background:var(--danger-bg);box-shadow:0 2px 8px rgba(163,64,46,0.15);}
+.btn-sm{padding:6px 10px;font-size:12.5px;}
+.btn-icon-only{padding:7px;}
+.btn-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}
+
+/* ============== TABLES ============== */
+.table-scroll{overflow-x:auto;border-radius:var(--radius-md);border:1px solid var(--surface-border);}
+table.inv-table{width:100%;border-collapse:collapse;font-size:13.5px;}
+table.inv-table.editable-table{table-layout:fixed;min-width:900px;}
+table.inv-table:not(.editable-table){min-width:600px;}
+table.inv-table thead th{
+  position:sticky;top:0;
+  background:var(--bg-sunken);
+  text-align:left;
+  font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;
+  color:var(--text-secondary);
+  padding:10px 10px;
+  border-bottom:1px solid var(--surface-border);
+  white-space:nowrap;
+}
+table.inv-table.editable-table th:nth-child(2),table.inv-table.editable-table td:nth-child(2){width:170px;}
+table.inv-table.editable-table th:last-child,table.inv-table.editable-table td:last-child{width:40px;}
+table.inv-table tbody td{
+  padding:7px 10px;
+  border-bottom:1px solid var(--surface-border);
+  color:var(--text-primary);
+  vertical-align:middle;
+}
+table.inv-table tbody tr:last-child td{border-bottom:none;}
+table.inv-table tbody tr{transition:background .12s ease;}
+table.inv-table tbody tr:hover{background:var(--bg-sunken);}
+table.inv-table tbody tr.row-shortage{background:var(--danger-bg);}
+table.inv-table tbody tr.row-shortage:hover{background:var(--danger-bg);filter:brightness(0.97);}
+table.inv-table tbody tr.row-expired{background:var(--warn-bg);}
+table.inv-table tbody tr.row-expiring-soon{background:rgba(154,116,21,0.08);}
+table.inv-table tbody tr.row-damaged{background:var(--warn-bg);}
+
+.cell-edit{
+  border:1px solid transparent;
+  background:transparent;
+  color:inherit;
+  font-size:13.5px;
+  padding:5px 7px;
+  border-radius:6px;
+  width:100%;
+  min-width:90px;
+  text-overflow:ellipsis;
+  transition:border-color .15s ease,background .15s ease,box-shadow .15s ease;
+}
+.cell-edit:hover{border-color:var(--surface-border);}
+.cell-edit:focus{border-color:var(--accent);background:var(--bg-elevated);box-shadow:0 0 0 2px var(--glow-accent);}
+select.cell-edit{cursor:pointer;}
+input.cell-edit[type="number"]{width:64px;min-width:54px;text-align:center;}
+input.cell-edit[type="date"]{min-width:130px;}
+
+.qty-stepper{display:flex;align-items:center;gap:4px;}
+.qty-stepper button{
+  width:26px;height:26px;border-radius:6px;
+  border:1px solid var(--surface-border);
+  background:var(--bg-elevated);color:var(--text-primary);
+  cursor:pointer;font-size:15px;line-height:1;
+  display:flex;align-items:center;justify-content:center;
+  transition:border-color .12s ease,color .12s ease,background .12s ease,transform .1s ease;
+}
+.qty-stepper button:hover{background:var(--bg-sunken);border-color:var(--accent);color:var(--accent);}
+.qty-stepper button:active{transform:scale(0.9);}
+.qty-stepper input{width:48px;text-align:center;}
+
+.badge{
+  display:inline-block;padding:3px 9px;border-radius:99px;
+  font-size:11.5px;font-weight:600;white-space:nowrap;
+}
+.badge-low{background:var(--ok-bg);color:var(--ok);}
+.badge-moderate{background:var(--warn-bg);color:var(--warn);}
+.badge-high{background:var(--danger-bg);color:var(--danger);}
+.badge-controlled{background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger);}
+.badge-excellent{background:var(--ok-bg);color:var(--ok);}
+.badge-good{background:var(--ok-bg);color:var(--ok);}
+.badge-fair{background:var(--warn-bg);color:var(--warn);}
+.badge-repair{background:var(--danger-bg);color:var(--danger);}
+.badge-replace{background:var(--danger-bg);color:var(--danger);}
+.badge-soon{background:var(--warn-bg);color:var(--warn);}
+
+td .del-row-btn{
+  width:26px;height:26px;border-radius:6px;border:1px solid var(--surface-border);
+  background:transparent;color:var(--text-muted);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .15s ease;
+}
+td .del-row-btn:hover{background:var(--danger-bg);color:var(--danger);border-color:var(--danger);box-shadow:0 0 0 3px rgba(163,64,46,0.12);}
+td .del-row-btn:active{transform:scale(0.88);}
+td .del-row-btn svg{width:14px;height:14px;}
+
+/* ============== FORMS / SETTINGS ============== */
+.form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;}
+.field{display:flex;flex-direction:column;gap:5px;}
+.field label{font-size:12.5px;font-weight:600;color:var(--text-secondary);}
+.field input,.field select,.field textarea{
+  padding:9px 11px;border-radius:var(--radius-sm);
+  border:1px solid var(--surface-border);
+  background:var(--bg-elevated);color:var(--text-primary);
+  font-size:14px;
+}
+.field textarea{resize:vertical;min-height:70px;}
+.help-text{font-size:12px;color:var(--text-muted);}
+
+/* ============== CHECKLIST (section 3) ============== */
+.checklist-row{display:flex;align-items:center;gap:10px;padding:7px 0;font-size:13.5px;}
+.checklist-row input[type="checkbox"]{width:18px;height:18px;accent-color:var(--accent-strong);cursor:pointer;}
+.checklist-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:4px 18px;margin-bottom:10px;}
+.notes-area{width:100%;min-height:70px;padding:10px;border-radius:var(--radius-sm);border:1px solid var(--surface-border);background:var(--bg-elevated);color:var(--text-primary);font-size:13.5px;resize:vertical;}
+
+/* practical category delete btn */
+.pc-delete-btn{
+  margin-left:auto;padding:4px 8px;border-radius:var(--radius-sm);
+  border:1px solid transparent;background:none;
+  color:var(--text-muted);font-size:12px;cursor:pointer;
+}
+.pc-delete-btn:hover{color:var(--danger);border-color:var(--danger);background:var(--danger-bg);}
+
+/* ============== STOCKTAKE MODE ============== */
+.stocktake-toolbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;}
+.stocktake-list{display:flex;flex-direction:column;gap:8px;}
+.stocktake-item{
+  display:flex;align-items:center;gap:12px;flex-wrap:wrap;
+  padding:12px 14px;border:1px solid var(--surface-border);border-radius:var(--radius-md);
+  background:var(--bg-elevated);
+}
+.stocktake-item .st-name{font-weight:600;font-size:14px;flex:1;min-width:140px;}
+.stocktake-item .st-loc{font-size:12px;color:var(--text-muted);}
+.stocktake-item.row-shortage{background:var(--danger-bg);border-color:var(--danger);}
+.stocktake-item.row-expiring-soon{background:rgba(154,116,21,0.08);border-color:var(--warn);}
+.filter-chip{
+  padding:6px 12px;border-radius:99px;border:1px solid var(--surface-border);
+  background:var(--bg-elevated);color:var(--text-secondary);font-size:12.5px;font-weight:600;cursor:pointer;
+  transition:all .18s ease;
+}
+.filter-chip:hover:not(.active){border-color:var(--accent);color:var(--text-primary);}
+.filter-chip.active{background:var(--accent-strong);border-color:var(--accent-strong);color:var(--ivory);box-shadow:0 1px 6px var(--glow-accent);}
+.filter-chip:active{transform:scale(0.96);}
+
+/* ============== EMPTY STATE ============== */
+.empty-state{padding:34px 20px;text-align:center;color:var(--text-muted);}
+.empty-state svg{width:34px;height:34px;margin-bottom:10px;color:var(--text-muted);}
+.empty-state .empty-title{font-weight:600;color:var(--text-secondary);margin-bottom:4px;font-size:14px;}
+.empty-state .empty-sub{font-size:12.5px;}
+
+/* ============== TOAST ============== */
+#toast-wrap{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);z-index:200;display:flex;flex-direction:column;gap:8px;align-items:center;}
+.toast{
+  background:var(--text-primary);color:var(--bg);
+  padding:10px 18px;border-radius:99px;font-size:13px;font-weight:600;
+  box-shadow:var(--shadow-lg);
+  opacity:0;transform:translateY(8px);
+  animation:toast-in .35s cubic-bezier(.22,.61,.36,1) forwards, toast-out .25s ease 2.6s forwards;
+}
+[data-theme="dark"] .toast{background:var(--accent-strong);color:#0c1009;}
+@keyframes toast-in{
+  0%{opacity:0;transform:translateY(18px) scale(0.92);}
+  55%{opacity:1;transform:translateY(-3px) scale(1.02);}
+  100%{opacity:1;transform:translateY(0) scale(1);}
+}
+@keyframes toast-out{to{opacity:0;transform:translateY(10px) scale(0.95);}}
+
+/* ============== REPORTS ============== */
+.report-block{margin-bottom:20px;}
+.report-block h3{font-size:14.5px;margin-bottom:8px;color:var(--text-primary);}
+.report-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;}
+.report-stat{background:var(--bg-sunken);border-radius:var(--radius-sm);padding:12px;}
+.report-stat .rs-val{font-family:var(--font-head);font-size:22px;}
+.report-stat .rs-label{font-size:11.5px;color:var(--text-muted);}
+
+/* ============== PRINT ============== */
+@media print{
+  header.topbar,.search-bar-wrap,.btn-row,.section-header .chevron,
+  .icon-btn,.qty-stepper button,.del-row-btn,#toast-wrap,.global-tabs,
+  .no-print,.subsection-header .chevron,.pc-delete-btn{display:none!important;}
+  body,body[data-theme="dark"]{
+    --bg:#ffffff;--bg-elevated:#ffffff;--bg-sunken:#f1f1ea;
+    --surface-border:#bbb;--text-primary:#000;--text-secondary:#333;--text-muted:#555;
+    --accent-strong:#1f3d1d;--accent:#1f3d1d;
+    --danger-bg:#fbe9e4;--warn-bg:#fbf1d8;--ok-bg:#e8f3e3;
+    background:#fff;color:#000;
+  }
+  .section{box-shadow:none;border:1px solid #999;break-inside:avoid;}
+  .subsection{break-inside:avoid;}
+  .section-body{display:block!important;}
+  .section.collapsed .section-body{display:block!important;}
+  .subsection-body{display:block!important;}
+  .subsection.collapsed .subsection-body{display:block!important;}
+  .dash-card{break-inside:avoid;}
+  table.inv-table tbody tr{break-inside:avoid;}
+  .cell-edit{border:none!important;background:transparent!important;}
+}
+
+/* ============== TABS ============== */
+.global-tabs{
+  display:flex;gap:2px;overflow-x:auto;margin-bottom:20px;
+  border-bottom:1px solid var(--surface-border);
+  padding-bottom:0;
+  scrollbar-width:none;
+}
+.global-tabs::-webkit-scrollbar{display:none;}
+.global-tab{
+  padding:10px 15px;font-size:13px;font-weight:600;
+  color:var(--text-muted);background:transparent;border:none;
+  border-bottom:2.5px solid transparent;cursor:pointer;white-space:nowrap;
+  transition:color .15s ease,border-color .15s ease,background .15s ease;
+  letter-spacing:.1px;
+  border-radius:var(--radius-sm) var(--radius-sm) 0 0;
+}
+.global-tab:hover{color:var(--text-primary);background:rgba(125,162,75,0.06);}
+.global-tab.active{color:var(--accent-strong);border-bottom-color:var(--accent-strong);background:rgba(125,162,75,0.08);}
+[data-theme="dark"] .global-tab.active{color:var(--accent);border-bottom-color:var(--accent);background:rgba(147,194,95,0.08);}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;animation:tab-fade-in .28s cubic-bezier(.22,.61,.36,1);}
+@keyframes tab-fade-in{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
+
+/* ============== PROGRESS BAR ============== */
+.stock-bar-wrap{display:flex;align-items:center;gap:8px;min-width:120px;}
+.stock-bar{flex:1;height:5px;border-radius:99px;background:var(--surface-border);overflow:hidden;}
+.stock-bar-fill{height:100%;border-radius:99px;transition:width .3s ease;}
+.stock-bar-fill.ok{background:var(--ok);}
+.stock-bar-fill.warn{background:var(--warn);}
+.stock-bar-fill.danger{background:var(--danger);}
+.stock-bar-pct{font-size:11.5px;color:var(--text-muted);width:32px;text-align:right;}
+
+/* ============== HAZARD BADGE (inline) ============== */
+.hazard-pill{
+  display:inline-flex;align-items:center;gap:4px;
+  padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;
+  letter-spacing:.3px;white-space:nowrap;
+}
+.hazard-pill::before{content:"";width:6px;height:6px;border-radius:50%;display:inline-block;}
+.hazard-low{background:var(--ok-bg);color:var(--ok);}
+.hazard-low::before{background:var(--ok);}
+.hazard-moderate{background:var(--warn-bg);color:var(--warn);}
+.hazard-moderate::before{background:var(--warn);}
+.hazard-high{background:var(--danger-bg);color:var(--danger);}
+.hazard-high::before{background:var(--danger);}
+.hazard-controlled{background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger);}
+.hazard-controlled::before{background:var(--danger);}
+
+/* ============== MINI CHART (reports) ============== */
+.mini-chart{display:flex;align-items:flex-end;gap:5px;height:52px;margin-top:10px;}
+.mini-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;}
+.mini-bar{width:100%;border-radius:4px 4px 0 0;min-height:3px;background:var(--accent);transition:height .4s ease;opacity:.85;}
+.mini-bar.danger{background:var(--danger);}
+.mini-bar.warn{background:var(--warn);}
+.mini-bar-label{font-size:10px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;text-align:center;}
+.mini-bar-val{font-size:11px;font-weight:700;color:var(--text-secondary);}
+
+/* ============== SECTION ENHANCEMENTS ============== */
+.section{transition:box-shadow .15s ease;}
+.section:hover{box-shadow:var(--shadow-md);}
+
+/* ============== UTILITY ============== */
+.flex-between{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;}
+.text-muted{color:var(--text-muted);}
+.mt-0{margin-top:0;}
+.mb-0{margin-bottom:0;}
+.hidden{display:none!important;}
+.small-note{font-size:12px;color:var(--text-muted);margin-top:10px;padding:8px 10px;background:var(--bg-sunken);border-radius:var(--radius-sm);border-left:3px solid var(--surface-border);}
+.expiry-warn{color:var(--warn);font-size:12px;margin-left:4px;}
+
+/* ============== SORT HEADERS ============== */
+.sortable-th{cursor:pointer;user-select:none;position:relative;padding-right:22px!important;transition:background .12s ease;}
+.sortable-th:hover{color:var(--text-primary);background:rgba(125,162,75,0.08);}
+.sort-arrow{position:absolute;right:4px;top:50%;transform:translateY(-50%);font-size:10px;color:var(--text-muted);opacity:0;transition:opacity .15s ease;}
+.sortable-th:hover .sort-arrow{opacity:.5;}
+.sortable-th.sort-active .sort-arrow{opacity:1;color:var(--accent-strong);}
+[data-theme="dark"] .sortable-th.sort-active .sort-arrow{color:var(--accent);}
+
+/* ============== TAB BADGES ============== */
+.tab-badge{
+  display:inline-flex;align-items:center;justify-content:center;
+  min-width:18px;height:18px;padding:0 5px;
+  border-radius:99px;font-size:10.5px;font-weight:700;
+  margin-left:5px;line-height:1;vertical-align:middle;
+}
+.tab-badge-warn{background:var(--warn-bg);color:var(--warn);}
+.tab-badge-danger{background:var(--danger-bg);color:var(--danger);}
+
+/* ============== FILTER SELECT ============== */
+.filter-select{
+  padding:7px 10px;border-radius:var(--radius-sm);
+  border:1px solid var(--surface-border);
+  background:var(--bg-elevated);color:var(--text-primary);
+  font-size:12.5px;font-weight:600;cursor:pointer;
+}
+
+/* ============== UNDO TOAST ============== */
+.toast-with-action{
+  display:flex;align-items:center;gap:12px;
+  animation:toast-in .35s cubic-bezier(.22,.61,.36,1) forwards, toast-out .25s ease 4.8s forwards;
+}
+.toast-undo-btn{
+  background:none;border:1px solid currentColor;
+  color:inherit;padding:3px 10px;border-radius:99px;
+  font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;
+}
+.toast-undo-btn:hover{opacity:.8;}
+
+/* ============== DRAG REORDER ============== */
+.drag-col{width:28px!important;min-width:28px;padding:0 2px!important;text-align:center;}
+.drag-handle{cursor:grab;color:var(--text-muted);font-size:14px;user-select:none;line-height:1;}
+.drag-handle:hover{color:var(--text-primary);}
+.drag-handle:active{cursor:grabbing;}
+tr.dragging{opacity:.35;}
+tr.drag-over td{box-shadow:inset 0 2px 0 var(--accent);}
+
+/* ============== EXPIRY CALENDAR ============== */
+.calendar-nav{display:flex;align-items:center;gap:12px;margin-bottom:12px;}
+.calendar-nav h3{flex:1;text-align:center;font-size:15px;margin:0;}
+.calendar-grid{
+  display:grid;grid-template-columns:repeat(7,1fr);gap:1px;
+  border:1px solid var(--surface-border);border-radius:var(--radius-md);
+  overflow:hidden;background:var(--surface-border);
+}
+.calendar-day-header{
+  background:var(--bg-sunken);padding:6px 4px;text-align:center;
+  font-size:10.5px;font-weight:700;color:var(--text-muted);text-transform:uppercase;
+}
+.calendar-day{
+  background:var(--bg-elevated);padding:6px;min-height:56px;font-size:12px;position:relative;
+}
+.calendar-day.empty{background:var(--bg-sunken);opacity:.4;}
+.calendar-day.today{box-shadow:inset 0 0 0 2px var(--accent);}
+.calendar-day .day-num{font-weight:700;font-size:11.5px;color:var(--text-secondary);margin-bottom:2px;}
+.calendar-day-items{display:flex;flex-direction:column;gap:1px;}
+.calendar-item{
+  font-size:9.5px;padding:1px 3px;border-radius:3px;white-space:nowrap;
+  overflow:hidden;text-overflow:ellipsis;
+}
+.calendar-item.expired{background:var(--danger-bg,rgba(239,68,68,.15));color:var(--danger);}
+.calendar-item.expiring{background:var(--warn-bg,rgba(234,179,8,.15));color:var(--warn);}
+.calendar-item.ok{background:var(--ok-bg,rgba(34,197,94,.15));color:var(--ok);}
+
+/* ============== STOCKTAKE PREMIUM ============== */
+.stocktake-item{transition:box-shadow .15s ease,border-color .15s ease;}
+.stocktake-item:hover{box-shadow:var(--shadow-md);}
+
+@media (max-width:640px){
+  .brand-text h1{font-size:16px;}
+  .brand-text .subtitle{font-size:11px;}
+  .section-header h2{font-size:15px;}
+  main{padding:14px 12px 50px;}
+  .dashboard{grid-template-columns:repeat(2,1fr);}
+}
+
+/* ============== SCROLLBAR ============== */
+::-webkit-scrollbar{width:7px;height:7px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--surface-border);border-radius:4px;}
+::-webkit-scrollbar-thumb:hover{background:var(--text-muted);}
+*{scrollbar-width:thin;scrollbar-color:var(--surface-border) transparent;}
+
+/* ============== FORM FOCUS ============== */
+.field input:focus,.field select:focus,.field textarea:focus,.notes-area:focus{
+  border-color:var(--accent);box-shadow:0 0 0 3px var(--glow-accent);
+  outline:none;
+}
+.field input,.field select,.field textarea,.notes-area{
+  transition:border-color .15s ease,box-shadow .15s ease;
+}
+.filter-select{transition:border-color .15s ease,box-shadow .15s ease;}
+.filter-select:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--glow-accent);outline:none;}
+
+/* ============== CALENDAR HOVER ============== */
+.calendar-day:not(.empty){transition:background .12s ease;}
+.calendar-day:not(.empty):hover{background:var(--bg-sunken);}
+
+/* ============== STOCKTAKE INTERACTION ============== */
+.stocktake-item{transition:box-shadow .15s ease,border-color .15s ease,transform .12s ease;}
+.stocktake-item:hover{box-shadow:var(--shadow-md);transform:translateY(-1px);}
+.stocktake-item:active{transform:translateY(0);}
+
+/* ============== SECTION HEADER ============== */
+.section-header{transition:background .12s ease;}
+.subsection-header{transition:background .12s ease;}
+.subsection-header:hover{background:rgba(125,162,75,0.06);}
+
+/* ============== DRAG HANDLE TRANSITIONS ============== */
+.drag-handle{transition:color .12s ease,transform .1s ease;}
+.drag-handle:hover{transform:scale(1.15);}
+
+/* ============== SORT HEADER ACTIVE ============== */
+.sortable-th.sort-active{background:rgba(125,162,75,0.05);}
+
+/* ============== REPORT STAT HOVER ============== */
+.report-stat{transition:box-shadow .15s ease,transform .12s ease;}
+.report-stat:hover{box-shadow:var(--shadow-sm);transform:translateY(-1px);}
+
+/* ============== BADGE HOVER ============== */
+.badge{transition:transform .1s ease;}
+
+/* ============== ICON BTN PULSE ============== */
+.icon-btn{transition:background .15s ease,transform .12s ease,border-color .15s ease,box-shadow .15s ease;}
+.icon-btn:hover{box-shadow:0 0 10px rgba(255,253,238,0.12);}
+
+/* ============== PROGRESS BAR ============== */
+.stock-bar{transition:background .15s ease;}
+.stock-bar-fill{transition:width .4s cubic-bezier(.22,.61,.36,1);}
+
+/* ============== TOAST SLIDE-UP ON HOVER ============== */
+.toast{transition:transform .15s ease;cursor:default;}
+.toast:hover{transform:translateY(-2px);}
+
+/* ============== TABLE SCROLL SHADOW ============== */
+.table-scroll{
+  position:relative;
+  background:
+    linear-gradient(to right, var(--bg-elevated) 20px, transparent 60px),
+    linear-gradient(to left, var(--bg-elevated) 20px, transparent 60px);
+  background-size:100% 100%;
+  background-attachment:local;
+}
+
+/* ============== CHECKLIST HOVER ============== */
+.checklist-row{transition:background .1s ease;border-radius:var(--radius-sm);padding-left:6px;padding-right:6px;}
+.checklist-row:hover{background:var(--bg-sunken);}
+
+/* ============== PRINT OVERRIDE ============== */
+@media print{
+  .section-body{max-height:none!important;opacity:1!important;padding:16px 18px 20px!important;border-color:var(--surface-border)!important;pointer-events:auto!important;}
+  .subsection-body{max-height:none!important;opacity:1!important;padding:14px!important;border-color:var(--surface-border)!important;pointer-events:auto!important;}
+}
+</style>
+</head>
+<body data-theme="dark">
+<div id="toast-wrap"></div>
+
+<div class="app">
+
+  <header class="topbar">
+    <div class="topbar-inner">
+      <div class="brand-mark">NH</div>
+      <div class="brand-text">
+        <h1>Newberry House <span style="font-weight:400;">— Science Inventory Manager</span></h1>
+        <div class="subtitle">Cambridge AS &amp; A Level Biology</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="icon-btn" id="themeToggle" title="Toggle dark / light mode" aria-label="Toggle theme">
+          <svg id="themeIconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+          <svg id="themeIconSun" class="hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+        </button>
+        <button class="icon-btn" id="printBtn" title="Print" aria-label="Print">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="search-bar-wrap">
+    <div class="search-bar-inner">
+      <div class="search-field">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="text" id="globalSearch" placeholder="Search equipment, chemicals, locations, suppliers, notes…" autocomplete="off" aria-label="Search inventory">
+        <button class="search-clear hidden" id="searchClearBtn" aria-label="Clear search">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+      <div class="search-results-count" id="searchCount" aria-live="polite"></div>
+    </div>
+  </div>
+
+  <main>
+    <div class="dashboard" id="dashboard" role="list"></div>
+
+    <div class="global-tabs" id="globalTabs" role="tablist">
+      <button class="global-tab active" data-tab="tab-equipment" role="tab" aria-selected="true">Equipment</button>
+      <button class="global-tab" data-tab="tab-chemicals" role="tab" aria-selected="false">Chemicals</button>
+      <button class="global-tab" data-tab="tab-practical" role="tab" aria-selected="false">Practical Requirements</button>
+      <button class="global-tab" data-tab="tab-stocktake" role="tab" aria-selected="false">Stocktake</button>
+      <button class="global-tab" data-tab="tab-orders" role="tab" aria-selected="false">Orders Required</button>
+      <button class="global-tab" data-tab="tab-reports" role="tab" aria-selected="false">Reports</button>
+      <button class="global-tab" data-tab="tab-settings" role="tab" aria-selected="false">Settings</button>
+    </div>
+
+    <div id="tabsContainer"></div>
+  </main>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+const LS_KEY = "nh_inventory_v1";
+const LS_UI_KEY = "nh_inventory_ui_v1";
+
+let state = null;
+let ui = null;
+
+/* ================================================================
+   ICONS
+   ================================================================ */
+const ICON = {
+  chevron:`<svg class="chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><polyline points="6 9 12 15 18 9"/></svg>`,
+  trash:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6m5 0V4a2 2 0 012-2h0a2 2 0 012 2v2"/></svg>`,
+  plus:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>`,
+  download:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`,
+  upload:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>`,
+  printer:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>`,
+  flask:`<svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 2v6L4.5 18a2 2 0 001.8 3h11.4a2 2 0 001.8-3L15 8V2"/><line x1="9" y1="2" x2="15" y2="2"/><line x1="6.5" y1="14" x2="17.5" y2="14"/></svg>`,
+  beaker:`<svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 2h10M9 2v6.5L4 19a1.7 1.7 0 001.5 2.5h13A1.7 1.7 0 0020 19l-5-10.5V2"/></svg>`,
+  clipboard:`<svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><path d="M9 12l2 2 4-4"/></svg>`,
+  list:`<svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>`,
+  cart:`<svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.7 13.4a2 2 0 002 1.6h9.7a2 2 0 002-1.6L23 6H6"/></svg>`,
+  bar:`<svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>`,
+  gear:`<svg class="section-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06A1.65 1.65 0 004.6 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06A1.65 1.65 0 009 4.6a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>`,
+  inbox:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 002 2h16a2 2 0 002-2v-6l-3.45-6.89A2 2 0 0016.76 4H7.24a2 2 0 00-1.79 1.11z"/></svg>`,
+};
+
+/* ================================================================
+   SEED DATA
+   ================================================================ */
+function defaultEquipmentCategories(){
+  return ["Microscopy","Glassware","Measurement","Dissection","Heating","General Laboratory","Fieldwork","Paper 3 Practical Equipment","Storage","Safety Equipment"];
+}
+const CONDITIONS = ["Excellent","Good","Fair","Repair","Replace"];
+const HAZARDS = ["Low","Moderate","High","Controlled"];
+
+function uid(prefix){ return prefix+"_"+Math.random().toString(36).slice(2,9)+Date.now().toString(36).slice(-4); }
+
+function seedEquipment(){
+  const rows = [
+    ["Microscope","Microscopy",12,12,"Good","Prep Room Cupboard A","Philip Harris"],
+    ["Eyepiece Graticule","Microscopy",12,9,"Good","Prep Room Drawer 2","Timstar"],
+    ["Stage Micrometer","Microscopy",6,4,"Fair","Prep Room Drawer 2","Timstar"],
+    ["Microscope Slides (box)","Microscopy",20,14,"Good","Prep Room Shelf B","Philip Harris"],
+    ["Cover Slips (box)","Microscopy",20,11,"Good","Prep Room Shelf B","Philip Harris"],
+    ["Petri Dishes","Glassware",60,48,"Good","Glassware Cabinet 1","Fisher Scientific"],
+    ["Beakers 250ml","Glassware",30,27,"Good","Glassware Cabinet 1","Fisher Scientific"],
+    ["Beakers 100ml","Glassware",30,30,"Good","Glassware Cabinet 1","Fisher Scientific"],
+    ["Conical Flasks 250ml","Glassware",24,18,"Good","Glassware Cabinet 2","Fisher Scientific"],
+    ["Measuring Cylinders 100ml","Measurement",18,15,"Good","Glassware Cabinet 2","Fisher Scientific"],
+    ["Test Tubes","Glassware",100,72,"Good","Glassware Cabinet 3","Fisher Scientific"],
+    ["Thermometers","Measurement",15,12,"Fair","Prep Room Drawer 3","Timstar"],
+    ["Stopwatches","Measurement",16,16,"Excellent","Prep Room Drawer 1","Timstar"],
+    ["Electronic Balances","Measurement",4,4,"Good","Balance Bench","Ohaus"],
+    ["Forceps","Dissection",20,17,"Good","Dissection Kit Tray","Philip Harris"],
+    ["Scalpels","Dissection",20,15,"Good","Dissection Kit Tray","Philip Harris"],
+    ["Rulers (30cm)","Measurement",20,20,"Good","Prep Room Drawer 1","Generic"],
+    ["Pipettes (graduated)","Measurement",30,22,"Good","Glassware Cabinet 3","Fisher Scientific"],
+    ["Dropping Pipettes","Measurement",60,40,"Good","Prep Room Shelf B","Fisher Scientific"],
+    ["Water Baths","Heating",4,4,"Good","Heating Bench","Grant Instruments"],
+    ["Dissection Trays","Dissection",16,16,"Good","Dissection Kit Tray","Philip Harris"],
+    ["Funnels","Glassware",15,12,"Good","Glassware Cabinet 1","Fisher Scientific"],
+    ["Filter Paper (pack)","General Laboratory",10,6,"Good","Prep Room Shelf C","Whatman"],
+    ["Wash Bottles","General Laboratory",12,10,"Good","Prep Room Shelf C","Fisher Scientific"],
+    ["Labels (roll)","Storage",10,4,"Good","Stationery Drawer","Generic"],
+    ["Marker Pens","Storage",15,9,"Good","Stationery Drawer","Generic"],
+    ["Safety Goggles","Safety Equipment",32,30,"Good","Safety Cabinet","Timstar"],
+    ["Lab Coats","Safety Equipment",32,28,"Fair","Safety Cabinet","Timstar"],
+    ["Disposable Gloves (box)","Safety Equipment",12,7,"Good","Safety Cabinet","Fisher Scientific"],
+    ["First Aid Kit","Safety Equipment",2,2,"Good","Wall Mount — Lab Entrance","St John Supplies"],
+    ["Quadrats","Fieldwork",10,8,"Good","Fieldwork Store","Philip Harris"],
+    ["Pooters","Fieldwork",10,6,"Fair","Fieldwork Store","Philip Harris"],
+    ["Sweep Nets","Fieldwork",6,5,"Good","Fieldwork Store","Philip Harris"],
+    ["Respirometer Sets","Paper 3 Practical Equipment",6,5,"Good","Prep Room Cupboard B","Philip Harris"],
+    ["Potometer Sets","Paper 3 Practical Equipment",6,4,"Fair","Prep Room Cupboard B","Philip Harris"],
+    ["Colorimeter","Paper 3 Practical Equipment",2,2,"Good","Instrument Shelf","Vernier"],
+    ["Storage Boxes (large)","Storage",10,10,"Good","Store Room","Generic"],
+  ];
+  return rows.map(r=>({id:uid("eq"),name:r[0],category:r[1],reqQty:r[2],curQty:r[3],condition:r[4],location:r[5],supplier:r[6],reorderAt:0,notes:""}));
+}
+
+function seedChemicals(){
+  const rows = [
+    ["Hydrogen Peroxide","H2O2","Moderate",1000,650,"ml","Chemical Store — Shelf 1","Fisher Scientific","2027-03-01"],
+    ["Iodine Solution","I2/KI","Moderate",500,310,"ml","Chemical Store — Shelf 1","Fisher Scientific","2026-11-15"],
+    ["Benedict's Solution","—","Low",2000,1400,"ml","Chemical Store — Shelf 2","Fisher Scientific","2027-06-01"],
+    ["Biuret Reagent","—","Moderate",500,180,"ml","Chemical Store — Shelf 2","Fisher Scientific","2026-09-01"],
+    ["Potassium Manganate(VII)","KMnO4","High",250,140,"g","Chemical Store — Locked Cabinet","Fisher Scientific","2027-01-20"],
+    ["Iron(II) Sulfate","FeSO4","Moderate",250,90,"g","Chemical Store — Shelf 3","Fisher Scientific","2026-08-10"],
+    ["Agar","—","Low",500,320,"g","Chemical Store — Shelf 4","Fisher Scientific","2028-01-01"],
+    ["Ethanol","C2H5OH","High",2500,900,"ml","Flammables Cabinet","Fisher Scientific","2027-05-01"],
+    ["Distilled Water","H2O","Low",10000,7000,"ml","Prep Room Sink Area","In-house",""],
+    ["Hydrochloric Acid (1M)","HCl","High",1000,550,"ml","Acids Cabinet","Fisher Scientific","2027-02-14"],
+    ["Sodium Hydroxide (1M)","NaOH","High",1000,620,"ml","Bases Cabinet","Fisher Scientific","2027-02-14"],
+    ["Copper Sulfate","CuSO4","Moderate",500,410,"g","Chemical Store — Shelf 3","Fisher Scientific","2027-09-01"],
+    ["Glucose Solution","C6H12O6","Low",1000,700,"ml","Chemical Store — Shelf 2","Fisher Scientific","2026-12-01"],
+    ["Starch Solution","—","Low",1000,250,"ml","Chemical Store — Shelf 2","Fisher Scientific","2026-07-15"],
+    ["Methylene Blue","—","Moderate",250,120,"ml","Stains Cabinet","Fisher Scientific","2027-04-01"],
+    ["Eosin","—","Moderate",250,200,"ml","Stains Cabinet","Fisher Scientific","2027-04-01"],
+    ["Safranin","—","Moderate",250,60,"ml","Stains Cabinet","Fisher Scientific","2026-10-01"],
+  ];
+  return rows.map(r=>({id:uid("chem"),name:r[0],formula:r[1],hazard:r[2],reqQty:r[3],curQty:r[4],unit:r[5],location:r[6],supplier:r[7],expiry:r[8],reorderAt:0,notes:""}));
+}
+
+function seedPracticalCategories(){
+  const names = [
+    "Microscopy Skills","Biological Drawing","Measurements","Investigations",
+    "Enzyme Practical Work","Photosynthesis Practical Work","Respiration Practical Work",
+    "Transport Practical Work","Ecology Practical Work","Statistics and Data Handling"
+  ];
+  return names.map(n=>({id:uid("pc"),name:n,equipmentAvailable:false,consumablesAvailable:false,readyForExam:false,notes:""}));
+}
+
+function defaultState(){
+  return {
+    version:1,
+    equipment: seedEquipment(),
+    equipmentCategories: defaultEquipmentCategories(),
+    chemicals: seedChemicals(),
+    practical: seedPracticalCategories(),
+    settings:{schoolName:"Newberry House School",teacherName:"",labName:"Biology Laboratory",academicYear:"2025–2027"},
+    lastUpdated: new Date().toISOString()
+  };
+}
+
+function defaultUI(){
+  return {theme:"dark",activeTab:"tab-equipment",collapsed:{},stocktakeFilter:"all",
+    equipmentSort:{col:null,dir:"asc"},chemicalsSort:{col:null,dir:"asc"},
+    equipmentCategoryFilter:"all",chemicalsHazardFilter:"all",
+    calendarMonth:new Date().getMonth(),calendarYear:new Date().getFullYear()};
+}
+
+/* ================================================================
+   PERSISTENCE
+   ================================================================ */
+function mergeDefaults(parsed){
+  const def = defaultState();
+  if(!parsed.equipmentCategories || !parsed.equipmentCategories.length) parsed.equipmentCategories = def.equipmentCategories;
+  if(!parsed.practical) parsed.practical = def.practical;
+  if(!parsed.settings) parsed.settings = def.settings;
+  else parsed.settings = Object.assign({}, def.settings, parsed.settings);
+  if(!parsed.lastUpdated) parsed.lastUpdated = def.lastUpdated;
+  return parsed;
+}
+function loadState(){
+  try{
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){
+      const parsed = JSON.parse(raw);
+      if(parsed && parsed.equipment && parsed.chemicals) return mergeDefaults(parsed);
+    }
+  }catch(e){ console.warn("Could not parse saved inventory, using defaults.",e); }
+  return defaultState();
+}
+function loadUI(){
+  try{
+    const raw = localStorage.getItem(LS_UI_KEY);
+    if(raw) return Object.assign(defaultUI(),JSON.parse(raw));
+  }catch(e){}
+  return defaultUI();
+}
+let saveTimer=null;
+function saveState(showToastMsg){
+  state.lastUpdated = new Date().toISOString();
+  localStorage.setItem(LS_KEY, JSON.stringify(state));
+  if(showToastMsg) showToast(showToastMsg);
+}
+function saveUI(){
+  localStorage.setItem(LS_UI_KEY, JSON.stringify(ui));
+}
+function scheduleSave(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(()=>saveState(), 250);
+}
+
+/* ================================================================
+   TOAST
+   ================================================================ */
+function showToast(msg, action){
+  const wrap = document.getElementById("toast-wrap");
+  const el = document.createElement("div");
+  el.className = "toast" + (action ? " toast-with-action" : "");
+  if(action){
+    const span = document.createElement("span");
+    span.textContent = msg;
+    el.appendChild(span);
+    const btn = document.createElement("button");
+    btn.className = "toast-undo-btn";
+    btn.textContent = action.label;
+    btn.addEventListener("click",()=>{ action.fn(); el.remove(); });
+    el.appendChild(btn);
+  }else{
+    el.textContent = msg;
+  }
+  wrap.appendChild(el);
+  setTimeout(()=>el.remove(), action ? 5000 : 2700);
+}
+
+/* ================================================================
+   THEME
+   ================================================================ */
+function applyTheme(){
+  document.body.setAttribute("data-theme", ui.theme);
+  document.getElementById("themeIconMoon").classList.toggle("hidden", ui.theme==="dark");
+  document.getElementById("themeIconSun").classList.toggle("hidden", ui.theme!=="dark");
+}
+document.getElementById("themeToggle").addEventListener("click",()=>{
+  ui.theme = ui.theme==="dark" ? "light" : "dark";
+  applyTheme(); saveUI();
+});
+document.getElementById("printBtn").addEventListener("click",()=>window.print());
+
+/* ================================================================
+   HELPERS
+   ================================================================ */
+function escapeHtml(str){
+  return String(str==null?"":str).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+}
+function conditionBadge(condition){
+  const cls = "badge badge-"+String(condition||"").toLowerCase().replace(/[^a-z]/g,"");
+  return `<span class="${cls}">${escapeHtml(condition)}</span>`;
+}
+function hazardBadge(hazard){
+  const key = String(hazard||"").toLowerCase().replace(/[^a-z]/g,"");
+  return `<span class="hazard-pill hazard-${key}">${escapeHtml(hazard)}</span>`;
+}
+function stockBar(cur, req){
+  const pct = req>0 ? Math.min(100, Math.round((cur/req)*100)) : 100;
+  const cls = pct>=100?"ok":pct>=50?"warn":"danger";
+  return `<div class="stock-bar-wrap">
+    <div class="stock-bar"><div class="stock-bar-fill ${cls}" style="width:${pct}%"></div></div>
+    <span class="stock-bar-pct">${pct}%</span>
+  </div>`;
+}
+function isExpiringOrExpired(dateStr){
+  if(!dateStr) return {expired:false,soon:false};
+  const d = new Date(dateStr);
+  if(isNaN(d)) return {expired:false,soon:false};
+  const now = new Date();
+  const diffDays = (d-now)/(1000*60*60*24);
+  return { expired: diffDays<0, soon: diffDays>=0 && diffDays<=60 };
+}
+function fmtDate(dateStr){
+  if(!dateStr) return "—";
+  try{
+    const d = new Date(dateStr);
+    if(isNaN(d)) return dateStr;
+    return d.toLocaleDateString(undefined,{day:"2-digit",month:"short",year:"numeric"});
+  }catch(e){return dateStr;}
+}
+function fmtDateTime(iso){
+  try{
+    const d = new Date(iso);
+    return d.toLocaleString(undefined,{day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"});
+  }catch(e){return iso;}
+}
+function matchesSearch(haystackArr, q){
+  if(!q) return true;
+  q = q.toLowerCase();
+  return haystackArr.some(v=>String(v||"").toLowerCase().includes(q));
+}
+function emptyState(title,sub){
+  return `<div class="empty-state">${ICON.inbox}<div class="empty-title">${escapeHtml(title)}</div><div class="empty-sub">${escapeHtml(sub||"")}</div></div>`;
+}
+
+function sortRows(rows, col, dir){
+  if(!col) return rows;
+  const mult = dir==="desc" ? -1 : 1;
+  return [...rows].sort((a,b)=>{
+    let va=a[col], vb=b[col];
+    if(typeof va==="number" && typeof vb==="number") return (va-vb)*mult;
+    va=String(va||"").toLowerCase(); vb=String(vb||"").toLowerCase();
+    return va<vb ? -1*mult : va>vb ? 1*mult : 0;
+  });
+}
+
+function sortableHeader(label, col, sortState){
+  const active = sortState.col===col;
+  const arrow = active ? (sortState.dir==="asc" ? "▲" : "▼") : "▲";
+  return `<th class="sortable-th${active?" sort-active":""}" data-sort-col="${col}">${escapeHtml(label)}<span class="sort-arrow">${arrow}</span></th>`;
+}
+
+function parseCSV(text){
+  const lines = text.split(/\r?\n/).filter(l=>l.trim());
+  if(lines.length<2) return {header:[],rows:[]};
+  const parse = line => {
+    const result=[]; let cur="",inQuote=false;
+    for(let i=0;i<line.length;i++){
+      const ch=line[i];
+      if(inQuote){ if(ch==='"'&&line[i+1]==='"'){cur+='"';i++;}else if(ch==='"'){inQuote=false;}else{cur+=ch;} }
+      else{ if(ch==='"'){inQuote=true;}else if(ch===','){result.push(cur.trim());cur="";}else{cur+=ch;} }
+    }
+    result.push(cur.trim());
+    return result;
+  };
+  const header = parse(lines[0]).map(h=>h.toLowerCase().replace(/[^a-z0-9]/g,""));
+  const rows = lines.slice(1).map(parse);
+  return {header,rows};
+}
+
+function updateTabBadges(){
+  const lowEq = state.equipment.filter(needsReorder).length;
+  const lowChem = state.chemicals.filter(needsReorder).length;
+  const orderCount = lowEq + lowChem;
+  const expiredCount = state.chemicals.filter(c=>isExpiringOrExpired(c.expiry).expired).length;
+  const expiringCount = state.chemicals.filter(c=>isExpiringOrExpired(c.expiry).soon).length;
+  const damagedCount = state.equipment.filter(i=>i.condition==="Repair"||i.condition==="Replace").length;
+  const badges = {
+    "tab-equipment": damagedCount > 0 ? `<span class="tab-badge tab-badge-warn">${damagedCount}</span>` : "",
+    "tab-chemicals": expiredCount > 0 ? `<span class="tab-badge tab-badge-danger">${expiredCount}</span>` : expiringCount > 0 ? `<span class="tab-badge tab-badge-warn">${expiringCount}</span>` : "",
+    "tab-orders": orderCount > 0 ? `<span class="tab-badge tab-badge-danger">${orderCount}</span>` : "",
+  };
+  const labels = {
+    "tab-equipment":"Equipment","tab-chemicals":"Chemicals","tab-practical":"Practical Requirements",
+    "tab-stocktake":"Stocktake","tab-orders":"Orders Required","tab-reports":"Reports","tab-settings":"Settings"
+  };
+  document.querySelectorAll(".global-tab").forEach(btn=>{
+    const tab = btn.getAttribute("data-tab");
+    if(labels[tab]) btn.innerHTML = escapeHtml(labels[tab]) + (badges[tab]||"");
+  });
+}
+
+function needsReorder(item){
+  const threshold = (item.reorderAt > 0) ? item.reorderAt : item.reqQty;
+  return item.curQty < threshold;
+}
+
+/* ================================================================
+   DASHBOARD
+   ================================================================ */
+function renderDashboard(){
+  const eqCount = state.equipment.length;
+  const chemCount = state.chemicals.length;
+  const lowStockEq = state.equipment.filter(needsReorder);
+  const lowStockChem = state.chemicals.filter(needsReorder);
+  const lowStockCount = lowStockEq.length + lowStockChem.length;
+  // total units to order (sum of deficits) — distinct from item count
+  const totalUnitsNeeded = [...lowStockEq,...lowStockChem].reduce((sum,i)=>sum+(i.reqQty-i.curQty),0);
+  const damaged = state.equipment.filter(i=>i.condition==="Repair"||i.condition==="Replace").length;
+  const expiredCount = state.chemicals.filter(c=>isExpiringOrExpired(c.expiry).expired).length;
+  const expiringCount = state.chemicals.filter(c=>isExpiringOrExpired(c.expiry).soon).length;
+
+  const cards = [
+    {label:"Equipment Items", value:eqCount, sub:eqCount+" tracked types", action:"tab-equipment"},
+    {label:"Chemical Items", value:chemCount, sub:chemCount+" tracked types", action:"tab-chemicals"},
+    {label:"Low Stock Items", value:lowStockCount, cls:lowStockCount>0?"warn":"", sub:lowStockEq.length+" equip · "+lowStockChem.length+" chemical", action:"tab-orders"},
+    {label:"Total Units to Order", value:totalUnitsNeeded, cls:totalUnitsNeeded>0?"alert":"", sub:"combined deficit across all items", action:"tab-orders"},
+    {label:"Damaged / Repair", value:damaged, cls:damaged>0?"warn":"", sub:"needs attention", action:"tab-stocktake", filter:"damaged"},
+    {label:"Expired Chemicals", value:expiredCount, cls:expiredCount>0?"alert":"", sub:expiringCount+" expiring within 60 days", action:"tab-stocktake", filter:"expired"},
+  ];
+
+  document.getElementById("dashboard").innerHTML = cards.map(c=>`
+    <div class="dash-card dash-card-clickable ${c.cls||""}" data-dash-action="${c.action}" ${c.filter?`data-dash-filter="${c.filter}"`:""} role="listitem button" tabindex="0" aria-label="View ${escapeHtml(c.label)}">
+      <div class="dash-label">${escapeHtml(c.label)}</div>
+      <div class="dash-value">${c.value}</div>
+      <div class="dash-sub">${escapeHtml(c.sub)}</div>
+    </div>
+  `).join("") + `
+    <div class="dash-card" role="listitem">
+      <div class="dash-label">Last Updated</div>
+      <div class="dash-value" style="font-size:15px;line-height:1.3;margin-top:10px;">${fmtDateTime(state.lastUpdated)}</div>
+    </div>
+  `;
+  updateTabBadges();
+}
+
+function goToDashCard(el){
+  const action = el.getAttribute("data-dash-action");
+  const filter = el.getAttribute("data-dash-filter");
+  if(!action) return;
+  if(filter){ ui.stocktakeFilter = filter; saveUI(); }
+  switchTab(action);
+}
+document.getElementById("dashboard").addEventListener("click",(e)=>{
+  const card = e.target.closest("[data-dash-action]");
+  if(card) goToDashCard(card);
+});
+document.getElementById("dashboard").addEventListener("keydown",(e)=>{
+  if(e.key!=="Enter" && e.key!==" ") return;
+  const card = e.target.closest("[data-dash-action]");
+  if(card){ e.preventDefault(); goToDashCard(card); }
+});
+
+/* ================================================================
+   COLLAPSIBLE SECTIONS
+   ================================================================ */
+function isCollapsed(id){ return !!ui.collapsed[id]; }
+function toggleCollapsed(id){
+  ui.collapsed[id] = !ui.collapsed[id];
+  saveUI();
+}
+function sectionWrap(id, iconSvg, title, metaText, bodyHtml){
+  const collapsed = isCollapsed(id) ? "collapsed":"";
+  return `
+  <section class="section ${collapsed}" data-section-id="${id}">
+    <div class="section-header" data-toggle-section="${id}" aria-expanded="${!isCollapsed(id)}">
+      ${iconSvg}
+      <h2>${escapeHtml(title)}</h2>
+      <span class="section-meta">${metaText||""}</span>
+      ${ICON.chevron}
+    </div>
+    <div class="section-body">${bodyHtml}</div>
+  </section>`;
+}
+function subsectionWrap(id, title, metaText, bodyHtml, extraHeaderHtml=""){
+  const collapsed = isCollapsed(id) ? "collapsed":"";
+  return `
+  <div class="subsection ${collapsed}" data-section-id="${id}">
+    <div class="subsection-header" data-toggle-section="${id}">
+      <h3>${escapeHtml(title)}</h3>
+      <span class="subsection-meta">${metaText||""}</span>
+      ${extraHeaderHtml}
+      ${ICON.chevron}
+    </div>
+    <div class="subsection-body">${bodyHtml}</div>
+  </div>`;
+}
+document.addEventListener("click",(e)=>{
+  const header = e.target.closest("[data-toggle-section]");
+  if(header && !e.target.closest("[data-pc-delete]")){
+    toggleCollapsed(header.getAttribute("data-toggle-section"));
+    rerenderActiveTab();
+  }
+});
+
+/* ================================================================
+   EQUIPMENT TAB
+   ================================================================ */
+function getSearchQuery(){
+  return (document.getElementById("globalSearch").value||"").trim();
+}
+
+function buildSelectOptions(options, currentValue){
+  return options.map(o=>`<option value="${escapeHtml(o)}"${o===currentValue?" selected":""}>${escapeHtml(o)}</option>`).join("");
+}
+
+function renderEquipmentTab(){
+  const q = getSearchQuery();
+  const catFilter = ui.equipmentCategoryFilter;
+  let rows = state.equipment.filter(item=>matchesSearch([item.name,item.category,item.location,item.supplier,item.notes,item.condition],q));
+  if(catFilter && catFilter!=="all") rows = rows.filter(item=>item.category===catFilter);
+  rows = sortRows(rows, ui.equipmentSort.col, ui.equipmentSort.dir);
+
+  let tableRows = "";
+  if(rows.length===0){
+    tableRows = `<tr><td colspan="11">${emptyState("No equipment found", q?"Try a different search term.":"Add your first item using the button above.")}</td></tr>`;
+  }else{
+    tableRows = rows.map(item=>{
+      const shortage = needsReorder(item);
+      const damaged = item.condition==="Repair"||item.condition==="Replace";
+      return `
+      <tr class="${shortage?"row-shortage":""} ${damaged && !shortage?"row-damaged":""}" data-eq-id="${item.id}">
+        <td class="drag-col">${!ui.equipmentSort.col && ui.equipmentCategoryFilter==="all" ? '<span class="drag-handle" draggable="true" data-drag-eq>⠿</span>' : ''}</td>
+        <td><input class="cell-edit" data-eq-field="name" value="${escapeHtml(item.name)}" placeholder="Item name"></td>
+        <td><select class="cell-edit" data-eq-field="category">${buildSelectOptions(state.equipmentCategories, item.category)}</select></td>
+        <td><input class="cell-edit" type="number" min="0" data-eq-field="reqQty" value="${item.reqQty}"></td>
+        <td><input class="cell-edit" type="number" min="0" data-eq-field="reorderAt" value="${item.reorderAt||0}" style="width:64px;" title="Reorder when stock falls below this level (0 = use Required Qty)"></td>
+        <td>
+          <div class="qty-stepper">
+            <button type="button" data-eq-step="-1" aria-label="Decrease quantity">−</button>
+            <input class="cell-edit" type="number" min="0" data-eq-field="curQty" value="${item.curQty}">
+            <button type="button" data-eq-step="1" aria-label="Increase quantity">+</button>
+          </div>
+        </td>
+        <td><select class="cell-edit" data-eq-field="condition">${buildSelectOptions(CONDITIONS, item.condition)}</select></td>
+        <td><input class="cell-edit" data-eq-field="location" value="${escapeHtml(item.location)}" placeholder="Location"></td>
+        <td><input class="cell-edit" data-eq-field="supplier" value="${escapeHtml(item.supplier)}" placeholder="Supplier"></td>
+        <td><input class="cell-edit" data-eq-field="notes" value="${escapeHtml(item.notes)}" placeholder="Notes"></td>
+        <td><button class="del-row-btn" data-eq-delete title="Delete row" aria-label="Delete row">${ICON.trash}</button></td>
+      </tr>`;
+    }).join("");
+  }
+
+  const catOptions = ["all",...state.equipmentCategories].map(c=>`<option value="${escapeHtml(c)}"${c===catFilter?" selected":""}>${c==="all"?"All categories":escapeHtml(c)}</option>`).join("");
+  const body = `
+    <div class="btn-row">
+      <button class="btn btn-primary" id="addEquipmentBtn">${ICON.plus} Add equipment item</button>
+      <button class="btn" id="manageEqCategoriesBtn">Manage categories</button>
+      <select class="filter-select" id="eqCategoryFilter">${catOptions}</select>
+      <button class="btn" id="exportEqCsvBtn">${ICON.download} Export CSV</button>
+      <button class="btn" id="importEqCsvBtn">${ICON.upload} Import CSV</button>
+      <input type="file" id="importEqFileInput" accept=".csv,text/csv" class="hidden">
+      <span class="text-muted" style="font-size:12.5px;margin-left:auto;">${rows.length} of ${state.equipment.length} items shown</span>
+    </div>
+    <div class="table-scroll">
+      <table class="inv-table editable-table">
+        <thead><tr>
+          <th class="drag-col"></th>${sortableHeader("Item Name","name",ui.equipmentSort)}${sortableHeader("Category","category",ui.equipmentSort)}${sortableHeader("Required Qty","reqQty",ui.equipmentSort)}${sortableHeader("Reorder At","reorderAt",ui.equipmentSort)}${sortableHeader("Current Qty","curQty",ui.equipmentSort)}
+          ${sortableHeader("Condition","condition",ui.equipmentSort)}${sortableHeader("Storage Location","location",ui.equipmentSort)}${sortableHeader("Supplier","supplier",ui.equipmentSort)}<th>Notes</th><th></th>
+        </tr></thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    </div>
+    <p class="small-note">Rows highlighted in red are below required quantity. Amber rows need repair or replacement. Click any cell to edit — changes save automatically.</p>
+  `;
+  return sectionWrap("sec-equipment", ICON.beaker, "Laboratory Equipment", `${state.equipment.length} items`, body);
+}
+
+function bindEquipmentEvents(container){
+  const addBtn = container.querySelector("#addEquipmentBtn");
+  if(addBtn) addBtn.addEventListener("click",()=>{
+    state.equipment.unshift({id:uid("eq"),name:"",category:state.equipmentCategories[0]||"General Laboratory",reqQty:0,curQty:0,condition:"Good",location:"",supplier:"",reorderAt:0,notes:""});
+    scheduleSave(); rerenderActiveTab();
+    setTimeout(()=>{ const f=container.querySelector('tbody tr td input[data-eq-field="name"]'); if(f) f.focus(); },30);
+  });
+  const catBtn = container.querySelector("#manageEqCategoriesBtn");
+  if(catBtn) catBtn.addEventListener("click",()=>manageEqCategories());
+  const csvBtn = container.querySelector("#exportEqCsvBtn");
+  if(csvBtn) csvBtn.addEventListener("click",()=>{
+    const header = ["Name","Category","Required Qty","Reorder At","Current Qty","Condition","Location","Supplier","Notes"];
+    const rows = state.equipment.map(i=>[i.name,i.category,i.reqQty,i.reorderAt||0,i.curQty,i.condition,i.location,i.supplier,i.notes]);
+    downloadCsv("equipment-inventory.csv", header, rows);
+  });
+
+  const catFilterEl = container.querySelector("#eqCategoryFilter");
+  if(catFilterEl) catFilterEl.addEventListener("change",()=>{
+    ui.equipmentCategoryFilter = catFilterEl.value;
+    saveUI(); rerenderActiveTab();
+  });
+
+  container.querySelectorAll(".sortable-th[data-sort-col]").forEach(th=>{
+    th.addEventListener("click",()=>{
+      const col = th.getAttribute("data-sort-col");
+      if(ui.equipmentSort.col===col) ui.equipmentSort.dir = ui.equipmentSort.dir==="asc"?"desc":"asc";
+      else{ ui.equipmentSort.col=col; ui.equipmentSort.dir="asc"; }
+      saveUI(); rerenderActiveTab();
+    });
+  });
+
+  const importBtn = container.querySelector("#importEqCsvBtn");
+  const importInput = container.querySelector("#importEqFileInput");
+  if(importBtn) importBtn.addEventListener("click",()=>importInput.click());
+  if(importInput) importInput.addEventListener("change",()=>{
+    const file = importInput.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const {header,rows} = parseCSV(reader.result);
+      if(rows.length===0){ alert("No data rows found in the CSV file."); return; }
+      const colMap = {name:-1,category:-1,reqqty:-1,requiredqty:-1,reorderat:-1,curqty:-1,currentqty:-1,condition:-1,location:-1,storagelocation:-1,supplier:-1,notes:-1};
+      header.forEach((h,i)=>{ if(h in colMap) colMap[h]=i; });
+      const nameCol = colMap.name!==-1?colMap.name : header.findIndex(h=>h.includes("name"));
+      if(nameCol===-1){ alert("Could not find a 'Name' column in the CSV header."); return; }
+      let added=0;
+      rows.forEach(r=>{
+        const name = (r[nameCol]||"").trim(); if(!name) return;
+        const get = (...keys)=>{ for(const k of keys){ if(colMap[k]!==-1 && r[colMap[k]]) return r[colMap[k]].trim(); } return ""; };
+        state.equipment.push({
+          id:uid("eq"), name,
+          category: get("category") || state.equipmentCategories[0] || "General Laboratory",
+          reqQty: parseInt(get("reqqty","requiredqty"),10)||0,
+          reorderAt: parseInt(get("reorderat"),10)||0,
+          curQty: parseInt(get("curqty","currentqty"),10)||0,
+          condition: get("condition") || "Good",
+          location: get("location","storagelocation"),
+          supplier: get("supplier"),
+          notes: get("notes")
+        });
+        added++;
+      });
+      importInput.value="";
+      if(added>0){ scheduleSave(`${added} items imported`); renderDashboard(); rerenderActiveTab(); }
+      else alert("No valid rows could be imported.");
+    };
+    reader.readAsText(file);
+  });
+
+  container.querySelectorAll("[data-eq-id]").forEach(row=>{
+    const id = row.getAttribute("data-eq-id");
+    const item = state.equipment.find(i=>i.id===id);
+    if(!item) return;
+
+    row.querySelectorAll("[data-eq-field]").forEach(input=>{
+      const field = input.getAttribute("data-eq-field");
+      const handler = ()=>{
+        let val = input.value;
+        if(field==="reqQty"||field==="curQty"||field==="reorderAt"){ val = Math.max(0, parseInt(val,10)||0); input.value=val; }
+        item[field]=val;
+        scheduleSave();
+        if(field==="reqQty"||field==="curQty"||field==="reorderAt"||field==="condition"){
+          clearTimeout(input._rrTimer);
+          input._rrTimer=setTimeout(()=>{ renderDashboard(); rerenderActiveTab(true); },350);
+        }else{
+          renderDashboard();
+        }
+      };
+      input.addEventListener("input", handler);
+      input.addEventListener("change", handler);
+    });
+
+    row.querySelectorAll("[data-eq-step]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const delta = parseInt(btn.getAttribute("data-eq-step"),10);
+        item.curQty = Math.max(0, (item.curQty||0)+delta);
+        scheduleSave(); renderDashboard(); rerenderActiveTab(true);
+      });
+    });
+
+    const delBtn = row.querySelector("[data-eq-delete]");
+    if(delBtn) delBtn.addEventListener("click",()=>{
+      const idx = state.equipment.findIndex(i=>i.id===id);
+      if(idx===-1) return;
+      const removed = state.equipment.splice(idx,1)[0];
+      scheduleSave(); renderDashboard(); rerenderActiveTab();
+      showToast(`"${removed.name||"Item"}" removed`, {label:"Undo", fn:()=>{
+        state.equipment.splice(idx,0,removed);
+        scheduleSave(); renderDashboard(); rerenderActiveTab();
+        showToast("Item restored");
+      }});
+    });
+  });
+
+  // Drag-to-reorder (only when no sort or filter is active)
+  if(!ui.equipmentSort.col && ui.equipmentCategoryFilter==="all"){
+    const tbody = container.querySelector(".editable-table tbody");
+    if(tbody){
+      tbody.addEventListener("dragstart",e=>{
+        const handle = e.target.closest("[data-drag-eq]");
+        if(!handle){ e.preventDefault(); return; }
+        const tr = handle.closest("tr");
+        tr.classList.add("dragging");
+        e.dataTransfer.effectAllowed="move";
+        e.dataTransfer.setData("text/plain",tr.getAttribute("data-eq-id"));
+      });
+      tbody.addEventListener("dragend",()=>{
+        tbody.querySelectorAll("tr").forEach(r=>r.classList.remove("dragging","drag-over"));
+      });
+      tbody.addEventListener("dragover",e=>{
+        e.preventDefault();
+        const tr = e.target.closest("tr");
+        if(!tr||tr.classList.contains("dragging")) return;
+        tbody.querySelectorAll(".drag-over").forEach(r=>r.classList.remove("drag-over"));
+        tr.classList.add("drag-over");
+      });
+      tbody.addEventListener("drop",e=>{
+        e.preventDefault();
+        const dragId = e.dataTransfer.getData("text/plain");
+        const dropTr = e.target.closest("tr");
+        if(!dropTr) return;
+        const dropId = dropTr.getAttribute("data-eq-id");
+        if(!dragId||!dropId||dragId===dropId) return;
+        const arr = state.equipment;
+        const fromIdx = arr.findIndex(i=>i.id===dragId);
+        const toIdx = arr.findIndex(i=>i.id===dropId);
+        if(fromIdx===-1||toIdx===-1) return;
+        const [moved] = arr.splice(fromIdx,1);
+        arr.splice(toIdx,0,moved);
+        scheduleSave(); rerenderActiveTab();
+      });
+    }
+  }
+}
+
+function manageEqCategories(){
+  const current = state.equipmentCategories.join(", ");
+  const updated = prompt("Edit equipment categories (comma-separated):", current);
+  if(updated==null) return;
+  const list = updated.split(",").map(s=>s.trim()).filter(Boolean);
+  if(list.length===0){ alert("You need at least one category."); return; }
+  state.equipmentCategories = list;
+  scheduleSave("Categories updated");
+  rerenderActiveTab();
+}
+
+/* ================================================================
+   CHEMICALS TAB
+   ================================================================ */
+function renderChemicalsTab(){
+  const q = getSearchQuery();
+  const hazFilter = ui.chemicalsHazardFilter;
+  let rows = state.chemicals.filter(item=>matchesSearch([item.name,item.formula,item.location,item.supplier,item.notes,item.hazard,item.unit],q));
+  if(hazFilter && hazFilter!=="all") rows = rows.filter(item=>item.hazard===hazFilter);
+  rows = sortRows(rows, ui.chemicalsSort.col, ui.chemicalsSort.dir);
+
+  let tableRows = "";
+  if(rows.length===0){
+    tableRows = `<tr><td colspan="13">${emptyState("No chemicals found", q?"Try a different search term.":"Add your first chemical using the button above.")}</td></tr>`;
+  }else{
+    tableRows = rows.map(item=>{
+      const shortage = needsReorder(item);
+      const exp = isExpiringOrExpired(item.expiry);
+      let rowClass = "";
+      if(shortage) rowClass = "row-shortage";
+      else if(exp.expired) rowClass = "row-expired";
+      else if(exp.soon) rowClass = "row-expiring-soon";
+      return `
+      <tr class="${rowClass}" data-chem-id="${item.id}">
+        <td class="drag-col">${!ui.chemicalsSort.col && ui.chemicalsHazardFilter==="all" ? '<span class="drag-handle" draggable="true" data-drag-chem>⠿</span>' : ''}</td>
+        <td><input class="cell-edit" data-chem-field="name" value="${escapeHtml(item.name)}" placeholder="Chemical name"></td>
+        <td><input class="cell-edit" data-chem-field="formula" value="${escapeHtml(item.formula)}" placeholder="Formula" style="width:90px;"></td>
+        <td><div style="display:flex;align-items:center;gap:6px;">${hazardBadge(item.hazard)}<select class="cell-edit" data-chem-field="hazard" style="width:auto;font-size:11.5px;padding:3px 5px;">${buildSelectOptions(HAZARDS, item.hazard)}</select></div></td>
+        <td><input class="cell-edit" type="number" min="0" data-chem-field="reqQty" value="${item.reqQty}"></td>
+        <td><input class="cell-edit" type="number" min="0" data-chem-field="reorderAt" value="${item.reorderAt||0}" style="width:64px;" title="Reorder when stock falls below this level (0 = use Required Qty)"></td>
+        <td>
+          <div class="qty-stepper">
+            <button type="button" data-chem-step="-1" aria-label="Decrease quantity">−</button>
+            <input class="cell-edit" type="number" min="0" data-chem-field="curQty" value="${item.curQty}">
+            <button type="button" data-chem-step="1" aria-label="Increase quantity">+</button>
+          </div>
+        </td>
+        <td><input class="cell-edit" data-chem-field="unit" value="${escapeHtml(item.unit)}" placeholder="ml/g" style="width:54px;"></td>
+        <td><input class="cell-edit" data-chem-field="location" value="${escapeHtml(item.location)}" placeholder="Location"></td>
+        <td><input class="cell-edit" data-chem-field="supplier" value="${escapeHtml(item.supplier)}" placeholder="Supplier"></td>
+        <td>
+          <input class="cell-edit" type="date" data-chem-field="expiry" value="${item.expiry||""}">
+          ${exp.soon && !exp.expired ? `<span class="expiry-warn" title="Expires within 60 days">⚠ Soon</span>` : ""}
+          ${exp.expired ? `<span class="expiry-warn" style="color:var(--danger);" title="Past expiry date">✕ Expired</span>` : ""}
+        </td>
+        <td><input class="cell-edit" data-chem-field="notes" value="${escapeHtml(item.notes)}" placeholder="Notes"></td>
+        <td><button class="del-row-btn" data-chem-delete title="Delete row" aria-label="Delete row">${ICON.trash}</button></td>
+      </tr>`;
+    }).join("");
+  }
+
+  const expiringCount = state.chemicals.filter(c=>isExpiringOrExpired(c.expiry).soon).length;
+  const expiredCount = state.chemicals.filter(c=>isExpiringOrExpired(c.expiry).expired).length;
+
+  const body = `
+    <div class="btn-row">
+      <button class="btn btn-primary" id="addChemicalBtn">${ICON.plus} Add chemical</button>
+      <select class="filter-select" id="chemHazardFilter">${["all",...HAZARDS].map(h=>`<option value="${escapeHtml(h)}"${h===hazFilter?" selected":""}>${h==="all"?"All hazard levels":escapeHtml(h)}</option>`).join("")}</select>
+      <button class="btn" id="exportChemCsvBtn">${ICON.download} Export CSV</button>
+      <button class="btn" id="importChemCsvBtn">${ICON.upload} Import CSV</button>
+      <input type="file" id="importChemFileInput" accept=".csv,text/csv" class="hidden">
+      <span class="text-muted" style="font-size:12.5px;margin-left:auto;">${rows.length} of ${state.chemicals.length} shown${expiredCount>0?` · <strong style="color:var(--danger)">${expiredCount} expired</strong>`:""}${expiringCount>0?` · <span style="color:var(--warn)">${expiringCount} expiring soon</span>`:""}</span>
+    </div>
+    <div class="table-scroll">
+      <table class="inv-table editable-table">
+        <thead><tr>
+          <th class="drag-col"></th>${sortableHeader("Chemical","name",ui.chemicalsSort)}${sortableHeader("Formula","formula",ui.chemicalsSort)}${sortableHeader("Hazard","hazard",ui.chemicalsSort)}${sortableHeader("Required Qty","reqQty",ui.chemicalsSort)}${sortableHeader("Reorder At","reorderAt",ui.chemicalsSort)}${sortableHeader("Current Qty","curQty",ui.chemicalsSort)}
+          <th>Unit</th>${sortableHeader("Storage Location","location",ui.chemicalsSort)}${sortableHeader("Supplier","supplier",ui.chemicalsSort)}${sortableHeader("Expiry Date","expiry",ui.chemicalsSort)}<th>Notes</th><th></th>
+        </tr></thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    </div>
+    <p class="small-note">Red = below required quantity. Orange = expired. Yellow = expiring within 60 days. All changes save automatically.</p>
+  `;
+  return sectionWrap("sec-chemicals", ICON.flask, "Chemicals", `${state.chemicals.length} items`, body);
+}
+
+function bindChemicalsEvents(container){
+  const addBtn = container.querySelector("#addChemicalBtn");
+  if(addBtn) addBtn.addEventListener("click",()=>{
+    state.chemicals.unshift({id:uid("chem"),name:"",formula:"",hazard:"Low",reqQty:0,curQty:0,unit:"ml",location:"",supplier:"",expiry:"",reorderAt:0,notes:""});
+    scheduleSave(); rerenderActiveTab();
+    setTimeout(()=>{ const f=container.querySelector('tbody tr td input[data-chem-field="name"]'); if(f) f.focus(); },30);
+  });
+  const csvBtn = container.querySelector("#exportChemCsvBtn");
+  if(csvBtn) csvBtn.addEventListener("click",()=>{
+    const header = ["Name","Formula","Hazard","Required Qty","Reorder At","Current Qty","Unit","Location","Supplier","Expiry","Notes"];
+    const rows = state.chemicals.map(i=>[i.name,i.formula,i.hazard,i.reqQty,i.reorderAt||0,i.curQty,i.unit,i.location,i.supplier,i.expiry,i.notes]);
+    downloadCsv("chemical-inventory.csv", header, rows);
+  });
+
+  const hazFilterEl = container.querySelector("#chemHazardFilter");
+  if(hazFilterEl) hazFilterEl.addEventListener("change",()=>{
+    ui.chemicalsHazardFilter = hazFilterEl.value;
+    saveUI(); rerenderActiveTab();
+  });
+
+  container.querySelectorAll(".sortable-th[data-sort-col]").forEach(th=>{
+    th.addEventListener("click",()=>{
+      const col = th.getAttribute("data-sort-col");
+      if(ui.chemicalsSort.col===col) ui.chemicalsSort.dir = ui.chemicalsSort.dir==="asc"?"desc":"asc";
+      else{ ui.chemicalsSort.col=col; ui.chemicalsSort.dir="asc"; }
+      saveUI(); rerenderActiveTab();
+    });
+  });
+
+  const importBtn = container.querySelector("#importChemCsvBtn");
+  const importInput = container.querySelector("#importChemFileInput");
+  if(importBtn) importBtn.addEventListener("click",()=>importInput.click());
+  if(importInput) importInput.addEventListener("change",()=>{
+    const file = importInput.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      const {header,rows} = parseCSV(reader.result);
+      if(rows.length===0){ alert("No data rows found in the CSV file."); return; }
+      const colMap = {name:-1,chemical:-1,formula:-1,hazard:-1,reqqty:-1,requiredqty:-1,reorderat:-1,curqty:-1,currentqty:-1,unit:-1,location:-1,storagelocation:-1,supplier:-1,expiry:-1,expirydate:-1,notes:-1};
+      header.forEach((h,i)=>{ if(h in colMap) colMap[h]=i; });
+      const nameCol = colMap.name!==-1?colMap.name : colMap.chemical!==-1?colMap.chemical : header.findIndex(h=>h.includes("name")||h.includes("chemical"));
+      if(nameCol===-1){ alert("Could not find a 'Name' or 'Chemical' column in the CSV header."); return; }
+      let added=0;
+      rows.forEach(r=>{
+        const name = (r[nameCol]||"").trim(); if(!name) return;
+        const get = (...keys)=>{ for(const k of keys){ if(colMap[k]!==-1 && r[colMap[k]]) return r[colMap[k]].trim(); } return ""; };
+        state.chemicals.push({
+          id:uid("chem"), name,
+          formula: get("formula"),
+          hazard: get("hazard") || "Low",
+          reqQty: parseInt(get("reqqty","requiredqty"),10)||0,
+          reorderAt: parseInt(get("reorderat"),10)||0,
+          curQty: parseInt(get("curqty","currentqty"),10)||0,
+          unit: get("unit") || "ml",
+          location: get("location","storagelocation"),
+          supplier: get("supplier"),
+          expiry: get("expiry","expirydate"),
+          notes: get("notes")
+        });
+        added++;
+      });
+      importInput.value="";
+      if(added>0){ scheduleSave(`${added} chemicals imported`); renderDashboard(); rerenderActiveTab(); }
+      else alert("No valid rows could be imported.");
+    };
+    reader.readAsText(file);
+  });
+
+  container.querySelectorAll("[data-chem-id]").forEach(row=>{
+    const id = row.getAttribute("data-chem-id");
+    const item = state.chemicals.find(i=>i.id===id);
+    if(!item) return;
+
+    row.querySelectorAll("[data-chem-field]").forEach(input=>{
+      const field = input.getAttribute("data-chem-field");
+      const handler = ()=>{
+        let val = input.value;
+        if(field==="reqQty"||field==="curQty"||field==="reorderAt"){ val = Math.max(0, parseInt(val,10)||0); input.value=val; }
+        item[field]=val;
+        scheduleSave();
+        if(field==="reqQty"||field==="curQty"||field==="reorderAt"||field==="expiry"){
+          clearTimeout(input._rrTimer);
+          input._rrTimer=setTimeout(()=>{ renderDashboard(); rerenderActiveTab(true); },350);
+        }else if(field==="hazard"){
+          const pill=input.closest("td").querySelector(".hazard-pill");
+          if(pill){ pill.className="hazard-pill hazard-"+val.toLowerCase().replace(/[^a-z]/g,""); pill.textContent=val; }
+          renderDashboard();
+        }else{
+          renderDashboard();
+        }
+      };
+      input.addEventListener("input", handler);
+      input.addEventListener("change", handler);
+    });
+
+    row.querySelectorAll("[data-chem-step]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const delta = parseInt(btn.getAttribute("data-chem-step"),10);
+        item.curQty = Math.max(0, (item.curQty||0)+delta);
+        scheduleSave(); renderDashboard(); rerenderActiveTab(true);
+      });
+    });
+
+    const delBtn = row.querySelector("[data-chem-delete]");
+    if(delBtn) delBtn.addEventListener("click",()=>{
+      const idx = state.chemicals.findIndex(i=>i.id===id);
+      if(idx===-1) return;
+      const removed = state.chemicals.splice(idx,1)[0];
+      scheduleSave(); renderDashboard(); rerenderActiveTab();
+      showToast(`"${removed.name||"Chemical"}" removed`, {label:"Undo", fn:()=>{
+        state.chemicals.splice(idx,0,removed);
+        scheduleSave(); renderDashboard(); rerenderActiveTab();
+        showToast("Item restored");
+      }});
+    });
+  });
+
+  // Drag-to-reorder (only when no sort or filter is active)
+  if(!ui.chemicalsSort.col && ui.chemicalsHazardFilter==="all"){
+    const tbody = container.querySelector(".editable-table tbody");
+    if(tbody){
+      tbody.addEventListener("dragstart",e=>{
+        const handle = e.target.closest("[data-drag-chem]");
+        if(!handle){ e.preventDefault(); return; }
+        const tr = handle.closest("tr");
+        tr.classList.add("dragging");
+        e.dataTransfer.effectAllowed="move";
+        e.dataTransfer.setData("text/plain",tr.getAttribute("data-chem-id"));
+      });
+      tbody.addEventListener("dragend",()=>{
+        tbody.querySelectorAll("tr").forEach(r=>r.classList.remove("dragging","drag-over"));
+      });
+      tbody.addEventListener("dragover",e=>{
+        e.preventDefault();
+        const tr = e.target.closest("tr");
+        if(!tr||tr.classList.contains("dragging")) return;
+        tbody.querySelectorAll(".drag-over").forEach(r=>r.classList.remove("drag-over"));
+        tr.classList.add("drag-over");
+      });
+      tbody.addEventListener("drop",e=>{
+        e.preventDefault();
+        const dragId = e.dataTransfer.getData("text/plain");
+        const dropTr = e.target.closest("tr");
+        if(!dropTr) return;
+        const dropId = dropTr.getAttribute("data-chem-id");
+        if(!dragId||!dropId||dragId===dropId) return;
+        const arr = state.chemicals;
+        const fromIdx = arr.findIndex(i=>i.id===dragId);
+        const toIdx = arr.findIndex(i=>i.id===dropId);
+        if(fromIdx===-1||toIdx===-1) return;
+        const [moved] = arr.splice(fromIdx,1);
+        arr.splice(toIdx,0,moved);
+        scheduleSave(); rerenderActiveTab();
+      });
+    }
+  }
+}
+
+/* ================================================================
+   PRACTICAL TAB
+   ================================================================ */
+function renderPracticalTab(){
+  const q = getSearchQuery();
+  const cats = state.practical.filter(c=>matchesSearch([c.name,c.notes],q));
+
+  const addBtn = `
+    <div class="btn-row" style="margin-bottom:14px;">
+      <button class="btn btn-primary" id="addPracticalCatBtn">${ICON.plus} Add practical category</button>
+    </div>`;
+
+  let body;
+  if(cats.length===0){
+    body = addBtn + emptyState("No practical categories found", q?"Try a different search term.":"Add your first category above.");
+  }else{
+    const readyCount = state.practical.filter(p=>p.readyForExam).length;
+    body = addBtn + `<p class="small-note" style="margin-bottom:12px;">${readyCount} of ${state.practical.length} categories marked exam-ready.</p>` +
+      cats.map(c=>{
+        const checked = [c.equipmentAvailable,c.consumablesAvailable,c.readyForExam].filter(Boolean).length;
+        const meta = c.readyForExam ? `<span class="badge badge-excellent">Exam ready</span>` : `${checked}/3 checked`;
+        const inner = `
+          <div class="checklist-grid">
+            <label class="checklist-row"><input type="checkbox" data-pc-field="equipmentAvailable" ${c.equipmentAvailable?"checked":""}> Equipment available</label>
+            <label class="checklist-row"><input type="checkbox" data-pc-field="consumablesAvailable" ${c.consumablesAvailable?"checked":""}> Consumables available</label>
+            <label class="checklist-row"><input type="checkbox" data-pc-field="readyForExam" ${c.readyForExam?"checked":""}> Ready for examination</label>
+          </div>
+          <div class="field" style="margin-top:6px;">
+            <label>Teacher notes</label>
+            <textarea class="notes-area" data-pc-field="notes" placeholder="Add notes…">${escapeHtml(c.notes)}</textarea>
+          </div>
+        `;
+        const deleteBtn = `<button class="pc-delete-btn" data-pc-delete title="Delete category" aria-label="Delete category">Delete</button>`;
+        return `<div data-pc-id="${c.id}">${subsectionWrap("pc-"+c.id, c.name, meta, inner, deleteBtn)}</div>`;
+      }).join("");
+  }
+
+  return sectionWrap("sec-practical", ICON.clipboard, "Cambridge Practical Requirements", `${state.practical.length} categories`, body);
+}
+
+function bindPracticalEvents(container){
+  const addBtn = container.querySelector("#addPracticalCatBtn");
+  if(addBtn) addBtn.addEventListener("click",()=>{
+    const name = prompt("New practical category name:");
+    if(!name || !name.trim()) return;
+    state.practical.push({id:uid("pc"),name:name.trim(),equipmentAvailable:false,consumablesAvailable:false,readyForExam:false,notes:""});
+    scheduleSave("Category added"); rerenderActiveTab();
+  });
+
+  container.querySelectorAll("[data-pc-id]").forEach(wrap=>{
+    const id = wrap.getAttribute("data-pc-id");
+    const item = state.practical.find(c=>c.id===id);
+    if(!item) return;
+
+    // delete button is inside subsection-header — prevent toggle from firing
+    const delBtn = wrap.querySelector("[data-pc-delete]");
+    if(delBtn) delBtn.addEventListener("click",(e)=>{
+      e.stopPropagation();
+      if(confirm(`Delete practical category "${item.name}"? This cannot be undone.`)){
+        state.practical = state.practical.filter(c=>c.id!==id);
+        scheduleSave("Category deleted"); rerenderActiveTab();
+      }
+    });
+
+    wrap.querySelectorAll("[data-pc-field]").forEach(input=>{
+      const field = input.getAttribute("data-pc-field");
+      const handler = ()=>{
+        if(input.type==="checkbox") item[field]=input.checked;
+        else item[field]=input.value;
+        scheduleSave();
+        if(input.type==="checkbox") rerenderActiveTab(true);
+      };
+      input.addEventListener("change", handler);
+      input.addEventListener("input", handler);
+    });
+  });
+}
+
+/* ================================================================
+   STOCKTAKE TAB
+   ================================================================ */
+function renderStocktakeTab(){
+  const q = getSearchQuery();
+  const filter = ui.stocktakeFilter;
+
+  const eqItems = state.equipment.map(i=>({...i,_type:"equipment"}));
+  const chemItems = state.chemicals.map(i=>({...i,_type:"chemical"}));
+  let all = [...eqItems,...chemItems].filter(i=>matchesSearch([i.name,i.location,i.supplier,i.category||i.formula],q));
+
+  all = all.filter(i=>{
+    const shortage = needsReorder(i);
+    const damaged = i._type==="equipment" && (i.condition==="Repair"||i.condition==="Replace");
+    const expired = i._type==="chemical" && isExpiringOrExpired(i.expiry).expired;
+    const soon = i._type==="chemical" && isExpiringOrExpired(i.expiry).soon;
+    if(filter==="shortage") return shortage;
+    if(filter==="damaged") return damaged;
+    if(filter==="expired") return expired;
+    if(filter==="expiring") return soon;
+    return true;
+  });
+
+  const chips = [
+    {key:"all",label:"All items"},
+    {key:"shortage",label:"Shortages"},
+    {key:"damaged",label:"Damaged"},
+    {key:"expired",label:"Expired chemicals"},
+    {key:"expiring",label:"Expiring soon"},
+  ].map(c=>`<button class="filter-chip ${ui.stocktakeFilter===c.key?"active":""}" data-stocktake-filter="${c.key}">${c.label}</button>`).join("");
+
+  let list;
+  if(all.length===0){
+    list = emptyState("No items match this view","Try a different filter or search term.");
+  }else{
+    list = `<div class="stocktake-list">` + all.map(i=>{
+      const shortage = needsReorder(i);
+      const damaged = i._type==="equipment" && (i.condition==="Repair"||i.condition==="Replace");
+      const expired = i._type==="chemical" && isExpiringOrExpired(i.expiry).expired;
+      const soon = i._type==="chemical" && isExpiringOrExpired(i.expiry).soon;
+      let badge = "";
+      if(shortage) badge = `<span class="badge badge-replace">Shortage</span>`;
+      else if(damaged) badge = `<span class="badge badge-fair">${escapeHtml(i.condition)}</span>`;
+      else if(expired) badge = `<span class="badge badge-high">Expired</span>`;
+      else if(soon) badge = `<span class="badge badge-soon">Expiring soon</span>`;
+      const rowClass = shortage?"row-shortage":soon&&!expired?"row-expiring-soon":"";
+      return `
+      <div class="stocktake-item ${rowClass}" data-st-id="${i.id}" data-st-type="${i._type}">
+        <span class="st-name">${escapeHtml(i.name||"(unnamed)")}</span>
+        <span class="st-loc">${escapeHtml(i.location||"—")}</span>
+        ${badge}
+        <div class="qty-stepper">
+          <button type="button" data-st-step="-1" aria-label="Decrease quantity">−</button>
+          <input class="cell-edit" type="number" min="0" data-st-field="curQty" value="${i.curQty}">
+          <button type="button" data-st-step="1" aria-label="Increase quantity">+</button>
+        </div>
+        <span class="text-muted" style="font-size:12px;">/ ${i.reqQty} required</span>
+        ${stockBar(i.curQty, i.reqQty)}
+      </div>`;
+    }).join("") + `</div>`;
+  }
+
+  const body = `
+    <div class="stocktake-toolbar">${chips}</div>
+    ${list}
+    <p class="small-note">Use the search bar above to find items quickly. All changes save automatically.</p>
+  `;
+  return sectionWrap("sec-stocktake", ICON.list, "Stocktake", `${all.length} items in view`, body);
+}
+
+function bindStocktakeEvents(container){
+  container.querySelectorAll("[data-stocktake-filter]").forEach(btn=>{
+    btn.addEventListener("click",()=>{
+      ui.stocktakeFilter = btn.getAttribute("data-stocktake-filter");
+      saveUI(); rerenderActiveTab();
+    });
+  });
+  container.querySelectorAll("[data-st-id]").forEach(row=>{
+    const id = row.getAttribute("data-st-id");
+    const type = row.getAttribute("data-st-type");
+    const arr = type==="equipment" ? state.equipment : state.chemicals;
+    const item = arr.find(i=>i.id===id);
+    if(!item) return;
+    const input = row.querySelector('[data-st-field="curQty"]');
+    const commit = (val)=>{
+      item.curQty = Math.max(0, val);
+      scheduleSave(); renderDashboard(); rerenderActiveTab(true);
+    };
+    input.addEventListener("change",()=>commit(parseInt(input.value,10)||0));
+    row.querySelectorAll("[data-st-step]").forEach(btn=>{
+      btn.addEventListener("click",()=>commit((item.curQty||0)+parseInt(btn.getAttribute("data-st-step"),10)));
+    });
+  });
+}
+
+/* ================================================================
+   ORDERS TAB
+   ================================================================ */
+function getOrderList(){
+  const eq = state.equipment.filter(needsReorder).map(i=>({
+    name:i.name, category:i.category, required:i.reqQty, current:i.curQty, order:i.reqQty-i.curQty, type:"Equipment", unit:""
+  }));
+  const chem = state.chemicals.filter(needsReorder).map(i=>({
+    name:i.name, category:i.hazard+" hazard", required:i.reqQty, current:i.curQty, order:i.reqQty-i.curQty, type:"Chemical", unit:i.unit
+  }));
+  return [...eq,...chem];
+}
+
+function renderOrdersTab(){
+  const q = getSearchQuery();
+  const orders = getOrderList().filter(o=>matchesSearch([o.name,o.category,o.type],q));
+
+  let tableRows;
+  if(orders.length===0){
+    tableRows = `<tr><td colspan="5">${emptyState("Nothing to order", "All tracked items currently meet their required quantity.")}</td></tr>`;
+  }else{
+    tableRows = orders.map(o=>`
+      <tr>
+        <td>${escapeHtml(o.name||"(unnamed)")}<div class="text-muted" style="font-size:11.5px;">${escapeHtml(o.type)} — ${escapeHtml(o.category)}</div></td>
+        <td>${o.required}${o.unit?" "+escapeHtml(o.unit):""}</td>
+        <td>${o.current}${o.unit?" "+escapeHtml(o.unit):""}</td>
+        <td><strong>${o.order}${o.unit?" "+escapeHtml(o.unit):""}</strong></td>
+        <td>${escapeHtml(o.type)}</td>
+      </tr>`).join("");
+  }
+
+  const body = `
+    <div class="btn-row">
+      <button class="btn" id="exportOrdersCsvBtn">${ICON.download} Export CSV</button>
+      <button class="btn" id="printOrdersBtn">${ICON.printer} Print order list</button>
+      <span class="text-muted" style="font-size:12.5px;margin-left:auto;">${orders.length} items · ${orders.reduce((s,o)=>s+o.order,0)} total units needed</span>
+    </div>
+    <div class="table-scroll">
+      <table class="inv-table">
+        <thead><tr><th>Item</th><th>Required</th><th>Current</th><th>Order Amount</th><th>Type</th></tr></thead>
+        <tbody>${tableRows}</tbody>
+      </table>
+    </div>
+    <p class="small-note">Generated automatically from items where current quantity is below required quantity.</p>
+  `;
+  return sectionWrap("sec-orders", ICON.cart, "Orders Required", `${orders.length} items`, body);
+}
+
+function bindOrdersEvents(container){
+  const csvBtn = container.querySelector("#exportOrdersCsvBtn");
+  if(csvBtn) csvBtn.addEventListener("click",()=>{
+    const orders = getOrderList();
+    downloadCsv("order-list.csv",
+      ["Item","Type","Category","Required","Current","Order Amount","Unit"],
+      orders.map(o=>[o.name,o.type,o.category,o.required,o.current,o.order,o.unit])
+    );
+  });
+  const printBtn = container.querySelector("#printOrdersBtn");
+  if(printBtn) printBtn.addEventListener("click",()=>window.print());
+}
+
+/* ================================================================
+   REPORTS TAB
+   ================================================================ */
+function renderReportsTab(){
+  const eqLow = state.equipment.filter(needsReorder);
+  const chemLow = state.chemicals.filter(needsReorder);
+  const chemExpired = state.chemicals.filter(c=>isExpiringOrExpired(c.expiry).expired);
+  const chemExpiring = state.chemicals.filter(c=>isExpiringOrExpired(c.expiry).soon);
+  const eqDamaged = state.equipment.filter(i=>i.condition==="Repair"||i.condition==="Replace");
+
+  const body = `
+    <div class="btn-row">
+      <button class="btn" id="exportJsonBtn">${ICON.download} Export JSON backup</button>
+      <button class="btn" id="exportCsvAllBtn">${ICON.download} Export full CSV</button>
+      <button class="btn" id="printReportBtn">${ICON.printer} Print report</button>
+    </div>
+
+    <div class="report-block">
+      <h3>Inventory Summary</h3>
+      <div class="report-grid">
+        <div class="report-stat"><div class="rs-val">${state.equipment.length}</div><div class="rs-label">Equipment types</div></div>
+        <div class="report-stat"><div class="rs-val">${state.chemicals.length}</div><div class="rs-label">Chemical types</div></div>
+        <div class="report-stat"><div class="rs-val">${eqLow.length+chemLow.length}</div><div class="rs-label">Items below required qty</div></div>
+        <div class="report-stat"><div class="rs-val">${chemExpired.length}</div><div class="rs-label">Expired chemicals</div></div>
+        <div class="report-stat"><div class="rs-val">${chemExpiring.length}</div><div class="rs-label">Expiring within 60 days</div></div>
+        <div class="report-stat"><div class="rs-val">${state.practical.filter(p=>p.readyForExam).length}/${state.practical.length}</div><div class="rs-label">Practical categories exam-ready</div></div>
+      </div>
+    </div>
+
+    <div class="report-block">
+      <h3>Equipment — Condition Breakdown</h3>
+      <div class="report-grid">
+        ${CONDITIONS.map(c=>{const n=state.equipment.filter(i=>i.condition===c).length;return`<div class="report-stat"><div class="rs-val">${n}</div><div class="rs-label">${c}</div></div>`;}).join("")}
+      </div>
+      ${(()=>{
+        const vals=CONDITIONS.map(c=>state.equipment.filter(i=>i.condition===c).length);
+        const max=Math.max(...vals,1);
+        const dangerCls=c=>c==="Repair"||c==="Replace"?"danger":c==="Fair"?"warn":"";
+        return`<div class="mini-chart">${CONDITIONS.map((c,i)=>{
+          const h=Math.round((vals[i]/max)*52);
+          return`<div class="mini-bar-wrap">
+            <div class="mini-bar-val">${vals[i]}</div>
+            <div class="mini-bar ${dangerCls(c)}" style="height:${h}px"></div>
+            <div class="mini-bar-label">${c}</div>
+          </div>`;
+        }).join("")}</div>`;
+      })()}
+    </div>
+
+    <div class="report-block">
+      <h3>Chemicals — Hazard Breakdown</h3>
+      <div class="report-grid">
+        ${HAZARDS.map(h=>{const n=state.chemicals.filter(i=>i.hazard===h).length;return`<div class="report-stat"><div class="rs-val">${n}</div><div class="rs-label">${hazardBadge(h)}</div></div>`;}).join("")}
+      </div>
+      ${(()=>{
+        const vals=HAZARDS.map(h=>state.chemicals.filter(i=>i.hazard===h).length);
+        const max=Math.max(...vals,1);
+        const cls=h=>h==="High"||h==="Controlled"?"danger":h==="Moderate"?"warn":"";
+        return`<div class="mini-chart">${HAZARDS.map((h,i)=>{
+          const ht=Math.round((vals[i]/max)*52);
+          return`<div class="mini-bar-wrap">
+            <div class="mini-bar-val">${vals[i]}</div>
+            <div class="mini-bar ${cls(h)}" style="height:${ht}px"></div>
+            <div class="mini-bar-label">${h}</div>
+          </div>`;
+        }).join("")}</div>`;
+      })()}
+    </div>
+
+    <div class="report-block">
+      <h3>Low Stock Report</h3>
+      ${eqLow.length+chemLow.length===0 ? `<p class="text-muted">No items currently below required quantity.</p>` : `
+      <div class="table-scroll"><table class="inv-table">
+        <thead><tr><th>Item</th><th>Type</th><th>Required</th><th>Current</th><th>Deficit</th></tr></thead>
+        <tbody>
+          ${eqLow.map(i=>`<tr><td>${escapeHtml(i.name)}</td><td>Equipment</td><td>${i.reqQty}</td><td>${i.curQty}</td><td>${i.reqQty-i.curQty}</td></tr>`).join("")}
+          ${chemLow.map(i=>`<tr><td>${escapeHtml(i.name)}</td><td>Chemical</td><td>${i.reqQty}</td><td>${i.curQty}</td><td>${i.reqQty-i.curQty}</td></tr>`).join("")}
+        </tbody>
+      </table></div>`}
+    </div>
+
+    ${chemExpired.length>0||chemExpiring.length>0 ? `
+    <div class="report-block">
+      <h3>Chemical Expiry Report</h3>
+      <div class="table-scroll"><table class="inv-table">
+        <thead><tr><th>Chemical</th><th>Expiry Date</th><th>Status</th><th>Location</th></tr></thead>
+        <tbody>
+          ${chemExpired.map(i=>`<tr class="row-expired"><td>${escapeHtml(i.name)}</td><td>${escapeHtml(i.expiry)}</td><td><span class="badge badge-high">Expired</span></td><td>${escapeHtml(i.location)}</td></tr>`).join("")}
+          ${chemExpiring.map(i=>`<tr class="row-expiring-soon"><td>${escapeHtml(i.name)}</td><td>${escapeHtml(i.expiry)}</td><td><span class="badge badge-soon">Expiring soon</span></td><td>${escapeHtml(i.location)}</td></tr>`).join("")}
+        </tbody>
+      </table></div>
+    </div>` : ""}
+
+    ${eqDamaged.length>0 ? `
+    <div class="report-block">
+      <h3>Equipment Needing Attention</h3>
+      <div class="table-scroll"><table class="inv-table">
+        <thead><tr><th>Item</th><th>Condition</th><th>Location</th></tr></thead>
+        <tbody>${eqDamaged.map(i=>`<tr><td>${escapeHtml(i.name)}</td><td>${conditionBadge(i.condition)}</td><td>${escapeHtml(i.location)}</td></tr>`).join("")}</tbody>
+      </table></div>
+    </div>` : ""}
+
+    ${renderExpiryCalendar()}
+
+    <p class="small-note">Reports reflect live data and print cleanly on A4.</p>
+  `;
+  return sectionWrap("sec-reports", ICON.bar, "Reports", "", body);
+}
+
+function renderExpiryCalendar(){
+  const month = ui.calendarMonth;
+  const year = ui.calendarYear;
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month+1, 0);
+  const startDow = firstDay.getDay();
+  const daysInMonth = lastDay.getDate();
+  const today = new Date();
+  const todayStr = today.getFullYear()+"-"+String(today.getMonth()+1).padStart(2,"0")+"-"+String(today.getDate()).padStart(2,"0");
+  const monthNames = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+
+  const expiryMap = {};
+  state.chemicals.forEach(c=>{
+    if(!c.expiry) return;
+    const parts = c.expiry.split("-");
+    if(parts.length<3) return;
+    const ey = parseInt(parts[0],10), em = parseInt(parts[1],10)-1;
+    if(ey===year && em===month){
+      const day = parseInt(parts[2],10);
+      if(!expiryMap[day]) expiryMap[day]=[];
+      const exp = isExpiringOrExpired(c.expiry);
+      const cls = exp.expired?"expired":exp.soon?"expiring":"ok";
+      expiryMap[day].push({name:c.name, cls});
+    }
+  });
+
+  const dayHeaders = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].map(d=>`<div class="calendar-day-header">${d}</div>`).join("");
+  let cells = "";
+  for(let i=0;i<startDow;i++) cells += `<div class="calendar-day empty"></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr = year+"-"+String(month+1).padStart(2,"0")+"-"+String(d).padStart(2,"0");
+    const isToday = dateStr===todayStr;
+    const items = expiryMap[d]||[];
+    const itemsHtml = items.map(i=>`<div class="calendar-item ${i.cls}" title="${escapeHtml(i.name)}">${escapeHtml(i.name)}</div>`).join("");
+    cells += `<div class="calendar-day${isToday?" today":""}"><div class="day-num">${d}</div><div class="calendar-day-items">${itemsHtml}</div></div>`;
+  }
+
+  return `
+    <div class="report-block">
+      <h3>Chemical Expiry Calendar</h3>
+      <div class="calendar-nav">
+        <button class="btn" id="calPrevBtn" style="padding:4px 10px;">&laquo; Prev</button>
+        <h3>${monthNames[month]} ${year}</h3>
+        <button class="btn" id="calNextBtn" style="padding:4px 10px;">Next &raquo;</button>
+      </div>
+      <div class="calendar-grid">
+        ${dayHeaders}
+        ${cells}
+      </div>
+      <p class="small-note" style="margin-top:8px;"><span style="color:var(--danger);">&#9632;</span> Expired &nbsp; <span style="color:var(--warn);">&#9632;</span> Expiring within 60 days &nbsp; <span style="color:var(--ok);">&#9632;</span> OK</p>
+    </div>`;
+}
+
+function bindReportsEvents(container){
+  container.querySelector("#exportJsonBtn")?.addEventListener("click",()=>{
+    const blob = new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href=url; a.download="newberry-house-inventory-backup.json";
+    document.body.appendChild(a); a.click(); a.remove();
+    URL.revokeObjectURL(url);
+    showToast("Backup downloaded");
+  });
+  container.querySelector("#exportCsvAllBtn")?.addEventListener("click",()=>{
+    downloadCsv("newberry-house-full-inventory.csv",
+      ["Type","Name","Category/Formula","Required","Reorder At","Current","Unit/Condition","Location","Supplier","Notes"],
+      [
+        ...state.equipment.map(i=>["Equipment",i.name,i.category,i.reqQty,i.reorderAt||0,i.curQty,i.condition,i.location,i.supplier,i.notes]),
+        ...state.chemicals.map(i=>["Chemical",i.name,i.formula,i.reqQty,i.reorderAt||0,i.curQty,i.unit,i.location,i.supplier,i.notes]),
+      ]
+    );
+  });
+  container.querySelector("#printReportBtn")?.addEventListener("click",()=>window.print());
+  container.querySelector("#calPrevBtn")?.addEventListener("click",()=>{
+    ui.calendarMonth--;
+    if(ui.calendarMonth<0){ ui.calendarMonth=11; ui.calendarYear--; }
+    saveUI(); rerenderActiveTab();
+  });
+  container.querySelector("#calNextBtn")?.addEventListener("click",()=>{
+    ui.calendarMonth++;
+    if(ui.calendarMonth>11){ ui.calendarMonth=0; ui.calendarYear++; }
+    saveUI(); rerenderActiveTab();
+  });
+}
+
+/* ================================================================
+   SETTINGS TAB
+   ================================================================ */
+function renderSettingsTab(){
+  const s = state.settings;
+  const body = `
+    <div class="form-grid">
+      <div class="field">
+        <label for="setSchoolName">School Name</label>
+        <input type="text" id="setSchoolName" value="${escapeHtml(s.schoolName)}">
+      </div>
+      <div class="field">
+        <label for="setTeacherName">Teacher Name</label>
+        <input type="text" id="setTeacherName" value="${escapeHtml(s.teacherName)}" placeholder="e.g. Dr. A. Patel">
+      </div>
+      <div class="field">
+        <label for="setLabName">Laboratory Name</label>
+        <input type="text" id="setLabName" value="${escapeHtml(s.labName)}">
+      </div>
+      <div class="field">
+        <label for="setAcademicYear">Academic Year</label>
+        <input type="text" id="setAcademicYear" value="${escapeHtml(s.academicYear)}">
+      </div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--surface-border);margin:22px 0;">
+    <h3 style="font-size:14.5px;margin-bottom:10px;">Data Management</h3>
+    <div class="btn-row">
+      <button class="btn" id="backupDataBtn">${ICON.download} Backup data (JSON)</button>
+      <button class="btn" id="restoreDataBtn">${ICON.upload} Restore from backup</button>
+      <input type="file" id="restoreFileInput" accept="application/json" class="hidden">
+      <button class="btn btn-danger" id="clearDemoBtn">${ICON.trash} Clear all data</button>
+    </div>
+    <p class="help-text">Backup downloads a complete JSON snapshot. Restore replaces all current data with a saved backup. Clearing removes all items but keeps settings.</p>
+  `;
+  return sectionWrap("sec-settings", ICON.gear, "Settings", "", body);
+}
+
+function bindSettingsEvents(container){
+  const map = {setSchoolName:"schoolName",setTeacherName:"teacherName",setLabName:"labName",setAcademicYear:"academicYear"};
+  Object.keys(map).forEach(elId=>{
+    const el = container.querySelector("#"+elId);
+    if(!el) return;
+    el.addEventListener("input",()=>{ state.settings[map[elId]]=el.value; scheduleSave(); });
+  });
+
+  container.querySelector("#backupDataBtn")?.addEventListener("click",()=>{
+    const blob = new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a"); a.href=url; a.download="newberry-house-inventory-backup.json";
+    document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+    showToast("Backup downloaded");
+  });
+
+  const restoreBtn = container.querySelector("#restoreDataBtn");
+  const fileInput = container.querySelector("#restoreFileInput");
+  restoreBtn?.addEventListener("click",()=>fileInput.click());
+  fileInput?.addEventListener("change",()=>{
+    const file = fileInput.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ()=>{
+      try{
+        const parsed = JSON.parse(reader.result);
+        if(!parsed.equipment || !parsed.chemicals){ alert("This file doesn't look like a valid inventory backup."); return; }
+        if(confirm("Restoring will replace all current data. Continue?")){
+          state = mergeDefaults(parsed); saveState(); renderDashboard(); rerenderActiveTab();
+          showToast("Data restored from backup");
+        }
+      }catch(e){ alert("Could not read this file as JSON."); }
+      fileInput.value="";
+    };
+    reader.readAsText(file);
+  });
+
+  container.querySelector("#clearDemoBtn")?.addEventListener("click",()=>{
+    if(confirm("This will remove ALL equipment and chemical items. Your settings will be kept. Continue?")){
+      state.equipment=[]; state.chemicals=[]; state.practical=seedPracticalCategories();
+      scheduleSave("All items cleared"); renderDashboard(); rerenderActiveTab();
+    }
+  });
+}
+
+/* ================================================================
+   SHARED UTILITY
+   ================================================================ */
+function downloadCsv(filename, header, rows){
+  const esc = v => { const s=String(v==null?"":v); return /[",\n]/.test(s)?'"'+s.replace(/"/g,'""')+'"':s; };
+  const lines = [header.map(esc).join(",")].concat(rows.map(r=>r.map(esc).join(",")));
+  const blob = new Blob([lines.join("\n")],{type:"text/csv;charset=utf-8;"});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href=url; a.download=filename;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+  showToast("Downloaded "+filename);
+}
+
+/* ================================================================
+   TAB ORCHESTRATION
+   ================================================================ */
+const TABS = [
+  {id:"tab-equipment", render:renderEquipmentTab, bind:bindEquipmentEvents},
+  {id:"tab-chemicals", render:renderChemicalsTab, bind:bindChemicalsEvents},
+  {id:"tab-practical", render:renderPracticalTab, bind:bindPracticalEvents},
+  {id:"tab-stocktake", render:renderStocktakeTab, bind:bindStocktakeEvents},
+  {id:"tab-orders", render:renderOrdersTab, bind:bindOrdersEvents},
+  {id:"tab-reports", render:renderReportsTab, bind:bindReportsEvents},
+  {id:"tab-settings", render:renderSettingsTab, bind:bindSettingsEvents},
+];
+
+function buildTabsShell(){
+  document.getElementById("tabsContainer").innerHTML = TABS.map(t=>`<div class="tab-panel" id="${t.id}" role="tabpanel"></div>`).join("");
+}
+
+function rerenderActiveTab(preserveFocus){
+  const tabDef = TABS.find(t=>t.id===ui.activeTab) || TABS[0];
+  const panel = document.getElementById(tabDef.id);
+  if(!panel) return;
+
+  let focusInfo = null;
+  if(preserveFocus){
+    const active = document.activeElement;
+    if(active && panel.contains(active)){
+      focusInfo = {
+        selector: active.getAttribute("data-eq-field")||active.getAttribute("data-chem-field")||active.getAttribute("data-pc-field")||active.getAttribute("data-st-field"),
+        rowId: active.closest("[data-eq-id]")?.getAttribute("data-eq-id")
+              ||active.closest("[data-chem-id]")?.getAttribute("data-chem-id")
+              ||active.closest("[data-pc-id]")?.getAttribute("data-pc-id")
+              ||active.closest("[data-st-id]")?.getAttribute("data-st-id"),
+        selectionStart: active.selectionStart, selectionEnd: active.selectionEnd
+      };
+    }
+  }
+
+  panel.innerHTML = tabDef.render();
+  tabDef.bind(panel);
+
+  if(focusInfo?.rowId && focusInfo?.selector){
+    const sel = `[data-eq-id="${focusInfo.rowId}"] [data-eq-field="${focusInfo.selector}"],`+
+                `[data-chem-id="${focusInfo.rowId}"] [data-chem-field="${focusInfo.selector}"],`+
+                `[data-pc-id="${focusInfo.rowId}"] [data-pc-field="${focusInfo.selector}"],`+
+                `[data-st-id="${focusInfo.rowId}"] [data-st-field="${focusInfo.selector}"]`;
+    const el = panel.querySelector(sel);
+    if(el){ el.focus(); try{if(focusInfo.selectionStart!=null) el.setSelectionRange(focusInfo.selectionStart,focusInfo.selectionEnd);}catch(e){} }
+  }
+}
+
+function switchTab(tabId){
+  ui.activeTab = tabId;
+  saveUI();
+  document.querySelectorAll(".global-tab").forEach(btn=>{
+    const active = btn.getAttribute("data-tab")===tabId;
+    btn.classList.toggle("active", active);
+    btn.setAttribute("aria-selected", active);
+  });
+  document.querySelectorAll(".tab-panel").forEach(panel=>{
+    panel.classList.toggle("active", panel.id===tabId);
+  });
+  rerenderActiveTab();
+}
+
+document.getElementById("globalTabs").addEventListener("click",(e)=>{
+  const btn = e.target.closest(".global-tab");
+  if(btn) switchTab(btn.getAttribute("data-tab"));
+});
+
+/* ================================================================
+   GLOBAL SEARCH
+   ================================================================ */
+function updateSearchCount(){
+  const q = getSearchQuery();
+  const countEl = document.getElementById("searchCount");
+  const clearBtn = document.getElementById("searchClearBtn");
+  clearBtn.classList.toggle("hidden", !q);
+  if(!q){ countEl.textContent=""; return; }
+  const eqN = state.equipment.filter(i=>matchesSearch([i.name,i.category,i.location,i.supplier,i.notes,i.condition],q)).length;
+  const chemN = state.chemicals.filter(i=>matchesSearch([i.name,i.formula,i.location,i.supplier,i.notes,i.hazard,i.unit],q)).length;
+  countEl.textContent = `${eqN+chemN} matches`;
+}
+
+let searchDebounce=null;
+document.getElementById("globalSearch").addEventListener("input",()=>{
+  clearTimeout(searchDebounce);
+  searchDebounce = setTimeout(()=>{ updateSearchCount(); rerenderActiveTab(); },150);
+});
+
+document.getElementById("globalSearch").addEventListener("keydown",(e)=>{
+  if(e.key==="Escape"){ clearSearch(); }
+});
+
+document.getElementById("searchClearBtn").addEventListener("click",clearSearch);
+
+function clearSearch(){
+  document.getElementById("globalSearch").value="";
+  updateSearchCount();
+  rerenderActiveTab();
+}
+
+/* ================================================================
+   INIT
+   ================================================================ */
+function init(){
+  state = loadState();
+  ui = loadUI();
+  applyTheme();
+  buildTabsShell();
+  renderDashboard();
+  switchTab(ui.activeTab);
+  updateSearchCount();
+  setInterval(renderDashboard, 60000);
+}
+
+init();
+
+})();
+</script>
+</body>
+</html>
