@@ -4,6 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Newberry House — Science Inventory Manager</title>
+<link rel="icon" type="image/webp" href="newberry-lab-logo.webp">
+<link rel="apple-touch-icon" href="newberry-lab-logo.webp">
 <style>
 /* ============================================================
    NEWBERRY HOUSE SCIENCE INVENTORY MANAGER
@@ -126,15 +128,15 @@ header.topbar{
   padding:13px 20px;
 }
 .brand-mark{
-  width:42px;height:42px;flex:0 0 auto;
+  width:44px;height:44px;flex:0 0 auto;
   border-radius:12px;
-  background:linear-gradient(135deg,rgba(255,253,238,0.22) 0%,rgba(255,253,238,0.06) 100%);
-  border:1.5px solid rgba(255,253,238,0.3);
-  display:flex;align-items:center;justify-content:center;
-  font-family:var(--font-head);font-weight:700;font-size:17px;
-  color:var(--ivory);
+  overflow:hidden;
   box-shadow:0 2px 8px rgba(0,0,0,0.25);
-  letter-spacing:-.5px;
+}
+.brand-logo{
+  width:100%;height:100%;
+  object-fit:cover;
+  display:block;
 }
 .brand-text{flex:1;min-width:0;}
 .brand-text h1{font-size:18px;letter-spacing:-.1px;color:var(--ivory);}
@@ -752,7 +754,7 @@ tr.drag-over td{box-shadow:inset 0 2px 0 var(--accent);}
 
   <header class="topbar">
     <div class="topbar-inner">
-      <div class="brand-mark">NH</div>
+      <div class="brand-mark"><img src="newberry-lab-logo.webp" alt="Newberry Lab" class="brand-logo"></div>
       <div class="brand-text">
         <h1>Newberry House <span style="font-weight:400;">— Science Inventory Manager</span></h1>
         <div class="subtitle">Cambridge AS &amp; A Level Biology</div>
