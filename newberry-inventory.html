@@ -326,7 +326,7 @@ main{flex:1;max-width:1400px;width:100%;margin:0 auto;padding:18px 20px 60px;}
 /* ============== TABLES ============== */
 .table-scroll{overflow-x:auto;border-radius:var(--radius-md);border:1px solid var(--surface-border);}
 table.inv-table{width:100%;border-collapse:collapse;font-size:13.5px;}
-table.inv-table.editable-table{table-layout:fixed;min-width:900px;}
+table.inv-table.editable-table{table-layout:fixed;min-width:1100px;}
 table.inv-table:not(.editable-table){min-width:600px;}
 table.inv-table thead th{
   position:sticky;top:0;
@@ -345,6 +345,7 @@ table.inv-table tbody td{
   border-bottom:1px solid var(--surface-border);
   color:var(--text-primary);
   vertical-align:middle;
+  overflow:hidden;text-overflow:ellipsis;
 }
 table.inv-table tbody tr:last-child td{border-bottom:none;}
 table.inv-table tbody tr{transition:background .12s ease;}
@@ -400,6 +401,28 @@ input.cell-edit[type="date"]{min-width:130px;}
 .badge-repair{background:var(--danger-bg);color:var(--danger);}
 .badge-replace{background:var(--danger-bg);color:var(--danger);}
 .badge-soon{background:var(--warn-bg);color:var(--warn);}
+.badge-shortage{background:var(--danger-bg);color:var(--danger);}
+
+.plan-items{margin-top:10px;}
+.plan-item{display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--surface-border);font-size:13px;}
+.plan-item:last-child{border-bottom:none;}
+.plan-item-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-primary);}
+.plan-item-qty{width:50px;text-align:center;font-weight:600;color:var(--text-secondary);}
+.plan-item-stock{font-size:12px;min-width:80px;text-align:right;}
+.plan-item-stock.ok{color:var(--ok);}
+.plan-item-stock.low{color:var(--danger);font-weight:600;}
+.plan-item-remove{width:22px;height:22px;border-radius:5px;border:none;background:transparent;color:var(--text-muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1;}
+.plan-item-remove:hover{background:var(--danger-bg);color:var(--danger);}
+.plan-add-row{display:flex;gap:6px;margin-top:8px;align-items:center;}
+.plan-add-row select,.plan-add-row input{font-size:12.5px;padding:5px 8px;border:1px solid var(--surface-border);border-radius:var(--radius-sm);background:var(--bg-elevated);color:var(--text-primary);}
+.plan-add-row select{flex:1;min-width:0;}
+.plan-add-row input[type="number"]{width:60px;text-align:center;}
+.plan-add-btn{font-size:12px;padding:5px 10px;border-radius:var(--radius-sm);border:1px solid var(--accent);background:transparent;color:var(--accent);cursor:pointer;font-weight:600;white-space:nowrap;}
+.plan-add-btn:hover{background:var(--accent);color:var(--ivory);}
+.plan-summary{display:flex;gap:14px;margin-top:10px;flex-wrap:wrap;}
+.plan-stat{font-size:12px;color:var(--text-secondary);}
+.plan-stat strong{font-weight:700;}
+.plan-stat.has-shortage strong{color:var(--danger);}
 
 td .del-row-btn{
   width:26px;height:26px;border-radius:6px;border:1px solid var(--surface-border);
@@ -547,19 +570,12 @@ td .del-row-btn svg{width:14px;height:14px;}
 
 /* ============== HAZARD BADGE (inline) ============== */
 .hazard-pill{
-  display:inline-flex;align-items:center;gap:4px;
-  padding:2px 8px;border-radius:99px;font-size:11px;font-weight:700;
-  letter-spacing:.3px;white-space:nowrap;
+  display:inline-block;width:8px;height:8px;border-radius:50%;flex-shrink:0;
 }
-.hazard-pill::before{content:"";width:6px;height:6px;border-radius:50%;display:inline-block;}
-.hazard-low{background:var(--ok-bg);color:var(--ok);}
-.hazard-low::before{background:var(--ok);}
-.hazard-moderate{background:var(--warn-bg);color:var(--warn);}
-.hazard-moderate::before{background:var(--warn);}
-.hazard-high{background:var(--danger-bg);color:var(--danger);}
-.hazard-high::before{background:var(--danger);}
-.hazard-controlled{background:var(--danger-bg);color:var(--danger);border:1px solid var(--danger);}
-.hazard-controlled::before{background:var(--danger);}
+.hazard-low{background:var(--ok);}
+.hazard-moderate{background:var(--warn);}
+.hazard-high{background:var(--danger);}
+.hazard-controlled{background:var(--danger);box-shadow:0 0 0 2px var(--danger-bg);}
 
 /* ============== MINI CHART (reports) ============== */
 .mini-chart{display:flex;align-items:flex-end;gap:5px;height:52px;margin-top:10px;}
@@ -914,7 +930,7 @@ function seedPracticalCategories(){
     "Enzyme Practical Work","Photosynthesis Practical Work","Respiration Practical Work",
     "Transport Practical Work","Ecology Practical Work","Statistics and Data Handling"
   ];
-  return names.map(n=>({id:uid("pc"),name:n,equipmentAvailable:false,consumablesAvailable:false,readyForExam:false,notes:""}));
+  return names.map(n=>({id:uid("pc"),name:n,equipmentAvailable:false,consumablesAvailable:false,readyForExam:false,notes:"",items:[]}));
 }
 
 function defaultState(){
@@ -1028,7 +1044,7 @@ function conditionBadge(condition){
 }
 function hazardBadge(hazard){
   const key = String(hazard||"").toLowerCase().replace(/[^a-z]/g,"");
-  return `<span class="hazard-pill hazard-${key}">${escapeHtml(hazard)}</span>`;
+  return `<span class="hazard-pill hazard-${key}" title="${escapeHtml(hazard)}"></span>`;
 }
 function stockBar(cur, req){
   const pct = req>0 ? Math.min(100, Math.round((cur/req)*100)) : 100;
@@ -1111,13 +1127,15 @@ function updateTabBadges(){
   const expiredCount = state.chemicals.filter(c=>isExpiringOrExpired(c.expiry).expired).length;
   const expiringCount = state.chemicals.filter(c=>isExpiringOrExpired(c.expiry).soon).length;
   const damagedCount = state.equipment.filter(i=>i.condition==="Repair"||i.condition==="Replace").length;
+  const practicalShortages = state.practical.reduce((sum,p)=>sum+checkPracticalStock(p).short,0);
   const badges = {
     "tab-equipment": damagedCount > 0 ? `<span class="tab-badge tab-badge-warn">${damagedCount}</span>` : "",
     "tab-chemicals": expiredCount > 0 ? `<span class="tab-badge tab-badge-danger">${expiredCount}</span>` : expiringCount > 0 ? `<span class="tab-badge tab-badge-warn">${expiringCount}</span>` : "",
+    "tab-practical": practicalShortages > 0 ? `<span class="tab-badge tab-badge-warn">${practicalShortages}</span>` : "",
     "tab-orders": orderCount > 0 ? `<span class="tab-badge tab-badge-danger">${orderCount}</span>` : "",
   };
   const labels = {
-    "tab-equipment":"Equipment","tab-chemicals":"Chemicals","tab-practical":"Practical Requirements",
+    "tab-equipment":"Equipment","tab-chemicals":"Chemicals","tab-practical":"Practicals",
     "tab-stocktake":"Stocktake","tab-orders":"Orders Required","tab-reports":"Reports","tab-settings":"Settings"
   };
   document.querySelectorAll(".global-tab").forEach(btn=>{
@@ -1129,6 +1147,23 @@ function updateTabBadges(){
 function needsReorder(item){
   const threshold = (item.reorderAt > 0) ? item.reorderAt : item.reqQty;
   return item.curQty < threshold;
+}
+
+function findInventoryItem(name, type){
+  if(type==="equipment") return state.equipment.find(i=>i.name===name);
+  if(type==="chemical") return state.chemicals.find(i=>i.name===name);
+  return state.equipment.find(i=>i.name===name) || state.chemicals.find(i=>i.name===name);
+}
+
+function checkPracticalStock(practical){
+  if(!practical.items || !practical.items.length) return {total:0,ok:0,short:0,items:[]};
+  const results = practical.items.map(pi=>{
+    const inv = findInventoryItem(pi.name, pi.type);
+    const inStock = inv ? inv.curQty : 0;
+    const needed = pi.qty || 0;
+    return {name:pi.name, type:pi.type, needed, inStock, sufficient: inStock >= needed};
+  });
+  return {total:results.length, ok:results.filter(r=>r.sufficient).length, short:results.filter(r=>!r.sufficient).length, items:results};
 }
 
 /* ================================================================
@@ -1628,7 +1663,7 @@ function bindChemicalsEvents(container){
           input._rrTimer=setTimeout(()=>{ renderDashboard(); rerenderActiveTab(true); },350);
         }else if(field==="hazard"){
           const pill=input.closest("td").querySelector(".hazard-pill");
-          if(pill){ pill.className="hazard-pill hazard-"+val.toLowerCase().replace(/[^a-z]/g,""); pill.textContent=val; }
+          if(pill){ pill.className="hazard-pill hazard-"+val.toLowerCase().replace(/[^a-z]/g,""); pill.title=val; }
           renderDashboard();
         }else{
           renderDashboard();
@@ -1706,7 +1741,9 @@ function bindChemicalsEvents(container){
    ================================================================ */
 function renderPracticalTab(){
   const q = getSearchQuery();
-  const cats = state.practical.filter(c=>matchesSearch([c.name,c.notes],q));
+  const cats = state.practical.filter(c=>matchesSearch([c.name,c.notes,...(c.items||[]).map(i=>i.name)],q));
+
+  const allNames = [...state.equipment.map(i=>({name:i.name,type:"equipment"})),...state.chemicals.map(i=>({name:i.name,type:"chemical"}))];
 
   const addBtn = `
     <div class="btn-row" style="margin-bottom:14px;">
@@ -1718,17 +1755,58 @@ function renderPracticalTab(){
     body = addBtn + emptyState("No practical categories found", q?"Try a different search term.":"Add your first category above.");
   }else{
     const readyCount = state.practical.filter(p=>p.readyForExam).length;
-    body = addBtn + `<p class="small-note" style="margin-bottom:12px;">${readyCount} of ${state.practical.length} categories marked exam-ready.</p>` +
+    const totalShortages = state.practical.reduce((sum,p)=>sum+checkPracticalStock(p).short,0);
+    body = addBtn + `<p class="small-note" style="margin-bottom:12px;">${readyCount} of ${state.practical.length} categories marked exam-ready.${totalShortages>0?` <strong style="color:var(--danger)">${totalShortages} stock shortage${totalShortages>1?"s":""} detected.</strong>`:` <span style="color:var(--ok)">All stock requirements met.</span>`}</p>` +
       cats.map(c=>{
+        if(!c.items) c.items=[];
+        const stock = checkPracticalStock(c);
         const checked = [c.equipmentAvailable,c.consumablesAvailable,c.readyForExam].filter(Boolean).length;
-        const meta = c.readyForExam ? `<span class="badge badge-excellent">Exam ready</span>` : `${checked}/3 checked`;
+        let meta;
+        if(c.readyForExam) meta = `<span class="badge badge-excellent">Exam ready</span>`;
+        else if(stock.short>0) meta = `<span class="badge badge-shortage">${stock.short} shortage${stock.short>1?"s":""}</span>`;
+        else meta = `${checked}/3 checked`;
+
+        const itemsUsed = new Set(c.items.map(i=>i.name));
+        const available = allNames.filter(a=>!itemsUsed.has(a.name));
+
+        const itemRows = c.items.length ? c.items.map((pi,idx)=>{
+          const inv = findInventoryItem(pi.name, pi.type);
+          const inStock = inv ? inv.curQty : 0;
+          const sufficient = inStock >= pi.qty;
+          const unit = inv ? (inv.unit||"") : "";
+          return `<div class="plan-item">
+            <span class="plan-item-name" title="${escapeHtml(pi.name)}">${escapeHtml(pi.name)}</span>
+            <input class="plan-item-qty" type="number" min="1" value="${pi.qty}" data-plan-item-idx="${idx}" title="Quantity needed">
+            <span class="plan-item-stock ${sufficient?"ok":"low"}">${inStock}${unit?" "+escapeHtml(unit):""} in stock</span>
+            <button class="plan-item-remove" data-plan-remove-idx="${idx}" title="Remove">&times;</button>
+          </div>`;
+        }).join("") : `<p style="font-size:12.5px;color:var(--text-muted);margin:6px 0;">No items added yet. Add equipment or chemicals this practical requires.</p>`;
+
+        const addRow = `<div class="plan-add-row">
+          <select data-plan-add-select><option value="">+ Add item…</option>${available.map(a=>`<option value="${escapeHtml(a.name)}" data-item-type="${a.type}">${escapeHtml(a.name)} (${a.type})</option>`).join("")}</select>
+          <input type="number" min="1" value="1" data-plan-add-qty placeholder="Qty">
+          <button class="plan-add-btn" data-plan-add-btn>Add</button>
+        </div>`;
+
+        const summary = stock.total > 0 ? `<div class="plan-summary">
+          <span class="plan-stat"><strong>${stock.total}</strong> items required</span>
+          <span class="plan-stat" style="color:var(--ok)"><strong>${stock.ok}</strong> in stock</span>
+          ${stock.short>0?`<span class="plan-stat has-shortage"><strong>${stock.short}</strong> short</span>`:""}
+        </div>` : "";
+
         const inner = `
           <div class="checklist-grid">
             <label class="checklist-row"><input type="checkbox" data-pc-field="equipmentAvailable" ${c.equipmentAvailable?"checked":""}> Equipment available</label>
             <label class="checklist-row"><input type="checkbox" data-pc-field="consumablesAvailable" ${c.consumablesAvailable?"checked":""}> Consumables available</label>
             <label class="checklist-row"><input type="checkbox" data-pc-field="readyForExam" ${c.readyForExam?"checked":""}> Ready for examination</label>
           </div>
-          <div class="field" style="margin-top:6px;">
+          <div style="margin-top:10px;">
+            <label style="font-size:12px;font-weight:600;color:var(--text-secondary);text-transform:uppercase;letter-spacing:.3px;">Required items &amp; stock check</label>
+            <div class="plan-items">${itemRows}</div>
+            ${addRow}
+            ${summary}
+          </div>
+          <div class="field" style="margin-top:10px;">
             <label>Teacher notes</label>
             <textarea class="notes-area" data-pc-field="notes" placeholder="Add notes…">${escapeHtml(c.notes)}</textarea>
           </div>
@@ -1738,7 +1816,7 @@ function renderPracticalTab(){
       }).join("");
   }
 
-  return sectionWrap("sec-practical", ICON.clipboard, "Cambridge Practical Requirements", `${state.practical.length} categories`, body);
+  return sectionWrap("sec-practical", ICON.clipboard, "Practical Experiment Planner", `${state.practical.length} categories`, body);
 }
 
 function bindPracticalEvents(container){
@@ -1746,7 +1824,7 @@ function bindPracticalEvents(container){
   if(addBtn) addBtn.addEventListener("click",()=>{
     const name = prompt("New practical category name:");
     if(!name || !name.trim()) return;
-    state.practical.push({id:uid("pc"),name:name.trim(),equipmentAvailable:false,consumablesAvailable:false,readyForExam:false,notes:""});
+    state.practical.push({id:uid("pc"),name:name.trim(),equipmentAvailable:false,consumablesAvailable:false,readyForExam:false,notes:"",items:[]});
     scheduleSave("Category added"); rerenderActiveTab();
   });
 
@@ -1775,6 +1853,35 @@ function bindPracticalEvents(container){
       };
       input.addEventListener("change", handler);
       input.addEventListener("input", handler);
+    });
+
+    if(!item.items) item.items=[];
+
+    wrap.querySelectorAll("[data-plan-item-idx]").forEach(input=>{
+      input.addEventListener("change",()=>{
+        const idx = parseInt(input.getAttribute("data-plan-item-idx"),10);
+        if(item.items[idx]) item.items[idx].qty = Math.max(1, parseInt(input.value,10)||1);
+        scheduleSave(); rerenderActiveTab(true);
+      });
+    });
+
+    wrap.querySelectorAll("[data-plan-remove-idx]").forEach(btn=>{
+      btn.addEventListener("click",()=>{
+        const idx = parseInt(btn.getAttribute("data-plan-remove-idx"),10);
+        item.items.splice(idx,1);
+        scheduleSave(); rerenderActiveTab(true);
+      });
+    });
+
+    const addBtn = wrap.querySelector("[data-plan-add-btn]");
+    if(addBtn) addBtn.addEventListener("click",()=>{
+      const sel = wrap.querySelector("[data-plan-add-select]");
+      const qtyInput = wrap.querySelector("[data-plan-add-qty]");
+      if(!sel || !sel.value) return;
+      const opt = sel.options[sel.selectedIndex];
+      const type = opt.getAttribute("data-item-type")||"equipment";
+      item.items.push({name:sel.value, type, qty:Math.max(1,parseInt(qtyInput.value,10)||1)});
+      scheduleSave(); rerenderActiveTab(true);
     });
   });
 }
