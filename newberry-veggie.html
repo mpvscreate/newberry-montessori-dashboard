@@ -1,0 +1,2216 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#1a2e1a">
+<title>Veggie Garden Designer — Newberry House</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Playfair+Display:wght@700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pk:#1a2e1a;--pk2:#0d1a0d;--asp:#7da24b;--asp2:#9ec06a;--gold:#c9a84c;--gold2:#e8cc7a;
+  --fd:#775d2f;--dun:#d1c7a3;--ivory:#fffdee;
+  --bg:#f0ebe0;--bg2:#e8e2d4;--card:rgba(255,255,255,.92);--card-solid:#fff;
+  --brd:rgba(0,0,0,.08);--brd2:rgba(0,0,0,.04);
+  --text:#1a1a18;--text2:#6a6a5a;--text3:#9a9a88;
+  --red:#c04040;--orange:#d08030;--blue:#4a8ab0;
+  --r:12px;--r2:16px;--r3:20px;
+  --shadow-sm:0 1px 3px rgba(0,0,0,.06);
+  --shadow:0 4px 16px rgba(0,0,0,.08);
+  --shadow-lg:0 8px 32px rgba(0,0,0,.12);
+  --shadow-xl:0 16px 48px rgba(0,0,0,.16);
+  --glass:rgba(255,255,255,.72);--glass2:rgba(255,255,255,.55);
+  --blur:saturate(180%) blur(16px);
+  --transition:all .25s cubic-bezier(.4,0,.2,1);
+  --bounce:all .35s cubic-bezier(.34,1.56,.64,1);
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;overflow:hidden;font-family:'Inter',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);}
+body{display:flex;flex-direction:column;}
+
+::selection{background:var(--asp);color:#fff;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--dun);border-radius:4px;}
+::-webkit-scrollbar-thumb:hover{background:var(--fd);}
+
+/* ── Toolbar ──────────────────────────────── */
+.toolbar{
+  display:flex;align-items:center;gap:3px;padding:6px 12px;
+  background:linear-gradient(135deg,var(--pk) 0%,var(--pk2) 100%);
+  height:52px;flex-shrink:0;z-index:50;
+  box-shadow:0 2px 20px rgba(0,0,0,.2);
+  position:relative;overflow-x:auto;
+  -webkit-overflow-scrolling:touch;
+  scrollbar-width:none;
+}
+.toolbar::-webkit-scrollbar{display:none;}
+.toolbar::after{
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.4;
+}
+.brand{display:flex;flex-direction:column;margin-right:10px;user-select:none;}
+.brand-name{
+  font-family:'Playfair Display',serif;font-size:14px;font-weight:800;
+  color:#fff;letter-spacing:.5px;line-height:1;
+  background:linear-gradient(135deg,#fff 30%,var(--gold2));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.brand-sub{font-size:8px;font-weight:500;color:var(--asp2);letter-spacing:2px;text-transform:uppercase;margin-top:1px;}
+.tool-divider{width:1px;height:24px;background:linear-gradient(180deg,transparent,rgba(255,255,255,.15),transparent);margin:0 4px;}
+.tool{
+  width:38px;height:36px;border:none;border-radius:10px;
+  background:transparent;color:rgba(255,255,255,.55);cursor:pointer;
+  font-size:15px;display:flex;align-items:center;justify-content:center;
+  transition:var(--transition);position:relative;flex-shrink:0;
+}
+.tool:hover{background:rgba(255,255,255,.1);color:rgba(255,255,255,.9);transform:translateY(-1px);}
+.tool.active{
+  background:linear-gradient(135deg,var(--asp),#5a8a30);color:#fff;
+  box-shadow:0 2px 12px rgba(125,162,75,.4),inset 0 1px 0 rgba(255,255,255,.2);
+}
+.tool .tt{
+  display:none;position:absolute;top:calc(100% + 6px);left:50%;transform:translateX(-50%);
+  background:var(--pk);color:#fff;font-size:9px;font-weight:600;letter-spacing:.5px;
+  padding:4px 10px;border-radius:6px;white-space:nowrap;pointer-events:none;z-index:99;
+  box-shadow:var(--shadow);
+}
+.tool .tt::before{content:'';position:absolute;top:-4px;left:50%;transform:translateX(-50%);border:4px solid transparent;border-bottom-color:var(--pk);}
+.tool:hover .tt{display:block;animation:ttIn .15s ease;}
+@keyframes ttIn{from{opacity:0;transform:translateX(-50%) translateY(4px)}to{opacity:1;transform:translateX(-50%)}}
+.tool svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round;flex-shrink:0;}
+.tool-spacer{flex:1;}
+.info-bar{display:flex;align-items:center;gap:8px;padding:0 6px;font-size:10px;color:rgba(255,255,255,.45);font-weight:500;}
+.info-bar span{white-space:nowrap;}
+#zoomLabel{
+  background:rgba(255,255,255,.08);padding:3px 8px;border-radius:6px;
+  font-weight:700;font-size:10px;letter-spacing:.5px;
+  border:1px solid rgba(255,255,255,.06);
+  color:rgba(255,255,255,.7);
+}
+
+/* ── Canvas ───────────────────────────────── */
+.canvas-wrap{
+  flex:1;position:relative;overflow:hidden;cursor:crosshair;
+  background:linear-gradient(145deg,#e8e2d4 0%,#ddd7c8 50%,#d5cfc0 100%);
+  touch-action:none;
+}
+.canvas-wrap.tool-select{cursor:default;}
+.canvas-wrap.tool-bed{cursor:crosshair;}
+.canvas-wrap.tool-plant{cursor:copy;}
+.canvas-wrap.tool-path{cursor:crosshair;}
+.canvas-wrap.tool-structure{cursor:copy;}
+.canvas-wrap.tool-delete{cursor:not-allowed;}
+.canvas-container{position:absolute!important;inset:0;}
+
+/* ── Plant Hover Tooltip ─────────────────── */
+.plant-tooltip{
+  position:absolute;pointer-events:none;z-index:20;
+  background:var(--pk);color:#fff;
+  padding:6px 12px;border-radius:10px;
+  font-size:10px;font-weight:600;letter-spacing:.2px;
+  box-shadow:var(--shadow);opacity:0;transition:opacity .15s ease;
+  white-space:nowrap;transform:translate(-50%,-100%);
+  line-height:1.4;
+}
+.plant-tooltip.show{opacity:1;}
+.plant-tooltip::after{
+  content:'';position:absolute;bottom:-5px;left:50%;transform:translateX(-50%);
+  border:5px solid transparent;border-top-color:var(--pk);
+}
+.plant-tooltip .pt-name{font-weight:800;font-size:11px;}
+.plant-tooltip .pt-meta{opacity:.7;font-size:9px;}
+
+.compass{
+  position:absolute;top:12px;right:12px;width:40px;height:40px;
+  background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border-radius:50%;border:1px solid var(--brd);
+  display:flex;align-items:center;justify-content:center;
+  font-size:11px;font-weight:800;color:var(--pk);
+  box-shadow:var(--shadow);z-index:10;pointer-events:none;
+  letter-spacing:1px;
+}
+.compass::after{
+  content:'';position:absolute;top:4px;left:50%;transform:translateX(-50%);
+  width:0;height:0;border-left:3px solid transparent;border-right:3px solid transparent;
+  border-bottom:5px solid var(--red);
+}
+
+.scale-bar{
+  position:absolute;bottom:10px;left:12px;display:flex;align-items:center;gap:6px;
+  font-size:9px;color:var(--text2);font-weight:600;z-index:10;pointer-events:none;
+  background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  padding:5px 12px;border-radius:8px;border:1px solid var(--brd);
+  box-shadow:var(--shadow-sm);letter-spacing:.3px;
+}
+.scale-line{height:2px;background:var(--text);border-radius:1px;opacity:.6;}
+
+/* ── Zoom Controls ───────────────────────── */
+.zoom-controls{
+  position:absolute;bottom:10px;right:12px;display:flex;flex-direction:column;gap:2px;z-index:10;
+}
+.zoom-btn{
+  width:32px;height:32px;border:1px solid var(--brd);border-radius:8px;
+  background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  cursor:pointer;display:flex;align-items:center;justify-content:center;
+  color:var(--text);font-size:14px;font-weight:700;transition:var(--transition);
+  box-shadow:var(--shadow-sm);
+}
+.zoom-btn:hover{background:rgba(255,255,255,.9);border-color:var(--asp);color:var(--asp);}
+.zoom-btn svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
+
+/* ── Status Bar ──────────────────────────── */
+.status-bar{
+  position:absolute;bottom:10px;left:50%;transform:translateX(-50%);
+  background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  padding:4px 12px;border-radius:16px;border:1px solid var(--brd);
+  font-size:9px;font-weight:600;color:var(--text2);letter-spacing:.3px;
+  z-index:10;pointer-events:none;opacity:0;transition:var(--transition);
+  box-shadow:var(--shadow-sm);display:flex;gap:10px;
+}
+.status-bar.show{opacity:1;}
+
+/* ── Bottom Tray ──────────────────────────── */
+.tray{
+  flex-shrink:0;background:var(--glass);
+  backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border-top:1px solid var(--brd);
+  display:flex;flex-direction:column;transition:height .3s cubic-bezier(.4,0,.2,1);
+  overflow:hidden;z-index:40;
+}
+.tray.collapsed{height:44px;}
+.tray.expanded{height:210px;}
+.tray-handle{
+  width:32px;height:3px;
+  background:linear-gradient(90deg,transparent,var(--dun),transparent);
+  border-radius:2px;margin:5px auto 3px;cursor:pointer;transition:var(--transition);
+}
+.tray-handle:hover{background:linear-gradient(90deg,transparent,var(--asp),transparent);transform:scaleX(1.5);}
+.tray-tabs{display:flex;gap:0;padding:0 8px;overflow-x:auto;flex-shrink:0;-webkit-overflow-scrolling:touch;}
+.tray-tab{
+  padding:6px 14px;font-size:10px;font-weight:700;color:var(--text3);
+  cursor:pointer;border:none;background:none;white-space:nowrap;
+  border-bottom:2px solid transparent;transition:var(--transition);
+  letter-spacing:.3px;text-transform:uppercase;
+}
+.tray-tab:hover{color:var(--text);}
+.tray-tab.active{
+  color:var(--asp);border-bottom-color:var(--asp);
+  text-shadow:0 0 20px rgba(125,162,75,.3);
+}
+.tray-items{
+  display:flex;gap:8px;padding:10px 12px;overflow-x:auto;overflow-y:hidden;
+  flex:1;align-items:flex-start;flex-wrap:wrap;align-content:flex-start;
+  -webkit-overflow-scrolling:touch;
+}
+.tray-item{
+  width:72px;flex-shrink:0;display:flex;flex-direction:column;align-items:center;
+  gap:4px;padding:8px 6px;border:1.5px solid var(--brd2);
+  border-radius:var(--r);cursor:pointer;transition:var(--bounce);
+  background:rgba(255,255,255,.5);position:relative;overflow:hidden;
+}
+.tray-item::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 40%,rgba(255,255,255,.3));
+  opacity:0;transition:var(--transition);border-radius:var(--r);
+}
+.tray-item:hover{
+  border-color:var(--dun);transform:translateY(-2px);
+  box-shadow:var(--shadow);
+}
+.tray-item:hover::before{opacity:1;}
+.tray-item.selected{
+  border-color:var(--asp);background:rgba(125,162,75,.08);
+  box-shadow:0 2px 16px rgba(125,162,75,.15),inset 0 0 0 1px rgba(125,162,75,.1);
+}
+.tray-item .ti-icon{font-size:22px;height:28px;display:flex;align-items:center;justify-content:center;transition:var(--bounce);}
+.tray-item:hover .ti-icon{transform:scale(1.15);}
+.tray-item .ti-name{font-size:8px;font-weight:700;text-align:center;line-height:1.2;color:var(--text);letter-spacing:.2px;}
+.tray-item .ti-meta{font-size:7px;color:var(--text3);text-align:center;font-weight:500;}
+
+/* ── Properties Panel ─────────────────────── */
+.prop-panel{
+  position:absolute;bottom:0;left:0;right:0;
+  background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  border-top:1px solid var(--brd);z-index:45;
+  padding:14px 16px;max-height:280px;overflow-y:auto;
+  box-shadow:0 -4px 24px rgba(0,0,0,.08);
+  animation:slideUp .25s cubic-bezier(.4,0,.2,1);
+}
+@keyframes slideUp{from{transform:translateY(20px);opacity:0}to{transform:none;opacity:1}}
+.prop-header{display:flex;align-items:center;margin-bottom:10px;}
+.prop-header h3{
+  flex:1;font-size:14px;font-weight:800;letter-spacing:.3px;
+  background:linear-gradient(135deg,var(--pk),var(--asp));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.prop-close{
+  background:none;border:none;font-size:16px;cursor:pointer;color:var(--text3);
+  padding:6px;border-radius:8px;transition:var(--transition);
+}
+.prop-close:hover{background:rgba(0,0,0,.05);color:var(--text);}
+.prop-row{display:flex;align-items:center;gap:8px;margin-bottom:8px;font-size:11px;}
+.prop-label{font-weight:700;color:var(--text3);min-width:60px;font-size:9px;text-transform:uppercase;letter-spacing:.8px;}
+.prop-val{flex:1;font-weight:600;color:var(--text);}
+.prop-input{
+  flex:1;padding:6px 10px;border:1.5px solid var(--brd);border-radius:8px;
+  font-size:11px;font-family:inherit;background:rgba(255,255,255,.6);
+  transition:var(--transition);font-weight:500;
+}
+.prop-input:focus{outline:none;border-color:var(--asp);box-shadow:0 0 0 3px rgba(125,162,75,.1);background:#fff;}
+.prop-tags{display:flex;flex-wrap:wrap;gap:4px;}
+.prop-tag{
+  padding:3px 8px;border-radius:20px;font-size:9px;font-weight:600;
+  border:1px solid;letter-spacing:.3px;
+}
+.prop-tag.good{background:rgba(125,200,96,.1);border-color:rgba(125,200,96,.3);color:#2a6a20;}
+.prop-tag.bad{background:rgba(220,80,80,.08);border-color:rgba(220,80,80,.2);color:#a04040;}
+.prop-actions{display:flex;gap:8px;margin-top:12px;}
+.prop-btn{
+  padding:8px 16px;border-radius:10px;border:none;cursor:pointer;
+  font-size:10px;font-weight:700;transition:var(--bounce);
+  letter-spacing:.3px;position:relative;overflow:hidden;
+}
+.prop-btn::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,rgba(255,255,255,.2),transparent);
+  opacity:0;transition:var(--transition);
+}
+.prop-btn:hover::before{opacity:1;}
+.prop-btn:hover{transform:translateY(-1px);box-shadow:var(--shadow);}
+.prop-btn-primary{background:linear-gradient(135deg,var(--asp),#5a8a30);color:#fff;}
+.prop-btn-danger{background:linear-gradient(135deg,#d04040,#a03030);color:#fff;}
+.prop-btn-secondary{background:var(--dun);color:var(--pk);}
+
+/* ── Modal ────────────────────────────────── */
+.modal-bg{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.4);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  z-index:200;align-items:center;justify-content:center;
+}
+.modal-bg.open{display:flex;}
+.modal{
+  background:var(--card-solid);border-radius:var(--r3);
+  width:90%;max-width:420px;max-height:80vh;overflow-y:auto;
+  padding:20px;box-shadow:var(--shadow-xl);
+  animation:modalIn .3s cubic-bezier(.4,0,.2,1);
+  border:1px solid var(--brd);
+}
+@keyframes modalIn{from{opacity:0;transform:scale(.95) translateY(10px)}to{opacity:1;transform:none}}
+.modal h3{
+  font-family:'Playfair Display',serif;font-size:18px;font-weight:800;
+  margin-bottom:16px;letter-spacing:.3px;
+  background:linear-gradient(135deg,var(--pk),var(--asp));
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+}
+.modal-close{
+  float:right;background:none;border:none;font-size:18px;cursor:pointer;
+  color:var(--text3);padding:6px;border-radius:8px;transition:var(--transition);
+}
+.modal-close:hover{background:rgba(0,0,0,.05);color:var(--text);}
+.template-card{
+  display:flex;align-items:center;gap:12px;padding:12px;
+  border:1.5px solid var(--brd2);border-radius:var(--r);
+  margin-bottom:8px;cursor:pointer;transition:var(--bounce);
+  background:rgba(255,255,255,.5);position:relative;overflow:hidden;
+}
+.template-card::before{
+  content:'';position:absolute;inset:0;
+  background:linear-gradient(135deg,transparent 50%,rgba(125,162,75,.03));
+  transition:var(--transition);
+}
+.template-card:hover{
+  border-color:var(--asp);transform:translateX(4px);
+  box-shadow:var(--shadow-sm);
+}
+.template-card:hover::before{background:linear-gradient(135deg,transparent 30%,rgba(125,162,75,.06));}
+.template-icon{font-size:24px;width:40px;text-align:center;flex-shrink:0;}
+.template-info{flex:1;}
+.template-name{font-size:12px;font-weight:700;color:var(--text);letter-spacing:.2px;}
+.template-desc{font-size:10px;color:var(--text2);margin-top:2px;line-height:1.3;}
+.section-label{
+  font-size:9px;font-weight:700;color:var(--text3);margin-bottom:8px;
+  letter-spacing:1.5px;text-transform:uppercase;
+}
+
+/* ── Companion lines on canvas ────────────── */
+.companion-legend{
+  position:absolute;top:12px;left:12px;
+  background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  padding:8px 14px;border-radius:10px;font-size:9px;font-weight:600;
+  display:none;z-index:10;box-shadow:var(--shadow);
+  border:1px solid var(--brd);letter-spacing:.3px;
+}
+.companion-legend.show{display:flex;gap:12px;}
+.cl-item{display:flex;align-items:center;gap:5px;}
+.cl-dot{width:8px;height:8px;border-radius:50%;box-shadow:0 0 6px currentColor;}
+
+/* ── Version Tag ─────────────────────────── */
+.version-tag{
+  font-size:8px;color:var(--text3);text-align:center;
+  padding:8px;letter-spacing:1px;font-weight:500;
+  border-top:1px solid var(--brd2);margin-top:8px;
+}
+
+/* ── Photo Overlay ───────────────────────── */
+.photo-controls{
+  position:absolute;top:56px;left:12px;
+  background:var(--glass);backdrop-filter:var(--blur);-webkit-backdrop-filter:var(--blur);
+  padding:10px 14px;border-radius:12px;border:1px solid var(--brd);
+  z-index:12;box-shadow:var(--shadow);display:none;
+  font-size:10px;font-weight:600;color:var(--text2);min-width:180px;
+}
+.photo-controls.show{display:block;}
+.photo-controls label{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.photo-slider{
+  -webkit-appearance:none;appearance:none;width:100px;height:4px;
+  background:var(--dun);border-radius:2px;outline:none;
+}
+.photo-slider::-webkit-slider-thumb{
+  -webkit-appearance:none;width:14px;height:14px;border-radius:50%;
+  background:var(--asp);border:2px solid #fff;cursor:pointer;
+  box-shadow:0 1px 4px rgba(0,0,0,.2);
+}
+.photo-remove{
+  background:none;border:1px solid var(--brd);border-radius:6px;
+  padding:4px 10px;font-size:9px;font-weight:700;color:var(--red);
+  cursor:pointer;transition:var(--transition);margin-top:4px;
+}
+.photo-remove:hover{background:rgba(192,64,64,.08);border-color:var(--red);}
+
+/* ── Shape Toggle ────────────────────────── */
+.shape-toggle{
+  display:flex;gap:2px;background:rgba(0,0,0,.04);border-radius:8px;padding:2px;
+  margin-bottom:8px;
+}
+.shape-btn{
+  flex:1;padding:5px 10px;border:none;border-radius:6px;background:transparent;
+  font-size:9px;font-weight:700;color:var(--text3);cursor:pointer;
+  transition:var(--transition);display:flex;align-items:center;justify-content:center;gap:4px;
+  letter-spacing:.3px;text-transform:uppercase;
+}
+.shape-btn.active{background:#fff;color:var(--asp);box-shadow:var(--shadow-sm);}
+.shape-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;}
+
+/* ── Freehand mode ───────────────────────── */
+.canvas-wrap.tool-freehand{cursor:crosshair;}
+
+/* ── Method Chips ────────────────────────── */
+.method-row{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px;}
+.method-chip{
+  padding:4px 10px;border-radius:20px;border:1.5px solid var(--brd2);
+  font-size:9px;font-weight:700;cursor:pointer;transition:var(--bounce);
+  background:rgba(255,255,255,.6);color:var(--text2);letter-spacing:.3px;
+}
+.method-chip:hover{border-color:var(--asp);color:var(--asp);}
+.method-chip.active{border-color:var(--asp);background:rgba(125,162,75,.1);color:var(--asp);}
+
+/* ── Context Menu ────────────────────────── */
+.ctx-menu{
+  display:none;position:fixed;z-index:300;
+  background:var(--card-solid);border:1px solid var(--brd);
+  border-radius:var(--r);box-shadow:var(--shadow-lg);
+  min-width:180px;padding:4px;
+  animation:ctxIn .15s cubic-bezier(.4,0,.2,1);
+  font-size:11px;font-weight:600;
+  overflow:hidden;
+}
+.ctx-menu.open{display:block;}
+@keyframes ctxIn{from{opacity:0;transform:scale(.96) translateY(-4px)}to{opacity:1;transform:none}}
+.ctx-item{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 12px;border-radius:8px;cursor:pointer;
+  color:var(--text);transition:background .12s ease,color .12s ease;
+  white-space:nowrap;
+}
+.ctx-item:hover{background:rgba(125,162,75,.1);color:var(--asp);}
+.ctx-item.danger:hover{background:rgba(192,64,64,.08);color:var(--red);}
+.ctx-item .ctx-icon{width:16px;text-align:center;font-size:13px;flex-shrink:0;}
+.ctx-item .ctx-label{flex:1;}
+.ctx-item .ctx-key{font-size:9px;color:var(--text3);font-weight:500;letter-spacing:.4px;}
+.ctx-divider{height:1px;background:var(--brd);margin:3px 8px;}
+
+/* ── Annotation ──────────────────────────── */
+.canvas-wrap.tool-annotate{cursor:text;}
+
+/* ── Responsive ───────────────────────────── */
+@media(max-width:480px){
+  .brand{display:none;}
+  .tool{width:34px;height:34px;font-size:14px;}
+  .toolbar{height:48px;padding:4px 8px;}
+  .tray.expanded{height:180px;}
+  .tray-item{width:62px;padding:6px 4px;}
+  .tray-item .ti-icon{font-size:18px;height:22px;}
+}
+@media(min-width:768px){
+  .tray-items{flex-wrap:nowrap;}
+  .tray.expanded{height:130px;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOOLBAR -->
+<div class="toolbar">
+  <div class="brand">
+    <div class="brand-name">Veggie Garden</div>
+    <div class="brand-sub">Newberry House</div>
+  </div>
+  <button class="tool active" data-tool="select" title="Select / Move"><span class="tt">Select (V)</span><svg viewBox="0 0 20 20"><path d="M5 2L5 15L8.5 11.5L12 17L14.5 15.5L11 10L15.5 8.5Z"/></svg></button>
+  <button class="tool" data-tool="bed" title="Draw Bed"><span class="tt">Draw Bed (B)</span><svg viewBox="0 0 20 20"><rect x="2" y="4" width="16" height="12" rx="2"/><line x1="5" y1="8" x2="15" y2="8"/><line x1="5" y1="12" x2="15" y2="12"/></svg></button>
+  <button class="tool" data-tool="plant" title="Place Plant"><span class="tt">Place Plant (P)</span><svg viewBox="0 0 20 20"><path d="M10 18V10"/><path d="M10 10C10 6 6 4 4 5C2 6 3 9 6 10"/><path d="M10 8C10 4 14 2 16 3C18 4 17 8 14 9"/></svg></button>
+  <button class="tool" data-tool="path" title="Draw Path"><span class="tt">Draw Path (A)</span><svg viewBox="0 0 20 20"><path d="M4 16C6 14 8 12 10 10C12 8 14 6 16 4" stroke-dasharray="3 2"/><circle cx="4" cy="16" r="1.5" fill="currentColor" stroke="none"/><circle cx="16" cy="4" r="1.5" fill="currentColor" stroke="none"/></svg></button>
+  <button class="tool" data-tool="freehand" title="Freehand Draw"><span class="tt">Freehand (F)</span><svg viewBox="0 0 20 20"><path d="M3 17C5 13 7 15 9 11C11 7 13 9 15 5C16 3 17 3 18 3"/><circle cx="3" cy="17" r="1.2" fill="currentColor" stroke="none"/></svg></button>
+  <button class="tool" data-tool="structure" title="Place Structure"><span class="tt">Structure (S)</span><svg viewBox="0 0 20 20"><path d="M3 18V8L10 3L17 8V18"/><line x1="3" y1="18" x2="17" y2="18"/><rect x="8" y="11" width="4" height="7"/></svg></button>
+  <button class="tool" data-tool="annotate" title="Add Note"><span class="tt">Annotate (N)</span><svg viewBox="0 0 20 20"><path d="M4 16L4 13L13 4L16 7L7 16Z"/><line x1="11" y1="6" x2="14" y2="9"/><line x1="4" y1="16" x2="7" y2="16"/></svg></button>
+  <div class="tool-divider"></div>
+  <button class="tool" data-tool="delete" title="Delete"><span class="tt">Delete</span><svg viewBox="0 0 20 20"><path d="M5 6V16C5 17.1 5.9 18 7 18H13C14.1 18 15 17.1 15 16V6"/><path d="M3 6H17"/><path d="M8 6V4C8 3.4 8.4 3 9 3H11C11.6 3 12 3.4 12 4V6"/><line x1="8.5" y1="9" x2="8.5" y2="15"/><line x1="11.5" y1="9" x2="11.5" y2="15"/></svg></button>
+  <div class="tool-spacer"></div>
+  <button class="tool" id="btnPhoto" title="Upload Photo" onclick="triggerPhotoUpload()"><span class="tt">Photo (I)</span><svg viewBox="0 0 20 20"><rect x="2" y="4" width="16" height="12" rx="2"/><circle cx="10" cy="10" r="3"/><circle cx="14.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg></button>
+  <button class="tool" id="btnCompanion" title="Show Companions" onclick="toggleCompanions()"><span class="tt">Companions (C)</span><svg viewBox="0 0 20 20"><circle cx="6" cy="10" r="3"/><circle cx="14" cy="10" r="3"/><line x1="9" y1="10" x2="11" y2="10"/></svg></button>
+  <button class="tool active" id="btnGrid" title="Toggle Grid" onclick="toggleGrid()"><span class="tt">Grid (G)</span><svg viewBox="0 0 20 20"><line x1="7" y1="2" x2="7" y2="18"/><line x1="13" y1="2" x2="13" y2="18"/><line x1="2" y1="7" x2="18" y2="7"/><line x1="2" y1="13" x2="18" y2="13"/></svg></button>
+  <button class="tool" title="Undo" onclick="undo()"><span class="tt">Undo (Ctrl+Z)</span><svg viewBox="0 0 20 20"><path d="M4 8H13C15.2 8 17 9.8 17 12C17 14.2 15.2 16 13 16H10"/><path d="M7 5L4 8L7 11"/></svg></button>
+  <div class="tool-divider"></div>
+  <button class="tool" title="Save" onclick="saveDesign()"><span class="tt">Save</span><svg viewBox="0 0 20 20"><path d="M15 18H5C3.9 18 3 17.1 3 16V4C3 2.9 3.9 2 5 2H13L17 6V16C17 17.1 16.1 18 15 18Z"/><path d="M13 2V6H17"/><rect x="6" y="11" width="8" height="5" rx="1"/></svg></button>
+  <button class="tool" title="Menu" onclick="openMenu()"><span class="tt">Menu</span><svg viewBox="0 0 20 20"><line x1="3" y1="6" x2="17" y2="6"/><line x1="3" y1="10" x2="17" y2="10"/><line x1="3" y1="14" x2="17" y2="14"/></svg></button>
+  <div class="info-bar"><span id="zoomLabel">100%</span><span id="dimLabel"></span></div>
+</div>
+
+<!-- CANVAS -->
+<div class="canvas-wrap tool-select" id="canvasWrap">
+  <canvas id="c"></canvas>
+  <div class="compass">N</div>
+  <div class="scale-bar"><div class="scale-line" id="scaleBarLine" style="width:60px"></div><span id="scaleBarLabel">1m</span></div>
+  <div class="plant-tooltip" id="plantTooltip"></div>
+  <div class="ctx-menu" id="ctxMenu"></div>
+  <div class="companion-legend" id="compLegend">
+    <div class="cl-item"><div class="cl-dot" style="background:#4CAF50;color:#4CAF50"></div> Companion</div>
+    <div class="cl-item"><div class="cl-dot" style="background:#F44336;color:#F44336"></div> Avoid</div>
+  </div>
+  <div class="zoom-controls">
+    <button class="zoom-btn" onclick="zoomIn()" title="Zoom In"><svg viewBox="0 0 20 20"><line x1="10" y1="5" x2="10" y2="15"/><line x1="5" y1="10" x2="15" y2="10"/></svg></button>
+    <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out"><svg viewBox="0 0 20 20"><line x1="5" y1="10" x2="15" y2="10"/></svg></button>
+    <button class="zoom-btn" onclick="zoomReset()" title="Reset Zoom" style="font-size:9px;font-weight:700">1:1</button>
+  </div>
+  <div class="status-bar" id="statusBar"></div>
+  <div class="photo-controls" id="photoControls">
+    <label>Opacity <input type="range" class="photo-slider" id="photoOpacity" min="0" max="100" value="30" oninput="setPhotoOpacity(this.value)"><span id="photoOpVal">30%</span></label>
+    <label>Lock Photo <input type="checkbox" id="photoLock" checked onchange="togglePhotoLock(this.checked)"></label>
+    <button class="photo-remove" onclick="removePhoto()">Remove Photo</button>
+  </div>
+  <input type="file" id="photoInput" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
+</div>
+
+<!-- BOTTOM TRAY -->
+<div class="tray expanded" id="tray">
+  <div class="tray-handle" id="trayHandle"></div>
+  <div class="tray-tabs" id="trayTabs"></div>
+  <div class="tray-items" id="trayItems"></div>
+</div>
+
+<!-- PROPERTIES PANEL (hidden) -->
+<div class="prop-panel" id="propPanel" style="display:none"></div>
+
+<!-- MENU MODAL -->
+<div class="modal-bg" id="menuModal" onclick="if(event.target===this)this.classList.remove('open')">
+<div class="modal">
+  <button class="modal-close" onclick="document.getElementById('menuModal').classList.remove('open')">&#x2715;</button>
+  <h3>Menu</h3>
+  <div style="margin-bottom:16px">
+    <div class="section-label">Templates</div>
+    <div class="template-card" onclick="applyTemplate('kitchen')"><div class="template-icon">&#x1F957;</div><div class="template-info"><div class="template-name">Kitchen Garden</div><div class="template-desc">4 raised beds with herb border and paths</div></div></div>
+    <div class="template-card" onclick="applyTemplate('threesisters')"><div class="template-icon">&#x1F33D;</div><div class="template-info"><div class="template-name">Three Sisters</div><div class="template-desc">Corn, beans & squash — Indigenous companion planting</div></div></div>
+    <div class="template-card" onclick="applyTemplate('sqft')"><div class="template-icon">&#x1F4D0;</div><div class="template-info"><div class="template-name">Square Foot Garden</div><div class="template-desc">1.2m x 1.2m grid with 16 planting squares</div></div></div>
+    <div class="template-card" onclick="applyTemplate('school')"><div class="template-icon">&#x1F3EB;</div><div class="template-info"><div class="template-name">School Garden</div><div class="template-desc">Multiple beds, greenhouse, compost area & paths</div></div></div>
+    <div class="template-card" onclick="applyTemplate('permaculture')"><div class="template-icon">&#x1F33F;</div><div class="template-info"><div class="template-name">Permaculture Guild</div><div class="template-desc">Food forest style with companion layers</div></div></div>
+  </div>
+  <div style="margin-bottom:16px">
+    <div class="section-label">Actions</div>
+    <div class="template-card" onclick="triggerPhotoUpload();document.getElementById('menuModal').classList.remove('open')"><div class="template-icon">&#x1F5BC;&#xFE0F;</div><div class="template-info"><div class="template-name">Upload Background Photo</div><div class="template-desc">Overlay your actual garden area to trace and design on top</div></div></div>
+    <div class="template-card" onclick="exportImage()"><div class="template-icon">&#x1F4F7;</div><div class="template-info"><div class="template-name">Export as Image</div><div class="template-desc">Save your design as a high-res PNG</div></div></div>
+    <div class="template-card" onclick="clearCanvas()"><div class="template-icon">&#x1F9F9;</div><div class="template-info"><div class="template-name">Clear Canvas</div><div class="template-desc">Remove all objects and start fresh</div></div></div>
+  </div>
+  <div class="version-tag">Veggie Garden Designer v2.0 &middot; Newberry House</div>
+</div>
+</div>
+
+<!-- Fill Bed Modal -->
+<div class="modal-bg" id="fillModal" onclick="if(event.target===this)this.classList.remove('open')">
+<div class="modal">
+  <button class="modal-close" onclick="document.getElementById('fillModal').classList.remove('open')">&#x2715;</button>
+  <h3>Fill Bed</h3>
+  <p style="font-size:11px;color:var(--text2);margin-bottom:12px;line-height:1.5">Choose a planting method and crop to auto-fill this bed.</p>
+  <div id="fillCropList" style="max-height:300px;overflow-y:auto"></div>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
+<script>
+const PPM = 60;
+const SNAP_M = 0.1;
+const SNAP_PX = SNAP_M * PPM;
+
+const PLANTS = [
+  {id:'tomato',name:'Tomato',icon:'\u{1F345}',cat:'veggie',color:'#c04030',spacing:60,sun:'full',water:'regular',companions:['basil','carrot','parsley','marigold'],avoid:['cabbage','fennel','potato']},
+  {id:'pepper',name:'Pepper',icon:'\u{1F336}\u{FE0F}',cat:'veggie',color:'#d04020',spacing:45,sun:'full',water:'regular',companions:['basil','carrot','tomato'],avoid:['fennel']},
+  {id:'lettuce',name:'Lettuce',icon:'\u{1F96C}',cat:'veggie',color:'#70b040',spacing:25,sun:'partial',water:'regular',companions:['carrot','radish','strawberry','chive'],avoid:[]},
+  {id:'spinach',name:'Spinach',icon:'\u{1F957}',cat:'veggie',color:'#308030',spacing:15,sun:'partial',water:'regular',companions:['strawberry','pea','bean'],avoid:['potato']},
+  {id:'kale',name:'Kale',icon:'\u{1F96C}',cat:'veggie',color:'#2a6a30',spacing:45,sun:'full',water:'regular',companions:['beetroot','onion','potato'],avoid:['strawberry','tomato']},
+  {id:'carrot',name:'Carrot',icon:'\u{1F955}',cat:'veggie',color:'#e08030',spacing:8,sun:'full',water:'regular',companions:['tomato','lettuce','onion','rosemary'],avoid:['dill']},
+  {id:'beetroot',name:'Beetroot',icon:'\u{1F7E3}',cat:'veggie',color:'#801050',spacing:10,sun:'full',water:'moderate',companions:['onion','lettuce','cabbage'],avoid:['bean']},
+  {id:'potato',name:'Potato',icon:'\u{1F954}',cat:'veggie',color:'#b09060',spacing:30,sun:'full',water:'regular',companions:['bean','corn','cabbage','marigold'],avoid:['tomato','squash']},
+  {id:'sweetpotato',name:'Sweet Potato',icon:'\u{1F360}',cat:'veggie',color:'#c06030',spacing:30,sun:'full',water:'moderate',companions:['bean','thyme'],avoid:['squash']},
+  {id:'onion',name:'Onion',icon:'\u{1F9C5}',cat:'veggie',color:'#c0a040',spacing:10,sun:'full',water:'moderate',companions:['carrot','lettuce','beetroot','tomato'],avoid:['bean','pea']},
+  {id:'garlic',name:'Garlic',icon:'\u{1F9C4}',cat:'veggie',color:'#e0d0b0',spacing:10,sun:'full',water:'low',companions:['tomato','beetroot','carrot'],avoid:['bean','pea']},
+  {id:'zucchini',name:'Zucchini',icon:'\u{1F952}',cat:'veggie',color:'#40802a',spacing:90,sun:'full',water:'regular',companions:['corn','bean','nasturtium','marigold'],avoid:['potato']},
+  {id:'cucumber',name:'Cucumber',icon:'\u{1F952}',cat:'veggie',color:'#308020',spacing:60,sun:'full',water:'high',companions:['bean','corn','pea','sunflower'],avoid:['potato','sage']},
+  {id:'pumpkin',name:'Pumpkin',icon:'\u{1F383}',cat:'veggie',color:'#d08020',spacing:120,sun:'full',water:'regular',companions:['corn','bean','marigold'],avoid:['potato']},
+  {id:'bean',name:'Green Bean',icon:'\u{1FAD8}',cat:'veggie',color:'#508030',spacing:15,sun:'full',water:'moderate',companions:['corn','potato','carrot','cucumber'],avoid:['onion','garlic','fennel']},
+  {id:'pea',name:'Pea',icon:'\u{1F7E2}',cat:'veggie',color:'#60a040',spacing:8,sun:'full',water:'moderate',companions:['carrot','radish','cucumber'],avoid:['onion','garlic']},
+  {id:'corn',name:'Sweet Corn',icon:'\u{1F33D}',cat:'veggie',color:'#e0c040',spacing:30,sun:'full',water:'regular',companions:['bean','pumpkin','cucumber'],avoid:['tomato']},
+  {id:'cabbage',name:'Cabbage',icon:'\u{1F96C}',cat:'veggie',color:'#60a060',spacing:45,sun:'full',water:'regular',companions:['onion','dill','thyme'],avoid:['strawberry','tomato']},
+  {id:'broccoli',name:'Broccoli',icon:'\u{1F966}',cat:'veggie',color:'#2a7a30',spacing:45,sun:'full',water:'regular',companions:['onion','beetroot'],avoid:['strawberry','tomato']},
+  {id:'radish',name:'Radish',icon:'\u{1F534}',cat:'veggie',color:'#d03030',spacing:5,sun:'full',water:'moderate',companions:['carrot','lettuce','pea','spinach'],avoid:[]},
+  {id:'cauliflower',name:'Cauliflower',icon:'\u{1F90D}',cat:'veggie',color:'#e8e0c8',spacing:45,sun:'full',water:'regular',companions:['bean','beetroot','onion'],avoid:['strawberry','tomato']},
+  {id:'eggplant',name:'Eggplant',icon:'\u{1F346}',cat:'veggie',color:'#503080',spacing:60,sun:'full',water:'regular',companions:['bean','pepper','marigold'],avoid:['fennel']},
+  {id:'basil',name:'Basil',icon:'\u{1F33F}',cat:'herb',color:'#40a040',spacing:25,sun:'full',water:'moderate',companions:['tomato','pepper'],avoid:['sage']},
+  {id:'parsley',name:'Parsley',icon:'\u{1F33F}',cat:'herb',color:'#308028',spacing:20,sun:'partial',water:'moderate',companions:['tomato','carrot'],avoid:[]},
+  {id:'rosemary',name:'Rosemary',icon:'\u{1F33F}',cat:'herb',color:'#607040',spacing:60,sun:'full',water:'low',companions:['bean','cabbage','carrot','sage'],avoid:[]},
+  {id:'thyme',name:'Thyme',icon:'\u{1F33F}',cat:'herb',color:'#708050',spacing:30,sun:'full',water:'low',companions:['cabbage','potato','strawberry','tomato'],avoid:[]},
+  {id:'mint',name:'Mint',icon:'\u{1F33F}',cat:'herb',color:'#30a048',spacing:30,sun:'partial',water:'regular',companions:['cabbage','tomato','pea'],avoid:[]},
+  {id:'coriander',name:'Coriander',icon:'\u{1F33F}',cat:'herb',color:'#50903a',spacing:15,sun:'partial',water:'moderate',companions:['carrot','spinach'],avoid:['fennel']},
+  {id:'chive',name:'Chives',icon:'\u{1F33F}',cat:'herb',color:'#609040',spacing:15,sun:'full',water:'moderate',companions:['carrot','tomato'],avoid:['bean','pea']},
+  {id:'dill',name:'Dill',icon:'\u{1F33F}',cat:'herb',color:'#80a050',spacing:25,sun:'full',water:'moderate',companions:['cabbage','lettuce','cucumber','onion'],avoid:['carrot','tomato']},
+  {id:'sage',name:'Sage',icon:'\u{1F33F}',cat:'herb',color:'#809070',spacing:45,sun:'full',water:'low',companions:['rosemary','cabbage','carrot'],avoid:['cucumber']},
+  {id:'oregano',name:'Oregano',icon:'\u{1F33F}',cat:'herb',color:'#609038',spacing:30,sun:'full',water:'low',companions:['tomato','pepper','basil'],avoid:[]},
+  {id:'strawberry',name:'Strawberry',icon:'\u{1F353}',cat:'fruit',color:'#d03040',spacing:30,sun:'full',water:'regular',companions:['lettuce','spinach','bean','onion','thyme'],avoid:['cabbage','broccoli']},
+  {id:'watermelon',name:'Watermelon',icon:'\u{1F349}',cat:'fruit',color:'#408030',spacing:120,sun:'full',water:'regular',companions:['corn','marigold','nasturtium'],avoid:['potato']},
+  {id:'melon',name:'Melon',icon:'\u{1F348}',cat:'fruit',color:'#c0a040',spacing:90,sun:'full',water:'regular',companions:['corn','marigold'],avoid:['potato']},
+  {id:'marigold',name:'Marigold',icon:'\u{1F3F5}\u{FE0F}',cat:'flower',color:'#e0a010',spacing:20,sun:'full',water:'low',companions:['tomato','pepper','bean','potato'],avoid:[]},
+  {id:'nasturtium',name:'Nasturtium',icon:'\u{1F338}',cat:'flower',color:'#e06020',spacing:30,sun:'full',water:'low',companions:['cucumber','zucchini','bean','cabbage'],avoid:[]},
+  {id:'sunflower',name:'Sunflower',icon:'\u{1F33B}',cat:'flower',color:'#e0c020',spacing:45,sun:'full',water:'moderate',companions:['cucumber','corn','bean'],avoid:['potato']},
+  {id:'lavender',name:'Lavender',icon:'\u{1F49C}',cat:'flower',color:'#8060a0',spacing:45,sun:'full',water:'low',companions:['rosemary','sage','thyme'],avoid:[]},
+];
+
+const BED_TYPES = [
+  {id:'raised',name:'Raised Bed',icon:'\u{1F7EB}',fill:'#a08058',stroke:'#7a5a30',sw:4,desc:'Wood-framed bed'},
+  {id:'inground',name:'In-Ground',icon:'\u{1F7E4}',fill:'#8a7048',stroke:'#5a4020',sw:2,desc:'Dug into soil'},
+  {id:'hugel',name:'Hügelkultur',icon:'⛰️',fill:'#907050',stroke:'#604828',sw:3,desc:'Mound bed'},
+  {id:'container',name:'Container',icon:'\u{1FAB4}',fill:'#988060',stroke:'#685030',sw:3,desc:'Pot or planter'},
+  {id:'herbspiral',name:'Herb Spiral',icon:'\u{1F300}',fill:'#90805a',stroke:'#605030',sw:3,desc:'Spiral herb bed'},
+];
+
+const PATH_TYPES = [
+  {id:'gravel',name:'Gravel',icon:'⬜',fill:'#c8b898',stroke:'#a09070',desc:'Crushed stone'},
+  {id:'mulch',name:'Mulch',icon:'\u{1F7EB}',fill:'#8B6914',stroke:'#6B4904',desc:'Wood chip mulch'},
+  {id:'paver',name:'Pavers',icon:'\u{1F532}',fill:'#989898',stroke:'#707070',desc:'Concrete pavers'},
+  {id:'stepping',name:'Stepping Stones',icon:'⚪',fill:'#b0a890',stroke:'#908870',desc:'Spaced stones'},
+  {id:'grass',name:'Grass',icon:'\u{1F7E9}',fill:'#7aaf4c',stroke:'#5a8f2c',desc:'Mowed grass path'},
+  {id:'brick',name:'Brick',icon:'\u{1F9F1}',fill:'#b07050',stroke:'#905030',desc:'Brick pathway'},
+];
+
+const STRUCTURES = [
+  {id:'greenhouse',name:'Greenhouse',icon:'\u{1F3E1}',fill:'rgba(180,220,180,0.2)',stroke:'#608898',sw:2,dash:[8,4],w:4,h:3,desc:'Growing shelter'},
+  {id:'tunnel',name:'Shade Tunnel',icon:'\u{1F32B}\u{FE0F}',fill:'rgba(200,200,200,0.15)',stroke:'#808080',sw:2,dash:[6,3],w:3,h:1.2,desc:'Shade cloth tunnel'},
+  {id:'coldframe',name:'Cold Frame',icon:'\u{1FA9F}',fill:'rgba(180,220,200,0.25)',stroke:'#6090a0',sw:2,dash:[4,4],w:1.2,h:0.8,desc:'Small glass frame'},
+  {id:'compost',name:'Compost Bin',icon:'♻️',fill:'#6a4a2a',stroke:'#4a2a0a',sw:2,dash:[],w:1,h:1,desc:'Compost area'},
+  {id:'wormfarm',name:'Worm Farm',icon:'\u{1FAB1}',fill:'#5a4030',stroke:'#3a2010',sw:2,dash:[],w:0.8,h:0.5,desc:'Vermicompost'},
+  {id:'rainbarrel',name:'Rain Barrel',icon:'\u{1F4A7}',fill:'#4080b0',stroke:'#306090',sw:2,dash:[],w:0.6,h:0.6,desc:'Water collection'},
+  {id:'shed',name:'Tool Shed',icon:'\u{1F527}',fill:'#808080',stroke:'#606060',sw:2,dash:[],w:2.5,h:2,desc:'Storage'},
+  {id:'trellis',name:'Trellis',icon:'\u{1FA9C}',fill:'#8a6a4a',stroke:'#6a4a2a',sw:3,dash:[],w:0.15,h:2,desc:'Vertical support'},
+  {id:'bench',name:'Potting Bench',icon:'\u{1FA91}',fill:'#a08060',stroke:'#806040',sw:2,dash:[],w:1.5,h:0.6,desc:'Work bench'},
+  {id:'waterpoint',name:'Water Tap',icon:'\u{1F6BF}',fill:'#3070a0',stroke:'#205080',sw:2,dash:[],w:0.3,h:0.3,desc:'Water source'},
+  {id:'fence',name:'Fence Section',icon:'\u{1F3D7}\u{FE0F}',fill:'#a0804a',stroke:'#806028',sw:3,dash:[],w:3,h:0.08,desc:'Garden boundary'},
+  {id:'gate',name:'Gate',icon:'\u{1F6AA}',fill:'#b09060',stroke:'#907040',sw:2,dash:[4,4],w:1,h:0.08,desc:'Entry gate'},
+];
+
+/* ═══ STATE ═══ */
+let canvas;
+let curTool = 'select';
+let curSubType = null;
+let selectedPlantId = null;
+let isDrawing = false;
+let drawOrigin = {x:0,y:0};
+let tempRect = null;
+let showGrid = true;
+let showCompanions = false;
+let companionLines = [];
+let history = [];
+let historyIdx = -1;
+let isPanning = false;
+let panStart = {x:0,y:0};
+let fillTargetBed = null;
+let trayCat = 'veggies';
+
+let clipboard = null;
+let bedShape = 'rect';
+let bgPhoto = null;
+let freehandBrush = null;
+
+/* ═══ INIT ═══ */
+document.addEventListener('DOMContentLoaded', ()=> {
+  const wrap = document.getElementById('canvasWrap');
+
+  // Custom selection handles
+  fabric.Object.prototype.set({
+    transparentCorners: false,
+    cornerColor: '#7da24b',
+    cornerStrokeColor: '#ffffff',
+    cornerSize: 9,
+    cornerStyle: 'circle',
+    borderColor: 'rgba(125,162,75,0.5)',
+    borderScaleFactor: 1.5,
+    borderDashArray: [4,3],
+    padding: 5,
+  });
+
+  // Custom rotation handle
+  fabric.Object.prototype.controls.mtr = new fabric.Control({
+    x: 0, y: -0.5, offsetY: -28,
+    cursorStyleHandler: () => 'grab',
+    actionHandler: fabric.controlsUtils.rotationWithSnapping,
+    actionName: 'rotate',
+    render: function(ctx, left, top) {
+      ctx.save();
+      ctx.translate(left, top);
+      ctx.beginPath();
+      ctx.arc(0, 0, 9, 0, Math.PI*2);
+      ctx.fillStyle = '#7da24b';
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(0, 0, 4, -2.2, 1.2);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(2, -4.5);
+      ctx.lineTo(4.5, -2);
+      ctx.lineTo(1, -2.5);
+      ctx.fillStyle = '#fff';
+      ctx.fill();
+      ctx.restore();
+    },
+    cornerSize: 20,
+  });
+
+  canvas = new fabric.Canvas('c', {
+    width: wrap.clientWidth,
+    height: wrap.clientHeight,
+    backgroundColor: '#e8e2d4',
+    selection: true,
+    preserveObjectStacking: true,
+    fireRightClick: true,
+    stopContextMenu: true,
+  });
+
+  canvas.on('after:render', renderGrid);
+  canvas.on('mouse:wheel', onWheel);
+  canvas.on('mouse:down', onMouseDown);
+  canvas.on('mouse:move', onMouseMove);
+  canvas.on('mouse:up', onMouseUp);
+  canvas.on('selection:created', onSelect);
+  canvas.on('selection:updated', onSelect);
+  canvas.on('selection:cleared', onDeselect);
+  canvas.on('object:modified', ()=> pushState());
+
+  canvas.on('mouse:over', function(e){
+    if(!e.target || !e.target._vg) return;
+    const obj = e.target;
+    const tooltip = document.getElementById('plantTooltip');
+    const wrapRect = document.getElementById('canvasWrap').getBoundingClientRect();
+    const vpt = canvas.viewportTransform;
+    const zoom = canvas.getZoom();
+    let cx, cy, html;
+
+    if(obj._type === 'plant'){
+      const p = PLANTS.find(pp=>pp.id===obj._plantId);
+      if(!p) return;
+      cx = (obj.left + (obj.width||0)/2) * zoom + vpt[4];
+      cy = obj.top * zoom + vpt[5];
+      html = `<div class="pt-name">${p.icon} ${p.name}</div><div class="pt-meta">${p.spacing}cm · ${p.sun} sun · ${p.water} water</div>`;
+    }
+    else if(obj._type === 'bed'){
+      const conf = BED_TYPES.find(b=>b.id===obj._sub);
+      if(obj.type === 'ellipse'){
+        cx = obj.left * zoom + vpt[4];
+        cy = (obj.top - obj.ry * (obj.scaleY||1)) * zoom + vpt[5];
+      } else {
+        cx = (obj.left + obj.width*(obj.scaleX||1)/2) * zoom + vpt[4];
+        cy = obj.top * zoom + vpt[5];
+      }
+      html = `<div class="pt-name">${obj._name||'Bed'}</div><div class="pt-meta">${conf?.name||obj._sub}</div>`;
+    }
+    else if(obj._type === 'structure'){
+      cx = (obj.left + (obj.width||0)*(obj.scaleX||1)/2) * zoom + vpt[4];
+      cy = obj.top * zoom + vpt[5];
+      html = `<div class="pt-name">${obj._name||'Structure'}</div>`;
+    }
+    else if(obj._type === 'path'){
+      cx = (obj.left + (obj.width||0)/2) * zoom + vpt[4];
+      cy = obj.top * zoom + vpt[5];
+      const conf = PATH_TYPES.find(p=>p.id===obj._sub);
+      html = `<div class="pt-name">${obj._name||'Path'}</div><div class="pt-meta">${conf?.name||obj._sub}</div>`;
+    }
+    else return;
+
+    tooltip.innerHTML = html;
+    tooltip.style.left = cx + 'px';
+    tooltip.style.top = (cy - 8) + 'px';
+    tooltip.classList.add('show');
+  });
+
+  canvas.on('mouse:out', function(e){
+    document.getElementById('plantTooltip').classList.remove('show');
+  });
+
+  freehandBrush = new fabric.PencilBrush(canvas);
+  freehandBrush.width = 20;
+  freehandBrush.color = '#c8b898';
+  freehandBrush.strokeLineCap = 'round';
+  freehandBrush.strokeLineJoin = 'round';
+
+  canvas.on('path:created', function(e){
+    if(curTool !== 'freehand') return;
+    const path = e.path;
+    const conf = PATH_TYPES.find(p=>p.id===curSubType) || PATH_TYPES[0];
+    path.set({
+      stroke: conf.fill,
+      strokeWidth: freehandBrush.width,
+      fill: null,
+      opacity: 0.85,
+      _vg: true, _type: 'path', _sub: curSubType, _name: conf.name + ' (freehand)',
+      selectable: true, evented: true,
+      hasControls: true, hasBorders: true,
+    });
+    canvas.renderAll();
+    pushState();
+  });
+
+  window.addEventListener('resize', ()=>{
+    canvas.setDimensions({width:wrap.clientWidth,height:wrap.clientHeight});
+    canvas.renderAll();
+  });
+  document.addEventListener('keydown', onKey);
+
+  document.querySelectorAll('.tool[data-tool]').forEach(btn=>{
+    btn.addEventListener('click', ()=> setTool(btn.dataset.tool));
+  });
+
+  document.getElementById('trayHandle').addEventListener('click', toggleTray);
+
+  setTool('select');
+  buildTrayTabs();
+  renderTray();
+  loadDesign();
+  pushState();
+  updateScaleBar();
+});
+
+/* ═══ GRID ═══ */
+function renderGrid(){
+  if(!showGrid) return;
+  const ctx = canvas.getContext('2d');
+  const vpt = canvas.viewportTransform;
+  const zoom = canvas.getZoom();
+  const w = canvas.width;
+  const h = canvas.height;
+
+  const gridSmall = 0.5 * PPM * zoom;
+  const gridBig = 1.0 * PPM * zoom;
+
+  const offX = vpt[4] % gridSmall;
+  const offY = vpt[5] % gridSmall;
+  const offXb = vpt[4] % gridBig;
+  const offYb = vpt[5] % gridBig;
+
+  ctx.save();
+  ctx.strokeStyle = 'rgba(0,0,0,0.04)';
+  ctx.lineWidth = 0.5;
+  ctx.beginPath();
+  for(let x = offX; x < w; x += gridSmall){ ctx.moveTo(x,0); ctx.lineTo(x,h); }
+  for(let y = offY; y < h; y += gridSmall){ ctx.moveTo(0,y); ctx.lineTo(w,y); }
+  ctx.stroke();
+
+  ctx.strokeStyle = 'rgba(0,0,0,0.09)';
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  for(let x = offXb; x < w; x += gridBig){ ctx.moveTo(x,0); ctx.lineTo(x,h); }
+  for(let y = offYb; y < h; y += gridBig){ ctx.moveTo(0,y); ctx.lineTo(w,y); }
+  ctx.stroke();
+
+  if(zoom > 0.4){
+    ctx.fillStyle = 'rgba(0,0,0,0.15)';
+    ctx.font = '500 9px Inter,sans-serif';
+    const startX = -Math.floor(vpt[4] / gridBig);
+    const startY = -Math.floor(vpt[5] / gridBig);
+    const cols = Math.ceil(w / gridBig) + 1;
+    const rows = Math.ceil(h / gridBig) + 1;
+    for(let i = 0; i < cols; i++){
+      const px = offXb + i * gridBig;
+      const m = startX + i;
+      if(m >= 0) ctx.fillText(m + 'm', px + 3, 12);
+    }
+    for(let j = 0; j < rows; j++){
+      const py = offYb + j * gridBig;
+      const m = startY + j;
+      if(m >= 0) ctx.fillText(m + 'm', 3, py - 3);
+    }
+  }
+  ctx.restore();
+}
+
+/* ═══ ZOOM & PAN ═══ */
+function onWheel(opt){
+  const e = opt.e;
+  const delta = e.deltaY;
+  let zoom = canvas.getZoom() * (0.999 ** delta);
+  zoom = Math.min(5, Math.max(0.2, zoom));
+  canvas.zoomToPoint({x: e.offsetX, y: e.offsetY}, zoom);
+  e.preventDefault();
+  e.stopPropagation();
+  updateZoomLabel();
+  updateScaleBar();
+}
+
+function updateZoomLabel(){
+  document.getElementById('zoomLabel').textContent = Math.round(canvas.getZoom()*100) + '%';
+}
+
+function updateScaleBar(){
+  const zoom = canvas.getZoom();
+  const barPx = 1 * PPM * zoom;
+  const el = document.getElementById('scaleBarLine');
+  const lbl = document.getElementById('scaleBarLabel');
+  if(barPx > 30 && barPx < 200){
+    el.style.width = barPx + 'px';
+    lbl.textContent = '1m';
+  } else if(barPx >= 200){
+    el.style.width = (barPx/2) + 'px';
+    lbl.textContent = '50cm';
+  } else {
+    el.style.width = (barPx*2) + 'px';
+    lbl.textContent = '2m';
+  }
+}
+
+function zoomIn(){
+  let z = Math.min(5, canvas.getZoom() * 1.25);
+  canvas.zoomToPoint({x:canvas.width/2,y:canvas.height/2}, z);
+  updateZoomLabel(); updateScaleBar();
+}
+function zoomOut(){
+  let z = Math.max(0.2, canvas.getZoom() / 1.25);
+  canvas.zoomToPoint({x:canvas.width/2,y:canvas.height/2}, z);
+  updateZoomLabel(); updateScaleBar();
+}
+function zoomReset(){
+  canvas.setZoom(1);
+  canvas.viewportTransform = [1,0,0,1,60,60];
+  canvas.renderAll();
+  updateZoomLabel(); updateScaleBar();
+}
+
+function updateStatusBar(){
+  const objs = canvas.getObjects().filter(o => o._vg);
+  const beds = objs.filter(o => o._type==='bed').length;
+  const plants = objs.filter(o => o._type==='plant').length;
+  const structs = objs.filter(o => o._type==='structure').length;
+  const paths = objs.filter(o => o._type==='path').length;
+  const notes = objs.filter(o => o._type==='annotation').length;
+  const total = beds + plants + structs + paths + notes;
+  const bar = document.getElementById('statusBar');
+  if(total === 0){ bar.classList.remove('show'); return; }
+  bar.classList.add('show');
+  const parts = [];
+  if(beds) parts.push(beds + ' bed' + (beds>1?'s':''));
+  if(plants) parts.push(plants + ' plant' + (plants>1?'s':''));
+  if(paths) parts.push(paths + ' path' + (paths>1?'s':''));
+  if(structs) parts.push(structs + ' structure' + (structs>1?'s':''));
+  if(notes) parts.push(notes + ' note' + (notes>1?'s':''));
+  bar.innerHTML = parts.join('<span style="opacity:.3">&middot;</span>');
+}
+
+/* ═══ TOOL MANAGEMENT ═══ */
+function setTool(t){
+  curTool = t;
+  document.querySelectorAll('.tool[data-tool]').forEach(b=> b.classList.toggle('active', b.dataset.tool === t));
+  const wrap = document.getElementById('canvasWrap');
+  wrap.className = 'canvas-wrap tool-' + t;
+
+  canvas.isDrawingMode = (t === 'freehand');
+  if(t === 'freehand'){
+    const conf = PATH_TYPES.find(p=>p.id===curSubType) || PATH_TYPES[0];
+    freehandBrush.color = conf.fill;
+    freehandBrush.width = 18;
+    canvas.freeDrawingBrush = freehandBrush;
+    canvas.selection = false;
+  } else {
+    canvas.selection = (t === 'select');
+  }
+
+  canvas.forEachObject(o => {
+    if(o._isPhoto || o._labelFor || o._companion) return;
+    o.selectable = (t === 'select');
+    o.evented = (t === 'select' || t === 'delete');
+  });
+
+  if(t === 'bed'){ trayCat = 'beds'; curSubType = curSubType || 'raised'; }
+  else if(t === 'plant'){ trayCat = trayCat || 'veggies'; }
+  else if(t === 'path' || t === 'freehand'){ trayCat = 'paths'; curSubType = curSubType || 'gravel'; }
+  else if(t === 'structure'){ trayCat = 'structures'; curSubType = curSubType || 'greenhouse'; }
+
+  buildTrayTabs();
+  renderTray();
+  canvas.discardActiveObject();
+  canvas.renderAll();
+}
+
+/* ═══ MOUSE HANDLERS ═══ */
+function onMouseDown(opt){
+  const e = opt.e;
+  const ptr = canvas.getPointer(e);
+
+  if(e.button === 2){
+    hideCtxMenu();
+    if(opt.target && opt.target._vg){
+      showCtxMenu(e.clientX, e.clientY, opt.target);
+    } else if(clipboard){
+      const menu = document.getElementById('ctxMenu');
+      menu.innerHTML = `<div class="ctx-item" onclick="pasteObj();hideCtxMenu()"><span class="ctx-icon">\u{1F4CB}</span><span class="ctx-label">Paste</span><span class="ctx-key">Ctrl+V</span></div>`;
+      menu.classList.add('open');
+      menu.style.left = e.clientX + 'px';
+      menu.style.top = e.clientY + 'px';
+    }
+    return;
+  }
+
+  if(e.altKey || e.button === 1 || (curTool === 'select' && !opt.target)){
+    if(curTool === 'select' && !opt.target){
+      isPanning = true;
+      panStart = {x: e.clientX, y: e.clientY};
+      canvas.selection = false;
+      return;
+    }
+    if(e.altKey || e.button === 1){
+      isPanning = true;
+      panStart = {x: e.clientX, y: e.clientY};
+      return;
+    }
+  }
+
+  if(curTool === 'delete' && opt.target && opt.target._vg){
+    canvas.remove(opt.target);
+    pushState();
+    if(showCompanions) drawCompanionLines();
+    return;
+  }
+
+  if(curTool === 'annotate'){
+    const text = prompt('Enter note:');
+    if(!text) return;
+    placeAnnotation(text, snap(ptr.x), snap(ptr.y));
+    pushState();
+    return;
+  }
+
+  if(curTool === 'bed' || curTool === 'path'){
+    isDrawing = true;
+    drawOrigin = {x: snap(ptr.x), y: snap(ptr.y)};
+    const conf = curTool === 'bed' ? BED_TYPES.find(b=>b.id===curSubType) : PATH_TYPES.find(p=>p.id===curSubType);
+    if(!conf) return;
+
+    if(curTool === 'bed' && bedShape === 'circle'){
+      tempRect = new fabric.Ellipse({
+        left: drawOrigin.x, top: drawOrigin.y,
+        rx: 1, ry: 1,
+        fill: conf.fill, stroke: conf.stroke,
+        strokeWidth: conf.sw || 2,
+        opacity: 0.85,
+        selectable: false, evented: false,
+        originX: 'center', originY: 'center',
+      });
+    } else {
+      tempRect = new fabric.Rect({
+        left: drawOrigin.x, top: drawOrigin.y,
+        width: 1, height: 1,
+        fill: conf.fill, stroke: conf.stroke,
+        strokeWidth: conf.sw || 2,
+        rx: curTool === 'bed' ? 4 : 2,
+        ry: curTool === 'bed' ? 4 : 2,
+        opacity: 0.85,
+        selectable: false, evented: false,
+      });
+    }
+    canvas.add(tempRect);
+    return;
+  }
+
+  if(curTool === 'plant' && selectedPlantId){
+    placeOnePlant(selectedPlantId, snap(ptr.x), snap(ptr.y));
+    pushState();
+    if(showCompanions) drawCompanionLines();
+    return;
+  }
+
+  if(curTool === 'structure' && curSubType){
+    placeStructure(curSubType, snap(ptr.x), snap(ptr.y));
+    pushState();
+    return;
+  }
+}
+
+function onMouseMove(opt){
+  const e = opt.e;
+  if(isPanning){
+    const vpt = canvas.viewportTransform;
+    vpt[4] += e.clientX - panStart.x;
+    vpt[5] += e.clientY - panStart.y;
+    panStart = {x: e.clientX, y: e.clientY};
+    canvas.requestRenderAll();
+    return;
+  }
+  if(isDrawing && tempRect){
+    const ptr = canvas.getPointer(e);
+    const sx = snap(ptr.x), sy = snap(ptr.y);
+
+    if(tempRect.type === 'ellipse'){
+      const rx = Math.abs(sx - drawOrigin.x) / 2;
+      const ry = Math.abs(sy - drawOrigin.y) / 2;
+      const useR = e.shiftKey ? Math.max(rx, ry) : null;
+      tempRect.set({
+        left: drawOrigin.x,
+        top: drawOrigin.y,
+        rx: Math.max(useR || rx, 2),
+        ry: Math.max(useR || ry, 2),
+      });
+      canvas.renderAll();
+      const dm = ((useR||rx)*2/PPM).toFixed(1), dm2 = ((useR||ry)*2/PPM).toFixed(1);
+      document.getElementById('dimLabel').textContent = dm + 'm × ' + dm2 + 'm';
+    } else {
+      const left = Math.min(drawOrigin.x, sx);
+      const top = Math.min(drawOrigin.y, sy);
+      const w = Math.abs(sx - drawOrigin.x);
+      const h = Math.abs(sy - drawOrigin.y);
+      tempRect.set({left, top, width: Math.max(w,2), height: Math.max(h,2)});
+      canvas.renderAll();
+      const wm = (w/PPM).toFixed(1), hm = (h/PPM).toFixed(1);
+      document.getElementById('dimLabel').textContent = wm + 'm × ' + hm + 'm';
+    }
+  }
+}
+
+function onMouseUp(opt){
+  if(isPanning){
+    isPanning = false;
+    canvas.selection = (curTool === 'select');
+    return;
+  }
+  if(isDrawing && tempRect){
+    isDrawing = false;
+    const isEllipse = tempRect.type === 'ellipse';
+    const tooSmall = isEllipse ? (tempRect.rx < 3 && tempRect.ry < 3) : (tempRect.width < 5 && tempRect.height < 5);
+    if(tooSmall){ canvas.remove(tempRect); tempRect = null; return; }
+
+    const objType = curTool;
+    const conf = objType === 'bed' ? BED_TYPES.find(b=>b.id===curSubType) : PATH_TYPES.find(p=>p.id===curSubType);
+    const shapeName = isEllipse ? 'Circle ' : '';
+    tempRect.set({
+      selectable: true, evented: true,
+      hasControls: true, hasBorders: true,
+      _vg: true,
+      _type: objType,
+      _sub: curSubType,
+      _shape: isEllipse ? 'circle' : 'rect',
+      _name: objType === 'bed' ? (shapeName + (conf?.name || 'Bed')) : (conf?.name || 'Path'),
+    });
+
+    addLabel(tempRect);
+    tempRect = null;
+    document.getElementById('dimLabel').textContent = '';
+    pushState();
+    if(curTool === 'bed') setTool('select');
+  }
+}
+
+/* ═══ OBJECT CREATION ═══ */
+function snap(v){ return Math.round(v / SNAP_PX) * SNAP_PX; }
+
+function placeOnePlant(plantId, x, y){
+  const p = PLANTS.find(pp=>pp.id===plantId);
+  if(!p) return;
+  const r = Math.max(6, (p.spacing/100) * PPM / 2);
+
+  const circle = new fabric.Circle({
+    left: x - r, top: y - r,
+    radius: r,
+    fill: p.color,
+    stroke: '#fff',
+    strokeWidth: 1.5,
+    opacity: 0.9,
+    shadow: new fabric.Shadow({color:'rgba(0,0,0,0.2)',blur:6,offsetX:1,offsetY:2}),
+    originX:'left', originY:'top',
+    _vg: true, _type:'plant', _plantId: p.id, _name: p.name,
+    selectable: false, evented: false,
+  });
+
+  const label = new fabric.Text(p.icon, {
+    left: x, top: y,
+    fontSize: Math.max(10, r * 0.9),
+    originX:'center', originY:'center',
+    selectable: false, evented: false,
+  });
+
+  const group = new fabric.Group([circle, label], {
+    left: x - r, top: y - r,
+    _vg: true, _type:'plant', _plantId: p.id, _name: p.name,
+    hasControls: false,
+    lockScalingX: true, lockScalingY: true,
+    selectable: (curTool === 'select'),
+    evented: (curTool === 'select'),
+  });
+
+  canvas.add(group);
+}
+
+function placeStructure(typeId, x, y){
+  const s = STRUCTURES.find(ss=>ss.id===typeId);
+  if(!s) return;
+  const w = s.w * PPM, h = s.h * PPM;
+
+  const rect = new fabric.Rect({
+    width: w, height: h,
+    fill: s.fill, stroke: s.stroke,
+    strokeWidth: s.sw,
+    strokeDashArray: s.dash.length ? s.dash : undefined,
+    rx: typeId === 'rainbarrel' || typeId === 'waterpoint' ? w/2 : 3,
+    ry: typeId === 'rainbarrel' || typeId === 'waterpoint' ? h/2 : 3,
+    originX:'left', originY:'top',
+  });
+
+  const label = new fabric.Text(s.icon + ' ' + s.name, {
+    fontSize: 10,
+    fill: s.fill.startsWith('rgba') ? s.stroke : '#fff',
+    fontWeight: 'bold',
+    fontFamily: 'Inter,sans-serif',
+    originX:'center', originY:'center',
+    left: w/2, top: h/2,
+    textAlign: 'center',
+  });
+
+  const group = new fabric.Group([rect, label], {
+    left: x - w/2, top: y - h/2,
+    _vg: true, _type:'structure', _sub: typeId, _name: s.name,
+    selectable: (curTool === 'select'),
+    evented: (curTool === 'select'),
+  });
+
+  canvas.add(group);
+}
+
+function addLabel(obj){
+  if(!obj._vg) return;
+  const isEllipse = obj.type === 'ellipse';
+  let w, h, cx, cy;
+  if(isEllipse){
+    w = obj.rx * 2; h = obj.ry * 2;
+    cx = obj.left; cy = obj.top;
+  } else {
+    w = obj.width; h = obj.height;
+    cx = obj.left + w/2; cy = obj.top + h/2;
+  }
+  const wm = (w/PPM).toFixed(1), hm = (h/PPM).toFixed(1);
+  const sizeText = isEllipse ? (wm + 'm Ø') : (wm + 'm × ' + hm + 'm');
+  const text = (obj._name || obj._type) + '\n' + sizeText;
+
+  const label = new fabric.Text(text, {
+    left: cx, top: cy,
+    fontSize: 10,
+    fill: '#fff',
+    fontWeight: 'bold',
+    fontFamily: 'Inter,sans-serif',
+    textAlign: 'center',
+    originX: 'center',
+    originY: 'center',
+    shadow: new fabric.Shadow({color:'rgba(0,0,0,0.5)',blur:4}),
+    selectable: false, evented: false,
+    _labelFor: obj,
+  });
+  canvas.add(label);
+
+  obj._label = label;
+  obj.on('moving', ()=> updateLabel(obj));
+  obj.on('scaling', ()=> updateLabel(obj));
+  obj.on('modified', ()=> updateLabel(obj));
+  obj.on('removed', ()=> { if(obj._label) canvas.remove(obj._label); });
+}
+
+function updateLabel(obj){
+  if(!obj._label) return;
+  const isEllipse = obj.type === 'ellipse';
+  let w, h, cx, cy;
+  if(isEllipse){
+    w = obj.rx * 2 * (obj.scaleX||1); h = obj.ry * 2 * (obj.scaleY||1);
+    cx = obj.left; cy = obj.top;
+  } else {
+    w = obj.width * (obj.scaleX||1); h = obj.height * (obj.scaleY||1);
+    cx = obj.left + w/2; cy = obj.top + h/2;
+  }
+  const wm = (w/PPM).toFixed(1), hm = (h/PPM).toFixed(1);
+  const sizeText = isEllipse ? (wm + 'm Ø') : (wm + 'm × ' + hm + 'm');
+  obj._label.set({
+    left: cx, top: cy,
+    text: (obj._name || obj._type) + '\n' + sizeText,
+  });
+  canvas.renderAll();
+}
+
+/* ═══ COMPANION PLANTING VIZ ═══ */
+function toggleCompanions(){
+  showCompanions = !showCompanions;
+  document.getElementById('btnCompanion').classList.toggle('active', showCompanions);
+  document.getElementById('compLegend').classList.toggle('show', showCompanions);
+  if(showCompanions) drawCompanionLines();
+  else clearCompanionLines();
+}
+
+function clearCompanionLines(){
+  companionLines.forEach(l => canvas.remove(l));
+  companionLines = [];
+  canvas.renderAll();
+}
+
+function drawCompanionLines(){
+  clearCompanionLines();
+  const plants = canvas.getObjects().filter(o => o._type === 'plant');
+  if(plants.length < 2) return;
+
+  for(let i = 0; i < plants.length; i++){
+    for(let j = i+1; j < plants.length; j++){
+      const a = plants[i], b = plants[j];
+      const pa = PLANTS.find(p=>p.id===a._plantId);
+      const pb = PLANTS.find(p=>p.id===b._plantId);
+      if(!pa || !pb) continue;
+
+      const ax = a.left + (a.width||0)/2, ay = a.top + (a.height||0)/2;
+      const bx = b.left + (b.width||0)/2, by = b.top + (b.height||0)/2;
+      const dist = Math.sqrt((bx-ax)**2 + (by-ay)**2);
+      if(dist > 3 * PPM) continue;
+
+      const isCompanion = pa.companions.includes(pb.id) || pb.companions.includes(pa.id);
+      const isAvoid = pa.avoid.includes(pb.id) || pb.avoid.includes(pa.id);
+
+      if(isCompanion || isAvoid){
+        const line = new fabric.Line([ax, ay, bx, by], {
+          stroke: isCompanion ? '#4CAF50' : '#F44336',
+          strokeWidth: 2,
+          strokeDashArray: isAvoid ? [6,4] : undefined,
+          opacity: 0.5,
+          selectable: false, evented: false,
+          _companion: true,
+        });
+        companionLines.push(line);
+        canvas.add(line);
+        canvas.sendToBack(line);
+      }
+    }
+  }
+  canvas.renderAll();
+}
+
+/* ═══ SELECTION / PROPERTIES ═══ */
+function onSelect(e){
+  const obj = e.selected?.[0];
+  if(!obj || !obj._vg) return;
+  showPropPanel(obj);
+}
+
+function onDeselect(){
+  document.getElementById('propPanel').style.display = 'none';
+}
+
+function showPropPanel(obj){
+  const panel = document.getElementById('propPanel');
+  let html = `<div class="prop-header"><h3>${obj._name || obj._type}</h3><button class="prop-close" onclick="closeProp()">✕</button></div>`;
+
+  if(obj._type === 'annotation'){
+    html += `<div class="prop-row"><span class="prop-label">Type</span><span class="prop-val">Annotation</span></div>`;
+    html += `<div class="prop-actions"><button class="prop-btn prop-btn-danger" onclick="deleteSel()">\u{1F5D1}\u{FE0F} Delete</button></div>`;
+  }
+  else if(obj._type === 'bed' || obj._type === 'path'){
+    const isEllipse = obj.type === 'ellipse';
+    let w, h, area;
+    if(isEllipse){
+      w = ((obj.rx * 2 * (obj.scaleX||1))/PPM).toFixed(2);
+      h = ((obj.ry * 2 * (obj.scaleY||1))/PPM).toFixed(2);
+      area = (Math.PI * (w/2) * (h/2)).toFixed(1);
+    } else {
+      w = ((obj.width * (obj.scaleX||1))/PPM).toFixed(2);
+      h = ((obj.height * (obj.scaleY||1))/PPM).toFixed(2);
+      area = (w * h).toFixed(1);
+    }
+    const shape = isEllipse ? 'Circle' : 'Rectangle';
+    html += `<div class="prop-row"><span class="prop-label">Type</span><span class="prop-val">${obj._sub} (${shape})</span></div>`;
+    html += `<div class="prop-row"><span class="prop-label">Size</span><span class="prop-val">${w}m × ${h}m (${area}m²)</span></div>`;
+    html += `<div class="prop-row"><span class="prop-label">Name</span><input class="prop-input" value="${obj._name||''}" onchange="renameSel(this.value)"></div>`;
+    if(obj._type === 'bed'){
+      html += `<div class="prop-actions"><button class="prop-btn prop-btn-primary" onclick="openFillModal()">\u{1F331} Fill Bed</button><button class="prop-btn prop-btn-danger" onclick="deleteSel()">\u{1F5D1}\u{FE0F} Delete</button></div>`;
+    } else {
+      html += `<div class="prop-actions"><button class="prop-btn prop-btn-danger" onclick="deleteSel()">\u{1F5D1}\u{FE0F} Delete</button></div>`;
+    }
+  }
+  else if(obj._type === 'plant'){
+    const p = PLANTS.find(pp=>pp.id===obj._plantId);
+    if(p){
+      html += `<div class="prop-row"><span class="prop-label">Spacing</span><span class="prop-val">${p.spacing}cm</span></div>`;
+      html += `<div class="prop-row"><span class="prop-label">Sun</span><span class="prop-val">${p.sun}</span></div>`;
+      html += `<div class="prop-row"><span class="prop-label">Water</span><span class="prop-val">${p.water}</span></div>`;
+      if(p.companions.length){
+        html += `<div class="prop-row"><span class="prop-label">Friends</span><div class="prop-tags">${p.companions.map(c=>{const cp=PLANTS.find(x=>x.id===c);return`<span class="prop-tag good">${cp?.icon||''} ${cp?.name||c}</span>`;}).join('')}</div></div>`;
+      }
+      if(p.avoid.length){
+        html += `<div class="prop-row"><span class="prop-label">Avoid</span><div class="prop-tags">${p.avoid.map(c=>{const cp=PLANTS.find(x=>x.id===c);return`<span class="prop-tag bad">${cp?.icon||''} ${cp?.name||c}</span>`;}).join('')}</div></div>`;
+      }
+    }
+    html += `<div class="prop-actions"><button class="prop-btn prop-btn-danger" onclick="deleteSel()">\u{1F5D1}\u{FE0F} Delete</button></div>`;
+  }
+  else if(obj._type === 'structure'){
+    const s = STRUCTURES.find(ss=>ss.id===obj._sub);
+    html += `<div class="prop-row"><span class="prop-label">Type</span><span class="prop-val">${s?.name||obj._sub}</span></div>`;
+    html += `<div class="prop-row"><span class="prop-label">Name</span><input class="prop-input" value="${obj._name||''}" onchange="renameSel(this.value)"></div>`;
+    html += `<div class="prop-actions"><button class="prop-btn prop-btn-danger" onclick="deleteSel()">\u{1F5D1}\u{FE0F} Delete</button></div>`;
+  }
+
+  panel.innerHTML = html;
+  panel.style.display = 'block';
+}
+
+function closeProp(){
+  document.getElementById('propPanel').style.display = 'none';
+  canvas.discardActiveObject();
+  canvas.renderAll();
+}
+
+function renameSel(name){
+  const obj = canvas.getActiveObject();
+  if(!obj) return;
+  obj._name = name;
+  if(obj._label) updateLabel(obj);
+}
+
+function deleteSel(){
+  const obj = canvas.getActiveObject();
+  if(!obj) return;
+  canvas.remove(obj);
+  closeProp();
+  pushState();
+  if(showCompanions) drawCompanionLines();
+}
+
+/* ═══ PHOTO BACKGROUND ═══ */
+function triggerPhotoUpload(){
+  document.getElementById('photoInput').click();
+}
+
+function handlePhotoUpload(e){
+  const file = e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev){
+    fabric.Image.fromURL(ev.target.result, function(img){
+      if(bgPhoto) canvas.remove(bgPhoto);
+      const scale = Math.max(canvas.width / img.width, canvas.height / img.height) * 0.8;
+      img.set({
+        left: canvas.width / 2 / canvas.getZoom(),
+        top: canvas.height / 2 / canvas.getZoom(),
+        scaleX: scale, scaleY: scale,
+        originX: 'center', originY: 'center',
+        opacity: 0.3,
+        selectable: false, evented: false,
+        hasControls: false, hasBorders: false,
+        _isPhoto: true,
+      });
+      canvas.add(img);
+      canvas.sendToBack(img);
+      bgPhoto = img;
+      document.getElementById('photoControls').classList.add('show');
+      document.getElementById('photoOpacity').value = 30;
+      document.getElementById('photoOpVal').textContent = '30%';
+      canvas.renderAll();
+      pushState();
+    });
+  };
+  reader.readAsDataURL(file);
+  e.target.value = '';
+}
+
+function setPhotoOpacity(val){
+  if(!bgPhoto) return;
+  bgPhoto.set('opacity', val / 100);
+  document.getElementById('photoOpVal').textContent = val + '%';
+  canvas.renderAll();
+}
+
+function togglePhotoLock(locked){
+  if(!bgPhoto) return;
+  bgPhoto.set({ selectable: !locked, evented: !locked, hasControls: !locked, hasBorders: !locked });
+  canvas.renderAll();
+}
+
+function removePhoto(){
+  if(!bgPhoto) return;
+  canvas.remove(bgPhoto);
+  bgPhoto = null;
+  document.getElementById('photoControls').classList.remove('show');
+  canvas.renderAll();
+  pushState();
+}
+
+/* ═══ ANNOTATION ═══ */
+function placeAnnotation(text, x, y){
+  const note = new fabric.Textbox(text, {
+    left: x, top: y,
+    width: 120,
+    fontSize: 11,
+    fill: '#1a2e1a',
+    fontFamily: 'Inter,sans-serif',
+    fontWeight: '600',
+    textAlign: 'center',
+    originX: 'center', originY: 'center',
+    backgroundColor: 'rgba(255,253,238,0.85)',
+    padding: 8,
+    borderColor: 'rgba(125,162,75,0.5)',
+    cornerColor: '#7da24b',
+    cornerStrokeColor: '#fff',
+    cornerSize: 8,
+    cornerStyle: 'circle',
+    _vg: true, _type: 'annotation', _name: 'Note',
+    selectable: true, evented: true,
+    hasControls: true,
+    editable: true,
+  });
+  canvas.add(note);
+  canvas.setActiveObject(note);
+  canvas.renderAll();
+}
+
+/* ═══ PLANTING METHODS ═══ */
+const FILL_METHODS = [
+  {id:'rows', name:'Rows', desc:'Traditional straight rows'},
+  {id:'grid', name:'Grid', desc:'Square-foot style grid'},
+  {id:'stagger', name:'Stagger', desc:'Offset rows for density'},
+  {id:'radial', name:'Radial', desc:'Concentric circles from center'},
+  {id:'random', name:'Scatter', desc:'Natural polyculture scatter'},
+  {id:'companion', name:'Companion Group', desc:'Mixed companion planting'},
+];
+
+function fillBedWithMethod(plantId, method){
+  if(!fillTargetBed) return;
+  const p = PLANTS.find(pp=>pp.id===plantId);
+  if(!p) return;
+
+  const bed = fillTargetBed;
+  const isCircle = bed.type === 'ellipse';
+  let bw, bh, bx, by;
+
+  if(isCircle){
+    bw = bed.rx * 2 * (bed.scaleX||1);
+    bh = bed.ry * 2 * (bed.scaleY||1);
+    bx = bed.left - bw/2;
+    by = bed.top - bh/2;
+  } else {
+    bw = bed.width * (bed.scaleX||1);
+    bh = bed.height * (bed.scaleY||1);
+    bx = bed.left;
+    by = bed.top;
+  }
+
+  const spacePx = (p.spacing / 100) * PPM;
+  const cx = bx + bw/2, cy = by + bh/2;
+
+  if(method === 'rows' || method === 'grid'){
+    const cols = Math.floor(bw / spacePx);
+    const rows = Math.floor(bh / spacePx);
+    const marginX = (bw - (cols-1) * spacePx) / 2;
+    const marginY = (bh - (rows-1) * spacePx) / 2;
+    for(let r = 0; r < rows; r++){
+      for(let c = 0; c < cols; c++){
+        const px = bx + marginX + c * spacePx;
+        const py = by + marginY + r * spacePx;
+        if(isCircle && !isInsideEllipse(px, py, cx, cy, bw/2, bh/2)) continue;
+        placeOnePlant(plantId, px, py);
+      }
+    }
+  }
+  else if(method === 'stagger'){
+    const cols = Math.floor(bw / spacePx);
+    const rowH = spacePx * 0.866;
+    const rows = Math.floor(bh / rowH);
+    const marginY = (bh - (rows-1) * rowH) / 2;
+    for(let r = 0; r < rows; r++){
+      const offset = (r % 2) * spacePx * 0.5;
+      const marginX = (bw - (cols-1) * spacePx) / 2 + offset;
+      for(let c = 0; c < cols; c++){
+        const px = bx + marginX + c * spacePx;
+        const py = by + marginY + r * rowH;
+        if(px < bx || px > bx + bw) continue;
+        if(isCircle && !isInsideEllipse(px, py, cx, cy, bw/2, bh/2)) continue;
+        placeOnePlant(plantId, px, py);
+      }
+    }
+  }
+  else if(method === 'radial'){
+    placeOnePlant(plantId, cx, cy);
+    let ring = 1;
+    while(ring * spacePx < Math.min(bw, bh)/2){
+      const radius = ring * spacePx;
+      const circumference = 2 * Math.PI * radius;
+      const count = Math.max(4, Math.floor(circumference / spacePx));
+      for(let i = 0; i < count; i++){
+        const angle = (i / count) * Math.PI * 2;
+        const px = cx + Math.cos(angle) * radius;
+        const py = cy + Math.sin(angle) * radius;
+        if(isCircle && !isInsideEllipse(px, py, cx, cy, bw/2, bh/2)) continue;
+        if(px < bx || px > bx+bw || py < by || py > by+bh) continue;
+        placeOnePlant(plantId, px, py);
+      }
+      ring++;
+    }
+  }
+  else if(method === 'random'){
+    const area = isCircle ? Math.PI * (bw/2) * (bh/2) : bw * bh;
+    const count = Math.floor(area / (spacePx * spacePx));
+    let placed = 0, attempts = 0;
+    while(placed < count && attempts < count * 5){
+      const px = bx + Math.random() * bw;
+      const py = by + Math.random() * bh;
+      if(isCircle && !isInsideEllipse(px, py, cx, cy, bw/2, bh/2)){ attempts++; continue; }
+      placeOnePlant(plantId, px, py);
+      placed++; attempts++;
+    }
+  }
+  else if(method === 'companion'){
+    const comp = p.companions.filter(c => PLANTS.find(x=>x.id===c));
+    const allPlants = [plantId, ...comp.slice(0, 3)];
+    const cols = Math.floor(bw / spacePx);
+    const rows = Math.floor(bh / spacePx);
+    const marginX = (bw - (cols-1) * spacePx) / 2;
+    const marginY = (bh - (rows-1) * spacePx) / 2;
+    let idx = 0;
+    for(let r = 0; r < rows; r++){
+      for(let c = 0; c < cols; c++){
+        const px = bx + marginX + c * spacePx;
+        const py = by + marginY + r * spacePx;
+        if(isCircle && !isInsideEllipse(px, py, cx, cy, bw/2, bh/2)) continue;
+        placeOnePlant(allPlants[idx % allPlants.length], px, py);
+        idx++;
+      }
+    }
+  }
+
+  document.getElementById('fillModal').classList.remove('open');
+  fillTargetBed = null;
+  pushState();
+  if(showCompanions) drawCompanionLines();
+  setTool('select');
+}
+
+function isInsideEllipse(px, py, cx, cy, rx, ry){
+  return ((px-cx)*(px-cx))/(rx*rx) + ((py-cy)*(py-cy))/(ry*ry) <= 1;
+}
+
+/* ═══ FILL BED WITH ROWS ═══ */
+let fillMethod = 'rows';
+
+function openFillModal(){
+  fillTargetBed = canvas.getActiveObject();
+  if(!fillTargetBed || fillTargetBed._type !== 'bed') return;
+  fillMethod = 'rows';
+  renderFillModal();
+  document.getElementById('fillModal').classList.add('open');
+}
+
+function renderFillModal(){
+  const list = document.getElementById('fillCropList');
+  const isCircle = fillTargetBed && fillTargetBed.type === 'ellipse';
+  let bedW, bedH;
+  if(isCircle){
+    bedW = fillTargetBed.rx * 2 * (fillTargetBed.scaleX||1) / PPM * 100;
+    bedH = fillTargetBed.ry * 2 * (fillTargetBed.scaleY||1) / PPM * 100;
+  } else {
+    bedW = (fillTargetBed.width * (fillTargetBed.scaleX||1)) / PPM * 100;
+    bedH = (fillTargetBed.height * (fillTargetBed.scaleY||1)) / PPM * 100;
+  }
+
+  const methodHtml = '<div class="section-label">Planting Method</div><div class="method-row">' +
+    FILL_METHODS.map(m => `<span class="method-chip ${fillMethod===m.id?'active':''}" onclick="fillMethod='${m.id}';renderFillModal()" title="${m.desc}">${m.name}</span>`).join('') +
+    '</div><div style="height:12px"></div><div class="section-label">Select Crop</div>';
+
+  const allPlants = PLANTS.filter(p=>p.cat!=='flower');
+  const cropHtml = allPlants.map(p => {
+    const cols = Math.floor(bedW / p.spacing);
+    const rows = Math.floor(bedH / p.spacing);
+    const total = isCircle ? Math.floor(cols * rows * 0.785) : cols * rows;
+    return `<div class="template-card" onclick="fillBedWithMethod('${p.id}','${fillMethod}')">
+      <div class="template-icon">${p.icon}</div>
+      <div class="template-info">
+        <div class="template-name">${p.name}</div>
+        <div class="template-desc">${p.spacing}cm spacing · ~${total} plants</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  list.innerHTML = methodHtml + cropHtml;
+}
+
+function fillBedWith(plantId){
+  if(!fillTargetBed) return;
+  const p = PLANTS.find(pp=>pp.id===plantId);
+  if(!p) return;
+
+  const bed = fillTargetBed;
+  const bw = bed.width * (bed.scaleX||1);
+  const bh = bed.height * (bed.scaleY||1);
+  const spacePx = (p.spacing / 100) * PPM;
+  const cols = Math.floor(bw / spacePx);
+  const rows = Math.floor(bh / spacePx);
+  const marginX = (bw - (cols-1) * spacePx) / 2;
+  const marginY = (bh - (rows-1) * spacePx) / 2;
+
+  for(let r = 0; r < rows; r++){
+    for(let c = 0; c < cols; c++){
+      const x = bed.left + marginX + c * spacePx;
+      const y = bed.top + marginY + r * spacePx;
+      placeOnePlant(plantId, x, y);
+    }
+  }
+
+  document.getElementById('fillModal').classList.remove('open');
+  fillTargetBed = null;
+  pushState();
+  if(showCompanions) drawCompanionLines();
+  setTool('select');
+}
+
+/* ═══ BOTTOM TRAY ═══ */
+function buildTrayTabs(){
+  const tabs = document.getElementById('trayTabs');
+  let items = [];
+  if(curTool === 'bed') items = [{id:'beds',label:'Bed Types'}];
+  else if(curTool === 'path' || curTool === 'freehand') items = [{id:'paths',label:'Path Materials'}];
+  else if(curTool === 'structure') items = [{id:'structures',label:'Structures'}];
+  else items = [
+    {id:'veggies',label:'Veggies'},{id:'herbs',label:'Herbs'},
+    {id:'fruits',label:'Fruits'},{id:'flowers',label:'Flowers'},
+    {id:'beds',label:'Beds'},{id:'paths',label:'Paths'},{id:'structures',label:'Structures'},
+  ];
+
+  if(!items.find(i=>i.id===trayCat)) trayCat = items[0].id;
+
+  tabs.innerHTML = items.map(i =>
+    `<button class="tray-tab ${trayCat===i.id?'active':''}" onclick="trayCat='${i.id}';buildTrayTabs();renderTray()">${i.label}</button>`
+  ).join('');
+}
+
+function renderTray(){
+  const el = document.getElementById('trayItems');
+  let html = '';
+
+  if(trayCat === 'beds'){
+    html = '<div class="shape-toggle">' +
+      `<button class="shape-btn ${bedShape==='rect'?'active':''}" onclick="bedShape='rect';renderTray()"><svg viewBox="0 0 20 20"><rect x="3" y="5" width="14" height="10" rx="2"/></svg>Rect</button>` +
+      `<button class="shape-btn ${bedShape==='circle'?'active':''}" onclick="bedShape='circle';renderTray()"><svg viewBox="0 0 20 20"><ellipse cx="10" cy="10" rx="7" ry="5"/></svg>Circle</button>` +
+    '</div>';
+    html += BED_TYPES.map(b =>
+      `<div class="tray-item ${curSubType===b.id && curTool==='bed'?'selected':''}" onclick="curSubType='${b.id}';setTool('bed')">
+        <div class="ti-icon">${b.icon}</div><div class="ti-name">${b.name}</div><div class="ti-meta">${b.desc}</div>
+      </div>`
+    ).join('');
+  }
+  else if(trayCat === 'paths'){
+    html = PATH_TYPES.map(p =>
+      `<div class="tray-item ${curSubType===p.id && (curTool==='path'||curTool==='freehand')?'selected':''}" onclick="curSubType='${p.id}';selectPathMaterial('${p.id}')">
+        <div class="ti-icon">${p.icon}</div><div class="ti-name">${p.name}</div><div class="ti-meta">${p.desc}</div>
+      </div>`
+    ).join('');
+  }
+  else if(trayCat === 'structures'){
+    html = STRUCTURES.map(s =>
+      `<div class="tray-item ${curSubType===s.id && curTool==='structure'?'selected':''}" onclick="curSubType='${s.id}';setTool('structure')">
+        <div class="ti-icon">${s.icon}</div><div class="ti-name">${s.name}</div><div class="ti-meta">${s.desc}</div>
+      </div>`
+    ).join('');
+  }
+  else {
+    const catMap = {veggies:'veggie',herbs:'herb',fruits:'fruit',flowers:'flower'};
+    const cat = catMap[trayCat] || 'veggie';
+    const list = PLANTS.filter(p => p.cat === cat);
+    html = list.map(p =>
+      `<div class="tray-item ${selectedPlantId===p.id?'selected':''}" onclick="selectPlant('${p.id}')">
+        <div class="ti-icon">${p.icon}</div><div class="ti-name">${p.name}</div><div class="ti-meta">${p.spacing}cm</div>
+      </div>`
+    ).join('');
+  }
+
+  el.innerHTML = html;
+}
+
+function selectPlant(id){
+  selectedPlantId = id;
+  if(curTool !== 'plant') setTool('plant');
+  else renderTray();
+}
+
+function selectPathMaterial(id){
+  curSubType = id;
+  const conf = PATH_TYPES.find(p=>p.id===id);
+  if(conf && freehandBrush){
+    freehandBrush.color = conf.fill;
+    if(canvas.isDrawingMode) canvas.freeDrawingBrush = freehandBrush;
+  }
+  if(curTool === 'freehand') setTool('freehand');
+  else setTool('path');
+}
+
+function toggleTray(){
+  document.getElementById('tray').classList.toggle('collapsed');
+  document.getElementById('tray').classList.toggle('expanded');
+  setTimeout(()=>{
+    canvas.setDimensions({width:document.getElementById('canvasWrap').clientWidth, height:document.getElementById('canvasWrap').clientHeight});
+    canvas.renderAll();
+  }, 350);
+}
+
+/* ═══ KEYBOARD ═══ */
+function onKey(e){
+  if(e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+  if(e.key === 'Delete' || e.key === 'Backspace'){
+    const obj = canvas.getActiveObject();
+    if(obj && obj._vg){ canvas.remove(obj); closeProp(); pushState(); if(showCompanions) drawCompanionLines(); }
+    e.preventDefault();
+  }
+  if((e.ctrlKey || e.metaKey) && e.key === 'z'){ undo(); e.preventDefault(); return; }
+  if((e.ctrlKey || e.metaKey) && e.key === 'c'){ copyObj(); e.preventDefault(); return; }
+  if((e.ctrlKey || e.metaKey) && e.key === 'v' ){ pasteObj(); e.preventDefault(); return; }
+  if((e.ctrlKey || e.metaKey) && e.key === 'd'){ duplicateObj(); e.preventDefault(); return; }
+  if(e.key === 'v') setTool('select');
+  if(e.key === 'b') setTool('bed');
+  if(e.key === 'p') setTool('plant');
+  if(e.key === 'a') setTool('path');
+  if(e.key === 'f') setTool('freehand');
+  if(e.key === 'n') setTool('annotate');
+  if(e.key === 's') setTool('structure');
+  if(e.key === 'i') triggerPhotoUpload();
+  if(e.key === 'g') toggleGrid();
+  if(e.key === 'c') toggleCompanions();
+  if(e.key === 'Escape'){ setTool('select'); closeProp(); }
+}
+
+/* ═══ COPY / PASTE / DUPLICATE ═══ */
+function copyObj(){
+  const obj = canvas.getActiveObject();
+  if(!obj || !obj._vg) return;
+  obj.clone(function(cloned){ clipboard = cloned; }, ['_vg','_type','_sub','_plantId','_name']);
+}
+function pasteObj(){
+  if(!clipboard) return;
+  clipboard.clone(function(cloned){
+    cloned.set({ left: cloned.left + 20, top: cloned.top + 20, evented: true, selectable: true });
+    canvas.add(cloned);
+    canvas.setActiveObject(cloned);
+    canvas.renderAll();
+    pushState();
+  }, ['_vg','_type','_sub','_plantId','_name']);
+}
+function duplicateObj(){
+  const obj = canvas.getActiveObject();
+  if(!obj || !obj._vg) return;
+  obj.clone(function(cloned){
+    cloned.set({ left: cloned.left + 20, top: cloned.top + 20, evented: true, selectable: true });
+    canvas.add(cloned);
+    canvas.setActiveObject(cloned);
+    canvas.renderAll();
+    pushState();
+  }, ['_vg','_type','_sub','_plantId','_name']);
+}
+
+/* ═══ CONTEXT MENU ═══ */
+let ctxTarget = null;
+
+function showCtxMenu(x, y, obj){
+  ctxTarget = obj;
+  const menu = document.getElementById('ctxMenu');
+  const type = obj._type;
+  let items = '';
+
+  if(type === 'bed'){
+    items += `<div class="ctx-item" onclick="ctxFillBed()"><span class="ctx-icon">\u{1F331}</span><span class="ctx-label">Fill Bed</span></div>`;
+    items += `<div class="ctx-item" onclick="ctxRename()"><span class="ctx-icon">\u{270F}\u{FE0F}</span><span class="ctx-label">Rename</span></div>`;
+    items += `<div class="ctx-divider"></div>`;
+  }
+  if(type === 'structure' || type === 'path'){
+    items += `<div class="ctx-item" onclick="ctxRename()"><span class="ctx-icon">\u{270F}\u{FE0F}</span><span class="ctx-label">Rename</span></div>`;
+    items += `<div class="ctx-divider"></div>`;
+  }
+
+  items += `<div class="ctx-item" onclick="ctxDuplicate()"><span class="ctx-icon">\u{1F4CB}</span><span class="ctx-label">Duplicate</span><span class="ctx-key">Ctrl+D</span></div>`;
+  items += `<div class="ctx-item" onclick="ctxCopy()"><span class="ctx-icon">\u{1F4C4}</span><span class="ctx-label">Copy</span><span class="ctx-key">Ctrl+C</span></div>`;
+
+  items += `<div class="ctx-divider"></div>`;
+  items += `<div class="ctx-item" onclick="ctxBringFront()"><span class="ctx-icon">\u{2B06}\u{FE0F}</span><span class="ctx-label">Bring to Front</span></div>`;
+  items += `<div class="ctx-item" onclick="ctxSendBack()"><span class="ctx-icon">\u{2B07}\u{FE0F}</span><span class="ctx-label">Send to Back</span></div>`;
+
+  const isLocked = obj.lockMovementX && obj.lockMovementY;
+  items += `<div class="ctx-divider"></div>`;
+  items += `<div class="ctx-item" onclick="ctxToggleLock()"><span class="ctx-icon">${isLocked ? '\u{1F513}' : '\u{1F512}'}</span><span class="ctx-label">${isLocked ? 'Unlock' : 'Lock'}</span></div>`;
+
+  items += `<div class="ctx-divider"></div>`;
+  items += `<div class="ctx-item danger" onclick="ctxDelete()"><span class="ctx-icon">\u{1F5D1}\u{FE0F}</span><span class="ctx-label">Delete</span><span class="ctx-key">Del</span></div>`;
+
+  menu.innerHTML = items;
+  menu.classList.add('open');
+
+  const mw = menu.offsetWidth, mh = menu.offsetHeight;
+  const vw = window.innerWidth, vh = window.innerHeight;
+  menu.style.left = (x + mw > vw ? vw - mw - 8 : x) + 'px';
+  menu.style.top = (y + mh > vh ? vh - mh - 8 : y) + 'px';
+}
+
+function hideCtxMenu(){
+  document.getElementById('ctxMenu').classList.remove('open');
+  ctxTarget = null;
+}
+
+function ctxDelete(){
+  if(!ctxTarget) return;
+  canvas.setActiveObject(ctxTarget);
+  canvas.remove(ctxTarget);
+  closeProp();
+  pushState();
+  if(showCompanions) drawCompanionLines();
+  hideCtxMenu();
+}
+
+function ctxDuplicate(){
+  if(!ctxTarget) return;
+  ctxTarget.clone(function(cloned){
+    cloned.set({ left: cloned.left + 20, top: cloned.top + 20, evented: true, selectable: true });
+    canvas.add(cloned);
+    canvas.setActiveObject(cloned);
+    canvas.renderAll();
+    pushState();
+  }, ['_vg','_type','_sub','_plantId','_name','_shape']);
+  hideCtxMenu();
+}
+
+function ctxCopy(){
+  if(!ctxTarget) return;
+  ctxTarget.clone(function(cloned){ clipboard = cloned; }, ['_vg','_type','_sub','_plantId','_name','_shape']);
+  hideCtxMenu();
+}
+
+function ctxBringFront(){
+  if(!ctxTarget) return;
+  canvas.bringToFront(ctxTarget);
+  if(ctxTarget._label) canvas.bringToFront(ctxTarget._label);
+  canvas.renderAll();
+  hideCtxMenu();
+}
+
+function ctxSendBack(){
+  if(!ctxTarget) return;
+  canvas.sendToBack(ctxTarget);
+  canvas.renderAll();
+  hideCtxMenu();
+}
+
+function ctxToggleLock(){
+  if(!ctxTarget) return;
+  const lock = !(ctxTarget.lockMovementX && ctxTarget.lockMovementY);
+  ctxTarget.set({
+    lockMovementX: lock, lockMovementY: lock,
+    lockScalingX: lock, lockScalingY: lock,
+    lockRotation: lock,
+    hasControls: !lock,
+  });
+  canvas.renderAll();
+  hideCtxMenu();
+}
+
+function ctxRename(){
+  if(!ctxTarget) return;
+  const name = prompt('Rename:', ctxTarget._name || '');
+  if(name === null) { hideCtxMenu(); return; }
+  ctxTarget._name = name;
+  if(ctxTarget._label) updateLabel(ctxTarget);
+  hideCtxMenu();
+}
+
+function ctxFillBed(){
+  if(!ctxTarget || ctxTarget._type !== 'bed') return;
+  hideCtxMenu();
+  canvas.setActiveObject(ctxTarget);
+  fillTargetBed = ctxTarget;
+  fillMethod = 'rows';
+  renderFillModal();
+  document.getElementById('fillModal').classList.add('open');
+}
+
+document.addEventListener('click', function(e){
+  if(!e.target.closest('.ctx-menu')) hideCtxMenu();
+});
+
+/* ═══ HISTORY / UNDO ═══ */
+function pushState(){
+  const json = canvas.toJSON(['_vg','_type','_sub','_plantId','_name','_labelFor','_companion','_shape','_isPhoto']);
+  historyIdx++;
+  history = history.slice(0, historyIdx);
+  history.push(JSON.stringify(json));
+  if(history.length > 30) { history.shift(); historyIdx--; }
+  updateStatusBar();
+}
+
+function undo(){
+  if(historyIdx <= 0) return;
+  historyIdx--;
+  canvas.loadFromJSON(history[historyIdx], ()=>{
+    canvas.renderAll();
+    canvas.getObjects().forEach(obj => {
+      if(obj._vg && (obj._type === 'bed' || obj._type === 'path')){
+        const label = canvas.getObjects().find(o => o._labelFor === obj);
+        if(label){
+          obj._label = label;
+          obj.on('moving', ()=> updateLabel(obj));
+          obj.on('scaling', ()=> updateLabel(obj));
+          obj.on('modified', ()=> updateLabel(obj));
+          obj.on('removed', ()=> { if(obj._label) canvas.remove(obj._label); });
+        }
+      }
+    });
+    if(showCompanions) drawCompanionLines();
+  });
+}
+
+/* ═══ SAVE / LOAD ═══ */
+function saveDesign(){
+  const json = canvas.toJSON(['_vg','_type','_sub','_plantId','_name','_labelFor','_companion','_shape','_isPhoto']);
+  json.zoom = canvas.getZoom();
+  json.vpt = canvas.viewportTransform.slice();
+  localStorage.setItem('vg_design', JSON.stringify(json));
+  const btn = document.querySelector('.tool[title="Save"]');
+  if(btn){
+    btn.style.background = 'linear-gradient(135deg,var(--asp),#5a8a30)';
+    btn.style.boxShadow = '0 2px 12px rgba(125,162,75,.4)';
+    setTimeout(()=>{btn.style.background='';btn.style.boxShadow='';},800);
+  }
+}
+
+function loadDesign(){
+  const raw = localStorage.getItem('vg_design');
+  if(!raw) return;
+  try{
+    const json = JSON.parse(raw);
+    const zoom = json.zoom || 1;
+    const vpt = json.vpt || [1,0,0,1,0,0];
+    canvas.loadFromJSON(json, ()=>{
+      canvas.setZoom(zoom);
+      canvas.viewportTransform = vpt;
+      canvas.renderAll();
+      updateZoomLabel();
+      updateScaleBar();
+      reattachListeners();
+    });
+  } catch(e){ console.warn('Load failed', e); }
+}
+
+function reattachListeners(){
+  canvas.getObjects().forEach(obj => {
+    if(obj._vg && (obj._type === 'bed' || obj._type === 'path')){
+      const label = canvas.getObjects().find(o => o.text && o.left === obj.left + obj.width/2 && !o._vg);
+      if(label){
+        obj._label = label;
+        obj.on('moving', ()=> updateLabel(obj));
+        obj.on('scaling', ()=> updateLabel(obj));
+        obj.on('modified', ()=> updateLabel(obj));
+        obj.on('removed', ()=> { if(obj._label) canvas.remove(obj._label); });
+      }
+    }
+  });
+}
+
+/* ═══ GRID TOGGLE ═══ */
+function toggleGrid(){
+  showGrid = !showGrid;
+  document.getElementById('btnGrid').classList.toggle('active', showGrid);
+  canvas.renderAll();
+}
+
+/* ═══ MENU ═══ */
+function openMenu(){
+  document.getElementById('menuModal').classList.add('open');
+}
+
+function exportImage(){
+  document.getElementById('menuModal').classList.remove('open');
+  const dataURL = canvas.toDataURL({format:'png', multiplier:2});
+  const link = document.createElement('a');
+  link.download = 'veggie-garden-design.png';
+  link.href = dataURL;
+  link.click();
+}
+
+function clearCanvas(){
+  if(!confirm('Clear everything and start fresh?')) return;
+  canvas.clear();
+  canvas.backgroundColor = '#e8e2d4';
+  canvas.setZoom(1);
+  canvas.viewportTransform = [1,0,0,1,0,0];
+  canvas.renderAll();
+  pushState();
+  document.getElementById('menuModal').classList.remove('open');
+  closeProp();
+}
+
+/* ═══ TEMPLATES ═══ */
+function applyTemplate(name){
+  if(canvas.getObjects().length > 0){
+    if(!confirm('This will clear the canvas first. Continue?')) return;
+  }
+  canvas.clear();
+  canvas.backgroundColor = '#e8e2d4';
+  canvas.setZoom(1);
+  canvas.viewportTransform = [1,0,0,1,60,60];
+
+  document.getElementById('menuModal').classList.remove('open');
+
+  if(name === 'kitchen') templateKitchen();
+  else if(name === 'threesisters') templateThreeSisters();
+  else if(name === 'sqft') templateSqft();
+  else if(name === 'school') templateSchool();
+  else if(name === 'permaculture') templatePermaculture();
+
+  canvas.renderAll();
+  pushState();
+  setTool('select');
+}
+
+function makeBed(x,y,w,h,type,name){
+  const conf = BED_TYPES.find(b=>b.id===type) || BED_TYPES[0];
+  const rect = new fabric.Rect({
+    left:x*PPM, top:y*PPM, width:w*PPM, height:h*PPM,
+    fill:conf.fill, stroke:conf.stroke, strokeWidth:conf.sw||2,
+    rx:4, ry:4, opacity:0.85,
+    _vg:true, _type:'bed', _sub:type, _name:name||conf.name,
+    selectable:true, evented:true, hasControls:true, hasBorders:true,
+  });
+  canvas.add(rect);
+  addLabel(rect);
+  return rect;
+}
+
+function makePath(x,y,w,h,type){
+  const conf = PATH_TYPES.find(p=>p.id===type) || PATH_TYPES[0];
+  const rect = new fabric.Rect({
+    left:x*PPM, top:y*PPM, width:w*PPM, height:h*PPM,
+    fill:conf.fill, stroke:conf.stroke, strokeWidth:2,
+    rx:2, ry:2, opacity:0.85,
+    _vg:true, _type:'path', _sub:type, _name:conf.name,
+    selectable:true, evented:true,
+  });
+  canvas.add(rect);
+  addLabel(rect);
+}
+
+function templateKitchen(){
+  makeBed(0, 0, 3, 1.2, 'raised', 'Bed A');
+  makeBed(0, 1.8, 3, 1.2, 'raised', 'Bed B');
+  makeBed(3.8, 0, 3, 1.2, 'raised', 'Bed C');
+  makeBed(3.8, 1.8, 3, 1.2, 'raised', 'Bed D');
+  makePath(3, 0, 0.8, 3, 'gravel');
+  makePath(0, 1.2, 6.8, 0.6, 'gravel');
+  makeBed(7.5, 0.4, 1.5, 1.5, 'herbspiral', 'Herb Spiral');
+  placeStructure('compost', 8.25*PPM, 2.8*PPM);
+  placeStructure('waterpoint', 0.2*PPM, 3.5*PPM);
+}
+
+function templateThreeSisters(){
+  makeBed(0, 0, 3, 3, 'inground', 'Three Sisters Bed');
+  const cx = 1.5*PPM, cy = 1.5*PPM;
+  placeOnePlant('corn', cx, cy);
+  placeOnePlant('corn', cx-25, cy-25);
+  placeOnePlant('corn', cx+25, cy-25);
+  placeOnePlant('corn', cx-25, cy+25);
+  placeOnePlant('corn', cx+25, cy+25);
+  for(let a = 0; a < 6; a++){
+    const angle = a * Math.PI / 3;
+    placeOnePlant('bean', cx + Math.cos(angle)*45, cy + Math.sin(angle)*45);
+  }
+  placeOnePlant('pumpkin', 0.5*PPM, 0.5*PPM);
+  placeOnePlant('pumpkin', 2.5*PPM, 0.5*PPM);
+  placeOnePlant('pumpkin', 0.5*PPM, 2.5*PPM);
+  placeOnePlant('pumpkin', 2.5*PPM, 2.5*PPM);
+}
+
+function templateSqft(){
+  makeBed(0, 0, 1.2, 1.2, 'raised', 'Square Foot Bed');
+  const sqSize = 0.3 * PPM;
+  const crops = ['lettuce','radish','carrot','spinach','beetroot','chive','basil','lettuce',
+                 'radish','onion','garlic','parsley','carrot','spinach','lettuce','radish'];
+  for(let r = 0; r < 4; r++){
+    for(let c = 0; c < 4; c++){
+      const idx = r*4 + c;
+      placeOnePlant(crops[idx], c*sqSize + sqSize/2, r*sqSize + sqSize/2);
+    }
+  }
+}
+
+function templateSchool(){
+  makeBed(0, 0, 4, 1.2, 'raised', 'Veggie Bed A');
+  makeBed(0, 1.8, 4, 1.2, 'raised', 'Veggie Bed B');
+  makeBed(0, 3.6, 4, 1.2, 'raised', 'Veggie Bed C');
+  makeBed(5, 0, 2, 2, 'herbspiral', 'Herb Garden');
+  makePath(4, 0, 1, 4.8, 'gravel');
+  makePath(0, 1.2, 4, 0.6, 'mulch');
+  makePath(0, 3.0, 4, 0.6, 'mulch');
+  placeStructure('greenhouse', 5.8*PPM, 3.5*PPM);
+  placeStructure('compost', 8*PPM, 0.5*PPM);
+  placeStructure('wormfarm', 8*PPM, 2*PPM);
+  placeStructure('waterpoint', 0.2*PPM, 5.5*PPM);
+  placeStructure('shed', 8*PPM, 4.5*PPM);
+  const fence = new fabric.Rect({
+    left:0, top:5.8*PPM, width:10*PPM, height:0.05*PPM,
+    fill:'#a0804a', stroke:'#806028', strokeWidth:3,
+    _vg:true, _type:'structure', _sub:'fence', _name:'Garden Fence',
+    selectable:true, evented:true,
+  });
+  canvas.add(fence);
+}
+
+function templatePermaculture(){
+  makeBed(1.5, 1.5, 3, 3, 'inground', 'Fruit Tree Guild');
+  makeBed(0, 0, 1.2, 1.2, 'raised', 'Herbs & Aromatics');
+  makeBed(4.8, 0, 1.2, 1.2, 'raised', 'Nitrogen Fixers');
+  makeBed(0, 4.5, 1.5, 1, 'raised', 'Root Zone');
+  makeBed(4.5, 4.5, 1.5, 1, 'raised', 'Pest Deterrents');
+  makePath(1.2, 0, 0.3, 5.5, 'mulch');
+  makePath(4.5, 0, 0.3, 5.5, 'mulch');
+  makePath(0, 1.2, 6, 0.3, 'mulch');
+  makePath(0, 4.2, 6, 0.3, 'mulch');
+  placeOnePlant('rosemary', 0.6*PPM, 0.6*PPM);
+  placeOnePlant('lavender', 0.6*PPM, 0.3*PPM);
+  placeOnePlant('bean', 5.4*PPM, 0.6*PPM);
+  placeOnePlant('pea', 5.4*PPM, 0.3*PPM);
+  placeOnePlant('marigold', 5.2*PPM, 5*PPM);
+  placeOnePlant('nasturtium', 4.8*PPM, 5*PPM);
+  placeStructure('compost', 6.5*PPM, 2.5*PPM);
+}
+
+if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+</script>
+</body>
+</html>
