@@ -269,6 +269,7 @@ printer:'<path d="M7 9V4h10v5M7 17H4v-7h16v7h-3"/><path d="M7 14h10v6H7z"/>',
 pencil:'<path d="M4 20l1-4L16.5 4.5a2 2 0 013 3L8 19z"/>',
 image:'<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4.5 4 3.5 3-2.5 4.5 3.5"/>',
 clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+refresh:'<path d="M20 11a8 8 0 00-14-4.5L4 9M4 4v5h5M4 13a8 8 0 0014 4.5l2-2.5M20 20v-5h-5"/>',
 chat:'<path d="M4 20l1.4-4.2A8 8 0 1112 20a8 8 0 01-4-1.1z"/><path d="M9 10.5c0 2.5 2 4.5 4.5 4.5l1.2-1.2-1.6-1-.8.6a3 3 0 01-1.6-1.6l.6-.8-1-1.6z"/>',
 sparkle:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>'
 };
@@ -282,7 +283,8 @@ let S;
 try{S=JSON.parse(localStorage.getItem(KEY))||structuredClone(DEF)}catch{S=structuredClone(DEF)}
 S.settings={...DEF.settings,...S.settings};
 let pushT;
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch{}; clearTimeout(pushT); pushT=setTimeout(push,600)};
+let pushPending=false;
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch{}; pushPending=true; clearTimeout(pushT); pushT=setTimeout(push,600)};
 const uid=()=>Math.random().toString(36).slice(2,9);
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -483,13 +485,36 @@ function loginScreen(msg){
 }
 async function push(){
   if(!online)return;
-  const now=new Date().toISOString();lastPushed=Date.now();
+  const now=new Date().toISOString();lastPushed=Date.now();stateAt=lastPushed;
   const a=sb.from("egg_state").update({state:S,updated_at:now}).eq("id",1);
   const b=sb.from("egg_public").update({price_per_dozen:S.settings.priceInd,available_dozens:Math.max(0,Math.floor(Math.max(0,stock())/6)/2),ordering_open:S.settings.open!==false,pickup_info:S.settings.pickup||"",school_note:S.settings.note||"",updated_at:now}).eq("id",1);
-  const [x,y]=await Promise.all([a,b]);setSync(x.error||y.error?"bad":"ok");
+  const [x,y]=await Promise.all([a,b]);pushPending=false;setSync(x.error||y.error?"bad":"ok");
 }
 function setSync(s){const e=$("#sync");e.className="sync "+s;e.innerHTML=s==="ok"?ic("cloud")+"Live":s==="bad"?ic("cloudoff")+"Offline, saved on this device":""}
-async function loadOrders(){const{data}=await sb.from("egg_orders").select("*").order("created_at",{ascending:false}).limit(200);if(data){O=data;render()}}
+let ordersAt=0,ordersLoaded=false;
+async function loadOrders(manual){
+  const{data,error}=await sb.from("egg_orders").select("*").order("created_at",{ascending:false}).limit(200);
+  if(error){setSync("bad");if(manual)toast("Couldn’t reach the server. Check your connection.");return}
+  const seen=new Set(O.map(o=>o.id)),fresh=ordersLoaded?data.filter(o=>o.status==="new"&&!seen.has(o.id)):[];
+  O=data;ordersAt=Date.now();ordersLoaded=true;setSync("ok");render();
+  if(fresh.length)toast(fresh.length===1?`New order from ${fresh[0].name}.`:`${fresh.length} new orders.`);
+  else if(manual)toast("Orders are up to date.");
+}
+/* pull the shared stock/sales if another device changed them (and we have nothing unsent) */
+let stateAt=0;
+async function pullState(){
+  if(clearTimeoutPending())return;
+  const{data:row}=await sb.from("egg_state").select("state,updated_at").eq("id",1).single();
+  if(!row?.state?.sales)return;
+  const t=new Date(row.updated_at).getTime();
+  if(t>stateAt+1500&&!clearTimeoutPending()){stateAt=t;S={...structuredClone(DEF),...row.state};S.settings={...DEF.settings,...S.settings};try{localStorage.setItem(KEY,JSON.stringify(S))}catch{}render()}
+}
+const clearTimeoutPending=()=>pushPending;
+/* the live connection is suspended when the phone sleeps or Safari is in the background, so also re-check on return and every 30 s */
+function syncNow(){if(!online||document.hidden)return;loadOrders();pullState()}
+document.addEventListener("visibilitychange",syncNow);
+addEventListener("pageshow",syncNow);addEventListener("focus",syncNow);addEventListener("online",syncNow);
+setInterval(syncNow,30000);
 async function loadStory(){const{data}=await sb.from("egg_story").select("*").order("story_date",{ascending:false}).order("created_at",{ascending:false});if(data){ST=data;render()}}
 async function boot(){
   if(!sb){render();return}
@@ -581,7 +606,8 @@ function ordersView(){
     <div class="small muted"><a href="tel:${esc(o.phone)}" style="color:var(--accent);font-weight:600">${ic("phone")} ${esc(o.phone)}</a> · ${o.pickup_date?"pickup "+dateLabel(o.pickup_date):"any day"} · ${ago(o.created_at)}</div>
     ${o.note?`<div class="small" style="margin-top:2px">“${esc(o.note)}”</div>`:""}
     ${o.status==="new"?`<div class="row wrapx" style="margin-top:10px"><button class="btn good small" data-act="oconfirmwa" data-id="${o.id}" aria-label="Confirm order from ${esc(o.name)} and message on WhatsApp">${ic("chat")}Confirm &amp; WhatsApp</button><button class="btn small" data-act="oconfirm" data-id="${o.id}" aria-label="Confirm order from ${esc(o.name)} without messaging">${ic("check")}Confirm</button><button class="btn small danger" data-act="odecline" data-id="${o.id}" aria-label="Decline order from ${esc(o.name)}">${ic("x")}Decline</button></div>`:`<div class="row wrapx" style="margin-top:6px"><span class="pill ${o.status==="confirmed"?"":"out"}">${ic(o.status==="confirmed"?"check":"x")}${o.status[0].toUpperCase()+o.status.slice(1)}</span><button class="btn small" data-act="owa" data-id="${o.id}" aria-label="Message ${esc(o.name)} on WhatsApp">${ic("chat")}WhatsApp</button></div>`}</div></li>`;
-  return `<div class="page-h"><h2>Parent orders</h2></div>
+  return `<div class="page-h"><h2>Parent orders</h2><button class="btn small" data-act="orefresh" aria-label="Check for new orders">${ic("refresh")}Refresh</button></div>
+  <p class="hint" style="margin:-8px 0 12px">${ordersAt?"Last checked "+new Date(ordersAt).toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"})+". Updates automatically.":"Checking…"}</p>
   <section class="card"><h2>New requests ${nw.length?`<span class="muted">(${nw.length})</span>`:""}</h2>${nw.length?`<ul class="list">${nw.map(row).join("")}</ul>`:`<div class="empty">${ic("inbox","xl")}<h3>No new requests</h3><p>Share your order link and requests will appear here the moment they’re sent.</p></div>`}
   <button class="btn block" data-act="copylink" style="margin-top:8px">${ic("link")}Copy parent order link</button></section>
   ${done.length?`<section class="card"><h2>Recently handled</h2><ul class="list">${done.map(row).join("")}</ul></section>`:""}`;
@@ -641,6 +667,7 @@ function act(a,id){
   else if(a==="pubpost"){const p=ST.find(x=>x.id===id);p.published=!p.published;render();sb.from("egg_story").update({published:p.published}).eq("id",id).then(()=>toast(p.published?"Now visible to parents.":"Hidden from parents."))}
   else if(a==="delpost"){const p=ST.find(x=>x.id===id);confirmSheet("Delete this post?",`“${p.title}” will be removed from the parent page for good.`,"Delete post",()=>{(p.media_path?sb.storage.from("egg-media").remove([p.media_path]):Promise.resolve()).then(()=>sb.from("egg_story").delete().eq("id",id)).then(()=>{ST=ST.filter(x=>x.id!==id);render();toast("Post deleted.")})})}
   else if(a==="oconfirm")handleOrder(id,"confirmed");
+  else if(a==="orefresh")loadOrders(true);
   else if(a==="oconfirmwa")handleOrder(id,"confirmed",true);
   else if(a==="owa"){const o=O.find(x=>x.id===id);if(o)openWhatsApp(o,o.status)}
   else if(a==="odecline")handleOrder(id,"declined");
