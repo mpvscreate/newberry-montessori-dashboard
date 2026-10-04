@@ -1,0 +1,142 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Order Fresh Eggs</title>
+<link rel="icon" href="newberry-house-logo.webp">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<style>
+:root{--paper:#faf7f0;--sheet:#fff;--ink:#2a2418;--muted:#6e6552;--line:#e6dfcf;--line-strong:#cfc5ad;--accent:#b8650b;--accent-ink:#fff;--accent-soft:#fbead2;--green:#2f6b3a;--green-soft:#e3f0e1;--red:#a8362a;--red-soft:#f8e4e0;--display:"Alegreya",Georgia,serif;--body:"Alegreya Sans","Segoe UI",system-ui,sans-serif}
+@media (prefers-color-scheme:dark){:root{--paper:#171410;--sheet:#211d17;--ink:#f1eadb;--muted:#a79d86;--line:#352f25;--line-strong:#4d4536;--accent:#f0a24a;--accent-ink:#1c1206;--accent-soft:#3a2a14;--green:#8fd29a;--green-soft:#1f3322;--red:#f2a597;--red-soft:#3a1f1b;color-scheme:dark}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:18px/1.45 var(--body)}
+button,input,textarea{font:inherit;color:inherit}
+h1,h2{font-family:var(--display);margin:0}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.wrap{max-width:520px;margin:0 auto;padding:20px 16px 50px}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.brand img{width:48px;height:48px;border-radius:12px}
+.brand h1{font-size:1.6rem;line-height:1.1}
+.card{background:var(--sheet);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:0 4px 14px rgba(60,40,10,.06)}
+.price{display:flex;justify-content:space-between;align-items:baseline}
+.price b{font:700 2rem var(--display);color:var(--accent)}
+.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.85rem;font-weight:700;background:var(--green-soft);color:var(--green)}
+.badge.off{background:var(--red-soft);color:var(--red)}
+label{display:block;font-weight:700;font-size:.9rem;margin:16px 0 6px}
+input.t,textarea.t{width:100%;padding:12px 14px;border:1px solid var(--line-strong);border-radius:12px;background:var(--sheet);min-height:50px}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:58px;height:58px;border-radius:50%;border:1px solid var(--line-strong);background:var(--sheet);font-size:1.8rem;cursor:pointer;flex:none}
+.stepper output{flex:1;text-align:center;font:700 2.2rem var(--display)}
+.chips{display:flex;gap:8px;justify-content:center;margin-top:8px}
+.chip{border:1px solid var(--line-strong);background:var(--sheet);border-radius:99px;padding:8px 18px;cursor:pointer;min-height:44px}
+.total{display:flex;justify-content:space-between;align-items:baseline;background:var(--paper);border-radius:14px;padding:14px 16px;margin:18px 0}
+.total b{font:700 1.9rem var(--display)}
+.go{width:100%;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:1.15rem;padding:15px;cursor:pointer;min-height:54px}
+.go:disabled{opacity:.5;cursor:default}
+.msg{padding:12px 14px;border-radius:12px;background:var(--red-soft);color:var(--red);margin-top:12px}
+.hp{position:absolute;left:-9999px}
+.done{text-align:center;padding:30px 10px}.done .em{font-size:3rem}
+.muted{color:var(--muted)}.small{font-size:.9rem}
+.story h2{font-size:1.5rem;margin:26px 0 4px}
+.post{background:var(--sheet);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:16px;box-shadow:0 4px 14px rgba(60,40,10,.06)}
+.post img,.post video{display:block;width:100%;max-height:420px;object-fit:cover;background:#000}
+.post .tx{padding:14px 16px 16px}
+.post h3{font:700 1.3rem var(--display);margin:6px 0 4px}
+.post p{margin:0;white-space:pre-line}
+.tag{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.78rem;font-weight:700;background:var(--accent-soft);color:var(--accent)}
+.jump{display:inline-block;margin:0 0 14px;color:var(--accent);font-weight:700;text-decoration:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand"><img src="newberry-house-logo.webp" alt="" onerror="this.style.display='none'"><div><h1>Fresh eggs</h1><div class="muted small">Newberry · raised and collected by our students</div></div></div>
+  <a class="jump" id="jump" href="#story" hidden>🐔 See our hens &amp; coop story ↓</a>
+  <div id="app"><div class="card muted">Loading…</div></div>
+  <section class="story" id="story" hidden></section>
+</div>
+<script>
+const URL_="https://oikwudpqmbnssttatlhc.supabase.co";
+const KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pa3d1ZHBxbWJuc3N0dGF0bGhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTMzODEsImV4cCI6MjA5NTY4OTM4MX0.p6I9qlvre5TjF3qOVjAIBus3_PNrbvCF2cMXHe3uiXw";
+const H={apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"};
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money=n=>new Intl.NumberFormat("en-ZA",{style:"currency",currency:"ZAR",minimumFractionDigits:2}).format(n||0);
+const app=document.getElementById("app");
+let info=null,doz=1,sending=false,err="";
+let saved={};try{saved=JSON.parse(localStorage.getItem("egg-parent")||"{}")}catch{}
+
+async function load(){
+  try{
+    const r=await fetch(URL_+"/rest/v1/egg_public?id=eq.1&select=*",{headers:H});
+    if(!r.ok)throw 0;info=(await r.json())[0];if(!info)throw 0;
+  }catch{app.innerHTML=`<div class="card"><h2>Can’t load right now</h2><p class="muted">Please check your connection and try again.</p><button class="go" onclick="location.reload()">Try again</button></div>`;return}
+  draw();
+}
+function draw(){
+  const max=Math.min(50,Math.floor(info.available_dozens*2)/2);
+  const open=info.ordering_open&&max>=0.5;
+  if(doz>max&&open)doz=max;
+  const dates=[];for(let i=0;i<14;i++){const d=new Date(Date.now()+i*864e5);dates.push(d)}
+  app.innerHTML=`
+  <div class="card"><div class="price"><div><span class="badge ${open?"":"off"}">${open?`${info.available_dozens>=1?Math.floor(info.available_dozens):"Less than 1"} dozen available`:"Orders paused"}</span></div><div><b>${money(info.price_per_dozen)}</b><span class="muted"> / dozen</span></div></div>
+  ${info.school_note?`<p class="muted" style="margin:10px 0 0">${esc(info.school_note)}</p>`:""}
+  ${info.pickup_info?`<p style="margin:8px 0 0"><b>Pickup:</b> ${esc(info.pickup_info)}</p>`:""}</div>
+  ${open?`<form class="card" id="f" novalidate>
+    <h2>Your order</h2>
+    <label>How many dozen?</label>
+    <div class="stepper"><button type="button" id="m" aria-label="Fewer">−</button><output aria-live="polite">${doz}</output><button type="button" id="p" aria-label="More">+</button></div>
+    <div class="chips">${[1,2,3].filter(n=>n<=max).map(n=>`<button type="button" class="chip" data-q="${n}">${n}</button>`).join("")}</div>
+    <label for="nm">Your name</label><input id="nm" class="t" autocomplete="name" value="${esc(saved.name)}" required>
+    <label for="ph">Phone number</label><input id="ph" class="t" type="tel" autocomplete="tel" value="${esc(saved.phone)}" required>
+    <label for="pd">Preferred pickup day</label>
+    <select id="pd" class="t" style="width:100%;padding:12px;border:1px solid var(--line-strong);border-radius:12px;background:var(--sheet);min-height:50px;font:inherit;color:inherit"><option value="">Any day is fine</option>${dates.filter(d=>d.getDay()%6).map(d=>`<option value="${d.toISOString().slice(0,10)}">${d.toLocaleDateString(undefined,{weekday:"long",month:"short",day:"numeric"})}</option>`).join("")}</select>
+    <label for="nt">Note (optional)</label><textarea id="nt" class="t" rows="2" maxlength="300" placeholder="e.g. My child will pick up"></textarea>
+    <input class="hp" id="web" tabindex="-1" autocomplete="off" aria-hidden="true">
+    <div class="total"><span>Total to pay at pickup</span><b>${money(doz*info.price_per_dozen)}</b></div>
+    <button class="go" ${sending?"disabled":""}>${sending?"Sending…":"Send my order request"}</button>
+    ${err?`<div class="msg" role="alert">${esc(err)}</div>`:""}
+    <p class="muted small" style="margin-bottom:0">This is a request. Our staff will confirm it by phone or text.</p>
+  </form>`:`<div class="card"><p>We’re not taking new orders right now. Please check back soon!</p></div>`}`;
+  if(!open)return;
+  const f=document.getElementById("f");
+  f.querySelector("#m").onclick=()=>{doz=Math.max(0.5,doz-0.5);keep();draw()};
+  f.querySelector("#p").onclick=()=>{doz=Math.min(max,doz+0.5);keep();draw()};
+  f.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{doz=+b.dataset.q;keep();draw()});
+  f.onsubmit=submit;
+}
+function keep(){saved={name:document.getElementById("nm")?.value||saved.name,phone:document.getElementById("ph")?.value||saved.phone}}
+async function submit(e){
+  e.preventDefault();
+  const name=nm.value.trim(),phone=ph.value.trim();
+  keep();err="";
+  if(web.value)return;                       /* honeypot */
+  if(!name){err="Please enter your name.";draw();nm.focus();return}
+  if(phone.replace(/\D/g,"").length<7){err="Please enter a phone number we can reach you on.";draw();ph.focus();return}
+  const body={name,phone,dozens:doz,pickup_date:pd.value||null,note:nt.value.trim()||null};
+  sending=true;draw();
+  try{
+    const r=await fetch(URL_+"/rest/v1/egg_orders",{method:"POST",headers:{...H,Prefer:"return=minimal"},body:JSON.stringify(body)});
+    if(!r.ok)throw 0;
+    try{localStorage.setItem("egg-parent",JSON.stringify(saved))}catch{}
+    sending=false;
+    app.innerHTML=`<div class="card done"><div class="em">🥚</div><h2>Thank you, ${esc(name.split(" ")[0])}!</h2><p>We got your request for <b>${doz} dozen</b> (${money(doz*info.price_per_dozen)}).<br>We’ll contact you at <b>${esc(phone)}</b> to confirm.</p><button class="go" onclick="doz=1;err='';load()">Place another order</button></div>`;
+  }catch{sending=false;err="Something went wrong sending your order. Please try again.";draw()}
+}
+async function loadStory(){
+  try{
+    const r=await fetch(URL_+"/rest/v1/egg_story?select=*&order=story_date.desc,created_at.desc&limit=40",{headers:H});
+    if(!r.ok)return;const posts=await r.json();if(!posts.length)return;
+    const m=p=>URL_+"/storage/v1/object/public/egg-media/"+encodeURIComponent(p);
+    const el=document.getElementById("story");
+    el.innerHTML=`<h2>Our hens &amp; coop journey</h2><p class="muted" style="margin:0 0 14px">From empty yard to fresh eggs, follow along with our students.</p>`+posts.map(p=>`<article class="post">
+      ${p.media_kind==="image"?`<img src="${m(p.media_path)}" alt="${esc(p.title)}" loading="lazy">`:""}
+      ${p.media_kind==="video"?`<video src="${m(p.media_path)}" controls playsinline preload="metadata"></video>`:""}
+      <div class="tx"><span class="tag">${esc(p.tag)}</span> <span class="muted small">${new Date(p.story_date+"T12:00").toLocaleDateString(undefined,{day:"numeric",month:"long",year:"numeric"})}</span>
+      <h3>${esc(p.title)}</h3>${p.body?`<p>${esc(p.body)}</p>`:""}</div></article>`).join("");
+    el.hidden=false;document.getElementById("jump").hidden=false;
+  }catch{}
+}
+load();loadStory();
+</script>
+</body>
+</html>
