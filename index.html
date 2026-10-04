@@ -153,15 +153,14 @@
   .plane-card-age{font-size:11px; color:var(--text-muted); margin-top:2px;}
   .plane-card-count{font-size:12px; color:var(--text-muted); margin-top:12px;}
   .plane-card-count strong{color:var(--text); font-family:'Trebuchet MS',sans-serif;}
-  .plane-card-bar{height:6px; background:var(--border); border-radius:20px; overflow:hidden; margin-top:10px;}
-  .plane-card-bar span{display:block; height:100%; background:var(--asparagus-green); border-radius:20px;}
+  .plane-card-bar{display:none;}
   .plane-card-top{display:flex; align-items:flex-start; justify-content:space-between; gap:12px;}
   .plane-card-info{flex:1; min-width:0;}
-  .plane-card-donut{flex-shrink:0; position:relative; width:52px; height:52px;}
-  .plane-card-donut svg{width:52px; height:52px; transform:rotate(-90deg);}
-  .plane-card-donut .donut-track{fill:none; stroke:var(--border); stroke-width:5;}
-  .plane-card-donut .donut-fill{fill:none; stroke:var(--asparagus-green); stroke-width:5; stroke-linecap:round; transition:stroke-dashoffset .5s ease;}
-  .plane-card-donut .donut-pct{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:700; color:var(--text);}
+  .plane-card-donut{flex-shrink:0; position:relative; width:56px; height:56px;}
+  .plane-card-donut svg{width:56px; height:56px; transform:rotate(-90deg);}
+  .plane-card-donut .donut-track{fill:none; stroke:var(--border); stroke-width:4.5;}
+  .plane-card-donut .donut-fill{fill:none; stroke:var(--asparagus-green); stroke-width:4.5; stroke-linecap:round; transition:stroke-dashoffset .5s ease;}
+  .plane-card-donut .donut-pct{position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:700; color:var(--text);}
   .plane-card-foot{display:flex; justify-content:space-between; font-size:11px; color:var(--text-muted); margin-top:8px;}
 
   .breadcrumb{font-size:12px; color:var(--text-muted); margin-bottom:10px;}
@@ -454,6 +453,16 @@
     input.cell-input, td .priority-select, td .status-select, td .ref-btn{ width:auto !important; max-width:62%; }
   }
 
+  /* Action button groups */
+  .action-groups{display:flex; flex-direction:column; gap:6px; margin-top:14px;}
+  .action-group{border:1px solid var(--border); border-radius:9px; overflow:hidden;}
+  .action-group-head{display:flex; align-items:center; gap:8px; padding:9px 13px; background:var(--bg); cursor:pointer; font-size:12px; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:.04em; user-select:none; border:none; width:100%; text-align:left;}
+  .action-group-head:hover{color:var(--text);}
+  .action-group-head .ag-chevron{font-size:10px; transition:transform .2s ease;}
+  .action-group-head.open .ag-chevron{transform:rotate(90deg);}
+  .action-group-body{display:none; padding:8px 12px; gap:6px; flex-wrap:wrap;}
+  .action-group-body.open{display:flex;}
+
   .budget-panel{background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:18px 20px; box-shadow:var(--shadow); margin-top:20px;}
   .budget-panel h3{font-size:15px; margin-bottom:14px;}
   .budget-row{display:flex; align-items:center; gap:12px; margin-bottom:10px;}
@@ -503,6 +512,7 @@
     .sidebar-section-title{display:none;}
     .plane-link{width:auto; min-width:150px;}
     .global-search input{width:130px;}
+    .topbar-actions .text-btn.hide-mobile{display:none;}
     main.content{padding:18px 14px 80px;}
     .mobile-nav{
       display:flex; position:fixed; bottom:0; left:0; right:0; z-index:50;
@@ -536,8 +546,8 @@
     </div>
     <button class="text-btn" id="saveStatus" onclick="backupData()" title="Save status">✓ Saved</button>
     <span class="text-btn sync-indicator" id="syncStatus" title="Cloud sync status">☁ Offline</span>
-    <button class="text-btn" onclick="printReport()">Report / Print</button>
-    <button class="text-btn" id="themeToggleBtn" onclick="toggleTheme()">Dark mode</button>
+    <button class="text-btn hide-mobile" onclick="printReport()">Report / Print</button>
+    <button class="text-btn hide-mobile" id="themeToggleBtn" onclick="toggleTheme()">Dark mode</button>
   </div>
 </header>
 
@@ -2492,21 +2502,32 @@ function renderOverview(){
         ${overdueCount ? `<div class="rollup-stat overdue-stat"><div class="n">${overdueCount}</div><div class="l">Overdue</div></div>` : ''}
         <div class="rollup-stat cost-col"><div class="n">${fmtMoney(o.cost)}</div><div class="l">Est. total cost</div></div>
       </div>
-      <div class="rollup-actions">
+      <div class="rollup-actions" style="gap:8px;flex-wrap:wrap;">
         <button class="link-btn" onclick="currentView='procurement';render();">Procurement view</button>
         <button class="link-btn" onclick="toggleCosts()" id="costsToggleBtn">Hide costs</button>
         <button class="link-btn" onclick="toggleVendorAll()" id="vendorToggleBtn">Hide vendor (all)</button>
-        <button class="link-btn" onclick="connectDataFile()">⭑ Auto-save to file</button>
-        <button class="link-btn" onclick="openDataFile()">Open data file</button>
-        <button class="link-btn" onclick="backupData()">Backup (download)</button>
-        <button class="link-btn" onclick="triggerRestore()">Restore backup</button>
-        <button class="link-btn" onclick="exportAllCSV()">Export all (CSV)</button>
-        <button class="link-btn" onclick="printReport()">Print report</button>
-        <button class="link-btn" onclick="printFurnitureSheets()">Print furniture</button>
-        <button class="link-btn" onclick="exportFurnitureHTML()">Export furniture + photos</button>
       </div>
     </div>
     <div class="progress-track"><div class="progress-fill" style="width:${o.pct}%"></div></div>
+    <div class="action-groups">
+      <div class="action-group">
+        <button class="action-group-head" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')"><span class="ag-chevron">▸</span> Data &amp; Backup</button>
+        <div class="action-group-body">
+          <button class="link-btn" onclick="connectDataFile()">⭑ Auto-save to file</button>
+          <button class="link-btn" onclick="openDataFile()">Open data file</button>
+          <button class="link-btn" onclick="backupData()">Backup (download)</button>
+          <button class="link-btn" onclick="triggerRestore()">Restore backup</button>
+        </div>
+      </div>
+      <div class="action-group">
+        <button class="action-group-head" onclick="this.classList.toggle('open');this.nextElementSibling.classList.toggle('open')"><span class="ag-chevron">▸</span> Export &amp; Print</button>
+        <div class="action-group-body">
+          <button class="link-btn" onclick="exportAllCSV()">Export all (CSV)</button>
+          <button class="link-btn" onclick="printReport()">Print report</button>
+          <button class="link-btn" onclick="printFurnitureSheets()">Print furniture</button>
+          <button class="link-btn" onclick="exportFurnitureHTML()">Export furniture + photos</button>
+        </div>
+    </div>
   `;
   main.appendChild(rollup);
 
