@@ -113,6 +113,9 @@ nav.tabs .badge{position:absolute;top:2px;left:50%;margin-left:6px;background:va
 .list li{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}
 .list li:first-child{border-top:0}
 .list li.tap{cursor:pointer;border-radius:12px}
+.list li{flex-wrap:wrap}
+.list li .grow{flex:1 1 9rem;overflow-wrap:anywhere}
+.list li .amt,.list li .end{margin-left:auto}
 .avatar{width:44px;height:44px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
 .avatar.rest{background:var(--green-soft);color:var(--green)}
 .amt{font:700 1.1rem var(--display);text-align:right;white-space:nowrap}
@@ -176,6 +179,28 @@ input,select,textarea{max-width:100%}
 .thumb img{width:100%;height:100%;object-fit:cover}
 .offline{background:var(--red-soft);color:var(--red);border-radius:12px;padding:8px 12px;margin-bottom:14px;font-size:.9rem;display:flex;gap:8px;align-items:center}
 @media (max-width:420px){.hero{grid-template-columns:1fr;justify-items:center;text-align:center}.hero .row{justify-content:center}}
+/* soft glow */
+:root{--glow:rgba(166,86,8,.38);--glow-soft:rgba(166,86,8,.18);--glow-green:rgba(39,107,54,.3)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--glow:rgba(242,165,79,.42);--glow-soft:rgba(242,165,79,.2);--glow-green:rgba(143,210,154,.3)}}
+.btn,.chip,.big,.fab,.fab-item,.stepper button,.seg button,nav.tabs button,.x{transition:box-shadow .25s ease,transform .08s,background .15s,border-color .2s,filter .2s}
+.btn:hover,.chip:hover,.stepper button:hover,.fab-item:hover{box-shadow:0 0 0 4px var(--glow-soft),0 4px 18px var(--glow-soft);border-color:var(--accent)}
+.btn.primary{box-shadow:0 2px 6px var(--glow-soft),0 6px 22px var(--glow)}
+.btn.primary:hover{box-shadow:0 0 0 4px var(--glow-soft),0 8px 28px var(--glow)}
+.btn.good:hover{box-shadow:0 0 0 4px var(--glow-green),0 4px 18px var(--glow-green);border-color:transparent}
+.btn.danger:hover{border-color:var(--red);box-shadow:0 0 0 4px rgba(179,38,30,.16)}
+.big.sell{box-shadow:0 8px 28px var(--glow)}
+.big.sell:hover{box-shadow:0 0 0 5px var(--glow-soft),0 12px 34px var(--glow)}
+.big.collect{box-shadow:0 6px 22px var(--glow-green)}
+.big.collect:hover{box-shadow:0 0 0 5px var(--glow-green),0 12px 34px var(--glow-green)}
+.chip[aria-pressed=true],.seg button[aria-pressed=true]{box-shadow:0 3px 14px var(--glow)}
+nav.tabs button[aria-current=page]{box-shadow:0 0 0 1px var(--glow-soft),0 4px 16px var(--glow-soft)}
+nav.tabs button:hover:not([aria-current]){background:var(--accent-soft);color:var(--accent)}
+.fab{box-shadow:0 0 0 6px var(--glow-soft),0 8px 28px var(--glow)}
+.fab:hover{box-shadow:0 0 0 9px var(--glow-soft),0 10px 34px var(--glow)}
+.btn:active,.chip:active,.big:active,.fab:active{box-shadow:0 0 0 2px var(--glow-soft)}
+.t:focus,input.t:focus,textarea.t:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--glow-soft)}
+:focus-visible{box-shadow:0 0 0 6px var(--glow-soft)}
+.btn[disabled]{box-shadow:none}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -381,7 +406,7 @@ function home(){
 }
 function saleRow(s){
   const c=cust(s.cust);
-  return `<li>${avatar(c)}<div class="grow"><b>${esc(custName(s.cust))}</b><div class="small muted">${dz(s.eggs)} · ${dateLabel(s.date)}</div></div><div style="text-align:right"><div class="amt">${money(saleTotal(s))}</div>${s.paid?`<div class="small muted">Paid</div>`:`<button class="btn good small" data-act="paid" data-id="${s.id}">${ic("check")}Mark paid</button>`}</div></li>`;
+  return `<li>${avatar(c)}<div class="grow"><b>${esc(custName(s.cust))}</b><div class="small muted">${dz(s.eggs)} · ${dateLabel(s.date)}</div></div><div class="end" style="text-align:right"><div class="amt">${money(saleTotal(s))}</div>${s.paid?`<div class="small muted">Paid</div>`:`<button class="btn good small" data-act="paid" data-id="${s.id}">${ic("check")}Mark paid</button>`}</div></li>`;
 }
 
 function people(){

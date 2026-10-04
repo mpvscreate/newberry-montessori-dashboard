@@ -77,6 +77,21 @@ label.f{display:block;font-weight:600;font-size:.9rem;margin:18px 0 6px}
 input[type=date]{-webkit-appearance:none;appearance:none}
 input,select,textarea{max-width:100%}
 footer{margin-top:30px;text-align:center;font-size:.85rem;color:var(--muted)}
+/* soft glow */
+:root{--glow:rgba(166,86,8,.38);--glow-soft:rgba(166,86,8,.18)}
+@media (prefers-color-scheme:dark){:root{--glow:rgba(242,165,79,.42);--glow-soft:rgba(242,165,79,.2)}}
+.go,.chip,.fab,.stepper button{transition:box-shadow .25s ease,transform .08s,border-color .2s,filter .2s}
+.go{box-shadow:0 2px 6px var(--glow-soft),0 8px 26px var(--glow)}
+.go:hover{filter:brightness(1.06);box-shadow:0 0 0 5px var(--glow-soft),0 10px 32px var(--glow)}
+.go:active{box-shadow:0 0 0 2px var(--glow-soft)}
+.go[disabled]{box-shadow:none}
+.chip:hover,.stepper button:hover:not([disabled]){border-color:var(--accent);box-shadow:0 0 0 4px var(--glow-soft),0 4px 16px var(--glow-soft)}
+.chip[aria-pressed=true]{box-shadow:0 3px 14px var(--glow)}
+.fab{box-shadow:0 0 0 6px var(--glow-soft),0 10px 30px var(--glow)}
+.fab:hover{box-shadow:0 0 0 9px var(--glow-soft),0 12px 36px var(--glow)}
+.t:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--glow-soft)}
+:focus-visible{box-shadow:0 0 0 6px var(--glow-soft)}
+.jump:hover{text-shadow:0 0 14px var(--glow)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
