@@ -14,6 +14,7 @@
 :root{--paper:#fbf8f2;--sheet:#fff;--ink:#1f1a12;--muted:#6a604d;--line:#ebe4d4;--field:#8f846c;--accent:#a65608;--accent-ink:#fff;--accent-soft:#fbe9d0;--green:#276b36;--green-soft:#e2f1e3;--red:#b3261e;--red-soft:#fbe5e2;--shadow:0 1px 2px rgba(60,40,10,.06),0 8px 24px rgba(60,40,10,.06);--display:"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif;--body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
 @media (prefers-color-scheme:dark){:root{--paper:#14110c;--sheet:#1d1912;--ink:#f3ecdd;--muted:#b0a58d;--line:#332d21;--field:#7d7258;--accent:#f2a54f;--accent-ink:#1d1203;--accent-soft:#3b2a12;--green:#8fd29a;--green-soft:#1f3322;--red:#f4a99d;--red-soft:#3d201c;--shadow:none}}
 *{box-sizing:border-box}
+[hidden]{display:none!important}
 body{margin:0;background:var(--paper);color:var(--ink);font:400 1.0625rem/1.5 var(--body);-webkit-font-smoothing:antialiased}
 button,input,select,textarea{font:inherit;color:inherit}
 h1,h2,h3{font-family:var(--display);font-variation-settings:"opsz" 48;letter-spacing:-.025em;line-height:1.08;margin:0;font-weight:700;text-wrap:balance}
@@ -31,9 +32,10 @@ h1,h2,h3{font-family:var(--display);font-variation-settings:"opsz" 48;letter-spa
 .hero h1 em{font-style:normal;color:var(--accent)}
 .hero p{color:var(--muted);margin:10px 0 0;max-width:34ch}
 .card{background:var(--sheet);border:1px solid var(--line);border-radius:22px;padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
-.price{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.price{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:10px 16px}
+.price .pr{white-space:nowrap;margin-left:auto}
 .price b{font:700 2.4rem var(--display);letter-spacing:-.03em;color:var(--accent);font-variant-numeric:tabular-nums}
-.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;font-size:.85rem;font-weight:600;background:var(--green-soft);color:var(--green)}
+.badge{display:inline-flex;align-items:center;gap:6px;white-space:nowrap;padding:5px 12px;border-radius:99px;font-size:.85rem;font-weight:600;background:var(--green-soft);color:var(--green)}
 .badge.off{background:var(--red-soft);color:var(--red)}
 .facts{list-style:none;margin:14px 0 0;padding:14px 0 0;border-top:1px solid var(--line);display:grid;gap:8px}
 .facts li{display:flex;gap:10px;align-items:flex-start}.facts .i{color:var(--accent);margin-top:2px}
@@ -45,7 +47,7 @@ label.f{display:block;font-weight:600;font-size:.9rem;margin:18px 0 6px}
 .stepper{display:flex;align-items:center;gap:10px}
 .stepper button{width:60px;height:60px;border-radius:50%;border:1.5px solid var(--field);background:var(--sheet);cursor:pointer;display:grid;place-items:center;flex:none}
 .stepper button:active{transform:scale(.94)}.stepper button[disabled]{opacity:.4;cursor:default}
-.stepper output{flex:1;text-align:center;font:700 2.6rem var(--display);letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+.stepper output{flex:1;text-align:center;font:700 2.6rem var(--display);letter-spacing:-.035em}
 .chips{display:flex;gap:8px;justify-content:center;margin-top:10px}
 .chip{border:1.5px solid var(--field);background:var(--sheet);border-radius:99px;padding:8px 20px;cursor:pointer;min-height:44px;font-weight:500}
 .chip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
@@ -82,16 +84,16 @@ footer{margin-top:30px;text-align:center;font-size:.85rem;color:var(--muted)}
 @media (prefers-color-scheme:dark){:root{--glow:rgba(242,165,79,.42);--glow-soft:rgba(242,165,79,.2)}}
 .go,.chip,.fab,.stepper button{transition:box-shadow .25s ease,transform .08s,border-color .2s,filter .2s}
 .go{box-shadow:0 2px 6px var(--glow-soft),0 8px 26px var(--glow)}
-.go:hover{filter:brightness(1.06);box-shadow:0 0 0 5px var(--glow-soft),0 10px 32px var(--glow)}
+@media (hover:hover){.go:hover{filter:brightness(1.06);box-shadow:0 0 0 5px var(--glow-soft),0 10px 32px var(--glow)}}
 .go:active{box-shadow:0 0 0 2px var(--glow-soft)}
 .go[disabled]{box-shadow:none}
-.chip:hover,.stepper button:hover:not([disabled]){border-color:var(--accent);box-shadow:0 0 0 4px var(--glow-soft),0 4px 16px var(--glow-soft)}
+@media (hover:hover){.chip:hover,.stepper button:hover:not([disabled]){border-color:var(--accent);box-shadow:0 0 0 4px var(--glow-soft),0 4px 16px var(--glow-soft)}}
 .chip[aria-pressed=true]{box-shadow:0 3px 14px var(--glow)}
 .fab{box-shadow:0 0 0 6px var(--glow-soft),0 10px 30px var(--glow)}
-.fab:hover{box-shadow:0 0 0 9px var(--glow-soft),0 12px 36px var(--glow)}
+@media (hover:hover){.fab:hover{box-shadow:0 0 0 9px var(--glow-soft),0 12px 36px var(--glow)}}
 .t:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--glow-soft)}
 :focus-visible{box-shadow:0 0 0 6px var(--glow-soft)}
-.jump:hover{text-shadow:0 0 14px var(--glow)}
+@media (hover:hover){.jump:hover{text-shadow:0 0 14px var(--glow)}}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -134,13 +136,30 @@ const main=document.getElementById("main");
 let info=null,doz=1,sending=false,errs={},form={};
 try{form=JSON.parse(localStorage.getItem("egg-parent")||"{}")}catch{}
 
+async function getInfo(){
+  const r=await fetch(URL_+"/rest/v1/egg_public?id=eq.1&select=*",{headers:H,cache:"no-store"});
+  if(!r.ok)throw 0;const i=(await r.json())[0];if(!i)throw 0;return i;
+}
 async function load(){
-  try{
-    const r=await fetch(URL_+"/rest/v1/egg_public?id=eq.1&select=*",{headers:H});
-    if(!r.ok)throw 0;info=(await r.json())[0];if(!info)throw 0;
-  }catch{main.innerHTML=`<div class="card" role="alert"><h2>We can’t load right now</h2><p class="muted">Please check your connection and try again.</p><button class="go" onclick="location.reload()">Try again</button></div>`;return}
+  finished=false;
+  try{info=await getInfo()}
+  catch{main.innerHTML=`<div class="card" role="alert"><h2>We can’t load right now</h2><p class="muted">Please check your connection and try again.</p><button class="go" onclick="location.reload()">Try again</button></div>`;return}
   draw();
 }
+/* keep price and stock fresh without a manual reload */
+let finished=false;
+async function refresh(){
+  if(!info||sending||finished)return;
+  if(document.activeElement&&document.getElementById("f")?.contains(document.activeElement))return;   /* don't disturb typing */
+  try{
+    const i=await getInfo();
+    if(["available_dozens","price_per_dozen","ordering_open","pickup_info","school_note"].some(k=>i[k]!==info[k])){grab();info=i;draw()}
+  }catch{}
+}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)refresh()});
+addEventListener("pageshow",refresh);
+addEventListener("focus",refresh);
+setInterval(()=>{if(!document.hidden)refresh()},30000);
 function grab(){const g=id=>document.getElementById(id)?.value;if(document.getElementById("nm")){form={name:g("nm"),phone:g("ph"),pickup:g("pd"),note:g("nt")}}}
 function draw(){
   const max=Math.min(50,Math.floor(info.available_dozens*2)/2);
@@ -150,7 +169,7 @@ function draw(){
   const avail=info.available_dozens>=1?`${Math.floor(info.available_dozens)} dozen available`:"Less than a dozen left";
   const e=errs;
   main.innerHTML=`
-  <section class="card" aria-label="Price and availability"><div class="price"><span class="badge ${open?"":"off"}">${ic(open?"check":"clock")}${open?avail:"Orders paused"}</span><div style="text-align:right"><b>${money(info.price_per_dozen)}</b><span class="muted"> / dozen</span></div></div>
+  <section class="card" aria-label="Price and availability"><div class="price"><span class="badge ${open?"":"off"}">${ic(open?"check":"clock")}${open?avail:info.ordering_open?"Sold out for now":"Orders paused"}</span><div class="pr"><b>${money(info.price_per_dozen)}</b><span class="muted"> per dozen</span></div></div>
   ${info.school_note||info.pickup_info?`<ul class="facts">${info.pickup_info?`<li>${ic("pin")}<span><b>Collect:</b> ${esc(info.pickup_info)}</span></li>`:""}${info.school_note?`<li>${ic("info")}<span>${esc(info.school_note)}</span></li>`:""}<li>${ic("cash")}<span>Pay when you collect.</span></li></ul>`:`<ul class="facts"><li>${ic("cash")}<span>Pay when you collect.</span></li></ul>`}</section>
   ${open?`<form class="card" id="f" novalidate aria-labelledby="oh">
     <h2 id="oh">Your order</h2>
@@ -208,7 +227,7 @@ async function submit(e){
     const r=await fetch(URL_+"/rest/v1/egg_orders",{method:"POST",headers:{...H,Prefer:"return=minimal"},body:JSON.stringify(body)});
     if(!r.ok)throw 0;
     try{localStorage.setItem("egg-parent",JSON.stringify({name,phone}))}catch{}
-    sending=false;watchForm(null);
+    sending=false;finished=true;watchForm(null);
     main.innerHTML=`<div class="card done" role="status">${ic("check","xl")}<h2>Thank you, ${esc(name.split(" ")[0])}!</h2>
       <p>We’ve got your request for <b>${doz} dozen</b> (${money(doz*info.price_per_dozen)}).</p>
       <ol class="steps"><li><span class="n">1</span><span>We’ll call or message <b>${esc(phone)}</b> to confirm.</span></li><li><span class="n">2</span><span>${info.pickup_info?`Collect your eggs: ${esc(info.pickup_info)}.`:"We’ll tell you when and where to collect."}</span></li><li><span class="n">3</span><span>Pay ${money(doz*info.price_per_dozen)} when you collect.</span></li></ol>

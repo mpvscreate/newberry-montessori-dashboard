@@ -25,6 +25,7 @@
   --accent:#f2a54f; --accent-ink:#1d1203; --accent-soft:#3b2a12;
   --green:#8fd29a; --green-soft:#1f3322; --red:#f4a99d; --red-soft:#3d201c; --amber-soft:#3a2e14; --shadow:none}}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
 html{scroll-padding-bottom:110px}
 body{margin:0;background:var(--paper);color:var(--ink);font:400 1.0625rem/1.5 var(--body);-webkit-font-smoothing:antialiased}
 body.lock{overflow:hidden}
@@ -90,9 +91,9 @@ nav.tabs .badge{position:absolute;top:2px;left:50%;margin-left:6px;background:va
 
 /* buttons */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid var(--field);background:var(--sheet);border-radius:14px;padding:11px 18px;font-weight:600;cursor:pointer;min-height:48px;transition:background .15s,transform .05s}
-.btn:hover{background:var(--paper)}.btn:active{transform:scale(.98)}
+@media (hover:hover){.btn:hover{background:var(--paper)}}.btn:active{transform:scale(.98)}
 .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-.btn.primary:hover{filter:brightness(1.08)}
+@media (hover:hover){.btn.primary:hover{filter:brightness(1.08)}}
 .btn.good{background:var(--green-soft);color:var(--green);border-color:transparent}
 .btn.danger{color:var(--red)}
 .btn.small{padding:6px 12px;min-height:44px;font-size:.9rem;border-radius:12px}
@@ -183,20 +184,20 @@ input,select,textarea{max-width:100%}
 :root{--glow:rgba(166,86,8,.38);--glow-soft:rgba(166,86,8,.18);--glow-green:rgba(39,107,54,.3)}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--glow:rgba(242,165,79,.42);--glow-soft:rgba(242,165,79,.2);--glow-green:rgba(143,210,154,.3)}}
 .btn,.chip,.big,.fab,.fab-item,.stepper button,.seg button,nav.tabs button,.x{transition:box-shadow .25s ease,transform .08s,background .15s,border-color .2s,filter .2s}
-.btn:hover,.chip:hover,.stepper button:hover,.fab-item:hover{box-shadow:0 0 0 4px var(--glow-soft),0 4px 18px var(--glow-soft);border-color:var(--accent)}
+@media (hover:hover){.btn:hover,.chip:hover,.stepper button:hover,.fab-item:hover{box-shadow:0 0 0 4px var(--glow-soft),0 4px 18px var(--glow-soft);border-color:var(--accent)}}
 .btn.primary{box-shadow:0 2px 6px var(--glow-soft),0 6px 22px var(--glow)}
-.btn.primary:hover{box-shadow:0 0 0 4px var(--glow-soft),0 8px 28px var(--glow)}
-.btn.good:hover{box-shadow:0 0 0 4px var(--glow-green),0 4px 18px var(--glow-green);border-color:transparent}
-.btn.danger:hover{border-color:var(--red);box-shadow:0 0 0 4px rgba(179,38,30,.16)}
+@media (hover:hover){.btn.primary:hover{box-shadow:0 0 0 4px var(--glow-soft),0 8px 28px var(--glow)}}
+@media (hover:hover){.btn.good:hover{box-shadow:0 0 0 4px var(--glow-green),0 4px 18px var(--glow-green);border-color:transparent}}
+@media (hover:hover){.btn.danger:hover{border-color:var(--red);box-shadow:0 0 0 4px rgba(179,38,30,.16)}}
 .big.sell{box-shadow:0 8px 28px var(--glow)}
-.big.sell:hover{box-shadow:0 0 0 5px var(--glow-soft),0 12px 34px var(--glow)}
+@media (hover:hover){.big.sell:hover{box-shadow:0 0 0 5px var(--glow-soft),0 12px 34px var(--glow)}}
 .big.collect{box-shadow:0 6px 22px var(--glow-green)}
-.big.collect:hover{box-shadow:0 0 0 5px var(--glow-green),0 12px 34px var(--glow-green)}
+@media (hover:hover){.big.collect:hover{box-shadow:0 0 0 5px var(--glow-green),0 12px 34px var(--glow-green)}}
 .chip[aria-pressed=true],.seg button[aria-pressed=true]{box-shadow:0 3px 14px var(--glow)}
 nav.tabs button[aria-current=page]{box-shadow:0 0 0 1px var(--glow-soft),0 4px 16px var(--glow-soft)}
-nav.tabs button:hover:not([aria-current]){background:var(--accent-soft);color:var(--accent)}
+@media (hover:hover){nav.tabs button:hover:not([aria-current]){background:var(--accent-soft);color:var(--accent)}}
 .fab{box-shadow:0 0 0 6px var(--glow-soft),0 8px 28px var(--glow)}
-.fab:hover{box-shadow:0 0 0 9px var(--glow-soft),0 10px 34px var(--glow)}
+@media (hover:hover){.fab:hover{box-shadow:0 0 0 9px var(--glow-soft),0 10px 34px var(--glow)}}
 .btn:active,.chip:active,.big:active,.fab:active{box-shadow:0 0 0 2px var(--glow-soft)}
 .t:focus,input.t:focus,textarea.t:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--glow-soft)}
 :focus-visible{box-shadow:0 0 0 6px var(--glow-soft)}
@@ -268,6 +269,7 @@ printer:'<path d="M7 9V4h10v5M7 17H4v-7h16v7h-3"/><path d="M7 14h10v6H7z"/>',
 pencil:'<path d="M4 20l1-4L16.5 4.5a2 2 0 013 3L8 19z"/>',
 image:'<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4.5 4 3.5 3-2.5 4.5 3.5"/>',
 clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+chat:'<path d="M4 20l1.4-4.2A8 8 0 1112 20a8 8 0 01-4-1.1z"/><path d="M9 10.5c0 2.5 2 4.5 4.5 4.5l1.2-1.2-1.6-1-.8.6a3 3 0 01-1.6-1.6l.6-.8-1-1.6z"/>',
 sparkle:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>'
 };
 document.getElementById("sprite").innerHTML=Object.entries(ICONS).map(([k,v])=>`<symbol id="i-${k}" viewBox="0 0 24 24">${v}</symbol>`).join("");
@@ -578,14 +580,35 @@ function ordersView(){
   const row=o=>`<li style="align-items:flex-start"><div class="avatar">${ic("cart")}</div><div class="grow"><b>${esc(o.name)}</b> <span class="muted">· ${o.dozens} dozen · <span class="num">${money(o.dozens*S.settings.priceInd)}</span></span>
     <div class="small muted"><a href="tel:${esc(o.phone)}" style="color:var(--accent);font-weight:600">${ic("phone")} ${esc(o.phone)}</a> · ${o.pickup_date?"pickup "+dateLabel(o.pickup_date):"any day"} · ${ago(o.created_at)}</div>
     ${o.note?`<div class="small" style="margin-top:2px">“${esc(o.note)}”</div>`:""}
-    ${o.status==="new"?`<div class="row wrapx" style="margin-top:10px"><button class="btn good small" data-act="oconfirm" data-id="${o.id}" aria-label="Confirm order from ${esc(o.name)}">${ic("check")}Confirm</button><button class="btn small danger" data-act="odecline" data-id="${o.id}" aria-label="Decline order from ${esc(o.name)}">${ic("x")}Decline</button></div>`:`<span class="pill ${o.status==="confirmed"?"":"out"}" style="margin-top:6px">${ic(o.status==="confirmed"?"check":"x")}${o.status[0].toUpperCase()+o.status.slice(1)}</span>`}</div></li>`;
+    ${o.status==="new"?`<div class="row wrapx" style="margin-top:10px"><button class="btn good small" data-act="oconfirmwa" data-id="${o.id}" aria-label="Confirm order from ${esc(o.name)} and message on WhatsApp">${ic("chat")}Confirm &amp; WhatsApp</button><button class="btn small" data-act="oconfirm" data-id="${o.id}" aria-label="Confirm order from ${esc(o.name)} without messaging">${ic("check")}Confirm</button><button class="btn small danger" data-act="odecline" data-id="${o.id}" aria-label="Decline order from ${esc(o.name)}">${ic("x")}Decline</button></div>`:`<div class="row wrapx" style="margin-top:6px"><span class="pill ${o.status==="confirmed"?"":"out"}">${ic(o.status==="confirmed"?"check":"x")}${o.status[0].toUpperCase()+o.status.slice(1)}</span><button class="btn small" data-act="owa" data-id="${o.id}" aria-label="Message ${esc(o.name)} on WhatsApp">${ic("chat")}WhatsApp</button></div>`}</div></li>`;
   return `<div class="page-h"><h2>Parent orders</h2></div>
   <section class="card"><h2>New requests ${nw.length?`<span class="muted">(${nw.length})</span>`:""}</h2>${nw.length?`<ul class="list">${nw.map(row).join("")}</ul>`:`<div class="empty">${ic("inbox","xl")}<h3>No new requests</h3><p>Share your order link and requests will appear here the moment they’re sent.</p></div>`}
   <button class="btn block" data-act="copylink" style="margin-top:8px">${ic("link")}Copy parent order link</button></section>
   ${done.length?`<section class="card"><h2>Recently handled</h2><ul class="list">${done.map(row).join("")}</ul></section>`:""}`;
 }
-async function handleOrder(id,status){
+/* WhatsApp: South African numbers (082…, +27 82…, 0027 82…) → wa.me format */
+function waNumber(p){
+  let d=String(p).replace(/\D/g,"");
+  if(d.startsWith("00"))d=d.slice(2);
+  else if(d.startsWith("0"))d="27"+d.slice(1);
+  return d;
+}
+function waMessage(o,status){
+  const first=o.name.trim().split(/\s+/)[0],amt=money(o.dozens*S.settings.priceInd),qty=`${o.dozens} dozen`;
+  const when=o.pickup_date?` You asked for ${dateLabel(o.pickup_date).toLowerCase()}.`:"";
+  const pick=S.settings.pickup?` Collect: ${S.settings.pickup}.`:"";
+  const sign=" Thank you! Newberry Middle School Project";
+  if(status==="confirmed")return `Hi ${first}, your egg order is confirmed: ${qty} (${amt}).${when}${pick} Please pay when you collect.${sign}`;
+  if(status==="declined")return `Hi ${first}, sorry, we can't fill your egg order of ${qty} right now. Please try again soon.${sign}`;
+  return `Hi ${first}, thanks for your egg order of ${qty} (${amt}). We'll confirm shortly.${sign}`;
+}
+function openWhatsApp(o,status){
+  const w=window.open(`https://wa.me/${waNumber(o.phone)}?text=${encodeURIComponent(waMessage(o,status))}`,"_blank","noopener");
+  if(!w)toast("Your browser blocked WhatsApp. Allow pop-ups and try again.");
+}
+async function handleOrder(id,status,wa){
   const o=O.find(x=>x.id===id);if(!o)return;
+  if(wa)openWhatsApp(o,status);   /* opened first, inside the tap, so pop-up blockers allow it */
   if(status==="confirmed"){
     let c=S.customers.find(x=>x.phone&&x.phone.replace(/\D/g,"")===o.phone.replace(/\D/g,""));
     if(!c){c={id:uid(),type:"individual",name:o.name,phone:o.phone,note:"Parent order"};S.customers.push(c)}
@@ -618,6 +641,8 @@ function act(a,id){
   else if(a==="pubpost"){const p=ST.find(x=>x.id===id);p.published=!p.published;render();sb.from("egg_story").update({published:p.published}).eq("id",id).then(()=>toast(p.published?"Now visible to parents.":"Hidden from parents."))}
   else if(a==="delpost"){const p=ST.find(x=>x.id===id);confirmSheet("Delete this post?",`“${p.title}” will be removed from the parent page for good.`,"Delete post",()=>{(p.media_path?sb.storage.from("egg-media").remove([p.media_path]):Promise.resolve()).then(()=>sb.from("egg_story").delete().eq("id",id)).then(()=>{ST=ST.filter(x=>x.id!==id);render();toast("Post deleted.")})})}
   else if(a==="oconfirm")handleOrder(id,"confirmed");
+  else if(a==="oconfirmwa")handleOrder(id,"confirmed",true);
+  else if(a==="owa"){const o=O.find(x=>x.id===id);if(o)openWhatsApp(o,o.status)}
   else if(a==="odecline")handleOrder(id,"declined");
   else if(a==="copylink"){const u=new URL("newberry-eggs-order.html",location.href).href;(navigator.clipboard?.writeText(u)||Promise.reject()).then(()=>toast("Order link copied."),()=>toast("Copy this link: "+u))}
   else if(a==="signout"){sb.auth.signOut().then(()=>location.reload())}
