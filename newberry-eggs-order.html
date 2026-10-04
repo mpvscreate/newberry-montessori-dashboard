@@ -49,7 +49,8 @@ label.f{display:block;font-weight:600;font-size:.9rem;margin:18px 0 6px}
 .chips{display:flex;gap:8px;justify-content:center;margin-top:10px}
 .chip{border:1.5px solid var(--field);background:var(--sheet);border-radius:99px;padding:8px 20px;cursor:pointer;min-height:44px;font-weight:500}
 .chip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
-.bar{position:sticky;bottom:0;background:var(--sheet);margin:22px -20px -20px;padding:14px 20px calc(16px + env(safe-area-inset-bottom));border-top:1px solid var(--line);border-radius:0 0 22px 22px}
+.engaged .bar{position:sticky}
+.bar{position:static;bottom:0;background:var(--sheet);margin:22px -20px -20px;padding:14px 20px calc(16px + env(safe-area-inset-bottom));border-top:1px solid var(--line);border-radius:0 0 22px 22px}
 .total{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
 .total b{font:700 1.9rem var(--display);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
 .go{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:16px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:1.1rem;padding:15px;cursor:pointer;min-height:56px}
@@ -71,6 +72,10 @@ label.f{display:block;font-weight:600;font-size:.9rem;margin:18px 0 6px}
 .post h3{font-size:1.4rem;margin:8px 0 6px}
 .post p{margin:0;white-space:pre-line}
 .tag{display:inline-block;padding:3px 11px;border-radius:99px;font-size:.78rem;font-weight:600;background:var(--accent-soft);color:var(--accent)}
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));z-index:30;display:inline-flex;align-items:center;gap:10px;border:0;border-radius:99px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:1.05rem;padding:0 24px 0 18px;min-height:56px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.3);transition:opacity .2s,transform .2s}
+.fab[hidden]{display:none}
+input[type=date]{-webkit-appearance:none;appearance:none}
+input,select,textarea{max-width:100%}
 footer{margin-top:30px;text-align:center;font-size:.85rem;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
@@ -84,6 +89,7 @@ footer{margin-top:30px;text-align:center;font-size:.85rem;color:var(--muted)}
   <a class="jump" id="jump" href="#story" hidden></a>
   <main id="main" tabindex="-1"><div class="skel" style="height:150px;margin-bottom:16px"></div><div class="skel" style="height:420px"></div></main>
   <section class="story" id="story" hidden></section>
+  <button class="fab" id="fab" hidden></button>
   <footer>Questions? Ask at the school office.</footer>
 </div>
 <script>
@@ -149,13 +155,30 @@ function draw(){
     <button class="go" ${sending?"disabled":""}>${sending?"Sending…":"Send my order request"}</button>
     ${e.send?`<p class="err" role="alert" style="justify-content:center">${ic("alert")}${e.send}</p>`:""}</div>
   </form>`:`<div class="card"><h2 style="font-size:1.5rem">We’re not taking orders right now</h2><p class="muted" style="margin-bottom:0">${info.ordering_open?"We’ve sold out of eggs for now.":"Ordering is paused."} Please check back soon. In the meantime, meet our hens below.</p></div>`}`;
-  if(!open)return;
+  if(!open){watchForm(null);return}
   const f=document.getElementById("f");
   f.querySelector("#m").onclick=()=>{grab();doz=Math.max(0.5,doz-0.5);draw();document.getElementById("m").focus()};
   f.querySelector("#p").onclick=()=>{grab();doz=Math.min(max,doz+0.5);draw();document.getElementById("p").focus()};
   f.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{grab();doz=+b.dataset.q;draw();document.querySelector(`[data-q="${b.dataset.q}"]`).focus()});
   f.onsubmit=submit;
+  watchForm(f);
 }
+/* floating "Order eggs" button: shows whenever the order form is off-screen */
+let watchF=null,tick=false;
+function updFab(){
+  tick=false;const fab=document.getElementById("fab");
+  if(!watchF||!watchF.isConnected){fab.hidden=true;return}
+  const r=watchF.getBoundingClientRect(),inside=r.top<innerHeight*.4&&r.bottom>140;
+  fab.hidden=inside;watchF.classList.toggle("engaged",inside);
+}
+function watchForm(f){
+  const fab=document.getElementById("fab");
+  watchF=f;if(!f){fab.hidden=true;return}
+  fab.innerHTML=ic("egg")+"Order eggs";
+  fab.onclick=()=>{f.scrollIntoView({behavior:"smooth",block:"start"});setTimeout(()=>document.getElementById("nm")?.focus({preventScroll:true}),600)};
+  updFab();
+}
+["scroll","resize"].forEach(ev=>addEventListener(ev,()=>{if(!tick){tick=true;requestAnimationFrame(updFab)}},{passive:true}));
 async function submit(e){
   e.preventDefault();if(sending)return;
   grab();errs={};
@@ -170,7 +193,7 @@ async function submit(e){
     const r=await fetch(URL_+"/rest/v1/egg_orders",{method:"POST",headers:{...H,Prefer:"return=minimal"},body:JSON.stringify(body)});
     if(!r.ok)throw 0;
     try{localStorage.setItem("egg-parent",JSON.stringify({name,phone}))}catch{}
-    sending=false;
+    sending=false;watchForm(null);
     main.innerHTML=`<div class="card done" role="status">${ic("check","xl")}<h2>Thank you, ${esc(name.split(" ")[0])}!</h2>
       <p>We’ve got your request for <b>${doz} dozen</b> (${money(doz*info.price_per_dozen)}).</p>
       <ol class="steps"><li><span class="n">1</span><span>We’ll call or message <b>${esc(phone)}</b> to confirm.</span></li><li><span class="n">2</span><span>${info.pickup_info?`Collect your eggs: ${esc(info.pickup_info)}.`:"We’ll tell you when and where to collect."}</span></li><li><span class="n">3</span><span>Pay ${money(doz*info.price_per_dozen)} when you collect.</span></li></ol>

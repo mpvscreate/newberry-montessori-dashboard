@@ -142,7 +142,20 @@ label.f{display:block;font-weight:600;font-size:.9rem;margin:16px 0 6px}
 .warn .i{color:var(--accent);margin-top:2px}
 
 /* sheet */
-.scrim{position:fixed;inset:0;background:rgba(20,12,0,.55);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+input[type=date]{-webkit-appearance:none;appearance:none;display:block;width:100%;min-width:0;max-width:100%;text-align:left;line-height:1.2}
+input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
+input,select,textarea{max-width:100%}
+.fab-wrap{position:fixed;right:16px;bottom:calc(88px + env(safe-area-inset-bottom));z-index:30;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+@media (min-width:900px){.fab-wrap{right:28px;bottom:28px}}
+.fab{width:60px;height:60px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.28);transition:transform .2s}
+.fab .i{width:28px;height:28px;stroke-width:2}
+.fab[aria-expanded=true]{transform:rotate(45deg)}
+.fab-menu{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.fab-menu[hidden]{display:none}
+.fab-item{display:inline-flex;align-items:center;gap:10px;border:0;border-radius:99px;background:var(--sheet);color:var(--ink);padding:0 20px 0 14px;min-height:52px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.25);animation:up .15s ease-out}
+.fab-item .i{color:var(--accent)}
+.fab-scrim{position:fixed;inset:0;z-index:29;background:rgba(20,12,0,.35)}
+.scrim{position:fixed;left:0;right:0;top:0;height:100dvh;background:rgba(20,12,0,.55);z-index:40;display:flex;align-items:flex-end;justify-content:center}
 .sheet{background:var(--sheet);width:100%;max-width:560px;max-height:92dvh;overflow:auto;border-radius:26px 26px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));animation:up .22s ease-out;overscroll-behavior:contain}
 .sheet:focus{outline:none}
 .sheet .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}
@@ -181,6 +194,14 @@ label.f{display:block;font-weight:600;font-size:.9rem;margin:16px 0 6px}
 <nav class="tabs" aria-label="Main"></nav>
 <div id="layer"></div>
 <div id="toasts" aria-live="polite"></div>
+<div class="fab-wrap" id="fab-wrap" hidden>
+  <div class="fab-menu" id="fab-menu" hidden>
+    <button class="fab-item" data-fab="sell"><svg class="i" aria-hidden="true"><use href="#i-cash"/></svg>Sell eggs</button>
+    <button class="fab-item" data-fab="collect"><svg class="i" aria-hidden="true"><use href="#i-basket"/></svg>Collect eggs</button>
+    <button class="fab-item" data-fab="newcust"><svg class="i" aria-hidden="true"><use href="#i-user"/></svg>New customer</button>
+  </div>
+  <button class="fab" id="fab" aria-label="Quick actions" aria-expanded="false" aria-controls="fab-menu"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg></button>
+</div>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true" id="sprite"></svg>
 
 <script>
@@ -273,8 +294,13 @@ function sheet(title,html,onMount){
   l.innerHTML=`<div class="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t" tabindex="-1"><div class="hd"><h2 id="sh-t">${esc(title)}</h2><button class="x" aria-label="Close dialog" type="button">${ic("x")}</button></div>${html}</div></div>`;
   document.body.classList.add("lock");
   [$("#app"),$("nav.tabs")].forEach(e=>e.inert=true);
-  const sh=l.querySelector(".sheet");
-  const close=()=>{l.innerHTML="";document.body.classList.remove("lock");[$("#app"),$("nav.tabs")].forEach(e=>e.inert=false);closeSheet=null;lastFocus?.isConnected&&lastFocus.focus()};
+  const sh=l.querySelector(".sheet"),scrim=l.querySelector(".scrim"),vv=window.visualViewport;
+  /* keep the dialog (and its sticky button) above the on-screen keyboard */
+  const fit=()=>{if(!vv)return;scrim.style.height=vv.height+"px";scrim.style.top=vv.offsetTop+"px";sh.style.maxHeight=(vv.height-12)+"px"};
+  vv?.addEventListener("resize",fit);vv?.addEventListener("scroll",fit);fit();
+  sh.addEventListener("focusin",e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))setTimeout(()=>e.target.scrollIntoView({block:"center",behavior:"smooth"}),300)});
+  setFab(false);$("#fab-wrap").hidden=true;
+  const close=()=>{vv?.removeEventListener("resize",fit);vv?.removeEventListener("scroll",fit);l.innerHTML="";document.body.classList.remove("lock");[$("#app"),$("nav.tabs")].forEach(e=>e.inert=false);closeSheet=null;$("#fab-wrap").hidden=!online&&!!sb;lastFocus?.isConnected&&lastFocus.focus()};
   closeSheet=close;
   l.querySelector(".x").onclick=close;
   l.querySelector(".scrim").onclick=e=>{if(e.target.classList.contains("scrim"))close()};
@@ -288,7 +314,15 @@ function sheet(title,html,onMount){
   (sh.querySelector("[data-autofocus]")||sh).focus({preventScroll:true});
   return close;
 }
-addEventListener("keydown",e=>{if(e.key==="Escape"&&closeSheet)closeSheet()});
+addEventListener("keydown",e=>{if(e.key==="Escape"){if(closeSheet)closeSheet();else if($("#fab").getAttribute("aria-expanded")==="true"){setFab(false);$("#fab").focus()}}});
+/* floating quick-action button */
+function setFab(o){
+  $("#fab").setAttribute("aria-expanded",o);$("#fab-menu").hidden=!o;
+  document.querySelector(".fab-scrim")?.remove();
+  if(o){const s=document.createElement("div");s.className="fab-scrim";s.onclick=()=>setFab(false);document.body.append(s)}
+}
+$("#fab").onclick=()=>setFab($("#fab").getAttribute("aria-expanded")!=="true");
+document.querySelectorAll("[data-fab]").forEach(b=>b.onclick=()=>{setFab(false);({sell:()=>sellSheet(),collect:collectSheet,newcust:()=>custForm()})[b.dataset.fab]()});
 /* keep keyboard focus stable when a sheet redraws */
 function redraw(sh,target,html){
   const a=document.activeElement,sel=a&&sh.contains(a)?(a.id?"#"+a.id:a.dataset.f?`[data-f="${a.dataset.f}"]`:null):null;
@@ -303,6 +337,7 @@ function confirmSheet(title,msg,okLabel,fn){
 /* ---------- views ---------- */
 function render(){
   if(sb&&!online)return;
+  $("#fab-wrap").hidden=!!closeSheet;
   document.querySelectorAll("nav.tabs button").forEach(b=>b.dataset.tab===tab?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
   const nb=O.filter(o=>o.status==="new").length,ob=$("#ob");ob.hidden=!nb;ob.textContent=nb;
   document.title=`${nb?`(${nb}) `:""}${TABS.find(t=>t[0]===tab)[1]} · Egg Tracker`;
