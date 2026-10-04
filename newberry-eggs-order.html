@@ -1,126 +1,182 @@
 <!doctype html>
-<html lang="en">
+<html lang="en-ZA">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light dark">
 <title>Order Fresh Eggs</title>
+<meta name="description" content="Order fresh eggs from our school hens. Collect at school.">
 <link rel="icon" href="newberry-house-logo.webp">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Alegreya:wght@500;700&family=Alegreya+Sans:wght@400;500;700&display=swap">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400..700&display=swap">
 <style>
-:root{--paper:#faf7f0;--sheet:#fff;--ink:#2a2418;--muted:#6e6552;--line:#e6dfcf;--line-strong:#cfc5ad;--accent:#b8650b;--accent-ink:#fff;--accent-soft:#fbead2;--green:#2f6b3a;--green-soft:#e3f0e1;--red:#a8362a;--red-soft:#f8e4e0;--display:"Alegreya",Georgia,serif;--body:"Alegreya Sans","Segoe UI",system-ui,sans-serif}
-@media (prefers-color-scheme:dark){:root{--paper:#171410;--sheet:#211d17;--ink:#f1eadb;--muted:#a79d86;--line:#352f25;--line-strong:#4d4536;--accent:#f0a24a;--accent-ink:#1c1206;--accent-soft:#3a2a14;--green:#8fd29a;--green-soft:#1f3322;--red:#f2a597;--red-soft:#3a1f1b;color-scheme:dark}}
+:root{--paper:#fbf8f2;--sheet:#fff;--ink:#1f1a12;--muted:#6a604d;--line:#ebe4d4;--field:#8f846c;--accent:#a65608;--accent-ink:#fff;--accent-soft:#fbe9d0;--green:#276b36;--green-soft:#e2f1e3;--red:#b3261e;--red-soft:#fbe5e2;--shadow:0 1px 2px rgba(60,40,10,.06),0 8px 24px rgba(60,40,10,.06);--display:"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif;--body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif}
+@media (prefers-color-scheme:dark){:root{--paper:#14110c;--sheet:#1d1912;--ink:#f3ecdd;--muted:#b0a58d;--line:#332d21;--field:#7d7258;--accent:#f2a54f;--accent-ink:#1d1203;--accent-soft:#3b2a12;--green:#8fd29a;--green-soft:#1f3322;--red:#f4a99d;--red-soft:#3d201c;--shadow:none}}
 *{box-sizing:border-box}
-body{margin:0;background:var(--paper);color:var(--ink);font:18px/1.45 var(--body)}
-button,input,textarea{font:inherit;color:inherit}
-h1,h2{font-family:var(--display);margin:0}
-:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
-.wrap{max-width:520px;margin:0 auto;padding:20px 16px 50px}
-.brand{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 1.0625rem/1.5 var(--body);-webkit-font-smoothing:antialiased}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--display);font-variation-settings:"opsz" 48;letter-spacing:-.025em;line-height:1.08;margin:0;font-weight:700;text-wrap:balance}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:8px}
+.i{width:1.25em;height:1.25em;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-.22em}
+.i.lg{width:1.7em;height:1.7em}.i.xl{width:2.6em;height:2.6em;stroke-width:1.5}
+.wrap{max-width:560px;margin:0 auto;padding:20px 16px 60px}
+.skip{position:fixed;left:12px;top:-60px;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:10px;z-index:100;text-decoration:none;font-weight:600}
+.skip:focus{top:12px}
+.brand{display:flex;align-items:center;gap:12px;margin-bottom:18px}
 .brand img{width:48px;height:48px;border-radius:12px}
-.brand h1{font-size:1.6rem;line-height:1.1}
-.card{background:var(--sheet);border:1px solid var(--line);border-radius:18px;padding:18px;margin-bottom:16px;box-shadow:0 4px 14px rgba(60,40,10,.06)}
-.price{display:flex;justify-content:space-between;align-items:baseline}
-.price b{font:700 2rem var(--display);color:var(--accent)}
-.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:.85rem;font-weight:700;background:var(--green-soft);color:var(--green)}
+.brand .eyebrow{font:600 .72rem/1 var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.hero{padding:6px 0 18px}
+.hero h1{font-size:clamp(2.4rem,11vw,3.4rem);letter-spacing:-.035em}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero p{color:var(--muted);margin:10px 0 0;max-width:34ch}
+.card{background:var(--sheet);border:1px solid var(--line);border-radius:22px;padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.price{display:flex;justify-content:space-between;align-items:flex-end;gap:12px}
+.price b{font:700 2.4rem var(--display);letter-spacing:-.03em;color:var(--accent);font-variant-numeric:tabular-nums}
+.badge{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:99px;font-size:.85rem;font-weight:600;background:var(--green-soft);color:var(--green)}
 .badge.off{background:var(--red-soft);color:var(--red)}
-label{display:block;font-weight:700;font-size:.9rem;margin:16px 0 6px}
-input.t,textarea.t{width:100%;padding:12px 14px;border:1px solid var(--line-strong);border-radius:12px;background:var(--sheet);min-height:50px}
+.facts{list-style:none;margin:14px 0 0;padding:14px 0 0;border-top:1px solid var(--line);display:grid;gap:8px}
+.facts li{display:flex;gap:10px;align-items:flex-start}.facts .i{color:var(--accent);margin-top:2px}
+label.f{display:block;font-weight:600;font-size:.9rem;margin:18px 0 6px}
+.t{width:100%;padding:12px 14px;border:1.5px solid var(--field);border-radius:12px;background:var(--sheet);min-height:50px;font-size:1rem}
+.t[aria-invalid=true]{border-color:var(--red)}
+.err{font-size:.875rem;color:var(--red);margin:6px 0 0;display:flex;gap:6px;align-items:center}
+.hint{font-size:.85rem;color:var(--muted);margin:6px 0 0}
 .stepper{display:flex;align-items:center;gap:10px}
-.stepper button{width:58px;height:58px;border-radius:50%;border:1px solid var(--line-strong);background:var(--sheet);font-size:1.8rem;cursor:pointer;flex:none}
-.stepper output{flex:1;text-align:center;font:700 2.2rem var(--display)}
-.chips{display:flex;gap:8px;justify-content:center;margin-top:8px}
-.chip{border:1px solid var(--line-strong);background:var(--sheet);border-radius:99px;padding:8px 18px;cursor:pointer;min-height:44px}
-.total{display:flex;justify-content:space-between;align-items:baseline;background:var(--paper);border-radius:14px;padding:14px 16px;margin:18px 0}
-.total b{font:700 1.9rem var(--display)}
-.go{width:100%;border:0;border-radius:14px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:1.15rem;padding:15px;cursor:pointer;min-height:54px}
-.go:disabled{opacity:.5;cursor:default}
-.msg{padding:12px 14px;border-radius:12px;background:var(--red-soft);color:var(--red);margin-top:12px}
+.stepper button{width:60px;height:60px;border-radius:50%;border:1.5px solid var(--field);background:var(--sheet);cursor:pointer;display:grid;place-items:center;flex:none}
+.stepper button:active{transform:scale(.94)}.stepper button[disabled]{opacity:.4;cursor:default}
+.stepper output{flex:1;text-align:center;font:700 2.6rem var(--display);letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+.chips{display:flex;gap:8px;justify-content:center;margin-top:10px}
+.chip{border:1.5px solid var(--field);background:var(--sheet);border-radius:99px;padding:8px 20px;cursor:pointer;min-height:44px;font-weight:500}
+.chip[aria-pressed=true]{background:var(--accent);border-color:var(--accent);color:var(--accent-ink);font-weight:600}
+.bar{position:sticky;bottom:0;background:var(--sheet);margin:22px -20px -20px;padding:14px 20px calc(16px + env(safe-area-inset-bottom));border-top:1px solid var(--line);border-radius:0 0 22px 22px}
+.total{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:10px}
+.total b{font:700 1.9rem var(--display);letter-spacing:-.03em;font-variant-numeric:tabular-nums}
+.go{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;border:0;border-radius:16px;background:var(--accent);color:var(--accent-ink);font-weight:700;font-size:1.1rem;padding:15px;cursor:pointer;min-height:56px}
+.go:active{transform:scale(.99)}.go[disabled]{opacity:.6;cursor:default}
 .hp{position:absolute;left:-9999px}
-.done{text-align:center;padding:30px 10px}.done .em{font-size:3rem}
 .muted{color:var(--muted)}.small{font-size:.9rem}
-.story h2{font-size:1.5rem;margin:26px 0 4px}
-.post{background:var(--sheet);border:1px solid var(--line);border-radius:18px;overflow:hidden;margin-bottom:16px;box-shadow:0 4px 14px rgba(60,40,10,.06)}
-.post img,.post video{display:block;width:100%;max-height:420px;object-fit:cover;background:#000}
-.post .tx{padding:14px 16px 16px}
-.post h3{font:700 1.3rem var(--display);margin:6px 0 4px}
+.steps{list-style:none;padding:0;margin:18px 0 0;display:grid;gap:14px;text-align:left}
+.steps li{display:flex;gap:12px;align-items:flex-start}
+.steps .n{width:30px;height:30px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font:700 .9rem var(--display);flex:none}
+.done{text-align:center}.done .i{color:var(--green)}
+.done h2{font-size:2rem;margin:10px 0 8px}
+.skel{border-radius:16px;background:linear-gradient(90deg,var(--line),var(--sheet),var(--line));background-size:200% 100%;animation:sh 1.3s linear infinite}
+@keyframes sh{to{background-position:-200% 0}}
+.jump{display:inline-flex;align-items:center;gap:8px;margin:0 0 16px;color:var(--accent);font-weight:600;text-decoration:none;min-height:44px}
+.story h2{font-size:clamp(1.8rem,7vw,2.3rem);margin:30px 0 6px}
+.post{background:var(--sheet);border:1px solid var(--line);border-radius:22px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow)}
+.post img,.post video{display:block;width:100%;max-height:440px;object-fit:cover;background:#000}
+.post .tx{padding:16px 18px 20px}
+.post h3{font-size:1.4rem;margin:8px 0 6px}
 .post p{margin:0;white-space:pre-line}
-.tag{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.78rem;font-weight:700;background:var(--accent-soft);color:var(--accent)}
-.jump{display:inline-block;margin:0 0 14px;color:var(--accent);font-weight:700;text-decoration:none}
+.tag{display:inline-block;padding:3px 11px;border-radius:99px;font-size:.78rem;font-weight:600;background:var(--accent-soft);color:var(--accent)}
+footer{margin-top:30px;text-align:center;font-size:.85rem;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
+<a class="skip" href="#main">Skip to order form</a>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" id="sprite"></svg>
 <div class="wrap">
-  <div class="brand"><img src="newberry-house-logo.webp" alt="" onerror="this.style.display='none'"><div><h1>Fresh eggs</h1><div class="muted small">Newberry · raised and collected by our students</div></div></div>
-  <a class="jump" id="jump" href="#story" hidden>🐔 See our hens &amp; coop story ↓</a>
-  <div id="app"><div class="card muted">Loading…</div></div>
+  <div class="brand"><img src="newberry-house-logo.webp" alt="" onerror="this.style.display='none'"><div><div style="font:700 1.15rem/1 var(--display);letter-spacing:-.02em">Newberry</div><div class="eyebrow">School hens &amp; coop</div></div></div>
+  <div class="hero"><h1>Fresh eggs, <em>from our own hens.</em></h1><p>Raised and collected by our students. Order here and collect at school.</p></div>
+  <a class="jump" id="jump" href="#story" hidden></a>
+  <main id="main" tabindex="-1"><div class="skel" style="height:150px;margin-bottom:16px"></div><div class="skel" style="height:420px"></div></main>
   <section class="story" id="story" hidden></section>
+  <footer>Questions? Ask at the school office.</footer>
 </div>
 <script>
+const ICONS={
+egg:'<path d="M12 3c-3.5 0-7 6-7 11a7 7 0 0014 0c0-5-3.5-11-7-11z"/>',
+check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+alert:'<path d="M12 4l10 17H2z"/><path d="M12 10v4M12 17.5h.01"/>',
+plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',
+clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+pin:'<path d="M12 21s7-6.2 7-11.5A7 7 0 005 9.5C5 14.8 12 21 12 21z"/><circle cx="12" cy="9.5" r="2.5"/>',
+cash:'<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>',
+phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2z"/>',
+arrow:'<path d="M12 5v14M6 13l6 6 6-6"/>',
+bird:'<path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 008-8V7a4 4 0 00-7.3-2.3L2 20"/><path d="M20 7l2 .5-2 .5"/><path d="M10 18v3M14 17.8V21"/>',
+info:'<circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 8h.01"/>'
+};
+document.getElementById("sprite").innerHTML=Object.entries(ICONS).map(([k,v])=>`<symbol id="i-${k}" viewBox="0 0 24 24">${v}</symbol>`).join("");
+const ic=(n,c="")=>`<svg class="i ${c}" aria-hidden="true" focusable="false"><use href="#i-${n}"/></svg>`;
+
 const URL_="https://oikwudpqmbnssttatlhc.supabase.co";
 const KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pa3d1ZHBxbWJuc3N0dGF0bGhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTMzODEsImV4cCI6MjA5NTY4OTM4MX0.p6I9qlvre5TjF3qOVjAIBus3_PNrbvCF2cMXHe3uiXw";
 const H={apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"};
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const money=n=>new Intl.NumberFormat("en-ZA",{style:"currency",currency:"ZAR",minimumFractionDigits:2}).format(n||0);
-const app=document.getElementById("app");
-let info=null,doz=1,sending=false,err="";
-let saved={};try{saved=JSON.parse(localStorage.getItem("egg-parent")||"{}")}catch{}
+const FMT=new Intl.NumberFormat("en-ZA",{style:"currency",currency:"ZAR",minimumFractionDigits:2});
+const money=n=>FMT.format(n||0);
+const main=document.getElementById("main");
+let info=null,doz=1,sending=false,errs={},form={};
+try{form=JSON.parse(localStorage.getItem("egg-parent")||"{}")}catch{}
 
 async function load(){
   try{
     const r=await fetch(URL_+"/rest/v1/egg_public?id=eq.1&select=*",{headers:H});
     if(!r.ok)throw 0;info=(await r.json())[0];if(!info)throw 0;
-  }catch{app.innerHTML=`<div class="card"><h2>Can’t load right now</h2><p class="muted">Please check your connection and try again.</p><button class="go" onclick="location.reload()">Try again</button></div>`;return}
+  }catch{main.innerHTML=`<div class="card" role="alert"><h2>We can’t load right now</h2><p class="muted">Please check your connection and try again.</p><button class="go" onclick="location.reload()">Try again</button></div>`;return}
   draw();
 }
+function grab(){const g=id=>document.getElementById(id)?.value;if(document.getElementById("nm")){form={name:g("nm"),phone:g("ph"),pickup:g("pd"),note:g("nt")}}}
 function draw(){
   const max=Math.min(50,Math.floor(info.available_dozens*2)/2);
   const open=info.ordering_open&&max>=0.5;
   if(doz>max&&open)doz=max;
-  const dates=[];for(let i=0;i<14;i++){const d=new Date(Date.now()+i*864e5);dates.push(d)}
-  app.innerHTML=`
-  <div class="card"><div class="price"><div><span class="badge ${open?"":"off"}">${open?`${info.available_dozens>=1?Math.floor(info.available_dozens):"Less than 1"} dozen available`:"Orders paused"}</span></div><div><b>${money(info.price_per_dozen)}</b><span class="muted"> / dozen</span></div></div>
-  ${info.school_note?`<p class="muted" style="margin:10px 0 0">${esc(info.school_note)}</p>`:""}
-  ${info.pickup_info?`<p style="margin:8px 0 0"><b>Pickup:</b> ${esc(info.pickup_info)}</p>`:""}</div>
-  ${open?`<form class="card" id="f" novalidate>
-    <h2>Your order</h2>
-    <label>How many dozen?</label>
-    <div class="stepper"><button type="button" id="m" aria-label="Fewer">−</button><output aria-live="polite">${doz}</output><button type="button" id="p" aria-label="More">+</button></div>
-    <div class="chips">${[1,2,3].filter(n=>n<=max).map(n=>`<button type="button" class="chip" data-q="${n}">${n}</button>`).join("")}</div>
-    <label for="nm">Your name</label><input id="nm" class="t" autocomplete="name" value="${esc(saved.name)}" required>
-    <label for="ph">Phone number</label><input id="ph" class="t" type="tel" autocomplete="tel" value="${esc(saved.phone)}" required>
-    <label for="pd">Preferred pickup day</label>
-    <select id="pd" class="t" style="width:100%;padding:12px;border:1px solid var(--line-strong);border-radius:12px;background:var(--sheet);min-height:50px;font:inherit;color:inherit"><option value="">Any day is fine</option>${dates.filter(d=>d.getDay()%6).map(d=>`<option value="${d.toISOString().slice(0,10)}">${d.toLocaleDateString(undefined,{weekday:"long",month:"short",day:"numeric"})}</option>`).join("")}</select>
-    <label for="nt">Note (optional)</label><textarea id="nt" class="t" rows="2" maxlength="300" placeholder="e.g. My child will pick up"></textarea>
+  const dates=[];for(let i=0;i<14;i++){const d=new Date(Date.now()+i*864e5);if(d.getDay()%6)dates.push(d)}
+  const avail=info.available_dozens>=1?`${Math.floor(info.available_dozens)} dozen available`:"Less than a dozen left";
+  const e=errs;
+  main.innerHTML=`
+  <section class="card" aria-label="Price and availability"><div class="price"><span class="badge ${open?"":"off"}">${ic(open?"check":"clock")}${open?avail:"Orders paused"}</span><div style="text-align:right"><b>${money(info.price_per_dozen)}</b><span class="muted"> / dozen</span></div></div>
+  ${info.school_note||info.pickup_info?`<ul class="facts">${info.pickup_info?`<li>${ic("pin")}<span><b>Collect:</b> ${esc(info.pickup_info)}</span></li>`:""}${info.school_note?`<li>${ic("info")}<span>${esc(info.school_note)}</span></li>`:""}<li>${ic("cash")}<span>Pay when you collect.</span></li></ul>`:`<ul class="facts"><li>${ic("cash")}<span>Pay when you collect.</span></li></ul>`}</section>
+  ${open?`<form class="card" id="f" novalidate aria-labelledby="oh">
+    <h2 id="oh">Your order</h2>
+    <label class="f" id="dl">How many dozen?</label>
+    <div class="stepper" role="group" aria-labelledby="dl"><button type="button" id="m" aria-label="Half a dozen less" ${doz<=0.5?"disabled":""}>${ic("minus","lg")}</button><output aria-live="polite" id="dv">${doz}</output><button type="button" id="p" aria-label="Half a dozen more" ${doz>=max?"disabled":""}>${ic("plus","lg")}</button></div>
+    <div class="chips" role="group" aria-label="Quick amounts">${[1,2,3,5].filter(n=>n<=max).map(n=>`<button type="button" class="chip" data-q="${n}" aria-pressed="${doz===n}">${n}</button>`).join("")}</div>
+    <p class="hint" style="text-align:center">${doz*12} eggs</p>
+    <label class="f" for="nm">Your name</label><input id="nm" class="t" autocomplete="name" value="${esc(form.name)}" ${e.name?'aria-invalid="true" aria-describedby="e-nm"':""}>
+    ${e.name?`<p class="err" id="e-nm" role="alert">${ic("alert")}${e.name}</p>`:""}
+    <label class="f" for="ph">Phone number</label><input id="ph" class="t" type="tel" inputmode="tel" autocomplete="tel" value="${esc(form.phone)}" aria-describedby="${e.phone?"e-ph":"h-ph"}" ${e.phone?'aria-invalid="true"':""}>
+    ${e.phone?`<p class="err" id="e-ph" role="alert">${ic("alert")}${e.phone}</p>`:`<p class="hint" id="h-ph">So we can confirm your order.</p>`}
+    <label class="f" for="pd">Preferred collection day</label>
+    <select id="pd" class="t"><option value="">Any day is fine</option>${dates.map(d=>{const v=d.toISOString().slice(0,10);return `<option value="${v}" ${form.pickup===v?"selected":""}>${d.toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"short"})}</option>`}).join("")}</select>
+    <label class="f" for="nt">Note <span class="muted">(optional)</span></label><textarea id="nt" class="t" rows="2" maxlength="300" placeholder="e.g. My child will collect">${esc(form.note)}</textarea>
     <input class="hp" id="web" tabindex="-1" autocomplete="off" aria-hidden="true">
-    <div class="total"><span>Total to pay at pickup</span><b>${money(doz*info.price_per_dozen)}</b></div>
+    <div class="bar"><div class="total"><span class="muted">Total, pay on collection</span><b>${money(doz*info.price_per_dozen)}</b></div>
     <button class="go" ${sending?"disabled":""}>${sending?"Sending…":"Send my order request"}</button>
-    ${err?`<div class="msg" role="alert">${esc(err)}</div>`:""}
-    <p class="muted small" style="margin-bottom:0">This is a request. Our staff will confirm it by phone or text.</p>
-  </form>`:`<div class="card"><p>We’re not taking new orders right now. Please check back soon!</p></div>`}`;
+    ${e.send?`<p class="err" role="alert" style="justify-content:center">${ic("alert")}${e.send}</p>`:""}</div>
+  </form>`:`<div class="card"><h2 style="font-size:1.5rem">We’re not taking orders right now</h2><p class="muted" style="margin-bottom:0">${info.ordering_open?"We’ve sold out of eggs for now.":"Ordering is paused."} Please check back soon. In the meantime, meet our hens below.</p></div>`}`;
   if(!open)return;
   const f=document.getElementById("f");
-  f.querySelector("#m").onclick=()=>{doz=Math.max(0.5,doz-0.5);keep();draw()};
-  f.querySelector("#p").onclick=()=>{doz=Math.min(max,doz+0.5);keep();draw()};
-  f.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{doz=+b.dataset.q;keep();draw()});
+  f.querySelector("#m").onclick=()=>{grab();doz=Math.max(0.5,doz-0.5);draw();document.getElementById("m").focus()};
+  f.querySelector("#p").onclick=()=>{grab();doz=Math.min(max,doz+0.5);draw();document.getElementById("p").focus()};
+  f.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{grab();doz=+b.dataset.q;draw();document.querySelector(`[data-q="${b.dataset.q}"]`).focus()});
   f.onsubmit=submit;
 }
-function keep(){saved={name:document.getElementById("nm")?.value||saved.name,phone:document.getElementById("ph")?.value||saved.phone}}
 async function submit(e){
-  e.preventDefault();
-  const name=nm.value.trim(),phone=ph.value.trim();
-  keep();err="";
-  if(web.value)return;                       /* honeypot */
-  if(!name){err="Please enter your name.";draw();nm.focus();return}
-  if(phone.replace(/\D/g,"").length<7){err="Please enter a phone number we can reach you on.";draw();ph.focus();return}
-  const body={name,phone,dozens:doz,pickup_date:pd.value||null,note:nt.value.trim()||null};
+  e.preventDefault();if(sending)return;
+  grab();errs={};
+  if(document.getElementById("web").value)return;                       /* honeypot */
+  const name=form.name.trim(),phone=form.phone.trim();
+  if(!name)errs.name="Please enter your name.";
+  if(phone.replace(/\D/g,"").length<7)errs.phone="Please enter a phone number we can reach you on.";
+  if(errs.name||errs.phone){draw();document.getElementById(errs.name?"nm":"ph").focus();return}
+  const body={name,phone,dozens:doz,pickup_date:form.pickup||null,note:(form.note||"").trim()||null};
   sending=true;draw();
   try{
     const r=await fetch(URL_+"/rest/v1/egg_orders",{method:"POST",headers:{...H,Prefer:"return=minimal"},body:JSON.stringify(body)});
     if(!r.ok)throw 0;
-    try{localStorage.setItem("egg-parent",JSON.stringify(saved))}catch{}
+    try{localStorage.setItem("egg-parent",JSON.stringify({name,phone}))}catch{}
     sending=false;
-    app.innerHTML=`<div class="card done"><div class="em">🥚</div><h2>Thank you, ${esc(name.split(" ")[0])}!</h2><p>We got your request for <b>${doz} dozen</b> (${money(doz*info.price_per_dozen)}).<br>We’ll contact you at <b>${esc(phone)}</b> to confirm.</p><button class="go" onclick="doz=1;err='';load()">Place another order</button></div>`;
-  }catch{sending=false;err="Something went wrong sending your order. Please try again.";draw()}
+    main.innerHTML=`<div class="card done" role="status">${ic("check","xl")}<h2>Thank you, ${esc(name.split(" ")[0])}!</h2>
+      <p>We’ve got your request for <b>${doz} dozen</b> (${money(doz*info.price_per_dozen)}).</p>
+      <ol class="steps"><li><span class="n">1</span><span>We’ll call or message <b>${esc(phone)}</b> to confirm.</span></li><li><span class="n">2</span><span>${info.pickup_info?`Collect your eggs: ${esc(info.pickup_info)}.`:"We’ll tell you when and where to collect."}</span></li><li><span class="n">3</span><span>Pay ${money(doz*info.price_per_dozen)} when you collect.</span></li></ol>
+      <button class="go" style="margin-top:22px;background:var(--sheet);color:var(--ink);border:1.5px solid var(--field)" onclick="doz=1;errs={};form.note='';load()">Place another order</button></div>`;
+    main.focus();scrollTo({top:0,behavior:"smooth"});
+  }catch{sending=false;errs={send:"Something went wrong sending your order. Please try again."};draw()}
 }
 async function loadStory(){
   try{
@@ -128,12 +184,12 @@ async function loadStory(){
     if(!r.ok)return;const posts=await r.json();if(!posts.length)return;
     const m=p=>URL_+"/storage/v1/object/public/egg-media/"+encodeURIComponent(p);
     const el=document.getElementById("story");
-    el.innerHTML=`<h2>Our hens &amp; coop journey</h2><p class="muted" style="margin:0 0 14px">From empty yard to fresh eggs, follow along with our students.</p>`+posts.map(p=>`<article class="post">
+    el.innerHTML=`<h2>Our hens &amp; coop journey</h2><p class="muted" style="margin:0 0 16px">From empty yard to fresh eggs. Follow along with our students.</p>`+posts.map(p=>`<article class="post">
       ${p.media_kind==="image"?`<img src="${m(p.media_path)}" alt="${esc(p.title)}" loading="lazy">`:""}
-      ${p.media_kind==="video"?`<video src="${m(p.media_path)}" controls playsinline preload="metadata"></video>`:""}
-      <div class="tx"><span class="tag">${esc(p.tag)}</span> <span class="muted small">${new Date(p.story_date+"T12:00").toLocaleDateString(undefined,{day:"numeric",month:"long",year:"numeric"})}</span>
+      ${p.media_kind==="video"?`<video src="${m(p.media_path)}" controls playsinline preload="metadata" aria-label="${esc(p.title)}"></video>`:""}
+      <div class="tx"><span class="tag">${esc(p.tag)}</span> <span class="muted small">${new Date(p.story_date+"T12:00").toLocaleDateString("en-ZA",{day:"numeric",month:"long",year:"numeric"})}</span>
       <h3>${esc(p.title)}</h3>${p.body?`<p>${esc(p.body)}</p>`:""}</div></article>`).join("");
-    el.hidden=false;document.getElementById("jump").hidden=false;
+    el.hidden=false;const j=document.getElementById("jump");j.innerHTML=ic("bird")+"Meet our hens &amp; see the coop story"+ic("arrow");j.hidden=false;
   }catch{}
 }
 load();loadStory();
