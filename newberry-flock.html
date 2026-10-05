@@ -2,6 +2,7 @@
 <html lang="en-ZA">
 <head>
 <meta charset="utf-8">
+<script>try{var t=localStorage.getItem("flock-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}try{if(JSON.parse(localStorage.getItem("flock-lock")).hash)document.documentElement.classList.add("locked")}catch(e){}</script>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <title>Newberry Flock</title>
@@ -28,11 +29,17 @@
   --display:"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif;
   --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --rail:236px;
 }
-@media (prefers-color-scheme:dark){:root{
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --paper:#14110c; --sheet:#1e1a13; --ink:#f4ecdc; --muted:#b1a68e; --line:#342e22; --field:#7d7258;
   --accent:#f2a54f; --accent-ink:#1d1203; --accent-soft:#3b2a12; --accent-2:#f6c07f;
   --green:#8fd29a; --green-soft:#1f3322; --red:#f4a99d; --red-soft:#3d201c; --amber:#f0c978; --amber-soft:#3a2e14; --sky:#8cc6e4; --sky-soft:#1b2f3a;
-  --glow:rgba(242,165,79,.4); --glow-soft:rgba(242,165,79,.2); --glow-green:rgba(143,210,154,.28); --shadow:none}}
+  --glow:rgba(242,165,79,.4); --glow-soft:rgba(242,165,79,.2); --glow-green:rgba(143,210,154,.28);   --shadow:none; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#14110c; --sheet:#1e1a13; --ink:#f4ecdc; --muted:#b1a68e; --line:#342e22; --field:#7d7258;
+  --accent:#f2a54f; --accent-ink:#1d1203; --accent-soft:#3b2a12; --accent-2:#f6c07f;
+  --green:#8fd29a; --green-soft:#1f3322; --red:#f4a99d; --red-soft:#3d201c; --amber:#f0c978; --amber-soft:#3a2e14; --sky:#8cc6e4; --sky-soft:#1b2f3a;
+  --glow:rgba(242,165,79,.4); --glow-soft:rgba(242,165,79,.2); --glow-green:rgba(143,210,154,.28);   --shadow:none; color-scheme:dark}
+:root[data-theme="light"]{color-scheme:light}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
 html{scroll-padding-bottom:120px}
@@ -202,19 +209,74 @@ input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
 .msgprev{background:var(--paper);border-radius:16px;padding:12px 14px;white-space:pre-line;font-size:.95rem;border-left:4px solid var(--green)}
 .sync{display:inline-flex;align-items:center;gap:5px;font:600 .8rem var(--body);color:var(--muted);background:none;border:0;cursor:pointer;padding:4px 0;min-height:32px}
 .sync.ok{color:var(--green)}.sync.error,.sync.offline{color:var(--red)}
+.locked #app,.locked nav.tabs,.locked .fab-wrap{visibility:hidden}
+html.privacy #app{filter:blur(22px)}
+#lock{position:fixed;inset:0;z-index:120;background:var(--paper);display:flex;align-items:center;justify-content:center;overflow:auto;padding:20px}
+#lock[hidden]{display:none}
+.lk-card{width:100%;max-width:340px;text-align:center;margin:auto}
+.lk-card img{width:72px;height:72px;border-radius:18px}
+.lk-s{min-height:1.5em;margin:6px 0 0;color:var(--muted)}.lk-s.bad{color:var(--red);font-weight:600}
+.lk-lenrow{display:flex;gap:8px;justify-content:center;margin-top:10px}
+.lk-dots{display:flex;gap:14px;justify-content:center;margin:20px 0 24px;min-height:18px}
+.lk-dots i{width:16px;height:16px;border-radius:50%;border:2px solid var(--field);transition:background .15s,box-shadow .2s}
+.lk-dots i.on{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 4px var(--glow-soft)}
+.lk-dots.shake{animation:shake .35s}
+@keyframes shake{20%,60%{transform:translateX(-8px)}40%,80%{transform:translateX(8px)}}
+.lk-pad{display:grid;grid-template-columns:repeat(3,76px);gap:14px;justify-content:center}
+.lk-pad button{width:76px;height:76px;border-radius:50%;border:1.5px solid var(--line);background:var(--sheet);font:600 1.7rem var(--display);cursor:pointer;display:grid;place-items:center;box-shadow:var(--shadow);transition:box-shadow .25s,transform .08s}
+.lk-pad button:active{transform:scale(.94);box-shadow:0 0 0 6px var(--glow-soft)}
+.lk-pad .ghost{visibility:hidden;box-shadow:none}
+.iconbtn{width:44px;height:44px;border-radius:50%;border:1.5px solid var(--line);background:var(--sheet);color:var(--accent);cursor:pointer;display:grid;place-items:center;flex:none;box-shadow:var(--shadow)}
+.iconbtn[hidden]{display:none}
+@media (min-width:900px){header.top .iconbtn{display:none}}
+.themes{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.themeopt{display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 8px;border:1.5px solid var(--field);border-radius:20px;background:var(--sheet);cursor:pointer;text-align:center;color:var(--ink);transition:box-shadow .25s,border-color .2s}
+.themeopt .i{color:var(--accent)}.themeopt b{font:700 1rem var(--display)}
+.themeopt[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 4px var(--glow-soft)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <a class="skip" href="#view">Skip to content</a>
 <div class="wrap" id="app">
-  <header class="top"><img src="newberry-house-logo.webp" alt="" onerror="this.style.display='none'"><div class="grow"><h1>Newberry Flock</h1><div class="small muted"><span id="today"></span> · <button class="sync" id="sync" type="button" aria-label="Cloud sync status"></button></div></div></header>
+  <header class="top"><img src="newberry-house-logo.webp" alt="" onerror="this.style.display='none'"><div class="grow"><h1>Newberry Flock</h1><div class="small muted"><span id="today"></span> · <button class="sync" id="sync" type="button" aria-label="Cloud sync status"></button></div></div>
+    <button class="iconbtn" id="themebtn" type="button"></button>
+    <button class="iconbtn" id="lockbtn" type="button" hidden aria-label="Lock the app"><svg class="i" aria-hidden="true"><use href="#i-lock"/></svg></button></header>
   <main id="view" tabindex="-1"></main>
 </div>
 <nav class="tabs" aria-label="Main"></nav>
 <div class="fab-wrap" id="fab-wrap">
   <div class="fab-menu" id="fab-menu" hidden></div>
   <button class="fab" id="fab" aria-label="Quick actions" aria-expanded="false" aria-controls="fab-menu"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg></button>
+</div>
+<div id="lock" role="dialog" aria-modal="true" aria-labelledby="lk-t" hidden>
+  <div class="lk-card">
+    <div id="lk-padpanel">
+      <img src="icons/flock-192.png" alt="" width="72" height="72">
+      <h2 id="lk-t" style="margin-top:12px">Enter your PIN</h2>
+      <p class="lk-s" id="lk-s" role="status" aria-live="polite"></p>
+      <div class="lk-lenrow" id="lk-lenrow" hidden><button class="chip" data-len="4" type="button">4 digits</button><button class="chip" data-len="6" type="button">6 digits</button></div>
+      <div class="lk-dots" id="lk-dots" role="img"></div>
+      <div class="lk-pad">
+        <button type="button" data-k="1" aria-label="1">1</button><button type="button" data-k="2" aria-label="2">2</button><button type="button" data-k="3" aria-label="3">3</button><button type="button" data-k="4" aria-label="4">4</button><button type="button" data-k="5" aria-label="5">5</button><button type="button" data-k="6" aria-label="6">6</button><button type="button" data-k="7" aria-label="7">7</button><button type="button" data-k="8" aria-label="8">8</button><button type="button" data-k="9" aria-label="9">9</button>
+        <button type="button" class="ghost" tabindex="-1" aria-hidden="true"></button>
+        <button type="button" data-k="0" aria-label="0">0</button>
+        <button type="button" data-k="b" aria-label="Delete the last digit"><svg class="i" aria-hidden="true"><use href="#i-backspace"/></svg></button>
+      </div>
+      <p style="margin:14px 0 0"><button class="linkbtn" id="lk-forgot" type="button">Forgot PIN?</button><button class="linkbtn" id="lk-cancel" type="button" hidden>Cancel</button></p>
+    </div>
+    <div id="lk-fp" hidden>
+      <h2 id="lk-fpt">Forgot your PIN?</h2><p class="muted" id="lk-fpm"></p>
+      <form id="lk-form" novalidate style="text-align:left">
+        <label class="f" for="lk-em">Email</label><input id="lk-em" class="t" type="email" autocomplete="username" inputmode="email">
+        <label class="f" for="lk-pw">Password</label><input id="lk-pw" class="t" type="password" autocomplete="current-password">
+        <p class="err" id="lk-err" role="alert" hidden></p>
+        <button class="btn primary block" id="lk-go" style="margin-top:16px">Sign in and remove the PIN</button>
+      </form>
+      <button class="btn block danger" id="lk-erase" type="button" style="margin-top:12px"></button>
+      <button class="linkbtn" id="lk-back" type="button" style="margin-top:6px">Back</button>
+    </div>
+  </div>
 </div>
 <div id="layer"></div>
 <div id="toasts" aria-live="polite"></div>
@@ -260,6 +322,11 @@ chat:'<path d="M4 20l1.4-4.2A8 8 0 1112 20a8 8 0 01-4-1.1z"/><path d="M9 10.5c0 
 cloud:'<path d="M7 18a4.5 4.5 0 01-.6-9A6 6 0 0118 10.5 3.8 3.8 0 0117.5 18z"/>',
 cloudoff:'<path d="M3 3l18 18"/><path d="M7 18a4.5 4.5 0 01-.6-9 6 6 0 011.7-2.7M11 5.2A6 6 0 0118 10.5a3.8 3.8 0 011.8 6.2"/><path d="M10 18h7.5"/>',
 logout:'<path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/>',
+lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>',
+backspace:'<path d="M21 5H9l-6 7 6 7h12z"/><path d="M13 9l4 6M17 9l-4 6"/>',
+sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+moon:'<path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z"/>',
+device:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
 sparkle:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
 note:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>',
 coop:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><circle cx="12" cy="14" r="2"/><path d="M12 16v4"/>'
@@ -582,7 +649,7 @@ function care(){
 function more(){
   const row=(i,t,s,a)=>`<li class="tap" data-act="${a}" tabindex="0" role="button"><div class="avatar">${ic(i)}</div><div class="grow"><b>${t}</b><div class="small muted">${s}</div></div>${ic("chev")}</li>`;
   return `<div class="page-h"><h2>More</h2></div><section class="card"><ul class="list">
-  ${row("cloud","Cloud sync",user?`Signed in as ${esc(user.email||"")}`:"Sign in to share data with other staff","sync")}${standalone()?"":row("download","Install the app","Add the Flock icon to your home screen","install")}${row("leaf","Health guide",S.guide.length+" conditions · organic treatments & prevention","guide")}${row("users","Customers",S.customers.length+" saved","custs")}${row("sliders","Coop, prices & alerts",`${esc(S.coops[0].name)} · ${money(S.settings.price)} per dozen · feed alert at ${S.settings.lowFeedDays} days`,"prices")}${row("download","Backup & data","Download, restore or export","data")}</ul></section>
+  ${row("moon","Appearance",({auto:"Auto, follows your phone",light:"Light",dark:"Dark"})[getTheme()],"theme")}${row("lock","App lock",lockOn()?`On · locks ${autoText()}`:"Ask for a PIN to open the app","applock")}${row("cloud","Cloud sync",user?`Signed in as ${esc(user.email||"")}`:"Sign in to share data with other staff","sync")}${standalone()?"":row("download","Install the app","Add the Flock icon to your home screen","install")}${row("leaf","Health guide",S.guide.length+" conditions · organic treatments & prevention","guide")}${row("users","Customers",S.customers.length+" saved","custs")}${row("sliders","Coop, prices & alerts",`${esc(S.coops[0].name)} · ${money(S.settings.price)} per dozen · feed alert at ${S.settings.lowFeedDays} days`,"prices")}${row("download","Backup & data","Download, restore or export","data")}</ul></section>
   <p class="hint" style="text-align:center">Your data is saved on this device only. Download a backup now and then.${saveOK?"":" <b style='color:var(--red)'>Storage is full.</b>"}</p>`;
 }
 
@@ -599,7 +666,7 @@ function act(a,id){
     delsale:()=>{const i=S.sales.findIndex(s=>s.id===id),[s]=S.sales.splice(i,1);save();render();toast("Sale deleted.",()=>S.sales.splice(i,0,s))},
     deldayeggs:()=>{const rem=S.eggs.filter(e=>e.date===id);S.eggs=S.eggs.filter(e=>e.date!==id);save();render();toast("Egg entries deleted.",()=>S.eggs.push(...rem))},
     delbuy:()=>{const i=S.purchases.findIndex(p=>p.id===id),[p]=S.purchases.splice(i,1);save();render();toast("Purchase deleted.",()=>S.purchases.splice(i,0,p))},
-    custs:()=>custSheet(),sync:()=>{if(!sb)return toast("Sync isn’t available yet. Check your connection and try again.");user?syncSheet():signInSheet()},syncdismiss:()=>{try{localStorage.setItem("flock-sync-dismiss","1")}catch{}render()},install:()=>installApp(),updates:()=>go("updates"),newupd:()=>updSheet(),editupd:()=>updSheet(S.updates.find(x=>x.id===id)),shareupd:()=>sendUpdate(id),
+    custs:()=>custSheet(),theme:()=>themeSheet(),applock:()=>lockSheet(),sync:()=>{if(!sb){toast("Connecting…");initAuth();return}user?syncSheet():signInSheet()},syncdismiss:()=>{try{localStorage.setItem("flock-sync-dismiss","1")}catch{}render()},install:()=>installApp(),updates:()=>go("updates"),newupd:()=>updSheet(),editupd:()=>updSheet(S.updates.find(x=>x.id===id)),shareupd:()=>sendUpdate(id),
     delupd:()=>{const u=S.updates.find(x=>x.id===id);confirmSheet("Delete this update?","The message and its photo or video are removed from this device.","Delete update",()=>{S.updates=S.updates.filter(x=>x.id!==id);if(u.media){mDel(u.media).catch(()=>{});dropMedia(u.media);removeCloudMedia(u.media)}save();render();toast("Update deleted.")})},guide:()=>openGuide(),gcat:()=>{guideCat=id;render()},gclear:()=>{guideQ="";guideCat="all";render()},newguide:()=>guideForm(),editguide:()=>guideForm(S.guide.find(g=>g.id===id)),
     logguide:()=>healthSheet(null,null,S.guide.find(g=>g.id===id).name+": "),
     delguide:()=>{const g=S.guide.find(x=>x.id===id);confirmSheet("Delete "+g.name+"?","This removes the entry from your guide. You can restore the defaults later.","Delete entry",()=>{const i=S.guide.findIndex(x=>x.id===id),[r]=S.guide.splice(i,1);save();render();toast("Entry deleted.",()=>S.guide.splice(i,0,r))})},
@@ -974,7 +1041,7 @@ const SYNC_KEY="newberry-flock-sync";
 let sm={meta:{},lastPull:null,pendingMedia:[],failedMedia:[]};
 try{sm={...sm,...JSON.parse(localStorage.getItem(SYNC_KEY))}}catch{}
 const persistSync=()=>{try{localStorage.setItem(SYNC_KEY,JSON.stringify(sm))}catch{}};
-let sb=null,user=null,syncState="signedout",syncedAt=null,pulling=false,pushing=false,channel=null,pushTimer;
+let lastErr="",sb=null,user=null,syncState="signedout",syncedAt=null,pulling=false,pushing=false,channel=null,pushTimer;
 const COLS=["hens","eggs","customers","sales","feeds","purchases","health","updates","guide"];
 const canon=v=>Array.isArray(v)?"["+v.map(canon).join(",")+"]":v&&typeof v==="object"?"{"+Object.keys(v).filter(k=>v[k]!==undefined).sort().map(k=>JSON.stringify(k)+":"+canon(v[k])).join(",")+"}":JSON.stringify(v);
 const hashOf=r=>{const s=canon(r);let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return h+":"+s.length};
@@ -1004,7 +1071,7 @@ const isDirty=(key,m,cur)=>m.del?m.s!=="x":(cur.has(key)&&m.h!==undefined&&m.s!=
 function setSync(s){
   syncState=s;if(s==="ok")syncedAt=Date.now();
   const e=$("#sync");if(!e)return;
-  const L={signedout:"Local only",unavailable:"Local only",syncing:"Syncing…",ok:"Synced",offline:"Offline, saved here",error:"Sync problem"};
+  const L={signedout:"Sign in to sync",unavailable:"Sync unavailable",syncing:"Syncing…",ok:"Synced",offline:"Offline, saved here",error:"Sync problem"};
   e.className="sync "+s;e.innerHTML=ic(s==="ok"||s==="syncing"?"cloud":"cloudoff")+L[s];
 }
 async function push(){
@@ -1021,7 +1088,7 @@ async function push(){
       part.forEach(r=>{const m=sm.meta[r.kind+"|"+r.id];if(m){if(r.deleted)m.s="x";else m.s=m.h}});
     }
     await pushMedia();persistSync();setSync("ok");
-  }catch(e){console.warn("sync push",e);setSync(navigator.onLine?"error":"offline")}
+  }catch(e){lastErr=e?.message||String(e);console.warn("sync push",e);setSync(navigator.onLine?"error":"offline")}
   finally{pushing=false;persistSync()}
 }
 function place(row){
@@ -1068,7 +1135,7 @@ async function pull(){
     if(max)sm.lastPull=max;persistSync();
     if(changed){try{localStorage.setItem(KEY,JSON.stringify(S))}catch{}render()}
     if(syncState!=="syncing")setSync("ok");
-  }catch(e){console.warn("sync pull",e);setSync(navigator.onLine?"error":"offline")}
+  }catch(e){lastErr=e?.message||String(e);console.warn("sync pull",e);setSync(navigator.onLine?"error":"offline")}
   finally{pulling=false}
 }
 const syncNow=async()=>{if(!user)return;await push();await pull()};
@@ -1117,7 +1184,7 @@ function signInSheet(msg){
   });
 }
 function syncSheet(){
-  const L={ok:"Everything is up to date.",syncing:"Syncing now…",offline:"You’re offline. Changes are saved here and will upload when you’re back online.",error:"The last sync didn’t finish. It will retry automatically.",signedout:"Not signed in.",unavailable:"Sync isn’t available in this browser."};
+  const L={ok:"Everything is up to date.",syncing:"Syncing now…",offline:"You’re offline. Changes are saved here and will upload when you’re back online.",error:"The last sync didn’t finish. It will retry automatically."+(lastErr?` (${lastErr})`:""),signedout:"Not signed in.",unavailable:"Sync isn’t available in this browser."};
   const pending=(()=>{const cur=recMap();return Object.entries(sm.meta).filter(([k,m])=>isDirty(k,m,cur)).length})();
   sheet("Cloud sync",`<div class="note-card" style="margin-top:8px">${ic("cloud")}<span><b>Signed in as ${esc(user?.email||"")}</b><br>${L[syncState]}${syncedAt?` Last synced ${new Date(syncedAt).toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"})}.`:""}${pending?` ${pending} change${pending===1?"":"s"} waiting to upload.`:""}</span></div>
   <p class="muted small">Eggs, sales, hens, feed, daily checks, health notes, the guide and updates are shared with every signed-in staff member. Each entry syncs on its own, so two people can work at the same time. If two people edit the very same entry, the later change wins.</p>
@@ -1130,6 +1197,173 @@ function syncSheet(){
 const syncPrompt=()=>{if(!sb||user||localStorage.getItem("flock-sync-dismiss"))return "";
   return `<div class="note-card" style="margin:0 0 14px">${ic("cloud")}<span><b>Share with other staff.</b> Sign in to sync this flock’s data across phones. <button class="linkbtn" style="padding:0;min-height:0" data-act="sync">Sign in</button> · <button class="linkbtn" style="padding:0;min-height:0;font-weight:500" data-act="syncdismiss">Not now</button></span></div>`};
 const updList=()=>[...S.updates].sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+
+/* ---------- app lock (PIN on this device) ---------- */
+const LKEY="flock-lock";
+let LK={};try{LK=JSON.parse(localStorage.getItem(LKEY))||{}}catch{}
+const saveLK=()=>{try{localStorage.setItem(LKEY,JSON.stringify(LK))}catch{}};
+const lockOn=()=>!!LK.hash;
+const AUTO=[[0,"Right away"],[1,"1 minute"],[5,"5 minutes"],[15,"15 minutes"]];
+const autoText=()=>LK.auto===0?"right away":`after ${LK.auto??5} min`;
+async function pinHash(pin,salt){
+  const key=await crypto.subtle.importKey("raw",new TextEncoder().encode(pin),"PBKDF2",false,["deriveBits"]);
+  const bits=await crypto.subtle.deriveBits({name:"PBKDF2",hash:"SHA-256",salt:Uint8Array.from(atob(salt),c=>c.charCodeAt(0)),iterations:150000},key,256);
+  return btoa(String.fromCharCode(...new Uint8Array(bits)));
+}
+const newSalt=()=>btoa(String.fromCharCode(...crypto.getRandomValues(new Uint8Array(16))));
+let pad=null,leftAt=0,lastActive=Date.now();
+const MAX_TRIES=5;
+function showPad(o){
+  closeSheet?.();setFab(false);
+  pad={len:4,digits:"",busy:false,...o};
+  const el=$("#lock");el.hidden=false;$("#lk-fp").hidden=true;$("#lk-padpanel").hidden=false;
+  [$("#app"),$("nav.tabs"),$("#fab-wrap")].forEach(e=>e.inert=true);document.body.classList.add("lock");
+  drawPad();
+}
+function hidePad(){
+  pad=null;$("#lock").hidden=true;[$("#app"),$("nav.tabs"),$("#fab-wrap")].forEach(e=>e.inert=false);
+  document.documentElement.classList.remove("locked");document.body.classList.remove("lock");updateLockBtn();
+}
+function drawPad(msg,bad){
+  if(!pad)return;const el=$("#lock");
+  $("#lk-t").textContent=pad.title;
+  const s=$("#lk-s");s.textContent=msg||pad.sub||"";s.className="lk-s"+(bad?" bad":"");
+  $("#lk-dots").innerHTML=Array.from({length:pad.len},(_,i)=>`<i class="${i<pad.digits.length?"on":""}"></i>`).join("");
+  $("#lk-dots").setAttribute("aria-label",`${pad.digits.length} of ${pad.len} digits entered`);
+  $("#lk-lenrow").hidden=!pad.showLen;
+  el.querySelectorAll("[data-len]").forEach(b=>b.setAttribute("aria-pressed",+b.dataset.len===pad.len));
+  $("#lk-cancel").hidden=!pad.cancel;$("#lk-forgot").hidden=!pad.forgot;
+}
+function padError(msg){
+  if(!pad)return;pad.digits="";const d=$("#lk-dots");d.classList.remove("shake");void d.offsetWidth;d.classList.add("shake");
+  navigator.vibrate?.(60);drawPad(msg,true);
+}
+function press(k){
+  if(!pad||pad.busy)return;
+  if(k==="b"){pad.digits=pad.digits.slice(0,-1);drawPad();return}
+  if(pad.digits.length>=pad.len)return;
+  pad.digits+=k;drawPad();
+  if(pad.digits.length===pad.len){
+    const pin=pad.digits,p=pad;p.busy=true;
+    setTimeout(async()=>{try{await p.onDone(pin)}finally{p.busy=false}},120);
+  }
+}
+async function checkPin(pin){
+  if(await pinHash(pin,LK.salt)===LK.hash){LK.tries=0;saveLK();return true}
+  LK.tries=(LK.tries||0)+1;if(LK.tries>=MAX_TRIES)LK.blocked=true;saveLK();return false;
+}
+function lockNow(){
+  if(!lockOn())return;
+  document.querySelector(".toast")?.remove();
+  if(LK.blocked){showForgot(true);return}
+  showPad({title:"Enter your PIN",sub:"Newberry Flock is locked.",len:LK.len||4,forgot:true,onDone:async pin=>{
+    if(await checkPin(pin)){hidePad();return}
+    if(LK.blocked){showForgot(true);return}
+    padError(`Wrong PIN. ${MAX_TRIES-LK.tries} ${MAX_TRIES-LK.tries===1?"try":"tries"} left.`);
+  }});
+}
+function verifyPin(title,then){
+  showPad({title,sub:"Enter your current PIN.",len:LK.len||4,cancel:true,onDone:async pin=>{
+    if(await checkPin(pin)){hidePad();then();return}
+    if(LK.blocked){showForgot(true);return}
+    padError(`Wrong PIN. ${MAX_TRIES-LK.tries} ${MAX_TRIES-LK.tries===1?"try":"tries"} left.`);
+  }});
+}
+function setupLock(after){
+  let first=null;
+  const stage1=msg=>showPad({title:"Choose a PIN",sub:msg||"Pick 4 or 6 digits you’ll remember.",len:pad?.len||LK.len||4,showLen:true,cancel:true,onDone:pin=>{first=pin;stage2(pad.len)}});
+  const stage2=len=>showPad({title:"Confirm your PIN",sub:"Enter it once more.",len,cancel:true,onDone:async pin=>{
+    if(pin!==first){first=null;stage1("Those didn’t match. Start again.");navigator.vibrate?.(60);return}
+    const salt=newSalt();LK={salt,hash:await pinHash(pin,salt),len,auto:LK.auto??5,tries:0,blocked:false};saveLK();hidePad();toast("App lock is on.");render();after?.();
+  }});
+  stage1();
+}
+/* forgot PIN / too many tries: sign in with the staff account, or erase this device */
+function showForgot(blocked){
+  pad=null;const el=$("#lock");el.hidden=false;[$("#app"),$("nav.tabs"),$("#fab-wrap")].forEach(e=>e.inert=true);document.body.classList.add("lock");
+  $("#lk-padpanel").hidden=true;$("#lk-fp").hidden=false;
+  $("#lk-fpt").textContent=blocked?"Too many wrong tries":"Forgot your PIN?";
+  $("#lk-fpm").textContent="Sign in with your staff account to remove the PIN. You can set a new one afterwards. Your data on this device is kept.";
+  $("#lk-back").hidden=!!blocked;$("#lk-err").hidden=true;$("#lk-erase").textContent="Erase this device’s data instead";
+}
+$("#lk-forgot").onclick=()=>showForgot(false);
+$("#lk-back").onclick=()=>lockNow();
+$("#lk-cancel").onclick=()=>{hidePad();render()};
+$("#lk-form").onsubmit=async e=>{
+  e.preventDefault();const err=$("#lk-err"),btn=$("#lk-go");
+  const say=m=>{err.textContent=m;err.hidden=false};
+  if(!sb||!window.supabase){say("Connect to the internet and try again.");initAuth();return}
+  btn.disabled=true;btn.textContent="Signing in…";
+  const{error}=await sb.auth.signInWithPassword({email:$("#lk-em").value.trim(),password:$("#lk-pw").value});
+  btn.disabled=false;btn.textContent="Sign in and remove the PIN";
+  if(error){say(/invalid/i.test(error.message)?"That email or password isn’t right.":error.message);return}
+  LK={};saveLK();$("#lk-pw").value="";hidePad();render();toast("PIN removed. You can set a new one in More.");
+};
+let eraseArmed=0;
+$("#lk-erase").onclick=async()=>{
+  if(Date.now()-eraseArmed>5000){eraseArmed=Date.now();$("#lk-erase").textContent="Tap again to erase everything on this device";return}
+  try{await mClear()}catch{}
+  [KEY,SYNC_KEY,LKEY,"flock-sync-dismiss"].forEach(k=>{try{localStorage.removeItem(k)}catch{}});location.reload();
+};
+$("#lock").addEventListener("click",e=>{
+  const k=e.target.closest("[data-k]");if(k){press(k.dataset.k);return}
+  const l=e.target.closest("[data-len]");if(l&&pad?.showLen){pad.len=+l.dataset.len;pad.digits="";drawPad()}
+});
+addEventListener("keydown",e=>{
+  if(!pad||$("#lock").hidden)return;
+  if(/^\d$/.test(e.key)){press(e.key);e.preventDefault()}else if(e.key==="Backspace"){press("b");e.preventDefault()}
+});
+/* lock automatically when away or idle */
+function updateLockBtn(){const b=$("#lockbtn");if(b)b.hidden=!lockOn()}
+$("#lockbtn").onclick=()=>lockNow();
+document.addEventListener("visibilitychange",()=>{
+  if(!lockOn())return;
+  if(document.hidden){leftAt=Date.now();document.documentElement.classList.add("privacy")}
+  else{document.documentElement.classList.remove("privacy");if(leftAt&&!pad&&(Date.now()-leftAt)/60000>=(LK.auto??5))lockNow();leftAt=0}
+});
+["pointerdown","keydown","touchstart"].forEach(ev=>addEventListener(ev,()=>{lastActive=Date.now()},{passive:true}));
+setInterval(()=>{if(!lockOn()||pad||document.hidden||!(LK.auto>0))return;if((Date.now()-lastActive)/60000>=LK.auto)lockNow()},15000);
+function lockSheet(){
+  if(!window.crypto?.subtle){toast("App lock needs a secure connection (https).");return}
+  if(!lockOn()){
+    sheet("App lock",`<p class="muted" style="margin:6px 0 12px">Ask for a PIN every time someone opens the app on this phone. It keeps students and visitors out of your records if the phone is left unlocked or borrowed.</p>
+    <div class="note-card">${ic("alert")}<span>If you forget the PIN, you reset it by signing in with your staff account. Without an account, the only way back in is to erase this phone’s data. Download a backup first (More, Backup &amp; data).</span></div>
+    <div class="foot"><button class="btn primary block" id="set">${ic("lock")}Set a PIN</button></div>`,(sh,close)=>{sh.querySelector("#set").onclick=()=>{close();setupLock(()=>{})}});
+    return;
+  }
+  sheet("App lock",`<div class="note-card" style="margin-top:8px">${ic("shield")}<span><b>App lock is on.</b> The app asks for a ${LK.len||4}-digit PIN when it opens and locks ${autoText()} after you leave or stop using it.</span></div>
+  <label class="f">Lock when I’m away or idle for</label><div class="chips" role="group" aria-label="Auto-lock">${AUTO.map(([m,l])=>`<button class="chip" data-a="${m}" aria-pressed="${(LK.auto??5)===m}">${l}</button>`).join("")}</div>
+  <div class="tasks" style="margin-top:18px"><button class="btn block" id="now">${ic("lock")}Lock now</button><button class="btn block" id="chg">Change PIN</button><button class="btn block danger" id="off">Turn off app lock</button></div>
+  <p class="hint">This stops casual access. It doesn’t encrypt the data stored on the phone.</p>`,(sh,close)=>{
+    sh.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{LK.auto=+b.dataset.a;saveLK();sh.querySelectorAll("[data-a]").forEach(x=>x.setAttribute("aria-pressed",x===b));render()});
+    sh.querySelector("#now").onclick=()=>{close();lockNow()};
+    sh.querySelector("#chg").onclick=()=>{close();verifyPin("Change your PIN",()=>setupLock())};
+    sh.querySelector("#off").onclick=()=>{close();verifyPin("Turn off app lock",()=>{LK={};saveLK();updateLockBtn();render();toast("App lock is off.")})};
+  });
+}
+
+/* ---------- appearance (auto / light / dark) ---------- */
+const THEME_KEY="flock-theme";
+const getTheme=()=>{try{return localStorage.getItem(THEME_KEY)||"auto"}catch{return "auto"}};
+const effectiveDark=()=>{const t=getTheme();return t==="dark"||(t==="auto"&&matchMedia("(prefers-color-scheme: dark)").matches)};
+function applyTheme(){
+  const t=getTheme(),root=document.documentElement;
+  t==="auto"?root.removeAttribute("data-theme"):root.setAttribute("data-theme",t);
+  document.querySelectorAll('meta[name="theme-color"]').forEach(m=>m.remove());
+  const add=(c,media)=>{const m=document.createElement("meta");m.name="theme-color";m.content=c;if(media)m.media=media;document.head.append(m)};
+  if(t==="auto"){add("#fbf6ec","(prefers-color-scheme: light)");add("#14110c","(prefers-color-scheme: dark)")}else add(t==="dark"?"#14110c":"#fbf6ec");
+  const b=$("#themebtn");if(b){const d=effectiveDark();b.innerHTML=ic(d?"sun":"moon");b.setAttribute("aria-label",d?"Switch to light mode":"Switch to dark mode")}
+}
+function setTheme(t){try{localStorage.setItem(THEME_KEY,t)}catch{}applyTheme();render()}
+matchMedia("(prefers-color-scheme: dark)").addEventListener?.("change",()=>{if(getTheme()==="auto")applyTheme()});
+$("#themebtn").onclick=()=>setTheme(effectiveDark()?"light":"dark");
+function themeSheet(){
+  const cur=getTheme();
+  sheet("Appearance",`<p class="muted" style="margin:6px 0 14px">Choose how the app looks. Auto follows your phone’s setting, so it goes dark at night if your phone does.</p>
+  <div class="themes" role="group" aria-label="Theme">${[["auto","Auto","device","Follows your phone"],["light","Light","sun","Warm and bright"],["dark","Dark","moon","Easy on the eyes"]].map(([k,l,i,d])=>`<button class="themeopt" data-t="${k}" aria-pressed="${cur===k}">${ic(i,"lg")}<b>${l}</b><span class="small muted">${d}</span></button>`).join("")}</div>`,(sh)=>{
+    sh.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{setTheme(b.dataset.t);sh.querySelectorAll("[data-t]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+  });
+}
 
 /* ---------- install to home screen ---------- */
 let installEvt=null;
@@ -1190,8 +1424,10 @@ function sample(){
 }
 
 initMeta();scan();persistSync();setSync(syncState);
-$("#sync").onclick=()=>{if(!sb)return toast("Sync isn’t available yet. Check your connection and try again.");user?syncSheet():signInSheet()};
+$("#sync").onclick=()=>{if(!sb){toast("Connecting…");initAuth();return}user?syncSheet():signInSheet()};
+applyTheme();
 render();
+updateLockBtn();if(lockOn())lockNow();
 initAuth();
 if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
