@@ -524,7 +524,7 @@ async function boot(){
   const{data:row}=await sb.from("egg_state").select("state").eq("id",1).single();
   const rs=row?.state;
   if(rs&&rs.sales){S={...structuredClone(DEF),...rs};S.settings={...DEF.settings,...rs.settings};try{localStorage.setItem(KEY,JSON.stringify(S))}catch{}}
-  push();loadStory();await loadOrders();render();
+  push();loadStory();loadHens();await loadOrders();render();
   sb.channel("egg-live").on("postgres_changes",{event:"*",schema:"public",table:"egg_orders"},()=>loadOrders())
     .on("postgres_changes",{event:"UPDATE",schema:"public",table:"egg_state"},p=>{
       if(Date.now()-lastPushed<4000||!p.new?.state?.sales)return;
@@ -543,14 +543,71 @@ async function shrink(file){
     c.width=Math.round(bm.width*k);c.height=Math.round(bm.height*k);c.getContext("2d").drawImage(bm,0,0,c.width,c.height);
     return await new Promise(r=>c.toBlob(r,"image/jpeg",.82))}catch{return file}
 }
+/* ---------- hen profiles ---------- */
+let HENS=[];
+const BREEDS=["Rhode Island Red","Sussex","Leghorn","Orpington","Plymouth Rock","Australorp","Boschveld","Koekoek","Bantam","Mixed breed"];
+async function loadHens(){const{data}=await sb.from("egg_hens").select("*").order("created_at",{ascending:true});if(data){HENS=data;render()}}
+function hensCard(){
+  return `<section class="card"><div class="row between" style="margin-bottom:6px"><h2 style="margin:0">Our hens</h2><button class="btn primary small" data-act="newhen">${ic("plus")}Add hen</button></div>
+  ${HENS.length?`<ul class="list">${HENS.map(h=>`<li><div class="thumb" style="border-radius:50%;width:60px;height:60px">${h.photo_path?`<img src="${esc(mediaUrl(h.photo_path))}" alt="" loading="lazy">`:ic("bird","lg")}</div>
+    <div class="grow"><b>${esc(h.name)}</b><div class="small muted">${esc(h.breed||"Breed not set")}${h.published?"":" · hidden from parents"}</div></div>
+    <button class="btn small" data-act="edithen" data-id="${h.id}" aria-label="Edit ${esc(h.name)}">${ic("pencil")}Edit</button></li>`).join("")}</ul>`
+  :`<div class="empty">${ic("bird","xl")}<h3>Introduce your hens</h3><p>Give each hen a name, breed and photo. Parents love knowing who laid their eggs.</p></div>`}</section>`;
+}
+function henSheet(hen){
+  const m={name:hen?.name||"",breed:hen?.breed||"",arrived:hen?.arrived||"",bio:hen?.bio||"",pub:hen?hen.published:true,file:null,err:{}};
+  sheet(hen?`Edit ${hen.name}`:"Add a hen",`<form id="f" novalidate></form>`,(sh,close)=>{
+    const f=sh.querySelector("#f");
+    const draw=()=>{
+      redraw(sh,f,`
+      <label class="f" for="hn">Name</label><input id="hn" data-autofocus class="t" maxlength="40" placeholder="e.g. Henrietta" value="${esc(m.name)}" autocomplete="off" ${m.err.name?'aria-invalid="true" aria-describedby="e-hn"':""}>
+      ${m.err.name?`<p class="err" id="e-hn" role="alert">${ic("alert")}${m.err.name}</p>`:""}
+      <label class="f" for="hb">Breed <span class="muted">(optional)</span></label><input id="hb" class="t" list="bl" maxlength="40" placeholder="e.g. Rhode Island Red" value="${esc(m.breed)}" autocomplete="off"><datalist id="bl">${BREEDS.map(b=>`<option value="${b}">`).join("")}</datalist>
+      <label class="f" for="ha">Arrived at school <span class="muted">(optional)</span></label><input id="ha" class="t" type="date" value="${m.arrived}" max="${iso()}">
+      <label class="f" for="hbio">About her <span class="muted">(optional)</span></label><textarea id="hbio" class="t" rows="3" maxlength="300" placeholder="e.g. Our boss hen. Lays a brown egg almost every day.">${esc(m.bio)}</textarea>
+      <label class="f" for="hpick">Photo <span class="muted">(optional)</span></label>
+      <input id="hfl" type="file" accept="image/*" hidden>
+      <button type="button" class="btn block" id="hpick">${ic(m.file||hen?.photo_path?"check":"image")}${m.file?esc(m.file.name)+" · change":hen?.photo_path?"Photo added · change":"Choose photo"}</button>
+      ${m.file?`<img src="${m.url}" alt="Preview" style="width:120px;height:120px;border-radius:50%;object-fit:cover;margin-top:10px">`:""}
+      <label class="row" style="cursor:pointer;min-height:44px;margin-top:14px"><input id="hpub" type="checkbox" ${m.pub?"checked":""} style="width:22px;height:22px;accent-color:var(--accent)"><span><b>Show on the parent page</b></span></label>
+      ${m.err.post?`<p class="err" role="alert">${ic("alert")}${esc(m.err.post)}</p>`:""}
+      <div class="foot"><button class="btn primary block" id="go" ${m.busy?"disabled":""}>${m.busy?"Saving…":hen?"Save changes":"Add hen"}</button>${hen?`<button type="button" class="btn danger block" id="hdel" style="margin-top:10px">${ic("trash")}Delete ${esc(hen.name)}</button>`:""}</div>`);
+      f.querySelector("#hdel")?.addEventListener("click",()=>{close();act("delhen",hen.id)});
+      f.querySelector("#hpick").onclick=()=>f.querySelector("#hfl").click();
+      f.querySelector("#hfl").onchange=e=>{keep();const file=e.target.files[0];if(!file)return;m.file=file;m.url=URL.createObjectURL(file);draw()};
+    };
+    const keep=()=>{m.name=f.querySelector("#hn").value;m.breed=f.querySelector("#hb").value;m.arrived=f.querySelector("#ha").value;m.bio=f.querySelector("#hbio").value;m.pub=f.querySelector("#hpub").checked};
+    f.onsubmit=async e=>{
+      e.preventDefault();if(m.busy)return;keep();
+      if(!m.name.trim()){m.err={name:"Please give her a name."};draw();f.querySelector("#hn").focus();return}
+      m.busy=true;m.err={};draw();
+      try{
+        let path=hen?.photo_path||null;
+        if(m.file){
+          const blob=await shrink(m.file);
+          const np=`hen-${Date.now()}-${uid()}.jpg`;
+          const{error}=await sb.storage.from("egg-media").upload(np,blob,{contentType:blob.type||"image/jpeg"});if(error)throw error;
+          if(path)sb.storage.from("egg-media").remove([path]);
+          path=np;
+        }
+        const row={name:m.name.trim(),breed:m.breed.trim()||null,arrived:m.arrived||null,bio:m.bio.trim()||null,photo_path:path,published:m.pub};
+        const{error}=hen?await sb.from("egg_hens").update(row).eq("id",hen.id):await sb.from("egg_hens").insert(row);
+        if(error)throw error;
+        close();await loadHens();toast(hen?"Hen updated.":`${row.name} is now on the parent page.`);
+      }catch(err){m.busy=false;m.err={post:"Couldn’t save: "+(err.message||"please try again.")};draw()}
+    };
+    draw();
+  });
+}
 function storyView(){
-  return `<div class="page-h"><h2>Our story</h2><button class="btn primary small" data-act="newpost">${ic("plus")}Add post</button></div>
-  <p class="muted" style="margin:-6px 0 14px">Photos, videos and updates about your hens and coop. They appear on the parent order page.</p>
-  <div class="card">${ST.length?ST.map(p=>`<div class="post"><div class="thumb">${p.media_kind==="image"?`<img src="${esc(mediaUrl(p.media_path))}" alt="" loading="lazy">`:ic(p.media_kind==="video"?"film":"note","lg")}</div>
+  return `<div class="page-h"><h2>Our story</h2></div>
+  <p class="muted" style="margin:-6px 0 14px">Everything here appears on the parent order page.</p>
+  ${hensCard()}
+  <section class="card"><div class="row between" style="margin-bottom:6px"><h2 style="margin:0">Journey posts</h2><button class="btn primary small" data-act="newpost">${ic("plus")}Add post</button></div>${ST.length?ST.map(p=>`<div class="post"><div class="thumb">${p.media_kind==="image"?`<img src="${esc(mediaUrl(p.media_path))}" alt="" loading="lazy">`:ic(p.media_kind==="video"?"film":"note","lg")}</div>
     <div class="grow"><span class="pill type">${esc(p.tag)}</span><div style="margin-top:4px"><b>${esc(p.title)}</b></div><div class="small muted">${dateLabel(p.story_date)}${p.published?"":" · hidden from parents"}</div></div>
     <button class="btn small icon" data-act="pubpost" data-id="${p.id}" aria-label="${p.published?"Hide from parents":"Show to parents"}: ${esc(p.title)}">${ic(p.published?"eye":"eyeoff")}</button>
     <button class="btn small icon danger" data-act="delpost" data-id="${p.id}" aria-label="Delete: ${esc(p.title)}">${ic("trash")}</button></div>`).join("")
-    :`<div class="empty">${ic("bird","xl")}<h3>Tell your hens’ story</h3><p>Add a photo of the hens, the coop being built, or the first chicks. Parents love knowing where their eggs come from.</p><button class="btn primary" data-act="newpost">${ic("plus")}Add your first post</button></div>`}</div>`;
+    :`<div class="empty">${ic("bird","xl")}<h3>Tell your hens’ story</h3><p>Add a photo of the hens, the coop being built, or the first chicks. Parents love knowing where their eggs come from.</p><button class="btn primary" data-act="newpost">${ic("plus")}Add your first post</button></div>`}</section>`;
 }
 function storySheet(){
   const m={tag:TAGS[0],file:null};
@@ -664,6 +721,10 @@ function act(a,id){
   else if(a==="restore")restore();
   else if(a==="sample")sample();
   else if(a==="newpost")storySheet();
+  else if(a==="newhen")henSheet();
+  else if(a==="edithen")henSheet(HENS.find(x=>x.id===id));
+  else if(a==="pubhen"){const h=HENS.find(x=>x.id===id);h.published=!h.published;render();sb.from("egg_hens").update({published:h.published}).eq("id",id).then(()=>toast(h.published?`${h.name} is visible to parents.`:`${h.name} is hidden from parents.`))}
+  else if(a==="delhen"){const h=HENS.find(x=>x.id===id);confirmSheet(`Delete ${h.name}?`,"Her profile will be removed from the parent page for good.","Delete hen",()=>{(h.photo_path?sb.storage.from("egg-media").remove([h.photo_path]):Promise.resolve()).then(()=>sb.from("egg_hens").delete().eq("id",id)).then(()=>{HENS=HENS.filter(x=>x.id!==id);render();toast(`${h.name} deleted.`)})})}
   else if(a==="pubpost"){const p=ST.find(x=>x.id===id);p.published=!p.published;render();sb.from("egg_story").update({published:p.published}).eq("id",id).then(()=>toast(p.published?"Now visible to parents.":"Hidden from parents."))}
   else if(a==="delpost"){const p=ST.find(x=>x.id===id);confirmSheet("Delete this post?",`“${p.title}” will be removed from the parent page for good.`,"Delete post",()=>{(p.media_path?sb.storage.from("egg-media").remove([p.media_path]):Promise.resolve()).then(()=>sb.from("egg_story").delete().eq("id",id)).then(()=>{ST=ST.filter(x=>x.id!==id);render();toast("Post deleted.")})})}
   else if(a==="oconfirm")handleOrder(id,"confirmed");

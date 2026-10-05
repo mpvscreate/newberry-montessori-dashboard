@@ -68,6 +68,14 @@ label.f{display:block;font-weight:600;font-size:.9rem;margin:18px 0 6px}
 @keyframes sh{to{background-position:-200% 0}}
 .jump{display:inline-flex;align-items:center;gap:8px;margin:0 0 16px;color:var(--accent);font-weight:600;text-decoration:none;min-height:44px}
 .story h2{font-size:clamp(1.8rem,7vw,2.3rem);margin:30px 0 6px}
+.hens{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-padding-inline:16px;margin:0 -16px 8px;padding:4px 16px 14px;scrollbar-width:none}
+.hens::-webkit-scrollbar{display:none}
+.hen{flex:0 0 min(72%,260px);scroll-snap-align:start;background:var(--sheet);border:1px solid var(--line);border-radius:22px;overflow:hidden;box-shadow:var(--shadow)}
+.hen img,.hen .ph{display:block;width:100%;aspect-ratio:1;object-fit:cover}
+.hen .ph{display:grid;place-items:center;background:var(--accent-soft);color:var(--accent)}
+.hen .hx{padding:12px 14px 16px}
+.hen h3{font-size:1.35rem;margin:0 0 6px}
+.hen p{margin:8px 0 0;font-size:.95rem}
 .post{background:var(--sheet);border:1px solid var(--line);border-radius:22px;overflow:hidden;margin-bottom:16px;box-shadow:var(--shadow)}
 .post img,.post video{display:block;width:100%;max-height:440px;object-fit:cover;background:#000}
 .post .tx{padding:16px 18px 20px}
@@ -237,16 +245,23 @@ async function submit(e){
 }
 async function loadStory(){
   try{
-    const r=await fetch(URL_+"/rest/v1/egg_story?select=*&order=story_date.desc,created_at.desc&limit=40",{headers:H});
-    if(!r.ok)return;const posts=await r.json();if(!posts.length)return;
+    const get=p=>fetch(URL_+"/rest/v1/"+p,{headers:H,cache:"no-store"}).then(r=>r.ok?r.json():[]);
+    const [posts,hens]=await Promise.all([get("egg_story?select=*&order=story_date.desc,created_at.desc&limit=40"),get("egg_hens?select=*&order=created_at.asc")]);
+    if(!posts.length&&!hens.length)return;
     const m=p=>URL_+"/storage/v1/object/public/egg-media/"+encodeURIComponent(p);
     const el=document.getElementById("story");
-    el.innerHTML=`<h2>Our hens &amp; coop journey</h2><p class="muted" style="margin:0 0 16px">From empty yard to fresh eggs. Follow along with our students.</p>`+posts.map(p=>`<article class="post">
+    const henHtml=hens.length?`<h2>Meet our hens</h2><p class="muted" style="margin:0 0 14px">The ladies who lay your eggs.</p>
+      <div class="hens" role="list">${hens.map(h=>`<article class="hen" role="listitem">
+        ${h.photo_path?`<img src="${m(h.photo_path)}" alt="${esc(h.name)}" loading="lazy">`:`<div class="ph">${ic("bird","xl")}</div>`}
+        <div class="hx"><h3>${esc(h.name)}</h3>${h.breed?`<span class="tag">${esc(h.breed)}</span>`:""}${h.bio?`<p>${esc(h.bio)}</p>`:""}${h.arrived?`<p class="muted small">At school since ${new Date(h.arrived+"T12:00").toLocaleDateString("en-ZA",{month:"long",year:"numeric"})}</p>`:""}</div></article>`).join("")}</div>`:"";
+    const postHtml=posts.length?`<h2>Our coop journey</h2><p class="muted" style="margin:0 0 16px">From empty yard to fresh eggs. Follow along with our students.</p>`+posts.map(p=>`<article class="post">
       ${p.media_kind==="image"?`<img src="${m(p.media_path)}" alt="${esc(p.title)}" loading="lazy">`:""}
       ${p.media_kind==="video"?`<video src="${m(p.media_path)}" controls playsinline preload="metadata" aria-label="${esc(p.title)}"></video>`:""}
       <div class="tx"><span class="tag">${esc(p.tag)}</span> <span class="muted small">${new Date(p.story_date+"T12:00").toLocaleDateString("en-ZA",{day:"numeric",month:"long",year:"numeric"})}</span>
-      <h3>${esc(p.title)}</h3>${p.body?`<p>${esc(p.body)}</p>`:""}</div></article>`).join("");
-    el.hidden=false;const j=document.getElementById("jump");j.innerHTML=ic("bird")+"Meet our hens &amp; see the coop story"+ic("arrow");j.hidden=false;
+      <h3>${esc(p.title)}</h3>${p.body?`<p>${esc(p.body)}</p>`:""}</div></article>`).join(""):"";
+    el.innerHTML=henHtml+postHtml;
+    el.hidden=false;const j=document.getElementById("jump");
+    j.innerHTML=ic("bird")+(hens.length&&posts.length?"Meet our hens &amp; see the coop story":hens.length?"Meet our hens":"See the coop story")+ic("arrow");j.hidden=false;
   }catch{}
 }
 load();loadStory();
