@@ -25,6 +25,7 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  if (/\/(rest|auth|storage)\/v1\//.test(e.request.url)) return; // never cache Supabase API responses
   e.respondWith(
     fetch(e.request).then(res => {
       if (res && res.status === 200) {

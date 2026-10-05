@@ -200,13 +200,15 @@ input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
 .pickbox b{color:var(--ink);font:700 1.1rem var(--display)}
 @media (hover:hover){.pickbox:hover{border-color:var(--accent);box-shadow:0 0 0 4px var(--glow-soft)}}
 .msgprev{background:var(--paper);border-radius:16px;padding:12px 14px;white-space:pre-line;font-size:.95rem;border-left:4px solid var(--green)}
+.sync{display:inline-flex;align-items:center;gap:5px;font:600 .8rem var(--body);color:var(--muted);background:none;border:0;cursor:pointer;padding:4px 0;min-height:32px}
+.sync.ok{color:var(--green)}.sync.error,.sync.offline{color:var(--red)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
 <a class="skip" href="#view">Skip to content</a>
 <div class="wrap" id="app">
-  <header class="top"><img src="newberry-house-logo.webp" alt="" onerror="this.style.display='none'"><div class="grow"><h1>Newberry Flock</h1><div class="small muted" id="today"></div></div></header>
+  <header class="top"><img src="newberry-house-logo.webp" alt="" onerror="this.style.display='none'"><div class="grow"><h1>Newberry Flock</h1><div class="small muted"><span id="today"></span> · <button class="sync" id="sync" type="button" aria-label="Cloud sync status"></button></div></div></header>
   <main id="view" tabindex="-1"></main>
 </div>
 <nav class="tabs" aria-label="Main"></nav>
@@ -255,6 +257,9 @@ share:'<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle c
 camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
 copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',
 chat:'<path d="M4 20l1.4-4.2A8 8 0 1112 20a8 8 0 01-4-1.1z"/><path d="M9 10.5c0 2.5 2 4.5 4.5 4.5l1.2-1.2-1.6-1-.8.6a3 3 0 01-1.6-1.6l.6-.8-1-1.6z"/>',
+cloud:'<path d="M7 18a4.5 4.5 0 01-.6-9A6 6 0 0118 10.5 3.8 3.8 0 0117.5 18z"/>',
+cloudoff:'<path d="M3 3l18 18"/><path d="M7 18a4.5 4.5 0 01-.6-9 6 6 0 011.7-2.7M11 5.2A6 6 0 0118 10.5a3.8 3.8 0 011.8 6.2"/><path d="M10 18h7.5"/>',
+logout:'<path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/>',
 sparkle:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
 note:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>',
 coop:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><circle cx="12" cy="14" r="2"/><path d="M12 16v4"/>'
@@ -387,7 +392,8 @@ let S;try{S={...DEF(),...JSON.parse(localStorage.getItem(KEY))}}catch{S=DEF()}
 S.settings={...DEF().settings,...S.settings};if(!S.coops?.length)S.coops=DEF().coops;
 if(S.coops.length>1)S.coops=[S.coops[0]];S.hens.forEach(h=>h.coop=S.coops[0].id);S.eggs.forEach(e=>e.coop=S.coops[0].id);
 let saveOK=true;
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));saveOK=true}catch{saveOK=false;toast("Storage is full. Download a backup, then remove some hen photos.")}};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));saveOK=true}catch{saveOK=false;toast("Storage is full. Download a backup, then remove some hen photos.")}
+  if(typeof scan==="function"){scan();persistSync();if(user&&sb){clearTimeout(pushTimer);pushTimer=setTimeout(syncNow,800)}}};
 const uid=()=>Math.random().toString(36).slice(2,9);
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -511,6 +517,7 @@ function home(){
   const hh=new Date().getHours(),greet=hh<12?"Good morning":hh<17?"Good afternoon":"Good evening";
   return `<div class="page-h"><h2>${greet}</h2></div>
   ${empty?`<div class="card empty">${ic("egg","xl")}<h3>Welcome to Newberry Flock</h3><p>Add your hens, then log eggs, feed and daily checks.<br>Want to look around first? Load some sample data.</p><div class="row wr" style="justify-content:center"><button class="btn primary" data-act="newhen">${ic("plus")}Add a hen</button><button class="btn" data-act="sample">${ic("sparkle")}Load sample data</button></div></div>`:""}
+  ${syncPrompt()}
   ${holdBanner()}
   <div class="bento">
     <section class="tile hero s2 r2" aria-label="Eggs today"><div class="lbl">${ic("egg")}Eggs today</div><div class="big">${e0}</div>
@@ -524,7 +531,7 @@ function home(){
     <button class="tile s2" data-act="gosales"><div class="lbl">${ic("cash")}Sales this month</div><div class="big">${money(rev)}</div><div class="sub">${owed()>0?`<b style="color:var(--red)">${money(owed())}</b> still to be paid`:"Everything is paid"}${cpd?` · feed cost ≈ ${money(cpd)} per dozen`:""}</div></button>
     <section class="tile s2 ${att.length?"alert":"green"}"><div class="lbl">${ic("pulse")}Hen health</div>
       ${att.length?`<ul class="list" style="margin:2px 0 0">${att.slice(0,3).map(h=>`<li class="tap" data-act="hen" data-id="${h.id}" tabindex="0" role="button" style="padding:6px 0;border:0">${avatarHtml(h)}<div class="grow"><b>${esc(h.name)}</b><div class="small muted">${esc(coopName(h.coop))}</div></div>${statusPill(h.status)}</li>`).join("")}</ul>`:`<div class="big" style="font-size:1.7rem">${S.hens.length?"All clear":"No hens yet"}</div><div class="sub">${S.hens.length?`${activeHens().length} hens, none needing attention`:"Add your first hen"}</div>`}</section>
-    <button class="tile s4" data-act="updates" style="min-height:0;flex-direction:row;align-items:center;gap:14px"><div class="avatar">${ic("share")}</div><div class="grow"><b style="font:700 1.1rem var(--display)">Share an update</b><div class="sub">${S.updates.length?`Last update ${dlabel(S.updates[0].date)}. Keep the community involved.`:"Send a photo or video to parents and the community on WhatsApp"}</div></div>${ic("chev")}</button>
+    <button class="tile s4" data-act="updates" style="min-height:0;flex-direction:row;align-items:center;gap:14px"><div class="avatar">${ic("share")}</div><div class="grow"><b style="font:700 1.1rem var(--display)">Share an update</b><div class="sub">${S.updates.length?`Last update ${dlabel(updList()[0].date)}. Keep the community involved.`:"Send a photo or video to parents and the community on WhatsApp"}</div></div>${ic("chev")}</button>
     <button class="tile s4 green" data-act="guide" style="min-height:0;flex-direction:row;align-items:center;gap:14px"><div class="avatar green">${ic("leaf")}</div><div class="grow"><b style="font:700 1.1rem var(--display)">Health guide</b><div class="sub">Organic treatments and prevention for common hen problems</div></div>${ic("chev")}</button>
     <section class="tile s4"><div class="lbl">${ic("trend")}Eggs per day, last 30 days</div>${trendChart(range(30).map(eggsOn),"Line chart of eggs collected per day over the last 30 days")}<div class="sub">${num(sum(range(30),eggsOn))} eggs in 30 days · average ${num(sum(range(30),eggsOn)/30,1)} a day</div></section>
   </div>`;
@@ -544,7 +551,7 @@ function eggs(){
     const un=S.sales.filter(s=>!s.paid);
     return `<div class="page-h"><h2>Eggs</h2><button class="btn primary small" data-act="sell">${ic("cash")}Sell eggs</button></div>${seg}
     <div class="bento" style="grid-template-columns:repeat(2,1fr)"><section class="tile green"><div class="lbl">${ic("basket")}In stock</div><div class="big">${Math.max(0,stock())}</div><div class="sub">eggs · ${Math.max(0,Math.floor(stock()/12))} dozen</div></section><section class="tile ${owed()>0?"alert":""}"><div class="lbl">${ic("clock")}To be paid</div><div class="big">${money(owed())}</div><div class="sub">${un.length} unpaid sale${un.length===1?"":"s"}</div></section></div>
-    <section class="card">${S.sales.length?`<ul class="list">${[...S.sales].reverse().slice(0,60).map(s=>`<li>${avatarHtml(null,cust(s.cust)?.type==="restaurant"?"green":"")}<div class="grow"><b>${esc(custName(s.cust))}</b><div class="small muted">${dz(s.eggs)} · ${dlabel(s.date)}</div></div><div class="end"><div class="amt">${money(saleTotal(s))}</div>${s.paid?`<div class="small muted">Paid</div>`:`<button class="btn good small" data-act="paid" data-id="${s.id}">${ic("check")}Mark paid</button>`}</div><button class="btn small icon" data-act="editsale" data-id="${s.id}" aria-label="Edit this sale">${ic("pencil")}</button><button class="btn small icon danger" data-act="delsale" data-id="${s.id}" aria-label="Delete this sale">${ic("trash")}</button></li>`).join("")}</ul>`:`<div class="empty">${ic("cash","xl")}<h3>No sales yet</h3><p>Record your first sale to start tracking income.</p><button class="btn primary" data-act="sell">${ic("cash")}Sell eggs</button></div>`}</section>`;
+    <section class="card">${S.sales.length?`<ul class="list">${[...S.sales].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,60).map(s=>`<li>${avatarHtml(null,cust(s.cust)?.type==="restaurant"?"green":"")}<div class="grow"><b>${esc(custName(s.cust))}</b><div class="small muted">${dz(s.eggs)} · ${dlabel(s.date)}</div></div><div class="end"><div class="amt">${money(saleTotal(s))}</div>${s.paid?`<div class="small muted">Paid</div>`:`<button class="btn good small" data-act="paid" data-id="${s.id}">${ic("check")}Mark paid</button>`}</div><button class="btn small icon" data-act="editsale" data-id="${s.id}" aria-label="Edit this sale">${ic("pencil")}</button><button class="btn small icon danger" data-act="delsale" data-id="${s.id}" aria-label="Delete this sale">${ic("trash")}</button></li>`).join("")}</ul>`:`<div class="empty">${ic("cash","xl")}<h3>No sales yet</h3><p>Record your first sale to start tracking income.</p><button class="btn primary" data-act="sell">${ic("cash")}Sell eggs</button></div>`}</section>`;
   }
   const dayList=[...S.eggs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,60);
   return `<div class="page-h"><h2>Eggs</h2><button class="btn primary small" data-act="logeggs">${ic("plus")}Log eggs</button></div>${seg}
@@ -575,7 +582,7 @@ function care(){
 function more(){
   const row=(i,t,s,a)=>`<li class="tap" data-act="${a}" tabindex="0" role="button"><div class="avatar">${ic(i)}</div><div class="grow"><b>${t}</b><div class="small muted">${s}</div></div>${ic("chev")}</li>`;
   return `<div class="page-h"><h2>More</h2></div><section class="card"><ul class="list">
-  ${standalone()?"":row("download","Install the app","Add the Flock icon to your home screen","install")}${row("leaf","Health guide",S.guide.length+" conditions · organic treatments & prevention","guide")}${row("users","Customers",S.customers.length+" saved","custs")}${row("sliders","Coop, prices & alerts",`${esc(S.coops[0].name)} · ${money(S.settings.price)} per dozen · feed alert at ${S.settings.lowFeedDays} days`,"prices")}${row("download","Backup & data","Download, restore or export","data")}</ul></section>
+  ${row("cloud","Cloud sync",user?`Signed in as ${esc(user.email||"")}`:"Sign in to share data with other staff","sync")}${standalone()?"":row("download","Install the app","Add the Flock icon to your home screen","install")}${row("leaf","Health guide",S.guide.length+" conditions · organic treatments & prevention","guide")}${row("users","Customers",S.customers.length+" saved","custs")}${row("sliders","Coop, prices & alerts",`${esc(S.coops[0].name)} · ${money(S.settings.price)} per dozen · feed alert at ${S.settings.lowFeedDays} days`,"prices")}${row("download","Backup & data","Download, restore or export","data")}</ul></section>
   <p class="hint" style="text-align:center">Your data is saved on this device only. Download a backup now and then.${saveOK?"":" <b style='color:var(--red)'>Storage is full.</b>"}</p>`;
 }
 
@@ -592,8 +599,8 @@ function act(a,id){
     delsale:()=>{const i=S.sales.findIndex(s=>s.id===id),[s]=S.sales.splice(i,1);save();render();toast("Sale deleted.",()=>S.sales.splice(i,0,s))},
     deldayeggs:()=>{const rem=S.eggs.filter(e=>e.date===id);S.eggs=S.eggs.filter(e=>e.date!==id);save();render();toast("Egg entries deleted.",()=>S.eggs.push(...rem))},
     delbuy:()=>{const i=S.purchases.findIndex(p=>p.id===id),[p]=S.purchases.splice(i,1);save();render();toast("Purchase deleted.",()=>S.purchases.splice(i,0,p))},
-    custs:()=>custSheet(),install:()=>installApp(),updates:()=>go("updates"),newupd:()=>updSheet(),editupd:()=>updSheet(S.updates.find(x=>x.id===id)),shareupd:()=>sendUpdate(id),
-    delupd:()=>{const u=S.updates.find(x=>x.id===id);confirmSheet("Delete this update?","The message and its photo or video are removed from this device.","Delete update",()=>{S.updates=S.updates.filter(x=>x.id!==id);if(u.media){mDel(u.media).catch(()=>{});dropMedia(u.media)}save();render();toast("Update deleted.")})},guide:()=>openGuide(),gcat:()=>{guideCat=id;render()},gclear:()=>{guideQ="";guideCat="all";render()},newguide:()=>guideForm(),editguide:()=>guideForm(S.guide.find(g=>g.id===id)),
+    custs:()=>custSheet(),sync:()=>{if(!sb)return toast("Sync isn’t available yet. Check your connection and try again.");user?syncSheet():signInSheet()},syncdismiss:()=>{try{localStorage.setItem("flock-sync-dismiss","1")}catch{}render()},install:()=>installApp(),updates:()=>go("updates"),newupd:()=>updSheet(),editupd:()=>updSheet(S.updates.find(x=>x.id===id)),shareupd:()=>sendUpdate(id),
+    delupd:()=>{const u=S.updates.find(x=>x.id===id);confirmSheet("Delete this update?","The message and its photo or video are removed from this device.","Delete update",()=>{S.updates=S.updates.filter(x=>x.id!==id);if(u.media){mDel(u.media).catch(()=>{});dropMedia(u.media);removeCloudMedia(u.media)}save();render();toast("Update deleted.")})},guide:()=>openGuide(),gcat:()=>{guideCat=id;render()},gclear:()=>{guideQ="";guideCat="all";render()},newguide:()=>guideForm(),editguide:()=>guideForm(S.guide.find(g=>g.id===id)),
     logguide:()=>healthSheet(null,null,S.guide.find(g=>g.id===id).name+": "),
     delguide:()=>{const g=S.guide.find(x=>x.id===id);confirmSheet("Delete "+g.name+"?","This removes the entry from your guide. You can restore the defaults later.","Delete entry",()=>{const i=S.guide.findIndex(x=>x.id===id),[r]=S.guide.splice(i,1);save();render();toast("Entry deleted.",()=>S.guide.splice(i,0,r))})},
     resetguide:()=>confirmSheet("Restore the default guide?","Built-in entries return to their original text. Entries you added yourself are kept.","Restore",()=>{const mine=S.guide.filter(g=>g.custom);S.guide=[...structuredClone(GUIDE_DEFAULT),...mine];save();render();toast("Default guide restored.")}),
@@ -849,7 +856,7 @@ const mdb=()=>new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error(
 const mTx=(mode,fn)=>mdb().then(db=>new Promise((res,rej)=>{const t=db.transaction("media",mode),q=fn(t.objectStore("media"));t.oncomplete=()=>res(q?.result);t.onerror=()=>rej(t.error)}));
 const mPut=(id,b)=>mTx("readwrite",s=>s.put(b,id)),mGet=id=>mTx("readonly",s=>s.get(id)),mDel=id=>mTx("readwrite",s=>s.delete(id)),mClear=()=>mTx("readwrite",s=>s.clear());
 const mediaCache=new Map();
-async function loadMedia(id){if(mediaCache.has(id))return mediaCache.get(id);const b=await mGet(id);if(!b)return null;const o={blob:b,url:URL.createObjectURL(b)};mediaCache.set(id,o);return o}
+async function loadMedia(id){if(mediaCache.has(id))return mediaCache.get(id);let b=await mGet(id).catch(()=>null);if(!b&&user){const{data}=await sb.storage.from("flock-media").download(id);if(data){b=data;mPut(id,b).catch(()=>{})}}if(!b)return null;const o={blob:b,url:URL.createObjectURL(b)};mediaCache.set(id,o);return o}
 function dropMedia(id){const o=mediaCache.get(id);if(o)URL.revokeObjectURL(o.url);mediaCache.delete(id)}
 async function prepPhoto(file){
   if(!file.type.startsWith("image/"))return file;
@@ -883,7 +890,7 @@ function updates(){
   return `<div class="page-h"><h2>Updates</h2><button class="btn primary small" data-act="newupd">${ic("plus")}New update</button></div>
   <p class="muted" style="margin:-6px 0 14px">Share short photo or video updates with parents and the community on WhatsApp.</p>
   ${S.settings.groupLink?`<a class="btn block" href="${esc(S.settings.groupLink)}" target="_blank" rel="noopener" style="margin-bottom:14px">${ic("users")}Open our WhatsApp group</a>`:""}
-  ${S.updates.length?S.updates.map(u=>`<article class="card upd">
+  ${S.updates.length?updList().map(u=>`<article class="card upd">
     ${u.media?`<div class="mthumb" data-mid="${u.media}" data-alt="${esc(u.title||"Update")}"><div class="skel" style="height:100%"></div></div>`:""}
     <div class="row between" style="margin:12px 0 4px"><span class="small muted">${dlabel(u.date)}</span>${u.shared?`<span class="pill">${ic("check","sm")}Shared ${dlabel(u.shared).toLowerCase()}</span>`:`<span class="pill gone">Not shared yet</span>`}</div>
     ${u.title?`<h3 style="font-size:1.25rem;margin-bottom:4px">${esc(u.title)}</h3>`:""}${u.text?`<p style="margin:0;white-space:pre-line">${esc(u.text)}</p>`:""}
@@ -934,8 +941,8 @@ async function updSheet(rec){
       const sharing=send?shareNow(text,file):null;          /* started first, inside the tap, so the phone allows it */
       const id=rec?.id||uid();let media=rec?.media||null;
       try{
-        if(m.file){await mPut(id,m.file);dropMedia(id);media=id}
-        else if(!m.keep&&rec?.media){await mDel(rec.media);dropMedia(rec.media);media=null}
+        if(m.file){await mPut(id,m.file);dropMedia(id);media=id;queueMedia(id)}
+        else if(!m.keep&&rec?.media){await mDel(rec.media);dropMedia(rec.media);removeCloudMedia(rec.media);media=null}
       }catch{toast("Couldn’t keep the photo or video on this browser. The message was saved.")}
       const obj={id,...data,media,shared:rec?.shared||null};
       if(rec)Object.assign(rec,obj);else S.updates.unshift(obj);
@@ -959,6 +966,170 @@ async function sendUpdate(id){
   if(r==="shared"){u.shared=today();save();render();toast("Shared. Thank you for keeping the community in the loop.")}
   else if(r==="fallback")fallbackSheet(text,file);
 }
+
+/* ---------- cloud sync (Supabase) ---------- */
+/* Local-first: every record syncs on its own, newest change wins, and a record is only pushed when its content changed. */
+const SB_URL="https://oikwudpqmbnssttatlhc.supabase.co",SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pa3d1ZHBxbWJuc3N0dGF0bGhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTMzODEsImV4cCI6MjA5NTY4OTM4MX0.p6I9qlvre5TjF3qOVjAIBus3_PNrbvCF2cMXHe3uiXw";
+const SYNC_KEY="newberry-flock-sync";
+let sm={meta:{},lastPull:null,pendingMedia:[],failedMedia:[]};
+try{sm={...sm,...JSON.parse(localStorage.getItem(SYNC_KEY))}}catch{}
+const persistSync=()=>{try{localStorage.setItem(SYNC_KEY,JSON.stringify(sm))}catch{}};
+let sb=null,user=null,syncState="signedout",syncedAt=null,pulling=false,pushing=false,channel=null,pushTimer;
+const COLS=["hens","eggs","customers","sales","feeds","purchases","health","updates","guide"];
+const canon=v=>Array.isArray(v)?"["+v.map(canon).join(",")+"]":v&&typeof v==="object"?"{"+Object.keys(v).filter(k=>v[k]!==undefined).sort().map(k=>JSON.stringify(k)+":"+canon(v[k])).join(",")+"}":JSON.stringify(v);
+const hashOf=r=>{const s=canon(r);let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return h+":"+s.length};
+function recMap(){
+  const m=new Map();
+  COLS.forEach(k=>(S[k]||[]).forEach(r=>m.set(k+"|"+r.id,{r})));
+  S.coops.forEach(c=>m.set("coops|"+c.id,{r:c}));
+  m.set("settings|main",{r:S.settings});
+  Object.entries(S.checks).forEach(([d,cs])=>Object.entries(cs).forEach(([co,c])=>{
+    if(c.fed!==undefined)m.set(`check|${d}|${co}|fed`,{r:{fed:c.fed,feed:c.feed}});
+    ["water","clean","secure","health","note"].forEach(t=>{if(c[t]!==undefined)m.set(`check|${d}|${co}|${t}`,{r:{v:c[t]}})});
+  }));
+  return m;
+}
+function initMeta(){GUIDE_DEFAULT.forEach(d=>{const k="guide|"+d.id;if(!sm.meta[k])sm.meta[k]={s:hashOf(d)}})}
+/* notice what changed since the last time we saved: set content hash + change time, flag deletions */
+function scan(){
+  const cur=recMap(),now=Date.now();
+  for(const [key,{r}] of cur){const h=hashOf(r),m=sm.meta[key]||(sm.meta[key]={});if(m.del&&m.s==="x"||m.del)m.del=false;if(m.h!==h){m.h=h;m.u=now}}
+  for(const key of Object.keys(sm.meta)){
+    if(cur.has(key))continue;const m=sm.meta[key];
+    if(m.s===undefined){delete sm.meta[key];continue}
+    if(m.s!=="x"&&!m.del){m.del=true;m.u=now}
+  }
+}
+const isDirty=(key,m,cur)=>m.del?m.s!=="x":(cur.has(key)&&m.h!==undefined&&m.s!==m.h);
+function setSync(s){
+  syncState=s;if(s==="ok")syncedAt=Date.now();
+  const e=$("#sync");if(!e)return;
+  const L={signedout:"Local only",unavailable:"Local only",syncing:"Syncing…",ok:"Synced",offline:"Offline, saved here",error:"Sync problem"};
+  e.className="sync "+s;e.innerHTML=ic(s==="ok"||s==="syncing"?"cloud":"cloudoff")+L[s];
+}
+async function push(){
+  if(!user||pushing)return;pushing=true;setSync("syncing");
+  try{
+    scan();const cur=recMap(),rows=[];
+    for(const [key,m] of Object.entries(sm.meta)){
+      if(!isDirty(key,m,cur))continue;
+      const i=key.indexOf("|"),kind=key.slice(0,i),id=key.slice(i+1);
+      rows.push(m.del?{kind,id,data:null,deleted:true,u:m.u}:{kind,id,data:cur.get(key).r,deleted:false,u:m.u});
+    }
+    for(let i=0;i<rows.length;i+=200){
+      const part=rows.slice(i,i+200),{error}=await sb.rpc("flock_upsert",{rows:part});if(error)throw error;
+      part.forEach(r=>{const m=sm.meta[r.kind+"|"+r.id];if(m){if(r.deleted)m.s="x";else m.s=m.h}});
+    }
+    await pushMedia();persistSync();setSync("ok");
+  }catch(e){console.warn("sync push",e);setSync(navigator.onLine?"error":"offline")}
+  finally{pushing=false;persistSync()}
+}
+function place(row){
+  const{kind,id,data,deleted}=row;
+  if(kind==="check"){
+    const[d,co,t]=id.split("|");S.checks[d]=S.checks[d]||{};const c=S.checks[d][co]=S.checks[d][co]||{};
+    if(deleted){if(t==="fed"){delete c.fed;delete c.feed}else delete c[t]}else if(t==="fed"){c.fed=data.fed;c.feed=data.feed}else c[t]=data.v;
+    return;
+  }
+  if(kind==="settings"){if(!deleted)S.settings={...DEF().settings,...data};return}
+  const arr=kind==="coops"?S.coops:S[kind];if(!arr)return;
+  const i=arr.findIndex(x=>x.id===id);
+  if(deleted){if(i>=0)arr.splice(i,1)}else if(i>=0)arr[i]=data;else arr.push(data);
+}
+function applyRemote(rows){
+  const touched=[];let cur=recMap();
+  for(const row of rows){
+    const key=row.kind+"|"+row.id,m=sm.meta[key]||(sm.meta[key]={});
+    const dirty=isDirty(key,m,cur),remoteH=row.deleted?"x":hashOf(row.data);
+    if(!row.deleted&&m.h===remoteH&&m.s!==remoteH){m.s=remoteH;continue}              /* same content already here */
+    if(m.s===remoteH&&!dirty)continue;                                        /* already have it */
+    const shared=row.kind==="settings"||row.kind==="coops";
+    if(dirty&&!(shared&&m.s===undefined)&&row.u<=m.u)continue;               /* our newer, unsent change wins */
+    place(row);touched.push([key,row]);cur=recMap();
+  }
+  for(const[key,row]of touched){
+    if(row.deleted)sm.meta[key]={s:"x",del:true,u:row.u};
+    else{const h=hashOf(cur.get(key)?.r??row.data);sm.meta[key]={h,u:row.u,s:h}}
+  }
+  return touched.length>0;
+}
+async function pull(){
+  if(!user||pulling)return;pulling=true;
+  try{
+    let from=sm.lastPull,max=sm.lastPull,changed=false;
+    for(;;){
+      let q=sb.from("flock_records").select("kind,id,data,deleted,u,updated_at").order("updated_at",{ascending:true}).limit(1000);
+      if(from)q=q.gte("updated_at",from);
+      const{data,error}=await q;if(error)throw error;
+      if(!data.length)break;
+      if(applyRemote(data))changed=true;
+      max=data.at(-1).updated_at;if(data.length<1000)break;from=max;
+    }
+    if(max)sm.lastPull=max;persistSync();
+    if(changed){try{localStorage.setItem(KEY,JSON.stringify(S))}catch{}render()}
+    if(syncState!=="syncing")setSync("ok");
+  }catch(e){console.warn("sync pull",e);setSync(navigator.onLine?"error":"offline")}
+  finally{pulling=false}
+}
+const syncNow=async()=>{if(!user)return;await push();await pull()};
+async function startSync(){
+  setSync("syncing");scan();persistSync();
+  await pull();await push();
+  if(!channel)channel=sb.channel("flock").on("postgres_changes",{event:"*",schema:"public",table:"flock_records"},()=>pull()).subscribe();
+  render();
+}
+function stopSync(){if(channel){sb.removeChannel(channel);channel=null}setSync("signedout")}
+function loadSupabase(){return new Promise(res=>{if(window.supabase)return res();const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";s.onload=()=>res();s.onerror=()=>res();document.head.append(s)})}
+async function initAuth(){
+  await loadSupabase();
+  if(!window.supabase){setSync("unavailable");render();return}
+  sb=window.supabase.createClient(SB_URL,SB_KEY);
+  const{data:{session}}=await sb.auth.getSession();user=session?.user||null;
+  sb.auth.onAuthStateChange((ev,s)=>{const was=user;user=s?.user||null;if(user&&!was)startSync();if(!user&&was){stopSync();render()}});
+  if(user)startSync();else{setSync("signedout");render()}
+}
+/* the phone suspends live connections in the background, so also re-check on return and every 30 s */
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)syncNow()});
+addEventListener("focus",syncNow);addEventListener("online",syncNow);addEventListener("offline",()=>{if(user)setSync("offline")});
+setInterval(()=>{if(!document.hidden)syncNow()},30000);
+/* photos and videos go to a private storage bucket */
+async function pushMedia(){
+  for(const id of [...sm.pendingMedia]){
+    const drop=()=>{sm.pendingMedia=sm.pendingMedia.filter(x=>x!==id)};
+    const b=await mGet(id).catch(()=>null);if(!b){drop();continue}
+    const{error}=await sb.storage.from("flock-media").upload(id,b,{upsert:true,contentType:b.type||"application/octet-stream"});
+    if(!error)drop();else if(/size|large|exceed/i.test(error.message)){drop();sm.failedMedia.push(id);toast("A video is too large to share with other staff. It stays on this device.")}
+  }
+}
+const queueMedia=id=>{if(!sm.pendingMedia.includes(id))sm.pendingMedia.push(id);persistSync()};
+const removeCloudMedia=id=>{if(user)sb.storage.from("flock-media").remove([id]).catch(()=>{})};
+/* sign-in and status screens */
+function signInSheet(msg){
+  sheet("Sign in to sync",`<form id="f" novalidate><p class="muted" style="margin:6px 0 0">Sign in with your staff account to share the flock data with other staff, on all your devices.</p>
+  <label class="f" for="em">Email</label><input id="em" data-autofocus class="t" type="email" autocomplete="username" inputmode="email">
+  <label class="f" for="pw">Password</label><input id="pw" class="t" type="password" autocomplete="current-password">
+  ${msg?`<p class="err" role="alert">${ic("alert")}${esc(msg)}</p>`:""}
+  <p class="hint">No account yet? Ask whoever manages your school’s Supabase to add you under Authentication, Users. The same staff account works for the older egg tracker.</p>
+  <div class="foot"><button class="btn primary block" id="go">Sign in</button></div></form>`,(sh,close)=>{
+    sh.querySelector("#f").onsubmit=async e=>{e.preventDefault();const b=sh.querySelector("#go");b.disabled=true;b.textContent="Signing in…";
+      const{error}=await sb.auth.signInWithPassword({email:sh.querySelector("#em").value.trim(),password:sh.querySelector("#pw").value});
+      close();if(error)signInSheet(/invalid/i.test(error.message)?"That email or password isn’t right.":error.message);else toast("Signed in. Syncing your data…")};
+  });
+}
+function syncSheet(){
+  const L={ok:"Everything is up to date.",syncing:"Syncing now…",offline:"You’re offline. Changes are saved here and will upload when you’re back online.",error:"The last sync didn’t finish. It will retry automatically.",signedout:"Not signed in.",unavailable:"Sync isn’t available in this browser."};
+  const pending=(()=>{const cur=recMap();return Object.entries(sm.meta).filter(([k,m])=>isDirty(k,m,cur)).length})();
+  sheet("Cloud sync",`<div class="note-card" style="margin-top:8px">${ic("cloud")}<span><b>Signed in as ${esc(user?.email||"")}</b><br>${L[syncState]}${syncedAt?` Last synced ${new Date(syncedAt).toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"})}.`:""}${pending?` ${pending} change${pending===1?"":"s"} waiting to upload.`:""}</span></div>
+  <p class="muted small">Eggs, sales, hens, feed, daily checks, health notes, the guide and updates are shared with every signed-in staff member. Each entry syncs on its own, so two people can work at the same time. If two people edit the very same entry, the later change wins.</p>
+  <div class="tasks"><button class="btn primary block" id="now">${ic("cloud")}Sync now</button><button class="btn block danger" id="out">${ic("logout")}Sign out</button></div>
+  <p class="hint">To add another staff member, create an account for them in Supabase under Authentication, Users, then have them sign in here.</p>`,(sh,close)=>{
+    sh.querySelector("#now").onclick=async()=>{close();toast("Syncing…");await syncNow();toast(syncState==="ok"?"Everything is up to date.":"Couldn’t finish syncing. Will retry.")};
+    sh.querySelector("#out").onclick=()=>{close();confirmSheet("Sign out?","Your data stays on this device, but it will stop syncing with other staff.","Sign out",async()=>{await sb.auth.signOut();toast("Signed out.")})};
+  });
+}
+const syncPrompt=()=>{if(!sb||user||localStorage.getItem("flock-sync-dismiss"))return "";
+  return `<div class="note-card" style="margin:0 0 14px">${ic("cloud")}<span><b>Share with other staff.</b> Sign in to sync this flock’s data across phones. <button class="linkbtn" style="padding:0;min-height:0" data-act="sync">Sign in</button> · <button class="linkbtn" style="padding:0;min-height:0;font-weight:500" data-act="syncdismiss">Not now</button></span></div>`};
+const updList=()=>[...S.updates].sort((a,b)=>(b.date||"").localeCompare(a.date||""));
 
 /* ---------- install to home screen ---------- */
 let installEvt=null;
@@ -993,8 +1164,8 @@ function dataSheet(){
     sh.querySelector("#bk").onclick=()=>dl("flock-backup-"+today()+".json",JSON.stringify(S),"application/json");
     sh.querySelector("#cs").onclick=()=>csv("flock-sales-"+today()+".csv",[["Date","Customer","Eggs","Price per dozen (ZAR)","Total (ZAR)","Paid"],...S.sales.map(s=>[s.date,custName(s.cust),s.eggs,s.price,saleTotal(s).toFixed(2),s.paid?"yes":"no"])]);
     sh.querySelector("#ce").onclick=()=>csv("flock-eggs-"+today()+".csv",[["Date","Coop","Eggs","Cracked"],...S.eggs.map(e=>[e.date,coopName(e.coop),e.count,e.cracked||0])]);
-    sh.querySelector("#rs").onclick=()=>{const i=document.createElement("input");i.type="file";i.accept=".json";i.onchange=async()=>{try{const d=JSON.parse(await i.files[0].text());if(!d.hens||!d.eggs)throw 0;close();confirmSheet("Restore this backup?","This replaces everything currently in the app.","Restore",()=>{S={...DEF(),...d};save();render();toast("Backup restored.")})}catch{toast("That file isn’t a Newberry Flock backup.")}};i.click()};
-    sh.querySelector("#rm").onclick=()=>{close();confirmSheet("Erase everything?","All hens, eggs, sales and records on this device are deleted. Download a backup first if unsure.","Erase all",()=>{S=DEF();save();mClear().catch(()=>{});mediaCache.forEach((o,k)=>dropMedia(k));render();toast("All data erased.")})};
+    sh.querySelector("#rs").onclick=()=>{const i=document.createElement("input");i.type="file";i.accept=".json";i.onchange=async()=>{try{const d=JSON.parse(await i.files[0].text());if(!d.hens||!d.eggs)throw 0;close();confirmSheet("Restore this backup?","This replaces everything currently in the app."+(user?" Cloud sync is on, so it also replaces the shared data for all staff.":""),"Restore",()=>{S={...DEF(),...d};save();render();toast("Backup restored.")})}catch{toast("That file isn’t a Newberry Flock backup.")}};i.click()};
+    sh.querySelector("#rm").onclick=()=>{close();confirmSheet("Erase everything?","All hens, eggs, sales and records on this device are deleted. Download a backup first if unsure."+(user?" Cloud sync is on, so this also deletes the shared data for every staff member.":""),"Erase all",()=>{S=DEF();save();mClear().catch(()=>{});mediaCache.forEach((o,k)=>dropMedia(k));render();toast("All data erased.")})};
   });
 }
 function dl(name,text,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
@@ -1018,7 +1189,10 @@ function sample(){
   save();render();toast("Sample data loaded.");
 }
 
+initMeta();scan();persistSync();setSync(syncState);
+$("#sync").onclick=()=>{if(!sb)return toast("Sync isn’t available yet. Check your connection and try again.");user?syncSheet():signInSheet()};
 render();
+initAuth();
 if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>
