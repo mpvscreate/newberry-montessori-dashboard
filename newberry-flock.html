@@ -1,0 +1,1025 @@
+<!doctype html>
+<html lang="en-ZA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Newberry Flock</title>
+<link rel="icon" type="image/png" sizes="32x32" href="icons/flock-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/flock-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/flock-apple-180.png">
+<link rel="manifest" href="manifest-flock.webmanifest">
+<meta name="theme-color" content="#fbf6ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14110c" media="(prefers-color-scheme: dark)">
+<meta name="application-name" content="Newberry Flock">
+<meta name="apple-mobile-web-app-title" content="Flock">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400..700&display=swap">
+<style>
+:root{
+  --paper:#fbf6ec; --sheet:#ffffff; --ink:#221c11; --muted:#6c6250; --line:#ece3cf; --field:#8f846c;
+  --accent:#a65608; --accent-ink:#fff; --accent-soft:#fbe8cc; --accent-2:#e8943a;
+  --green:#276b36; --green-soft:#e2f1e3; --red:#b3261e; --red-soft:#fbe5e2; --amber:#8a5a00; --amber-soft:#fbf0d2; --sky:#2a6b8f; --sky-soft:#e0eff6;
+  --glow:rgba(166,86,8,.36); --glow-soft:rgba(166,86,8,.16); --glow-green:rgba(39,107,54,.28);
+  --shadow:0 1px 2px rgba(70,45,10,.05),0 10px 30px rgba(70,45,10,.07);
+  --display:"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif;
+  --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --rail:236px;
+}
+@media (prefers-color-scheme:dark){:root{
+  --paper:#14110c; --sheet:#1e1a13; --ink:#f4ecdc; --muted:#b1a68e; --line:#342e22; --field:#7d7258;
+  --accent:#f2a54f; --accent-ink:#1d1203; --accent-soft:#3b2a12; --accent-2:#f6c07f;
+  --green:#8fd29a; --green-soft:#1f3322; --red:#f4a99d; --red-soft:#3d201c; --amber:#f0c978; --amber-soft:#3a2e14; --sky:#8cc6e4; --sky-soft:#1b2f3a;
+  --glow:rgba(242,165,79,.4); --glow-soft:rgba(242,165,79,.2); --glow-green:rgba(143,210,154,.28); --shadow:none}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html{scroll-padding-bottom:120px}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 1.0625rem/1.5 var(--body);-webkit-font-smoothing:antialiased}
+body.lock{overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--display);font-variation-settings:"opsz" 48;letter-spacing:-.025em;line-height:1.08;margin:0;font-weight:700;text-wrap:balance}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:10px;box-shadow:0 0 0 6px var(--glow-soft)}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.skip{position:fixed;left:12px;top:-60px;background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:10px;z-index:100;text-decoration:none;font-weight:600}.skip:focus{top:12px}
+.i{width:1.25em;height:1.25em;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-.22em}
+.i.lg{width:1.6em;height:1.6em}.i.xl{width:2.5em;height:2.5em;stroke-width:1.5}.i.sm{width:1em;height:1em}
+.muted{color:var(--muted)}.small{font-size:.875rem}
+.eyebrow{font:600 .72rem/1 var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.wrap{max-width:860px;margin:0 auto;padding:16px 16px 130px}
+main:focus{outline:none}
+.row{display:flex;align-items:center;gap:12px}.wr{flex-wrap:wrap}.grow{flex:1;min-width:0}.between{justify-content:space-between}
+
+/* header + nav */
+header.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+header.top img{width:44px;height:44px;border-radius:12px;object-fit:cover}
+header.top h1{font-size:1.45rem}
+.page-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 14px}
+.page-h h2{font-size:clamp(1.6rem,5vw,2.1rem)}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--sheet) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:20}
+nav.tabs button{position:relative;flex:1;border:0;background:none;padding:8px 2px;border-radius:14px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:.72rem;font-weight:600;cursor:pointer;min-height:56px;transition:box-shadow .25s,background .15s}
+nav.tabs button .i{width:1.5rem;height:1.5rem}
+nav.tabs button[aria-current=page]{color:var(--accent);background:var(--accent-soft);box-shadow:0 4px 16px var(--glow-soft)}
+nav.tabs .dot{position:absolute;top:6px;left:50%;margin-left:8px;width:9px;height:9px;border-radius:50%;background:var(--red)}
+@media (min-width:900px){
+  body{padding-left:var(--rail)}
+  nav.tabs{top:0;right:auto;width:var(--rail);flex-direction:column;gap:4px;border-top:0;border-right:1px solid var(--line);padding:84px 12px 12px}
+  nav.tabs button{flex:none;flex-direction:row;justify-content:flex-start;gap:12px;font-size:1rem;padding:12px 14px;min-height:48px}
+  header.top{position:fixed;left:16px;top:16px;margin:0;z-index:21}header.top h1{font-size:1.2rem}
+  .wrap{padding-top:28px;padding-bottom:60px}
+}
+@media (hover:hover){nav.tabs button:hover:not([aria-current]){background:var(--accent-soft);color:var(--accent)}}
+
+/* bento */
+.bento{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:16px}
+@media (min-width:720px){.bento{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}}
+.tile{position:relative;background:var(--sheet);border:1px solid var(--line);border-radius:26px;padding:16px;box-shadow:var(--shadow);text-align:left;display:flex;flex-direction:column;gap:6px;min-height:132px;overflow:hidden;color:inherit}
+button.tile{cursor:pointer;transition:transform .08s,box-shadow .25s}button.tile:active{transform:scale(.985)}
+@media (hover:hover){button.tile:hover{box-shadow:0 0 0 4px var(--glow-soft),var(--shadow)}}
+.tile .lbl{display:flex;align-items:center;gap:7px;font-size:.82rem;font-weight:600;color:var(--muted)}
+.tile .lbl .i{color:var(--accent)}
+.tile .big{font:700 clamp(1.9rem,6vw,2.5rem)/1 var(--display);letter-spacing:-.035em;font-variant-numeric:tabular-nums}
+.tile .sub{font-size:.82rem;color:var(--muted)}
+.s2{grid-column:span 2}.s4{grid-column:1/-1}.r2{grid-row:span 2}
+.tile.hero{background:linear-gradient(150deg,#c46a0d 0%,#a65608 55%,#8a4505 100%);color:#fff;border-color:transparent;box-shadow:0 12px 36px var(--glow)}
+.tile.hero .lbl,.tile.hero .sub{color:rgba(255,255,255,.85)}.tile.hero .lbl .i{color:#fff}
+.tile.hero .big{font-size:clamp(3.4rem,13vw,4.6rem)}
+.tile.warm{background:linear-gradient(160deg,var(--accent-soft),var(--sheet) 70%)}
+.tile.green{background:linear-gradient(160deg,var(--green-soft),var(--sheet) 70%)}
+.tile.sky{background:linear-gradient(160deg,var(--sky-soft),var(--sheet) 70%)}
+.tile.alert{background:linear-gradient(160deg,var(--red-soft),var(--sheet) 70%)}
+.ringbox{position:relative;width:84px;height:84px;margin-top:auto}
+.ringbox .c{position:absolute;inset:0;display:grid;place-items:center;font:700 1.15rem var(--display);letter-spacing:-.02em}
+.chip-d{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:99px;font-size:.78rem;font-weight:600;background:rgba(255,255,255,.2);color:#fff;width:fit-content}
+.bars{display:flex;align-items:flex-end;gap:7px;height:78px;margin-top:auto}
+.bars div{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;gap:4px;height:100%}
+.bars i{display:block;width:100%;border-radius:8px 8px 4px 4px;background:rgba(255,255,255,.4);min-height:4px}
+.bars div.now i{background:#fff}.bars span{font-size:.65rem;color:rgba(255,255,255,.8)}
+.meter{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:auto}.meter i{display:block;height:100%;border-radius:99px;background:var(--green)}
+.meter.low i{background:var(--red)}.meter.mid i{background:var(--accent-2)}
+
+.card{background:var(--sheet);border:1px solid var(--line);border-radius:24px;padding:18px;box-shadow:var(--shadow);margin-bottom:16px}
+.card>h2,.card>.row>h2{font-size:1.2rem;margin-bottom:10px}
+
+/* controls */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:1.5px solid var(--field);background:var(--sheet);border-radius:15px;padding:11px 18px;font-weight:600;cursor:pointer;min-height:48px;transition:box-shadow .25s,transform .08s,background .15s,border-color .2s}
+.btn:active{transform:scale(.98)}
+@media (hover:hover){.btn:hover{border-color:var(--accent);box-shadow:0 0 0 4px var(--glow-soft),0 4px 18px var(--glow-soft)}}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 2px 6px var(--glow-soft),0 6px 22px var(--glow)}
+.btn.good{background:var(--green-soft);color:var(--green);border-color:transparent}
+.btn.danger{color:var(--red)}
+.btn.small{padding:6px 14px;min-height:44px;font-size:.92rem;border-radius:13px}.btn.block{width:100%}.btn.icon{padding:0;width:44px}
+.btn.ghost{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.5);color:#fff}
+.btn[disabled]{opacity:.55;box-shadow:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px}
+.chips.scroll{flex-wrap:nowrap;overflow-x:auto;margin-inline:-16px;padding:2px 16px 6px;scrollbar-width:none}.chips.scroll::-webkit-scrollbar{display:none}.chips.scroll .chip{flex:none}
+@media (min-width:640px){.chips.scroll{flex-wrap:wrap;overflow:visible;margin-inline:0;padding-inline:0}}
+.linkbtn{background:none;border:0;color:var(--accent);font-weight:600;text-decoration:underline;cursor:pointer;padding:10px 4px;min-height:44px}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--field);background:var(--sheet);border-radius:99px;padding:8px 16px;cursor:pointer;font-weight:500;min-height:44px;transition:box-shadow .25s,border-color .2s}
+.chip[aria-pressed=true]{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600;box-shadow:0 3px 14px var(--glow)}
+@media (hover:hover){.chip:hover{border-color:var(--accent);box-shadow:0 0 0 4px var(--glow-soft)}}
+.segc{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--accent-soft);border-radius:16px;padding:4px;margin-bottom:14px}
+.segc button{border:0;background:none;border-radius:12px;min-height:44px;font-weight:600;color:var(--muted);cursor:pointer}
+.segc button[aria-pressed=true]{background:var(--sheet);color:var(--accent);box-shadow:0 2px 10px var(--glow-soft)}
+label.f{display:block;font-weight:600;font-size:.9rem;margin:16px 0 6px}
+.hint{font-size:.85rem;color:var(--muted);margin:4px 0 0}
+.err{font-size:.875rem;color:var(--red);margin:6px 0 0;display:flex;gap:6px;align-items:center}
+.t{width:100%;max-width:100%;padding:12px 14px;border:1.5px solid var(--field);border-radius:13px;background:var(--sheet);min-height:48px;font-size:1rem}
+.t:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 4px var(--glow-soft)}.t[aria-invalid=true]{border-color:var(--red)}
+input[type=date]{-webkit-appearance:none;appearance:none;display:block;min-width:0;text-align:left}
+input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
+.stepper{display:flex;align-items:center;gap:10px}
+.stepper button{width:56px;height:56px;border-radius:50%;border:1.5px solid var(--field);background:var(--sheet);cursor:pointer;display:grid;place-items:center;flex:none}
+.stepper button:active{transform:scale(.94)}
+.stepper input{width:100%;text-align:center;font:700 2.3rem var(--display);letter-spacing:-.03em;border:0;background:none;min-width:0}
+.total{display:flex;justify-content:space-between;align-items:baseline;background:var(--paper);padding:14px 16px;border-radius:16px;margin:16px 0 12px}
+.total b{font:700 1.9rem var(--display);letter-spacing:-.03em}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:3px 11px;border-radius:99px;font-size:.78rem;font-weight:600;background:var(--green-soft);color:var(--green);white-space:nowrap}
+.pill.watch{background:var(--amber-soft);color:var(--amber)}.pill.unwell{background:var(--red-soft);color:var(--red)}.pill.gone{background:var(--line);color:var(--muted)}.pill.type{background:var(--accent-soft);color:var(--accent)}.pill.sky{background:var(--sky-soft);color:var(--sky)}
+.warn{display:flex;gap:8px;background:var(--amber-soft);padding:10px 12px;border-radius:12px;font-size:.9rem;margin-top:10px}.warn .i{color:var(--accent);margin-top:2px}
+
+/* lists + hens */
+.list{list-style:none;margin:0;padding:0}
+.list li{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line);flex-wrap:wrap}
+.list li:first-child{border-top:0}.list li .grow{flex:1 1 9rem;overflow-wrap:anywhere}.list li .end{margin-left:auto;text-align:right}
+.list li.tap{cursor:pointer;border-radius:12px}
+.avatar{width:46px;height:46px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none;overflow:hidden;font:700 1.1rem var(--display)}
+.avatar img{width:100%;height:100%;object-fit:cover}.avatar.green{background:var(--green-soft);color:var(--green)}
+.amt{font:700 1.1rem var(--display);white-space:nowrap}
+.hgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (min-width:640px){.hgrid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+.hcard{background:var(--sheet);border:1px solid var(--line);border-radius:24px;padding:14px;box-shadow:var(--shadow);text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px;align-items:flex-start;color:inherit;transition:box-shadow .25s,transform .08s}
+.hcard:active{transform:scale(.985)}@media (hover:hover){.hcard:hover{box-shadow:0 0 0 4px var(--glow-soft),var(--shadow)}}
+.hcard .avatar{width:64px;height:64px;font-size:1.5rem}.hcard b{font:700 1.15rem var(--display);letter-spacing:-.02em}
+.empty{text-align:center;padding:26px 12px;color:var(--muted)}.empty .i{color:var(--accent);margin-bottom:8px}.empty h3{color:var(--ink);font-size:1.25rem;margin-bottom:6px}
+.task{display:flex;align-items:center;gap:12px;width:100%;border:1.5px solid var(--line);background:var(--paper);border-radius:16px;padding:10px 12px;min-height:56px;cursor:pointer;text-align:left;transition:box-shadow .25s,border-color .2s,background .2s}
+.task .tick{width:30px;height:30px;border-radius:50%;border:2px solid var(--field);display:grid;place-items:center;flex:none;color:transparent}
+.task[aria-pressed=true]{background:var(--green-soft);border-color:transparent}
+.task[aria-pressed=true] .tick{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 0 0 4px var(--glow-green)}
+.task .tl{flex:1;font-weight:600}.task .tl small{display:block;font-weight:400;color:var(--muted);font-size:.8rem}
+.kgbox{display:flex;align-items:center;gap:6px;margin:6px 0 2px 42px}.kgbox input{width:90px}
+.tasks{display:grid;gap:8px}
+
+/* sheet */
+.scrim{position:fixed;left:0;right:0;top:0;height:100dvh;background:rgba(25,15,0,.55);z-index:40;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--sheet);width:100%;max-width:560px;max-height:92dvh;overflow:auto;border-radius:28px 28px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom));animation:up .22s ease-out;overscroll-behavior:contain}
+.sheet:focus{outline:none}.sheet .hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:2px}.sheet .hd h2{font-size:1.5rem}
+.sheet .foot{position:sticky;bottom:calc(-18px - env(safe-area-inset-bottom));background:var(--sheet);padding:12px 0 calc(18px + env(safe-area-inset-bottom));margin-bottom:calc(-18px - env(safe-area-inset-bottom))}
+@keyframes up{from{transform:translateY(24px);opacity:0}}
+@media (min-width:640px){.scrim{align-items:center}.sheet{border-radius:28px}}
+.x{border:0;background:var(--paper);width:44px;height:44px;border-radius:50%;cursor:pointer;display:grid;place-items:center}
+#toasts{position:fixed;left:0;right:0;bottom:92px;display:flex;justify-content:center;z-index:60;pointer-events:none;padding:0 12px}
+@media (min-width:900px){#toasts{bottom:24px;padding-left:var(--rail)}}
+.toast{pointer-events:auto;background:var(--ink);color:var(--paper);padding:12px 12px 12px 18px;border-radius:16px;display:flex;gap:14px;align-items:center;box-shadow:0 8px 28px rgba(0,0,0,.3);max-width:min(92vw,480px);animation:up .2s ease-out}
+.toast button{background:none;border:0;color:inherit;font-weight:700;cursor:pointer;padding:10px 12px;border-radius:10px;text-decoration:underline;min-height:44px}
+
+/* fab */
+.fab-wrap{position:fixed;right:16px;bottom:calc(88px + env(safe-area-inset-bottom));z-index:30;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+@media (min-width:900px){.fab-wrap{right:28px;bottom:28px}}
+.fab{width:60px;height:60px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;cursor:pointer;box-shadow:0 0 0 6px var(--glow-soft),0 8px 28px var(--glow);transition:transform .2s,box-shadow .25s}
+.fab .i{width:28px;height:28px;stroke-width:2}.fab[aria-expanded=true]{transform:rotate(45deg)}
+.fab-menu{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.fab-item{display:inline-flex;align-items:center;gap:10px;border:0;border-radius:99px;background:var(--sheet);color:var(--ink);padding:0 20px 0 14px;min-height:52px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.25);animation:up .15s ease-out}.fab-item .i{color:var(--accent)}
+.fab-scrim{position:fixed;inset:0;z-index:29;background:rgba(25,15,0,.35)}
+.note-card{display:flex;gap:10px;background:var(--sky-soft);border-radius:16px;padding:12px 14px;font-size:.88rem;margin-bottom:12px}.note-card .i{color:var(--sky);margin-top:2px}
+.gd{background:var(--sheet);border:1px solid var(--line);border-radius:20px;margin-bottom:10px;overflow:hidden;box-shadow:var(--shadow)}
+.gd.urgent{border-color:var(--red)}
+.gd summary{list-style:none;display:flex;flex-wrap:wrap;align-items:center;gap:6px 10px;padding:14px 48px 14px 16px;cursor:pointer;min-height:60px;position:relative}
+.gd summary::-webkit-details-marker{display:none}
+.gd summary .chv{position:absolute;right:16px;top:50%;margin-top:-.62em;transition:transform .2s;color:var(--muted)}
+.gd[open] summary .chv{transform:rotate(90deg)}
+.gname{flex-basis:100%;font:700 1.1rem var(--display);letter-spacing:-.02em}
+.gbody{padding:0 16px 16px}
+.gh{display:flex;gap:8px;align-items:center;font:700 .95rem var(--display);margin:16px 0 6px;color:var(--accent)}
+.gbody{max-width:68ch}.gl{margin:0;padding-left:20px}.gl li{margin:5px 0}.gl.vet li::marker{color:var(--red)}
+.mthumb{aspect-ratio:4/3;border-radius:20px;overflow:hidden;background:var(--accent-soft)}
+.mthumb img,.mthumb video{display:block;width:100%;height:100%;object-fit:cover;background:#000}
+.mmiss{height:100%;display:grid;place-content:center;justify-items:center;gap:6px;color:var(--muted);text-align:center;padding:12px}
+.pickbox{width:100%;display:flex;flex-direction:column;align-items:center;gap:4px;padding:26px 14px;border:2px dashed var(--field);border-radius:20px;background:var(--paper);color:var(--accent);cursor:pointer}
+.pickbox b{color:var(--ink);font:700 1.1rem var(--display)}
+@media (hover:hover){.pickbox:hover{border-color:var(--accent);box-shadow:0 0 0 4px var(--glow-soft)}}
+.msgprev{background:var(--paper);border-radius:16px;padding:12px 14px;white-space:pre-line;font-size:.95rem;border-left:4px solid var(--green)}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<a class="skip" href="#view">Skip to content</a>
+<div class="wrap" id="app">
+  <header class="top"><img src="newberry-house-logo.webp" alt="" onerror="this.style.display='none'"><div class="grow"><h1>Newberry Flock</h1><div class="small muted" id="today"></div></div></header>
+  <main id="view" tabindex="-1"></main>
+</div>
+<nav class="tabs" aria-label="Main"></nav>
+<div class="fab-wrap" id="fab-wrap">
+  <div class="fab-menu" id="fab-menu" hidden></div>
+  <button class="fab" id="fab" aria-label="Quick actions" aria-expanded="false" aria-controls="fab-menu"><svg class="i" aria-hidden="true"><use href="#i-plus"/></svg></button>
+</div>
+<div id="layer"></div>
+<div id="toasts" aria-live="polite"></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" id="sprite"></svg>
+
+<script>
+/* ---------- outline icons ---------- */
+const ICONS={
+home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
+bird:'<path d="M16 7h.01"/><path d="M3.4 18H12a8 8 0 008-8V7a4 4 0 00-7.3-2.3L2 20"/><path d="M20 7l2 .5-2 .5"/><path d="M10 18v3M14 17.8V21"/>',
+egg:'<path d="M12 3c-3.5 0-7 6-7 11a7 7 0 0014 0c0-5-3.5-11-7-11z"/>',
+pulse:'<path d="M12 20s-8-4.8-8-11a4.5 4.5 0 018-2.8A4.5 4.5 0 0120 9c0 6.2-8 11-8 11z"/><path d="M5 12.5h4l1.5-3 3 6 1.5-3h4"/>',
+dots:'<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>',
+plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>',check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+cash:'<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>',
+basket:'<path d="M3 10h18l-2 10H5z"/><path d="M8 10l4-6 4 6"/>',
+grain:'<path d="M12 21V9"/><path d="M12 9c-2.6 0-4-1.8-4-4.2 2.6 0 4 1.8 4 4.2zM12 9c2.6 0 4-1.8 4-4.2-2.6 0-4 1.8-4 4.2zM12 15c-2.6 0-4-1.8-4-4.2 2.6 0 4 1.8 4 4.2zM12 15c2.6 0 4-1.8 4-4.2-2.6 0-4 1.8-4 4.2z"/>',
+drop:'<path d="M12 3s6 6.3 6 11a6 6 0 01-12 0c0-4.7 6-11 6-11z"/>',
+shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+broom:'<path d="M15 3l-3 8"/><path d="M8 11h9l2 10H6z"/><path d="M10 15l.5 6M14 15l-.5 6"/>',
+clip:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4h6v3H9zM9 14l2 2 4-4"/>',
+trend:'<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',
+bag:'<path d="M7 7h10l2 13H5z"/><path d="M9 7l1-3h4l1 3"/>',
+sliders:'<path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/>',
+users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.6a3.5 3.5 0 010 6.8"/><path d="M18 14.3c2 .7 3.5 2.6 3.5 5.7"/>',
+user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
+utensils:'<path d="M7 3v8M4 3v5a3 3 0 006 0V3M7 11v10"/><path d="M17 21V3c-2.5 1.5-3.5 4.5-3.5 8H17"/>',
+trash:'<path d="M4 7h16M10 11v6M14 11v6M6 7l1 13h10l1-13M9 7V4h6v3"/>',
+pencil:'<path d="M4 20l1-4L16.5 4.5a2 2 0 013 3L8 19z"/>',
+image:'<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="10" r="1.6"/><path d="M4 17l5-4.5 4 3.5 3-2.5 4.5 3.5"/>',
+alert:'<path d="M12 4l10 17H2z"/><path d="M12 10v4M12 17.5h.01"/>',
+clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+download:'<path d="M12 4v11M7 11l5 5 5-5M4 20h16"/>',upload:'<path d="M12 16V5M7 9l5-5 5 5M4 20h16"/>',
+chev:'<path d="M9 5l7 7-7 7"/>',left:'<path d="M15 5l-7 7 7 7"/>',
+up:'<path d="M12 19V5M6 11l6-6 6 6"/>',down:'<path d="M12 5v14M6 13l6 6 6-6"/>',
+book:'<path d="M5 4h10a3 3 0 013 3v13H8a3 3 0 01-3-3z"/><path d="M5 17a3 3 0 013-3h10"/>',
+leaf:'<path d="M5 19c0-8 5-13 14-14 0 9-5 14-13 14z"/><path d="M5 19c3-5 6-8 10-10"/>',
+eye:'<path d="M2 12s3.7-7 10-7 10 7 10 7-3.7 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/>',
+share:'<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6"/>',
+camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
+copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',
+chat:'<path d="M4 20l1.4-4.2A8 8 0 1112 20a8 8 0 01-4-1.1z"/><path d="M9 10.5c0 2.5 2 4.5 4.5 4.5l1.2-1.2-1.6-1-.8.6a3 3 0 01-1.6-1.6l.6-.8-1-1.6z"/>',
+sparkle:'<path d="M12 3l1.8 5.2L19 10l-5.2 1.8L12 17l-1.8-5.2L5 10l5.2-1.8z"/>',
+note:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>',
+coop:'<path d="M3 11l9-7 9 7"/><path d="M5 10v10h14V10"/><circle cx="12" cy="14" r="2"/><path d="M12 16v4"/>'
+};
+document.getElementById("sprite").innerHTML=Object.entries(ICONS).map(([k,v])=>`<symbol id="i-${k}" viewBox="0 0 24 24">${v}</symbol>`).join("");
+const ic=(n,c="")=>`<svg class="i ${c}" aria-hidden="true" focusable="false"><use href="#i-${n}"/></svg>`;
+
+const GUIDE_DEFAULT=[
+{id:"g-daily",cat:"General care",urgency:"routine",name:"Daily prevention routine",
+ signs:["Most illness is caught early by simply looking at every hen, every day."],
+ organic:[],
+ prevent:["Look at each hen daily: bright eyes, red upright comb, alert stance, normal droppings, eating and drinking.","Fresh clean water every day; scrub drinkers weekly.","Keep bedding dry. Wet litter breeds coccidia, mould and mites.","Layer feed with oyster shell or limestone always available; treats no more than about 10% of the diet.","Rest and rotate the run; fix muddy patches.","Quarantine every new bird for 3 to 4 weeks before mixing.","Handle each hen monthly: check crop, breast bone (weight), vent, legs and feet.","Write anything unusual in the Health log so patterns show up early."],
+ vet:["A hen that is hunched, fluffed up and apart from the flock for more than a day.","Two or more sick hens at once, or any unexplained sudden deaths."]},
+{id:"g-school",cat:"General care",urgency:"routine",name:"School biosecurity and hygiene",
+ signs:["Children and visitors can carry disease in or out, and poultry can carry Salmonella to people."],
+ organic:[],
+ prevent:["Wash hands with soap after touching hens, eggs or equipment, and before eating.","No eating or drinking in the coop or run.","Use a footbath or dedicated coop shoes; visit your own flock before any other poultry.","Supervise students. Young children should not handle birds unsupervised.","Wipe or discard dirty eggs, keep eggs cool, and cook them thoroughly.","Keep wild birds and rodents out: sealed feed bins, covered feeders, no spilled grain.","Limit visitors and keep a simple visitor log."],
+ vet:["Breathing problems together with sudden deaths: stop visits and call the State Veterinarian."]},
+{id:"g-kit",cat:"General care",urgency:"routine",name:"Organic first-aid kit",
+ signs:["Having supplies ready means you can act within minutes."],
+ organic:["Isolation box or small pen with soft dry bedding.","Electrolytes and a poultry probiotic.","Sterile saline for flushing wounds, clean towels, gauze and self-sticking bandage.","Epsom salt for warm soaks.","Food-grade diatomaceous earth (wear a dust mask when applying).","Coconut or neem oil for scaly legs.","Disposable gloves and a torch.","Your vet’s phone number and the State Veterinarian’s number written inside the lid."],
+ prevent:["Check the kit monthly and replace anything that has expired.","Ask your organic certifier which antiseptics and sprays are permitted before you need them."],
+ vet:[]},
+{id:"g-redmite",cat:"Parasites",urgency:"soon",name:"Red mite",
+ signs:["Hens reluctant to go into the coop at night, or restless on the perch.","Pale comb and wattles (anaemia), falling egg numbers.","Blood spots on eggs, grey-red specks under perches and in cracks.","Wipe a white cloth along perch ends at dusk: red or grey smears are mites."],
+ organic:["Remove all bedding, scrub the coop with hot water, and let it dry completely.","Apply food-grade diatomaceous earth to dry cracks, perch ends and nest boxes, and light dustings in the dust bath. Wear a mask.","Treat the house, not only the birds: mites live in the cracks by day.","Plant-based or silica-based coop sprays may be used if your certifier allows them.","Repeat the clean-out and treatment after 7 days to catch newly hatched mites."],
+ prevent:["Use removable, smooth perches without cracks.","Seal gaps and keep the coop dry and well ventilated.","Check perches weekly at dusk.","Give hens a dry dust bath of sand and wood ash."],
+ vet:["Hens that are weak, very pale or collapsing from blood loss."]},
+{id:"g-scaly",cat:"Parasites",urgency:"routine",name:"Scaly leg mite",
+ signs:["Raised, crusty, lifted scales on the legs and feet.","Limping or reluctance to perch."],
+ organic:["Soak the legs in warm soapy water to soften crusts. Do not pick them off.","Smother the mites by coating the legs with coconut oil, neem oil or plain vegetable oil.","Repeat every few days for 3 to 4 weeks until healthy scales grow back.","Clean and dry the perches and bedding."],
+ prevent:["Check legs during monthly handling.","Keep perches clean and dry.","Isolate affected birds while treating."],
+ vet:["Bleeding, deep cracks, swelling or a hen that will not walk."]},
+{id:"g-lice",cat:"Parasites",urgency:"routine",name:"Lice",
+ signs:["Itching, restlessness, dull feathers.","Feather loss around the vent and under the wings.","Small yellowish egg clusters at the base of feathers."],
+ organic:["Provide a dry dust bath of sand, soil and wood ash.","Dust the vent and under the wings lightly with food-grade diatomaceous earth.","Clean out and dry the coop.","Check again after 10 days and repeat."],
+ prevent:["Keep dust baths available year round.","Quarantine new birds and check them closely.","Keep bedding clean and dry."],
+ vet:["Heavy infestation with scabby or bleeding skin."]},
+{id:"g-worms",cat:"Parasites",urgency:"soon",name:"Worms",
+ signs:["Weight loss despite eating, pale comb, dull feathers.","Watery or mucousy droppings, sometimes with visible worms.","Gaping, head shaking and coughing can mean gapeworm.","Falling egg production."],
+ organic:["Confirm with a faecal egg count from your vet before treating.","Rest and rotate the run; remove droppings regularly.","Evidence for herbal wormers such as garlic or pumpkin seed is limited. Treat them as support, not a cure.","If a worm burden is confirmed, ask your vet and certifier which treatment is allowed, and what the egg withdrawal period is. Record it in the Health log."],
+ prevent:["Rotate or rest ground for several weeks.","Keep feed and water off the ground.","Do not overcrowd.","Test droppings once or twice a year."],
+ vet:["A confirmed heavy burden, a thin hen that is not improving, or gapeworm signs."]},
+{id:"g-cocc",cat:"Digestive",urgency:"urgent",name:"Coccidiosis",
+ signs:["Bloody or very watery droppings.","Hunched, fluffed up, pale, not eating.","Poor growth and deaths in chicks."],
+ organic:["Call your vet the same day. Coccidiosis can kill quickly, especially chicks.","Move the sick bird to a clean, dry, warm pen.","Give electrolytes and a probiotic to support recovery.","Replace wet bedding and scrub drinkers.","Treatment, if prescribed, must be checked against your organic standard. Ask for the egg withdrawal period."],
+ prevent:["Keep litter dry, especially around drinkers.","Do not overcrowd; rotate the run.","Clean feeders and drinkers daily.","Raise chicks on clean dry bedding and keep older birds’ droppings away."],
+ vet:["Any bloody droppings. Do not wait."]},
+{id:"g-crop",cat:"Digestive",urgency:"soon",name:"Sour or impacted crop",
+ signs:["Crop still swollen and squishy or hard first thing in the morning.","Sour smell from the beak, regurgitating liquid.","Lethargy, not eating."],
+ organic:["Isolate the hen with water available.","Withhold feed for 12 to 24 hours.","Gently massage the crop downward, a few minutes at a time.","A teaspoon of olive oil can help soften blockages.","A poultry probiotic helps afterwards.","Do not hang her upside down or force vomiting. She can inhale the fluid."],
+ prevent:["Provide grit at all times.","Keep long grass, string and plastic out of the run.","Never feed mouldy food.","Change the diet gradually."],
+ vet:["No improvement after 24 to 48 hours, a hard crop that will not empty, or a foul smell. It may need flushing or an antifungal."]},
+{id:"g-diarrhoea",cat:"Digestive",urgency:"soon",name:"Diarrhoea and digestive upset",
+ signs:["Loose, smelly or green droppings, soiled feathers around the vent.","Reduced appetite or thirst."],
+ organic:["Check water is clean and available.","Cut back treats, wet feed and fresh greens for a few days.","Add a poultry probiotic and electrolytes to the water.","Clean the vent area gently with warm water and dry the bird.","Check for worms or coccidiosis if it lasts."],
+ prevent:["Keep feed and water clean and dry.","Introduce new feed gradually.","Remove spoiled food daily."],
+ vet:["Lasts more than 2 days, is bloody, or more than one hen is affected."]},
+{id:"g-resp",cat:"Respiratory",urgency:"soon",name:"Colds and respiratory infections",
+ signs:["Sneezing, runny nose, bubbly or swollen eyes, facial swelling.","Rattling or noisy breathing, gaping.","Drop in laying, reduced appetite."],
+ organic:["Isolate sick birds straight away and look after them last.","Keep them warm, dry and out of draughts but with good ventilation.","Remove dusty bedding and dusty feed.","Provide clean water with electrolytes and a probiotic.","Many respiratory diseases are contagious. Ask your vet for a diagnosis and about antibiotics and their egg withdrawal period."],
+ prevent:["Ventilate high up in the coop but avoid draughts at hen height.","Quarantine new birds for 3 to 4 weeks.","Keep wild birds away from feed and water.","Ask your vet about a vaccination programme."],
+ vet:["Several birds affected, gasping, or sudden deaths. Treat as possibly notifiable (see Avian influenza and Newcastle)."]},
+{id:"g-notifiable",cat:"Notifiable",urgency:"urgent",name:"Avian influenza and Newcastle disease",
+ signs:["Sudden deaths, several birds at once.","Swollen head, blue or purple comb and wattles.","Green watery droppings, twisted neck or paralysis.","Sharp fall in laying, soft shells."],
+ organic:["This is an emergency, not a home treatment.","Stop all movement of birds, eggs, feed, equipment and people off the premises.","Isolate sick birds and wash your hands and boots.","Call your vet and the State Veterinarian (Department of Agriculture) immediately. These diseases are notifiable by law."],
+ prevent:["Keep wild birds and waterfowl away from your flock and feed.","Use footbaths and limit visitors.","Cover feed and water.","Do not bring in birds of unknown health."],
+ vet:["Always. Call at the first suspicion."]},
+{id:"g-pox",cat:"Skin & feet",urgency:"soon",name:"Fowl pox",
+ signs:["Dry scabby lumps on comb, wattles and face.","In the wet form, yellow patches in the mouth and throat with trouble swallowing."],
+ organic:["There is no cure. It usually runs its course over 3 to 4 weeks.","Isolate affected birds and provide soft, easy food and clean water.","Do not pull off scabs.","Control mosquitoes and remove standing water."],
+ prevent:["Vaccination is available. Ask your vet.","Reduce mosquitoes: drain puddles and clean drinkers.","Quarantine new birds."],
+ vet:["Mouth or throat lesions, or hens unable to eat."]},
+{id:"g-bumble",cat:"Skin & feet",urgency:"soon",name:"Bumblefoot",
+ signs:["Swollen foot pad, often with a dark scab.","Limping or standing on one foot."],
+ organic:["Soak the foot in warm water with Epsom salt for 10 minutes.","Clean with sterile saline and check for a hard core under the scab.","Early cases: dress with an antiseptic your certifier allows, bandage, and keep her on soft dry bedding.","Change the dressing daily until healed."],
+ prevent:["Keep perches low and rounded.","Keep the run and litter dry.","Check feet during monthly handling."],
+ vet:["Swelling that is hot, firm or deep, pus, or no improvement after 3 days. Deep infections need a vet."]},
+{id:"g-binding",cat:"Egg laying",urgency:"urgent",name:"Egg binding",
+ signs:["Straining, tail pumping, upright penguin stance.","Sitting on the floor of the coop, lethargic.","No egg for a day or more."],
+ organic:["Place her in a warm, dark, quiet box.","Soak her lower body in warm water (about 38°C) with Epsom salt for 15 to 20 minutes.","Offer water. A vet can give a calcium injection.","Never try to pull the egg out or break it inside her."],
+ prevent:["Feed a balanced layer feed with calcium and vitamin D.","Keep hens at a healthy weight.","Provide oyster shell free choice."],
+ vet:["No egg after 12 to 24 hours of warmth, a broken egg, or a hen that is weakening."]},
+{id:"g-soft",cat:"Egg laying",urgency:"routine",name:"Soft, thin or misshapen shells",
+ signs:["Thin or rubbery shells, or shell-less eggs.","Ridged or odd-shaped eggs."],
+ organic:["Provide oyster shell or limestone grit free choice.","Check layer feed is fresh and not diluted by too many treats.","Give shade and cool water in hot weather.","If it continues, check for illness such as infectious bronchitis."],
+ prevent:["Keep treats under about 10% of the diet.","Provide sunlight or vitamin D in the feed.","Reduce stress, loud noise and predators at night."],
+ vet:["Persistent shell problems with coughing or sneezing in the flock."]},
+{id:"g-prolapse",cat:"Egg laying",urgency:"urgent",name:"Vent prolapse",
+ signs:["Pink or red tissue protruding from the vent.","Other hens pecking at her."],
+ organic:["Separate her immediately into a quiet, dark, warm pen. Other hens will peck the tissue.","Gently clean the area with warm water.","Call your vet the same day."],
+ prevent:["Keep hens at a healthy weight and avoid overfeeding.","Provide a balanced layer feed and correct lighting.","Watch for hens laying oversized eggs."],
+ vet:["Always. A prolapse can be life-threatening."]},
+{id:"g-moult",cat:"Egg laying",urgency:"routine",name:"Moulting",
+ signs:["Feather loss, often in autumn.","Eggs slow or stop for weeks. Hen looks scruffy but is otherwise bright."],
+ organic:["Raise protein: move to about 18 to 20 percent protein feed.","Handle gently; new feathers are sensitive.","Keep her warm and dry and reduce stress.","Mark her as Moulting in her profile so she doesn’t affect your laying-rate worries."],
+ prevent:["Good nutrition all year.","Avoid sudden changes of routine."],
+ vet:["Bald patches, scabs or itching, which may mean mites or lice."]},
+{id:"g-broody",cat:"Egg laying",urgency:"routine",name:"Broody hen",
+ signs:["Sits on the nest all day and night, puffed up and growling.","Plucks her breast feathers, rarely eats or drinks."],
+ organic:["Decide whether to let her hatch eggs, or break the broodiness.","To break it: remove her from the nest, collect eggs often, and keep her in a bright, cool pen with food and water for 3 to 4 days.","Make sure she eats and drinks. Broody hens lose weight."],
+ prevent:["Collect eggs at least once a day.","Block off favourite nest corners."],
+ vet:[]},
+{id:"g-wound",cat:"Injury & behaviour",urgency:"soon",name:"Wounds, injuries and flystrike",
+ signs:["Bleeding, torn skin, limping, or a swollen part.","Maggots in a wound or around the vent (flystrike)."],
+ organic:["Isolate her, because other hens will peck the wound.","Flush with sterile saline or clean lukewarm water and pat dry.","Apply an antiseptic your certifier allows and keep the area clean.","Keep her in a clean, dry, shaded pen until healed."],
+ prevent:["Remove sharp edges and protruding wire.","Keep the coop and vents clean, because flies love soiled feathers.","Check hens daily in warm months."],
+ vet:["Deep wounds, exposed bone, maggots, or a hen that is weak or in shock. Maggots are an emergency."]},
+{id:"g-peck",cat:"Injury & behaviour",urgency:"routine",name:"Feather pecking and bullying",
+ signs:["Bald patches, bloody feathers, one hen chased from food.","Pecking at wounds or vents."],
+ organic:["Separate injured birds until healed.","Add more feeders, drinkers and perches so no hen is blocked.","Provide enrichment: scratch areas, hanging greens, dust baths.","Check feed protein is adequate and the coop is not overcrowded."],
+ prevent:["Give enough space; organic standards set minimums.","Introduce new birds slowly after quarantine.","Keep the daily routine calm and consistent."],
+ vet:["Serious wounds or persistent cannibalism."]},
+{id:"g-heat",cat:"Heat & seasonal",urgency:"urgent",name:"Heat stress",
+ signs:["Panting with open beak, wings held away from the body.","Lethargy, pale comb, very watery droppings.","Drop in egg production, thin shells."],
+ organic:["Move her into shade and offer cool water straight away.","Add electrolytes to the water.","Wet her feet in a shallow tray of cool water. Do not drench her.","Increase airflow and handle birds as little as possible."],
+ prevent:["Provide shade and several water points.","Ventilate the coop well.","Feed in the cool of the morning and evening.","Offer frozen fruit or ice in water on very hot days."],
+ vet:["A hen that collapses, or deaths during a heat wave."]},
+{id:"g-mould",cat:"Feed & nutrition",urgency:"soon",name:"Mouldy feed and mycotoxins",
+ signs:["Musty smell or clumped feed.","Breathing trouble (aspergillosis), poor laying, sudden unthriftiness."],
+ organic:["Throw away mouldy or damp feed. Do not feed it to any animal.","Scrub and dry feeders and drinkers.","Provide fresh feed and clean water straight away.","Ask your vet if several birds are coughing or gasping."],
+ prevent:["Store feed in sealed, dry bins off the floor.","Buy amounts you can use within a few weeks.","Never top up old feed with new."],
+ vet:["Several birds coughing or gasping after eating suspect feed."]}
+];
+
+/* ---------- data (browser only: no sign-in yet) ---------- */
+const KEY="newberry-flock-v1";
+const DEF=()=>({settings:{price:55,priceRest:45,lowFeedDays:7,signature:"Newberry Middle School Project",groupLink:""},coops:[{id:"c1",name:"Main coop"}],hens:[],eggs:[],customers:[],sales:[],feeds:[],purchases:[],checks:{},health:[],guide:structuredClone(GUIDE_DEFAULT),updates:[]});
+let S;try{S={...DEF(),...JSON.parse(localStorage.getItem(KEY))}}catch{S=DEF()}
+S.settings={...DEF().settings,...S.settings};if(!S.coops?.length)S.coops=DEF().coops;
+if(S.coops.length>1)S.coops=[S.coops[0]];S.hens.forEach(h=>h.coop=S.coops[0].id);S.eggs.forEach(e=>e.coop=S.coops[0].id);
+let saveOK=true;
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));saveOK=true}catch{saveOK=false;toast("Storage is full. Download a backup, then remove some hen photos.")}};
+const uid=()=>Math.random().toString(36).slice(2,9);
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const iso=d=>{d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const today=()=>iso();
+const addDays=(s,n)=>{const d=new Date(s+"T12:00");d.setDate(d.getDate()+n);return iso(d)};
+const FMT=new Intl.NumberFormat("en-ZA",{style:"currency",currency:"ZAR",minimumFractionDigits:2});
+const money=n=>FMT.format(n||0);
+const num=(n,d=0)=>new Intl.NumberFormat("en-ZA",{maximumFractionDigits:d}).format(n||0);
+const dz=n=>{const d=Math.floor(n/12),r=n%12;return d?`${d} dozen${r?` + ${r}`:""}`:`${r} egg${r===1?"":"s"}`};
+const dlabel=d=>{const t=today();return d===t?"Today":d===addDays(t,-1)?"Yesterday":new Date(d+"T12:00").toLocaleDateString("en-ZA",{weekday:"short",day:"numeric",month:"short"})};
+const sum=(a,f)=>a.reduce((x,y)=>x+f(y),0);
+const range=(n,end=today())=>Array.from({length:n},(_,i)=>addDays(end,i-n+1));
+
+/* ---------- stats ---------- */
+const ACTIVE=["healthy","watch","unwell","broody","moulting"];
+const layingHens=()=>S.hens.filter(h=>["healthy","watch","unwell"].includes(h.status));
+const activeHens=()=>S.hens.filter(h=>ACTIVE.includes(h.status));
+const eggsOn=d=>sum(S.eggs.filter(e=>e.date===d),e=>e.count);
+const goodEggs=()=>sum(S.eggs,e=>e.count-(e.cracked||0));
+const stock=()=>goodEggs()-sum(S.sales,s=>s.eggs);
+const saleTotal=s=>s.eggs/12*s.price;
+const layRate=(n=7)=>{const hs=layingHens().length;if(!hs)return null;const ds=range(n);return Math.min(1,sum(ds,eggsOn)/(n*hs))};
+
+const cust=id=>S.customers.find(c=>c.id===id);
+const custName=id=>cust(id)?.name||"Walk-in";
+const owed=()=>sum(S.sales.filter(s=>!s.paid),saleTotal);
+const hen=id=>S.hens.find(h=>h.id===id);
+const coopName=id=>S.coops.find(c=>c.id===id)?.name||"No coop";
+const feedName=id=>S.feeds.find(f=>f.id===id)?.name||"Feed";
+const fedKg=(feed,from="0000-00-00")=>sum(Object.entries(S.checks).filter(([d])=>d>=from),([,cs])=>sum(Object.values(cs),c=>c.fed&&(c.feed===feed||!c.feed&&feed===S.feeds[0]?.id)?+c.fed:0));
+const feedStock=id=>sum(S.purchases.filter(p=>p.feed===id),p=>+p.kg)-fedKg(id);
+const feedUse=id=>{const from=addDays(today(),-13),days=Object.keys(S.checks).filter(d=>d>=from&&Object.values(S.checks[d]).some(c=>c.fed)).length;return days?fedKg(id,from)/days:0};
+const daysLeft=id=>{const u=feedUse(id);return u>0?feedStock(id)/u:null};
+const minDaysLeft=()=>{const v=S.feeds.map(f=>daysLeft(f.id)).filter(x=>x!==null);return v.length?Math.min(...v):null};
+const TASKS=[["fed","Fed","grain"],["water","Fresh water","drop"],["clean","Bedding cleaned","broom"],["secure","Locked up safely","shield"],["health","Health walk-through","pulse"]];
+const checkOf=(d,c)=>S.checks[d]?.[c]||{};
+const taskDone=(c,k)=>k==="fed"?+c.fed>0:!!c[k];
+const checksProgress=d=>{let done=0,total=0;S.coops.forEach(co=>{const c=checkOf(d,co.id);TASKS.forEach(([k])=>{total++;if(taskDone(c,k))done++})});return{done,total}};
+const attention=()=>S.hens.filter(h=>h.status==="watch"||h.status==="unwell");
+const costPerDozen=()=>{const from=addDays(today(),-29),cost=sum(S.purchases.filter(p=>p.date>=from),p=>+p.cost||0),dozens=sum(S.eggs.filter(e=>e.date>=from),e=>e.count-(e.cracked||0))/12;return dozens>0&&cost>0?cost/dozens:null};
+
+/* ---------- ui chrome ---------- */
+let tab="home",eggSub="log",careSub="daily",careDate=today(),henFilter={coop:"all",st:"all"};
+const TABS=[["home","Today","home"],["hens","Hens","bird"],["eggs","Eggs","egg"],["care","Care","pulse"],["updates","Updates","camera"],["more","More","dots"]];
+$("nav.tabs").innerHTML=TABS.map(([k,l,i])=>`<button data-tab="${k}">${ic(i)}<span>${l}</span>${k==="care"?'<i class="dot" id="cdot" hidden></i>':""}</button>`).join("");
+$("#today").textContent=new Date().toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long"});
+$("#fab-menu").innerHTML=[["egg","egg","Log eggs"],["cash","cash","Sell eggs"],["clip","clip","Daily check"],["bag","bag","Feed bought"],["pulse","pulse","Health note"],["book","book","Health guide"],["share","share","Share update"],["bird","bird","Add hen"]].map(([k,i,l])=>`<button class="fab-item" data-fab="${k}">${ic(i)}${l}</button>`).join("");
+
+let toastT;
+function toast(msg,undo){
+  clearTimeout(toastT);const t=document.createElement("div");t.className="toast";
+  t.innerHTML=`<span>${esc(msg)}</span>${undo?"<button>Undo</button>":""}`;
+  if(undo)t.querySelector("button").onclick=()=>{undo();t.remove();save();render()};
+  $("#toasts").replaceChildren(t);toastT=setTimeout(()=>t.remove(),6000);
+}
+let closeSheet=null,lastFocus=null;
+function sheet(title,html,onMount){
+  lastFocus=document.activeElement;const l=$("#layer");
+  l.innerHTML=`<div class="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t" tabindex="-1"><div class="hd"><h2 id="sh-t">${esc(title)}</h2><button class="x" aria-label="Close dialog" type="button">${ic("x")}</button></div>${html}</div></div>`;
+  document.body.classList.add("lock");[$("#app"),$("nav.tabs")].forEach(e=>e.inert=true);$("#fab-wrap").hidden=true;setFab(false);
+  const sh=l.querySelector(".sheet"),scrim=l.querySelector(".scrim"),vv=window.visualViewport;
+  const fit=()=>{if(!vv)return;scrim.style.height=vv.height+"px";scrim.style.top=vv.offsetTop+"px";sh.style.maxHeight=(vv.height-12)+"px"};
+  vv?.addEventListener("resize",fit);vv?.addEventListener("scroll",fit);fit();
+  sh.addEventListener("focusin",e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))setTimeout(()=>e.target.scrollIntoView({block:"center",behavior:"smooth"}),300)});
+  const close=()=>{vv?.removeEventListener("resize",fit);vv?.removeEventListener("scroll",fit);l.innerHTML="";document.body.classList.remove("lock");[$("#app"),$("nav.tabs")].forEach(e=>e.inert=false);$("#fab-wrap").hidden=false;closeSheet=null;lastFocus?.isConnected&&lastFocus.focus()};
+  closeSheet=close;l.querySelector(".x").onclick=close;
+  l.querySelector(".scrim").onclick=e=>{if(e.target.classList.contains("scrim"))close()};
+  sh.addEventListener("keydown",e=>{if(e.key!=="Tab")return;const f=[...sh.querySelectorAll('button:not([disabled]),[href],input:not([disabled]):not([type=hidden]),select,textarea')].filter(x=>x.offsetParent);if(!f.length)return;const a=f[0],z=f[f.length-1];
+    if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}});
+  onMount?.(sh,close);(sh.querySelector("[data-autofocus]")||sh).focus({preventScroll:true});return close;
+}
+function redraw(sh,target,html){const a=document.activeElement,sel=a&&sh.contains(a)?(a.id?"#"+a.id:a.dataset.f?`[data-f="${a.dataset.f}"]`:null):null;target.innerHTML=html;if(sel)target.querySelector(sel)?.focus({preventScroll:true})}
+function confirmSheet(title,msg,ok,fn){sheet(title,`<p class="muted" style="margin:6px 0 18px">${esc(msg)}</p><div class="row"><button class="btn grow" id="no" type="button">Cancel</button><button class="btn grow" id="yes" type="button" style="background:var(--red);border-color:var(--red);color:#fff">${esc(ok)}</button></div>`,(sh,close)=>{sh.querySelector("#no").onclick=close;sh.querySelector("#yes").onclick=()=>{close();fn()};sh.querySelector("#no").focus()})}
+function setFab(o){$("#fab").setAttribute("aria-expanded",o);$("#fab-menu").hidden=!o;document.querySelector(".fab-scrim")?.remove();if(o){const s=document.createElement("div");s.className="fab-scrim";s.onclick=()=>setFab(false);document.body.append(s)}}
+$("#fab").onclick=()=>setFab($("#fab").getAttribute("aria-expanded")!=="true");
+document.querySelectorAll("[data-fab]").forEach(b=>b.onclick=()=>{setFab(false);quick(b.dataset.fab)});
+function quick(k){({egg:()=>eggSheet(),cash:()=>sellSheet(),clip:()=>{careDate=today();careSub="daily";go("care")},bag:()=>purchaseSheet(),pulse:()=>healthSheet(),book:()=>openGuide(),share:()=>updSheet(),bird:()=>henForm()})[k]()}
+addEventListener("keydown",e=>{if(e.key==="Escape"){if(closeSheet)closeSheet();else if($("#fab").getAttribute("aria-expanded")==="true"){setFab(false);$("#fab").focus()}}});
+function go(t){tab=t;render();scrollTo(0,0);$("#view").focus({preventScroll:true})}
+document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>go(b.dataset.tab));
+
+/* ---------- small svg widgets ---------- */
+const ring=(p,col,size=84,w=10)=>{const r=(size-w)/2,c=2*Math.PI*r;p=Math.max(0,Math.min(1,p||0));return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}" style="transform:rotate(-90deg)" aria-hidden="true"><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="var(--line)" stroke-width="${w}"/><circle cx="${size/2}" cy="${size/2}" r="${r}" fill="none" stroke="${col}" stroke-width="${w}" stroke-linecap="round" stroke-dasharray="${c*p} ${c}"/></svg>`};
+function trendChart(vals,label){
+  const W=640,H=150,max=Math.max(10,...vals)*1.1,step=W/(vals.length-1||1);
+  const pts=vals.map((v,i)=>[i*step,H-6-(v/max)*(H-16)]);
+  const line=pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join(" ");
+  return `<svg viewBox="0 0 ${W} ${H+4}" width="100%" role="img" aria-label="${esc(label)}"><defs><linearGradient id="tg" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".35"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>
+  ${[.25,.5,.75].map(f=>`<line x1="0" x2="${W}" y1="${H*f}" y2="${H*f}" stroke="var(--line)" stroke-dasharray="3 5"/>`).join("")}
+  <path d="${line} L${W} ${H} L0 ${H} Z" fill="url(#tg)"/><path d="${line}" fill="none" stroke="var(--accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="${pts.at(-1)[0]}" cy="${pts.at(-1)[1]}" r="5" fill="var(--accent)" stroke="var(--sheet)" stroke-width="3"/></svg>`;
+}
+const avatarHtml=(h,cls="")=>`<div class="avatar ${cls}">${h?.photo?`<img src="${h.photo}" alt="">`:h?.name?esc(h.name[0].toUpperCase()):ic("bird")}</div>`;
+const statusPill=s=>({healthy:`<span class="pill">${ic("check","sm")}Healthy</span>`,watch:`<span class="pill watch">${ic("alert","sm")}Watch</span>`,unwell:`<span class="pill unwell">${ic("pulse","sm")}Unwell</span>`,broody:`<span class="pill sky">Broody</span>`,moulting:`<span class="pill sky">Moulting</span>`,retired:`<span class="pill gone">Retired</span>`,deceased:`<span class="pill gone">Passed away</span>`}[s]||"");
+
+/* ---------- views ---------- */
+function render(){
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.dataset.tab===tab?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
+  const cp=checksProgress(today()),dl=minDaysLeft();
+  $("#cdot").hidden=!(attention().length||(dl!==null&&dl<S.settings.lowFeedDays));
+  document.title=`${TABS.find(t=>t[0]===tab)[1]} · Newberry Flock`;
+  const v=$("#view");v.innerHTML=({home,hens,eggs,care,updates,more})[tab]();
+  v.querySelectorAll("[data-act]").forEach(el=>el.addEventListener("click",()=>act(el.dataset.act,el.dataset.id,el)));
+  v.querySelectorAll("li.tap").forEach(el=>el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click()}}));
+  if(tab==="updates")hydrateMedia();
+  /* keep the chosen filter visible inside swipeable chip rows */
+  v.querySelectorAll(".chips.scroll").forEach(row=>{const on=row.querySelector('[aria-pressed="true"]');if(on&&row.scrollWidth>row.clientWidth)row.scrollLeft=on.offsetLeft-(row.clientWidth-on.offsetWidth)/2});
+  const gs=v.querySelector("#gsearch");if(gs)gs.oninput=()=>{guideQ=gs.value;const p=gs.selectionStart;render();const n=$("#gsearch");n.focus();n.setSelectionRange(p,p)};
+  v.querySelectorAll("details[data-gid]").forEach(d=>d.addEventListener("toggle",()=>{d.open?guideOpen.add(d.dataset.gid):guideOpen.delete(d.dataset.gid)}));
+  v.querySelectorAll("[data-fedkg]").forEach(el=>el.addEventListener("change",()=>setFed(el.dataset.fedkg,el.value)));
+  v.querySelectorAll("[data-fedfeed]").forEach(el=>el.addEventListener("change",()=>{const c=checkOf(careDate,el.dataset.fedfeed);setCheck(el.dataset.fedfeed,{feed:el.value});render()}));
+  v.querySelectorAll("[data-cnote]").forEach(el=>el.addEventListener("change",()=>setCheck(el.dataset.cnote,{note:el.value.trim()})));
+}
+function home(){
+  const t=today(),y=addDays(t,-1),e0=eggsOn(t),e1=eggsOn(y),d=e0-e1;
+  const days=range(7),vals=days.map(eggsOn),mx=Math.max(1,...vals);
+  const st=stock(),cap=Math.max(st,72),rate=layRate(),cp=checksProgress(t),dl=minDaysLeft(),low=dl!==null&&dl<S.settings.lowFeedDays;
+  const mStart=iso(new Date(new Date().getFullYear(),new Date().getMonth(),1)),rev=sum(S.sales.filter(s=>s.date>=mStart),saleTotal),att=attention(),cpd=costPerDozen();
+  const empty=!S.hens.length&&!S.eggs.length&&!S.sales.length;
+  const hh=new Date().getHours(),greet=hh<12?"Good morning":hh<17?"Good afternoon":"Good evening";
+  return `<div class="page-h"><h2>${greet}</h2></div>
+  ${empty?`<div class="card empty">${ic("egg","xl")}<h3>Welcome to Newberry Flock</h3><p>Add your hens, then log eggs, feed and daily checks.<br>Want to look around first? Load some sample data.</p><div class="row wr" style="justify-content:center"><button class="btn primary" data-act="newhen">${ic("plus")}Add a hen</button><button class="btn" data-act="sample">${ic("sparkle")}Load sample data</button></div></div>`:""}
+  ${holdBanner()}
+  <div class="bento">
+    <section class="tile hero s2 r2" aria-label="Eggs today"><div class="lbl">${ic("egg")}Eggs today</div><div class="big">${e0}</div>
+      <span class="chip-d">${ic(d>=0?"up":"down","sm")}${d===0?"Same as yesterday":Math.abs(d)+(d>0?" more":" fewer")+" than yesterday"}</span>
+      <div class="bars" role="img" aria-label="Eggs per day, last 7 days: ${vals.join(", ")}">${days.map((dd,i)=>`<div class="${i===6?"now":""}"><i style="height:${Math.max(6,vals[i]/mx*100)}%"></i><span>${new Date(dd+"T12:00").toLocaleDateString("en-ZA",{weekday:"narrow"})}</span></div>`).join("")}</div>
+      <button class="btn ghost small" data-act="logeggs" style="margin-top:6px">${ic("plus")}Log eggs</button></section>
+    <button class="tile green" data-go="eggs" data-act="go" data-id="eggs"><div class="lbl">${ic("basket")}In stock</div><div class="big">${Math.max(0,Math.floor(st/12))}<span class="small muted" style="font:500 .9rem var(--body)"> dozen</span></div><div class="sub">${Math.max(0,st)} eggs ready to sell</div><div class="meter ${st<=12?"low":st<=36?"mid":""}"><i style="width:${Math.min(100,Math.max(4,st/cap*100))}%"></i></div></button>
+    <section class="tile warm"><div class="lbl">${ic("trend")}Laying rate</div><div class="ringbox">${ring(rate,"var(--accent)")}<div class="c">${rate===null?"–":Math.round(rate*100)+"%"}</div></div><div class="sub">${rate===null?"Add hens to see this":"7-day average · "+layingHens().length+" laying hens"}</div></section>
+    <button class="tile sky" data-act="go" data-id="care"><div class="lbl">${ic("clip")}Daily checks</div><div class="ringbox">${ring(cp.total?cp.done/cp.total:0,"var(--sky)")}<div class="c">${cp.done}/${cp.total}</div></div><div class="sub">${cp.total&&cp.done===cp.total?"All done today":"Tap to tick off"}</div></button>
+    <button class="tile ${low?"alert":""}" data-act="gofeed"><div class="lbl">${ic("grain")}Feed left</div><div class="big">${dl===null?"–":Math.floor(dl)}<span class="small muted" style="font:500 .9rem var(--body)"> ${dl===null?"":"days"}</span></div><div class="sub">${dl===null?"Log purchases and feeding":low?"Time to reorder":"At the current pace"}</div><div class="meter ${low?"low":""}"><i style="width:${dl===null?0:Math.min(100,dl/30*100)}%"></i></div></button>
+    <button class="tile s2" data-act="gosales"><div class="lbl">${ic("cash")}Sales this month</div><div class="big">${money(rev)}</div><div class="sub">${owed()>0?`<b style="color:var(--red)">${money(owed())}</b> still to be paid`:"Everything is paid"}${cpd?` · feed cost ≈ ${money(cpd)} per dozen`:""}</div></button>
+    <section class="tile s2 ${att.length?"alert":"green"}"><div class="lbl">${ic("pulse")}Hen health</div>
+      ${att.length?`<ul class="list" style="margin:2px 0 0">${att.slice(0,3).map(h=>`<li class="tap" data-act="hen" data-id="${h.id}" tabindex="0" role="button" style="padding:6px 0;border:0">${avatarHtml(h)}<div class="grow"><b>${esc(h.name)}</b><div class="small muted">${esc(coopName(h.coop))}</div></div>${statusPill(h.status)}</li>`).join("")}</ul>`:`<div class="big" style="font-size:1.7rem">${S.hens.length?"All clear":"No hens yet"}</div><div class="sub">${S.hens.length?`${activeHens().length} hens, none needing attention`:"Add your first hen"}</div>`}</section>
+    <button class="tile s4" data-act="updates" style="min-height:0;flex-direction:row;align-items:center;gap:14px"><div class="avatar">${ic("share")}</div><div class="grow"><b style="font:700 1.1rem var(--display)">Share an update</b><div class="sub">${S.updates.length?`Last update ${dlabel(S.updates[0].date)}. Keep the community involved.`:"Send a photo or video to parents and the community on WhatsApp"}</div></div>${ic("chev")}</button>
+    <button class="tile s4 green" data-act="guide" style="min-height:0;flex-direction:row;align-items:center;gap:14px"><div class="avatar green">${ic("leaf")}</div><div class="grow"><b style="font:700 1.1rem var(--display)">Health guide</b><div class="sub">Organic treatments and prevention for common hen problems</div></div>${ic("chev")}</button>
+    <section class="tile s4"><div class="lbl">${ic("trend")}Eggs per day, last 30 days</div>${trendChart(range(30).map(eggsOn),"Line chart of eggs collected per day over the last 30 days")}<div class="sub">${num(sum(range(30),eggsOn))} eggs in 30 days · average ${num(sum(range(30),eggsOn)/30,1)} a day</div></section>
+  </div>`;
+}
+
+function hens(){
+  const list=S.hens.filter(h=>(henFilter.st==="all"||(henFilter.st==="attention"?h.status==="watch"||h.status==="unwell":henFilter.st==="active"?ACTIVE.includes(h.status):!ACTIVE.includes(h.status))));
+  return `<div class="page-h"><h2>Hens</h2><button class="btn primary small" data-act="newhen">${ic("plus")}Add hen</button></div>
+  <div class="chips scroll" role="group" aria-label="Filter by status" style="margin-bottom:6px">${[["all","All"],["active","Active"],["attention","Needs attention"],["gone","Retired"]].map(([k,l])=>`<button class="chip" aria-pressed="${henFilter.st===k}" data-act="hfst" data-id="${k}">${l}</button>`).join("")}</div>
+  ${list.length?`<div class="hgrid">${list.map(h=>`<button class="hcard" data-act="hen" data-id="${h.id}">${avatarHtml(h)}<b>${esc(h.name)}</b><span class="small muted">${esc(h.breed||"Breed not set")}</span>${statusPill(h.status)}</button>`).join("")}</div>`
+  :`<div class="card empty">${ic("bird","xl")}<h3>${S.hens.length?"No hens match":"Meet your flock"}</h3><p>${S.hens.length?"Try a different filter.":"Give every hen a name, breed and photo so you can follow her health and laying."}</p>${S.hens.length?"":`<button class="btn primary" data-act="newhen">${ic("plus")}Add your first hen</button>`}</div>`}`;
+}
+
+function eggs(){
+  const seg=`<div class="segc" role="group" aria-label="Section"><button aria-pressed="${eggSub==="log"}" data-act="eggsub" data-id="log">Collection</button><button aria-pressed="${eggSub==="sales"}" data-act="eggsub" data-id="sales">Sales</button></div>`;
+  if(eggSub==="sales"){
+    const un=S.sales.filter(s=>!s.paid);
+    return `<div class="page-h"><h2>Eggs</h2><button class="btn primary small" data-act="sell">${ic("cash")}Sell eggs</button></div>${seg}
+    <div class="bento" style="grid-template-columns:repeat(2,1fr)"><section class="tile green"><div class="lbl">${ic("basket")}In stock</div><div class="big">${Math.max(0,stock())}</div><div class="sub">eggs · ${Math.max(0,Math.floor(stock()/12))} dozen</div></section><section class="tile ${owed()>0?"alert":""}"><div class="lbl">${ic("clock")}To be paid</div><div class="big">${money(owed())}</div><div class="sub">${un.length} unpaid sale${un.length===1?"":"s"}</div></section></div>
+    <section class="card">${S.sales.length?`<ul class="list">${[...S.sales].reverse().slice(0,60).map(s=>`<li>${avatarHtml(null,cust(s.cust)?.type==="restaurant"?"green":"")}<div class="grow"><b>${esc(custName(s.cust))}</b><div class="small muted">${dz(s.eggs)} · ${dlabel(s.date)}</div></div><div class="end"><div class="amt">${money(saleTotal(s))}</div>${s.paid?`<div class="small muted">Paid</div>`:`<button class="btn good small" data-act="paid" data-id="${s.id}">${ic("check")}Mark paid</button>`}</div><button class="btn small icon" data-act="editsale" data-id="${s.id}" aria-label="Edit this sale">${ic("pencil")}</button><button class="btn small icon danger" data-act="delsale" data-id="${s.id}" aria-label="Delete this sale">${ic("trash")}</button></li>`).join("")}</ul>`:`<div class="empty">${ic("cash","xl")}<h3>No sales yet</h3><p>Record your first sale to start tracking income.</p><button class="btn primary" data-act="sell">${ic("cash")}Sell eggs</button></div>`}</section>`;
+  }
+  const dayList=[...S.eggs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,60);
+  return `<div class="page-h"><h2>Eggs</h2><button class="btn primary small" data-act="logeggs">${ic("plus")}Log eggs</button></div>${seg}
+  <div class="bento" style="grid-template-columns:repeat(2,1fr)"><section class="tile warm"><div class="lbl">${ic("egg")}This week</div><div class="big">${sum(range(7),eggsOn)}</div><div class="sub">eggs · ${num(sum(range(7),eggsOn)/7,1)} a day</div></section><section class="tile"><div class="lbl">${ic("alert")}Cracked (30 days)</div><div class="big">${sum(S.eggs.filter(e=>e.date>=addDays(today(),-29)),e=>e.cracked||0)}</div><div class="sub">eggs lost</div></section></div>
+  <section class="card">${dayList.length?`<ul class="list">${dayList.map(e=>`<li><div class="avatar">${ic("egg")}</div><div class="grow"><b>${dlabel(e.date)}</b><div class="small muted">${e.count} egg${e.count===1?"":"s"}${e.cracked?` · ${e.cracked} cracked`:""}</div></div><span class="amt">${e.count}</span><button class="btn small icon" data-act="editegg" data-id="${e.id}" aria-label="Edit egg entry for ${dlabel(e.date)}">${ic("pencil")}</button><button class="btn small icon danger" data-act="delegg" data-id="${e.id}" aria-label="Delete egg entry for ${dlabel(e.date)}">${ic("trash")}</button></li>`).join("")}</ul>`:`<div class="empty">${ic("egg","xl")}<h3>No eggs logged yet</h3><p>Log today’s collection. It takes ten seconds.</p><button class="btn primary" data-act="logeggs">${ic("plus")}Log eggs</button></div>`}</section>`;
+}
+
+
+function care(){
+  const seg=`<div class="segc" role="group" aria-label="Section"><button aria-pressed="${careSub==="daily"}" data-act="caresub" data-id="daily">Daily checks</button><button aria-pressed="${careSub==="feed"}" data-act="caresub" data-id="feed">Feed</button><button aria-pressed="${careSub==="guide"}" data-act="caresub" data-id="guide">Guide</button></div>`;
+  if(careSub==="guide")return careGuide(seg);
+  if(careSub==="feed"){
+    const dl=minDaysLeft(),low=dl!==null&&dl<S.settings.lowFeedDays,cpd=costPerDozen();
+    return `<div class="page-h"><h2>Care</h2><button class="btn primary small" data-act="buy">${ic("bag")}Feed bought</button></div>${seg}
+    ${low?`<div class="warn" role="alert" style="margin:0 0 14px">${ic("alert")}<span><b>Feed is running low.</b> About ${Math.floor(dl)} day${Math.floor(dl)===1?"":"s"} left at the current pace. Time to reorder.</span></div>`:""}
+    ${S.feeds.length?`<div class="bento" style="grid-template-columns:repeat(2,1fr)">${S.feeds.map(f=>{const st=feedStock(f.id),d=daysLeft(f.id),lw=d!==null&&d<S.settings.lowFeedDays;return `<section class="tile ${lw?"alert":"warm"}"><div class="lbl">${ic("grain")}${esc(f.name)}</div><div class="big">${num(Math.max(0,st),1)}<span class="small muted" style="font:500 .9rem var(--body)"> kg</span></div><div class="sub">${d===null?"Log daily feeding to estimate days left":`About ${Math.floor(d)} days left`}</div><div class="meter ${lw?"low":""}"><i style="width:${d===null?0:Math.min(100,d/30*100)}%"></i></div></section>`}).join("")}${cpd?`<section class="tile green"><div class="lbl">${ic("cash")}Feed cost per dozen</div><div class="big">${money(cpd)}</div><div class="sub">last 30 days</div></section>`:""}</div>`:""}
+    <section class="card"><h2>Purchases</h2>${S.purchases.length?`<ul class="list">${[...S.purchases].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,30).map(p=>`<li><div class="avatar">${ic("bag")}</div><div class="grow"><b>${esc(feedName(p.feed))} · ${num(p.kg,1)} kg</b><div class="small muted">${dlabel(p.date)}${p.supplier?" · "+esc(p.supplier):""}${p.organic?` · <span class="pill sky">Organic</span>`:""}${p.cert?" · cert "+esc(p.cert):""}</div></div><div class="end"><div class="amt">${money(p.cost)}</div><div class="small muted">${p.kg>0&&p.cost>0?money(p.cost/p.kg)+"/kg":""}</div></div><button class="btn small icon" data-act="editbuy" data-id="${p.id}" aria-label="Edit this purchase">${ic("pencil")}</button><button class="btn small icon danger" data-act="delbuy" data-id="${p.id}" aria-label="Delete this purchase">${ic("trash")}</button></li>`).join("")}</ul>`:`<div class="empty">${ic("bag","xl")}<h3>No feed recorded</h3><p>Log each bag you buy. With daily feeding ticks, the app estimates how many days are left.</p><button class="btn primary" data-act="buy">${ic("bag")}Log a purchase</button></div>`}</section>`;
+  }
+  const d=careDate,prog=checksProgress(d);
+  return `<div class="page-h"><h2>Care</h2></div>${seg}
+  <div class="row between" style="margin-bottom:12px"><button class="btn small icon" data-act="cdprev" aria-label="Previous day">${ic("left")}</button><div style="text-align:center"><b style="font:700 1.2rem var(--display)">${dlabel(d)}</b><div class="small muted">${prog.done} of ${prog.total} tasks done</div></div><button class="btn small icon" data-act="cdnext" aria-label="Next day" ${d>=today()?"disabled":""}>${ic("chev")}</button></div>
+  ${S.coops.map(co=>{const c=checkOf(d,co.id),n=TASKS.filter(([k])=>taskDone(c,k)).length;return `<section class="card"><div class="row between" style="margin-bottom:10px"><h2 style="margin:0">${esc(co.name)}</h2><span class="pill ${n===TASKS.length?"":"type"}">${n}/${TASKS.length}</span></div>
+    <div class="tasks">${TASKS.map(([k,l,i])=>{const done=taskDone(c,k);return `<div><button class="task" aria-pressed="${done}" data-act="task" data-id="${co.id}|${k}"><span class="tick">${ic("check","sm")}</span><span class="tl">${l}${k==="fed"&&done?`<small>${num(c.fed,1)} kg of ${esc(feedName(c.feed||S.feeds[0]?.id))}</small>`:""}</span>${ic(i)}</button>
+      ${k==="fed"&&done?`<div class="kgbox"><label class="sr" for="kg-${co.id}">Kilograms fed</label><input id="kg-${co.id}" class="t" type="number" inputmode="decimal" step="0.1" min="0" value="${c.fed}" data-fedkg="${co.id}" aria-label="Kilograms fed"><span class="muted">kg</span>${S.feeds.length>1?`<select class="t" data-fedfeed="${co.id}" aria-label="Which feed" style="width:auto">${S.feeds.map(f=>`<option value="${f.id}" ${(c.feed||S.feeds[0].id)===f.id?"selected":""}>${esc(f.name)}</option>`).join("")}</select>`:""}</div>`:""}</div>`}).join("")}</div>
+    <label class="f" for="n-${co.id}">Notes <span class="muted">(optional)</span></label><input id="n-${co.id}" class="t" data-cnote="${co.id}" value="${esc(c.note||"")}" placeholder="Anything unusual today?"></section>`}).join("")}`;
+}
+
+function more(){
+  const row=(i,t,s,a)=>`<li class="tap" data-act="${a}" tabindex="0" role="button"><div class="avatar">${ic(i)}</div><div class="grow"><b>${t}</b><div class="small muted">${s}</div></div>${ic("chev")}</li>`;
+  return `<div class="page-h"><h2>More</h2></div><section class="card"><ul class="list">
+  ${standalone()?"":row("download","Install the app","Add the Flock icon to your home screen","install")}${row("leaf","Health guide",S.guide.length+" conditions · organic treatments & prevention","guide")}${row("users","Customers",S.customers.length+" saved","custs")}${row("sliders","Coop, prices & alerts",`${esc(S.coops[0].name)} · ${money(S.settings.price)} per dozen · feed alert at ${S.settings.lowFeedDays} days`,"prices")}${row("download","Backup & data","Download, restore or export","data")}</ul></section>
+  <p class="hint" style="text-align:center">Your data is saved on this device only. Download a backup now and then.${saveOK?"":" <b style='color:var(--red)'>Storage is full.</b>"}</p>`;
+}
+
+/* ---------- actions ---------- */
+function act(a,id){
+  const A={
+    go:()=>go(id),gofeed:()=>{careSub="feed";go("care")},gosales:()=>{eggSub="sales";go("eggs")},
+    logeggs:()=>eggSheet(),sell:()=>sellSheet(),buy:()=>purchaseSheet(),newhen:()=>henForm(),hen:()=>henDetail(id),
+    hfst:()=>{henFilter.st=id;render()},
+    eggsub:()=>{eggSub=id;render()},caresub:()=>{careSub=id;render()},
+    cdprev:()=>{careDate=addDays(careDate,-1);render()},cdnext:()=>{if(careDate<today()){careDate=addDays(careDate,1);render()}},
+    task:()=>{const[co,k]=id.split("|"),c=checkOf(careDate,co);if(k==="fed"){setCheck(co,{fed:+c.fed>0?0:(c.lastKg||lastKg(co)||1),feed:c.feed||S.feeds[0]?.id})}else setCheck(co,{[k]:!c[k]});render()},
+    paid:()=>{const s=S.sales.find(x=>x.id===id);s.paid=true;save();render();toast("Marked as paid.",()=>{s.paid=false})},
+    delsale:()=>{const i=S.sales.findIndex(s=>s.id===id),[s]=S.sales.splice(i,1);save();render();toast("Sale deleted.",()=>S.sales.splice(i,0,s))},
+    deldayeggs:()=>{const rem=S.eggs.filter(e=>e.date===id);S.eggs=S.eggs.filter(e=>e.date!==id);save();render();toast("Egg entries deleted.",()=>S.eggs.push(...rem))},
+    delbuy:()=>{const i=S.purchases.findIndex(p=>p.id===id),[p]=S.purchases.splice(i,1);save();render();toast("Purchase deleted.",()=>S.purchases.splice(i,0,p))},
+    custs:()=>custSheet(),install:()=>installApp(),updates:()=>go("updates"),newupd:()=>updSheet(),editupd:()=>updSheet(S.updates.find(x=>x.id===id)),shareupd:()=>sendUpdate(id),
+    delupd:()=>{const u=S.updates.find(x=>x.id===id);confirmSheet("Delete this update?","The message and its photo or video are removed from this device.","Delete update",()=>{S.updates=S.updates.filter(x=>x.id!==id);if(u.media){mDel(u.media).catch(()=>{});dropMedia(u.media)}save();render();toast("Update deleted.")})},guide:()=>openGuide(),gcat:()=>{guideCat=id;render()},gclear:()=>{guideQ="";guideCat="all";render()},newguide:()=>guideForm(),editguide:()=>guideForm(S.guide.find(g=>g.id===id)),
+    logguide:()=>healthSheet(null,null,S.guide.find(g=>g.id===id).name+": "),
+    delguide:()=>{const g=S.guide.find(x=>x.id===id);confirmSheet("Delete "+g.name+"?","This removes the entry from your guide. You can restore the defaults later.","Delete entry",()=>{const i=S.guide.findIndex(x=>x.id===id),[r]=S.guide.splice(i,1);save();render();toast("Entry deleted.",()=>S.guide.splice(i,0,r))})},
+    resetguide:()=>confirmSheet("Restore the default guide?","Built-in entries return to their original text. Entries you added yourself are kept.","Restore",()=>{const mine=S.guide.filter(g=>g.custom);S.guide=[...structuredClone(GUIDE_DEFAULT),...mine];save();render();toast("Default guide restored.")}),
+    editegg:()=>eggSheet(S.eggs.find(e=>e.id===id)),editsale:()=>sellSheet(null,S.sales.find(x=>x.id===id)),editbuy:()=>purchaseSheet(S.purchases.find(x=>x.id===id)),
+    edithealth:()=>healthSheet(null,S.health.find(x=>x.id===id)),
+    delhealth:()=>{const i=S.health.findIndex(x=>x.id===id),[r]=S.health.splice(i,1);save();render();toast("Health note deleted.",()=>S.health.splice(i,0,r))},
+    delegg:()=>{const i=S.eggs.findIndex(x=>x.id===id),[r]=S.eggs.splice(i,1);save();render();toast("Egg entry deleted.",()=>S.eggs.splice(i,0,r))},prices:()=>pricesSheet(),data:()=>dataSheet(),sample:()=>sample()
+  };A[a]?.();
+}
+function lastKg(co){for(const d of Object.keys(S.checks).sort().reverse()){const c=S.checks[d][co];if(c?.fed>0)return c.fed}return 0}
+function setCheck(co,patch){S.checks[careDate]=S.checks[careDate]||{};S.checks[careDate][co]={...S.checks[careDate][co],...patch};save()}
+function setFed(co,v){const kg=Math.max(0,parseFloat(v)||0);setCheck(co,{fed:kg});render()}
+
+/* ---------- sheets ---------- */
+function eggSheet(rec){
+  const m={date:rec?.date||today(),coop:S.coops[0].id,count:rec?.count||0,cracked:rec?.cracked||0,tried:false};
+  sheet(rec?"Edit egg entry":"Log eggs",`<form id="f" novalidate></form>`,(sh,close)=>{
+    const f=sh.querySelector("#f");
+    const keep=()=>{const g=id=>f.querySelector(id);if(g("#dt"))m.date=g("#dt").value||today();if(g("#eg"))m.count=Math.max(0,parseInt(g("#eg").value)||0);if(g("#br"))m.cracked=Math.max(0,Math.min(m.count,parseInt(g("#br").value)||0))};
+    const draw=()=>{
+      const hold=heldHens();
+      redraw(sh,f,`
+      <label class="f" for="eg">Eggs collected from the flock</label>
+      <div class="stepper"><button type="button" data-f="em" data-e="-1" aria-label="One less">${ic("minus","lg")}</button><input id="eg" inputmode="numeric" value="${m.count}" ${m.tried&&m.count<=0?'aria-invalid="true" aria-describedby="e-eg"':""}><button type="button" data-f="ep" data-e="1" aria-label="One more">${ic("plus","lg")}</button></div>
+      <div class="chips" style="justify-content:center;margin-top:10px"><button type="button" class="chip" data-f="e6" data-e="6">+6</button><button type="button" class="chip" data-f="e12" data-e="12">+1 dozen</button><button type="button" class="chip" data-f="e30" data-e="30">+30 tray</button><button type="button" class="chip" data-f="e0" data-e="0">Clear</button></div>
+      <p class="hint" style="text-align:center">${dz(m.count)}</p>
+      ${m.tried&&m.count<=0?`<p class="err" id="e-eg" role="alert" style="justify-content:center">${ic("alert")}Enter how many eggs you collected.</p>`:""}
+      ${hold.size?`<div class="warn" role="alert">${ic("alert")}<span><b>${[...hold.keys()].map(i=>esc(hen(i).name)).join(", ")}</b> ${hold.size===1?"is":"are"} on a treatment hold. Eggs are collected together, so keep ${hold.size===1?"her":"them"} in a separate pen, or hold today’s eggs.</span></div>`:""}
+      <label class="f" for="br">Cracked or unsellable</label>
+      <div class="stepper"><button type="button" data-f="bm" data-b="-1" aria-label="One less cracked">${ic("minus","lg")}</button><input id="br" inputmode="numeric" value="${m.cracked}" style="font-size:1.6rem"><button type="button" data-f="bp" data-b="1" aria-label="One more cracked">${ic("plus","lg")}</button></div>
+      <label class="f" for="dt">Date</label><input id="dt" class="t" type="date" value="${m.date}" max="${today()}">
+      <div class="foot"><button class="btn primary block" id="go" style="font-size:1.1rem">${rec?"Save changes":`Add ${Math.max(0,m.count-m.cracked)} sellable eggs`}</button></div>`);
+      f.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{keep();const v=+b.dataset.e;m.count=v===0?0:Math.max(0,m.count+v);m.cracked=Math.min(m.cracked,m.count);draw()});
+      f.querySelectorAll("[data-b]").forEach(b=>b.onclick=()=>{keep();m.cracked=Math.max(0,Math.min(m.count,m.cracked+ +b.dataset.b));draw()});
+      f.querySelector("#eg").onchange=()=>{keep();draw()};f.querySelector("#br").onchange=()=>{keep();draw()};
+    };
+    f.onsubmit=e=>{e.preventDefault();keep();if(m.count<=0){m.tried=true;draw();f.querySelector("#eg").focus();return}
+      if(rec){Object.assign(rec,{date:m.date,count:m.count,cracked:m.cracked});save();close();render();toast("Entry updated.");return}
+      const r={id:uid(),date:m.date,coop:m.coop,count:m.count,cracked:m.cracked};S.eggs.push(r);save();close();render();toast(`Logged ${m.count} eggs (${m.count-m.cracked} sellable).`,()=>S.eggs.splice(S.eggs.indexOf(r),1))};
+    draw();
+  });
+}
+
+function sellSheet(pre,rec){
+  const m={cust:rec?rec.cust:pre||null,doz:rec?Math.round(rec.eggs/12*100)/100:1,price:rec?rec.price:null,paid:rec?rec.paid:true,date:rec?.date||today()};
+  const priceFor=()=>cust(m.cust)?.type==="restaurant"?S.settings.priceRest:S.settings.price;
+  sheet(rec?"Edit sale":"Sell eggs",`<form id="f" novalidate></form>`,(sh,close)=>{
+    const f=sh.querySelector("#f");
+    const draw=()=>{
+      const price=m.price??priceFor(),tot=m.doz*price,short=!rec&&m.doz*12>stock(),hold=heldHens();
+      redraw(sh,f,`
+      <label class="f">Who is buying?</label>
+      <div class="chips" role="group" aria-label="Customer"><button type="button" class="chip" data-f="c-" data-c="" aria-pressed="${!m.cust}">${ic("user")}Walk-in</button>${S.customers.slice(0,8).map(c=>`<button type="button" class="chip" data-f="c-${c.id}" data-c="${c.id}" aria-pressed="${m.cust===c.id}">${ic(c.type==="restaurant"?"utensils":"user")}${esc(c.name)}</button>`).join("")}<button type="button" class="chip" data-new>${ic("plus")}New</button></div>
+      <label class="f" for="doz">How many dozen?</label>
+      <div class="stepper"><button type="button" data-f="dm" data-d="-0.5" aria-label="Half a dozen less">${ic("minus","lg")}</button><input id="doz" inputmode="decimal" value="${m.doz}"><button type="button" data-f="dp" data-d="0.5" aria-label="Half a dozen more">${ic("plus","lg")}</button></div>
+      <div class="chips" style="justify-content:center;margin-top:10px">${[1,2,5,10].map(n=>`<button type="button" class="chip" data-f="q${n}" data-q="${n}" aria-pressed="${m.doz===n}">${n}</button>`).join("")}</div>
+      <p class="hint" style="text-align:center">${Math.round(m.doz*12)} eggs · ${Math.max(0,stock())} in stock</p>
+      ${short?`<div class="warn" role="alert">${ic("alert")}<span>You only have ${dz(Math.max(0,stock()))} in stock. You can still record this sale.</span></div>`:""}
+      ${hold.size?`<div class="warn" role="alert">${ic("alert")}<span><b>${[...hold.keys()].map(i=>esc(hen(i).name)).join(", ")}</b> ${hold.size===1?"is":"are"} on a treatment hold. Eggs are collected together, so make sure the treated hen was kept apart, or hold these eggs.</span></div>`:""}
+      <label class="f" for="pz">Price per dozen (R)</label><input id="pz" class="t" type="number" inputmode="decimal" step="1" min="0" value="${price}">
+      <div class="total"><span>Total</span><b>${money(tot)}</b></div>
+      <div class="segc" style="margin:0" role="group" aria-label="Payment"><button type="button" data-f="p1" data-p="1" aria-pressed="${m.paid}">Paid now</button><button type="button" data-f="p0" data-p="0" aria-pressed="${!m.paid}">Pay later</button></div>
+      <label class="f" for="sd">Date</label><input id="sd" class="t" type="date" value="${m.date}" max="${today()}">
+      <div class="foot"><button class="btn primary block" id="go" style="font-size:1.1rem">${rec?"Save changes":"Record sale"} · ${money(tot)}</button></div>`);
+      f.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{m.date=f.querySelector("#sd").value||m.date;m.cust=b.dataset.c||null;m.price=null;if(!rec&&cust(m.cust)?.type==="restaurant")m.paid=false;draw()});
+      f.querySelector("[data-new]").onclick=()=>{close();custForm(id=>sellSheet(id))};
+      f.querySelectorAll("[data-d]").forEach(b=>b.onclick=()=>{m.date=f.querySelector("#sd").value||m.date;m.doz=Math.max(0.5,m.doz+ +b.dataset.d);draw()});
+      f.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{m.date=f.querySelector("#sd").value||m.date;m.doz=+b.dataset.q;draw()});
+      f.querySelector("#doz").onchange=e=>{m.doz=Math.max(0.5,Math.round((parseFloat(e.target.value)||1)*2)/2);draw()};
+      f.querySelector("#pz").onchange=e=>{m.price=parseFloat(e.target.value)||0;draw()};
+      f.querySelector("#sd").onchange=e=>m.date=e.target.value||today();
+      f.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{m.date=f.querySelector("#sd").value||m.date;m.paid=b.dataset.p==="1";draw()});
+    };
+    f.onsubmit=e=>{e.preventDefault();const dv=parseFloat(f.querySelector("#doz").value);if(dv>0)m.doz=dv;const pv=parseFloat(f.querySelector("#pz").value);m.date=f.querySelector("#sd").value||today();
+      const vals={date:m.date,cust:m.cust,eggs:Math.round(m.doz*12),price:isNaN(pv)?priceFor():pv,paid:m.paid};
+      if(rec){Object.assign(rec,vals);save();close();render();toast("Sale updated.");return}
+      const s={id:uid(),...vals};S.sales.push(s);save();close();render();toast(`Sold ${dz(s.eggs)} · ${money(saleTotal(s))}`,()=>S.sales.splice(S.sales.indexOf(s),1))};
+    draw();
+  });
+}
+
+
+function custForm(after,rec){
+  const m={type:rec?.type||"individual"};
+  sheet(rec?"Edit customer":"New customer",`<form id="f" novalidate>
+    <label class="f">Type</label><div class="segc" style="margin:0" role="group" aria-label="Customer type"><button type="button" data-t="individual" aria-pressed="${m.type==="individual"}">Individual</button><button type="button" data-t="restaurant" aria-pressed="${m.type==="restaurant"}">Restaurant</button></div>
+    <label class="f" for="nm">Name</label><input id="nm" data-autofocus class="t" autocomplete="off" placeholder="e.g. Mrs. Naidoo, Blue Door Café" value="${esc(rec?.name||"")}" aria-describedby="e-nm"><p class="err" id="e-nm" role="alert" hidden>${ic("alert")}Please enter a name.</p>
+    <label class="f" for="ph">Phone <span class="muted">(optional)</span></label><input id="ph" class="t" type="tel" inputmode="tel" autocomplete="off" value="${esc(rec?.phone||"")}">
+    <div class="foot"><button class="btn primary block">Save customer</button></div></form>`,(sh,close)=>{
+    sh.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{m.type=b.dataset.t;sh.querySelectorAll("[data-t]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+    sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const nm=sh.querySelector("#nm"),name=nm.value.trim();if(!name){nm.setAttribute("aria-invalid","true");sh.querySelector("#e-nm").hidden=false;nm.focus();return}
+      const vals={type:m.type,name,phone:sh.querySelector("#ph").value.trim()};
+      if(rec){Object.assign(rec,vals);save();close();render();after?.(rec.id);toast("Customer updated.");return}
+      const c={id:uid(),...vals};S.customers.push(c);save();close();render();after?.(c.id)};
+  });
+}
+function custSheet(){
+  sheet("Customers",`<ul class="list" style="margin:8px 0 14px">${S.customers.map(c=>`<li><div class="avatar ${c.type==="restaurant"?"green":""}">${ic(c.type==="restaurant"?"utensils":"user")}</div><div class="grow"><b>${esc(c.name)}</b><div class="small muted">${c.type==="restaurant"?"Restaurant":"Individual"}${c.phone?" · "+esc(c.phone):""}</div></div><button class="btn small icon" data-edit="${c.id}" aria-label="Edit ${esc(c.name)}">${ic("pencil")}</button><button class="btn small icon danger" data-del="${c.id}" aria-label="Delete ${esc(c.name)}">${ic("trash")}</button></li>`).join("")||`<li class="muted">No customers yet.</li>`}</ul><button class="btn primary block" id="add">${ic("plus")}Add customer</button>`,(sh,close)=>{
+    sh.querySelector("#add").onclick=()=>{close();custForm(()=>custSheet())};
+    sh.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>{const c=cust(b.dataset.edit);close();custForm(()=>custSheet(),c)});
+    sh.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const id=b.dataset.del,c=cust(id);close();confirmSheet(`Delete ${c.name}?`,"Their past sales stay in your records as walk-in sales.","Delete customer",()=>{S.sales.forEach(s=>{if(s.cust===id)s.cust=null});S.customers=S.customers.filter(x=>x.id!==id);save();render();toast("Customer deleted.")})});
+  });
+}
+
+
+function resizePhoto(file,max=360){return new Promise(res=>{const img=new Image(),u=URL.createObjectURL(file);img.onload=()=>{const k=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext("2d").drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",.78))};img.onerror=()=>res(null);img.src=u})}
+const BREEDS=["Rhode Island Red","Sussex","Leghorn","Orpington","Plymouth Rock","Australorp","Boschveld","Koekoek","Bantam","Mixed breed"];
+function henForm(h){
+  const m={name:h?.name||"",breed:h?.breed||"",coop:h?.coop||S.coops[0].id,born:h?.born||"",note:h?.note||"",photo:h?.photo||null,err:""};
+  sheet(h?`Edit ${h.name}`:"Add a hen",`<form id="f" novalidate></form>`,(sh,close)=>{
+    const f=sh.querySelector("#f"),keep=()=>{const g=i=>f.querySelector(i);m.name=g("#hn").value;m.breed=g("#hb").value;m.born=g("#ha").value;m.note=g("#hnote").value};
+    const draw=()=>{
+      redraw(sh,f,`
+      <div class="row" style="margin:10px 0 0"><div class="avatar" style="width:72px;height:72px;font-size:1.6rem">${m.photo?`<img src="${m.photo}" alt="Photo">`:m.name?esc(m.name[0].toUpperCase()):ic("bird","lg")}</div><div><input id="hfl" type="file" accept="image/*" hidden><button type="button" class="btn small" id="hpick">${ic("image")}${m.photo?"Change photo":"Add photo"}</button>${m.photo?`<button type="button" class="btn small danger" id="hrm" style="margin-left:6px">Remove</button>`:""}</div></div>
+      <label class="f" for="hn">Name</label><input id="hn" data-autofocus class="t" maxlength="40" placeholder="e.g. Henrietta" value="${esc(m.name)}" autocomplete="off" ${m.err?'aria-invalid="true" aria-describedby="e-hn"':""}>${m.err?`<p class="err" id="e-hn" role="alert">${ic("alert")}${m.err}</p>`:""}
+      <label class="f" for="hb">Breed <span class="muted">(optional)</span></label><input id="hb" class="t" list="bl" maxlength="40" value="${esc(m.breed)}" autocomplete="off"><datalist id="bl">${BREEDS.map(b=>`<option value="${b}">`).join("")}</datalist>
+      <label class="f" for="ha">Hatched or arrived <span class="muted">(optional)</span></label><input id="ha" class="t" type="date" value="${m.born}" max="${today()}">
+      <label class="f" for="hnote">Notes <span class="muted">(optional)</span></label><textarea id="hnote" class="t" rows="2" maxlength="300" placeholder="Personality, markings…">${esc(m.note)}</textarea>
+      <div class="foot"><button class="btn primary block" id="go">${h?"Save changes":"Add hen"}</button></div>`);
+      f.querySelector("#hpick").onclick=()=>f.querySelector("#hfl").click();
+      f.querySelector("#hfl").onchange=async e=>{keep();const file=e.target.files[0];if(!file)return;m.photo=await resizePhoto(file);draw()};
+      f.querySelector("#hrm")?.addEventListener("click",()=>{keep();m.photo=null;draw()});
+    };
+    f.onsubmit=e=>{e.preventDefault();keep();if(!m.name.trim()){m.err="Please give her a name.";draw();f.querySelector("#hn").focus();return}
+      const rec={name:m.name.trim(),breed:m.breed.trim(),coop:m.coop,born:m.born,note:m.note.trim(),photo:m.photo};
+      if(h)Object.assign(h,rec);else S.hens.push({id:uid(),status:"healthy",...rec});save();close();render();toast(h?"Hen updated.":`${rec.name} joined the flock.`)};
+    draw();
+  });
+}
+const HTYPES=[["checkup","Check-up"],["illness","Illness"],["injury","Injury"],["treatment","Treatment"],["note","Note"]];
+const STATUSES=[["healthy","Healthy"],["watch","Watch"],["unwell","Unwell"],["broody","Broody"],["moulting","Moulting"],["retired","Retired"],["deceased","Passed away"]];
+function ageText(b){if(!b)return "";const mo=Math.max(0,Math.round((Date.now()-new Date(b+"T12:00"))/2.63e9));return mo<12?mo+" months old":(mo/12).toFixed(1).replace(".0","")+" years old"}
+function henDetail(id){
+  const h=hen(id);if(!h)return;
+  const logs=S.health.filter(x=>x.hen===id).sort((a,b)=>b.date.localeCompare(a.date)||0);
+  sheet(h.name,`<div class="row" style="margin:8px 0 12px">${avatarHtml(h).replace('class="avatar','class="avatar" style="width:72px;height:72px;font-size:1.6rem" data-x="')}<div class="grow">${statusPill(h.status)}<div class="small muted" style="margin-top:4px">${esc(h.breed||"Breed not set")}${h.born?" · "+ageText(h.born):""}</div></div></div>
+    ${h.note?`<p class="muted small" style="margin:0 0 10px">${esc(h.note)}</p>`:""}
+        <label class="f">Status</label><div class="chips" role="group" aria-label="Status">${STATUSES.map(([k,l])=>`<button class="chip" data-f="s-${k}" data-st="${k}" aria-pressed="${h.status===k}">${l}</button>`).join("")}</div>
+    <h3 style="margin:20px 0 4px;font-size:1.15rem">Health log</h3>
+    ${logs.length?`<ul class="list">${logs.slice(0,12).map(x=>`<li><div class="grow"><span class="pill ${x.type==="illness"||x.type==="injury"?"unwell":x.type==="treatment"?"watch":"sky"}">${esc(HTYPES.find(t=>t[0]===x.type)?.[1]||"Note")}</span> <span class="small muted">${dlabel(x.date)}</span><div>${esc(x.text)}</div>${x.product?`<div class="small muted">Used: ${esc(x.product)}</div>`:""}${x.holdUntil?`<div class="small" style="color:var(--amber)">Eggs on hold until ${new Date(x.holdUntil+"T12:00").toLocaleDateString("en-ZA",{day:"numeric",month:"short"})}</div>`:""}</div><button class="btn small icon" data-edit="${x.id}" aria-label="Edit this note">${ic("pencil")}</button><button class="btn small icon danger" data-delh="${x.id}" aria-label="Delete this note">${ic("trash")}</button></li>`).join("")}</ul>`:`<p class="muted small">No health notes yet.</p>`}
+    <div class="row wr" style="margin-top:14px"><button class="btn primary grow" id="addh">${ic("plus")}Add health note</button><button class="btn" id="hguide">${ic("book")}Guide</button><button class="btn" id="edit">${ic("pencil")}Edit</button><button class="btn danger" id="del" aria-label="Delete ${esc(h.name)}">${ic("trash")}</button></div>`,(sh,close)=>{
+    sh.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{h.status=b.dataset.st;save();sh.querySelectorAll("[data-st]").forEach(x=>x.setAttribute("aria-pressed",x===b));render();toast(`${h.name} is now ${STATUSES.find(s=>s[0]===h.status)[1].toLowerCase()}.`)});
+    sh.querySelector("#addh").onclick=()=>{close();healthSheet(id)};
+    sh.querySelector("#hguide").onclick=()=>{close();openGuide()};
+    sh.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>{close();healthSheet(null,S.health.find(x=>x.id===b.dataset.edit))});
+    sh.querySelectorAll("[data-delh]").forEach(b=>b.onclick=()=>{const hid=b.dataset.delh,i=S.health.findIndex(x=>x.id===hid),[r]=S.health.splice(i,1);save();close();render();toast("Health note deleted.",()=>S.health.splice(i,0,r))});
+    sh.querySelector("#edit").onclick=()=>{close();henForm(h)};
+    sh.querySelector("#del").onclick=()=>{close();confirmSheet(`Delete ${h.name}?`,"Her profile and health log are removed. Egg totals stay.","Delete hen",()=>{S.hens=S.hens.filter(x=>x.id!==id);S.health=S.health.filter(x=>x.hen!==id);save();render();toast(`${h.name} deleted.`)})};
+  });
+}
+function healthSheet(pre,rec,prefill){
+  if(!S.hens.length){toast("Add a hen first.");return henForm()}
+  const m={hen:rec?.hen||pre||S.hens[0].id,type:rec?.type||"checkup",text:rec?.text||prefill||"",date:rec?.date||today(),product:rec?.product||"",hold:rec?.hold||0,err:""};
+  sheet(rec?"Edit health note":"Health note",`<form id="f" novalidate></form>`,(sh,close)=>{
+    const f=sh.querySelector("#f"),keep=()=>{const g=i=>f.querySelector(i);m.text=g("#tx").value;m.date=g("#dt").value||today();if(g("#pr"))m.product=g("#pr").value;if(g("#hd"))m.hold=Math.max(0,parseInt(g("#hd").value)||0);m.hen=g("#hs").value};
+    const draw=()=>{redraw(sh,f,`
+      <label class="f" for="hs">Which hen?</label><select id="hs" class="t">${S.hens.map(h=>`<option value="${h.id}" ${m.hen===h.id?"selected":""}>${esc(h.name)}</option>`).join("")}</select>
+      <label class="f">What kind of note?</label><div class="chips" role="group" aria-label="Type">${HTYPES.map(([k,l])=>`<button type="button" class="chip" data-f="t-${k}" data-ty="${k}" aria-pressed="${m.type===k}">${l}</button>`).join("")}</div>
+      <label class="f" for="tx">What did you see or do?</label><textarea id="tx" data-autofocus class="t" rows="3" maxlength="400" placeholder="e.g. Limping on left foot, isolated in the small pen" ${m.err?'aria-invalid="true" aria-describedby="e-tx"':""}>${esc(m.text)}</textarea>${m.err?`<p class="err" id="e-tx" role="alert">${ic("alert")}${m.err}</p>`:""}
+      <button type="button" class="btn small" id="gl" style="margin-top:8px">${ic("book")}Look up in the health guide</button>
+      ${m.type==="treatment"?`<label class="f" for="pr">Product or remedy used <span class="muted">(optional)</span></label><input id="pr" class="t" value="${esc(m.product)}" autocomplete="off" placeholder="e.g. Diatomaceous earth, electrolytes">
+      <label class="f" for="hd">How many days should eggs be held back?</label><input id="hd" class="t" type="number" inputmode="numeric" min="0" max="60" value="${m.hold}"><p class="hint">Enter the withdrawal period from your vet or label. Use 0 if there isn’t one. The app reminds you until it ends. Since eggs are collected together, keep the treated hen in a separate pen if you can.</p>`:""}
+      <label class="f" for="dt">Date</label><input id="dt" class="t" type="date" value="${m.date}" max="${today()}">
+      <div class="foot"><button class="btn primary block" id="go">${rec?"Save changes":"Save note"}</button></div>`);
+      f.querySelector("#hs").onchange=()=>keep();
+      f.querySelector("#gl").onclick=()=>{keep();close();openGuide(m.text.length<40?m.text:"")};
+      f.querySelectorAll("[data-ty]").forEach(b=>b.onclick=()=>{keep();m.type=b.dataset.ty;draw()});};
+    f.onsubmit=e=>{e.preventDefault();keep();if(!m.text.trim()){m.err="Please describe what happened.";draw();f.querySelector("#tx").focus();return}
+      const vals={hen:m.hen,type:m.type,text:m.text.trim(),date:m.date,product:m.type==="treatment"?m.product.trim():"",hold:m.type==="treatment"?m.hold:0,holdUntil:m.type==="treatment"&&m.hold>0?addDays(m.date,m.hold):null};
+      if(rec){Object.assign(rec,vals);save();close();render();toast("Health note updated.");return}
+      S.health.push({id:uid(),...vals});const h=hen(m.hen);let extra="";
+      if((m.type==="illness"||m.type==="injury")&&h.status==="healthy"){h.status="unwell";extra=` ${h.name} is now marked unwell.`}
+      if(vals.holdUntil)extra+=` Her eggs are on hold until ${new Date(vals.holdUntil+"T12:00").toLocaleDateString("en-ZA",{day:"numeric",month:"short"})}.`;
+      save();close();render();toast("Health note saved."+extra)};
+    draw();
+  });
+}
+
+
+function purchaseSheet(rec){
+  const m={feed:rec?.feed??(S.feeds[0]?.id||""),newFeed:S.feeds.length?"":"Layer pellets",date:rec?.date||today(),kg:rec?.kg??25,cost:rec?.cost??"",supplier:rec?.supplier||"",organic:rec?rec.organic:true,cert:rec?.cert||"",err:""};
+  sheet(rec?"Edit purchase":"Feed bought",`<form id="f" novalidate></form>`,(sh,close)=>{
+    const f=sh.querySelector("#f"),keep=()=>{const g=i=>f.querySelector(i);m.date=g("#dt").value||today();m.kg=parseFloat(g("#kg").value)||0;m.cost=g("#co").value;m.supplier=g("#su").value;m.cert=g("#ce").value;m.organic=g("#or").checked;if(g("#nf"))m.newFeed=g("#nf").value};
+    const draw=()=>{redraw(sh,f,`
+      <label class="f">Which feed?</label><div class="chips" role="group" aria-label="Feed">${S.feeds.map(x=>`<button type="button" class="chip" data-f="fd-${x.id}" data-fd="${x.id}" aria-pressed="${m.feed===x.id}">${esc(x.name)}</button>`).join("")}<button type="button" class="chip" data-fd="" aria-pressed="${!m.feed}" data-f="fd-new">${ic("plus")}New feed</button></div>
+      ${!m.feed?`<label class="f" for="nf">Feed name</label><input id="nf" data-autofocus class="t" placeholder="e.g. Organic layer pellets" value="${esc(m.newFeed)}" ${m.err?'aria-invalid="true" aria-describedby="e-nf"':""}>${m.err?`<p class="err" id="e-nf" role="alert">${ic("alert")}${m.err}</p>`:""}`:""}
+      <div class="row wr"><div class="grow"><label class="f" for="kg">Amount (kg)</label><input id="kg" class="t" type="number" inputmode="decimal" step="0.5" min="0" value="${m.kg}"></div><div class="grow"><label class="f" for="co">Total cost (R)</label><input id="co" class="t" type="number" inputmode="decimal" step="1" min="0" value="${m.cost}" placeholder="0"></div></div>
+      <label class="f" for="su">Supplier <span class="muted">(optional)</span></label><input id="su" class="t" value="${esc(m.supplier)}" autocomplete="off">
+      <label class="row" style="cursor:pointer;min-height:44px;margin-top:12px"><input id="or" type="checkbox" ${m.organic?"checked":""} style="width:22px;height:22px;accent-color:var(--accent)"><b>Certified organic</b></label>
+      <label class="f" for="ce">Certificate or batch number <span class="muted">(optional)</span></label><input id="ce" class="t" value="${esc(m.cert)}" autocomplete="off">
+      <label class="f" for="dt">Date</label><input id="dt" class="t" type="date" value="${m.date}" max="${today()}">
+      <div class="foot"><button class="btn primary block" id="go">${rec?"Save changes":"Save purchase"}</button></div>`);
+      f.querySelectorAll("[data-fd]").forEach(b=>b.onclick=()=>{keep();m.feed=b.dataset.fd;draw()});};
+    f.onsubmit=e=>{e.preventDefault();keep();let feed=m.feed;
+      if(!feed){if(!m.newFeed.trim()){m.err="Please name this feed.";draw();f.querySelector("#nf").focus();return}feed=uid();S.feeds.push({id:feed,name:m.newFeed.trim()})}
+      if(!(m.kg>0)){toast("Enter how many kilograms you bought.");return}
+      const vals={date:m.date,feed,kg:m.kg,cost:parseFloat(m.cost)||0,supplier:m.supplier.trim(),organic:m.organic,cert:m.cert.trim()};
+      if(rec){Object.assign(rec,vals);save();close();render();toast("Purchase updated.");return}
+      S.purchases.push({id:uid(),...vals});save();close();render();toast(`Added ${num(m.kg,1)} kg to feed stock.`)};
+    draw();
+  });
+}
+
+
+/* ---------- health guide (editable reference) ---------- */
+let guideQ="",guideCat="all",guideOpen=new Set();
+const URG={routine:["Routine","sky"],soon:["Act soon","watch"],urgent:["Act quickly","unwell"]};
+function openGuide(q="",open){careSub="guide";guideQ=q;guideCat="all";if(open)guideOpen.add(open);go("care")}
+function careGuide(seg){
+  const q=guideQ.trim().toLowerCase(),cats=["all",...new Set(S.guide.map(g=>g.cat))];
+  const list=S.guide.filter(g=>(guideCat==="all"||g.cat===guideCat)&&(!q||[g.name,g.cat,...g.signs,...g.organic,...g.prevent,...g.vet,g.note||""].join(" ").toLowerCase().includes(q)));
+  const sec=(t,i,arr,cls="")=>arr?.length?`<h4 class="gh">${ic(i)}${t}</h4><ul class="gl ${cls}">${arr.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:"";
+  return `<div class="page-h"><h2>Care</h2><button class="btn primary small" data-act="newguide">${ic("plus")}Add</button></div>${seg}
+  <div class="note-card">${ic("leaf")}<span>General guidance for small and school flocks. It doesn’t replace a vet. What is allowed differs between organic certifiers, so check before using any product on certified birds.</span></div>
+  <label class="sr" for="gsearch">Search the health guide</label><input id="gsearch" class="t" type="search" placeholder="Search a sign or condition, e.g. limping" value="${esc(guideQ)}" style="margin-bottom:10px">
+  <div class="chips scroll" role="group" aria-label="Category" style="margin-bottom:10px">${cats.map(c=>`<button class="chip" aria-pressed="${guideCat===c}" data-act="gcat" data-id="${esc(c)}">${c==="all"?"All":esc(c)}</button>`).join("")}</div>
+  ${guideCat!=="all"||q?`<p class="hint" role="status" style="margin:0 0 10px">Showing ${list.length} of ${S.guide.length}${guideCat!=="all"?" in <b>"+esc(guideCat)+"</b>":""}${q?` matching “${esc(guideQ.trim())}”`:""} · <button class="linkbtn" data-act="gclear">Clear filters</button></p>`:""}
+  ${list.length?list.map(g=>`<details class="gd ${g.urgency}" data-gid="${g.id}" ${guideOpen.has(g.id)?"open":""}><summary><span class="gname">${esc(g.name)}</span><span class="pill ${URG[g.urgency]?.[1]||"sky"}">${URG[g.urgency]?.[0]||"Routine"}</span><span class="small muted">${esc(g.cat)}</span>${ic("chev","chv")}</summary>
+    <div class="gbody">${sec("What you might see","eye",g.signs)}${sec("Organic options","leaf",g.organic)}${sec("Prevention","shield",g.prevent)}${sec("Call a vet when","alert",g.vet,"vet")}${g.note?`<p class="small muted">${esc(g.note)}</p>`:""}
+    <div class="row wr" style="margin-top:14px"><button class="btn small primary" data-act="logguide" data-id="${g.id}">${ic("pulse")}Log a health note</button><button class="btn small" data-act="editguide" data-id="${g.id}">${ic("pencil")}Edit</button><button class="btn small danger" data-act="delguide" data-id="${g.id}" aria-label="Delete ${esc(g.name)}">${ic("trash")}</button></div></div></details>`).join("")
+  :`<div class="card empty">${ic("leaf","xl")}<h3>Nothing found</h3><p>Try a different word, or add your own entry.</p><button class="btn primary" data-act="newguide">${ic("plus")}Add an entry</button></div>`}
+  <p style="text-align:center;margin-top:10px"><button class="btn small" data-act="resetguide">Restore the default guide</button></p>`;
+}
+function guideForm(g){
+  const m=g?{...g}:{id:uid(),custom:true,cat:"General care",urgency:"routine",name:"",signs:[],organic:[],prevent:[],vet:[],note:""};
+  const lines=a=>(a||[]).join("\n");
+  sheet(g?`Edit ${g.name}`:"Add to the health guide",`<form id="f" novalidate>
+    <label class="f" for="gn">Name</label><input id="gn" data-autofocus class="t" maxlength="80" value="${esc(m.name)}" placeholder="e.g. Egg eating" aria-describedby="e-gn"><p class="err" id="e-gn" role="alert" hidden>${ic("alert")}Please enter a name.</p>
+    <label class="f" for="gc">Category</label><input id="gc" class="t" list="gcl" maxlength="40" value="${esc(m.cat)}"><datalist id="gcl">${[...new Set(S.guide.map(x=>x.cat))].map(c=>`<option value="${esc(c)}">`).join("")}</datalist>
+    <label class="f">How urgent is it?</label><div class="segc" style="margin:0" role="group" aria-label="Urgency">${Object.entries(URG).map(([k,[l]])=>`<button type="button" data-u="${k}" aria-pressed="${m.urgency===k}">${l}</button>`).join("")}</div>
+    <p class="hint">Write one point per line in each box below.</p>
+    <label class="f" for="gs">What you might see</label><textarea id="gs" class="t" rows="3">${esc(lines(m.signs))}</textarea>
+    <label class="f" for="go2">Organic options</label><textarea id="go2" class="t" rows="4">${esc(lines(m.organic))}</textarea>
+    <label class="f" for="gp">Prevention</label><textarea id="gp" class="t" rows="3">${esc(lines(m.prevent))}</textarea>
+    <label class="f" for="gv">Call a vet when</label><textarea id="gv" class="t" rows="2">${esc(lines(m.vet))}</textarea>
+    <label class="f" for="gt">Extra note <span class="muted">(optional)</span></label><input id="gt" class="t" value="${esc(m.note||"")}">
+    <div class="foot"><button class="btn primary block">Save</button></div></form>`,(sh,close)=>{
+    sh.querySelectorAll("[data-u]").forEach(b=>b.onclick=()=>{m.urgency=b.dataset.u;sh.querySelectorAll("[data-u]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+    sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const nm=sh.querySelector("#gn");if(!nm.value.trim()){nm.setAttribute("aria-invalid","true");sh.querySelector("#e-gn").hidden=false;nm.focus();return}
+      const arr=id=>sh.querySelector(id).value.split("\n").map(x=>x.trim()).filter(Boolean);
+      Object.assign(m,{name:nm.value.trim(),cat:sh.querySelector("#gc").value.trim()||"General care",signs:arr("#gs"),organic:arr("#go2"),prevent:arr("#gp"),vet:arr("#gv"),note:sh.querySelector("#gt").value.trim()});
+      if(g)Object.assign(g,m);else S.guide.push(m);guideOpen.add(m.id);save();close();render();toast(g?"Guide entry updated.":"Added to the guide.")};
+  });
+}
+function holdBanner(){
+  const hm=heldHens();if(!hm.size)return "";
+  return `<div class="warn" role="status" style="margin:0 0 14px">${ic("alert")}<span><b>Treatment hold:</b> ${[...hm].map(([id,u])=>`${esc(hen(id).name)} until ${new Date(u+"T12:00").toLocaleDateString("en-ZA",{day:"numeric",month:"short"})}`).join(", ")}. Eggs are collected together, so keep the treated hen in a separate pen, or hold the eggs until then.</span></div>`;
+}
+const heldHens=()=>{const m=new Map();S.health.filter(x=>x.holdUntil&&x.holdUntil>=today()).forEach(x=>{const h=hen(x.hen);if(h&&(!m.has(h.id)||m.get(h.id)<x.holdUntil))m.set(h.id,x.holdUntil)});return m};
+
+/* ---------- community updates (photo/video + message, shared on WhatsApp) ---------- */
+const mdb=()=>new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error("no storage"));const r=indexedDB.open("newberry-flock-media",1);r.onupgradeneeded=()=>r.result.createObjectStore("media");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+const mTx=(mode,fn)=>mdb().then(db=>new Promise((res,rej)=>{const t=db.transaction("media",mode),q=fn(t.objectStore("media"));t.oncomplete=()=>res(q?.result);t.onerror=()=>rej(t.error)}));
+const mPut=(id,b)=>mTx("readwrite",s=>s.put(b,id)),mGet=id=>mTx("readonly",s=>s.get(id)),mDel=id=>mTx("readwrite",s=>s.delete(id)),mClear=()=>mTx("readwrite",s=>s.clear());
+const mediaCache=new Map();
+async function loadMedia(id){if(mediaCache.has(id))return mediaCache.get(id);const b=await mGet(id);if(!b)return null;const o={blob:b,url:URL.createObjectURL(b)};mediaCache.set(id,o);return o}
+function dropMedia(id){const o=mediaCache.get(id);if(o)URL.revokeObjectURL(o.url);mediaCache.delete(id)}
+async function prepPhoto(file){
+  if(!file.type.startsWith("image/"))return file;
+  try{const bm=await createImageBitmap(file),k=Math.min(1,1280/Math.max(bm.width,bm.height)),c=document.createElement("canvas");c.width=Math.round(bm.width*k);c.height=Math.round(bm.height*k);c.getContext("2d").drawImage(bm,0,0,c.width,c.height);
+    const b=await new Promise(r=>c.toBlob(r,"image/jpeg",.82));return b?new File([b],"photo.jpg",{type:"image/jpeg"}):file}catch{return file}
+}
+function mkFile(blob,date){const t=blob.type||"";const ext=t.includes("video")?(t.includes("quicktime")?"mov":t.includes("webm")?"webm":"mp4"):"jpg";return new File([blob],`newberry-update-${date}.${ext}`,{type:t})}
+const composeText=u=>[u.title,u.text,S.settings.signature].map(x=>(x||"").trim()).filter(Boolean).join("\n\n");
+async function shareNow(text,file){
+  try{
+    if(file&&navigator.canShare?.({files:[file]})){await navigator.share({files:[file],text});return "shared"}
+    if(!file&&navigator.share){await navigator.share({text});return "shared"}
+  }catch(e){if(e.name==="AbortError")return "cancelled"}
+  return "fallback";
+}
+function fallbackSheet(text,file){
+  sheet("Send on WhatsApp",`<p class="muted" style="margin:6px 0 14px">This device can’t attach a photo or video straight from a web page. Do these in order. On a phone, the Send button attaches it for you.</p>
+  <div class="tasks">
+  ${file?`<button class="btn block" id="sv">${ic("download")}1. Save the ${file.type.startsWith("video")?"video":"photo"}</button>`:""}
+  <button class="btn primary block" id="wa">${ic("chat")}${file?"2":"1"}. Open WhatsApp with the message</button>
+  <button class="btn block" id="cp">${ic("copy")}Copy the message</button>
+  ${S.settings.groupLink?`<a class="btn block" href="${esc(S.settings.groupLink)}" target="_blank" rel="noopener">${ic("users")}Open our WhatsApp group</a>`:""}
+  </div>
+  ${file?`<p class="hint">In WhatsApp, tap the attach (paperclip) button and choose the saved ${file.type.startsWith("video")?"video":"photo"}.</p>`:""}`,(sh)=>{
+    sh.querySelector("#sv")?.addEventListener("click",()=>{const a=document.createElement("a");a.href=URL.createObjectURL(file);a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)});
+    sh.querySelector("#wa").onclick=()=>window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank","noopener");
+    sh.querySelector("#cp").onclick=()=>{(navigator.clipboard?.writeText(text)||Promise.reject()).then(()=>toast("Message copied."),()=>toast("Couldn’t copy. Select the text and copy it manually."))};
+  });
+}
+function updates(){
+  return `<div class="page-h"><h2>Updates</h2><button class="btn primary small" data-act="newupd">${ic("plus")}New update</button></div>
+  <p class="muted" style="margin:-6px 0 14px">Share short photo or video updates with parents and the community on WhatsApp.</p>
+  ${S.settings.groupLink?`<a class="btn block" href="${esc(S.settings.groupLink)}" target="_blank" rel="noopener" style="margin-bottom:14px">${ic("users")}Open our WhatsApp group</a>`:""}
+  ${S.updates.length?S.updates.map(u=>`<article class="card upd">
+    ${u.media?`<div class="mthumb" data-mid="${u.media}" data-alt="${esc(u.title||"Update")}"><div class="skel" style="height:100%"></div></div>`:""}
+    <div class="row between" style="margin:12px 0 4px"><span class="small muted">${dlabel(u.date)}</span>${u.shared?`<span class="pill">${ic("check","sm")}Shared ${dlabel(u.shared).toLowerCase()}</span>`:`<span class="pill gone">Not shared yet</span>`}</div>
+    ${u.title?`<h3 style="font-size:1.25rem;margin-bottom:4px">${esc(u.title)}</h3>`:""}${u.text?`<p style="margin:0;white-space:pre-line">${esc(u.text)}</p>`:""}
+    <button class="btn primary block" data-act="shareupd" data-id="${u.id}" style="margin-top:14px">${ic("chat")}Send on WhatsApp</button><div class="row" style="margin-top:8px"><button class="btn small grow" data-act="editupd" data-id="${u.id}">${ic("pencil")}Edit</button><button class="btn small grow danger" data-act="delupd" data-id="${u.id}">${ic("trash")}Delete</button></div></article>`).join("")
+  :`<div class="card empty">${ic("camera","xl")}<h3>Keep your community involved</h3><p>Snap a photo or short video of the hens, the coop or egg day. Add a line or two and send it to parents on WhatsApp.</p><button class="btn primary" data-act="newupd">${ic("plus")}Create your first update</button></div>`}`;
+}
+function hydrateMedia(){
+  document.querySelectorAll("[data-mid]").forEach(async el=>{
+    const m=await loadMedia(el.dataset.mid).catch(()=>null);if(!el.isConnected)return;
+    el.innerHTML=m?(m.blob.type.startsWith("video")?`<video src="${m.url}" controls playsinline preload="metadata" aria-label="${esc(el.dataset.alt)}"></video>`:`<img src="${m.url}" alt="${esc(el.dataset.alt)}">`):`<div class="mmiss">${ic("image","lg")}<span>This photo or video isn’t on this device</span></div>`;
+  });
+}
+async function updSheet(rec){
+  const m={title:rec?.title||"",text:rec?.text||"",date:rec?.date||today(),file:null,url:null,keep:!!rec?.media,err:""};
+  let existing=null;if(rec?.media)existing=await loadMedia(rec.media).catch(()=>null);
+  sheet(rec?"Edit update":"New update",`<form id="f" novalidate></form>`,(sh,close)=>{
+    const f=sh.querySelector("#f");
+    const keep=()=>{const g=i=>f.querySelector(i);if(g("#ut")){m.title=g("#ut").value;m.text=g("#ux").value}};
+    const cur=()=>m.file?{type:m.file.type,url:m.url,size:m.file.size}:(m.keep&&existing?{type:existing.blob.type,url:existing.url,size:existing.blob.size}:null);
+    const mb=n=>(n/1048576).toFixed(n>1e7?0:1)+" MB";
+    const draw=()=>{
+      const c=cur(),t=composeText({title:m.title.trim(),text:m.text.trim()});
+      redraw(sh,f,`
+      <div style="margin-top:10px">${c?`<div class="mthumb">${c.type.startsWith("video")?`<video src="${c.url}" controls playsinline preload="metadata"></video>`:`<img src="${c.url}" alt="Selected photo">`}</div>
+        <div class="row" style="margin-top:8px"><span class="small muted grow">${c.type.startsWith("video")?"Video":"Photo"} · ${mb(c.size)}</span><button type="button" class="btn small" id="pick">Change</button><button type="button" class="btn small danger" id="rmv">Remove</button></div>`
+        :`<button type="button" class="pickbox" id="pick">${ic("camera","xl")}<b>Add a photo or video</b><span class="small muted">Take one now or choose from your gallery</span></button>`}
+        <input id="fl" type="file" accept="image/*,video/*" hidden>
+        ${c&&c.type.startsWith("video")&&c.size>16*1048576?`<div class="warn">${ic("alert")}<span>This video is large. WhatsApp sends short clips (under about 30 seconds) fastest.</span></div>`:""}</div>
+      <label class="f" for="ut">Title <span class="muted">(optional)</span></label><input id="ut" data-autofocus class="t" maxlength="80" placeholder="e.g. Meet our newest hen" value="${esc(m.title)}">
+      <label class="f" for="ux">Message</label><textarea id="ux" class="t" rows="3" maxlength="600" placeholder="Two or three short lines read best on WhatsApp.">${esc(m.text)}</textarea>
+      <div class="chips" style="margin-top:8px" role="group" aria-label="Quick add"><button type="button" class="chip" data-q="week">${ic("egg","sm")}This week’s eggs</button><button type="button" class="chip" data-q="total">${ic("trend","sm")}Total so far</button><button type="button" class="chip" data-q="thanks">${ic("pulse","sm")}Thank you</button></div>
+      ${m.err?`<p class="err" role="alert">${ic("alert")}${esc(m.err)}</p>`:""}
+      <div class="eyebrow" style="margin:16px 0 6px">What will be sent</div><div class="msgprev">${t?esc(t):'<span class="muted">Your message appears here.</span>'}</div>
+      <div class="foot"><button class="btn primary block" id="go">${ic("chat")}${rec?"Save & send on WhatsApp":"Send on WhatsApp"}</button><button type="button" class="linkbtn" id="later" style="display:block;margin:2px auto 0">Save without sending</button></div>`);
+      f.querySelector("#pick").onclick=()=>f.querySelector("#fl").click();
+      f.querySelector("#fl").onchange=async e=>{keep();const file=e.target.files[0];if(!file)return;
+        if(file.size>200*1048576){m.err="That file is too large. Try a shorter video.";draw();return}
+        m.err="";m.file=await prepPhoto(file);if(m.url)URL.revokeObjectURL(m.url);m.url=URL.createObjectURL(m.file);draw()};
+      f.querySelector("#rmv")?.addEventListener("click",()=>{keep();m.file=null;m.keep=false;draw()});
+      f.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{keep();const wk=sum(range(7),eggsOn),all=sum(S.eggs,e=>e.count);
+        const add={week:`This week our hens laid ${wk} eggs, about ${num(wk/7,1)} a day.`,total:`So far our hens have laid ${num(all)} eggs (${num(all/12)} dozen).`,thanks:"Thank you to everyone who supports our hens and our school project!"}[b.dataset.q];
+        m.text=(m.text.trim()?m.text.trim()+"\n":"")+add;draw()});
+    };
+    const run=async send=>{
+      keep();const file=m.file||(m.keep&&existing?mkFile(existing.blob,m.date):null);
+      if(!m.title.trim()&&!m.text.trim()&&!file){m.err="Add a photo, video or message first.";draw();return}
+      const data={title:m.title.trim(),text:m.text.trim(),date:m.date},text=composeText(data);
+      const sharing=send?shareNow(text,file):null;          /* started first, inside the tap, so the phone allows it */
+      const id=rec?.id||uid();let media=rec?.media||null;
+      try{
+        if(m.file){await mPut(id,m.file);dropMedia(id);media=id}
+        else if(!m.keep&&rec?.media){await mDel(rec.media);dropMedia(rec.media);media=null}
+      }catch{toast("Couldn’t keep the photo or video on this browser. The message was saved.")}
+      const obj={id,...data,media,shared:rec?.shared||null};
+      if(rec)Object.assign(rec,obj);else S.updates.unshift(obj);
+      save();close();tab="updates";render();scrollTo(0,0);
+      if(!sharing){toast("Update saved.");return}
+      const r=await sharing;
+      if(r==="shared"){obj.shared=today();save();render();toast("Shared. Thank you for keeping the community in the loop.")}
+      else if(r==="fallback")fallbackSheet(text,file);
+    };
+    f.onsubmit=e=>{e.preventDefault();run(true)};
+    draw();
+    f.addEventListener("click",e=>{if(e.target.closest("#later"))run(false)});
+  });
+}
+async function sendUpdate(id){
+  const u=S.updates.find(x=>x.id===id);if(!u)return;
+  const c=u.media?mediaCache.get(u.media):null;
+  if(u.media&&!c){await loadMedia(u.media).catch(()=>null);toast("Photo loaded. Tap Send again.");return}
+  const file=c?mkFile(c.blob,u.date):null,text=composeText(u);
+  const r=await shareNow(text,file);
+  if(r==="shared"){u.shared=today();save();render();toast("Shared. Thank you for keeping the community in the loop.")}
+  else if(r==="fallback")fallbackSheet(text,file);
+}
+
+/* ---------- install to home screen ---------- */
+let installEvt=null;
+const standalone=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
+addEventListener("beforeinstallprompt",e=>{e.preventDefault();installEvt=e});
+addEventListener("appinstalled",()=>{installEvt=null;render();toast("Newberry Flock is installed.")});
+function installApp(){
+  if(installEvt){const ev=installEvt;installEvt=null;ev.prompt();return}
+  sheet("Add to your home screen",`<div style="display:flex;align-items:center;gap:14px;margin:8px 0 14px"><img src="icons/flock-192.png" alt="" width="64" height="64" style="border-radius:16px"><p class="muted" style="margin:0">Install Newberry Flock so it opens full screen from an icon, like any other app.</p></div>
+  <ul class="list">
+  <li style="align-items:flex-start"><span class="avatar" style="width:34px;height:34px;font-size:1rem">1</span><div class="grow"><b>iPhone or iPad (Safari)</b><div class="small muted">Tap the Share button, then <b>Add to Home Screen</b>, then <b>Add</b>.</div></div></li>
+  <li style="align-items:flex-start"><span class="avatar" style="width:34px;height:34px;font-size:1rem">2</span><div class="grow"><b>Android (Chrome)</b><div class="small muted">Tap the menu (three dots), then <b>Install app</b> or <b>Add to Home screen</b>.</div></div></li>
+  <li style="align-items:flex-start"><span class="avatar" style="width:34px;height:34px;font-size:1rem">3</span><div class="grow"><b>Computer (Chrome or Edge)</b><div class="small muted">Click the install icon at the right end of the address bar.</div></div></li></ul>
+  <p class="hint">Open this page in Safari or Chrome first. Links opened inside WhatsApp can’t be installed.</p>
+  <div class="foot"><button class="btn primary block" id="ok">Got it</button></div>`,(sh,close)=>{sh.querySelector("#ok").onclick=close});
+}
+
+function pricesSheet(){
+  sheet("Prices & alerts",`<form id="f"><label class="f" for="cn">Coop name</label><input id="cn" class="t" maxlength="40" value="${esc(S.coops[0].name)}"><label class="f" for="p1">Price per dozen, individuals (R)</label><input id="p1" class="t" type="number" inputmode="decimal" step="1" min="0" value="${S.settings.price}">
+  <label class="f" for="p2">Price per dozen, restaurants (R)</label><input id="p2" class="t" type="number" inputmode="decimal" step="1" min="0" value="${S.settings.priceRest}">
+  <label class="f" for="p3">Warn me when feed will last fewer than (days)</label><input id="p3" class="t" type="number" inputmode="numeric" min="1" value="${S.settings.lowFeedDays}">
+  <h3 style="margin-top:22px;font-size:1.1rem">WhatsApp updates</h3>
+  <label class="f" for="sg">Sign-off added to every update</label><input id="sg" class="t" maxlength="80" value="${esc(S.settings.signature)}" placeholder="e.g. Newberry Middle School Project">
+  <label class="f" for="gl">WhatsApp group or channel link <span class="muted">(optional)</span></label><input id="gl" class="t" type="url" inputmode="url" value="${esc(S.settings.groupLink)}" placeholder="https://chat.whatsapp.com/…"><p class="hint">Adds an “Open our WhatsApp group” button on the Updates screen.</p>
+  <div class="foot"><button class="btn primary block">Save</button></div></form>`,(sh,close)=>{
+    sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const gl=sh.querySelector("#gl").value.trim();if(gl&&!/^https:\/\//i.test(gl)){toast("The WhatsApp link must start with https://");return}S.coops[0].name=sh.querySelector("#cn").value.trim()||S.coops[0].name;S.settings={...S.settings,price:+sh.querySelector("#p1").value||0,priceRest:+sh.querySelector("#p2").value||0,lowFeedDays:Math.max(1,+sh.querySelector("#p3").value||7),signature:sh.querySelector("#sg").value.trim(),groupLink:gl};save();close();render();toast("Saved.")};
+  });
+}
+function dataSheet(){
+  sheet("Backup & data",`<p class="muted" style="margin:6px 0 14px">Everything is stored on this device. A backup lets you move it to another phone or recover it. Photos and videos in Updates stay on this device and aren’t in the backup file.</p>
+  <div class="tasks"><button class="btn block" id="bk">${ic("download")}Download backup (JSON)</button><button class="btn block" id="cs">${ic("download")}Export sales (CSV)</button><button class="btn block" id="ce">${ic("download")}Export egg log (CSV)</button><button class="btn block" id="rs">${ic("upload")}Restore from backup</button><button class="btn block danger" id="rm">${ic("trash")}Erase everything</button></div>`,(sh,close)=>{
+    sh.querySelector("#bk").onclick=()=>dl("flock-backup-"+today()+".json",JSON.stringify(S),"application/json");
+    sh.querySelector("#cs").onclick=()=>csv("flock-sales-"+today()+".csv",[["Date","Customer","Eggs","Price per dozen (ZAR)","Total (ZAR)","Paid"],...S.sales.map(s=>[s.date,custName(s.cust),s.eggs,s.price,saleTotal(s).toFixed(2),s.paid?"yes":"no"])]);
+    sh.querySelector("#ce").onclick=()=>csv("flock-eggs-"+today()+".csv",[["Date","Coop","Eggs","Cracked"],...S.eggs.map(e=>[e.date,coopName(e.coop),e.count,e.cracked||0])]);
+    sh.querySelector("#rs").onclick=()=>{const i=document.createElement("input");i.type="file";i.accept=".json";i.onchange=async()=>{try{const d=JSON.parse(await i.files[0].text());if(!d.hens||!d.eggs)throw 0;close();confirmSheet("Restore this backup?","This replaces everything currently in the app.","Restore",()=>{S={...DEF(),...d};save();render();toast("Backup restored.")})}catch{toast("That file isn’t a Newberry Flock backup.")}};i.click()};
+    sh.querySelector("#rm").onclick=()=>{close();confirmSheet("Erase everything?","All hens, eggs, sales and records on this device are deleted. Download a backup first if unsure.","Erase all",()=>{S=DEF();save();mClear().catch(()=>{});mediaCache.forEach((o,k)=>dropMedia(k));render();toast("All data erased.")})};
+  });
+}
+function dl(name,text,type){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([text],{type}));a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000)}
+function csv(name,rows){dl(name,"﻿"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\n"),"text/csv")}
+
+function sample(){
+  S=DEF();S.coops=[{id:"c1",name:"Main coop"}];
+  const names=[["Henrietta","Rhode Island Red","c1"],["Pearl","Sussex","c1"],["Daisy","Leghorn","c1"],["Goldie","Orpington","c1"],["Clucky","Boschveld","c1"],["Ginger","Rhode Island Red","c1"],["Mabel","Plymouth Rock","c1"],["Peaches","Koekoek","c1"]];
+  S.hens=names.map(([name,breed,coop],i)=>({id:"h"+i,name,breed,coop,born:addDays(today(),-300-i*20),status:"healthy",note:"",photo:null}));
+  S.hens[3].status="watch";S.hens[6].status="unwell";
+  S.health=[{id:"x1",hen:"h6",type:"illness",text:"Quiet and off her food. Moved to the small pen and checked the comb.",date:addDays(today(),-1)},{id:"x3",hen:"h6",type:"treatment",text:"Electrolytes and probiotic in the water while she recovers",product:"Electrolytes + probiotic",hold:3,holdUntil:addDays(today(),1),date:addDays(today(),-2)},{id:"x2",hen:"h3",type:"checkup",text:"Slightly pale comb. Keep an eye on her this week.",date:addDays(today(),-3)}];
+  S.customers=[{id:"k1",type:"restaurant",name:"Blue Door Café",phone:""},{id:"k2",type:"restaurant",name:"Maple Street Diner",phone:""},{id:"k3",type:"individual",name:"Mrs. Naidoo",phone:""}];
+  S.feeds=[{id:"f1",name:"Organic layer pellets"}];
+  S.purchases=[{id:"p1",date:addDays(today(),-20),feed:"f1",kg:25,cost:410,supplier:"Farm Co-op",organic:true,cert:"ORG-2291"},{id:"p2",date:addDays(today(),-4),feed:"f1",kg:25,cost:420,supplier:"Farm Co-op",organic:true,cert:"ORG-2307"}];
+  for(let i=20;i>=0;i--){const d=addDays(today(),-i);
+    {const n=S.hens.filter(h=>["healthy","watch"].includes(h.status)&&Math.random()<.82).length;if(n)S.eggs.push({id:uid(),date:d,coop:"c1",count:n,cracked:Math.random()<.25?1:0})}
+    S.checks[d]={c1:{fed:1,feed:"f1",water:true,clean:i%3!==0,secure:true,health:i!==0}};
+    if(i===0)S.checks[d].c1={fed:1,feed:"f1",water:true};
+    if(i%4===0)S.sales.push({id:uid(),date:d,cust:"k1",eggs:12,price:45,paid:i>3});
+    if(i%6===0)S.sales.push({id:uid(),date:d,cust:"k3",eggs:12,price:55,paid:true});}
+  save();render();toast("Sample data loaded.");
+}
+
+render();
+if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
+</script>
+</body>
+</html>

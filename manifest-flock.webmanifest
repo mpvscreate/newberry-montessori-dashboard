@@ -1,0 +1,16 @@
+{
+  "name": "Newberry Flock",
+  "short_name": "Flock",
+  "description": "Track hens, eggs, sales, feed and daily care for the Newberry school flock.",
+  "start_url": "./newberry-flock.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fbf6ec",
+  "theme_color": "#1d6b33",
+  "icons": [
+    { "src": "icons/flock-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/flock-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/flock-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
