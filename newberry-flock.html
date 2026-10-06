@@ -459,7 +459,7 @@ const GUIDE_DEFAULT=[
 
 /* ---------- data (browser only: no sign-in yet) ---------- */
 const KEY="newberry-flock-v1";
-const DEF=()=>({settings:{price:55,priceRest:45,lowFeedDays:7,signature:"Newberry Middle School Project",groupLink:""},coops:[{id:"c1",name:"Main coop"}],hens:[],eggs:[],customers:[],sales:[],feeds:[],purchases:[],checks:{},health:[],guide:structuredClone(GUIDE_DEFAULT),updates:[],adjust:[],expenses:[]});
+const DEF=()=>({settings:{price:55,priceRest:45,lowFeedDays:7,signature:"Newberry Middle School Project",groupLink:"",targetMargin:30,restDiscount:15,priceRound:5},coops:[{id:"c1",name:"Main coop"}],hens:[],eggs:[],customers:[],sales:[],feeds:[],purchases:[],checks:{},health:[],guide:structuredClone(GUIDE_DEFAULT),updates:[],adjust:[],expenses:[]});
 let S;try{S={...DEF(),...JSON.parse(localStorage.getItem(KEY))}}catch{S=DEF()}
 S.settings={...DEF().settings,...S.settings};if(!S.coops?.length)S.coops=DEF().coops;
 if(S.coops.length>1)S.coops=[S.coops[0]];S.hens.forEach(h=>h.coop=S.coops[0].id);S.eggs.forEach(e=>e.coop=S.coops[0].id);
@@ -673,7 +673,7 @@ function act(a,id){
     delsale:()=>{const i=S.sales.findIndex(s=>s.id===id),[s]=S.sales.splice(i,1);save();render();toast("Sale deleted.",()=>S.sales.splice(i,0,s))},
     deldayeggs:()=>{const rem=S.eggs.filter(e=>e.date===id);S.eggs=S.eggs.filter(e=>e.date!==id);save();render();toast("Egg entries deleted.",()=>S.eggs.push(...rem))},
     delbuy:()=>{const i=S.purchases.findIndex(p=>p.id===id),[p]=S.purchases.splice(i,1);save();render();toast("Purchase deleted.",()=>S.purchases.splice(i,0,p))},
-    custs:()=>custSheet(),goprofit:()=>{eggSub="money";go("eggs")},weekly:()=>weeklySheet(),pperiod:()=>{profPeriod=id;render()},newexp:()=>expSheet(),editexp:()=>expSheet(S.expenses.find(x=>x.id===id)),
+    custs:()=>custSheet(),applyprice:()=>applyPrice(id),setpm:()=>setPriceOpt(id),goprofit:()=>{eggSub="money";go("eggs")},weekly:()=>weeklySheet(),pperiod:()=>{profPeriod=id;render()},newexp:()=>expSheet(),editexp:()=>expSheet(S.expenses.find(x=>x.id===id)),
     delexp:()=>{const i=S.expenses.findIndex(x=>x.id===id),[r]=S.expenses.splice(i,1);save();render();toast("Expense deleted.",()=>S.expenses.splice(i,0,r))},stock:()=>stockSheet(),theme:()=>themeSheet(),applock:()=>lockSheet(),sync:()=>{if(!sb){toast("Connecting…");initAuth();return}user?syncSheet():signInSheet()},syncdismiss:()=>{try{localStorage.setItem("flock-sync-dismiss","1")}catch{}render()},install:()=>installApp(),updates:()=>go("updates"),newupd:()=>updSheet(),editupd:()=>updSheet(S.updates.find(x=>x.id===id)),shareupd:()=>sendUpdate(id),
     delupd:()=>{const u=S.updates.find(x=>x.id===id);confirmSheet("Delete this update?","The message and its photo or video are removed from this device.","Delete update",()=>{S.updates=S.updates.filter(x=>x.id!==id);if(u.media){mDel(u.media).catch(()=>{});dropMedia(u.media);removeCloudMedia(u.media)}save();render();toast("Update deleted.")})},guide:()=>openGuide(),gcat:()=>{guideCat=id;render()},gclear:()=>{guideQ="";guideCat="all";render()},newguide:()=>guideForm(),editguide:()=>guideForm(S.guide.find(g=>g.id===id)),
     logguide:()=>healthSheet(null,null,S.guide.find(g=>g.id===id).name+": "),
@@ -735,6 +735,7 @@ function sellSheet(pre,rec){
       <p class="hint" style="text-align:center">${Math.round(m.doz*12)} eggs · ${Math.max(0,stock())} in stock</p>
       ${short?`<div class="warn" role="alert">${ic("alert")}<span>You only have ${dz(Math.max(0,stock()))} in stock. You can still record this sale. <button type="button" class="linkbtn" style="padding:0;min-height:0" data-stockfix>Count stock</button></span></div>`:""}
       ${hold.size?`<div class="warn" role="alert">${ic("alert")}<span><b>${[...hold.keys()].map(i=>esc(hen(i).name)).join(", ")}</b> ${hold.size===1?"is":"are"} on a treatment hold. Eggs are collected together, so make sure the treated hen was kept apart, or hold these eggs.</span></div>`:""}
+      ${belowCost(price)}
       <label class="f" for="pz">Price per dozen (R)</label><input id="pz" class="t" type="number" inputmode="decimal" step="1" min="0" value="${price}">
       <div class="total"><span>Total</span><b>${money(tot)}</b></div>
       <div class="segc" style="margin:0" role="group" aria-label="Payment"><button type="button" data-f="p1" data-p="1" aria-pressed="${m.paid}">Paid now</button><button type="button" data-f="p0" data-p="0" aria-pressed="${!m.paid}">Pay later</button></div>
@@ -1439,6 +1440,7 @@ function profitView(seg){
     <section class="tile s2 ${p.profit<0?"alert":"warm"}"><div class="lbl">${ic("trend")}Profit · ${label.toLowerCase()}</div><div class="big">${money(p.profit)}</div>
       <div class="sub">${p.profitPerDoz!==null?`${money(p.profitPerDoz)} profit per dozen sold`:"Sell some eggs to see profit per dozen"}${p.costPerDoz!==null?` · it costs about ${money(p.costPerDoz)} to produce a dozen`:""}</div></section>
   </div>
+  ${priceCard()}
   <section class="card"><h2>Where the money goes</h2>${cats.length?`<div class="cbars">${cats.map(([c,v])=>`<div class="cbar"><span>${esc(c)}</span><b class="amt">${money(v)}</b><div class="tr"><i style="width:${Math.max(3,v/top*100)}%"></i></div></div>`).join("")}</div>`:`<p class="muted" style="margin:0">No costs in this period yet. Feed you log under Care → Feed counts automatically. Add anything else with <b>Add expense</b>.</p>`}
     <p class="hint">Feed is counted as it’s used, at your average price per kg, so one big delivery doesn’t distort a month. This needs the “Fed” kilograms in Daily checks. Without them, bags count on the day you buy them.</p></section>
   <section class="card"><h2>Expenses</h2>${list.length?`<ul class="list">${list.map(e=>`<li><div class="avatar">${ic("bag")}</div><div class="grow"><b>${esc(e.category)}</b><div class="small muted">${dlabel(e.date)}${e.note?" · "+esc(e.note):""}</div></div><span class="amt">${money(e.amount)}</span><button class="btn small icon" data-act="editexp" data-id="${e.id}" aria-label="Edit this expense">${ic("pencil")}</button><button class="btn small icon danger" data-act="delexp" data-id="${e.id}" aria-label="Delete this expense">${ic("trash")}</button></li>`).join("")}</ul>`:`<div class="empty">${ic("bag","xl")}<h3>No expenses yet</h3><p>Vet visits, bedding, repairs, equipment. Add them to see your real profit.</p><button class="btn primary" data-act="newexp">${ic("plus")}Add an expense</button></div>`}</section>`;
@@ -1557,6 +1559,62 @@ async function weeklySheet(){
   });
 }
 
+/* ---------- price helper ---------- */
+/* what a dozen costs to produce, from the last 90 days (or since the first egg was logged) */
+function costBasis(){
+  const t=today(),first=S.eggs.reduce((m,e)=>e.date<m?e.date:m,"9999-12-31");
+  const from=first==="9999-12-31"?addDays(t,-89):(first>addDays(t,-89)?first:addDays(t,-89));
+  const p=periodStats(from,t),days=Math.round((new Date(t+"T12:00")-new Date(from+"T12:00"))/864e5)+1;
+  return{cost:p.dozLaid>0&&p.costs>0?p.costPerDoz:null,days,dozLaid:p.dozLaid,costs:p.costs};
+}
+const ceilTo=(v,step)=>Math.ceil(v/step-1e-9)*step;
+const clampM=m=>Math.min(70,Math.max(5,+m||30));
+function priceSuggest(cost){
+  const st=S.settings,m=clampM(st.targetMargin)/100,step=+st.priceRound||5,d=Math.min(50,Math.max(0,+st.restDiscount||0))/100;
+  const ind=ceilTo(cost/(1-m),step),rest=Math.max(Math.round(ind*(1-d)/step)*step,ceilTo(cost*1.05,step));
+  return{ind,rest,m,step,d};
+}
+const marginOf=(price,cost)=>price>0?(price-cost)/price:-1;
+function belowCost(price){
+  const c=costBasis().cost;if(c===null||!(price>0)||price>=c)return "";
+  return `<div class="warn" role="alert">${ic("alert")}<span>${money(price)} is below what a dozen costs you (about ${money(c)}). You’d lose ${money(c-price)} on every dozen.</span></div>`;
+}
+function costHint(){
+  const b=costBasis();if(b.cost===null)return "";
+  const sg=priceSuggest(b.cost);
+  return `<p class="hint">A dozen costs you about ${money(b.cost)} to produce. For a ${Math.round(sg.m*100)}% margin you’d charge about ${money(sg.ind)}. See Eggs, Profit for details.</p>`;
+}
+function priceCard(){
+  const b=costBasis(),st=S.settings,opt=(k,vals,cur,fmt)=>vals.map(v=>`<button class="chip" style="min-height:40px;padding:4px 14px" data-act="setpm" data-id="${k}:${v}" aria-pressed="${+cur===v}">${fmt(v)}</button>`).join("");
+  if(b.cost===null){
+    return `<section class="card"><h2>Price check</h2><p class="muted" style="margin:0">To see whether your prices make money, the app needs your costs. Log feed bought in Care, Feed, tick “Fed” with kilograms in Daily checks, and add other costs here. Then it works out what a dozen costs you and suggests prices.</p></section>`;
+  }
+  const sg=priceSuggest(b.cost),rows=[["ind","Individuals",st.price,sg.ind],["rest","Restaurants",st.priceRest,sg.rest]];
+  const row=([k,l,now,sug])=>{
+    const mg=marginOf(now,b.cost),ok=now>=sug*0.97,loss=now<b.cost;
+    const pill=loss?`<span class="pill unwell">${ic("alert","sm")}Losing ${money(b.cost-now)} a dozen</span>`:ok?`<span class="pill">${ic("check","sm")}On target · ${Math.round(mg*100)}% margin</span>`:`<span class="pill watch">Thin margin · ${Math.round(mg*100)}%</span>`;
+    return `<li style="align-items:flex-start"><div class="grow"><b>${l}</b><div class="small muted" style="margin:2px 0 6px">You charge ${money(now)} a dozen</div>${pill}${ok?"":`<div style="margin-top:10px"><button class="btn small primary" data-act="applyprice" data-id="${k}">Charge ${money(sug)} instead</button><div class="small muted" style="margin-top:4px">Suggested for a ${Math.round(sg.m*100)}% margin${k==="rest"?", after the restaurant discount":""}</div></div>`}</div></li>`;
+  };
+  return `<section class="card"><h2>Price check</h2>
+    <p style="margin:0 0 4px">A dozen costs you about <b>${money(b.cost)}</b> to produce.</p>
+    <p class="hint" style="margin:0 0 8px">Based on the last ${b.days} day${b.days===1?"":"s"}: ${num(b.dozLaid,1)} dozen laid, ${money(b.costs)} of costs.${b.days<14?" It gets more accurate with more days of data.":" One-off costs, like a big vet bill, raise it for a while."}</p>
+    <ul class="list">${rows.map(row).join("")}</ul>
+    <details style="margin-top:8px"><summary style="cursor:pointer;font-weight:600;min-height:44px;display:flex;align-items:center">Pricing settings</summary>
+      <div class="eyebrow" style="margin:8px 0 6px">Profit margin I want</div><div class="chips">${opt("m",[20,30,40,50],st.targetMargin,v=>v+"%")}</div>
+      <div class="eyebrow" style="margin:12px 0 6px">Restaurant discount</div><div class="chips">${opt("d",[0,10,15,20],st.restDiscount,v=>v+"%")}</div>
+      <div class="eyebrow" style="margin:12px 0 6px">Round prices up to the nearest</div><div class="chips">${opt("r",[1,5,10],st.priceRound,v=>"R"+v)}</div>
+      <p class="hint">Margin means the share of the price that is profit. A 30% margin on a R70 dozen is R21 profit.</p></details></section>`;
+}
+function applyPrice(k){
+  const b=costBasis();if(b.cost===null)return;const sg=priceSuggest(b.cost),key=k==="ind"?"price":"priceRest",old=S.settings[key],nv=k==="ind"?sg.ind:sg.rest;
+  S.settings={...S.settings,[key]:nv};save();render();
+  toast(`${k==="ind"?"Individual":"Restaurant"} price is now ${money(nv)} a dozen.`,()=>{S.settings={...S.settings,[key]:old}});
+}
+function setPriceOpt(spec){
+  const[k,v]=spec.split(":"),key={m:"targetMargin",d:"restDiscount",r:"priceRound"}[k];
+  S.settings={...S.settings,[key]:+v};save();render();
+}
+
 /* ---------- install to home screen ---------- */
 let installEvt=null;
 const standalone=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
@@ -1576,6 +1634,7 @@ function installApp(){
 function pricesSheet(){
   sheet("Prices & alerts",`<form id="f"><label class="f" for="cn">Coop name</label><input id="cn" class="t" maxlength="40" value="${esc(S.coops[0].name)}"><label class="f" for="p1">Price per dozen, individuals (R)</label><input id="p1" class="t" type="number" inputmode="decimal" step="1" min="0" value="${S.settings.price}">
   <label class="f" for="p2">Price per dozen, restaurants (R)</label><input id="p2" class="t" type="number" inputmode="decimal" step="1" min="0" value="${S.settings.priceRest}">
+  ${costHint()}
   <label class="f" for="p3">Warn me when feed will last fewer than (days)</label><input id="p3" class="t" type="number" inputmode="numeric" min="1" value="${S.settings.lowFeedDays}">
   <h3 style="margin-top:22px;font-size:1.1rem">WhatsApp updates</h3>
   <label class="f" for="sg">Sign-off added to every update</label><input id="sg" class="t" maxlength="80" value="${esc(S.settings.signature)}" placeholder="e.g. Newberry Middle School Project">
