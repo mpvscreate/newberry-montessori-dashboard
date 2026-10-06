@@ -159,6 +159,11 @@ input[type=range]{width:100%;height:36px;accent-color:var(--green)}
 .confetti i{position:absolute;top:-20px;width:10px;height:14px;border-radius:3px;animation:fall 1.6s ease-in forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
 .photos button{position:relative}
+.targets{list-style:none;margin:10px 0 0;padding:0}
+.targets li{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}.targets li:first-child{border-top:0}
+.targets li.tdone .grow{text-decoration:line-through;color:var(--muted)}
+.tick.sm{width:30px;height:30px}.tick.sm::after{inset:-8px}
+.note-warn{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--amber-soft);border-radius:14px;padding:10px 12px;margin-top:10px;font-size:.9rem}.note-warn .i{color:var(--accent)}.note-warn div{flex:1 1 10rem}
 .photos button.sel{outline:3px solid var(--green);outline-offset:-3px}
 .photos button.sel img,.photos button.sel video{opacity:.7}
 .ck{position:absolute;left:8px;top:8px;width:28px;height:28px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.35);color:transparent;display:grid;place-items:center}
@@ -279,7 +284,7 @@ function loadSync(){try{return JSON.parse(localStorage.getItem(SYNC))||{}}catch{
 function save(o){if(o)o.u=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem(SYNC,JSON.stringify(sm))}catch{toast("Storage is full. Delete some photos.")}scheduleSync()}
 const prods=()=>S.prods.filter(p=>!p.del);
 const P=id=>S.prods.find(p=>p.id===id);
-const goalPct=g=>g.done?100:g.pct||0;
+const goalPct=g=>g.targets&&g.targets.length?Math.round(g.targets.filter(t=>t.done).length/g.targets.length*100):g.done?100:g.pct||0;
 const prodPct=p=>p.goals.length?Math.round(p.goals.reduce((a,g)=>a+goalPct(g),0)/p.goals.length):0;
 const who=()=>user?.email?.split("@")[0]||"me";
 const fmt=t=>new Date(t).toLocaleDateString(undefined,{day:"numeric",month:"short"})+" "+new Date(t).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
@@ -463,38 +468,67 @@ function wireProd(p){
 }
 const fabBtn=(id,label)=>`<div class="fab-wrap"><button class="fab" id="${id}">${ic("plus")}${label}</button></div>`;
 
-/* goals */
+/* goals: every main goal is broken into targets; progress comes from the targets that are done */
+const hasT=g=>g.targets&&g.targets.length>0;
+function syncGoal(g){const was=g.done;if(hasT(g)){const d=g.targets.filter(t=>t.done).length;g.pct=Math.round(d/g.targets.length*100);g.done=d===g.targets.length}g.doneAt=g.done?(g.doneAt||Date.now()):0;return g.done&&!was}
 function goalsTab(p){
-  return (p.goals.length?p.goals.map(g=>`<div class="card goal ${g.done?"done":""}" data-g="${g.id}">
-    <div class="row"><button class="tick" data-done aria-pressed="${!!g.done}" aria-label="Mark ${esc(g.title)} done">${ic("check")}</button><h3 class="grow" style="font-size:1.1rem">${esc(g.title)}</h3><button class="x" data-edg aria-label="Edit goal">${ic("pencil")}</button></div>
-    ${g.due?`<div class="small muted" style="margin-left:44px">${ic("clock","sm")} Due ${esc(g.due)} ${!g.done&&g.due<new Date().toISOString().slice(0,10)?`<span class="pill late">Overdue</span>`:""}</div>`:""}
-    <input type="range" min="0" max="100" step="5" value="${goalPct(g)}" data-pct aria-label="Progress for ${esc(g.title)}"><div class="small muted"><span data-pv>${goalPct(g)}</span>%</div>
+  const today=new Date().toISOString().slice(0,10);
+  return (p.goals.length?p.goals.map(g=>{const q=goalPct(g),nd=hasT(g)?g.targets.filter(t=>t.done).length:0;
+    return `<div class="card goal ${g.done?"done":""}" data-g="${g.id}">
+    <div class="row"><button class="tick" data-done aria-pressed="${!!g.done}" aria-label="${g.done?"Reopen":"Complete"} ${esc(g.title)}">${ic("check")}</button><h3 class="grow" style="font-size:1.1rem">${esc(g.title)}</h3><button class="x" data-edg aria-label="Edit goal">${ic("pencil")}</button></div>
+    ${g.due?`<div class="small muted" style="margin-left:44px">${ic("clock","sm")} Due ${esc(g.due)} ${!g.done&&g.due<today?`<span class="pill late">Overdue</span>`:""}</div>`:""}
+    <div class="meter" style="margin:12px 0 4px" role="progressbar" aria-valuenow="${q}" aria-valuemin="0" aria-valuemax="100" aria-label="${esc(g.title)} progress"><i style="width:${q}%"></i></div>
+    <div class="small muted">${hasT(g)?`${nd} of ${g.targets.length} targets done · ${q}%`:`${q}%`}</div>
+    ${hasT(g)?`<ul class="targets">${g.targets.map(t=>`<li class="${t.done?"tdone":""}"><button class="tick sm" data-tt="${t.id}" aria-pressed="${!!t.done}" aria-label="${t.done?"Reopen":"Complete"} target ${esc(t.title)}">${ic("check","sm")}</button><span class="grow">${esc(t.title)}</span></li>`).join("")}</ul>`
+      :`<div class="note-warn">${ic("alert")}<div><b>No targets yet.</b> Break this goal into steps so progress can be tracked.</div><button class="btn small" data-edg>Add targets</button></div>`}
+    ${hasT(g)?`<div class="row wr" style="margin-top:8px"><input class="t" style="flex:1 1 12rem" type="text" data-ti placeholder="Add another target" aria-label="New target for ${esc(g.title)}">${micBtn()}<button class="btn small" data-ta>Add</button></div>`:""}
+    ${g.comments.length?`<h4 class="eyebrow" style="margin:16px 0 4px">Comments</h4>`:""}
     ${g.comments.map(c=>`<div class="cm">${esc(c.text)}<div class="small muted">${esc(c.by)} · ${fmt(c.t)}</div></div>`).join("")}
-    <div class="row" style="margin-top:10px"><input class="t" type="text" data-ci placeholder="Add a comment" aria-label="Comment on ${esc(g.title)}">${micBtn()}<button class="btn primary small" data-cs>Add</button></div></div>`).join("")
-    :`<div class="empty">${ic("target","xl")}<h3>No goals yet</h3>Add the first one.</div>`)+fabBtn("addg","New goal");
+    <div class="row wr" style="margin-top:10px"><input class="t" style="flex:1 1 12rem" type="text" data-ci placeholder="Add a comment" aria-label="Comment on ${esc(g.title)}">${micBtn()}<button class="btn primary small" data-cs>Comment</button></div></div>`}).join("")
+    :`<div class="empty">${ic("target","xl")}<h3>No goals yet</h3>Set a main goal and its targets.</div>`)+fabBtn("addg","New goal");
 }
 function wireGoals(p){
   $("#addg").onclick=()=>goalSheet(p);wireMics(document);
   document.querySelectorAll("[data-g]").forEach(el=>{
     const g=p.goals.find(x=>x.id===el.dataset.g);
-    el.querySelector("[data-done]").onclick=()=>{g.done=!g.done;g.pct=g.done?100:0;g.doneAt=g.done?Date.now():0;if(g.done)confetti();save(p);render()};
-    const r=el.querySelector("[data-pct]");r.oninput=()=>el.querySelector("[data-pv]").textContent=r.value;
-    r.onchange=()=>{g.pct=+r.value;g.done=g.pct===100;g.doneAt=g.done?(g.doneAt||Date.now()):0;if(g.done)confetti();save(p);render()};
-    el.querySelector("[data-edg]").onclick=()=>goalSheet(p,g);
+    el.querySelector("[data-done]").onclick=()=>{
+      if(hasT(g)){const snap=g.targets.map(t=>({...t})),all=!g.done;g.targets.forEach(t=>{t.done=all;t.doneAt=all?(t.doneAt||Date.now()):0});if(syncGoal(g))confetti();if(!all)g.doneAt=0;save(p);render();
+        toast(all?"All targets done.":"Goal reopened.",()=>{g.targets=snap;syncGoal(g);save(p);render()})}
+      else{g.done=!g.done;g.pct=g.done?100:0;g.doneAt=g.done?Date.now():0;if(g.done)confetti();save(p);render()}};
+    el.querySelectorAll("[data-tt]").forEach(b=>b.onclick=()=>{const t=g.targets.find(x=>x.id===b.dataset.tt);t.done=!t.done;t.doneAt=t.done?Date.now():0;const fin=syncGoal(g);if(fin)confetti();save(p);render()});
+    el.querySelectorAll("[data-edg]").forEach(b=>b.onclick=()=>goalSheet(p,g));
+    const ti=el.querySelector("[data-ti]"),addT=()=>{const v=ti.value.trim();if(!v)return;if(listening)listening.stop();g.targets.push({id:uid(),title:v,done:false,doneAt:0});syncGoal(g);save(p);render()};
+    if(ti){el.querySelector("[data-ta]").onclick=addT;ti.onkeydown=e=>{if(e.key==="Enter")addT()}}
     const add=()=>{const t=el.querySelector("[data-ci]").value.trim();if(!t)return;if(listening)listening.stop();g.comments.push({id:uid(),text:t,by:who(),t:Date.now()});save(p);render()};
     el.querySelector("[data-cs]").onclick=add;
     el.querySelector("[data-ci]").onkeydown=e=>{if(e.key==="Enter")add()};
   });
 }
 function goalSheet(p,g){
-  const isNew=!g;g=g||{title:"",due:""};
-  sheet(isNew?"New goal":"Edit goal",`<label class="f" for="gt">What do we want to achieve?</label><div class="row"><input class="t" id="gt" type="text" value="${esc(g.title)}">${micBtn()}</div>
+  const isNew=!g;g=g||{title:"",due:""};const tl=(g.targets||[]).map(t=>({...t}));
+  sheet(isNew?"New goal":"Edit goal",`<label class="f" for="gt">Main goal</label><div class="row"><input class="t" id="gt" type="text" value="${esc(g.title)}" placeholder="What do we want to achieve?">${micBtn()}</div>
   <label class="f" for="gd">Due date (optional)</label><input class="t" id="gd" type="date" value="${esc(g.due)}">
+  <label class="f">Targets <span class="muted" style="font-weight:400">(at least one)</span></label>
+  <p class="hint" style="margin:0 0 8px">Break the goal into small steps. The goal's progress grows as each target is done.</p>
+  <div id="tl"></div>
+  <div class="row" style="margin-top:8px"><input class="t" id="tn" type="text" placeholder="Add a target" aria-label="New target">${micBtn()}<button class="btn small" id="ta" type="button">Add</button></div>
+  <p class="err" id="ge" role="alert" hidden></p>
   <div class="row" style="margin-top:22px">${isNew?"":`<button class="btn danger" id="del">${ic("trash")}Delete</button>`}<span class="grow"></span><button class="btn primary" id="ok">Save</button></div>`,(d,close)=>{
     wireMics(d);
+    const err=m=>{const e=$("#ge");e.textContent=m;e.hidden=!m};
+    const draw=()=>{$("#tl").innerHTML=tl.map((t,i)=>`<div class="row" style="margin-bottom:8px"><input class="t" data-i="${i}" type="text" value="${esc(t.title)}" aria-label="Target ${i+1}"><button class="x" data-rm="${i}" type="button" aria-label="Remove target ${i+1}">${ic("x")}</button></div>`).join("");
+      d.querySelectorAll("[data-i]").forEach(inp=>inp.oninput=()=>{tl[+inp.dataset.i].title=inp.value});
+      d.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{tl.splice(+b.dataset.rm,1);draw()})};
+    const add=()=>{const v=$("#tn").value.trim();if(!v){$("#tn").focus();return false}if(listening)listening.stop();tl.push({id:uid(),title:v,done:false,doneAt:0});$("#tn").value="";err("");draw();$("#tn").focus();return true};
+    draw();$("#ta").onclick=add;$("#tn").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();add()}};
     if(!isNew)$("#del").onclick=()=>{const i=p.goals.indexOf(g);p.goals.splice(i,1);save(p);close();render();toast("Goal deleted.",()=>{p.goals.splice(i,0,g);save(p);render()})};
-    $("#ok").onclick=()=>{const t=$("#gt").value.trim();if(!t){$("#gt").focus();return}
-      g.title=t;g.due=$("#gd").value;if(isNew){Object.assign(g,{id:uid(),pct:0,done:false,comments:[]});p.goals.push(g)}
+    $("#ok").onclick=()=>{const t=$("#gt").value.trim();if(!t){err("Give the goal a name.");$("#gt").focus();return}
+      if($("#tn").value.trim())add();
+      const targets=tl.map(x=>({...x,title:x.title.trim()})).filter(x=>x.title);
+      if(!targets.length){err("Add at least one target so progress can be tracked.");$("#tn").focus();return}
+      g.title=t;g.due=$("#gd").value;g.targets=targets;
+      if(isNew)Object.assign(g,{id:uid(),pct:0,done:false,comments:[]});
+      const fin=syncGoal(g);if(isNew)p.goals.push(g);if(fin)confetti();
       save(p);close();render()};
   });
 }
@@ -860,7 +894,7 @@ function repStats(p,from,to){
   const items=list.map(q=>({name:q.name,color:q.color,pct:prodPct(q),done:q.goals.filter(g=>g.done&&inR(g.doneAt||0)).length,
     notes:q.log.filter(l=>inR(l.t)).length+q.goals.reduce((a,g)=>a+g.comments.filter(c=>inR(c.t)).length,0),
     photos:S.media.filter(m=>m.pid===q.id&&!m.del&&inR(m.t)).length,
-    hl:[...q.goals.filter(g=>g.done&&inR(g.doneAt||0)).map(g=>({t:g.doneAt,s:"Done: "+g.title})),...q.log.filter(l=>inR(l.t)).map(l=>({t:l.t,s:l.text})),...q.goals.flatMap(g=>g.comments.filter(c=>inR(c.t)).map(c=>({t:c.t,s:g.title+": "+c.text})))]}));
+    hl:[...q.goals.filter(g=>g.done&&inR(g.doneAt||0)).map(g=>({t:g.doneAt,s:"Goal done: "+g.title})),...q.goals.flatMap(g=>(g.targets||[]).filter(t=>t.done&&inR(t.doneAt||0)&&!(g.done&&inR(g.doneAt||0))).map(t=>({t:t.doneAt,s:"Target done: "+t.title+" ("+g.title+")"}))),...q.log.filter(l=>inR(l.t)).map(l=>({t:l.t,s:l.text})),...q.goals.flatMap(g=>g.comments.filter(c=>inR(c.t)).map(c=>({t:c.t,s:g.title+": "+c.text})))]}));
   const sum=k=>items.reduce((a,i)=>a+i[k],0);
   return{from,to,p,items,done:sum("done"),notes:sum("notes"),photos:sum("photos"),pct:items.length?Math.round(items.reduce((a,i)=>a+i.pct,0)/items.length):0,
     hl:items.flatMap(i=>i.hl.map(h=>({...h,n:items.length>1?i.name:""}))).sort((a,b)=>b.t-a.t).slice(0,4)};
