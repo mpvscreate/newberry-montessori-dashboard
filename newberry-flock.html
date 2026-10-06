@@ -234,6 +234,10 @@ html.privacy #app{filter:blur(22px)}
 .themeopt{display:flex;flex-direction:column;align-items:center;gap:4px;padding:16px 8px;border:1.5px solid var(--field);border-radius:20px;background:var(--sheet);cursor:pointer;text-align:center;color:var(--ink);transition:box-shadow .25s,border-color .2s}
 .themeopt .i{color:var(--accent)}.themeopt b{font:700 1rem var(--display)}
 .themeopt[aria-pressed=true]{border-color:var(--accent);background:var(--accent-soft);box-shadow:0 0 0 4px var(--glow-soft)}
+.cbars{display:grid;gap:14px}
+.cbar{display:grid;grid-template-columns:1fr auto;gap:4px 12px;align-items:baseline}
+.cbar .tr{grid-column:1/-1;height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.cbar .tr i{display:block;height:100%;border-radius:99px;background:linear-gradient(90deg,var(--accent-2),var(--accent))}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -455,7 +459,7 @@ const GUIDE_DEFAULT=[
 
 /* ---------- data (browser only: no sign-in yet) ---------- */
 const KEY="newberry-flock-v1";
-const DEF=()=>({settings:{price:55,priceRest:45,lowFeedDays:7,signature:"Newberry Middle School Project",groupLink:""},coops:[{id:"c1",name:"Main coop"}],hens:[],eggs:[],customers:[],sales:[],feeds:[],purchases:[],checks:{},health:[],guide:structuredClone(GUIDE_DEFAULT),updates:[],adjust:[]});
+const DEF=()=>({settings:{price:55,priceRest:45,lowFeedDays:7,signature:"Newberry Middle School Project",groupLink:""},coops:[{id:"c1",name:"Main coop"}],hens:[],eggs:[],customers:[],sales:[],feeds:[],purchases:[],checks:{},health:[],guide:structuredClone(GUIDE_DEFAULT),updates:[],adjust:[],expenses:[]});
 let S;try{S={...DEF(),...JSON.parse(localStorage.getItem(KEY))}}catch{S=DEF()}
 S.settings={...DEF().settings,...S.settings};if(!S.coops?.length)S.coops=DEF().coops;
 if(S.coops.length>1)S.coops=[S.coops[0]];S.hens.forEach(h=>h.coop=S.coops[0].id);S.eggs.forEach(e=>e.coop=S.coops[0].id);
@@ -597,7 +601,7 @@ function home(){
     <section class="tile warm"><div class="lbl">${ic("trend")}Laying rate</div><div class="ringbox">${ring(rate,"var(--accent)")}<div class="c">${rate===null?"–":Math.round(rate*100)+"%"}</div></div><div class="sub">${rate===null?"Add hens to see this":"7-day average · "+layingHens().length+" laying hens"}</div></section>
     <button class="tile sky" data-act="go" data-id="care"><div class="lbl">${ic("clip")}Daily checks</div><div class="ringbox">${ring(cp.total?cp.done/cp.total:0,"var(--sky)")}<div class="c">${cp.done}/${cp.total}</div></div><div class="sub">${cp.total&&cp.done===cp.total?"All done today":"Tap to tick off"}</div></button>
     <button class="tile ${low?"alert":""}" data-act="gofeed"><div class="lbl">${ic("grain")}Feed left</div><div class="big">${dl===null?"–":Math.floor(dl)}<span class="small muted" style="font:500 .9rem var(--body)"> ${dl===null?"":"days"}</span></div><div class="sub">${dl===null?"Log purchases and feeding":low?"Time to reorder":"At the current pace"}</div><div class="meter ${low?"low":""}"><i style="width:${dl===null?0:Math.min(100,dl/30*100)}%"></i></div></button>
-    <button class="tile s2" data-act="gosales"><div class="lbl">${ic("cash")}Sales this month</div><div class="big">${money(rev)}</div><div class="sub">${owed()>0?`<b style="color:var(--red)">${money(owed())}</b> still to be paid`:"Everything is paid"}${cpd?` · feed cost ≈ ${money(cpd)} per dozen`:""}</div></button>
+    <button class="tile s2" data-act="goprofit"><div class="lbl">${ic("cash")}Sales this month</div><div class="big">${money(rev)}</div><div class="sub">${(()=>{const p=periodStats(mStart,t);return `Costs ${money(p.costs)} · <b style="color:${p.profit<0?"var(--red)":"var(--green)"}">Profit ${money(p.profit)}</b>`})()}${owed()>0?` · <b style="color:var(--red)">${money(owed())}</b> unpaid`:""}</div></button>
     <section class="tile s2 ${att.length?"alert":"green"}"><div class="lbl">${ic("pulse")}Hen health</div>
       ${att.length?`<ul class="list" style="margin:2px 0 0">${att.slice(0,3).map(h=>`<li class="tap" data-act="hen" data-id="${h.id}" tabindex="0" role="button" style="padding:6px 0;border:0">${avatarHtml(h)}<div class="grow"><b>${esc(h.name)}</b><div class="small muted">${esc(coopName(h.coop))}</div></div>${statusPill(h.status)}</li>`).join("")}</ul>`:`<div class="big" style="font-size:1.7rem">${S.hens.length?"All clear":"No hens yet"}</div><div class="sub">${S.hens.length?`${activeHens().length} hens, none needing attention`:"Add your first hen"}</div>`}</section>
     <button class="tile s4" data-act="updates" style="min-height:0;flex-direction:row;align-items:center;gap:14px"><div class="avatar">${ic("share")}</div><div class="grow"><b style="font:700 1.1rem var(--display)">Share an update</b><div class="sub">${S.updates.length?`Last update ${dlabel(updList()[0].date)}. Keep the community involved.`:"Send a photo or video to parents and the community on WhatsApp"}</div></div>${ic("chev")}</button>
@@ -615,7 +619,8 @@ function hens(){
 }
 
 function eggs(){
-  const seg=`<div class="segc" role="group" aria-label="Section"><button aria-pressed="${eggSub==="log"}" data-act="eggsub" data-id="log">Collection</button><button aria-pressed="${eggSub==="sales"}" data-act="eggsub" data-id="sales">Sales</button></div>`;
+  const seg=`<div class="segc" role="group" aria-label="Section"><button aria-pressed="${eggSub==="log"}" data-act="eggsub" data-id="log">Collection</button><button aria-pressed="${eggSub==="sales"}" data-act="eggsub" data-id="sales">Sales</button><button aria-pressed="${eggSub==="money"}" data-act="eggsub" data-id="money">Profit</button></div>`;
+  if(eggSub==="money")return profitView(seg);
   if(eggSub==="sales"){
     const un=S.sales.filter(s=>!s.paid);
     return `<div class="page-h"><h2>Eggs</h2><button class="btn primary small" data-act="sell">${ic("cash")}Sell eggs</button></div>${seg}
@@ -668,7 +673,8 @@ function act(a,id){
     delsale:()=>{const i=S.sales.findIndex(s=>s.id===id),[s]=S.sales.splice(i,1);save();render();toast("Sale deleted.",()=>S.sales.splice(i,0,s))},
     deldayeggs:()=>{const rem=S.eggs.filter(e=>e.date===id);S.eggs=S.eggs.filter(e=>e.date!==id);save();render();toast("Egg entries deleted.",()=>S.eggs.push(...rem))},
     delbuy:()=>{const i=S.purchases.findIndex(p=>p.id===id),[p]=S.purchases.splice(i,1);save();render();toast("Purchase deleted.",()=>S.purchases.splice(i,0,p))},
-    custs:()=>custSheet(),stock:()=>stockSheet(),theme:()=>themeSheet(),applock:()=>lockSheet(),sync:()=>{if(!sb){toast("Connecting…");initAuth();return}user?syncSheet():signInSheet()},syncdismiss:()=>{try{localStorage.setItem("flock-sync-dismiss","1")}catch{}render()},install:()=>installApp(),updates:()=>go("updates"),newupd:()=>updSheet(),editupd:()=>updSheet(S.updates.find(x=>x.id===id)),shareupd:()=>sendUpdate(id),
+    custs:()=>custSheet(),goprofit:()=>{eggSub="money";go("eggs")},weekly:()=>weeklySheet(),pperiod:()=>{profPeriod=id;render()},newexp:()=>expSheet(),editexp:()=>expSheet(S.expenses.find(x=>x.id===id)),
+    delexp:()=>{const i=S.expenses.findIndex(x=>x.id===id),[r]=S.expenses.splice(i,1);save();render();toast("Expense deleted.",()=>S.expenses.splice(i,0,r))},stock:()=>stockSheet(),theme:()=>themeSheet(),applock:()=>lockSheet(),sync:()=>{if(!sb){toast("Connecting…");initAuth();return}user?syncSheet():signInSheet()},syncdismiss:()=>{try{localStorage.setItem("flock-sync-dismiss","1")}catch{}render()},install:()=>installApp(),updates:()=>go("updates"),newupd:()=>updSheet(),editupd:()=>updSheet(S.updates.find(x=>x.id===id)),shareupd:()=>sendUpdate(id),
     delupd:()=>{const u=S.updates.find(x=>x.id===id);confirmSheet("Delete this update?","The message and its photo or video are removed from this device.","Delete update",()=>{S.updates=S.updates.filter(x=>x.id!==id);if(u.media){mDel(u.media).catch(()=>{});dropMedia(u.media);removeCloudMedia(u.media)}save();render();toast("Update deleted.")})},guide:()=>openGuide(),gcat:()=>{guideCat=id;render()},gclear:()=>{guideQ="";guideCat="all";render()},newguide:()=>guideForm(),editguide:()=>guideForm(S.guide.find(g=>g.id===id)),
     logguide:()=>healthSheet(null,null,S.guide.find(g=>g.id===id).name+": "),
     delguide:()=>{const g=S.guide.find(x=>x.id===id);confirmSheet("Delete "+g.name+"?","This removes the entry from your guide. You can restore the defaults later.","Delete entry",()=>{const i=S.guide.findIndex(x=>x.id===id),[r]=S.guide.splice(i,1);save();render();toast("Entry deleted.",()=>S.guide.splice(i,0,r))})},
@@ -960,6 +966,7 @@ function fallbackSheet(text,file){
 function updates(){
   return `<div class="page-h"><h2>Updates</h2><button class="btn primary small" data-act="newupd">${ic("plus")}New update</button></div>
   <p class="muted" style="margin:-6px 0 14px">Share short photo or video updates with parents and the community on WhatsApp.</p>
+  <button class="btn block" data-act="weekly" style="margin-bottom:14px">${ic("trend")}Create this week’s report</button>
   ${S.settings.groupLink?`<a class="btn block" href="${esc(S.settings.groupLink)}" target="_blank" rel="noopener" style="margin-bottom:14px">${ic("users")}Open our WhatsApp group</a>`:""}
   ${S.updates.length?updList().map(u=>`<article class="card upd">
     ${u.media?`<div class="mthumb" data-mid="${u.media}" data-alt="${esc(u.title||"Update")}"><div class="skel" style="height:100%"></div></div>`:""}
@@ -1046,7 +1053,7 @@ let sm={meta:{},lastPull:null,pendingMedia:[],failedMedia:[]};
 try{sm={...sm,...JSON.parse(localStorage.getItem(SYNC_KEY))}}catch{}
 const persistSync=()=>{try{localStorage.setItem(SYNC_KEY,JSON.stringify(sm))}catch{}};
 let lastErr="",sb=null,user=null,syncState="signedout",syncedAt=null,pulling=false,pushing=false,channel=null,pushTimer;
-const COLS=["hens","eggs","customers","sales","feeds","purchases","health","updates","guide","adjust"];
+const COLS=["hens","eggs","customers","sales","feeds","purchases","health","updates","guide","adjust","expenses"];
 const canon=v=>Array.isArray(v)?"["+v.map(canon).join(",")+"]":v&&typeof v==="object"?"{"+Object.keys(v).filter(k=>v[k]!==undefined).sort().map(k=>JSON.stringify(k)+":"+canon(v[k])).join(",")+"}":JSON.stringify(v);
 const hashOf=r=>{const s=canon(r);let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return h+":"+s.length};
 function recMap(){
@@ -1389,6 +1396,164 @@ function stockSheet(){
       toast(`Stock set to ${n} eggs.`,()=>{S.adjust.splice(S.adjust.indexOf(rec),1)});
     };
     sh.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const i=S.adjust.findIndex(a=>a.id===b.dataset.del),[r]=S.adjust.splice(i,1);save();close();render();toast("Correction deleted.",()=>S.adjust.splice(i,0,r))});
+  });
+}
+
+/* ---------- costs & profit ---------- */
+const EXP_CATS=["Vet & medicine","Bedding & supplies","Equipment","Coop & repairs","Other"];
+let profPeriod="month";
+const PERIODS=[["month","This month"],["last","Last month"],["d90","90 days"],["all","All time"]];
+function periodRange(k){
+  const t=today(),d=new Date();
+  if(k==="month")return[iso(new Date(d.getFullYear(),d.getMonth(),1)),t];
+  if(k==="last")return[iso(new Date(d.getFullYear(),d.getMonth()-1,1)),iso(new Date(d.getFullYear(),d.getMonth(),0))];
+  if(k==="d90")return[addDays(t,-89),t];
+  return["0000-00-00","9999-12-31"];
+}
+function periodStats(from,to){
+  const inR=d=>d>=from&&d<=to;
+  const sales=S.sales.filter(s=>inR(s.date)),income=sum(sales,saleTotal);
+  /* feed is counted as it is used (kg fed x your average price per kg); if no feeding is logged, bags count when bought */
+  let feed=0,usedAny=false;
+  for(const f of S.feeds){
+    const kg=sum(Object.entries(S.checks).filter(([d])=>inR(d)),([,cs])=>sum(Object.values(cs),c=>c.fed&&(c.feed===f.id||!c.feed&&f.id===S.feeds[0]?.id)?+c.fed:0));
+    const bags=S.purchases.filter(p=>p.feed===f.id),bought=sum(bags,p=>+p.kg||0),paid=sum(bags,p=>+p.cost||0);
+    if(kg>0&&bought>0){feed+=kg*(paid/bought);usedAny=true}
+  }
+  if(!usedAny)feed=sum(S.purchases.filter(p=>inR(p.date)),p=>+p.cost||0);
+  const ex=(S.expenses||[]).filter(e=>inR(e.date)),other=sum(ex,e=>+e.amount||0);
+  const byCat={};if(feed>0)byCat["Feed"]=feed;ex.forEach(e=>{byCat[e.category]=(byCat[e.category]||0)+(+e.amount||0)});
+  const costs=feed+other,laid=sum(S.eggs.filter(e=>inR(e.date)),e=>e.count-(e.cracked||0)),soldEggs=sum(sales,s=>s.eggs);
+  return{income,feed,other,costs,profit:income-costs,byCat,expenses:ex,dozLaid:laid/12,dozSold:soldEggs/12,
+    costPerDoz:laid>0?costs/(laid/12):null,profitPerDoz:soldEggs>0?(income-costs)/(soldEggs/12):null};
+}
+function profitView(seg){
+  const[from,to]=periodRange(profPeriod),p=periodStats(from,to),label=PERIODS.find(x=>x[0]===profPeriod)[1];
+  const cats=Object.entries(p.byCat).sort((a,b)=>b[1]-a[1]),top=cats[0]?.[1]||1;
+  const list=[...p.expenses].sort((a,b)=>b.date.localeCompare(a.date));
+  return `<div class="page-h"><h2>Eggs</h2><button class="btn primary small" data-act="newexp">${ic("plus")}Add expense</button></div>${seg}
+  <div class="chips scroll" role="group" aria-label="Period" style="margin-bottom:12px">${PERIODS.map(([k,l])=>`<button class="chip" aria-pressed="${profPeriod===k}" data-act="pperiod" data-id="${k}">${l}</button>`).join("")}</div>
+  <div class="bento" style="grid-template-columns:repeat(2,1fr)">
+    <section class="tile green"><div class="lbl">${ic("cash")}Income</div><div class="big">${money(p.income)}</div><div class="sub">${num(p.dozSold,1)} dozen sold</div></section>
+    <section class="tile"><div class="lbl">${ic("bag")}Costs</div><div class="big">${money(p.costs)}</div><div class="sub">feed + ${money(p.other)} other</div></section>
+    <section class="tile s2 ${p.profit<0?"alert":"warm"}"><div class="lbl">${ic("trend")}Profit · ${label.toLowerCase()}</div><div class="big">${money(p.profit)}</div>
+      <div class="sub">${p.profitPerDoz!==null?`${money(p.profitPerDoz)} profit per dozen sold`:"Sell some eggs to see profit per dozen"}${p.costPerDoz!==null?` · it costs about ${money(p.costPerDoz)} to produce a dozen`:""}</div></section>
+  </div>
+  <section class="card"><h2>Where the money goes</h2>${cats.length?`<div class="cbars">${cats.map(([c,v])=>`<div class="cbar"><span>${esc(c)}</span><b class="amt">${money(v)}</b><div class="tr"><i style="width:${Math.max(3,v/top*100)}%"></i></div></div>`).join("")}</div>`:`<p class="muted" style="margin:0">No costs in this period yet. Feed you log under Care → Feed counts automatically. Add anything else with <b>Add expense</b>.</p>`}
+    <p class="hint">Feed is counted as it’s used, at your average price per kg, so one big delivery doesn’t distort a month. This needs the “Fed” kilograms in Daily checks. Without them, bags count on the day you buy them.</p></section>
+  <section class="card"><h2>Expenses</h2>${list.length?`<ul class="list">${list.map(e=>`<li><div class="avatar">${ic("bag")}</div><div class="grow"><b>${esc(e.category)}</b><div class="small muted">${dlabel(e.date)}${e.note?" · "+esc(e.note):""}</div></div><span class="amt">${money(e.amount)}</span><button class="btn small icon" data-act="editexp" data-id="${e.id}" aria-label="Edit this expense">${ic("pencil")}</button><button class="btn small icon danger" data-act="delexp" data-id="${e.id}" aria-label="Delete this expense">${ic("trash")}</button></li>`).join("")}</ul>`:`<div class="empty">${ic("bag","xl")}<h3>No expenses yet</h3><p>Vet visits, bedding, repairs, equipment. Add them to see your real profit.</p><button class="btn primary" data-act="newexp">${ic("plus")}Add an expense</button></div>`}</section>`;
+}
+function expSheet(rec){
+  const m={date:rec?.date||today(),category:rec?.category||EXP_CATS[0],amount:rec?.amount??"",note:rec?.note||"",err:""};
+  sheet(rec?"Edit expense":"Add expense",`<form id="f" novalidate></form>`,(sh,close)=>{
+    const f=sh.querySelector("#f"),keep=()=>{const g=i=>f.querySelector(i);m.amount=g("#am").value;m.note=g("#nt").value;m.date=g("#dt").value||today()};
+    const draw=()=>{redraw(sh,f,`
+      <label class="f">What was it for?</label><div class="chips" role="group" aria-label="Category">${EXP_CATS.map(c=>`<button type="button" class="chip" data-f="c-${esc(c)}" data-c="${esc(c)}" aria-pressed="${m.category===c}">${esc(c)}</button>`).join("")}</div>
+      <label class="f" for="am">Amount (R)</label><input id="am" data-autofocus class="t" type="number" inputmode="decimal" min="0" step="1" value="${esc(m.amount)}" ${m.err?'aria-invalid="true" aria-describedby="e-am"':""}>${m.err?`<p class="err" id="e-am" role="alert">${ic("alert")}${m.err}</p>`:""}
+      <label class="f" for="nt">Note <span class="muted">(optional)</span></label><input id="nt" class="t" maxlength="80" value="${esc(m.note)}" placeholder="e.g. Wood shavings, vet visit">
+      <label class="f" for="dt">Date</label><input id="dt" class="t" type="date" value="${m.date}" max="${today()}">
+      <p class="hint">Feed bought is already counted from Care → Feed. Don’t add it again here.</p>
+      <div class="foot"><button class="btn primary block" id="go">${rec?"Save changes":"Save expense"}</button></div>`);
+      f.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{keep();m.category=b.dataset.c;draw()})};
+    f.onsubmit=e=>{e.preventDefault();keep();const a=parseFloat(m.amount);
+      if(!(a>0)){m.err="Enter how much it cost.";draw();f.querySelector("#am").focus();return}
+      const vals={date:m.date,category:m.category,amount:a,note:m.note.trim()};
+      if(rec){Object.assign(rec,vals);save();close();render();toast("Expense updated.");return}
+      const r={id:uid(),...vals};S.expenses.push(r);save();close();render();toast(`Added ${money(a)} to costs.`,()=>S.expenses.splice(S.expenses.indexOf(r),1))};
+    draw();
+  });
+}
+
+/* ---------- weekly report card (image + message) for WhatsApp ---------- */
+function weekRange(k){
+  const t=today(),dow=(new Date().getDay()+6)%7;
+  if(k==="last7")return[addDays(t,-6),t];
+  if(k==="this")return[addDays(t,-dow),t];
+  const end=addDays(t,-dow-1);return[addDays(end,-6),end];
+}
+const wd=d=>new Date(d+"T12:00").toLocaleDateString("en-ZA",{weekday:"short"});
+const dm=d=>new Date(d+"T12:00").toLocaleDateString("en-ZA",{day:"numeric",month:"short"});
+function weekStats(from,to){
+  const days=[];for(let d=from;d<=to;d=addDays(d,1))days.push(d);
+  const eggs=days.map(eggsOn),total=sum(eggs,x=>x),best=eggs.indexOf(Math.max(...eggs));
+  const ps=periodStats(from,to);
+  return{from,to,days,eggs,total,avg:total/days.length,best,bestN:eggs[best]||0,cracked:sum(S.eggs.filter(e=>e.date>=from&&e.date<=to),e=>e.cracked||0),
+    soldDoz:ps.dozSold,income:ps.income,costs:ps.costs,profit:ps.profit,unpaid:owed(),feedDays:minDaysLeft(),watch:attention()};
+}
+function weekText(st,aud){
+  const head=`Weekly update, ${dm(st.from)} to ${dm(st.to)}`;
+  const eggs=st.total>0?`Our hens laid ${st.total} eggs (about ${num(st.avg,1)} a day).${st.bestN>0?` Best day: ${wd(st.days[st.best])} with ${st.bestN}.`:""}`:"No eggs were logged this week.";
+  if(aud!=="staff")return [head,eggs,"Thank you to everyone who supports our hens and our school project!"].join("\n\n");
+  const money1=[`Sold ${num(st.soldDoz,1)} dozen for ${money(st.income)}.`,`Costs ${money(st.costs)}. Profit ${money(st.profit)}.`,st.unpaid>0?`Still to be paid: ${money(st.unpaid)}.`:""].filter(Boolean).join(" ");
+  const care=[st.feedDays!==null?`Feed left: about ${Math.floor(st.feedDays)} days.`:"",st.watch.length?`Hens to keep an eye on: ${st.watch.map(h=>`${h.name} (${h.status})`).join(", ")}.`:"All hens are doing well."].filter(Boolean).join(" ");
+  return [head,eggs,money1,care].join("\n\n");
+}
+async function drawCard(st,aud){
+  const W=1080,H=1350,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
+  try{await Promise.all([document.fonts.load('700 120px "Bricolage Grotesque"'),document.fonts.load('600 40px "Instrument Sans"')])}catch{}
+  const D='"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif',B='"Instrument Sans",system-ui,sans-serif';
+  const rr=(x,y,w,h,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()};
+  g.fillStyle="#fbf6ec";g.fillRect(0,0,W,H);
+  const gr=g.createLinearGradient(0,0,W,520);gr.addColorStop(0,"#c46a0d");gr.addColorStop(1,"#8a4505");g.fillStyle=gr;
+  g.beginPath();g.moveTo(0,0);g.lineTo(W,0);g.lineTo(W,440);g.arcTo(W,520,W-80,520,80);g.lineTo(80,520);g.arcTo(0,520,0,440,80);g.closePath();g.fill();
+  try{const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src="icons/flock-192.png"});g.drawImage(img,60,56,112,112)}catch{}
+  g.fillStyle="#fff";g.font=`700 42px ${D}`;g.textBaseline="alphabetic";g.fillText("Newberry Middle School Project",196,102);
+  g.globalAlpha=.88;g.font=`500 34px ${B}`;g.fillText(`Weekly update · ${dm(st.from)} to ${dm(st.to)}`,196,152);g.globalAlpha=1;
+  g.font=`700 250px ${D}`;g.fillText(String(st.total),56,420);const nw=g.measureText(String(st.total)).width;
+  g.font=`600 54px ${B}`;g.fillText("eggs laid",56+nw+28,330);g.globalAlpha=.88;g.font=`500 38px ${B}`;g.fillText(`about ${num(st.avg,1)} a day`,56+nw+28,386);g.globalAlpha=1;
+  /* bars */
+  const n=st.days.length,areaX=60,areaW=960,gap=18,bw=(areaW-gap*(n-1))/n,top=640,base=1010,mx=Math.max(1,...st.eggs);
+  g.fillStyle="#6c6250";g.font=`600 30px ${B}`;g.textAlign="center";
+  st.eggs.forEach((v,i)=>{
+    const x=areaX+i*(bw+gap),h=Math.max(8,(v/mx)*(base-top-50)),y=base-h;
+    g.fillStyle=i===st.best&&v>0?"#a65608":"#e8b27a";rr(x,y,bw,h,18);g.fill();
+    g.fillStyle="#221c11";g.font=`700 38px ${D}`;g.fillText(String(v),x+bw/2,y-14);
+    g.fillStyle="#6c6250";g.font=`600 30px ${B}`;g.fillText(wd(st.days[i]),x+bw/2,base+48);
+  });
+  g.textAlign="left";
+  /* facts */
+  const tile=(x,w,label,val,col)=>{g.fillStyle="#fff";rr(x,1110,w,150,26);g.fill();g.strokeStyle="#ece3cf";g.lineWidth=2;g.stroke();g.fillStyle="#6c6250";g.font=`600 28px ${B}`;g.fillText(label,x+28,1158);g.fillStyle=col||"#221c11";g.font=`700 48px ${D}`;g.fillText(val,x+28,1226)};
+  if(aud==="staff"){const w=(areaW-2*gap)/3;tile(60,w,"Sold",`${num(st.soldDoz,1)} dozen`);tile(60+w+gap,w,"Income",money(st.income));tile(60+2*(w+gap),w,"Profit",money(st.profit),st.profit<0?"#b3261e":"#276b36")}
+  else{const w=(areaW-gap)/2;tile(60,w,"Best day",st.bestN>0?`${wd(st.days[st.best])} · ${st.bestN} eggs`:"None yet");tile(60+w+gap,w,"Cracked",`${st.cracked} egg${st.cracked===1?"":"s"}`)}
+  g.fillStyle="#6c6250";g.font=`500 30px ${B}`;g.textAlign="center";g.fillText(S.settings.signature||"Fresh eggs from our school hens",W/2,1318);
+  return new Promise(r=>c.toBlob(r,"image/png"));
+}
+async function weeklySheet(){
+  const m={period:"last7",aud:"community",text:"",blob:null,url:null,edited:false,busy:true,token:0};
+  sheet("Weekly report",`<div id="wr"></div>`,(sh,close)=>{
+    const root=sh.querySelector("#wr");
+    const draw=()=>{
+      const st=m.st,PER=[["last7","Last 7 days"],["this","This week"],["last","Last week"]];
+      redraw(sh,root,`
+      <label class="f">Period</label><div class="chips" role="group" aria-label="Period">${PER.map(([k,l])=>`<button type="button" class="chip" data-f="p-${k}" data-p="${k}" aria-pressed="${m.period===k}">${l}</button>`).join("")}</div>
+      <label class="f">Who is it for?</label><div class="segc" style="margin:0" role="group" aria-label="Audience"><button type="button" data-f="a-c" data-a="community" aria-pressed="${m.aud==="community"}">Parents &amp; community</button><button type="button" data-f="a-s" data-a="staff" aria-pressed="${m.aud==="staff"}">Staff (with money)</button></div>
+      <div style="margin-top:14px">${m.url?`<img src="${m.url}" alt="Weekly report card" style="display:block;width:100%;border-radius:18px;box-shadow:var(--shadow)">`:`<div class="skel" style="aspect-ratio:4/5"></div>`}</div>
+      ${st&&st.total===0?`<div class="warn">${ic("alert")}<span>No eggs are logged for this period. Pick another period, or log the eggs first.</span></div>`:""}
+      <label class="f" for="wt">Message</label><textarea id="wt" class="t" rows="7">${esc(m.text)}</textarea>
+      <p class="hint">${S.settings.signature?`Your sign-off “${esc(S.settings.signature)}” is added when you send.`:"Add a sign-off under More, Coop, prices & alerts."}</p>
+      <div class="foot"><button class="btn primary block" id="send" ${m.busy?"disabled":""}>${ic("chat")}Send on WhatsApp</button>
+      <div class="row wr" style="margin-top:10px;justify-content:center"><button type="button" class="linkbtn" id="sv">Save to Updates</button><button type="button" class="linkbtn" id="cp">Copy text</button><button type="button" class="linkbtn" id="dl">Save image</button></div></div>`);
+      root.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{m.period=b.dataset.p;build()});
+      root.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{m.aud=b.dataset.a;build()});
+      root.querySelector("#wt").oninput=e=>{m.text=e.target.value;m.edited=true};
+      const file=()=>new File([m.blob],`newberry-weekly-${m.st.to}.png`,{type:"image/png"});
+      root.querySelector("#send").onclick=async()=>{
+        if(!m.blob)return;const text=composeText({text:m.text}),f=file(),p=shareNow(text,f);   /* started inside the tap */
+        const r=await p;if(r==="shared"){close();toast("Shared. Thank you for keeping the community in the loop.")}else if(r==="fallback"){close();fallbackSheet(text,f)}};
+      root.querySelector("#sv").onclick=async()=>{
+        if(!m.blob)return;const id=uid();
+        try{await mPut(id,m.blob);queueMedia(id)}catch{toast("Couldn’t keep the image on this browser. The text was saved.")}
+        S.updates.unshift({id,title:`Weekly report: ${dm(m.st.from)} to ${dm(m.st.to)}`,text:m.text,date:today(),media:id,shared:null});save();close();tab="updates";render();toast("Saved to Updates.")};
+      root.querySelector("#cp").onclick=()=>{(navigator.clipboard?.writeText(composeText({text:m.text}))||Promise.reject()).then(()=>toast("Message copied."),()=>toast("Couldn’t copy. Select the text and copy it manually."))};
+      root.querySelector("#dl").onclick=()=>{if(!m.blob)return;const a=document.createElement("a");a.href=m.url;a.download=file().name;a.click()};
+    };
+    const build=async()=>{
+      const tok=++m.token,[from,to]=weekRange(m.period);m.st=weekStats(from,to);
+      m.text=weekText(m.st,m.aud);m.edited=false;m.busy=true;if(m.url)URL.revokeObjectURL(m.url);m.blob=null;m.url=null;draw();
+      const blob=await drawCard(m.st,m.aud);if(tok!==m.token)return;
+      m.blob=blob;m.url=URL.createObjectURL(blob);m.busy=false;draw();
+    };
+    build();
   });
 }
 
