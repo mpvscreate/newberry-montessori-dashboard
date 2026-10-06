@@ -324,9 +324,9 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const COLORS=["#a65608","#2f7d4f","#2a6b8f","#b5527a","#7a5cc4","#b08a14","#1f8a80","#b3261e"];
 const DEFAULTS=[["Maintenance","wrench",0],["Media","film",2],["Gardening","sprout",1],["Crafts","scissors",3],["Mountain biking","bike",6],["Crèche","smile",5],["Cooking","utensils",7],["Construction","hammer",4],["Chicken Coop","coop",0]];
 /* sign-in is switched off for now: the app opens with a PIN and keeps data on this device. Set LOGIN=true to bring staff sign-in and cloud sync back. */
-/* staff sign-in happens once per device (the session is remembered). A PIN is optional and only locks this device. */
-const LOGIN=true,PINLEN=3;
-let S=load(),sm=loadSync(),user=null,sb=null,route="home",tab="goals",syncState="",authReady=false,listening=null;
+/* sign-in is switched off for now: the app opens straight in and keeps data on this device. Set LOGIN=true to bring staff sign-in and cloud sync back. An optional PIN can still lock a device. */
+const LOGIN=false,PINLEN=3;
+let S=load(),sm=loadSync(),user=null,sb=null,route="home",tab="goals",syncState=LOGIN?"":"Saved on this device",authReady=false,listening=null;
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.prods)return d}catch{}
   const now=Date.now();return{prods:DEFAULTS.map(([name,icon,c],i)=>({id:"p"+i,name,icon,color:COLORS[c],desc:"",members:[],goals:[],log:[],del:false,u:now})),media:[]}}
 function loadSync(){try{return JSON.parse(localStorage.getItem(SYNC))||{}}catch{return{}}}
@@ -484,9 +484,9 @@ function morePage(){const t=theme();
   return `<div class="page-h"><h2>Settings</h2></div><div class="card"><h2>Appearance</h2><div class="segc" role="group" aria-label="Theme">${[["auto","Auto","device"],["light","Light","sun"],["dark","Dark","moon"]].map(([k,l,i])=>`<button data-th="${k}" aria-label="${l}" aria-pressed="${t===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div>
   <div class="card"><h2>Voice dictation</h2><p class="muted" style="margin:0">${SR?"On. Tap the microphone next to any text box and speak.":"Not available in this browser. Try Chrome or Edge, or use your phone keyboard's microphone."}</p></div>
   <div class="card"><h2>App lock</h2><p class="muted" style="margin-top:0">Optional. Add a 3-digit PIN and the app asks for it when you open it on this device. You stay signed in either way.</p>${getPin()?`<div class="row wr"><button class="btn" id="pinchg">Change PIN</button><button class="btn danger" id="pinoff">Remove PIN</button></div>`:`<button class="btn primary" id="pinset">${ic("lock")}Set a PIN</button>`}</div>
-  <div class="card"><h2>Backup</h2><p class="muted" style="margin-top:0">Your goals sync to the cloud while you are signed in. A downloaded backup is an extra copy of your goals, targets, team and logs. Photos and videos are not included.</p><div class="row wr"><button class="btn" id="bk-out">${ic("download")}Download backup</button><button class="btn" id="bk-in">${ic("upload")}Restore</button></div><input type="file" id="bk-f" accept="application/json,.json" class="sr" aria-label="Choose a backup file" tabindex="-1"></div>
-  <div class="card"><h2>Account</h2><p class="muted" style="margin-top:0">Signed in as ${esc(user.email)}. You only need to sign in once on this device.</p><div class="row wr"><button class="btn" id="out">${ic("logout")}Sign out</button>${getPin()?`<button class="btn" id="lk">${ic("lock")}Lock now</button>`:""}</div></div>`}
-function wireMore(){document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#pinset")&&($("#pinset").onclick=setPin);$("#pinchg")&&($("#pinchg").onclick=()=>{removePinThenSet()});$("#pinoff")&&($("#pinoff").onclick=removePin);$("#lk")&&($("#lk").onclick=lockNow);$("#out").onclick=()=>{if(!confirm("Sign out of this device? You will need to sign in again."))return;if(sb)sb.auth.signOut();else{user=null;try{localStorage.removeItem(USERK)}catch{}render()}};
+  <div class="card"><h2>Backup</h2><p class="muted" style="margin-top:0">Everything is stored on this device only while sign-in is off. Download a backup of your goals, targets, team and logs now and then. Photos and videos are not included.</p><div class="row wr"><button class="btn" id="bk-out">${ic("download")}Download backup</button><button class="btn" id="bk-in">${ic("upload")}Restore</button></div><input type="file" id="bk-f" accept="application/json,.json" class="sr" aria-label="Choose a backup file" tabindex="-1"></div>
+  <div class="card"><h2>This device</h2><p class="muted" style="margin-top:0">${LOGIN?`Signed in as ${esc(user.email)}. You only need to sign in once on this device.`:"Sign-in is switched off for now, so cloud sync is paused. Everything you add is saved on this device only."}</p><div class="row wr">${LOGIN?`<button class="btn" id="out">${ic("logout")}Sign out</button>`:""}${getPin()?`<button class="btn" id="lk">${ic("lock")}Lock now</button>`:""}</div></div>`}
+function wireMore(){document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#pinset")&&($("#pinset").onclick=setPin);$("#pinchg")&&($("#pinchg").onclick=()=>{removePinThenSet()});$("#pinoff")&&($("#pinoff").onclick=removePin);$("#lk")&&($("#lk").onclick=lockNow);$("#out")&&($("#out").onclick=()=>{if(!confirm("Sign out of this device? You will need to sign in again."))return;if(sb)sb.auth.signOut();else{user=null;try{localStorage.removeItem(USERK)}catch{}render()}});
   $("#bk-out").onclick=()=>{const blob=new Blob([JSON.stringify({app:"ms-productions",v:1,at:new Date().toISOString(),prods:S.prods},null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ms-productions-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")};
   $("#bk-in").onclick=()=>$("#bk-f").click();
   $("#bk-f").onchange=async e=>{const file=e.target.files[0];if(!file)return;let d;try{d=JSON.parse(await file.text())}catch{toast("That file isn't a valid backup.");return}
@@ -1087,7 +1087,8 @@ function reportSheet(p){
 
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch{}
-migrateMedia();render();initAuth();
+if(!LOGIN){user={email:"staff@local",local:true};authReady=true}
+lockNow();migrateMedia();render();if(LOGIN)initAuth();
 </script>
 </body>
 </html>
