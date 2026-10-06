@@ -52,7 +52,8 @@ h1,h2,h3{font-family:var(--display);font-variation-settings:"opsz" 48;letter-spa
 .row{display:flex;align-items:center;gap:12px}.wr{flex-wrap:wrap}.grow{flex:1;min-width:0}.between{justify-content:space-between}
 header.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
 header.top .logo{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
-header.top h1{font-size:1.45rem}
+header.top h1{font-size:1.45rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:480px){.sync .st{display:none}.sync{padding:6px 9px}.pavatar{display:none}}
 .sync{display:inline-flex;align-items:center;gap:6px;font-size:.78rem;font-weight:600;color:var(--muted);background:var(--sheet);border:1px solid var(--line);border-radius:99px;padding:6px 12px;min-height:36px}
 .page-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 14px}
 .page-h h2{font-size:clamp(1.6rem,5vw,2.1rem)}
@@ -156,6 +157,26 @@ input[type=range]{width:100%;height:36px;accent-color:var(--accent)}
 .confetti{position:fixed;inset:0;pointer-events:none;z-index:70;overflow:hidden}
 .confetti i{position:absolute;top:-20px;width:10px;height:14px;border-radius:3px;animation:fall 1.6s ease-in forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
+.photos button{position:relative}
+.photos video{width:100%;height:100%;object-fit:cover;display:block;background:#000}
+.vb{position:absolute;right:8px;bottom:8px;width:30px;height:30px;border-radius:50%;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cmp figure{margin:0;position:relative;border-radius:16px;overflow:hidden;aspect-ratio:1;background:var(--line)}
+.cmp img{width:100%;height:100%;object-fit:cover;display:block}
+.cmp figcaption{position:absolute;left:8px;bottom:8px;background:rgba(0,0,0,.65);color:#fff;border-radius:99px;padding:3px 10px;font-size:.78rem;font-weight:600}
+#lock{position:fixed;inset:0;z-index:100;background:var(--paper);display:flex;padding:24px;overflow:auto}
+.lk-card{width:100%;max-width:340px;text-align:center;margin:auto}
+.lk-s{min-height:1.5em;margin:6px 0 0;color:var(--muted)}.lk-s.bad{color:var(--red);font-weight:600}
+.lk-dots{display:flex;gap:14px;justify-content:center;margin:20px 0 24px;min-height:18px}
+.lk-dots i{width:16px;height:16px;border-radius:50%;border:2px solid var(--field);transition:background .15s,box-shadow .2s}
+.lk-dots i.on{background:var(--accent);border-color:var(--accent);box-shadow:0 0 0 4px var(--glow-soft)}
+.lk-pad{display:grid;grid-template-columns:repeat(3,76px);gap:14px;justify-content:center}
+.lk-pad button{width:76px;height:76px;border-radius:50%;border:1.5px solid var(--line);background:var(--sheet);font:600 1.7rem var(--display);cursor:pointer;display:grid;place-items:center}
+.lk-pad button:active{transform:scale(.94);box-shadow:0 0 0 6px var(--glow-soft)}
+.lk-pad .ghost{visibility:hidden}
+.linkbtn{background:none;border:0;color:var(--accent);font-weight:600;text-decoration:underline;cursor:pointer;padding:10px 4px;min-height:44px}
+.rep img{display:block;width:100%;border-radius:18px;box-shadow:var(--shadow)}
+.chips .chip{padding:8px 14px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
@@ -179,6 +200,14 @@ image:'<rect x="3.5" y="4.5" width="17" height="15" rx="2"/><circle cx="9" cy="1
 camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
 users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.6a3.5 3.5 0 010 6.8"/><path d="M18 14.3c2 .7 3.5 2.6 3.5 5.7"/>',
 note:'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4M9 13h6M9 17h6"/>',
+play:'<path d="M7 4l13 8-13 8z"/>',
+lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>',
+backspace:'<path d="M21 5H9l-6 7 6 7h12z"/><path d="M13 9l4 6M17 9l-4 6"/>',
+share:'<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6"/>',
+download:'<path d="M12 4v11M7 11l5 5 5-5M4 20h16"/>',
+copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',
+trend:'<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',
+video:'<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3"/>',
 user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
 mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/>',
 pencil:'<path d="M4 20l1-4L16.5 4.5a2 2 0 013 3L8 19z"/>',
@@ -269,10 +298,10 @@ function loadSb(){return new Promise(res=>{if(window.supabase)return res();const
 async function initAuth(){
   await loadSb();
   if(window.supabase){sb=supabase.createClient(SB_URL,SB_KEY);
-    const{data}=await sb.auth.getSession();user=data.session?.user||null;
-    sb.auth.onAuthStateChange((_e,s)=>{const was=user;user=s?.user||null;if(user&&!was){render();syncNow()}if(!user&&was)render()});
+    const{data}=await sb.auth.getSession();user=data.session?.user||null;if(user){try{localStorage.setItem(USERK,user.email)}catch{}}
+    sb.auth.onAuthStateChange((_e,s)=>{const was=user;user=s?.user||null;if(user){try{localStorage.setItem(USERK,user.email);if(localStorage.getItem(RESETK)){localStorage.removeItem(RESETK);localStorage.removeItem(PINK);toast("PIN removed. You can set a new one in Settings.")}}catch{}}else if(_e==="SIGNED_OUT"){try{localStorage.removeItem(USERK)}catch{}}if(user&&!was){render();syncNow()}if(!user&&was)render()});
     if(user)syncNow();
-  }
+  }else{const cu=localStorage.getItem(USERK);if(cu&&getPin()){user={email:cu,offline:true}}}
   render();
 }
 function authScreen(msg){
@@ -304,13 +333,14 @@ async function syncNow(){
     [["ms_prod",S.prods],["ms_media",S.media]].forEach(([kind,list])=>list.forEach(x=>{
       if((x.u||0)>(sm.rem[kind+"|"+x.id]||0))rows.push({kind,id:x.id,data:x,deleted:!!x.del,u:x.u||Date.now()})}));
     for(let i=0;i<rows.length;i+=20){const{error:e}=await sb.rpc("flock_upsert",{rows:rows.slice(i,i+20)});if(e)throw e;rows.slice(i,i+20).forEach(r=>sm.rem[r.kind+"|"+r.id]=r.u)}
+    await pushMedia();
     localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem(SYNC,JSON.stringify(sm));
     setSyncUi("Synced");
     if(changed&&!isOpen())render();
   }catch(e){console.warn(e);setSyncUi(navigator.onLine?"Sync problem":"Offline, saved here")}
 }
-function setSyncUi(t){syncState=t;const e=$("#sync");if(e)e.innerHTML=ic(t==="Synced"||t==="Syncing…"?"cloud":"cloudoff","sm")+esc(t)}
-addEventListener("online",syncNow);
+function setSyncUi(t){syncState=t;const e=$("#sync");if(e)e.innerHTML=ic(t==="Synced"||t==="Syncing…"?"cloud":"cloudoff","sm")+`<span class="st">${esc(t)}</span>`;e.title=t}
+addEventListener("online",()=>{if(!sb)initAuth();else syncNow()});
 setInterval(()=>{if(!document.hidden)syncNow()},60000);
 
 /* shell */
@@ -324,6 +354,7 @@ function render(){
   <nav class="tabs" aria-label="Main">${NAV.map(([k,l,i])=>`<button data-nav="${k}" ${cur===k?'aria-current="page"':""}>${ic(i)}${l}</button>`).join("")}</nav>`;
   setSyncUi(syncState||"Sign in to sync");
   document.querySelectorAll("[data-nav]").forEach(b=>b.onclick=()=>nav(b.dataset.nav));
+  hydrate();
   p?wireProd(p):({home:wireHome,prods:wireHome,activity(){},more:wireMore}[route]||wireHome)();
 }
 
@@ -337,7 +368,7 @@ function home(){
   const ps=prods(),all=ps.flatMap(p=>p.goals),open=all.filter(g=>!g.done).length,
     pct=ps.length?Math.round(ps.reduce((a,p)=>a+prodPct(p),0)/ps.length):0,
     photos=S.media.filter(m=>!m.del).length,f=feedItems().slice(0,5);
-  return `<div class="page-h"><h2>Overview</h2></div>
+  return `<div class="page-h"><h2>Overview</h2><button class="btn small" id="rep">${ic("trend")}Weekly report</button></div>
   <div class="bento"><div class="tile hero s2"><div class="lbl">${ic("sparkle")}Overall progress</div><div class="big">${pct}%</div><div class="sub">${ps.length} productions</div><div class="meter"><i style="width:${pct}%"></i></div></div>
   <div class="tile green"><div class="lbl">${ic("target")}Open goals</div><div class="big">${open}</div><div class="sub">${all.length-open} done</div></div>
   <div class="tile sky"><div class="lbl">${ic("image")}Photos</div><div class="big">${photos}</div><div class="sub">across all</div></div></div>
@@ -349,14 +380,15 @@ const actRow=f=>`<li><div class="avatar" style="color:${f.p.color}">${ic(f.p.ico
 const fab=()=>`<div class="fab-wrap"><button class="fab" id="addp">${ic("plus")}New production</button></div>`;
 function wireHome(){
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>nav("p/"+b.dataset.open));
-  $("#addp")&&($("#addp").onclick=()=>prodSheet());
+  $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#rep")&&($("#rep").onclick=()=>reportSheet(null));
 }
 function prodsPage(){return `<div class="page-h"><h2>Productions</h2></div><div class="hgrid">${prods().map(card).join("")}</div>${fab()}`}
 function activityPage(){const f=feedItems().slice(0,60);return `<div class="page-h"><h2>Activity</h2></div><div class="card">${f.length?`<ul class="list">${f.map(actRow).join("")}</ul>`:`<div class="empty">${ic("pulse","xl")}<h3>No activity yet</h3>Comments and log entries from every production show up here.</div>`}</div>`}
 function morePage(){const t=theme();
   return `<div class="page-h"><h2>Settings</h2></div><div class="card"><h2>Appearance</h2><div class="segc" role="group" aria-label="Theme">${[["auto","Auto","device"],["light","Light","sun"],["dark","Dark","moon"]].map(([k,l,i])=>`<button data-th="${k}" aria-pressed="${t===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div>
+  <div class="card"><h2>App lock</h2><p class="muted" style="margin-top:0">${getPin()?"A 4-digit PIN protects this device. It also lets you open the app offline.":"Add a 4-digit PIN so only you can open the app on this device."}</p>${getPin()?`<div class="row wr"><button class="btn" id="pinchg">Change PIN</button><button class="btn danger" id="pinoff">Remove PIN</button></div>`:`<button class="btn primary" id="pinset">${ic("lock")}Set a PIN</button>`}</div>
   <div class="card"><h2>Account</h2><p class="muted" style="margin-top:0">Signed in as ${esc(user.email)}</p><button class="btn block" id="out">${ic("logout")}Sign out</button></div>`}
-function wireMore(){document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#out").onclick=()=>confirm("Sign out?")&&sb.auth.signOut()}
+function wireMore(){document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#pinset")&&($("#pinset").onclick=setPin);$("#pinchg")&&($("#pinchg").onclick=()=>{removePinThenSet()});$("#pinoff")&&($("#pinoff").onclick=removePin);$("#out").onclick=()=>confirm("Sign out?")&&(sb?sb.auth.signOut():(user=null,localStorage.removeItem(USERK),render()))}
 
 /* production editor */
 function prodSheet(p){
@@ -382,13 +414,13 @@ function prodSheet(p){
 const TABS=[["goals","Goals","target"],["media","Media","image"],["team","Team","users"],["log","Log","note"]];
 function prodView(p){
   const q=prodPct(p);
-  return `<div class="row" style="margin-bottom:14px"><button class="x" id="back" aria-label="Back to productions">${ic("left")}</button><div class="avatar" style="color:${p.color}">${ic(p.icon)}</div><h2 class="grow" style="font-size:1.6rem">${esc(p.name)}</h2><button class="x" id="edp" aria-label="Edit production">${ic("pencil")}</button></div>
+  return `<div class="row" style="margin-bottom:14px"><button class="x" id="back" aria-label="Back to productions">${ic("left")}</button><div class="avatar pavatar" style="color:${p.color}">${ic(p.icon)}</div><h2 class="grow" style="font-size:1.6rem">${esc(p.name)}</h2><button class="x" id="rep" aria-label="Weekly report">${ic("trend")}</button><button class="x" id="edp" aria-label="Edit production">${ic("pencil")}</button></div>
   <div class="tile" style="min-height:0;margin-bottom:14px"><div class="row between"><div class="lbl">${ic("target")}${q}% complete</div></div><div class="sub">${esc(p.desc||"Tap the pencil to add a description.")}</div><div class="meter" style="margin-top:8px"><i style="width:${q}%;background:${p.color}"></i></div></div>
   <div class="segc" role="group" aria-label="Sections">${TABS.map(([k,l,i])=>`<button data-tab="${k}" aria-pressed="${tab===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div>
   ${{goals:goalsTab,media:mediaTab,team:teamTab,log:logTab}[tab](p)}`;
 }
 function wireProd(p){
-  $("#back").onclick=()=>nav("prods");$("#edp").onclick=()=>prodSheet(p);
+  $("#back").onclick=()=>nav("prods");$("#rep").onclick=()=>reportSheet(p);$("#edp").onclick=()=>prodSheet(p);
   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render()});
   ({goals:wireGoals,media:wireMedia,team:wireTeam,log:wireLog})[tab](p);
 }
@@ -408,9 +440,9 @@ function wireGoals(p){
   $("#addg").onclick=()=>goalSheet(p);wireMics(document);
   document.querySelectorAll("[data-g]").forEach(el=>{
     const g=p.goals.find(x=>x.id===el.dataset.g);
-    el.querySelector("[data-done]").onclick=()=>{g.done=!g.done;g.pct=g.done?100:0;if(g.done)confetti();save(p);render()};
+    el.querySelector("[data-done]").onclick=()=>{g.done=!g.done;g.pct=g.done?100:0;g.doneAt=g.done?Date.now():0;if(g.done)confetti();save(p);render()};
     const r=el.querySelector("[data-pct]");r.oninput=()=>el.querySelector("[data-pv]").textContent=r.value;
-    r.onchange=()=>{g.pct=+r.value;g.done=g.pct===100;if(g.done)confetti();save(p);render()};
+    r.onchange=()=>{g.pct=+r.value;g.done=g.pct===100;g.doneAt=g.done?(g.doneAt||Date.now()):0;if(g.done)confetti();save(p);render()};
     el.querySelector("[data-edg]").onclick=()=>goalSheet(p,g);
     const add=()=>{const t=el.querySelector("[data-ci]").value.trim();if(!t)return;if(listening)listening.stop();g.comments.push({id:uid(),text:t,by:who(),t:Date.now()});save(p);render()};
     el.querySelector("[data-cs]").onclick=add;
@@ -430,21 +462,67 @@ function goalSheet(p,g){
   });
 }
 
-/* media */
-function mediaTab(p){
-  const ms=S.media.filter(m=>m.pid===p.id&&!m.del).sort((a,b)=>b.t-a.t);
-  return (ms.length?`<div class="photos">${ms.map(m=>`<button data-m="${m.id}" aria-label="Open photo ${esc(m.cap||"")}"><img src="${m.data}" alt="${esc(m.cap||"Photo")}" loading="lazy"></button>`).join("")}</div>`:`<div class="empty">${ic("image","xl")}<h3>No photos yet</h3>Add one from the camera or gallery.</div>`)+
-  `<input type="file" id="pf" accept="image/*" multiple class="sr">`+fabBtn("addm","Add photo");
+/* media: photos and videos live in IndexedDB on the device and in the shared "flock-media" bucket (under ms/) */
+const mdb=()=>new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error("no storage"));const r=indexedDB.open("ms-prod-media",1);r.onupgradeneeded=()=>r.result.createObjectStore("media");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
+const mPut=async(id,b)=>{const d=await mdb();return new Promise((res,rej)=>{const t=d.transaction("media","readwrite");t.objectStore("media").put(b,id);t.oncomplete=res;t.onerror=()=>rej(t.error)})};
+const mGet=async id=>{const d=await mdb();return new Promise((res,rej)=>{const q=d.transaction("media").objectStore("media").get(id);q.onsuccess=()=>res(q.result||null);q.onerror=()=>rej(q.error)})};
+const mDel=async id=>{const d=await mdb();return new Promise(res=>{const t=d.transaction("media","readwrite");t.objectStore("media").delete(id);t.oncomplete=res;t.onerror=res})};
+const mcache=new Map(),MAXVID=45*1024*1024;
+async function loadMedia(id){
+  if(mcache.has(id))return mcache.get(id);
+  let b=await mGet(id).catch(()=>null);
+  if(!b&&user&&sb){const{data}=await sb.storage.from("flock-media").download("ms/"+id).catch(()=>({}));if(data){b=data;mPut(id,b).catch(()=>{})}}
+  if(!b)return null;const u=URL.createObjectURL(b);mcache.set(id,u);return u;
 }
-function resize(file){return new Promise(res=>{const im=new Image(),u=URL.createObjectURL(file);im.onload=()=>{const s=Math.min(1,1000/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",.7))};im.onerror=()=>res(null);im.src=u})}
+async function pushMedia(){
+  sm.up=sm.up||{};
+  for(const m of S.media){
+    if(m.del||sm.up[m.id])continue;const b=await mGet(m.id).catch(()=>null);if(!b)continue;
+    const{error}=await sb.storage.from("flock-media").upload("ms/"+m.id,b,{upsert:true,contentType:b.type||"application/octet-stream"});
+    if(error)throw error;sm.up[m.id]=1;
+  }
+}
+function hydrate(root=document){root.querySelectorAll("[data-mid]").forEach(async el=>{const u=await loadMedia(el.dataset.mid);if(u)el.src=u})}
+async function migrateMedia(){let n=0;for(const m of S.media){if(!m.data)continue;try{const b=await (await fetch(m.data)).blob();await mPut(m.id,b);delete m.data;m.type=m.type||"photo";n++}catch{}}if(n){save();if(!isOpen())render()}}
+function toBlob(file){return new Promise(res=>{const im=new Image(),u=URL.createObjectURL(file);im.onload=()=>{const s=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(res,"image/jpeg",.75)};im.onerror=()=>res(null);im.src=u})}
+
+let mview="grid";
+const mediaOf=p=>S.media.filter(m=>m.pid===p.id&&!m.del).sort((a,b)=>b.t-a.t);
+const mthumb=m=>`<button data-m="${m.id}" aria-label="Open ${m.type==="video"?"video":"photo"} ${esc(m.cap||"")}">${m.type==="video"?`<video data-mid="${m.id}" muted playsinline preload="metadata"></video><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${m.id}" alt="${esc(m.cap||"Photo")}" loading="lazy">`}</button>`;
+function weekStart(t){const d=new Date(t);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime()}
+function mediaTab(p){
+  const ms=mediaOf(p),pics=ms.filter(m=>m.type!=="video");
+  let body;
+  if(!ms.length)body=`<div class="empty">${ic("image","xl")}<h3>No photos or videos yet</h3>Add one from the camera or gallery.</div>`;
+  else if(mview==="grid")body=`<div class="photos">${ms.map(mthumb).join("")}</div>`;
+  else{
+    const first=pics.at(-1),last=pics[0],g={};ms.forEach(m=>(g[weekStart(m.t)]=g[weekStart(m.t)]||[]).push(m));
+    body=(pics.length>1?`<div class="card"><h2>Before and now</h2><div class="cmp"><figure><img data-mid="${first.id}" alt="Earliest photo"><figcaption>Before · ${new Date(first.t).toLocaleDateString(undefined,{day:"numeric",month:"short"})}</figcaption></figure><figure><img data-mid="${last.id}" alt="Latest photo"><figcaption>Now · ${new Date(last.t).toLocaleDateString(undefined,{day:"numeric",month:"short"})}</figcaption></figure></div></div>`:"")+
+      Object.entries(g).sort((a,b)=>b[0]-a[0]).map(([w,l])=>`<div class="card"><h2>Week of ${new Date(+w).toLocaleDateString(undefined,{day:"numeric",month:"short"})}</h2><div class="small muted" style="margin:-6px 0 10px">${l.length} item${l.length>1?"s":""}</div><div class="photos">${l.map(mthumb).join("")}</div></div>`).join("");
+  }
+  return `<div class="segc" role="group" aria-label="Media view" style="max-width:280px"><button data-mv="grid" aria-pressed="${mview==="grid"}">${ic("grid")}<span>Grid</span></button><button data-mv="time" aria-pressed="${mview==="time"}">${ic("clock")}<span>Timeline</span></button></div>`+body+
+  `<input type="file" id="pf" accept="image/*,video/*" multiple class="sr">`+fabBtn("addm","Add photo or video");
+}
 function wireMedia(p){
+  document.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{mview=b.dataset.mv;render()});
   $("#addm").onclick=()=>$("#pf").click();
-  $("#pf").onchange=async e=>{for(const f of e.target.files){const d=await resize(f);if(d)S.media.push({id:uid(),pid:p.id,data:d,cap:"",t:Date.now(),by:who(),del:false,u:Date.now()})}save();render()};
+  $("#pf").onchange=async e=>{
+    let n=0;
+    for(const f of e.target.files){
+      const vid=f.type.startsWith("video/");
+      if(vid&&f.size>MAXVID){toast("Video too large. Keep clips under 45 MB (about 30 seconds).");continue}
+      const b=vid?f:await toBlob(f);if(!b){toast("Couldn't read that file.");continue}
+      const id=uid();try{await mPut(id,b)}catch{toast("No space to store this on the device.");continue}
+      S.media.push({id,pid:p.id,type:vid?"video":"photo",cap:"",t:Date.now(),by:who(),del:false,u:Date.now()});n++;
+    }
+    if(n)save();render();
+  };
   document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const m=S.media.find(x=>x.id===b.dataset.m);
-    sheet("Photo",`<img src="${m.data}" alt="" style="width:100%;border-radius:16px;margin-top:8px"><label class="f" for="mc">Caption</label><div class="row"><input class="t" id="mc" type="text" value="${esc(m.cap)}">${micBtn()}</div>
+    sheet(m.type==="video"?"Video":"Photo",`${m.type==="video"?`<video data-mid="${m.id}" controls playsinline style="width:100%;border-radius:16px;margin-top:8px;background:#000"></video>`:`<img data-mid="${m.id}" alt="" style="width:100%;border-radius:16px;margin-top:8px">`}<label class="f" for="mc">Caption</label><div class="row"><input class="t" id="mc" type="text" value="${esc(m.cap)}">${micBtn()}</div>
     <p class="muted small">${esc(m.by)} · ${fmt(m.t)}</p><div class="row"><button class="btn danger" id="del">${ic("trash")}Delete</button><span class="grow"></span><button class="btn primary" id="ok">Save</button></div>`,(d,close)=>{
-      wireMics(d);$("#ok").onclick=()=>{m.cap=$("#mc").value.trim();save(m);close();render()};
-      $("#del").onclick=()=>{m.del=true;save(m);close();render();toast("Photo deleted.",()=>{m.del=false;save(m);render()})}})});
+      hydrate(d);wireMics(d);$("#ok").onclick=()=>{m.cap=$("#mc").value.trim();save(m);close();render()};
+      $("#del").onclick=()=>{m.del=true;save(m);close();render();if(user&&sb)sb.storage.from("flock-media").remove(["ms/"+m.id]).catch(()=>{});if(sm.up)delete sm.up[m.id];
+        toast("Deleted.",()=>{m.del=false;save(m);render()})}})});
 }
 
 /* team */
@@ -473,8 +551,139 @@ function wireLog(p){
   document.querySelectorAll("[data-dl]").forEach(b=>b.onclick=()=>{const i=p.log.findIndex(l=>l.id===b.dataset.dl),[l]=p.log.splice(i,1);save(p);render();toast("Entry deleted.",()=>{p.log.splice(i,0,l);save(p);render()})});
 }
 
+/* ---------- app lock (PIN) ---------- */
+const PINK="ms-prod-pin",USERK="ms-prod-user",RESETK="ms-prod-pinreset";
+const getPin=()=>{try{return JSON.parse(localStorage.getItem(PINK))}catch{return null}};
+async function hashPin(pin,salt){
+  const s=salt+":"+pin;
+  if(crypto.subtle){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+  let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return "d"+h;
+}
+function pinPad({title,sub,cancel,forgot,onDone}){
+  document.getElementById("lock")?.remove();
+  const l=document.createElement("div");l.id="lock";l.setAttribute("role","dialog");l.setAttribute("aria-modal","true");l.setAttribute("aria-label",title);
+  let v="",busy=false,fails=0,until=0;
+  const draw=(msg,bad)=>{
+    l.innerHTML=`<div class="lk-card"><div class="avatar" style="margin:0 auto;width:64px;height:64px">${ic("lock","lg")}</div><h2 style="margin-top:12px">${esc(title)}</h2>
+    <p class="lk-s ${bad?"bad":""}" role="status" aria-live="polite">${esc(msg||sub||"")}</p>
+    <div class="lk-dots" aria-hidden="true">${[0,1,2,3].map(i=>`<i class="${i<v.length?"on":""}"></i>`).join("")}</div>
+    <div class="lk-pad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button type="button" data-k="${n}">${n}</button>`).join("")}<button class="ghost" tabindex="-1" aria-hidden="true"></button><button type="button" data-k="0">0</button><button type="button" data-k="b" aria-label="Delete last digit">${ic("backspace")}</button></div>
+    <p style="margin:14px 0 0">${forgot?`<button class="linkbtn" type="button" id="lk-f">Forgot PIN?</button>`:""}${cancel?`<button class="linkbtn" type="button" id="lk-c">Cancel</button>`:""}</p></div>`;
+    l.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>key(b.dataset.k));
+    l.querySelector("#lk-f")&&(l.querySelector("#lk-f").onclick=forgot);l.querySelector("#lk-c")&&(l.querySelector("#lk-c").onclick=()=>{l.remove();removeEventListener("keydown",kd)});
+  };
+  async function key(k){
+    if(busy)return;
+    if(Date.now()<until){draw("Too many tries. Wait a moment.",true);return}
+    if(k==="b")v=v.slice(0,-1);else if(v.length<4)v+=k;
+    if(v.length<4){draw();return}
+    draw();busy=true;const r=await onDone(v);busy=false;v="";
+    if(r==="ok"){l.remove();removeEventListener("keydown",kd)}
+    else if(r&&typeof r==="object"){title=r.title;sub=r.sub;draw()}
+    else{fails++;if(fails>=5){until=Date.now()+30000;fails=0}draw(r||"That PIN isn't right.",true);navigator.vibrate&&navigator.vibrate(120)}
+  }
+  const kd=e=>{if(/^\d$/.test(e.key))key(e.key);else if(e.key==="Backspace")key("b")};
+  addEventListener("keydown",kd);draw();document.body.append(l);l.querySelector("[data-k]").focus();
+}
+function lockNow(){
+  const pk=getPin();if(!pk||document.getElementById("lock"))return;
+  pinPad({title:"Enter your PIN",sub:"MS Productions is locked",forgot:forgotPin,onDone:async pin=>(await hashPin(pin,pk.salt))===pk.h?"ok":"That PIN isn't right."});
+}
+async function forgotPin(){
+  if(!navigator.onLine||!window.supabase){toast("Connect to the internet to reset your PIN.");return}
+  if(!confirm("Sign out and sign in again with your staff account to remove the PIN?"))return;
+  try{localStorage.setItem(RESETK,"1");localStorage.removeItem(USERK)}catch{}
+  document.getElementById("lock")?.remove();user=null;try{await sb.auth.signOut()}catch{}render();
+}
+function setPin(){
+  const salt=uid();let first=null;
+  const step=(title,sub)=>pinPad({title,sub,cancel:true,onDone:async pin=>{
+    if(!first){first=pin;return{title:"Confirm your PIN",sub:"Enter the same 4 digits again"}}
+    if(pin!==first){first=null;return{title:"Choose a PIN",sub:"They didn't match. Try again"}}
+    localStorage.setItem(PINK,JSON.stringify({salt,h:await hashPin(pin,salt)}));toast("PIN is on.");render();return"ok"}});
+  step("Choose a PIN","4 digits to open the app");
+}
+function removePinThenSet(){const pk=getPin();pinPad({title:"Enter your PIN",sub:"to change it",cancel:true,onDone:async pin=>{if((await hashPin(pin,pk.salt))!==pk.h)return"That PIN isn't right.";setTimeout(setPin,0);return"ok"}})}
+function removePin(){const pk=getPin();pinPad({title:"Enter your PIN",sub:"to turn it off",cancel:true,onDone:async pin=>{if((await hashPin(pin,pk.salt))!==pk.h)return"That PIN isn't right.";localStorage.removeItem(PINK);toast("PIN removed.");render();return"ok"}})}
+let hiddenAt=0;
+document.addEventListener("visibilitychange",()=>{if(document.hidden)hiddenAt=Date.now();else if(getPin()&&hiddenAt&&Date.now()-hiddenAt>60000)lockNow()});
+
+/* ---------- weekly report card (image + message) ---------- */
+function repRange(k){
+  const s=new Date();s.setHours(0,0,0,0);const dow=(s.getDay()+6)%7,mon=s.getTime()-dow*864e5,end=new Date();end.setHours(23,59,59,999);
+  if(k==="this")return[mon,end.getTime()];if(k==="last")return[mon-7*864e5,mon-1];return[end.getTime()-7*864e5+1,end.getTime()];
+}
+const dmy=t=>new Date(t).toLocaleDateString(undefined,{day:"numeric",month:"short"});
+function repStats(p,from,to){
+  const list=p?[p]:prods(),inR=t=>t>=from&&t<=to;
+  const items=list.map(q=>({name:q.name,color:q.color,pct:prodPct(q),done:q.goals.filter(g=>g.done&&inR(g.doneAt||0)).length,
+    notes:q.log.filter(l=>inR(l.t)).length+q.goals.reduce((a,g)=>a+g.comments.filter(c=>inR(c.t)).length,0),
+    photos:S.media.filter(m=>m.pid===q.id&&!m.del&&inR(m.t)).length,
+    hl:[...q.goals.filter(g=>g.done&&inR(g.doneAt||0)).map(g=>({t:g.doneAt,s:"Done: "+g.title})),...q.log.filter(l=>inR(l.t)).map(l=>({t:l.t,s:l.text})),...q.goals.flatMap(g=>g.comments.filter(c=>inR(c.t)).map(c=>({t:c.t,s:g.title+": "+c.text})))]}));
+  const sum=k=>items.reduce((a,i)=>a+i[k],0);
+  return{from,to,p,items,done:sum("done"),notes:sum("notes"),photos:sum("photos"),pct:items.length?Math.round(items.reduce((a,i)=>a+i.pct,0)/items.length):0,
+    hl:items.flatMap(i=>i.hl.map(h=>({...h,n:items.length>1?i.name:""}))).sort((a,b)=>b.t-a.t).slice(0,4)};
+}
+function repText(st){
+  const head=`Weekly update, ${dmy(st.from)} to ${dmy(st.to)}`;
+  const top=st.p?`${st.p.name}: ${st.pct}% complete.`:`All productions: ${st.pct}% complete on average.`;
+  const nums=`${st.done} goal${st.done===1?"":"s"} finished, ${st.photos} new photo${st.photos===1?"":"s"} or video${st.photos===1?"":"s"}, ${st.notes} update${st.notes===1?"":"s"}.`;
+  const hl=st.hl.length?"Highlights:\n"+st.hl.map(h=>"- "+(h.n?h.n+": ":"")+h.s).join("\n"):"Nothing logged this week yet.";
+  const rows=st.p?"":"\n\n"+st.items.map(i=>`${i.name}: ${i.pct}%`).join("\n");
+  return [head,top,nums].join("\n")+rows+"\n\n"+hl+"\n\nNewberry Middle School Project";
+}
+async function repCard(st){
+  const W=1080,H=1350,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
+  try{await Promise.all([document.fonts.load('700 120px "Bricolage Grotesque"'),document.fonts.load('600 40px "Instrument Sans"')])}catch{}
+  const D='"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif',B='"Instrument Sans",system-ui,sans-serif';
+  const rr=(x,y,w,h,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()};
+  const wrap=(t,x,y,mw,lh,max)=>{const w=t.split(/\s+/);let line="",n=0;for(const word of w){const test=line?line+" "+word:word;if(g.measureText(test).width>mw&&line){if(++n>=max){g.fillText(line+"…",x,y);return y+lh}g.fillText(line,x,y);y+=lh;line=word}else line=test}g.fillText(line,x,y);return y+lh};
+  g.fillStyle="#fbf6ec";g.fillRect(0,0,W,H);
+  const gr=g.createLinearGradient(0,0,W,520);gr.addColorStop(0,"#c46a0d");gr.addColorStop(1,"#8a4505");g.fillStyle=gr;
+  g.beginPath();g.moveTo(0,0);g.lineTo(W,0);g.lineTo(W,440);g.arcTo(W,520,W-80,520,80);g.lineTo(80,520);g.arcTo(0,520,0,440,80);g.closePath();g.fill();
+  g.fillStyle="#fff";g.font=`700 42px ${D}`;g.fillText("Newberry Middle School Project",60,100);
+  g.globalAlpha=.88;g.font=`500 34px ${B}`;g.fillText(`Weekly update · ${dmy(st.from)} to ${dmy(st.to)}`,60,150);g.globalAlpha=1;
+  g.font=`700 84px ${D}`;g.fillText(st.p?st.p.name:"All productions",60,270);
+  g.font=`700 190px ${D}`;g.fillText(st.pct+"%",56,450);const nw=g.measureText(st.pct+"%").width;
+  g.font=`600 54px ${B}`;g.fillText("complete",56+nw+28,420);
+  g.fillStyle="rgba(255,255,255,.3)";rr(60,480,960,14,7);g.fill();g.fillStyle="#fff";rr(60,480,Math.max(14,960*st.pct/100),14,7);g.fill();
+  const tile=(x,w,label,val,y=1110)=>{g.fillStyle="#fff";rr(x,y,w,150,26);g.fill();g.strokeStyle="#ece3cf";g.lineWidth=2;g.stroke();g.fillStyle="#6c6250";g.font=`600 28px ${B}`;g.fillText(label,x+28,y+48);g.fillStyle="#221c11";g.font=`700 56px ${D}`;g.fillText(String(val),x+28,y+118)};
+  const w3=(960-36)/3;tile(60,w3,"Goals done",st.done);tile(60+w3+18,w3,"Updates",st.notes);tile(60+2*(w3+18),w3,"Photos & video",st.photos);
+  if(st.p){
+    g.fillStyle="#221c11";g.font=`700 44px ${D}`;g.fillText("Highlights",60,610);let y=670;g.fillStyle="#221c11";g.font=`500 34px ${B}`;
+    if(!st.hl.length){g.fillStyle="#6c6250";g.fillText("Nothing logged this week yet.",60,y)}
+    st.hl.forEach(h=>{g.fillStyle=st.p.color;g.beginPath();g.arc(72,y-10,9,0,7);g.fill();g.fillStyle="#221c11";y=wrap(h.s,100,y,920,44,2)+22});
+  }else{
+    const n=st.items.length,rh=Math.min(54,480/Math.max(1,n));let y=585;
+    st.items.forEach(i=>{g.fillStyle="#221c11";g.font=`600 30px ${B}`;g.fillText(i.name,60,y+rh*.55);g.fillStyle="#ece3cf";rr(420,y+rh*.55-22,520,18,9);g.fill();g.fillStyle=i.color;rr(420,y+rh*.55-22,Math.max(18,520*i.pct/100),18,9);g.fill();g.fillStyle="#6c6250";g.font=`600 28px ${B}`;g.textAlign="right";g.fillText(i.pct+"%",1020,y+rh*.55);g.textAlign="left";y+=rh});
+  }
+  g.fillStyle="#6c6250";g.font=`500 30px ${B}`;g.textAlign="center";g.fillText("Learning by doing, together",W/2,1318);
+  return new Promise(r=>c.toBlob(r,"image/png"));
+}
+function reportSheet(p){
+  const m={k:"last7",blob:null,url:null,text:"",edited:false,tok:0};
+  sheet("Weekly report",`<div id="wr"></div>`,(sh,close)=>{
+    const root=sh.querySelector("#wr");
+    const draw=()=>{
+      root.innerHTML=`<div class="chips" role="group" aria-label="Period" style="margin:10px 0 14px">${[["last7","Last 7 days"],["this","This week"],["last","Last week"]].map(([k,l])=>`<button class="chip" data-k="${k}" aria-pressed="${m.k===k}">${l}</button>`).join("")}</div>
+      <div class="rep">${m.url?`<img src="${m.url}" alt="Weekly report card">`:`<p class="muted">Making your card…</p>`}</div>
+      <label class="f" for="rt">Message</label><textarea class="t" id="rt" rows="8">${esc(m.text)}</textarea>
+      <div class="row wr" style="margin-top:14px"><button class="btn primary grow" id="rs" ${m.blob?"":"disabled"}>${ic("share")}Share</button><button class="btn" id="rd" ${m.blob?"":"disabled"}>${ic("download")}Save image</button><button class="btn" id="rc">${ic("copy")}Copy text</button></div>`;
+      root.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{m.k=b.dataset.k;build()});
+      root.querySelector("#rt").oninput=e=>{m.text=e.target.value};
+      const file=()=>new File([m.blob],"productions-weekly.png",{type:"image/png"});
+      root.querySelector("#rs").onclick=async()=>{try{if(navigator.canShare?.({files:[file()]}))await navigator.share({files:[file()],text:m.text});else if(navigator.share)await navigator.share({text:m.text});else toast("Sharing isn't available here. Use Save image.")}catch{}};
+      root.querySelector("#rd").onclick=()=>{const a=document.createElement("a");a.href=m.url;a.download="productions-weekly.png";a.click()};
+      root.querySelector("#rc").onclick=()=>navigator.clipboard.writeText(m.text).then(()=>toast("Copied."),()=>toast("Couldn't copy."));
+    };
+    const build=async()=>{const tok=++m.tok;m.blob=null;if(m.url){URL.revokeObjectURL(m.url);m.url=null}const[f,t]=repRange(m.k),st=repStats(p,f,t);m.text=repText(st);draw();
+      const b=await repCard(st);if(tok!==m.tok)return;m.blob=b;m.url=URL.createObjectURL(b);draw()};
+    build();
+  });
+}
+
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
-render();initAuth();
+lockNow();migrateMedia();render();initAuth();
 </script>
 </body>
 </html>
