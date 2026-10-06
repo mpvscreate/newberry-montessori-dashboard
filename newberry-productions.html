@@ -159,6 +159,13 @@ input[type=range]{width:100%;height:36px;accent-color:var(--accent)}
 .confetti i{position:absolute;top:-20px;width:10px;height:14px;border-radius:3px;animation:fall 1.6s ease-in forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
 .photos button{position:relative}
+.photos button.sel{outline:3px solid var(--accent);outline-offset:-3px}
+.photos button.sel img,.photos button.sel video{opacity:.7}
+.ck{position:absolute;left:8px;top:8px;width:28px;height:28px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.35);color:transparent;display:grid;place-items:center}
+.photos button.sel .ck{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.selbar{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:31;background:var(--sheet);border:1px solid var(--line);border-radius:22px;box-shadow:0 8px 28px rgba(0,0,0,.28);padding:10px 12px;display:flex;align-items:center;gap:8px;max-width:560px;margin:0 auto;animation:up .18s ease-out}
+.selcount{font-weight:700;flex:1;white-space:nowrap}
+@media (min-width:900px){.selbar{bottom:24px;left:calc(var(--rail) + 12px)}}
 .row .t{min-width:0}
 .hcard b,.goal h3,.ptitle{overflow-wrap:anywhere}
 .ptitle{font-size:clamp(1.25rem,5.5vw,1.6rem);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
@@ -220,6 +227,10 @@ download:'<path d="M12 4v11M7 11l5 5 5-5M4 20h16"/>',
 copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',
 trend:'<path d="M3 17l6-6 4 4 8-8M15 7h6v6"/>',
 video:'<rect x="3" y="6" width="13" height="12" rx="2"/><path d="M16 10l5-3v10l-5-3"/>',
+chat:'<path d="M4 20l1.4-4.2A8 8 0 1112 20a8 8 0 01-4-1.1z"/><path d="M9 10.5c0 2.5 2 4.5 4.5 4.5l1.2-1.2-1.6-1-.8.6a3 3 0 01-1.6-1.6l.6-.8-1-1.6z"/>',
+rotl:'<path d="M4 11a8 8 0 112.3 5.7M4 4v7h7"/>',
+rotr:'<path d="M20 11a8 8 0 10-2.3 5.7M20 4v7h-7"/>',
+flip:'<path d="M12 3v18M8 7L3 12l5 5zM16 7l5 5-5 5z"/>',
 user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
 mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/>',
 pencil:'<path d="M4 20l1-4L16.5 4.5a2 2 0 013 3L8 19z"/>',
@@ -445,7 +456,7 @@ function prodView(p){
 }
 function wireProd(p){
   $("#back").onclick=()=>nav("prods");$("#rep").onclick=()=>reportSheet(p);$("#edp").onclick=()=>prodSheet(p);
-  document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render()});
+  document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;clearSel();render()});
   ({goals:wireGoals,media:wireMedia,team:wireTeam,log:wireLog})[tab](p);
 }
 const fabBtn=(id,label)=>`<div class="fab-wrap"><button class="fab" id="${id}">${ic("plus")}${label}</button></div>`;
@@ -510,12 +521,15 @@ function hydrate(root=document){root.querySelectorAll("[data-mid]").forEach(asyn
 async function migrateMedia(){let n=0;for(const m of S.media){if(!m.data)continue;try{const b=await (await fetch(m.data)).blob();await mPut(m.id,b);delete m.data;m.type=m.type||"photo";n++}catch{}}if(n){save();if(!isOpen())render()}}
 function toBlob(file){return new Promise(res=>{const im=new Image(),u=URL.createObjectURL(file);im.onload=()=>{const s=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(res,"image/jpeg",.75)};im.onerror=()=>res(null);im.src=u})}
 
-let mview="grid";
+let mview="grid",selecting=false,selScope="";const sel=new Set();
 const mediaOf=p=>S.media.filter(m=>m.pid===p.id&&!m.del).sort((a,b)=>b.t-a.t);
-const mthumb=m=>`<button data-m="${m.id}" aria-label="Open ${m.type==="video"?"video":"photo"} ${esc(m.cap||"")}">${m.type==="video"?`<video data-mid="${m.id}" muted playsinline preload="metadata"></video><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${m.id}" alt="${esc(m.cap||"Photo")}" loading="lazy">`}</button>`;
+const mthumb=m=>`<button data-m="${m.id}" ${selecting?`aria-pressed="${sel.has(m.id)}"`:""} class="${sel.has(m.id)?"sel":""}" aria-label="${selecting?"Select ":"Open "}${m.type==="video"?"video":"photo"} ${esc(m.cap||"")}">${m.type==="video"?`<video data-mid="${m.id}" muted playsinline preload="metadata"></video><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${m.id}" alt="${esc(m.cap||"Photo")}" loading="lazy">`}${selecting?`<span class="ck">${ic("check","sm")}</span>`:""}</button>`;
 function weekStart(t){const d=new Date(t);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime()}
+function clearSel(){selecting=false;sel.clear()}
 function mediaTab(p){
+  if(selScope!==p.id){clearSel();selScope=p.id}
   const ms=mediaOf(p),pics=ms.filter(m=>m.type!=="video");
+  for(const id of [...sel])if(!ms.some(m=>m.id===id))sel.delete(id);
   let body;
   if(!ms.length)body=`<div class="empty">${ic("image","xl")}<h3>No photos or videos yet</h3>Add one from the camera or gallery.</div>`;
   else if(mview==="grid")body=`<div class="photos">${ms.map(mthumb).join("")}</div>`;
@@ -524,12 +538,19 @@ function mediaTab(p){
     body=(pics.length>1?`<div class="card"><h2>Before and now</h2><div class="cmp"><figure><img data-mid="${first.id}" alt="Earliest photo"><figcaption>Before · ${new Date(first.t).toLocaleDateString(undefined,{day:"numeric",month:"short"})}</figcaption></figure><figure><img data-mid="${last.id}" alt="Latest photo"><figcaption>Now · ${new Date(last.t).toLocaleDateString(undefined,{day:"numeric",month:"short"})}</figcaption></figure></div></div>`:"")+
       Object.entries(g).sort((a,b)=>b[0]-a[0]).map(([w,l])=>`<div class="card"><h2>Week of ${new Date(+w).toLocaleDateString(undefined,{day:"numeric",month:"short"})}</h2><div class="small muted" style="margin:-6px 0 10px">${l.length} item${l.length>1?"s":""}</div><div class="photos">${l.map(mthumb).join("")}</div></div>`).join("");
   }
-  return `<div class="segc" role="group" aria-label="Media view" style="max-width:280px"><button data-mv="grid" aria-label="Grid" aria-pressed="${mview==="grid"}">${ic("grid")}<span>Grid</span></button><button data-mv="time" aria-label="Timeline" aria-pressed="${mview==="time"}">${ic("clock")}<span>Timeline</span></button></div>`+body+
-  `<input type="file" id="pf" accept="image/*,video/*" multiple class="sr">`+fabBtn("addm","Add photo or video");
+  const n=sel.size,onePhoto=n===1&&ms.find(m=>m.id===[...sel][0])?.type!=="video";
+  return `<div class="row" style="margin-bottom:14px"><div class="segc grow" role="group" aria-label="Media view" style="margin:0;max-width:260px"><button data-mv="grid" aria-label="Grid" aria-pressed="${mview==="grid"}">${ic("grid")}<span>Grid</span></button><button data-mv="time" aria-label="Timeline" aria-pressed="${mview==="time"}">${ic("clock")}<span>Timeline</span></button></div>
+  ${ms.length?`<button class="btn small" id="seltog" aria-pressed="${selecting}">${ic(selecting?"x":"check")}${selecting?"Done":"Select"}</button>`:""}</div>`+body+
+  `<input type="file" id="pf" accept="image/*,video/*" multiple class="sr">`+
+  (selecting?(n?`<div style="height:80px" aria-hidden="true"></div><div class="selbar" role="toolbar" aria-label="Actions for selected media"><span class="selcount" aria-live="polite">${n} selected</span>
+    <button class="btn primary small" id="s-wa">${ic("chat")}WhatsApp</button>
+    ${onePhoto?`<button class="btn small" id="s-ed">${ic("sliders")}Edit</button>`:""}
+    <button class="btn small danger" id="s-del" aria-label="Delete selected">${ic("trash")}</button></div>`:`<p class="hint" style="text-align:center">Tap photos or videos to select them.</p>`):fabBtn("addm","Add photo or video"));
 }
 function wireMedia(p){
   document.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{mview=b.dataset.mv;render()});
-  $("#addm").onclick=()=>$("#pf").click();
+  $("#seltog")&&($("#seltog").onclick=()=>{selecting?clearSel():selecting=true;render()});
+  $("#addm")&&($("#addm").onclick=()=>$("#pf").click());
   $("#pf").onchange=async e=>{
     let n=0;
     for(const f of e.target.files){
@@ -541,12 +562,98 @@ function wireMedia(p){
     }
     if(n)save();render();
   };
-  document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const m=S.media.find(x=>x.id===b.dataset.m);
+  if($("#s-wa"))$("#s-wa").onclick=()=>waSheet(p,[...sel]);
+  if($("#s-ed"))$("#s-ed").onclick=()=>editSheet(p,S.media.find(m=>m.id===[...sel][0]));
+  if($("#s-del"))$("#s-del").onclick=()=>{const ids=[...sel],ms=ids.map(id=>S.media.find(m=>m.id===id));ms.forEach(m=>{m.del=true;save(m);if(user&&sb)sb.storage.from("flock-media").remove(["ms/"+m.id]).catch(()=>{});if(sm.up)delete sm.up[m.id]});clearSel();render();
+    toast(ms.length+" deleted.",()=>{ms.forEach(m=>{m.del=false;save(m)});render()})};
+  document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{
+    const m=S.media.find(x=>x.id===b.dataset.m);
+    if(selecting){sel.has(m.id)?sel.delete(m.id):sel.add(m.id);render();return}
     sheet(m.type==="video"?"Video":"Photo",`${m.type==="video"?`<video data-mid="${m.id}" controls playsinline style="width:100%;border-radius:16px;margin-top:8px;background:#000"></video>`:`<img data-mid="${m.id}" alt="" style="width:100%;border-radius:16px;margin-top:8px">`}<label class="f" for="mc">Caption</label><div class="row"><input class="t" id="mc" type="text" value="${esc(m.cap)}">${micBtn()}</div>
     <p class="muted small">${esc(m.by)} · ${fmt(m.t)}</p><div class="row"><button class="btn danger" id="del">${ic("trash")}Delete</button><span class="grow"></span><button class="btn primary" id="ok">Save</button></div>`,(d,close)=>{
       hydrate(d);wireMics(d);$("#ok").onclick=()=>{m.cap=$("#mc").value.trim();save(m);close();render()};
       $("#del").onclick=()=>{m.del=true;save(m);close();render();if(user&&sb)sb.storage.from("flock-media").remove(["ms/"+m.id]).catch(()=>{});if(sm.up)delete sm.up[m.id];
         toast("Deleted.",()=>{m.del=false;save(m);render()})}})});
+}
+
+/* share selected media with a WhatsApp message */
+async function mediaFiles(ids,p){
+  const out=[];
+  for(const id of ids){
+    const m=S.media.find(x=>x.id===id);let b=await mGet(id).catch(()=>null);
+    if(!b){await loadMedia(id);b=await mGet(id).catch(()=>null)}
+    if(b)out.push(new File([b],`${p.name.replace(/[^\w]+/g,"-")}-${out.length+1}.${m.type==="video"?(b.type.includes("quicktime")?"mov":"mp4"):"jpg"}`,{type:b.type||(m.type==="video"?"video/mp4":"image/jpeg")}));
+  }
+  return out;
+}
+function waSheet(p,ids){
+  const ms=ids.map(id=>S.media.find(m=>m.id===id)).filter(Boolean);
+  const caps=ms.map(m=>m.cap).filter(Boolean);
+  let text=`${p.name} update`+(caps.length?"\n"+caps.map(c=>"- "+c).join("\n"):"")+"\n\nNewberry Middle School Project";
+  sheet("Send on WhatsApp",`<div class="chips" style="gap:6px;margin:10px 0">${ms.slice(0,8).map(m=>`<span style="width:56px;height:56px;border-radius:12px;overflow:hidden;display:block;background:var(--line)">${m.type==="video"?`<video data-mid="${m.id}" muted playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover"></video>`:`<img data-mid="${m.id}" alt="" style="width:100%;height:100%;object-fit:cover">`}</span>`).join("")}${ms.length>8?`<span class="muted small">+${ms.length-8} more</span>`:""}</div>
+  <p class="muted small" style="margin:0">${ms.length} item${ms.length>1?"s":""} selected</p>
+  <label class="f" for="wm">Your message</label><div class="row" style="align-items:flex-start"><textarea class="t" id="wm" rows="6">${esc(text)}</textarea>${micBtn()}</div>
+  <div class="row wr" style="margin-top:16px"><button class="btn primary grow" id="wsend">${ic("share")}Share with photos</button><button class="btn" id="wtxt">${ic("chat")}Message only</button><button class="btn" id="wcp">${ic("copy")}Copy</button></div>
+  <p class="hint">"Share with photos" opens your phone's share menu. Choose WhatsApp, then the chat or group.</p>`,(d,close)=>{
+    hydrate(d);wireMics(d);const msg=()=>$("#wm").value.trim();
+    $("#wsend").onclick=async()=>{const b=$("#wsend");b.disabled=true;
+      try{const files=await mediaFiles(ids,p);
+        if(files.length&&navigator.canShare?.({files})){await navigator.share({files,text:msg()});close()}
+        else{toast(files.length?"This browser can't share files. Sending the message only.":"Couldn't read the files.");window.open("https://wa.me/?text="+encodeURIComponent(msg()),"_blank","noopener")}
+      }catch(e){if(e.name!=="AbortError")toast("Couldn't share. Try again.")}b.disabled=false};
+    $("#wtxt").onclick=()=>window.open("https://wa.me/?text="+encodeURIComponent(msg()),"_blank","noopener");
+    $("#wcp").onclick=()=>navigator.clipboard.writeText(msg()).then(()=>toast("Copied."),()=>toast("Couldn't copy."));
+  });
+}
+
+/* basic photo editor: rotate, flip, crop, brightness, contrast, colour */
+function drawEdit(img,st,maxDim){
+  const odd=st.rot%2===1,w=odd?img.naturalHeight:img.naturalWidth,h=odd?img.naturalWidth:img.naturalHeight;
+  const o=document.createElement("canvas");o.width=w;o.height=h;const g=o.getContext("2d");
+  g.translate(w/2,h/2);g.rotate(st.rot*Math.PI/2);if(st.flip)g.scale(-1,1);g.drawImage(img,-img.naturalWidth/2,-img.naturalHeight/2);
+  let cw=w,ch=h;const r=st.ratio?(w>=h?st.ratio:1/st.ratio):0;
+  if(r){if(w/h>r)cw=Math.round(h*r);else ch=Math.round(w/r)}
+  const cx=Math.round((w-cw)/2),cy=Math.round((h-ch)/2),s=Math.min(1,maxDim/Math.max(cw,ch));
+  const out=document.createElement("canvas");out.width=Math.max(1,Math.round(cw*s));out.height=Math.max(1,Math.round(ch*s));
+  out.getContext("2d").drawImage(o,cx,cy,cw,ch,0,0,out.width,out.height);return out;
+}
+function bake(cv,st){
+  if(!st.b&&!st.c&&!st.s)return;
+  const g=cv.getContext("2d"),d=g.getImageData(0,0,cv.width,cv.height),a=d.data,b=1+st.b/100,c=1+st.c/100,s=1+st.s/100,cl=v=>v<0?0:v>255?255:v;
+  for(let i=0;i<a.length;i+=4){
+    let r=(a[i]*b-128)*c+128,gg=(a[i+1]*b-128)*c+128,bl=(a[i+2]*b-128)*c+128;
+    const l=.2126*r+.7152*gg+.0722*bl;
+    a[i]=cl(l+(r-l)*s);a[i+1]=cl(l+(gg-l)*s);a[i+2]=cl(l+(bl-l)*s);
+  }
+  g.putImageData(d,0,0);
+}
+async function editSheet(p,m){
+  const u=await loadMedia(m.id);if(!u){toast("This photo isn't on this device yet. Connect to the internet and try again.");return}
+  const img=new Image();img.src=u;try{await img.decode()}catch{toast("Couldn't open this photo.");return}
+  const st={rot:0,flip:false,ratio:0,b:0,c:0,s:0},RAT=[["Original",0],["Square",1],["4:3",4/3],["16:9",16/9]];
+  sheet("Edit photo",`<div style="text-align:center;margin:10px 0"><canvas id="ec" style="max-width:100%;max-height:48dvh;border-radius:14px;background:var(--line)"></canvas></div>
+  <div class="row wr" style="margin-bottom:6px"><button class="btn small" id="e-l" aria-label="Rotate left">${ic("rotl")}Left</button><button class="btn small" id="e-r" aria-label="Rotate right">${ic("rotr")}Right</button><button class="btn small" id="e-f" aria-label="Flip">${ic("flip")}Flip</button></div>
+  <label class="f">Crop</label><div class="chips" role="group" aria-label="Crop shape">${RAT.map(([l,v],i)=>`<button class="chip" data-r="${i}" aria-pressed="${i===0}">${l}</button>`).join("")}</div>
+  ${[["b","Brightness"],["c","Contrast"],["s","Colour"]].map(([k,l])=>`<label class="f" for="e-${k}">${l}</label><input type="range" id="e-${k}" min="-50" max="50" step="1" value="0">`).join("")}
+  <div class="row wr" style="margin-top:18px"><button class="btn" id="e-reset">Reset</button><span class="grow"></span></div>
+  <div class="row wr" style="margin-top:10px"><button class="btn grow" id="e-copy">Save as new copy</button><button class="btn primary grow" id="e-save">Replace original</button></div>`,(d,close)=>{
+    const cv=$("#ec");
+    const paint=()=>{const o=drawEdit(img,st,720);cv.width=o.width;cv.height=o.height;cv.getContext("2d").drawImage(o,0,0);cv.style.filter=`brightness(${1+st.b/100}) contrast(${1+st.c/100}) saturate(${1+st.s/100})`};
+    paint();
+    $("#e-l").onclick=()=>{st.rot=(st.rot+3)%4;paint()};$("#e-r").onclick=()=>{st.rot=(st.rot+1)%4;paint()};$("#e-f").onclick=()=>{st.flip=!st.flip;paint()};
+    d.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{st.ratio=RAT[+b.dataset.r][1];d.querySelectorAll("[data-r]").forEach(x=>x.setAttribute("aria-pressed",x===b));paint()});
+    ["b","c","s"].forEach(k=>$("#e-"+k).oninput=e=>{st[k]=+e.target.value;paint()});
+    $("#e-reset").onclick=()=>{Object.assign(st,{rot:0,flip:false,ratio:0,b:0,c:0,s:0});["b","c","s"].forEach(k=>$("#e-"+k).value=0);d.querySelectorAll("[data-r]").forEach((x,i)=>x.setAttribute("aria-pressed",i===0));paint()};
+    const commit=async replace=>{
+      const out=drawEdit(img,st,1600);bake(out,st);
+      const blob=await new Promise(r=>out.toBlob(r,"image/jpeg",.85));if(!blob){toast("Couldn't save the edit.");return}
+      const id=uid();try{await mPut(id,blob)}catch{toast("No space to store this on the device.");return}
+      S.media.push({id,pid:m.pid,type:"photo",cap:m.cap,t:replace?m.t:Date.now(),by:who(),del:false,u:Date.now()});
+      if(replace){m.del=true;save(m);if(user&&sb)sb.storage.from("flock-media").remove(["ms/"+m.id]).catch(()=>{});if(sm.up)delete sm.up[m.id]}else save();
+      sel.clear();sel.add(id);close();render();toast(replace?"Original replaced.":"Saved as a new copy.");
+    };
+    $("#e-copy").onclick=()=>commit(false);$("#e-save").onclick=()=>commit(true);
+  });
 }
 
 /* team */
