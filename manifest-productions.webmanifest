@@ -1,15 +1,31 @@
 {
   "name": "MS Productions",
   "short_name": "Productions",
-  "description": "Goals, photos, team and progress for every Middle School production.",
+  "description": "Goals, targets, photos, team and progress for every Middle School production.",
   "start_url": "./newberry-productions.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#f6f3ec",
-  "theme_color": "#2f6f4f",
+  "background_color": "#fbf6ec",
+  "theme_color": "#0b5d3b",
   "icons": [
-    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+    {
+      "src": "icons/productions-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/productions-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icons/productions-maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }

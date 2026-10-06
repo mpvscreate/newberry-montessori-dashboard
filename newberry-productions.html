@@ -6,8 +6,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <title>MS Productions</title>
-<link rel="icon" href="icon.svg">
-<link rel="apple-touch-icon" href="icons/icon-192.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/productions-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/productions-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/productions-apple-180.png">
 <link rel="manifest" href="manifest-productions.webmanifest">
 <meta name="theme-color" content="#fbf6ec" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14110c" media="(prefers-color-scheme: dark)">
@@ -52,6 +53,7 @@ h1,h2,h3{font-family:var(--display);font-variation-settings:"opsz" 48;letter-spa
 .wrap{max-width:860px;margin:0 auto;padding:calc(16px + env(safe-area-inset-top)) 16px 130px}
 .row{display:flex;align-items:center;gap:12px}.wr{flex-wrap:wrap}.grow{flex:1;min-width:0}.between{justify-content:space-between}
 header.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+header.top .brand{height:51px;width:auto;flex:none;filter:drop-shadow(0 2px 6px rgba(0,0,0,.25))}
 header.top .logo{width:44px;height:44px;border-radius:12px;background:var(--green-soft);color:var(--green);display:grid;place-items:center}
 header.top h1{font-size:1.45rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:480px){.sync .st{display:none}.sync{padding:6px 9px}}
@@ -117,7 +119,7 @@ input[type=range]{width:100%;height:36px;accent-color:var(--green)}
 .hcard:active{transform:scale(.985)}@media (hover:hover){.hcard:hover{box-shadow:0 0 0 4px var(--glow-soft),var(--shadow)}}
 .hcard .avatar{width:56px;height:56px;border-radius:18px;background:color-mix(in srgb,var(--pc) 16%,var(--sheet));color:var(--pc)}
 .hcard .avatar .i{width:1.7rem;height:1.7rem}
-.hcard b{font:700 clamp(.95rem,4.2vw,1.1rem) var(--display);letter-spacing:-.02em}
+.hcard b{font:700 clamp(.85rem,3.6vw,1.1rem) var(--display);hyphens:auto;letter-spacing:-.02em}
 .hcard .meter i{background:var(--pc)}
 .list{list-style:none;margin:0;padding:0}
 .list li{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line);flex-wrap:wrap}.list li:first-child{border-top:0}
@@ -340,8 +342,8 @@ async function initAuth(){
   render();
 }
 function authScreen(msg){
-  $("#app").innerHTML=`<div class="auth"><form class="card" id="lf"><div class="row" style="justify-content:center"><div class="avatar" style="width:64px;height:64px">${ic("tree","lg")}</div></div>
-  <h1 style="text-align:center;margin:12px 0 2px">MS Productions</h1><p class="muted" style="text-align:center;margin:0 0 6px">Staff sign in</p>
+  $("#app").innerHTML=`<div class="auth"><form class="card" id="lf"><div class="row" style="justify-content:center"><img src="icons/productions-192.png" alt="MS Productions" width="112" height="130" style="height:130px;width:auto"></div>
+  <h1 class="sr">MS Productions</h1><p class="muted" style="text-align:center;margin:0 0 6px">Staff sign in</p>
   ${msg?`<p role="alert" class="err">${esc(msg)}</p>`:""}
   <label class="f" for="em">Email</label><input class="t" id="em" type="email" autocomplete="username" required>
   <label class="f" for="pw">Password</label><input class="t" id="pw" type="password" autocomplete="current-password" required>
@@ -388,7 +390,7 @@ function render(){
   const fk=focusKey(),sy=lastRoute===route+tab?scrollY:0;
   const m=route.match(/^p\/(.+)/),p=m&&P(m[1]);
   const cur=p?"prods":route;
-  $("#app").innerHTML=`<div class="wrap"><header class="top"><div class="logo">${ic("tree")}</div><h1 class="grow">MS Productions</h1><span class="sync" id="sync" aria-live="polite"></span></header>
+  $("#app").innerHTML=`<div class="wrap"><header class="top"><img class="brand" src="icons/productions-96.png" alt="" width="44" height="51"><h1 class="sr">MS Productions</h1><span class="grow"></span><span class="sync" id="sync" aria-live="polite"></span></header>
   <main id="main" tabindex="-1">${p?prodView(p):{home,prods:prodsPage,activity:activityPage,more:morePage}[route]?.()||home()}</main></div>
   <nav class="tabs" aria-label="Main">${NAV.map(([k,l,i])=>`<button data-nav="${k}" ${cur===k?'aria-current="page"':""}>${ic(i)}${l}</button>`).join("")}</nav>`;
   setSyncUi(syncState||"Sign in to sync");
