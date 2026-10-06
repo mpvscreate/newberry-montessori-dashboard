@@ -116,6 +116,7 @@ button.tile{cursor:pointer;transition:transform .08s,box-shadow .25s}button.tile
 .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 2px 6px var(--glow-soft),0 6px 22px var(--glow)}
 .btn.good{background:var(--green-soft);color:var(--green);border-color:transparent}
 .btn.danger{color:var(--red)}
+.btn.grow{flex:1 1 auto;min-width:max-content}
 .btn.small{padding:6px 14px;min-height:44px;font-size:.92rem;border-radius:13px}.btn.block{width:100%}.btn.icon{padding:0;width:44px}
 .btn.ghost{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.5);color:#fff}
 .btn[disabled]{opacity:.55;box-shadow:none}
@@ -808,7 +809,8 @@ function henDetail(id){
         <label class="f">Status</label><div class="chips" role="group" aria-label="Status">${STATUSES.map(([k,l])=>`<button class="chip" data-f="s-${k}" data-st="${k}" aria-pressed="${h.status===k}">${l}</button>`).join("")}</div>
     <h3 style="margin:20px 0 4px;font-size:1.15rem">Health log</h3>
     ${logs.length?`<ul class="list">${logs.slice(0,12).map(x=>`<li><div class="grow"><span class="pill ${x.type==="illness"||x.type==="injury"?"unwell":x.type==="treatment"?"watch":"sky"}">${esc(HTYPES.find(t=>t[0]===x.type)?.[1]||"Note")}</span> <span class="small muted">${dlabel(x.date)}</span><div>${esc(x.text)}</div>${x.product?`<div class="small muted">Used: ${esc(x.product)}</div>`:""}${x.holdUntil?`<div class="small" style="color:var(--amber)">Eggs on hold until ${new Date(x.holdUntil+"T12:00").toLocaleDateString("en-ZA",{day:"numeric",month:"short"})}</div>`:""}</div><button class="btn small icon" data-edit="${x.id}" aria-label="Edit this note">${ic("pencil")}</button><button class="btn small icon danger" data-delh="${x.id}" aria-label="Delete this note">${ic("trash")}</button></li>`).join("")}</ul>`:`<p class="muted small">No health notes yet.</p>`}
-    <div class="row wr" style="margin-top:14px"><button class="btn primary grow" id="addh">${ic("plus")}Add health note</button><button class="btn" id="hguide">${ic("book")}Guide</button><button class="btn" id="edit">${ic("pencil")}Edit</button><button class="btn danger" id="del" aria-label="Delete ${esc(h.name)}">${ic("trash")}</button></div>`,(sh,close)=>{
+    <button class="btn primary block" id="addh" style="margin-top:14px">${ic("plus")}Add health note</button>
+    <div class="row" style="margin-top:10px"><button class="btn grow" id="hguide">${ic("book")}Guide</button><button class="btn grow" id="edit">${ic("pencil")}Edit</button><button class="btn danger icon" id="del" aria-label="Delete ${esc(h.name)}" style="width:52px">${ic("trash")}</button></div>`,(sh,close)=>{
     sh.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{h.status=b.dataset.st;save();sh.querySelectorAll("[data-st]").forEach(x=>x.setAttribute("aria-pressed",x===b));render();toast(`${h.name} is now ${STATUSES.find(s=>s[0]===h.status)[1].toLowerCase()}.`)});
     sh.querySelector("#addh").onclick=()=>{close();healthSheet(id)};
     sh.querySelector("#hguide").onclick=()=>{close();openGuide()};
