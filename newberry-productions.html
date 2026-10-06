@@ -94,6 +94,7 @@ nav.tabs button[aria-current=page]{color:var(--green);background:var(--green-sof
 .btn:active{transform:scale(.98)}
 @media (hover:hover){.btn:hover{border-color:var(--accent);box-shadow:0 0 0 4px var(--glow-soft),0 4px 18px var(--glow-soft)}}
 .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 2px 6px var(--glow-soft),0 6px 22px var(--glow)}
+.btn{white-space:nowrap}.btn.grow{flex:1 1 auto;min-width:max-content}
 .btn.danger{color:var(--red)}.btn.block{width:100%}.btn.small{padding:6px 14px;min-height:44px;font-size:.92rem;border-radius:13px}
 .btn[disabled]{opacity:.55;box-shadow:none}
 .segc{display:grid;grid-auto-flow:column;grid-auto-columns:1fr;background:var(--green-soft);border-radius:16px;padding:4px;margin-bottom:14px}
@@ -691,7 +692,7 @@ function waSheet(p,ids){
   sheet("Send on WhatsApp",`<div class="chips" style="gap:6px;margin:10px 0">${ms.slice(0,8).map(m=>`<span style="width:56px;height:56px;border-radius:12px;overflow:hidden;display:block;background:var(--line)">${m.type==="video"?`<video data-mid="${m.id}" muted playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover"></video>`:`<img data-mid="${m.id}" alt="" style="width:100%;height:100%;object-fit:cover">`}</span>`).join("")}${ms.length>8?`<span class="muted small">+${ms.length-8} more</span>`:""}</div>
   <p class="muted small" style="margin:0">${ms.length} item${ms.length>1?"s":""} selected</p>
   <label class="f" for="wm">Your message</label><div class="row" style="align-items:flex-start"><textarea class="t" id="wm" rows="6">${esc(text)}</textarea>${micBtn()}</div>
-  <div class="row wr" style="margin-top:16px"><button class="btn primary grow" id="wsend">${ic("share")}Share with photos</button><button class="btn" id="wtxt">${ic("chat")}Message only</button><button class="btn" id="wcp">${ic("copy")}Copy</button></div>
+  <button class="btn primary block" id="wsend" style="margin-top:16px">${ic("share")}Share with photos</button><div class="row" style="margin-top:10px"><button class="btn grow" id="wtxt">${ic("chat")}Message only</button><button class="btn grow" id="wcp">${ic("copy")}Copy</button></div>
   <p class="hint">"Share with photos" opens your phone's share menu. Choose WhatsApp, then the chat or group.</p>`,(d,close)=>{
     hydrate(d);wireMics(d);const msg=()=>$("#wm").value.trim();
     $("#wsend").onclick=async()=>{const b=$("#wsend");b.disabled=true;
