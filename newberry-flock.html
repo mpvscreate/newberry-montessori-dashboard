@@ -13,7 +13,7 @@
 <meta name="theme-color" content="#fbf6ec" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14110c" media="(prefers-color-scheme: dark)">
 <meta name="application-name" content="Newberry Flock">
-<meta name="apple-mobile-web-app-title" content="Flock">
+<meta name="apple-mobile-web-app-title" content="&#x2800;">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -455,7 +455,7 @@ const GUIDE_DEFAULT=[
 
 /* ---------- data (browser only: no sign-in yet) ---------- */
 const KEY="newberry-flock-v1";
-const DEF=()=>({settings:{price:55,priceRest:45,lowFeedDays:7,signature:"Newberry Middle School Project",groupLink:""},coops:[{id:"c1",name:"Main coop"}],hens:[],eggs:[],customers:[],sales:[],feeds:[],purchases:[],checks:{},health:[],guide:structuredClone(GUIDE_DEFAULT),updates:[]});
+const DEF=()=>({settings:{price:55,priceRest:45,lowFeedDays:7,signature:"Newberry Middle School Project",groupLink:""},coops:[{id:"c1",name:"Main coop"}],hens:[],eggs:[],customers:[],sales:[],feeds:[],purchases:[],checks:{},health:[],guide:structuredClone(GUIDE_DEFAULT),updates:[],adjust:[]});
 let S;try{S={...DEF(),...JSON.parse(localStorage.getItem(KEY))}}catch{S=DEF()}
 S.settings={...DEF().settings,...S.settings};if(!S.coops?.length)S.coops=DEF().coops;
 if(S.coops.length>1)S.coops=[S.coops[0]];S.hens.forEach(h=>h.coop=S.coops[0].id);S.eggs.forEach(e=>e.coop=S.coops[0].id);
@@ -482,7 +482,8 @@ const layingHens=()=>S.hens.filter(h=>["healthy","watch","unwell"].includes(h.st
 const activeHens=()=>S.hens.filter(h=>ACTIVE.includes(h.status));
 const eggsOn=d=>sum(S.eggs.filter(e=>e.date===d),e=>e.count);
 const goodEggs=()=>sum(S.eggs,e=>e.count-(e.cracked||0));
-const stock=()=>goodEggs()-sum(S.sales,s=>s.eggs);
+const adjTotal=()=>sum(S.adjust||[],a=>a.eggs);
+const stock=()=>goodEggs()-sum(S.sales,s=>s.eggs)+adjTotal();
 const saleTotal=s=>s.eggs/12*s.price;
 const layRate=(n=7)=>{const hs=layingHens().length;if(!hs)return null;const ds=range(n);return Math.min(1,sum(ds,eggsOn)/(n*hs))};
 
@@ -592,7 +593,7 @@ function home(){
       <span class="chip-d">${ic(d>=0?"up":"down","sm")}${d===0?"Same as yesterday":Math.abs(d)+(d>0?" more":" fewer")+" than yesterday"}</span>
       <div class="bars" role="img" aria-label="Eggs per day, last 7 days: ${vals.join(", ")}">${days.map((dd,i)=>`<div class="${i===6?"now":""}"><i style="height:${Math.max(6,vals[i]/mx*100)}%"></i><span>${new Date(dd+"T12:00").toLocaleDateString("en-ZA",{weekday:"narrow"})}</span></div>`).join("")}</div>
       <button class="btn ghost small" data-act="logeggs" style="margin-top:6px">${ic("plus")}Log eggs</button></section>
-    <button class="tile green" data-go="eggs" data-act="go" data-id="eggs"><div class="lbl">${ic("basket")}In stock</div><div class="big">${Math.max(0,Math.floor(st/12))}<span class="small muted" style="font:500 .9rem var(--body)"> dozen</span></div><div class="sub">${Math.max(0,st)} eggs ready to sell</div><div class="meter ${st<=12?"low":st<=36?"mid":""}"><i style="width:${Math.min(100,Math.max(4,st/cap*100))}%"></i></div></button>
+    <button class="tile ${st<0?"alert":"green"}" data-act="stock"><div class="lbl">${ic("basket")}In stock</div><div class="big">${Math.max(0,Math.floor(st/12))}<span class="small muted" style="font:500 .9rem var(--body)"> dozen</span></div><div class="sub">${st<0?`Sales are ${-st} eggs ahead of what’s logged. Tap to fix.`:`${st} eggs ready to sell · tap to count`}</div><div class="meter ${st<=12?"low":st<=36?"mid":""}"><i style="width:${Math.min(100,Math.max(4,st/cap*100))}%"></i></div></button>
     <section class="tile warm"><div class="lbl">${ic("trend")}Laying rate</div><div class="ringbox">${ring(rate,"var(--accent)")}<div class="c">${rate===null?"–":Math.round(rate*100)+"%"}</div></div><div class="sub">${rate===null?"Add hens to see this":"7-day average · "+layingHens().length+" laying hens"}</div></section>
     <button class="tile sky" data-act="go" data-id="care"><div class="lbl">${ic("clip")}Daily checks</div><div class="ringbox">${ring(cp.total?cp.done/cp.total:0,"var(--sky)")}<div class="c">${cp.done}/${cp.total}</div></div><div class="sub">${cp.total&&cp.done===cp.total?"All done today":"Tap to tick off"}</div></button>
     <button class="tile ${low?"alert":""}" data-act="gofeed"><div class="lbl">${ic("grain")}Feed left</div><div class="big">${dl===null?"–":Math.floor(dl)}<span class="small muted" style="font:500 .9rem var(--body)"> ${dl===null?"":"days"}</span></div><div class="sub">${dl===null?"Log purchases and feeding":low?"Time to reorder":"At the current pace"}</div><div class="meter ${low?"low":""}"><i style="width:${dl===null?0:Math.min(100,dl/30*100)}%"></i></div></button>
@@ -618,7 +619,7 @@ function eggs(){
   if(eggSub==="sales"){
     const un=S.sales.filter(s=>!s.paid);
     return `<div class="page-h"><h2>Eggs</h2><button class="btn primary small" data-act="sell">${ic("cash")}Sell eggs</button></div>${seg}
-    <div class="bento" style="grid-template-columns:repeat(2,1fr)"><section class="tile green"><div class="lbl">${ic("basket")}In stock</div><div class="big">${Math.max(0,stock())}</div><div class="sub">eggs · ${Math.max(0,Math.floor(stock()/12))} dozen</div></section><section class="tile ${owed()>0?"alert":""}"><div class="lbl">${ic("clock")}To be paid</div><div class="big">${money(owed())}</div><div class="sub">${un.length} unpaid sale${un.length===1?"":"s"}</div></section></div>
+    <div class="bento" style="grid-template-columns:repeat(2,1fr)"><button class="tile ${stock()<0?"alert":"green"}" data-act="stock"><div class="lbl">${ic("basket")}In stock</div><div class="big">${Math.max(0,stock())}</div><div class="sub">${stock()<0?`Sales are ${-stock()} eggs ahead. Tap to fix.`:`eggs · ${Math.floor(stock()/12)} dozen · tap to count`}</div></button><section class="tile ${owed()>0?"alert":""}"><div class="lbl">${ic("clock")}To be paid</div><div class="big">${money(owed())}</div><div class="sub">${un.length} unpaid sale${un.length===1?"":"s"}</div></section></div>
     <section class="card">${S.sales.length?`<ul class="list">${[...S.sales].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,60).map(s=>`<li>${avatarHtml(null,cust(s.cust)?.type==="restaurant"?"green":"")}<div class="grow"><b>${esc(custName(s.cust))}</b><div class="small muted">${dz(s.eggs)} · ${dlabel(s.date)}</div></div><div class="end"><div class="amt">${money(saleTotal(s))}</div>${s.paid?`<div class="small muted">Paid</div>`:`<button class="btn good small" data-act="paid" data-id="${s.id}">${ic("check")}Mark paid</button>`}</div><button class="btn small icon" data-act="editsale" data-id="${s.id}" aria-label="Edit this sale">${ic("pencil")}</button><button class="btn small icon danger" data-act="delsale" data-id="${s.id}" aria-label="Delete this sale">${ic("trash")}</button></li>`).join("")}</ul>`:`<div class="empty">${ic("cash","xl")}<h3>No sales yet</h3><p>Record your first sale to start tracking income.</p><button class="btn primary" data-act="sell">${ic("cash")}Sell eggs</button></div>`}</section>`;
   }
   const dayList=[...S.eggs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,60);
@@ -667,7 +668,7 @@ function act(a,id){
     delsale:()=>{const i=S.sales.findIndex(s=>s.id===id),[s]=S.sales.splice(i,1);save();render();toast("Sale deleted.",()=>S.sales.splice(i,0,s))},
     deldayeggs:()=>{const rem=S.eggs.filter(e=>e.date===id);S.eggs=S.eggs.filter(e=>e.date!==id);save();render();toast("Egg entries deleted.",()=>S.eggs.push(...rem))},
     delbuy:()=>{const i=S.purchases.findIndex(p=>p.id===id),[p]=S.purchases.splice(i,1);save();render();toast("Purchase deleted.",()=>S.purchases.splice(i,0,p))},
-    custs:()=>custSheet(),theme:()=>themeSheet(),applock:()=>lockSheet(),sync:()=>{if(!sb){toast("Connecting…");initAuth();return}user?syncSheet():signInSheet()},syncdismiss:()=>{try{localStorage.setItem("flock-sync-dismiss","1")}catch{}render()},install:()=>installApp(),updates:()=>go("updates"),newupd:()=>updSheet(),editupd:()=>updSheet(S.updates.find(x=>x.id===id)),shareupd:()=>sendUpdate(id),
+    custs:()=>custSheet(),stock:()=>stockSheet(),theme:()=>themeSheet(),applock:()=>lockSheet(),sync:()=>{if(!sb){toast("Connecting…");initAuth();return}user?syncSheet():signInSheet()},syncdismiss:()=>{try{localStorage.setItem("flock-sync-dismiss","1")}catch{}render()},install:()=>installApp(),updates:()=>go("updates"),newupd:()=>updSheet(),editupd:()=>updSheet(S.updates.find(x=>x.id===id)),shareupd:()=>sendUpdate(id),
     delupd:()=>{const u=S.updates.find(x=>x.id===id);confirmSheet("Delete this update?","The message and its photo or video are removed from this device.","Delete update",()=>{S.updates=S.updates.filter(x=>x.id!==id);if(u.media){mDel(u.media).catch(()=>{});dropMedia(u.media);removeCloudMedia(u.media)}save();render();toast("Update deleted.")})},guide:()=>openGuide(),gcat:()=>{guideCat=id;render()},gclear:()=>{guideQ="";guideCat="all";render()},newguide:()=>guideForm(),editguide:()=>guideForm(S.guide.find(g=>g.id===id)),
     logguide:()=>healthSheet(null,null,S.guide.find(g=>g.id===id).name+": "),
     delguide:()=>{const g=S.guide.find(x=>x.id===id);confirmSheet("Delete "+g.name+"?","This removes the entry from your guide. You can restore the defaults later.","Delete entry",()=>{const i=S.guide.findIndex(x=>x.id===id),[r]=S.guide.splice(i,1);save();render();toast("Entry deleted.",()=>S.guide.splice(i,0,r))})},
@@ -726,7 +727,7 @@ function sellSheet(pre,rec){
       <div class="stepper"><button type="button" data-f="dm" data-d="-0.5" aria-label="Half a dozen less">${ic("minus","lg")}</button><input id="doz" inputmode="decimal" value="${m.doz}"><button type="button" data-f="dp" data-d="0.5" aria-label="Half a dozen more">${ic("plus","lg")}</button></div>
       <div class="chips" style="justify-content:center;margin-top:10px">${[1,2,5,10].map(n=>`<button type="button" class="chip" data-f="q${n}" data-q="${n}" aria-pressed="${m.doz===n}">${n}</button>`).join("")}</div>
       <p class="hint" style="text-align:center">${Math.round(m.doz*12)} eggs · ${Math.max(0,stock())} in stock</p>
-      ${short?`<div class="warn" role="alert">${ic("alert")}<span>You only have ${dz(Math.max(0,stock()))} in stock. You can still record this sale.</span></div>`:""}
+      ${short?`<div class="warn" role="alert">${ic("alert")}<span>You only have ${dz(Math.max(0,stock()))} in stock. You can still record this sale. <button type="button" class="linkbtn" style="padding:0;min-height:0" data-stockfix>Count stock</button></span></div>`:""}
       ${hold.size?`<div class="warn" role="alert">${ic("alert")}<span><b>${[...hold.keys()].map(i=>esc(hen(i).name)).join(", ")}</b> ${hold.size===1?"is":"are"} on a treatment hold. Eggs are collected together, so make sure the treated hen was kept apart, or hold these eggs.</span></div>`:""}
       <label class="f" for="pz">Price per dozen (R)</label><input id="pz" class="t" type="number" inputmode="decimal" step="1" min="0" value="${price}">
       <div class="total"><span>Total</span><b>${money(tot)}</b></div>
@@ -740,6 +741,7 @@ function sellSheet(pre,rec){
       f.querySelector("#doz").onchange=e=>{m.doz=Math.max(0.5,Math.round((parseFloat(e.target.value)||1)*2)/2);draw()};
       f.querySelector("#pz").onchange=e=>{m.price=parseFloat(e.target.value)||0;draw()};
       f.querySelector("#sd").onchange=e=>m.date=e.target.value||today();
+      f.querySelector("[data-stockfix]")?.addEventListener("click",()=>{close();stockSheet()});
       f.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{m.date=f.querySelector("#sd").value||m.date;m.paid=b.dataset.p==="1";draw()});
     };
     f.onsubmit=e=>{e.preventDefault();const dv=parseFloat(f.querySelector("#doz").value);if(dv>0)m.doz=dv;const pv=parseFloat(f.querySelector("#pz").value);m.date=f.querySelector("#sd").value||today();
@@ -1044,7 +1046,7 @@ let sm={meta:{},lastPull:null,pendingMedia:[],failedMedia:[]};
 try{sm={...sm,...JSON.parse(localStorage.getItem(SYNC_KEY))}}catch{}
 const persistSync=()=>{try{localStorage.setItem(SYNC_KEY,JSON.stringify(sm))}catch{}};
 let lastErr="",sb=null,user=null,syncState="signedout",syncedAt=null,pulling=false,pushing=false,channel=null,pushTimer;
-const COLS=["hens","eggs","customers","sales","feeds","purchases","health","updates","guide"];
+const COLS=["hens","eggs","customers","sales","feeds","purchases","health","updates","guide","adjust"];
 const canon=v=>Array.isArray(v)?"["+v.map(canon).join(",")+"]":v&&typeof v==="object"?"{"+Object.keys(v).filter(k=>v[k]!==undefined).sort().map(k=>JSON.stringify(k)+":"+canon(v[k])).join(",")+"}":JSON.stringify(v);
 const hashOf=r=>{const s=canon(r);let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return h+":"+s.length};
 function recMap(){
@@ -1367,6 +1369,29 @@ function themeSheet(){
   });
 }
 
+/* ---------- stock count & corrections ---------- */
+function stockSheet(){
+  const col=goodEggs(),sold=sum(S.sales,x=>x.eggs),adj=adjTotal(),st=stock();
+  const sg=n=>(n<0?"−":"+")+Math.abs(n);
+  sheet("Egg stock",`<div class="bento" style="grid-template-columns:1fr;margin:8px 0 12px"><div class="tile ${st<0?"alert":"green"}" style="min-height:0"><div class="lbl">${ic("basket")}In stock now</div><div class="big">${st} <span class="small muted" style="font:500 .95rem var(--body)">eggs</span></div><div class="sub">${dz(Math.max(0,st))}</div></div></div>
+  <ul class="list" style="margin-bottom:6px"><li><div class="grow">Eggs collected (not cracked)</div><b class="amt">${sg(col)}</b></li><li><div class="grow">Eggs sold</div><b class="amt">${sg(-sold)}</b></li><li><div class="grow">Stock corrections</div><b class="amt">${sg(adj)}</b></li></ul>
+  ${st<0?`<div class="warn" role="alert">${ic("alert")}<span>You’ve recorded ${-st} more eggs sold than collected. This usually means eggs from before you started using the app, or a collection that wasn’t logged. Count your eggs and save the count below.</span></div>`:""}
+  <form id="f" novalidate><label class="f" for="cnt">Count your eggs right now</label>
+  <input id="cnt" data-autofocus class="t" inputmode="numeric" placeholder="How many eggs are in stock?" aria-describedby="e-cnt"><p class="err" id="e-cnt" role="alert" hidden>${ic("alert")}Enter a number of eggs, for example 36.</p>
+  <p class="hint">The app adjusts the stock to match your count. Use it to set your starting stock, or whenever the shelf and the app disagree.</p>
+  <div class="foot"><button class="btn primary block">Save stock count</button></div></form>
+  ${(S.adjust||[]).length?`<h3 style="font-size:1.1rem;margin-top:8px">Corrections</h3><ul class="list">${[...S.adjust].sort((a,b)=>b.date.localeCompare(a.date)).map(a=>`<li><div class="grow"><b>${esc(a.note||"Correction")}</b><div class="small muted">${dlabel(a.date)}</div></div><b class="amt">${sg(a.eggs)}</b><button class="btn small icon danger" data-del="${a.id}" aria-label="Delete this correction">${ic("trash")}</button></li>`).join("")}</ul>`:""}`,(sh,close)=>{
+    sh.querySelector("#f").onsubmit=e=>{
+      e.preventDefault();const inp=sh.querySelector("#cnt"),n=parseInt(inp.value,10);
+      if(isNaN(n)||n<0){inp.setAttribute("aria-invalid","true");sh.querySelector("#e-cnt").hidden=false;inp.focus();return}
+      const delta=n-stock();if(delta===0){close();toast("Stock already matches your count.");return}
+      const rec={id:uid(),date:today(),eggs:delta,note:"Stock count: "+n};S.adjust.push(rec);save();close();render();
+      toast(`Stock set to ${n} eggs.`,()=>{S.adjust.splice(S.adjust.indexOf(rec),1)});
+    };
+    sh.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const i=S.adjust.findIndex(a=>a.id===b.dataset.del),[r]=S.adjust.splice(i,1);save();close();render();toast("Correction deleted.",()=>S.adjust.splice(i,0,r))});
+  });
+}
+
 /* ---------- install to home screen ---------- */
 let installEvt=null;
 const standalone=()=>matchMedia("(display-mode: standalone)").matches||navigator.standalone===true;
@@ -1420,8 +1445,8 @@ function sample(){
     {const n=S.hens.filter(h=>["healthy","watch"].includes(h.status)&&Math.random()<.82).length;if(n)S.eggs.push({id:uid(),date:d,coop:"c1",count:n,cracked:Math.random()<.25?1:0})}
     S.checks[d]={c1:{fed:1,feed:"f1",water:true,clean:i%3!==0,secure:true,health:i!==0}};
     if(i===0)S.checks[d].c1={fed:1,feed:"f1",water:true};
-    if(i%4===0)S.sales.push({id:uid(),date:d,cust:"k1",eggs:12,price:45,paid:i>3});
-    if(i%6===0)S.sales.push({id:uid(),date:d,cust:"k3",eggs:12,price:55,paid:true});}
+    if(i%5===0)S.sales.push({id:uid(),date:d,cust:"k1",eggs:12,price:45,paid:i>3});
+    if(i%7===0)S.sales.push({id:uid(),date:d,cust:"k3",eggs:6,price:55,paid:true});}
   save();render();toast("Sample data loaded.");
 }
 
