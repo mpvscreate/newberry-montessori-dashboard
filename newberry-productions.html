@@ -194,6 +194,8 @@ input[type=range]{width:100%;height:36px;accent-color:var(--green)}
 .sw{width:56px;height:32px;border-radius:99px;border:0;background:var(--line);position:relative;cursor:pointer;flex:none}.sw::after{content:"";position:absolute;inset:-8px 0}
 .sw i{position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;transition:transform .2s}.sw[aria-checked=true]{background:var(--green)}.sw[aria-checked=true] i{transform:translateX(24px)}
 
+@media (max-width:520px){.fab{width:60px;padding:0}.fab span{display:none}}
+.chip.static button{position:relative}.chip.static button::after{content:"";position:absolute;inset:-6px}
 .photos button{position:relative}
 .targets{list-style:none;margin:10px 0 0;padding:0}
 .targets li{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}.targets li:first-child{border-top:0}
@@ -336,18 +338,24 @@ const who=()=>user?.email?.split("@")[0]||"me";
 const fmt=t=>new Date(t).toLocaleDateString(undefined,{day:"numeric",month:"short"})+" "+new Date(t).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
 
 function theme(m){if(m){try{m==="auto"?localStorage.removeItem(THEME):localStorage.setItem(THEME,m)}catch{}if(m==="auto")document.documentElement.removeAttribute("data-theme");else document.documentElement.setAttribute("data-theme",m)}let t="auto";try{t=localStorage.getItem(THEME)||"auto"}catch{}return t}
-function toast(msg,undo){const e=document.createElement("div");e.className="toast";e.textContent=msg;if(undo){const b=document.createElement("button");b.textContent="Undo";b.onclick=()=>{undo();e.remove()};e.append(b)}$("#toasts").append(e);setTimeout(()=>e.remove(),undo?6000:2500)}
+function toast(msg,undo){document.querySelectorAll("#toasts .toast").forEach(x=>x.remove());const e=document.createElement("div");e.className="toast";e.textContent=msg;if(undo){const b=document.createElement("button");b.textContent="Undo";b.onclick=()=>{undo();e.remove()};e.append(b)}$("#toasts").append(e);setTimeout(()=>e.remove(),undo?6000:2500)}
 function confetti(){const c=document.createElement("div");c.className="confetti";c.setAttribute("aria-hidden","true");for(let i=0;i<40;i++){const p=document.createElement("i");p.style.cssText=`left:${Math.random()*100}%;background:${COLORS[i%8]};animation-delay:${Math.random()*.4}s`;c.append(p)}document.body.append(c);setTimeout(()=>c.remove(),2400)}
 
 /* sheets */
+/* the phone's back button closes the open sheet or editor instead of leaving the page */
+const ovStack=[];let ovSkip=0;
+function ovPush(e){history.pushState({ov:1},"");ovStack.push(e)}
+function ovPop(k,fb){const i=ovStack.map(x=>x.k).lastIndexOf(k);if(i<0)return;ovStack.splice(i,1);if(fb!==true){ovSkip++;history.back()}}
+addEventListener("popstate",()=>{if(ovSkip>0){ovSkip--;return}const e=ovStack.pop();if(e)e.close(true)});
 let sheetOpener=null,sheetKey=null;
-function closeSheet(){if(listening)listening.stop();$("#layer").innerHTML="";document.body.classList.remove("noscroll");removeEventListener("keydown",sheetKey);sheetKey=null;if(sheetOpener&&document.contains(sheetOpener))sheetOpener.focus();sheetOpener=null}
+function closeSheet(fb){ovPop("sheet",fb);if(listening)listening.stop();$("#layer").innerHTML="";document.body.classList.remove("noscroll");removeEventListener("keydown",sheetKey);sheetKey=null;if(sheetOpener&&document.contains(sheetOpener))sheetOpener.focus();sheetOpener=null}
 function sheet(title,body,wire){
   const l=$("#layer");if(!sheetOpener&&!document.getElementById("lock"))sheetOpener=document.activeElement;
   if(sheetKey)removeEventListener("keydown",sheetKey);
   l.innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title)}" tabindex="-1"><div class="hd"><h2>${esc(title)}</h2><button class="x" id="sx" aria-label="Close">${ic("x")}</button></div>${body}</div></div>`;
   document.body.classList.add("noscroll");
-  $("#sx").onclick=closeSheet;$("#scrim").onclick=e=>{if(e.target.id==="scrim")closeSheet()};
+  if(!ovStack.some(x=>x.k==="sheet"))ovPush({k:"sheet",close:fb=>closeSheet(fb)});
+  $("#sx").onclick=()=>closeSheet();$("#scrim").onclick=e=>{if(e.target.id==="scrim")closeSheet()};
   sheetKey=e=>{if(document.getElementById("lock"))return;if(e.key==="Escape")closeSheet();else if(e.key==="Tab"){const f=[...l.querySelectorAll("button,input,textarea,select,[tabindex='0']")].filter(x=>!x.disabled&&x.offsetParent);if(!f.length)return;const first=f[0],last=f.at(-1);if(e.shiftKey&&(document.activeElement===first||document.activeElement===l.querySelector(".sheet"))){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}};
   addEventListener("keydown",sheetKey);
   l.querySelector(".sheet").focus();wire&&wire(l,closeSheet);
@@ -454,7 +462,7 @@ function home(){
   const ps=prods(),all=ps.flatMap(p=>p.goals),open=all.filter(g=>!g.done).length,
     pct=ps.length?Math.round(ps.reduce((a,p)=>a+prodPct(p),0)/ps.length):0,
     photos=S.media.filter(m=>!m.del).length,f=feedItems().slice(0,5);
-  return `<div class="page-h"><h2>Overview</h2><button class="btn small" id="rep">${ic("trend")}Weekly report</button></div>
+  return `<div class="page-h"><h2>Overview</h2><button class="btn small" id="rep" aria-label="Weekly report">${ic("trend")}Report</button></div>
   <div class="bento"><div class="tile hero s2"><div class="lbl">${ic("sparkle")}Overall progress</div><div class="big">${pct}%</div><div class="sub">${ps.length} productions</div><div class="meter"><i style="width:${pct}%"></i></div></div>
   <div class="tile green"><div class="lbl">${ic("target")}Open goals</div><div class="big">${open}</div><div class="sub">${all.length-open} done</div></div>
   <div class="tile sky"><div class="lbl">${ic("image")}Photos</div><div class="big">${photos}</div><div class="sub">across all</div></div></div>
@@ -463,7 +471,7 @@ function home(){
   ${fab()}`;
 }
 const actRow=f=>`<li><div class="avatar" style="color:${f.p.color}">${ic(f.p.icon)}</div><div class="grow"><b>${esc(f.p.name)}</b> <span class="pill type">${f.k}</span><div>${esc(f.txt)}</div><div class="small muted">${fmt(f.t)}</div></div></li>`;
-const fab=()=>`<div class="fab-wrap"><button class="fab" id="addp">${ic("plus")}New production</button></div>`;
+const fab=()=>`<div class="fab-wrap"><button class="fab" id="addp" aria-label="New production">${ic("plus")}<span>New production</span></button></div>`;
 function wireHome(){
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>nav("p/"+b.dataset.open));
   $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#rep")&&($("#rep").onclick=()=>reportSheet(null));
@@ -474,8 +482,14 @@ function morePage(){const t=theme();
   return `<div class="page-h"><h2>Settings</h2></div><div class="card"><h2>Appearance</h2><div class="segc" role="group" aria-label="Theme">${[["auto","Auto","device"],["light","Light","sun"],["dark","Dark","moon"]].map(([k,l,i])=>`<button data-th="${k}" aria-label="${l}" aria-pressed="${t===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div>
   <div class="card"><h2>Voice dictation</h2><p class="muted" style="margin:0">${SR?"On. Tap the microphone next to any text box and speak.":"Not available in this browser. Try Chrome or Edge, or use your phone keyboard's microphone."}</p></div>
   <div class="card"><h2>App lock</h2><p class="muted" style="margin-top:0">The app asks for a 3-digit PIN every time you open it. ${getPin()?"You are using your own PIN.":"You are using the default PIN. Choose your own to keep this device private."}</p>${getPin()?`<div class="row wr"><button class="btn" id="pinchg">Change PIN</button><button class="btn danger" id="pinoff">Back to default PIN</button></div>`:`<button class="btn primary" id="pinset">${ic("lock")}Choose my own PIN</button>`}</div>
+  <div class="card"><h2>Backup</h2><p class="muted" style="margin-top:0">Everything is stored on this device only. Download a backup of your goals, targets, team and logs now and then. Photos and videos are not included.</p><div class="row wr"><button class="btn" id="bk-out">${ic("download")}Download backup</button><button class="btn" id="bk-in">${ic("upload")}Restore</button></div><input type="file" id="bk-f" accept="application/json,.json" class="sr" aria-label="Choose a backup file" tabindex="-1"></div>
   <div class="card"><h2>This device</h2><p class="muted" style="margin-top:0">Sign-in is switched off for now, so cloud sync is paused. Everything you add is saved on this device only.</p><button class="btn block" id="out">${ic("lock")}Lock now</button></div>`}
-function wireMore(){document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#pinset")&&($("#pinset").onclick=setPin);$("#pinchg")&&($("#pinchg").onclick=()=>{removePinThenSet()});$("#pinoff")&&($("#pinoff").onclick=removePin);$("#out").onclick=lockNow}
+function wireMore(){document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#pinset")&&($("#pinset").onclick=setPin);$("#pinchg")&&($("#pinchg").onclick=()=>{removePinThenSet()});$("#pinoff")&&($("#pinoff").onclick=removePin);$("#out").onclick=lockNow;
+  $("#bk-out").onclick=()=>{const blob=new Blob([JSON.stringify({app:"ms-productions",v:1,at:new Date().toISOString(),prods:S.prods},null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ms-productions-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")};
+  $("#bk-in").onclick=()=>$("#bk-f").click();
+  $("#bk-f").onchange=async e=>{const file=e.target.files[0];if(!file)return;let d;try{d=JSON.parse(await file.text())}catch{toast("That file isn't a valid backup.");return}
+    if(d.app!=="ms-productions"||!Array.isArray(d.prods)){toast("That file isn't an MS Productions backup.");return}
+    sheet("Restore backup?",`<p class="muted" style="margin:4px 0 14px">This will add or update ${d.prods.length} productions from the backup. Newer changes on this device are kept.</p><div class="row wr"><button class="btn grow" id="rk">Cancel</button><button class="btn primary grow" id="rr">Restore</button></div>`,(dd,cl)=>{$("#rk").onclick=()=>cl();$("#rr").onclick=()=>{let n=0;d.prods.forEach(p=>{const i=S.prods.findIndex(x=>x.id===p.id);if(i<0){S.prods.push(p);n++}else if((p.u||0)>(S.prods[i].u||0)){S.prods[i]=p;n++}});save();cl();render();toast(n+" production"+(n===1?"":"s")+" restored.")}})}}
 
 /* production editor */
 function prodSheet(p){
@@ -512,7 +526,7 @@ function wireProd(p){
   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;clearSel();render()});
   ({goals:wireGoals,media:wireMedia,team:wireTeam,log:wireLog})[tab](p);
 }
-const fabBtn=(id,label)=>`<div class="fab-wrap"><button class="fab" id="${id}">${ic("plus")}${label}</button></div>`;
+const fabBtn=(id,label)=>`<div class="fab-wrap"><button class="fab" id="${id}" aria-label="${label}">${ic("plus")}<span>${label}</span></button></div>`;
 
 /* goals: every main goal is broken into targets; progress comes from the targets that are done */
 const hasT=g=>g.targets&&g.targets.length>0;
@@ -560,7 +574,7 @@ function goalSheet(p,g){
   <div class="row" style="margin-top:8px"><input class="t" id="tn" type="text" placeholder="Add a target" aria-label="New target">${micBtn()}<button class="btn small" id="ta" type="button">Add</button></div>
   <p class="err" id="ge" role="alert" hidden></p>
   <div class="row" style="margin-top:22px">${isNew?"":`<button class="btn danger" id="del">${ic("trash")}Delete</button>`}<span class="grow"></span><button class="btn primary" id="ok">Save</button></div>`,(d,close)=>{
-    wireMics(d);
+    wireMics(d);if(isNew)setTimeout(()=>$("#gt")&&$("#gt").focus(),60);$("#gt").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();$("#tn").focus()}};
     const err=m=>{const e=$("#ge");e.textContent=m;e.hidden=!m};
     const draw=()=>{$("#tl").innerHTML=tl.map((t,i)=>`<div class="row" style="margin-bottom:8px"><input class="t" data-i="${i}" type="text" value="${esc(t.title)}" aria-label="Target ${i+1}"><button class="x" data-rm="${i}" type="button" aria-label="Remove target ${i+1}">${ic("x")}</button></div>`).join("");
       d.querySelectorAll("[data-i]").forEach(inp=>inp.oninput=()=>{tl[+inp.dataset.i].title=inp.value});
@@ -599,7 +613,7 @@ async function pushMedia(){
     if(error)throw error;sm.up[m.id]=1;
   }
 }
-function hydrate(root=document){root.querySelectorAll("[data-mid]").forEach(async el=>{const u=await loadMedia(el.dataset.mid);if(u)el.src=u})}
+function hydrate(root=document){root.querySelectorAll("[data-mid]").forEach(async el=>{const u=await loadMedia(el.dataset.mid);if(u)el.src=el.tagName==="VIDEO"&&!el.controls?u+"#t=0.1":u})}
 async function migrateMedia(){let n=0;for(const m of S.media){if(!m.data)continue;try{const b=await (await fetch(m.data)).blob();await mPut(m.id,b);delete m.data;m.type=m.type||"photo";n++}catch{}}if(n){save();if(!isOpen())render()}}
 function toBlob(file){return new Promise(res=>{const im=new Image(),u=URL.createObjectURL(file);im.onload=()=>{const s=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(res,"image/jpeg",.75)};im.onerror=()=>res(null);im.src=u})}
 
@@ -623,7 +637,7 @@ function mediaTab(p){
   const n=sel.size,onePhoto=n===1&&ms.find(m=>m.id===[...sel][0])?.type!=="video";
   return `<div class="row" style="margin-bottom:14px"><div class="segc grow" role="group" aria-label="Media view" style="margin:0;max-width:260px"><button data-mv="grid" aria-label="Grid" aria-pressed="${mview==="grid"}">${ic("grid")}<span>Grid</span></button><button data-mv="time" aria-label="Timeline" aria-pressed="${mview==="time"}">${ic("clock")}<span>Timeline</span></button></div>
   ${ms.length?`<button class="btn small" id="seltog" aria-pressed="${selecting}">${ic(selecting?"x":"check")}${selecting?"Done":"Select"}</button>`:""}</div>`+body+
-  `<input type="file" id="pf" accept="image/*,video/*" multiple class="sr">`+
+  `<input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1">`+
   (selecting?(n?`<div style="height:80px" aria-hidden="true"></div><div class="selbar" role="toolbar" aria-label="Actions for selected media"><span class="selcount" aria-live="polite">${n} selected</span>
     <button class="btn primary small" id="s-wa">${ic("chat")}WhatsApp</button>
     ${n===1?`<button class="btn small" id="s-ed">${ic("sliders")}Edit</button>`:""}
@@ -753,12 +767,13 @@ function editorShell({title,tools,dirty,start}){
   <div class="ed-stage" id="ed-stage"></div><div class="ed-panel" id="ed-panel"></div>
   <div class="ed-tools" role="group" aria-label="Edit tools">${tools.map(t=>`<button type="button" data-tool="${t.id}" aria-pressed="false">${ic(t.icon)}<span>${t.label}</span><i class="dot"></i></button>`).join("")}</div>`;
   const opener=document.activeElement;document.body.append(root);document.body.classList.add("noscroll");
+  const entry={k:"editor",close:fb=>{if(fb!==true)return api.close();if(busy||dirty()){ovPush(entry);if(!busy)leave()}else api.close(true)}};ovPush(entry);
   const q=s=>root.querySelector(s);let busy=false;
   const api={root,stage:q("#ed-stage"),panel:q("#ed-panel"),
     select(id){const t=tools.find(x=>x.id===id);root.querySelectorAll("[data-tool]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.tool===id));api.panel.innerHTML="";t.panel(api.panel);t.onSelect&&t.onSelect();api.tool=id;q(`[data-tool="${id}"]`).scrollIntoView({inline:"center",block:"nearest",behavior:"smooth"})},
     dots(){tools.forEach(t=>q(`[data-tool="${t.id}"]`).classList.toggle("mod",!!(t.mod&&t.mod())))},
     busy(v){busy=v;root.classList.toggle("busy",v)},
-    close(){document.removeEventListener("keydown",key);root.remove();if(!document.querySelector(".scrim"))document.body.classList.remove("noscroll");opener&&opener.focus&&opener.focus();api.onClose&&api.onClose()},
+    close(fb){ovPop("editor",fb);document.removeEventListener("keydown",key);root.remove();if(!document.querySelector(".scrim"))document.body.classList.remove("noscroll");opener&&opener.focus&&opener.focus();api.onClose&&api.onClose()},
     askSave(go){sheet("Save your edit",`<p class="muted" style="margin:4px 0 14px">Keep the original, or replace it with the edited version.</p><button class="btn primary block" id="sv-c">${ic("copy")}Save as new copy</button><button class="btn block" id="sv-r" style="margin-top:10px">${ic("check")}Replace original</button>`,(d,cl)=>{$("#sv-c").onclick=()=>{cl();go(false)};$("#sv-r").onclick=()=>{cl();go(true)}})},
   };
   const leave=()=>{if(busy)return;if(!dirty())return api.close();sheet("Discard your changes?",`<p class="muted" style="margin:4px 0 14px">Your edits haven't been saved.</p><div class="row wr"><button class="btn grow" id="dk">Keep editing</button><button class="btn danger grow" id="dd">Discard</button></div>`,(d,cl)=>{$("#dk").onclick=cl;$("#dd").onclick=()=>{cl();api.close()}})};
@@ -1064,6 +1079,7 @@ function reportSheet(p){
 
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 if(!LOGIN)user={email:"staff@local",local:true};
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch{}
 lockNow();migrateMedia();render();if(LOGIN)initAuth();
 </script>
 </body>
