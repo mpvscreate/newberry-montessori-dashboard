@@ -343,6 +343,7 @@ const who=()=>user?.email?.split("@")[0]||"me";
 const fmt=t=>new Date(t).toLocaleDateString(undefined,{day:"numeric",month:"short"})+" "+new Date(t).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
 
 function theme(m){if(m){try{m==="auto"?localStorage.removeItem(THEME):localStorage.setItem(THEME,m)}catch{}if(m==="auto")document.documentElement.removeAttribute("data-theme");else document.documentElement.setAttribute("data-theme",m)}let t="auto";try{t=localStorage.getItem(THEME)||"auto"}catch{}return t}
+const isDark=()=>document.documentElement.getAttribute("data-theme")==="dark"||(!document.documentElement.getAttribute("data-theme")&&matchMedia("(prefers-color-scheme: dark)").matches);
 function toast(msg,undo){document.querySelectorAll("#toasts .toast").forEach(x=>x.remove());const e=document.createElement("div");e.className="toast";e.textContent=msg;if(undo){const b=document.createElement("button");b.textContent="Undo";b.onclick=()=>{undo();e.remove()};e.append(b)}$("#toasts").append(e);setTimeout(()=>e.remove(),undo?6000:2500)}
 function confetti(){const c=document.createElement("div");c.className="confetti";c.setAttribute("aria-hidden","true");for(let i=0;i<40;i++){const p=document.createElement("i");p.style.cssText=`left:${Math.random()*100}%;background:${COLORS[i%8]};animation-delay:${Math.random()*.4}s`;c.append(p)}document.body.append(c);setTimeout(()=>c.remove(),2400)}
 
@@ -448,11 +449,12 @@ function render(){
   const fk=focusKey(),sy=lastRoute===route+tab?scrollY:0;
   const m=route.match(/^p\/(.+)/),p=m&&P(m[1]);
   const cur=p?"prods":route;
-  $("#app").innerHTML=`<div class="wrap"><header class="top"><img class="brand" src="icons/productions-96.png" alt="" width="44" height="51"><h1 class="sr">MS Productions</h1><span class="grow"></span><span class="sync" id="sync" aria-live="polite"></span></header>
+  $("#app").innerHTML=`<div class="wrap"><header class="top"><img class="brand" src="icons/productions-96.png" alt="" width="44" height="51"><h1 class="sr">MS Productions</h1><span class="grow"></span><span class="sync" id="sync" aria-live="polite"></span><button class="x" id="thm" aria-label="${isDark()?"Switch to light mode":"Switch to dark mode"}" title="${isDark()?"Light mode":"Dark mode"}">${ic(isDark()?"sun":"moon")}</button></header>
   <main id="main" tabindex="-1">${p?prodView(p):{home,prods:prodsPage,activity:activityPage,more:morePage}[route]?.()||home()}</main></div>
   <nav class="tabs" aria-label="Main">${NAV.map(([k,l,i])=>`<button data-nav="${k}" ${cur===k?'aria-current="page"':""}>${ic(i)}${l}</button>`).join("")}</nav>`;
   setSyncUi(syncState||"Sign in to sync");
   document.querySelectorAll("[data-nav]").forEach(b=>b.onclick=()=>nav(b.dataset.nav));
+  $("#thm").onclick=()=>{theme(isDark()?"light":"dark");render()};
   hydrate();lastRoute=route+tab;
   p?wireProd(p):({home:wireHome,prods:wireHome,activity(){},more:wireMore}[route]||wireHome)();
   scrollTo(0,sy);restoreFocus(fk);
