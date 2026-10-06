@@ -1018,11 +1018,23 @@ let hiddenAt=0;
 document.addEventListener("visibilitychange",()=>{if(document.hidden)hiddenAt=Date.now();else if(getPin()&&user&&hiddenAt&&Date.now()-hiddenAt>60000)lockNow()});
 
 /* ---------- weekly report card (image + message) ---------- */
-function repRange(k){
-  const s=new Date();s.setHours(0,0,0,0);const dow=(s.getDay()+6)%7,mon=s.getTime()-dow*864e5,end=new Date();end.setHours(23,59,59,999);
-  if(k==="this")return[mon,end.getTime()];if(k==="last")return[mon-7*864e5,mon-1];return[end.getTime()-7*864e5+1,end.getTime()];
+const TERMK="ms-prod-term";
+const getTerm=()=>{try{const t=JSON.parse(localStorage.getItem(TERMK));return t&&t.from&&t.to?t:null}catch{return null}};
+const dstart=x=>{const[y,mo,d]=x.split("-").map(Number);return new Date(y,mo-1,d).getTime()};
+const dend=x=>{const[y,mo,d]=x.split("-").map(Number);return new Date(y,mo-1,d,23,59,59,999).getTime()};
+const todayStr=()=>{const d=new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+/* returns [from,to] in ms, or null when the dates still need choosing */
+function repRange(k,m){
+  const s=new Date();s.setHours(0,0,0,0);const dow=(s.getDay()+6)%7,mon=s.getTime()-dow*864e5,end=new Date();end.setHours(23,59,59,999);const E=end.getTime();
+  if(k==="this")return[mon,E];if(k==="last")return[mon-7*864e5,mon-1];
+  if(k==="d30")return[E-30*864e5+1,E];
+  if(k==="year")return[new Date(s.getFullYear(),0,1).getTime(),E];
+  if(k==="term"){const t=getTerm();return t&&t.from<=t.to?[dstart(t.from),Math.min(dend(t.to),E)]:null}
+  if(k==="custom")return m&&m.cf&&m.ct&&m.cf<=m.ct?[dstart(m.cf),dend(m.ct)]:null;
+  return[E-7*864e5+1,E];
 }
 const dmy=t=>new Date(t).toLocaleDateString(undefined,{day:"numeric",month:"short"});
+const dmy2=t=>new Date(t).toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"});
 function repStats(p,from,to){
   const list=p?[p]:prods(),inR=t=>t>=from&&t<=to;
   const items=list.map(q=>({name:q.name,color:q.color,pct:prodPct(q),done:q.goals.filter(g=>g.done&&inR(g.doneAt||0)).length,
@@ -1031,13 +1043,13 @@ function repStats(p,from,to){
     hl:[...q.goals.filter(g=>g.done&&inR(g.doneAt||0)).map(g=>({t:g.doneAt,s:"Goal done: "+g.title})),...q.goals.flatMap(g=>(g.targets||[]).filter(t=>t.done&&inR(t.doneAt||0)&&!(g.done&&inR(g.doneAt||0))).map(t=>({t:t.doneAt,s:"Target done: "+t.title+" ("+g.title+")"}))),...q.log.filter(l=>inR(l.t)).map(l=>({t:l.t,s:l.text})),...q.goals.flatMap(g=>g.comments.filter(c=>inR(c.t)).map(c=>({t:c.t,s:g.title+": "+c.text})))]}));
   const sum=k=>items.reduce((a,i)=>a+i[k],0);
   return{from,to,p,items,done:sum("done"),notes:sum("notes"),photos:sum("photos"),pct:items.length?Math.round(items.reduce((a,i)=>a+i.pct,0)/items.length):0,
-    hl:items.flatMap(i=>i.hl.map(h=>({...h,n:items.length>1?i.name:""}))).sort((a,b)=>b.t-a.t).slice(0,4)};
+    long:(to-from)>8*864e5,hl:items.flatMap(i=>i.hl.map(h=>({...h,n:items.length>1?i.name:""}))).sort((a,b)=>b.t-a.t).slice(0,12)};
 }
 function repText(st){
-  const head=`Weekly update, ${dmy(st.from)} to ${dmy(st.to)}`;
+  const head=`${st.long?"Progress report":"Weekly update"}, ${dmy2(st.from)} to ${dmy2(st.to)}`;
   const top=st.p?`${st.p.name}: ${st.pct}% complete.`:`All productions: ${st.pct}% complete on average.`;
   const nums=`${st.done} goal${st.done===1?"":"s"} finished, ${st.photos} new photo${st.photos===1?"":"s"} or video${st.photos===1?"":"s"}, ${st.notes} update${st.notes===1?"":"s"}.`;
-  const hl=st.hl.length?"Highlights:\n"+st.hl.map(h=>"- "+(h.n?h.n+": ":"")+h.s).join("\n"):"Nothing logged this week yet.";
+  const hl=st.hl.length?"Highlights:\n"+st.hl.slice(0,st.long?8:4).map(h=>"- "+(h.n?h.n+": ":"")+h.s).join("\n"):"Nothing logged in this period yet.";
   const rows=st.p?"":"\n\n"+st.items.map(i=>`${i.name}: ${i.pct}%`).join("\n");
   return [head,top,nums].join("\n")+rows+"\n\n"+hl+"\n\nNewberry Middle School Project";
 }
@@ -1051,7 +1063,7 @@ async function repCard(st){
   const gr=g.createLinearGradient(0,0,W,520);gr.addColorStop(0,"#c46a0d");gr.addColorStop(1,"#8a4505");g.fillStyle=gr;
   g.beginPath();g.moveTo(0,0);g.lineTo(W,0);g.lineTo(W,440);g.arcTo(W,520,W-80,520,80);g.lineTo(80,520);g.arcTo(0,520,0,440,80);g.closePath();g.fill();
   g.fillStyle="#fff";g.font=`700 42px ${D}`;g.fillText("Newberry Middle School Project",60,100);
-  g.globalAlpha=.88;g.font=`500 34px ${B}`;g.fillText(`Weekly update · ${dmy(st.from)} to ${dmy(st.to)}`,60,150);g.globalAlpha=1;
+  g.globalAlpha=.88;g.font=`500 34px ${B}`;g.fillText(`${st.long?"Progress report":"Weekly update"} · ${st.long?dmy2(st.from)+" to "+dmy2(st.to):dmy(st.from)+" to "+dmy(st.to)}`,60,150);g.globalAlpha=1;
   g.font=`700 84px ${D}`;g.fillText(st.p?st.p.name:"All productions",60,270);
   g.font=`700 190px ${D}`;g.fillText(st.pct+"%",56,450);const nw=g.measureText(st.pct+"%").width;
   g.font=`600 54px ${B}`;g.fillText("complete",56+nw+28,420);
@@ -1060,8 +1072,8 @@ async function repCard(st){
   const w3=(960-36)/3;tile(60,w3,"Goals done",st.done);tile(60+w3+18,w3,"Updates",st.notes);tile(60+2*(w3+18),w3,"Photos & video",st.photos);
   if(st.p){
     g.fillStyle="#221c11";g.font=`700 44px ${D}`;g.fillText("Highlights",60,610);let y=670;g.fillStyle="#221c11";g.font=`500 34px ${B}`;
-    if(!st.hl.length){g.fillStyle="#6c6250";g.fillText("Nothing logged this week yet.",60,y)}
-    st.hl.forEach(h=>{g.fillStyle=st.p.color;g.beginPath();g.arc(72,y-10,9,0,7);g.fill();g.fillStyle="#221c11";y=wrap(h.s,100,y,920,44,2)+22});
+    if(!st.hl.length){g.fillStyle="#6c6250";g.fillText("Nothing logged in this period yet.",60,y)}
+    st.hl.slice(0,4).forEach(h=>{g.fillStyle=st.p.color;g.beginPath();g.arc(72,y-10,9,0,7);g.fill();g.fillStyle="#221c11";y=wrap(h.s,100,y,920,44,2)+22});
   }else{
     const n=st.items.length,rh=Math.min(54,480/Math.max(1,n));let y=585;
     st.items.forEach(i=>{g.fillStyle="#221c11";g.font=`600 30px ${B}`;g.fillText(i.name,60,y+rh*.55);g.fillStyle="#ece3cf";rr(420,y+rh*.55-22,520,18,9);g.fill();g.fillStyle=i.color;rr(420,y+rh*.55-22,Math.max(18,520*i.pct/100),18,9);g.fill();g.fillStyle="#6c6250";g.font=`600 28px ${B}`;g.textAlign="right";g.fillText(i.pct+"%",1020,y+rh*.55);g.textAlign="left";y+=rh});
@@ -1070,22 +1082,33 @@ async function repCard(st){
   return new Promise(r=>c.toBlob(r,"image/png"));
 }
 function reportSheet(p){
-  const m={k:"last7",blob:null,url:null,text:"",edited:false,tok:0};
-  sheet("Weekly report",`<div id="wr"></div>`,(sh,close)=>{
+  const m={k:"last7",cf:"",ct:todayStr(),blob:null,url:null,text:"",msg:"",tok:0};
+  const PER=[["last7","7 days"],["this","This week"],["last","Last week"],["d30","30 days"],["term","This term"],["year","This year"],["custom","Custom"]];
+  sheet("Report",`<div id="wr"></div>`,(sh,close)=>{
     const root=sh.querySelector("#wr");
+    const dates=()=>{
+      if(m.k==="term"){const t0=getTerm()||{from:"",to:""},t={from:m.ta!==undefined?m.ta:t0.from,to:m.tb!==undefined?m.tb:t0.to};return`<div class="row" style="margin:-4px 0 14px;align-items:flex-end"><div class="grow"><label class="f" for="d-a" style="margin:0 0 4px">Term starts</label><input class="t" type="date" id="d-a" value="${t.from}"></div><div class="grow"><label class="f" for="d-b" style="margin:0 0 4px">Term ends</label><input class="t" type="date" id="d-b" value="${t.to}"></div></div>`}
+      if(m.k==="custom")return`<div class="row" style="margin:-4px 0 14px;align-items:flex-end"><div class="grow"><label class="f" for="d-a" style="margin:0 0 4px">From</label><input class="t" type="date" id="d-a" value="${m.cf}" max="${todayStr()}"></div><div class="grow"><label class="f" for="d-b" style="margin:0 0 4px">To</label><input class="t" type="date" id="d-b" value="${m.ct}" max="${todayStr()}"></div></div>`;
+      return"";
+    };
     const draw=()=>{
-      root.innerHTML=`<div class="chips" role="group" aria-label="Period" style="margin:10px 0 14px">${[["last7","Last 7 days"],["this","This week"],["last","Last week"]].map(([k,l])=>`<button class="chip" data-k="${k}" aria-pressed="${m.k===k}">${l}</button>`).join("")}</div>
-      <div class="rep">${m.url?`<img src="${m.url}" alt="Weekly report card">`:`<p class="muted">Making your card…</p>`}</div>
+      root.innerHTML=`<div class="chips" role="group" aria-label="Period" style="margin:10px 0 14px">${PER.map(([k,l])=>`<button class="chip" data-k="${k}" aria-pressed="${m.k===k}">${l}</button>`).join("")}</div>${dates()}
+      <div class="rep">${m.url?`<img src="${m.url}" alt="Report card">`:`<p class="muted">${esc(m.msg||"Making your card…")}</p>`}</div>
       <label class="f" for="rt">Message</label><textarea class="t" id="rt" rows="8">${esc(m.text)}</textarea>
-      <div class="row wr" style="margin-top:14px"><button class="btn primary grow" id="rs" ${m.blob?"":"disabled"}>${ic("share")}Share</button><button class="btn" id="rd" ${m.blob?"":"disabled"}>${ic("download")}Save image</button><button class="btn" id="rc">${ic("copy")}Copy text</button></div>`;
+      <div class="row wr" style="margin-top:14px"><button class="btn primary grow" id="rs" ${m.blob?"":"disabled"}>${ic("share")}Share</button><button class="btn" id="rd" ${m.blob?"":"disabled"}>${ic("download")}Save image</button><button class="btn" id="rc" ${m.text?"":"disabled"}>${ic("copy")}Copy text</button></div>`;
       root.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{m.k=b.dataset.k;build()});
+      const da=root.querySelector("#d-a"),db=root.querySelector("#d-b");
+      if(da&&db){const ch=()=>{if(m.k==="term"){m.ta=da.value;m.tb=db.value;if(da.value&&db.value)try{localStorage.setItem(TERMK,JSON.stringify({from:da.value,to:db.value}))}catch{}}else{m.cf=da.value;m.ct=db.value}build()};da.onchange=db.onchange=ch}
       root.querySelector("#rt").oninput=e=>{m.text=e.target.value};
-      const file=()=>new File([m.blob],"productions-weekly.png",{type:"image/png"});
+      const file=()=>new File([m.blob],"productions-report.png",{type:"image/png"});
       root.querySelector("#rs").onclick=async()=>{try{if(navigator.canShare?.({files:[file()]}))await navigator.share({files:[file()],text:m.text});else if(navigator.share)await navigator.share({text:m.text});else toast("Sharing isn't available here. Use Save image.")}catch{}};
-      root.querySelector("#rd").onclick=()=>{const a=document.createElement("a");a.href=m.url;a.download="productions-weekly.png";a.click()};
+      root.querySelector("#rd").onclick=()=>{const a=document.createElement("a");a.href=m.url;a.download="productions-report.png";a.click()};
       root.querySelector("#rc").onclick=()=>navigator.clipboard.writeText(m.text).then(()=>toast("Copied."),()=>toast("Couldn't copy."));
     };
-    const build=async()=>{const tok=++m.tok;m.blob=null;if(m.url){URL.revokeObjectURL(m.url);m.url=null}const[f,t]=repRange(m.k),st=repStats(p,f,t);m.text=repText(st);draw();
+    const build=async()=>{const tok=++m.tok;m.blob=null;if(m.url){URL.revokeObjectURL(m.url);m.url=null}
+      const r=repRange(m.k,m);
+      if(!r){m.text="";m.msg=m.k==="term"?"Choose the dates your term starts and ends.":m.cf&&m.ct&&m.cf>m.ct?"The start date must be before the end date.":"Choose the first and last day for your report.";draw();return}
+      m.msg="";const st=repStats(p,r[0],r[1]);m.text=repText(st);draw();
       const b=await repCard(st);if(tok!==m.tok)return;m.blob=b;m.url=URL.createObjectURL(b);draw()};
     build();
   });
