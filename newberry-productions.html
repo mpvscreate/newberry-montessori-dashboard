@@ -231,6 +231,8 @@ chat:'<path d="M4 20l1.4-4.2A8 8 0 1112 20a8 8 0 01-4-1.1z"/><path d="M9 10.5c0 
 rotl:'<path d="M4 11a8 8 0 112.3 5.7M4 4v7h7"/>',
 rotr:'<path d="M20 11a8 8 0 10-2.3 5.7M20 4v7h-7"/>',
 flip:'<path d="M12 3v18M8 7L3 12l5 5zM16 7l5 5-5 5z"/>',
+type:'<path d="M5 6V4h14v2M12 4v16M9 20h6"/>',
+undo:'<path d="M9 14L4 9l5-5"/><path d="M4 9h10a6 6 0 010 12h-3"/>',
 user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
 mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/>',
 pencil:'<path d="M4 20l1-4L16.5 4.5a2 2 0 013 3L8 19z"/>',
@@ -544,7 +546,7 @@ function mediaTab(p){
   `<input type="file" id="pf" accept="image/*,video/*" multiple class="sr">`+
   (selecting?(n?`<div style="height:80px" aria-hidden="true"></div><div class="selbar" role="toolbar" aria-label="Actions for selected media"><span class="selcount" aria-live="polite">${n} selected</span>
     <button class="btn primary small" id="s-wa">${ic("chat")}WhatsApp</button>
-    ${onePhoto?`<button class="btn small" id="s-ed">${ic("sliders")}Edit</button>`:""}
+    ${n===1?`<button class="btn small" id="s-ed">${ic("sliders")}Edit</button>`:""}
     <button class="btn small danger" id="s-del" aria-label="Delete selected">${ic("trash")}</button></div>`:`<p class="hint" style="text-align:center">Tap photos or videos to select them.</p>`):fabBtn("addm","Add photo or video"));
 }
 function wireMedia(p){
@@ -563,7 +565,7 @@ function wireMedia(p){
     if(n)save();render();
   };
   if($("#s-wa"))$("#s-wa").onclick=()=>waSheet(p,[...sel]);
-  if($("#s-ed"))$("#s-ed").onclick=()=>editSheet(p,S.media.find(m=>m.id===[...sel][0]));
+  if($("#s-ed"))$("#s-ed").onclick=()=>{const m=S.media.find(x=>x.id===[...sel][0]);m.type==="video"?videoEditSheet(p,m):editSheet(p,m)};
   if($("#s-del"))$("#s-del").onclick=()=>{const ids=[...sel],ms=ids.map(id=>S.media.find(m=>m.id===id));ms.forEach(m=>{m.del=true;save(m);if(user&&sb)sb.storage.from("flock-media").remove(["ms/"+m.id]).catch(()=>{});if(sm.up)delete sm.up[m.id]});clearSel();render();
     toast(ms.length+" deleted.",()=>{ms.forEach(m=>{m.del=false;save(m)});render()})};
   document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{
@@ -606,7 +608,22 @@ function waSheet(p,ids){
   });
 }
 
-/* basic photo editor: rotate, flip, crop, brightness, contrast, colour */
+/* ---------- photo + video editor ---------- */
+const VS="attribute vec2 p;varying vec2 v;void main(){v=p*.5+.5;gl_Position=vec4(p,0.,1.);}";
+const FS="precision mediump float;varying vec2 v;uniform sampler2D t;uniform vec2 px;uniform float b,c,s,w,sh;void main(){vec3 col=texture2D(t,v).rgb;if(sh>0.){vec3 n=texture2D(t,v+vec2(0.,-px.y)).rgb+texture2D(t,v+vec2(0.,px.y)).rgb+texture2D(t,v+vec2(-px.x,0.)).rgb+texture2D(t,v+vec2(px.x,0.)).rgb;col=col+(col*4.-n)*sh;}col*=b;col=(col-.5)*c+.5;float l=dot(col,vec3(.2126,.7152,.0722));col=mix(vec3(l),col,s);col.r+=w*.08;col.b-=w*.08;gl_FragColor=vec4(clamp(col,0.,1.),1.);}";
+function makeGL(canvas){
+  let gl;try{gl=canvas.getContext("webgl",{preserveDrawingBuffer:true,premultipliedAlpha:false})}catch{}if(!gl)return null;
+  const mk=(t,src)=>{const s=gl.createShader(t);gl.shaderSource(s,src);gl.compileShader(s);return s},pr=gl.createProgram();
+  gl.attachShader(pr,mk(gl.VERTEX_SHADER,VS));gl.attachShader(pr,mk(gl.FRAGMENT_SHADER,FS));gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS))return null;gl.useProgram(pr);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const loc=gl.getAttribLocation(pr,"p");gl.enableVertexAttribArray(loc);gl.vertexAttribPointer(loc,2,gl.FLOAT,false,0,0);
+  const tex=gl.createTexture();gl.bindTexture(gl.TEXTURE_2D,tex);
+  [[gl.TEXTURE_WRAP_S,gl.CLAMP_TO_EDGE],[gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE],[gl.TEXTURE_MIN_FILTER,gl.LINEAR],[gl.TEXTURE_MAG_FILTER,gl.LINEAR]].forEach(([a,b])=>gl.texParameteri(gl.TEXTURE_2D,a,b));
+  const U=n=>gl.getUniformLocation(pr,n);
+  return{draw(src,w,h,P){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h);gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,true);gl.bindTexture(gl.TEXTURE_2D,tex);gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,src);
+    gl.uniform2f(U("px"),1/w,1/h);gl.uniform1f(U("b"),1+P.b/100);gl.uniform1f(U("c"),1+P.c/100);gl.uniform1f(U("s"),1+P.s/100);gl.uniform1f(U("w"),P.w/50);gl.uniform1f(U("sh"),P.sh/100*.8);gl.drawArrays(gl.TRIANGLE_STRIP,0,4)}};
+}
 function drawEdit(img,st,maxDim){
   const odd=st.rot%2===1,w=odd?img.naturalHeight:img.naturalWidth,h=odd?img.naturalWidth:img.naturalHeight;
   const o=document.createElement("canvas");o.width=w;o.height=h;const g=o.getContext("2d");
@@ -617,42 +634,135 @@ function drawEdit(img,st,maxDim){
   const out=document.createElement("canvas");out.width=Math.max(1,Math.round(cw*s));out.height=Math.max(1,Math.round(ch*s));
   out.getContext("2d").drawImage(o,cx,cy,cw,ch,0,0,out.width,out.height);return out;
 }
-function bake(cv,st){
-  if(!st.b&&!st.c&&!st.s)return;
-  const g=cv.getContext("2d"),d=g.getImageData(0,0,cv.width,cv.height),a=d.data,b=1+st.b/100,c=1+st.c/100,s=1+st.s/100,cl=v=>v<0?0:v>255?255:v;
-  for(let i=0;i<a.length;i+=4){
-    let r=(a[i]*b-128)*c+128,gg=(a[i+1]*b-128)*c+128,bl=(a[i+2]*b-128)*c+128;
-    const l=.2126*r+.7152*gg+.0722*bl;
-    a[i]=cl(l+(r-l)*s);a[i+1]=cl(l+(gg-l)*s);a[i+2]=cl(l+(bl-l)*s);
-  }
-  g.putImageData(d,0,0);
+/* colour + sharpen pass: WebGL when available, simple pixel maths otherwise (no sharpen) */
+function filterPass(glh,glc,src,st){
+  if(glh){glh.draw(src,src.width,src.height,st);return glc}
+  const c=document.createElement("canvas");c.width=src.width;c.height=src.height;const g=c.getContext("2d");g.drawImage(src,0,0);
+  if(st.b||st.c||st.s){const d=g.getImageData(0,0,c.width,c.height),a=d.data,b=1+st.b/100,k=1+st.c/100,s=1+st.s/100,cl=v=>v<0?0:v>255?255:v;
+    for(let i=0;i<a.length;i+=4){let r=(a[i]*b-128)*k+128,gg=(a[i+1]*b-128)*k+128,bl=(a[i+2]*b-128)*k+128;const l=.2126*r+.7152*gg+.0722*bl;a[i]=cl(l+(r-l)*s);a[i+1]=cl(l+(gg-l)*s);a[i+2]=cl(l+(bl-l)*s)}g.putImageData(d,0,0)}
+  return c;
 }
+const ANNC=["#ffffff","#000000","#e53935","#fdd835","#43a047","#1e88e5"];
+const lum=c=>{const n=parseInt(c.slice(1),16);return(.2126*(n>>16)+.7152*((n>>8)&255)+.0722*(n&255))/255};
+const tfont=(s,w)=>`700 ${s*.009*w}px "Instrument Sans",system-ui,sans-serif`;
+function drawAnn(g,w,h,ann){
+  for(const a of ann){
+    if(a.k==="s"){g.strokeStyle=a.c;g.lineWidth=a.s*.0025*w;g.lineCap="round";g.lineJoin="round";g.beginPath();a.p.forEach(([x,y],i)=>i?g.lineTo(x*w,y*h):g.moveTo(x*w,y*h));if(a.p.length===1)g.lineTo(a.p[0][0]*w+.01,a.p[0][1]*h);g.stroke()}
+    else{const fs=a.s*.009*w;g.font=tfont(a.s,w);g.textAlign="center";g.textBaseline="middle";g.lineJoin="round";g.lineWidth=fs*.2;g.strokeStyle=lum(a.c)>.5?"#000":"#fff";g.strokeText(a.t,a.x*w,a.y*h);g.fillStyle=a.c;g.fillText(a.t,a.x*w,a.y*h)}
+  }
+}
+const sliderRow=(id,l,min,max,val=0)=>`<label class="f" for="${id}">${l}</label><input type="range" id="${id}" min="${min}" max="${max}" step="1" value="${val}">`;
+
 async function editSheet(p,m){
   const u=await loadMedia(m.id);if(!u){toast("This photo isn't on this device yet. Connect to the internet and try again.");return}
   const img=new Image();img.src=u;try{await img.decode()}catch{toast("Couldn't open this photo.");return}
-  const st={rot:0,flip:false,ratio:0,b:0,c:0,s:0},RAT=[["Original",0],["Square",1],["4:3",4/3],["16:9",16/9]];
-  sheet("Edit photo",`<div style="text-align:center;margin:10px 0"><canvas id="ec" style="max-width:100%;max-height:48dvh;border-radius:14px;background:var(--line)"></canvas></div>
-  <div class="row wr" style="margin-bottom:6px"><button class="btn small" id="e-l" aria-label="Rotate left">${ic("rotl")}Left</button><button class="btn small" id="e-r" aria-label="Rotate right">${ic("rotr")}Right</button><button class="btn small" id="e-f" aria-label="Flip">${ic("flip")}Flip</button></div>
-  <label class="f">Crop</label><div class="chips" role="group" aria-label="Crop shape">${RAT.map(([l,v],i)=>`<button class="chip" data-r="${i}" aria-pressed="${i===0}">${l}</button>`).join("")}</div>
-  ${[["b","Brightness"],["c","Contrast"],["s","Colour"]].map(([k,l])=>`<label class="f" for="e-${k}">${l}</label><input type="range" id="e-${k}" min="-50" max="50" step="1" value="0">`).join("")}
-  <div class="row wr" style="margin-top:18px"><button class="btn" id="e-reset">Reset</button><span class="grow"></span></div>
-  <div class="row wr" style="margin-top:10px"><button class="btn grow" id="e-copy">Save as new copy</button><button class="btn primary grow" id="e-save">Replace original</button></div>`,(d,close)=>{
-    const cv=$("#ec");
-    const paint=()=>{const o=drawEdit(img,st,720);cv.width=o.width;cv.height=o.height;cv.getContext("2d").drawImage(o,0,0);cv.style.filter=`brightness(${1+st.b/100}) contrast(${1+st.c/100}) saturate(${1+st.s/100})`};
+  const st={rot:0,flip:false,ratio:0,b:0,c:0,s:0,w:0,sh:0},RAT=[["Original",0],["Square",1],["4:3",4/3],["16:9",16/9]];
+  const ann=[];let mode="adjust",col=ANNC[2],size=8,drag=null;
+  const glc=document.createElement("canvas"),glh=makeGL(glc);
+  sheet("Edit photo",`<div style="text-align:center;margin:10px 0"><div style="position:relative;display:inline-block;max-width:100%"><canvas id="ec" style="display:block;max-width:100%;max-height:44dvh;border-radius:14px;background:var(--line)"></canvas><canvas id="ov" style="position:absolute;left:0;top:0;width:100%;height:100%;touch-action:none;border-radius:14px"></canvas></div></div>
+  <div class="segc" role="group" aria-label="Editor tools">${[["adjust","Adjust","sliders"],["draw","Draw","pencil"],["text","Text","type"]].map(([k,l,i])=>`<button data-mode="${k}" aria-label="${l}" aria-pressed="${k==="adjust"}">${ic(i)}<span>${l}</span></button>`).join("")}</div>
+  <div id="pn-adjust">
+    <div class="row wr" style="margin-bottom:6px"><button class="btn small" id="e-l" aria-label="Rotate left">${ic("rotl")}Left</button><button class="btn small" id="e-r" aria-label="Rotate right">${ic("rotr")}Right</button><button class="btn small" id="e-f" aria-label="Flip">${ic("flip")}Flip</button></div>
+    <label class="f">Crop</label><div class="chips" role="group" aria-label="Crop shape">${RAT.map(([l],i)=>`<button class="chip" data-r="${i}" aria-pressed="${i===0}">${l}</button>`).join("")}</div>
+    ${sliderRow("e-b","Brightness",-50,50)}${sliderRow("e-c","Contrast",-50,50)}${sliderRow("e-s","Colour",-50,50)}${sliderRow("e-w","Warmth",-50,50)}${sliderRow("e-sh","Sharpness",0,100)}
+    <div class="row" style="margin-top:14px"><button class="btn small" id="e-reset">Reset adjustments</button></div></div>
+  <div id="pn-ann" hidden>
+    <div id="tx-row" hidden style="margin-top:6px"><label class="f" for="tx-in">Your text</label><div class="row"><input class="t" id="tx-in" type="text" maxlength="60" placeholder="Type or speak">${micBtn()}<button class="btn primary small" id="tx-add">Add</button></div><p class="hint">Drag the text on the photo to move it.</p></div>
+    <label class="f">Colour</label><div class="swatches" id="sw">${ANNC.map(c=>`<button type="button" data-c="${c}" style="background:${c}" aria-pressed="${c===col}" aria-label="Colour ${c}"></button>`).join("")}</div>
+    ${sliderRow("a-size","Size",1,40,8)}
+    <div class="row wr" style="margin-top:14px"><button class="btn small" id="a-undo">${ic("undo")}Undo</button><button class="btn small danger" id="a-clear">Clear all</button></div></div>
+  <div class="row wr" style="margin-top:20px"><button class="btn grow" id="e-copy">Save as new copy</button><button class="btn primary grow" id="e-save">Replace original</button></div>`,(d,close)=>{
+    wireMics(d);const cv=$("#ec"),ov=$("#ov");let base=null;
+    const paintOv=()=>{ov.width=cv.width;ov.height=cv.height;const g=ov.getContext("2d");g.clearRect(0,0,ov.width,ov.height);drawAnn(g,ov.width,ov.height,ann)};
+    const paint=()=>{const o=drawEdit(img,st,720);base=o;const f=filterPass(glh,glc,o,st);cv.width=o.width;cv.height=o.height;cv.getContext("2d").drawImage(f,0,0);paintOv()};
+    const geo=()=>{if(ann.length){ann.length=0;toast("Drawings cleared because the shape changed.")}paint()};
     paint();
-    $("#e-l").onclick=()=>{st.rot=(st.rot+3)%4;paint()};$("#e-r").onclick=()=>{st.rot=(st.rot+1)%4;paint()};$("#e-f").onclick=()=>{st.flip=!st.flip;paint()};
-    d.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{st.ratio=RAT[+b.dataset.r][1];d.querySelectorAll("[data-r]").forEach(x=>x.setAttribute("aria-pressed",x===b));paint()});
-    ["b","c","s"].forEach(k=>$("#e-"+k).oninput=e=>{st[k]=+e.target.value;paint()});
-    $("#e-reset").onclick=()=>{Object.assign(st,{rot:0,flip:false,ratio:0,b:0,c:0,s:0});["b","c","s"].forEach(k=>$("#e-"+k).value=0);d.querySelectorAll("[data-r]").forEach((x,i)=>x.setAttribute("aria-pressed",i===0));paint()};
+    $("#e-l").onclick=()=>{st.rot=(st.rot+3)%4;geo()};$("#e-r").onclick=()=>{st.rot=(st.rot+1)%4;geo()};$("#e-f").onclick=()=>{st.flip=!st.flip;geo()};
+    d.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{st.ratio=RAT[+b.dataset.r][1];d.querySelectorAll("[data-r]").forEach(x=>x.setAttribute("aria-pressed",x===b));geo()});
+    ["b","c","s","w","sh"].forEach(k=>$("#e-"+k).oninput=e=>{st[k]=+e.target.value;paint()});
+    $("#e-reset").onclick=()=>{Object.assign(st,{b:0,c:0,s:0,w:0,sh:0});["b","c","s","w","sh"].forEach(k=>$("#e-"+k).value=0);paint()};
+    d.querySelectorAll("[data-mode]").forEach(b=>b.onclick=()=>{mode=b.dataset.mode;d.querySelectorAll("[data-mode]").forEach(x=>x.setAttribute("aria-pressed",x===b));
+      $("#pn-adjust").hidden=mode!=="adjust";$("#pn-ann").hidden=mode==="adjust";$("#tx-row").hidden=mode!=="text";ov.style.cursor=mode==="draw"?"crosshair":mode==="text"?"move":"default";ov.style.pointerEvents=mode==="adjust"?"none":"auto"});
+    ov.style.pointerEvents="none";
+    d.querySelectorAll("#sw [data-c]").forEach(b=>b.onclick=()=>{col=b.dataset.c;d.querySelectorAll("#sw [data-c]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+    $("#a-size").oninput=e=>{size=+e.target.value};
+    $("#a-undo").onclick=()=>{ann.pop();paintOv()};$("#a-clear").onclick=()=>{if(ann.length){const keep=ann.splice(0);paintOv();toast("Cleared.",()=>{ann.push(...keep);paintOv()})}};
+    const pt=e=>{const r=ov.getBoundingClientRect();return[(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height]};
+    const hit=([x,y])=>{const g=ov.getContext("2d");for(let i=ann.length-1;i>=0;i--){const a=ann[i];if(a.k!=="t")continue;g.font=tfont(a.s,ov.width);const tw=g.measureText(a.t).width/ov.width,th=a.s*.009*1.2;if(Math.abs(x-a.x)<=tw/2+.02&&Math.abs(y-a.y)<=th/2+.02*ov.width/ov.height)return a}return null};
+    ov.onpointerdown=e=>{e.preventDefault();ov.setPointerCapture(e.pointerId);const q=pt(e);
+      if(mode==="draw"){const a={k:"s",c:col,s:size,p:[q]};ann.push(a);drag={a,t:"s"}}
+      else if(mode==="text"){const a=hit(q);if(a)drag={a,t:"t",dx:a.x-q[0],dy:a.y-q[1]}}
+      paintOv()};
+    ov.onpointermove=e=>{if(!drag)return;const q=pt(e);if(drag.t==="s")drag.a.p.push(q);else{drag.a.x=Math.min(1,Math.max(0,q[0]+drag.dx));drag.a.y=Math.min(1,Math.max(0,q[1]+drag.dy))}paintOv()};
+    ov.onpointerup=ov.onpointercancel=()=>{drag=null};
+    const addText=()=>{const t=$("#tx-in").value.trim();if(!t){$("#tx-in").focus();return}if(listening)listening.stop();ann.push({k:"t",t,c:col,s:size,x:.5,y:.5});$("#tx-in").value="";paintOv()};
+    $("#tx-add").onclick=addText;$("#tx-in").onkeydown=e=>{if(e.key==="Enter")addText()};
     const commit=async replace=>{
-      const out=drawEdit(img,st,1600);bake(out,st);
-      const blob=await new Promise(r=>out.toBlob(r,"image/jpeg",.85));if(!blob){toast("Couldn't save the edit.");return}
+      const out=drawEdit(img,st,1600),f=filterPass(glh,glc,out,st),fin=document.createElement("canvas");fin.width=out.width;fin.height=out.height;
+      const g=fin.getContext("2d");g.drawImage(f,0,0);drawAnn(g,fin.width,fin.height,ann);
+      const blob=await new Promise(r=>fin.toBlob(r,"image/jpeg",.88));if(!blob){toast("Couldn't save the edit.");return}
       const id=uid();try{await mPut(id,blob)}catch{toast("No space to store this on the device.");return}
       S.media.push({id,pid:m.pid,type:"photo",cap:m.cap,t:replace?m.t:Date.now(),by:who(),del:false,u:Date.now()});
       if(replace){m.del=true;save(m);if(user&&sb)sb.storage.from("flock-media").remove(["ms/"+m.id]).catch(()=>{});if(sm.up)delete sm.up[m.id]}else save();
       sel.clear();sel.add(id);close();render();toast(replace?"Original replaced.":"Saved as a new copy.");
     };
     $("#e-copy").onclick=()=>commit(false);$("#e-save").onclick=()=>commit(true);
+  });
+}
+
+/* video editor: colour, sharpness, trim, mute. Saved by replaying the clip through the filter and re-recording it. */
+function pickMime(a=true){const c=a?["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4","video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"]:["video/mp4;codecs=avc1.42E01E","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"];return c.find(t=>window.MediaRecorder&&MediaRecorder.isTypeSupported(t))||""}
+const fmtT=t=>{t=Math.max(0,t);return Math.floor(t/60)+":"+String(Math.floor(t%60)).padStart(2,"0")+"."+Math.floor((t%1)*10)};
+async function videoEditSheet(p,m){
+  if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream){toast("Video editing isn't supported in this browser. Try Chrome or a recent Safari.");return}
+  const u=await loadMedia(m.id);if(!u){toast("This video isn't on this device yet. Connect to the internet and try again.");return}
+  const v=document.createElement("video");v.src=u;v.playsInline=true;v.preload="auto";v.crossOrigin="anonymous";
+  try{await new Promise((res,rej)=>{v.onloadeddata=res;v.onerror=rej})}catch{toast("Couldn't open this video.");return}
+  const dur=v.duration||0;if(!isFinite(dur)||dur<=0){toast("Couldn't read this video's length.");return}
+  const sc=Math.min(1,1280/Math.max(v.videoWidth,v.videoHeight)),W=Math.max(2,Math.round(v.videoWidth*sc/2)*2),H=Math.max(2,Math.round(v.videoHeight*sc/2)*2);
+  const st={b:0,c:0,s:0,w:0,sh:0};let t0=0,t1=dur,mute=false,busy=false,playing=false,raf=0;
+  sheet("Edit video",`<div style="text-align:center;margin:10px 0"><canvas id="vc" style="display:block;margin:0 auto;max-width:100%;max-height:42dvh;border-radius:14px;background:#000"></canvas></div>
+  <div class="row"><button class="btn small" id="v-play" aria-label="Play">${ic("play")}Play</button><span class="muted small grow" id="v-time" aria-live="off"></span><button class="chip" id="v-mute" aria-pressed="false">Mute</button></div>
+  <div id="v-ctl">
+  ${sliderRow("v-t0","Trim start",0,Math.round(dur*10),0)}<div class="small muted" id="v-l0"></div>${sliderRow("v-t1","Trim end",0,Math.round(dur*10),Math.round(dur*10))}<div class="small muted" id="v-l1"></div>
+  ${sliderRow("v-b","Brightness",-50,50)}${sliderRow("v-c","Contrast",-50,50)}${sliderRow("v-s","Colour",-50,50)}${sliderRow("v-w","Warmth",-50,50)}${sliderRow("v-sh","Sharpness",0,100)}
+  <div class="row" style="margin-top:14px"><button class="btn small" id="v-reset">Reset adjustments</button></div></div>
+  <div id="v-prog" hidden style="margin-top:16px"><div class="meter" style="margin:0 0 6px"><i id="v-bar" style="width:0%"></i></div><p class="muted small" style="margin:0" id="v-msg" role="status">Saving. The clip plays in real time. Keep this open.</p></div>
+  <div class="row wr" style="margin-top:20px" id="v-btns"><button class="btn grow" id="v-copy">Save as new copy</button><button class="btn primary grow" id="v-save">Replace original</button></div>
+  <p class="hint">Saving re-records the clip, so it takes as long as the clip. ${pickMime().startsWith("video/mp4")?"":"This browser saves video as WebM, which some WhatsApp versions can't play."}</p>`,(d,close)=>{
+    const vc=$("#vc");vc.width=W;vc.height=H;let glh=makeGL(vc),c2=glh?null:vc.getContext("2d");
+    const frame=()=>{if(glh)glh.draw(v,W,H,st);else{c2.filter=`brightness(${1+st.b/100}) contrast(${1+st.c/100}) saturate(${1+st.s/100})`;c2.drawImage(v,0,0,W,H)}};
+    const lab=()=>{$("#v-l0").textContent="Start at "+fmtT(t0);$("#v-l1").textContent="End at "+fmtT(t1)+" · length "+fmtT(t1-t0);$("#v-time").textContent=fmtT(v.currentTime)+" / "+fmtT(dur)};
+    const stop=()=>{playing=false;cancelAnimationFrame(raf);v.pause();$("#v-play").innerHTML=ic("play")+"Play"};
+    const loop=()=>{frame();lab();if(v.currentTime>=t1||v.ended){stop();v.currentTime=t0;return}if(playing)raf=requestAnimationFrame(loop)};
+    v.onseeked=()=>{if(!busy){frame();lab()}};frame();lab();
+    $("#v-play").onclick=()=>{if(playing){stop();return}if(v.currentTime>=t1-.05||v.currentTime<t0)v.currentTime=t0;v.muted=mute;playing=true;v.play();$("#v-play").innerHTML=ic("x")+"Pause";raf=requestAnimationFrame(loop)};
+    $("#v-mute").onclick=e=>{mute=!mute;e.currentTarget.setAttribute("aria-pressed",mute);v.muted=mute};
+    $("#v-t0").oninput=e=>{t0=Math.min(+e.target.value/10,t1-.5);if(+e.target.value/10>t1-.5)e.target.value=Math.round(t0*10);stop();v.currentTime=t0;lab()};
+    $("#v-t1").oninput=e=>{t1=Math.max(+e.target.value/10,t0+.5);if(+e.target.value/10<t0+.5)e.target.value=Math.round(t1*10);stop();v.currentTime=Math.max(t0,t1-.1);lab()};
+    ["b","c","s","w","sh"].forEach(k=>$("#v-"+k).oninput=e=>{st[k]=+e.target.value;frame()});
+    $("#v-reset").onclick=()=>{Object.assign(st,{b:0,c:0,s:0,w:0,sh:0});["b","c","s","w","sh"].forEach(k=>$("#v-"+k).value=0);frame()};
+    const origClose=close;
+    const commit=async replace=>{
+      stop();busy=true;$("#v-ctl").style.opacity=.4;$("#v-ctl").style.pointerEvents="none";$("#v-btns").hidden=true;$("#v-prog").hidden=false;
+      try{
+        await new Promise(r=>{v.onseeked=r;v.currentTime=t0});
+        const stream=vc.captureStream(30);
+        if(!mute){try{const vs=v.captureStream?v.captureStream():null;vs&&vs.getAudioTracks().forEach(t=>stream.addTrack(t))}catch{}}
+        const mime=pickMime(stream.getAudioTracks().length>0);const rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:4e6}:{videoBitsPerSecond:4e6}),chunks=[];
+        rec.ondataavailable=e=>e.data.size&&chunks.push(e.data);
+        const done=new Promise(r=>rec.onstop=r);v.muted=mute;rec.start(500);await v.play();
+        await new Promise(res=>{const tick=()=>{frame();const pr=Math.min(1,(v.currentTime-t0)/Math.max(.1,t1-t0));$("#v-bar").style.width=Math.round(pr*100)+"%";if(v.currentTime>=t1-.03||v.ended){v.pause();setTimeout(()=>{rec.stop();res()},150)}else requestAnimationFrame(tick)};tick()});
+        await done;const blob=new Blob(chunks,{type:rec.mimeType||mime||"video/webm"});
+        if(!blob.size)throw new Error("empty");
+        if(blob.size>MAXVID){toast("The edited video is over 45 MB. Trim it shorter.");busy=false;$("#v-ctl").style.opacity=1;$("#v-ctl").style.pointerEvents="auto";$("#v-btns").hidden=false;$("#v-prog").hidden=true;return}
+        const id=uid();await mPut(id,blob);
+        S.media.push({id,pid:m.pid,type:"video",cap:m.cap,t:replace?m.t:Date.now(),by:who(),del:false,u:Date.now()});
+        if(replace){m.del=true;save(m);if(user&&sb)sb.storage.from("flock-media").remove(["ms/"+m.id]).catch(()=>{});if(sm.up)delete sm.up[m.id]}else save();
+        sel.clear();sel.add(id);origClose();render();toast(replace?"Original replaced.":"Saved as a new copy.");
+      }catch(e){console.warn(e);busy=false;toast("Couldn't save the video in this browser.");$("#v-ctl").style.opacity=1;$("#v-ctl").style.pointerEvents="auto";$("#v-btns").hidden=false;$("#v-prog").hidden=true}
+    };
+    $("#v-copy").onclick=()=>commit(false);$("#v-save").onclick=()=>commit(true);
   });
 }
 
