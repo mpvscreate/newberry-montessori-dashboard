@@ -279,7 +279,9 @@ const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const COLORS=["#a65608","#2f7d4f","#2a6b8f","#b5527a","#7a5cc4","#b08a14","#1f8a80","#b3261e"];
 const DEFAULTS=[["Maintenance","wrench",0],["Media","film",2],["Gardening","sprout",1],["Crafts","scissors",3],["Mountain biking","bike",6],["Crèche","smile",5],["Cooking","utensils",7],["Construction","hammer",4],["Chicken Coop","coop",0]];
-let S=load(),sm=loadSync(),user=null,sb=null,route="home",tab="goals",syncState="",listening=null;
+/* sign-in is switched off for now: the app opens with a PIN and keeps data on this device. Set LOGIN=true to bring staff sign-in and cloud sync back. */
+const LOGIN=false,PINLEN=3,DEFPIN="007";
+let S=load(),sm=loadSync(),user=null,sb=null,route="home",tab="goals",syncState=LOGIN?"":"Saved on this device",listening=null;
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.prods)return d}catch{}
   const now=Date.now();return{prods:DEFAULTS.map(([name,icon,c],i)=>({id:"p"+i,name,icon,color:COLORS[c],desc:"",members:[],goals:[],log:[],del:false,u:now})),media:[]}}
 function loadSync(){try{return JSON.parse(localStorage.getItem(SYNC))||{}}catch{return{}}}
@@ -376,8 +378,8 @@ async function syncNow(){
     if(changed&&!isOpen()&&!/INPUT|TEXTAREA/.test(document.activeElement?.tagName))render();
   }catch(e){console.warn(e);setSyncUi(navigator.onLine?"Sync problem":"Offline, saved here")}
 }
-function setSyncUi(t){syncState=t;const e=$("#sync");if(e)e.innerHTML=ic(t==="Synced"||t==="Syncing…"?"cloud":"cloudoff","sm")+`<span class="st">${esc(t)}</span>`;e.title=t}
-addEventListener("online",()=>{if(!sb)initAuth();else syncNow()});
+function setSyncUi(t){syncState=t;const e=$("#sync");if(e)e.innerHTML=ic(t==="Synced"||t==="Syncing…"?"cloud":t==="Saved on this device"?"device":"cloudoff","sm")+`<span class="st">${esc(t)}</span>`;e.title=t}
+addEventListener("online",()=>{if(!LOGIN)return;if(!sb)initAuth();else syncNow()});
 setInterval(()=>{if(!document.hidden)syncNow()},60000);
 
 /* shell */
@@ -429,9 +431,9 @@ function activityPage(){const f=feedItems().slice(0,60);return `<div class="page
 function morePage(){const t=theme();
   return `<div class="page-h"><h2>Settings</h2></div><div class="card"><h2>Appearance</h2><div class="segc" role="group" aria-label="Theme">${[["auto","Auto","device"],["light","Light","sun"],["dark","Dark","moon"]].map(([k,l,i])=>`<button data-th="${k}" aria-label="${l}" aria-pressed="${t===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div>
   <div class="card"><h2>Voice dictation</h2><p class="muted" style="margin:0">${SR?"On. Tap the microphone next to any text box and speak.":"Not available in this browser. Try Chrome or Edge, or use your phone keyboard's microphone."}</p></div>
-  <div class="card"><h2>App lock</h2><p class="muted" style="margin-top:0">${getPin()?"A 4-digit PIN protects this device. It also lets you open the app offline.":"Add a 4-digit PIN so only you can open the app on this device."}</p>${getPin()?`<div class="row wr"><button class="btn" id="pinchg">Change PIN</button><button class="btn danger" id="pinoff">Remove PIN</button></div>`:`<button class="btn primary" id="pinset">${ic("lock")}Set a PIN</button>`}</div>
-  <div class="card"><h2>Account</h2><p class="muted" style="margin-top:0">Signed in as ${esc(user.email)}</p><button class="btn block" id="out">${ic("logout")}Sign out</button></div>`}
-function wireMore(){document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#pinset")&&($("#pinset").onclick=setPin);$("#pinchg")&&($("#pinchg").onclick=()=>{removePinThenSet()});$("#pinoff")&&($("#pinoff").onclick=removePin);$("#out").onclick=()=>confirm("Sign out?")&&(sb?sb.auth.signOut():(user=null,localStorage.removeItem(USERK),render()))}
+  <div class="card"><h2>App lock</h2><p class="muted" style="margin-top:0">The app asks for a 3-digit PIN every time you open it. ${getPin()?"You are using your own PIN.":"You are using the default PIN. Choose your own to keep this device private."}</p>${getPin()?`<div class="row wr"><button class="btn" id="pinchg">Change PIN</button><button class="btn danger" id="pinoff">Back to default PIN</button></div>`:`<button class="btn primary" id="pinset">${ic("lock")}Choose my own PIN</button>`}</div>
+  <div class="card"><h2>This device</h2><p class="muted" style="margin-top:0">Sign-in is switched off for now, so cloud sync is paused. Everything you add is saved on this device only.</p><button class="btn block" id="out">${ic("lock")}Lock now</button></div>`}
+function wireMore(){document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#pinset")&&($("#pinset").onclick=setPin);$("#pinchg")&&($("#pinchg").onclick=()=>{removePinThenSet()});$("#pinoff")&&($("#pinoff").onclick=removePin);$("#out").onclick=lockNow}
 
 /* production editor */
 function prodSheet(p){
@@ -830,7 +832,8 @@ function wireLog(p){
 
 /* ---------- app lock (PIN) ---------- */
 const PINK="ms-prod-pin",USERK="ms-prod-user",RESETK="ms-prod-pinreset";
-const getPin=()=>{try{return JSON.parse(localStorage.getItem(PINK))}catch{return null}};
+const getPin=()=>{try{const p=JSON.parse(localStorage.getItem(PINK));return p&&p.n===PINLEN?p:null}catch{return null}};
+const checkPin=async pin=>{const pk=getPin();return pk?(await hashPin(pin,pk.salt))===pk.h:pin===DEFPIN};
 async function hashPin(pin,salt){
   const s=salt+":"+pin;
   if(crypto.subtle){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
@@ -843,7 +846,7 @@ function pinPad({title,sub,cancel,forgot,onDone}){
   const draw=(msg,bad)=>{
     l.innerHTML=`<div class="lk-card"><div class="avatar" style="margin:0 auto;width:64px;height:64px">${ic("lock","lg")}</div><h2 style="margin-top:12px">${esc(title)}</h2>
     <p class="lk-s ${bad?"bad":""}" role="status" aria-live="polite">${esc(msg||sub||"")}</p>
-    <div class="lk-dots" aria-hidden="true">${[0,1,2,3].map(i=>`<i class="${i<v.length?"on":""}"></i>`).join("")}</div>
+    <div class="lk-dots" aria-hidden="true">${Array.from({length:PINLEN},(_,i)=>i).map(i=>`<i class="${i<v.length?"on":""}"></i>`).join("")}</div>
     <div class="lk-pad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button type="button" data-k="${n}">${n}</button>`).join("")}<button class="ghost" tabindex="-1" aria-hidden="true"></button><button type="button" data-k="0">0</button><button type="button" data-k="b" aria-label="Delete last digit">${ic("backspace")}</button></div>
     <p style="margin:14px 0 0">${forgot?`<button class="linkbtn" type="button" id="lk-f">Forgot PIN?</button>`:""}${cancel?`<button class="linkbtn" type="button" id="lk-c">Cancel</button>`:""}</p></div>`;
     l.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>key(b.dataset.k));
@@ -852,8 +855,8 @@ function pinPad({title,sub,cancel,forgot,onDone}){
   async function key(k){
     if(busy)return;
     if(Date.now()<until){draw("Too many tries. Wait a moment.",true);return}
-    if(k==="b")v=v.slice(0,-1);else if(v.length<4)v+=k;
-    if(v.length<4){draw();return}
+    if(k==="b")v=v.slice(0,-1);else if(v.length<PINLEN)v+=k;
+    if(v.length<PINLEN){draw();return}
     draw();busy=true;const r=await onDone(v);busy=false;v="";
     if(r==="ok"){l.remove();removeEventListener("keydown",kd)}
     else if(r&&typeof r==="object"){title=r.title;sub=r.sub;draw()}
@@ -863,25 +866,19 @@ function pinPad({title,sub,cancel,forgot,onDone}){
   addEventListener("keydown",kd);draw();document.body.append(l);l.querySelector("[data-k]").focus();
 }
 function lockNow(){
-  const pk=getPin();if(!pk||document.getElementById("lock"))return;
-  pinPad({title:"Enter your PIN",sub:"MS Productions is locked",forgot:forgotPin,onDone:async pin=>(await hashPin(pin,pk.salt))===pk.h?"ok":"That PIN isn't right."});
-}
-async function forgotPin(){
-  if(!navigator.onLine||!window.supabase){toast("Connect to the internet to reset your PIN.");return}
-  if(!confirm("Sign out and sign in again with your staff account to remove the PIN?"))return;
-  try{localStorage.setItem(RESETK,"1");localStorage.removeItem(USERK)}catch{}
-  document.getElementById("lock")?.remove();user=null;try{await sb.auth.signOut()}catch{}render();
+  if(document.getElementById("lock"))return;
+  pinPad({title:"Enter your PIN",sub:"MS Productions is locked",onDone:async pin=>(await checkPin(pin))?"ok":"That PIN isn't right."});
 }
 function setPin(){
   const salt=uid();let first=null;
   const step=(title,sub)=>pinPad({title,sub,cancel:true,onDone:async pin=>{
-    if(!first){first=pin;return{title:"Confirm your PIN",sub:"Enter the same 4 digits again"}}
+    if(!first){first=pin;return{title:"Confirm your PIN",sub:"Enter the same 3 digits again"}}
     if(pin!==first){first=null;return{title:"Choose a PIN",sub:"They didn't match. Try again"}}
-    localStorage.setItem(PINK,JSON.stringify({salt,h:await hashPin(pin,salt)}));toast("PIN is on.");render();return"ok"}});
-  step("Choose a PIN","4 digits to open the app");
+    localStorage.setItem(PINK,JSON.stringify({salt,n:PINLEN,h:await hashPin(pin,salt)}));toast("PIN is on.");render();return"ok"}});
+  step("Choose a PIN","3 digits to open the app");
 }
-function removePinThenSet(){const pk=getPin();pinPad({title:"Enter your PIN",sub:"to change it",cancel:true,onDone:async pin=>{if((await hashPin(pin,pk.salt))!==pk.h)return"That PIN isn't right.";setTimeout(setPin,0);return"ok"}})}
-function removePin(){const pk=getPin();pinPad({title:"Enter your PIN",sub:"to turn it off",cancel:true,onDone:async pin=>{if((await hashPin(pin,pk.salt))!==pk.h)return"That PIN isn't right.";localStorage.removeItem(PINK);toast("PIN removed.");render();return"ok"}})}
+function removePinThenSet(){pinPad({title:"Enter your PIN",sub:"to change it",cancel:true,onDone:async pin=>{if(!(await checkPin(pin)))return"That PIN isn't right.";setTimeout(setPin,0);return"ok"}})}
+function removePin(){pinPad({title:"Enter your PIN",sub:"to go back to the default PIN",cancel:true,onDone:async pin=>{if(!(await checkPin(pin)))return"That PIN isn't right.";localStorage.removeItem(PINK);toast("Back to the default PIN.");render();return"ok"}})}
 let hiddenAt=0;
 document.addEventListener("visibilitychange",()=>{if(document.hidden)hiddenAt=Date.now();else if(getPin()&&hiddenAt&&Date.now()-hiddenAt>60000)lockNow()});
 
@@ -960,7 +957,8 @@ function reportSheet(p){
 }
 
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
-lockNow();migrateMedia();render();initAuth();
+if(!LOGIN)user={email:"staff@local",local:true};
+lockNow();migrateMedia();render();if(LOGIN)initAuth();
 </script>
 </body>
 </html>
