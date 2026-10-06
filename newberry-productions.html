@@ -324,8 +324,9 @@ const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const COLORS=["#a65608","#2f7d4f","#2a6b8f","#b5527a","#7a5cc4","#b08a14","#1f8a80","#b3261e"];
 const DEFAULTS=[["Maintenance","wrench",0],["Media","film",2],["Gardening","sprout",1],["Crafts","scissors",3],["Mountain biking","bike",6],["Crèche","smile",5],["Cooking","utensils",7],["Construction","hammer",4],["Chicken Coop","coop",0]];
 /* sign-in is switched off for now: the app opens with a PIN and keeps data on this device. Set LOGIN=true to bring staff sign-in and cloud sync back. */
-const LOGIN=false,PINLEN=3,DEFPIN="007";
-let S=load(),sm=loadSync(),user=null,sb=null,route="home",tab="goals",syncState=LOGIN?"":"Saved on this device",listening=null;
+/* staff sign-in happens once per device (the session is remembered). A PIN is optional and only locks this device. */
+const LOGIN=true,PINLEN=3;
+let S=load(),sm=loadSync(),user=null,sb=null,route="home",tab="goals",syncState="",authReady=false,listening=null;
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.prods)return d}catch{}
   const now=Date.now();return{prods:DEFAULTS.map(([name,icon,c],i)=>({id:"p"+i,name,icon,color:COLORS[c],desc:"",members:[],goals:[],log:[],del:false,u:now})),media:[]}}
 function loadSync(){try{return JSON.parse(localStorage.getItem(SYNC))||{}}catch{return{}}}
@@ -390,9 +391,10 @@ async function initAuth(){
     const{data}=await sb.auth.getSession();user=data.session?.user||null;if(user){try{localStorage.setItem(USERK,user.email)}catch{}}
     sb.auth.onAuthStateChange((_e,s)=>{const was=user;user=s?.user||null;if(user){try{localStorage.setItem(USERK,user.email);if(localStorage.getItem(RESETK)){localStorage.removeItem(RESETK);localStorage.removeItem(PINK);toast("PIN removed. You can set a new one in Settings.")}}catch{}}else if(_e==="SIGNED_OUT"){try{localStorage.removeItem(USERK)}catch{}}if(user&&!was){render();syncNow()}if(!user&&was)render()});
     if(user)syncNow();
-  }else{const cu=localStorage.getItem(USERK);if(cu&&getPin()){user={email:cu,offline:true}}}
-  render();
+  }else{const cu=localStorage.getItem(USERK);if(cu){user={email:cu,offline:true}}}
+  authReady=true;if(user)lockNow();render();
 }
+function splash(){$("#app").innerHTML=`<div class="auth"><img src="icons/productions-192.png" alt="MS Productions" width="112" height="130" style="height:130px;width:auto;opacity:.9"></div>`}
 function authScreen(msg){
   $("#app").innerHTML=`<div class="auth"><form class="card" id="lf"><div class="row" style="justify-content:center"><img src="icons/productions-192.png" alt="MS Productions" width="112" height="130" style="height:130px;width:auto"></div>
   <h1 class="sr">MS Productions</h1><p class="muted" style="text-align:center;margin:0 0 6px">Staff sign in</p>
@@ -438,7 +440,7 @@ function focusKey(){const a=document.activeElement;if(!a||!a.closest||!a.closest
 function restoreFocus(k){if(!k)return;let e=null;if(k.id)e=document.getElementById(k.id);else if(k.nv)e=document.querySelector(`[data-nav="${k.nv}"]`);else if(k.tb)e=document.querySelector(`[data-tab="${k.tb}"]`);else if(k.mv)e=document.querySelector(`[data-mv="${k.mv}"]`);else if(k.th)e=document.querySelector(`[data-th="${k.th}"]`);else if(k.g){const sc=document.querySelector(`[data-g="${k.g}"]`);if(sc)e=k.dn?sc.querySelector("[data-done]"):[...sc.querySelectorAll("[aria-label]")].find(x=>x.getAttribute("aria-label")===k.al)}if(e)e.focus({preventScroll:true})}
 let lastRoute="";
 function render(){
-  if(!user){authScreen();return}
+  if(!user){authReady?authScreen():splash();return}
   const fk=focusKey(),sy=lastRoute===route+tab?scrollY:0;
   const m=route.match(/^p\/(.+)/),p=m&&P(m[1]);
   const cur=p?"prods":route;
@@ -481,10 +483,10 @@ function activityPage(){const f=feedItems().slice(0,60);return `<div class="page
 function morePage(){const t=theme();
   return `<div class="page-h"><h2>Settings</h2></div><div class="card"><h2>Appearance</h2><div class="segc" role="group" aria-label="Theme">${[["auto","Auto","device"],["light","Light","sun"],["dark","Dark","moon"]].map(([k,l,i])=>`<button data-th="${k}" aria-label="${l}" aria-pressed="${t===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div>
   <div class="card"><h2>Voice dictation</h2><p class="muted" style="margin:0">${SR?"On. Tap the microphone next to any text box and speak.":"Not available in this browser. Try Chrome or Edge, or use your phone keyboard's microphone."}</p></div>
-  <div class="card"><h2>App lock</h2><p class="muted" style="margin-top:0">The app asks for a 3-digit PIN every time you open it. ${getPin()?"You are using your own PIN.":"You are using the default PIN. Choose your own to keep this device private."}</p>${getPin()?`<div class="row wr"><button class="btn" id="pinchg">Change PIN</button><button class="btn danger" id="pinoff">Back to default PIN</button></div>`:`<button class="btn primary" id="pinset">${ic("lock")}Choose my own PIN</button>`}</div>
-  <div class="card"><h2>Backup</h2><p class="muted" style="margin-top:0">Everything is stored on this device only. Download a backup of your goals, targets, team and logs now and then. Photos and videos are not included.</p><div class="row wr"><button class="btn" id="bk-out">${ic("download")}Download backup</button><button class="btn" id="bk-in">${ic("upload")}Restore</button></div><input type="file" id="bk-f" accept="application/json,.json" class="sr" aria-label="Choose a backup file" tabindex="-1"></div>
-  <div class="card"><h2>This device</h2><p class="muted" style="margin-top:0">Sign-in is switched off for now, so cloud sync is paused. Everything you add is saved on this device only.</p><button class="btn block" id="out">${ic("lock")}Lock now</button></div>`}
-function wireMore(){document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#pinset")&&($("#pinset").onclick=setPin);$("#pinchg")&&($("#pinchg").onclick=()=>{removePinThenSet()});$("#pinoff")&&($("#pinoff").onclick=removePin);$("#out").onclick=lockNow;
+  <div class="card"><h2>App lock</h2><p class="muted" style="margin-top:0">Optional. Add a 3-digit PIN and the app asks for it when you open it on this device. You stay signed in either way.</p>${getPin()?`<div class="row wr"><button class="btn" id="pinchg">Change PIN</button><button class="btn danger" id="pinoff">Remove PIN</button></div>`:`<button class="btn primary" id="pinset">${ic("lock")}Set a PIN</button>`}</div>
+  <div class="card"><h2>Backup</h2><p class="muted" style="margin-top:0">Your goals sync to the cloud while you are signed in. A downloaded backup is an extra copy of your goals, targets, team and logs. Photos and videos are not included.</p><div class="row wr"><button class="btn" id="bk-out">${ic("download")}Download backup</button><button class="btn" id="bk-in">${ic("upload")}Restore</button></div><input type="file" id="bk-f" accept="application/json,.json" class="sr" aria-label="Choose a backup file" tabindex="-1"></div>
+  <div class="card"><h2>Account</h2><p class="muted" style="margin-top:0">Signed in as ${esc(user.email)}. You only need to sign in once on this device.</p><div class="row wr"><button class="btn" id="out">${ic("logout")}Sign out</button>${getPin()?`<button class="btn" id="lk">${ic("lock")}Lock now</button>`:""}</div></div>`}
+function wireMore(){document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#pinset")&&($("#pinset").onclick=setPin);$("#pinchg")&&($("#pinchg").onclick=()=>{removePinThenSet()});$("#pinoff")&&($("#pinoff").onclick=removePin);$("#lk")&&($("#lk").onclick=lockNow);$("#out").onclick=()=>{if(!confirm("Sign out of this device? You will need to sign in again."))return;if(sb)sb.auth.signOut();else{user=null;try{localStorage.removeItem(USERK)}catch{}render()}};
   $("#bk-out").onclick=()=>{const blob=new Blob([JSON.stringify({app:"ms-productions",v:1,at:new Date().toISOString(),prods:S.prods},null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ms-productions-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")};
   $("#bk-in").onclick=()=>$("#bk-f").click();
   $("#bk-f").onchange=async e=>{const file=e.target.files[0];if(!file)return;let d;try{d=JSON.parse(await file.text())}catch{toast("That file isn't a valid backup.");return}
@@ -954,7 +956,7 @@ function wireLog(p){
 /* ---------- app lock (PIN) ---------- */
 const PINK="ms-prod-pin",USERK="ms-prod-user",RESETK="ms-prod-pinreset";
 const getPin=()=>{try{const p=JSON.parse(localStorage.getItem(PINK));return p&&p.n===PINLEN?p:null}catch{return null}};
-const checkPin=async pin=>{const pk=getPin();return pk?(await hashPin(pin,pk.salt))===pk.h:pin===DEFPIN};
+const checkPin=async pin=>{const pk=getPin();return !!pk&&(await hashPin(pin,pk.salt))===pk.h};
 async function hashPin(pin,salt){
   const s=salt+":"+pin;
   if(crypto.subtle){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
@@ -987,8 +989,14 @@ function pinPad({title,sub,cancel,forgot,onDone}){
   addEventListener("keydown",kd);draw();document.body.append(l);l.querySelector("[data-k]").focus();
 }
 function lockNow(){
-  if(document.getElementById("lock"))return;
-  pinPad({title:"Enter your PIN",sub:"MS Productions is locked",onDone:async pin=>(await checkPin(pin))?"ok":"That PIN isn't right."});
+  if(!getPin()||!user||document.getElementById("lock"))return;
+  pinPad({title:"Enter your PIN",sub:"MS Productions is locked",forgot:forgotPin,onDone:async pin=>(await checkPin(pin))?"ok":"That PIN isn't right."});
+}
+async function forgotPin(){
+  if(!navigator.onLine||!sb){toast("Connect to the internet to reset your PIN.");return}
+  if(!confirm("Sign out and sign in again with your staff account to remove the PIN?"))return;
+  try{localStorage.setItem(RESETK,"1");localStorage.removeItem(USERK)}catch{}
+  document.getElementById("lock")?.remove();user=null;try{await sb.auth.signOut()}catch{}render();
 }
 function setPin(){
   const salt=uid();let first=null;
@@ -999,9 +1007,9 @@ function setPin(){
   step("Choose a PIN","3 digits to open the app");
 }
 function removePinThenSet(){pinPad({title:"Enter your PIN",sub:"to change it",cancel:true,onDone:async pin=>{if(!(await checkPin(pin)))return"That PIN isn't right.";setTimeout(setPin,0);return"ok"}})}
-function removePin(){pinPad({title:"Enter your PIN",sub:"to go back to the default PIN",cancel:true,onDone:async pin=>{if(!(await checkPin(pin)))return"That PIN isn't right.";localStorage.removeItem(PINK);toast("Back to the default PIN.");render();return"ok"}})}
+function removePin(){pinPad({title:"Enter your PIN",sub:"to turn it off",cancel:true,onDone:async pin=>{if(!(await checkPin(pin)))return"That PIN isn't right.";localStorage.removeItem(PINK);toast("PIN removed.");render();return"ok"}})}
 let hiddenAt=0;
-document.addEventListener("visibilitychange",()=>{if(document.hidden)hiddenAt=Date.now();else if(getPin()&&hiddenAt&&Date.now()-hiddenAt>60000)lockNow()});
+document.addEventListener("visibilitychange",()=>{if(document.hidden)hiddenAt=Date.now();else if(getPin()&&user&&hiddenAt&&Date.now()-hiddenAt>60000)lockNow()});
 
 /* ---------- weekly report card (image + message) ---------- */
 function repRange(k){
@@ -1078,9 +1086,8 @@ function reportSheet(p){
 }
 
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
-if(!LOGIN)user={email:"staff@local",local:true};
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch{}
-lockNow();migrateMedia();render();if(LOGIN)initAuth();
+migrateMedia();render();initAuth();
 </script>
 </body>
 </html>
