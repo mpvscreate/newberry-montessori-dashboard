@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>MS Productions</title>
+<meta name="theme-color" content="#2f6f4f">
+<link rel="manifest" href="manifest-productions.webmanifest">
+<link rel="icon" href="icon.svg">
+<style>
+:root{--bg:#f6f3ec;--card:#fff;--ink:#1f2a24;--mut:#66726b;--line:#e3ded2;--brand:#2f6f4f;--brand2:#e9f3ed;--accent:#f0a030;--danger:#c0392b;--r:16px;--sh:0 1px 2px rgba(0,0,0,.06),0 4px 14px rgba(0,0,0,.05)}
+:root[data-t=dark]{--bg:#121816;--card:#1b2420;--ink:#ecf1ee;--mut:#9aa9a1;--line:#2a3630;--brand:#5fbf8a;--brand2:#20332a;--accent:#f2b24d;--danger:#ef6a5b;--sh:none}
+@media(prefers-color-scheme:dark){:root[data-t=auto]{--bg:#121816;--card:#1b2420;--ink:#ecf1ee;--mut:#9aa9a1;--line:#2a3630;--brand:#5fbf8a;--brand2:#20332a;--accent:#f2b24d;--danger:#ef6a5b;--sh:none}}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding-bottom:env(safe-area-inset-bottom)}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.sr{position:absolute;left:-9999px}
+header{position:sticky;top:0;z-index:5;background:var(--bg);border-bottom:1px solid var(--line);padding:calc(10px + env(safe-area-inset-top)) 16px 10px;display:flex;align-items:center;gap:10px}
+header h1{font-size:1.15rem;margin:0;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ib{width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--card);display:grid;place-items:center;font-size:1.2rem}
+main{max-width:860px;margin:0 auto;padding:16px}
+.btn{min-height:44px;padding:0 18px;border-radius:12px;border:1px solid var(--line);background:var(--card);font-weight:600}
+.btn.p{background:var(--brand);border-color:var(--brand);color:#fff}
+:root[data-t=dark] .btn.p,:root[data-t=auto] .btn.p{color:#0c1511}
+@media(prefers-color-scheme:light){:root[data-t=auto] .btn.p{color:#fff}}
+.btn.d{color:var(--danger)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--sh);padding:16px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.pc{display:block;text-align:left;width:100%;transition:transform .15s}
+.pc:hover{transform:translateY(-2px)}
+.pc .em{font-size:2rem;width:56px;height:56px;border-radius:16px;display:grid;place-items:center;margin-bottom:8px}
+.pc h3{margin:0 0 2px}.mut{color:var(--mut);font-size:.9rem}
+.bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin:8px 0 4px}
+.bar>i{display:block;height:100%;border-radius:99px;transition:width .4s}
+.hero{display:flex;gap:18px;align-items:center;flex-wrap:wrap;margin-bottom:16px}
+.ring{--p:0;width:96px;height:96px;border-radius:50%;background:conic-gradient(var(--brand) calc(var(--p)*1%),var(--line) 0);display:grid;place-items:center;flex:none}
+.ring b{width:74px;height:74px;border-radius:50%;background:var(--card);display:grid;place-items:center;font-size:1.3rem}
+.tabs{display:flex;gap:6px;overflow-x:auto;margin:12px 0;padding-bottom:4px}
+.tab{min-height:44px;padding:0 16px;border-radius:99px;border:1px solid var(--line);background:var(--card);white-space:nowrap;font-weight:600}
+.tab[aria-selected=true]{background:var(--brand);color:#fff;border-color:var(--brand)}
+:root[data-t=dark] .tab[aria-selected=true]{color:#0c1511}
+h2{font-size:1.1rem;margin:20px 0 10px}
+.row{display:flex;gap:10px;align-items:center}.row.w{flex-wrap:wrap}.sp{flex:1}
+.goal{margin-bottom:12px}
+.goal.done h3{text-decoration:line-through;color:var(--mut)}
+.goal h3{margin:0;font-size:1rem}
+input[type=range]{width:100%;height:32px;accent-color:var(--brand)}
+input[type=text],input[type=email],input[type=password],input[type=date],textarea,select{width:100%;min-height:44px;padding:10px 12px;border-radius:12px;border:1px solid var(--line);background:var(--bg)}
+textarea{min-height:80px;resize:vertical}
+label{display:block;font-weight:600;font-size:.9rem;margin:12px 0 4px}
+.cm{border-left:3px solid var(--brand);padding:2px 0 2px 10px;margin:8px 0}
+.cm small{color:var(--mut)}
+.mic{width:44px;height:44px;flex:none;border-radius:50%;border:1px solid var(--line);background:var(--card);font-size:1.2rem}
+.mic.on{background:var(--danger);color:#fff;animation:pulse 1s infinite}
+@keyframes pulse{50%{box-shadow:0 0 0 8px rgba(192,57,43,.2)}}
+.photos{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.photos button{padding:0;border:0;background:none;border-radius:12px;overflow:hidden;aspect-ratio:1}
+.photos img{width:100%;height:100%;object-fit:cover;display:block}
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom));min-height:56px;padding:0 22px;border-radius:99px;border:0;background:var(--accent);color:#1f2a24;font-weight:700;box-shadow:0 4px 14px rgba(0,0,0,.25)}
+dialog{border:0;border-radius:20px;padding:0;width:min(520px,calc(100% - 24px));background:var(--card);color:var(--ink);box-shadow:0 10px 40px rgba(0,0,0,.4);max-height:92vh}
+dialog::backdrop{background:rgba(0,0,0,.5)}
+.sheet{padding:18px}.sheet h2{margin-top:0}
+.colors,.emojis{display:flex;flex-wrap:wrap;gap:8px}
+.colors button{width:36px;height:36px;border-radius:50%;border:3px solid transparent}
+.colors button[aria-pressed=true]{border-color:var(--ink)}
+.emojis button{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:var(--bg);font-size:1.4rem}
+.emojis button[aria-pressed=true]{border-color:var(--brand);background:var(--brand2)}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--brand2);border-radius:99px;padding:6px 8px 6px 12px;margin:0 6px 6px 0}
+.chip button{border:0;background:none;font-size:1rem;min-width:28px;min-height:28px}
+.toast{position:fixed;left:50%;bottom:90px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:12px 18px;border-radius:12px;z-index:50;display:flex;gap:12px;align-items:center}
+.toast button{background:none;border:0;color:var(--accent);font-weight:700}
+.auth{min-height:100vh;display:grid;place-items:center;padding:16px}
+.auth .card{width:min(400px,100%)}
+.empty{text-align:center;padding:28px 12px;color:var(--mut)}
+.sync{font-size:.8rem;color:var(--mut)}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:60;overflow:hidden}
+.confetti i{position:absolute;top:-20px;width:10px;height:14px;animation:fall 1.6s ease-in forwards}
+@keyframes fall{to{transform:translateY(110vh) rotate(540deg);opacity:.8}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<dialog id="dlg"></dialog>
+<script>
+"use strict";
+const SB_URL="https://oikwudpqmbnssttatlhc.supabase.co",SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pa3d1ZHBxbWJuc3N0dGF0bGhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTMzODEsImV4cCI6MjA5NTY4OTM4MX0.p6I9qlvre5TjF3qOVjAIBus3_PNrbvCF2cMXHe3uiXw";
+const KEY="ms-prod-data",SYNC="ms-prod-sync",THEME="ms-prod-theme";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const COLORS=["#2f6f4f","#d9822b","#3b82c4","#b5527a","#7a5cc4","#c9a227","#2a9d8f","#c0392b"];
+const EMOJI=["🔧","🎬","🌱","🧶","🚵","🧸","🍳","🏗️","🐔","🎨","🎵","⚽","📚","🔬","🐝","🪵"];
+const DEFAULTS=[["Maintenance","🔧",0],["Media","🎬",2],["Gardening","🌱",0],["Crafts","🧶",4],["Mountain biking","🚵",1],["Crèche","🧸",3],["Cooking","🍳",1],["Construction","🏗️",7],["Chicken Coop","🐔",5]];
+let S=load(),sm=loadSync(),user=null,sb=null,route="home",tab="goals",syncState="",listening=null;
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.prods)return d}catch{}
+  const now=Date.now();return{prods:DEFAULTS.map(([name,icon,c],i)=>({id:"p"+i,name,icon,color:COLORS[c],desc:"",members:[],goals:[],log:[],del:false,u:now})),media:[]}}
+function loadSync(){try{return JSON.parse(localStorage.getItem(SYNC))||{}}catch{return{}}}
+function save(o){const n=Date.now();if(o)o.u=n;try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem(SYNC,JSON.stringify(sm))}catch{toast("Storage is full. Delete some photos.")}scheduleSync()}
+const prods=()=>S.prods.filter(p=>!p.del);
+const P=id=>S.prods.find(p=>p.id===id);
+const goalPct=g=>g.done?100:g.pct||0;
+const prodPct=p=>p.goals.length?Math.round(p.goals.reduce((a,g)=>a+goalPct(g),0)/p.goals.length):0;
+const who=()=>user?.email?.split("@")[0]||"me";
+const fmt=t=>new Date(t).toLocaleDateString(undefined,{day:"numeric",month:"short"})+" "+new Date(t).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+
+/* theme */
+function theme(m){if(m){try{localStorage.setItem(THEME,m)}catch{}}let t="auto";try{t=localStorage.getItem(THEME)||"auto"}catch{}document.documentElement.dataset.t=t;return t}
+theme();
+function cycleTheme(){const o=["auto","light","dark"],t=theme(),n=o[(o.indexOf(t)+1)%3];theme(n);toast("Theme: "+n);render()}
+
+/* toast / confetti */
+function toast(msg,undo){const e=document.createElement("div");e.className="toast";e.setAttribute("role","status");e.textContent=msg;if(undo){const b=document.createElement("button");b.textContent="Undo";b.onclick=()=>{undo();e.remove()};e.append(b)}document.body.append(e);setTimeout(()=>e.remove(),undo?6000:2500)}
+function confetti(){const c=document.createElement("div");c.className="confetti";c.setAttribute("aria-hidden","true");for(let i=0;i<40;i++){const p=document.createElement("i");p.style.cssText=`left:${Math.random()*100}%;background:${COLORS[i%8]};animation-delay:${Math.random()*.4}s`;c.append(p)}document.body.append(c);setTimeout(()=>c.remove(),2400)}
+
+/* dialog */
+function sheet(html,wire){const d=$("#dlg");d.innerHTML=`<div class="sheet">${html}</div>`;if(!d.open)d.showModal();wire&&wire(d,()=>d.close())}
+$("#dlg").addEventListener("click",e=>{if(e.target.id==="dlg")e.target.close()});
+
+/* voice */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+function micBtn(){return SR?`<button type="button" class="mic" data-mic aria-label="Dictate with your voice" title="Tap and speak">🎤</button>`:""}
+function wireMics(root){root.querySelectorAll("[data-mic]").forEach(b=>{
+  const field=b.parentElement.querySelector("textarea,input[type=text]");
+  b.onclick=()=>{
+    if(listening){listening.stop();return}
+    const r=new SR();r.lang=navigator.language||"en-ZA";r.interimResults=true;r.continuous=true;
+    const base=field.value?field.value.trimEnd()+" ":"";let fin="";
+    r.onresult=e=>{let t="";for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;field.value=base+t};
+    r.onend=()=>{listening=null;b.classList.remove("on");b.setAttribute("aria-label","Dictate with your voice")};
+    r.onerror=e=>toast(e.error==="not-allowed"?"Allow microphone access to dictate.":"Voice stopped: "+e.error);
+    listening=r;b.classList.add("on");b.setAttribute("aria-label","Stop dictating");r.start();
+  }})}
+
+/* routing */
+addEventListener("hashchange",()=>{route=location.hash.slice(2)||"home";render();scrollTo(0,0)});
+route=location.hash.slice(2)||"home";
+
+/* auth + sync */
+function loadSb(){return new Promise(res=>{if(window.supabase)return res();const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";s.onload=res;s.onerror=res;document.head.append(s)})}
+async function initAuth(){
+  await loadSb();
+  if(window.supabase){sb=supabase.createClient(SB_URL,SB_KEY);
+    const{data}=await sb.auth.getSession();user=data.session?.user||null;
+    sb.auth.onAuthStateChange((_e,s)=>{const was=user;user=s?.user||null;if(user&&!was){render();syncNow()}if(!user&&was)render()});
+    if(user)syncNow();
+  }
+  render();
+}
+function authScreen(msg){
+  $("#app").innerHTML=`<div class="auth"><form class="card" id="lf"><div style="font-size:3rem;text-align:center" aria-hidden="true">🌳</div>
+  <h1 style="text-align:center;margin:4px 0">MS Productions</h1><p class="mut" style="text-align:center;margin-top:0">Staff sign in</p>
+  ${msg?`<p role="alert" style="color:var(--danger)">${esc(msg)}</p>`:""}
+  <label for="em">Email</label><input id="em" type="email" autocomplete="username" required>
+  <label for="pw">Password</label><input id="pw" type="password" autocomplete="current-password" required>
+  <button class="btn p" style="width:100%;margin-top:16px" id="go">Sign in</button>
+  ${sb?"":`<p class="mut">Connecting… if this stays, check your internet.</p>`}</form></div>`;
+  $("#lf").onsubmit=async e=>{e.preventDefault();if(!sb){authScreen("Not connected yet. Try again in a moment.");return}
+    const b=$("#go");b.disabled=true;b.textContent="Signing in…";
+    const{error}=await sb.auth.signInWithPassword({email:$("#em").value.trim(),password:$("#pw").value});
+    if(error)authScreen(/invalid/i.test(error.message)?"That email or password isn't right.":error.message)};
+}
+let st;function scheduleSync(){clearTimeout(st);if(user)st=setTimeout(syncNow,1200)}
+async function syncNow(){
+  if(!user||!sb)return;setSyncUi("Syncing…");
+  try{
+    const{data,error}=await sb.from("flock_records").select("kind,id,data,deleted,u").in("kind",["ms_prod","ms_media"]);
+    if(error)throw error;
+    sm.rem=sm.rem||{};let changed=false;
+    for(const r of data){
+      const k=r.kind+"|"+r.id;sm.rem[k]=r.u;
+      const list=r.kind==="ms_prod"?S.prods:S.media,i=list.findIndex(x=>x.id===r.id),loc=list[i];
+      if(!loc||(loc.u||0)<r.u){const rec={...r.data,del:r.deleted||r.data?.del||false,u:r.u};if(i>=0)list[i]=rec;else list.push(rec);changed=true}
+    }
+    const rows=[];
+    [["ms_prod",S.prods],["ms_media",S.media]].forEach(([kind,list])=>list.forEach(x=>{
+      if((x.u||0)>(sm.rem[kind+"|"+x.id]||0))rows.push({kind,id:x.id,data:x,deleted:!!x.del,u:x.u||Date.now()})}));
+    for(let i=0;i<rows.length;i+=20){const{error:e}=await sb.rpc("flock_upsert",{rows:rows.slice(i,i+20)});if(e)throw e;rows.slice(i,i+20).forEach(r=>sm.rem[r.kind+"|"+r.id]=r.u)}
+    localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem(SYNC,JSON.stringify(sm));
+    setSyncUi("Synced "+new Date().toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}));
+    if(changed&&!$("#dlg").open)render();
+  }catch(e){console.warn(e);setSyncUi(navigator.onLine?"Sync problem":"Offline, saved here")}
+}
+function setSyncUi(t){syncState=t;const e=$("#sync");if(e)e.textContent=t}
+addEventListener("online",syncNow);
+setInterval(()=>{if(!document.hidden)syncNow()},60000);
+
+/* render */
+function render(){
+  if(!user){authScreen();return}
+  const m=route.match(/^p\/(.+)/),p=m&&P(m[1]);
+  const th=theme(),ti={auto:"🌗",light:"☀️",dark:"🌙"}[th];
+  $("#app").innerHTML=`<header>${p?`<button class="ib" id="back" aria-label="Back to overview">←</button>`:""}
+    <h1>${p?esc(p.icon)+" "+esc(p.name):"🌳 MS Productions"}</h1>
+    <span class="sync" id="sync" aria-live="polite">${esc(syncState)}</span>
+    <button class="ib" id="theme" aria-label="Change theme, now ${th}">${ti}</button>
+    <button class="ib" id="out" aria-label="Sign out">⎋</button></header>
+  <main>${p?prodView(p):home()}</main>`;
+  $("#theme").onclick=cycleTheme;$("#out").onclick=()=>confirm("Sign out?")&&sb.auth.signOut();
+  if($("#back"))$("#back").onclick=()=>location.hash="#/";
+  p?wireProd(p):wireHome();
+}
+
+/* home / overview */
+function home(){
+  const ps=prods(),all=ps.flatMap(p=>p.goals),open=all.filter(g=>!g.done).length,
+    pct=ps.length?Math.round(ps.reduce((a,p)=>a+prodPct(p),0)/ps.length):0;
+  const feed=ps.flatMap(p=>[...p.log.map(l=>({p,t:l.t,txt:l.text,k:"Log"})),...p.goals.flatMap(g=>g.comments.map(c=>({p,t:c.t,txt:g.title+": "+c.text,k:"Comment"})))]).sort((a,b)=>b.t-a.t).slice(0,8);
+  return `<div class="card hero"><div class="ring" style="--p:${pct}"><b>${pct}%</b></div>
+    <div><h2 style="margin:0">Overall progress</h2><p class="mut" style="margin:4px 0 0">${ps.length} productions · ${open} open goals · ${all.length-open} done</p></div></div>
+  <div class="grid">${ps.map(p=>{const q=prodPct(p),o=p.goals.filter(g=>!g.done).length;
+    return `<button class="card pc" data-open="${p.id}"><div class="em" style="background:${p.color}22">${esc(p.icon)}</div>
+    <h3>${esc(p.name)}</h3><div class="bar" role="progressbar" aria-valuenow="${q}" aria-valuemin="0" aria-valuemax="100" aria-label="${esc(p.name)} progress"><i style="width:${q}%;background:${p.color}"></i></div>
+    <span class="mut">${q}% · ${o?o+" open goal"+(o>1?"s":""):p.goals.length?"All done 🎉":"No goals yet"}</span></button>`}).join("")}</div>
+  <h2>Recent activity</h2>${feed.length?feed.map(f=>`<div class="card" style="margin-bottom:8px;padding:12px"><b>${esc(f.p.icon)} ${esc(f.p.name)}</b> <small class="mut">· ${f.k} · ${fmt(f.t)}</small><div>${esc(f.txt)}</div></div>`).join(""):`<div class="empty">Nothing yet. Open a production and add a goal or a log note.</div>`}
+  <button class="fab" id="addp">＋ New production</button>`;
+}
+function wireHome(){
+  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>location.hash="#/p/"+b.dataset.open);
+  $("#addp").onclick=()=>prodSheet();
+}
+
+/* production editor */
+function prodSheet(p){
+  const isNew=!p;p=p||{name:"",icon:EMOJI[0],color:COLORS[0],desc:""};let ic=p.icon,co=p.color;
+  sheet(`<h2>${isNew?"New production":"Edit production"}</h2>
+  <label for="pn">Name</label><input id="pn" type="text" value="${esc(p.name)}" maxlength="40">
+  <label for="pd">What is it about?</label><div class="row"><textarea id="pdsc">${esc(p.desc)}</textarea>${micBtn()}</div>
+  <label>Icon</label><div class="emojis">${EMOJI.map(e=>`<button type="button" data-e="${e}" aria-pressed="${e===ic}" aria-label="${e}">${e}</button>`).join("")}</div>
+  <label>Colour</label><div class="colors">${COLORS.map(c=>`<button type="button" data-c="${c}" style="background:${c}" aria-pressed="${c===co}" aria-label="Colour ${c}"></button>`).join("")}</div>
+  <div class="row" style="margin-top:20px">${isNew?"":`<button class="btn d" id="del">Delete</button>`}<span class="sp"></span><button class="btn" id="cx">Cancel</button><button class="btn p" id="ok">Save</button></div>`,(d,close)=>{
+    wireMics(d);
+    d.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{ic=b.dataset.e;d.querySelectorAll("[data-e]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+    d.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{co=b.dataset.c;d.querySelectorAll("[data-c]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+    $("#cx").onclick=close;
+    if(!isNew)$("#del").onclick=()=>{if(!confirm("Delete this production and its goals?"))return;p.del=true;save(p);close();location.hash="#/";toast("Production deleted.",()=>{p.del=false;save(p);render()})};
+    $("#ok").onclick=()=>{const n=$("#pn").value.trim();if(!n){$("#pn").focus();return}
+      Object.assign(p,{name:n,icon:ic,color:co,desc:$("#pdsc").value.trim()});
+      if(isNew){Object.assign(p,{id:uid(),members:[],goals:[],log:[],del:false});S.prods.push(p)}
+      save(p);close();render()};
+  });
+}
+
+/* production view */
+function prodView(p){
+  const q=prodPct(p),T=[["goals","🎯 Goals"],["media","📷 Media"],["team","👥 Team"],["log","📝 Log"]];
+  return `<div class="card"><div class="row"><div class="em" style="font-size:2rem">${esc(p.icon)}</div><div class="sp"><b>${q}% complete</b><div class="mut">${esc(p.desc||"Tap Edit to add a description.")}</div></div><button class="btn" id="edp">Edit</button></div>
+  <div class="bar"><i style="width:${q}%;background:${p.color}"></i></div></div>
+  <div class="tabs" role="tablist">${T.map(([k,l])=>`<button class="tab" role="tab" data-tab="${k}" aria-selected="${tab===k}">${l}</button>`).join("")}</div>
+  <div>${{goals:goalsTab,media:mediaTab,team:teamTab,log:logTab}[tab](p)}</div>`;
+}
+function wireProd(p){
+  $("#edp").onclick=()=>prodSheet(p);
+  document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;render()});
+  ({goals:wireGoals,media:wireMedia,team:wireTeam,log:wireLog})[tab](p);
+}
+
+/* goals */
+function goalsTab(p){
+  return (p.goals.length?p.goals.map(g=>`<div class="card goal ${g.done?"done":""}" data-g="${g.id}">
+    <div class="row"><input type="checkbox" data-done ${g.done?"checked":""} style="width:26px;height:26px;accent-color:var(--brand)" aria-label="Mark ${esc(g.title)} done"><h3 class="sp">${esc(g.title)}</h3><button class="btn" data-edg>Edit</button></div>
+    ${g.due?`<div class="mut">Due ${esc(g.due)}</div>`:""}
+    <input type="range" min="0" max="100" step="5" value="${goalPct(g)}" data-pct aria-label="Progress for ${esc(g.title)}"><div class="mut"><span data-pv>${goalPct(g)}</span>%</div>
+    ${g.comments.map(c=>`<div class="cm">${esc(c.text)}<br><small>${esc(c.by)} · ${fmt(c.t)}</small></div>`).join("")}
+    <div class="row" style="margin-top:8px"><input type="text" data-ci placeholder="Add a comment (or tap the mic)" aria-label="Comment on ${esc(g.title)}">${micBtn()}<button class="btn p" data-cs>Add</button></div></div>`).join("")
+    :`<div class="empty">🎯<br>No goals yet. Add the first one!</div>`)+`<button class="fab" id="addg">＋ New goal</button>`;
+}
+function wireGoals(p){
+  $("#addg").onclick=()=>goalSheet(p);
+  wireMics(document);
+  document.querySelectorAll("[data-g]").forEach(el=>{
+    const g=p.goals.find(x=>x.id===el.dataset.g);
+    el.querySelector("[data-done]").onchange=e=>{g.done=e.target.checked;if(g.done){g.pct=100;confetti()}save(p);render()};
+    const r=el.querySelector("[data-pct]");r.oninput=()=>el.querySelector("[data-pv]").textContent=r.value;
+    r.onchange=()=>{g.pct=+r.value;g.done=g.pct===100;if(g.done)confetti();save(p);render()};
+    el.querySelector("[data-edg]").onclick=()=>goalSheet(p,g);
+    const add=()=>{const i=el.querySelector("[data-ci]"),t=i.value.trim();if(!t)return;if(listening)listening.stop();g.comments.push({id:uid(),text:t,by:who(),t:Date.now()});save(p);render()};
+    el.querySelector("[data-cs]").onclick=add;
+    el.querySelector("[data-ci]").onkeydown=e=>{if(e.key==="Enter")add()};
+  });
+}
+function goalSheet(p,g){
+  const isNew=!g;g=g||{title:"",due:""};
+  sheet(`<h2>${isNew?"New goal":"Edit goal"}</h2><label for="gt">What do we want to achieve?</label><div class="row"><input id="gt" type="text" value="${esc(g.title)}">${micBtn()}</div>
+  <label for="gd">Due date (optional)</label><input id="gd" type="date" value="${esc(g.due)}">
+  <div class="row" style="margin-top:20px">${isNew?"":`<button class="btn d" id="del">Delete</button>`}<span class="sp"></span><button class="btn" id="cx">Cancel</button><button class="btn p" id="ok">Save</button></div>`,(d,close)=>{
+    wireMics(d);$("#cx").onclick=close;
+    if(!isNew)$("#del").onclick=()=>{const i=p.goals.indexOf(g);p.goals.splice(i,1);save(p);close();render();toast("Goal deleted.",()=>{p.goals.splice(i,0,g);save(p);render()})};
+    $("#ok").onclick=()=>{const t=$("#gt").value.trim();if(!t){$("#gt").focus();return}
+      g.title=t;g.due=$("#gd").value;if(isNew)Object.assign(g,{id:uid(),pct:0,done:false,comments:[]}),p.goals.push(g);
+      save(p);close();render()};
+  });
+}
+
+/* media (photos, resized and synced) */
+function mediaTab(p){
+  const ms=S.media.filter(m=>m.pid===p.id&&!m.del).sort((a,b)=>b.t-a.t);
+  return (ms.length?`<div class="photos">${ms.map(m=>`<button data-m="${m.id}" aria-label="Open photo ${esc(m.cap||"")}"><img src="${m.data}" alt="${esc(m.cap||"Photo")}" loading="lazy"></button>`).join("")}</div>`:`<div class="empty">📷<br>No photos yet. Add one!</div>`)+
+  `<input type="file" id="pf" accept="image/*" multiple class="sr"><button class="fab" id="addm">＋ Add photo</button>`;
+}
+function resize(file){return new Promise(res=>{const im=new Image(),u=URL.createObjectURL(file);im.onload=()=>{const s=Math.min(1,1000/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",.7))};im.onerror=()=>res(null);im.src=u})}
+function wireMedia(p){
+  $("#addm").onclick=()=>$("#pf").click();
+  $("#pf").onchange=async e=>{for(const f of e.target.files){const d=await resize(f);if(d)S.media.push({id:uid(),pid:p.id,data:d,cap:"",t:Date.now(),by:who(),del:false,u:Date.now()})}save();render()};
+  document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const m=S.media.find(x=>x.id===b.dataset.m);
+    sheet(`<img src="${m.data}" alt="" style="width:100%;border-radius:12px"><label for="mc">Caption</label><div class="row"><input id="mc" type="text" value="${esc(m.cap)}">${micBtn()}</div>
+    <p class="mut">${esc(m.by)} · ${fmt(m.t)}</p><div class="row"><button class="btn d" id="del">Delete</button><span class="sp"></span><button class="btn" id="cx">Close</button><button class="btn p" id="ok">Save</button></div>`,(d,close)=>{
+      wireMics(d);$("#cx").onclick=close;$("#ok").onclick=()=>{m.cap=$("#mc").value.trim();save(m);close();render()};
+      $("#del").onclick=()=>{m.del=true;save(m);close();render();toast("Photo deleted.",()=>{m.del=false;save(m);render()})}})});
+}
+
+/* team */
+function teamTab(p){
+  return `<div class="card"><div>${p.members.length?p.members.map((m,i)=>`<span class="chip">${esc(m)}<button data-rm="${i}" aria-label="Remove ${esc(m)}">✕</button></span>`).join(""):`<span class="mut">No team members yet.</span>`}</div>
+  <div class="row" style="margin-top:10px"><input type="text" id="mn" placeholder="Add a name" aria-label="Team member name">${micBtn()}<button class="btn p" id="ma">Add</button></div></div>`;
+}
+function wireTeam(p){
+  wireMics(document);
+  const add=()=>{const n=$("#mn").value.trim();if(!n)return;p.members.push(n);save(p);render()};
+  $("#ma").onclick=add;$("#mn").onkeydown=e=>{if(e.key==="Enter")add()};
+  document.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{const[m]=p.members.splice(+b.dataset.rm,1);save(p);render();toast(m+" removed.")});
+}
+
+/* weekly log */
+function logTab(p){
+  const wk=t=>{const d=new Date(t);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime()};
+  const L=[...p.log].sort((a,b)=>b.t-a.t),groups={};L.forEach(l=>(groups[wk(l.t)]=groups[wk(l.t)]||[]).push(l));
+  return `<div class="card"><label for="ln" style="margin-top:0">What happened this week?</label><div class="row"><textarea id="ln" placeholder="Type or tap the mic to speak"></textarea>${micBtn()}</div>
+  <button class="btn p" id="la" style="margin-top:10px">Add to log</button></div>`+
+  (L.length?Object.entries(groups).map(([w,ls])=>`<h2>Week of ${new Date(+w).toLocaleDateString(undefined,{day:"numeric",month:"short"})}</h2>${ls.map(l=>`<div class="card" style="margin-bottom:8px;padding:12px"><div>${esc(l.text)}</div><small class="mut">${esc(l.by)} · ${fmt(l.t)}</small> <button class="btn" style="min-height:32px;padding:0 10px" data-dl="${l.id}">Delete</button></div>`).join("")}`).join(""):`<div class="empty">📝<br>The log is empty.</div>`);
+}
+function wireLog(p){
+  wireMics(document);
+  $("#la").onclick=()=>{const t=$("#ln").value.trim();if(!t)return;if(listening)listening.stop();p.log.push({id:uid(),text:t,by:who(),t:Date.now()});save(p);render()};
+  document.querySelectorAll("[data-dl]").forEach(b=>b.onclick=()=>{const i=p.log.findIndex(l=>l.id===b.dataset.dl),[l]=p.log.splice(i,1);save(p);render();toast("Entry deleted.",()=>{p.log.splice(i,0,l);save(p);render()})});
+}
+
+if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
+render();initAuth();
+</script>
+</body>
+</html>
