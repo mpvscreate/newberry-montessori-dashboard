@@ -277,6 +277,8 @@ html{overscroll-behavior-y:contain}
 @keyframes bannerIn{from{opacity:0;transform:translate(-50%,-24px) scale(.9)}}
 textarea.t.ta{min-height:48px;height:48px;resize:none;overflow:hidden;line-height:1.35;padding:12px 14px;display:block}
 .row:has(textarea.ta){align-items:flex-start}
+.vprompt{margin:10px 0;padding:12px;border-radius:16px;background:var(--green-soft);animation:fadeIn .2s}
+.vprompt p{margin:0 0 10px;font-weight:600}
 .photos button{position:relative}
 .targets{list-style:none;margin:10px 0 0;padding:0}
 .targets li{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}.targets li:first-child{border-top:0}
@@ -479,7 +481,7 @@ function wireMics(root){root.querySelectorAll("[data-mic]").forEach(b=>{
     const r=new SR();r.lang=navigator.language||"en-ZA";r.interimResults=true;r.continuous=true;
     const base=field.value?field.value.trimEnd()+" ":"";
     r.onresult=e=>{let t="";for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;field.value=base+t;autosize(field)};
-    r.onend=()=>{listening=null;b.classList.remove("on");b.setAttribute("aria-label","Dictate with your voice")};
+    r.onend=()=>{listening=null;b.classList.remove("on");b.setAttribute("aria-label","Dictate with your voice");if(field.value.trim()&&field.value.trim()!==base.trim())field.dispatchEvent(new CustomEvent("voicedone",{bubbles:true}))};
     r.onerror=e=>toast(e.error==="not-allowed"?"Allow microphone access to dictate.":"Voice stopped: "+e.error);
     listening=r;b.classList.add("on");b.setAttribute("aria-label","Stop dictating");r.start();
   }})}
@@ -750,13 +752,30 @@ function goalSheet(p,g){
   <div id="tl"></div>
   <div class="row" style="margin-top:8px"><textarea class="t ta" rows="1" id="tn" placeholder="Add a target" aria-label="New target"></textarea>${micBtn()}<button class="btn icon" id="ta" type="button" aria-label="Add target">${ic("plus")}</button></div>
   <p class="err" id="ge" role="alert" hidden></p>
-  <div class="row" style="margin-top:22px">${isNew?"":`<button class="btn danger" id="del">${ic("trash")}Delete</button>`}<span class="grow"></span><button class="btn primary" id="ok">Save</button></div>`,(d,close)=>{
+  <div class="row" style="margin-top:22px">${isNew?"":`<button class="btn danger" id="del">${ic("trash")}Delete</button>`}<span class="grow"></span><button class="btn primary" id="ok">Done</button></div>`,(d,close)=>{
     wireMics(d);if(isNew)setTimeout(()=>$("#gt")&&$("#gt").focus(),60);$("#gt").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();$("#tn").focus()}};
     const err=m=>{const e=$("#ge");e.textContent=m;e.hidden=!m};
     const draw=()=>{$("#tl").innerHTML=tl.map((t,i)=>`<div class="row" style="margin-bottom:8px"><textarea class="t ta" rows="1" data-i="${i}" aria-label="Target ${i+1}">${esc(t.title)}</textarea><button class="x" data-rm="${i}" type="button" aria-label="Remove target ${i+1}">${ic("x")}</button></div>`).join("");
       d.querySelectorAll("[data-i]").forEach(inp=>{autosize(inp);inp.oninput=()=>{tl[+inp.dataset.i].title=inp.value};inp.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();$("#tn").focus()}}});
       d.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{tl.splice(+b.dataset.rm,1);draw()})};
     const add=()=>{const v=$("#tn").value.trim();if(!v){$("#tn").focus();return false}if(listening)listening.stop();tl.push({id:uid(),title:v,done:false,doneAt:0});$("#tn").value="";autosize($("#tn"));err("");draw();$("#tn").focus();return true};
+    /* when voice recording finishes, keep the words and ask what to do next */
+    const vp=()=>d.querySelector("#vp");
+    d.addEventListener("voicedone",e=>{const f=e.target;if(f.id!=="gt"&&f.id!=="tn")return;vp()&&vp().remove();
+      const box=document.createElement("div");box.id="vp";box.className="vprompt";box.setAttribute("role","status");const kill=()=>box.remove();
+      const mic=()=>$("#tn").parentElement.querySelector("[data-mic]");
+      if(f.id==="tn"){box.innerHTML='<p>Add this as a target?</p><div class="row wr"><button class="btn small primary" id="vp-a" type="button">Add as target</button><button class="btn small" id="vp-s" type="button">Add and speak next</button><button class="btn small" id="vp-k" type="button">Keep editing</button></div>';
+        f.parentElement.after(box);
+        box.querySelector("#vp-a").onclick=()=>{kill();add()};
+        box.querySelector("#vp-s").onclick=()=>{kill();if(add())setTimeout(()=>mic()&&mic().click(),150)};
+      }else{box.innerHTML='<p>Goal captured. Next, say your targets.</p><div class="row wr"><button class="btn small primary" id="vp-a" type="button">Speak targets</button><button class="btn small" id="vp-k" type="button">Keep editing</button></div>';
+        f.parentElement.after(box);
+        box.querySelector("#vp-a").onclick=()=>{kill();$("#tn").focus();setTimeout(()=>mic()&&mic().click(),150)};
+      }
+      box.querySelector("#vp-k").onclick=()=>{kill();f.focus()};
+      box.scrollIntoView({block:"nearest",behavior:"smooth"});
+    });
+    d.addEventListener("input",e=>{if(e.target.id==="gt"||e.target.id==="tn")vp()&&vp().remove()});
     draw();$("#ta").onclick=add;$("#tn").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();add()}};
     if(!isNew)$("#del").onclick=()=>{const i=p.goals.indexOf(g);p.goals.splice(i,1);save(p);close();render();toast("Goal deleted.",()=>{p.goals.splice(i,0,g);save(p);render()})};
     $("#ok").onclick=()=>{const t=$("#gt").value.trim();if(!t){err("Give the goal a name.");$("#gt").focus();return}
