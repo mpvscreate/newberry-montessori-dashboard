@@ -197,6 +197,28 @@ input[type=range]{width:100%;height:36px;accent-color:var(--green)}
 
 @media (max-width:520px){.fab{width:60px;padding:0}.fab span{display:none}}
 .chip.static button{position:relative}.chip.static button::after{content:"";position:absolute;inset:-6px}
+.wrap.fit{padding-bottom:calc(84px + env(safe-area-inset-bottom))}
+.wrap.fit header.top{margin-bottom:12px}
+.hbar{display:flex;align-items:center;gap:12px;background:linear-gradient(150deg,#14a47a 0%,#0e8460 55%,#0a6a4c 100%);color:#fff;border-radius:22px;padding:10px 12px;box-shadow:0 8px 24px var(--glow-green);margin-bottom:12px}
+.hbar .rg{width:54px;height:54px;border-radius:50%;background:conic-gradient(#fff calc(var(--p)*1%),rgba(255,255,255,.28) 0);display:grid;place-items:center;flex:none}
+.hbar .rg b{width:42px;height:42px;border-radius:50%;background:#0e8460;display:grid;place-items:center;font:700 .9rem var(--display)}
+.hbar .st{display:flex;flex-direction:column;line-height:1.05;min-width:0}.hbar .st b{font:700 1.25rem var(--display)}.hbar .st span{font-size:.7rem;opacity:.88}
+.hbar .btn{margin-left:auto;background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.55);color:#fff;min-height:44px;padding:0 12px}
+.ptiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(84px,1fr);gap:10px;min-height:calc(100dvh - 252px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+@media (min-width:640px){.ptiles{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media (min-width:900px){.ptiles{min-height:calc(100dvh - 190px)}}
+.ptile{container-type:size;background:var(--sheet);border:1px solid var(--line);border-radius:22px;padding:0;box-shadow:var(--shadow);cursor:pointer;color:inherit;min-width:0;transition:box-shadow .25s,transform .08s}
+.ptile:active{transform:scale(.97)}@media (hover:hover){.ptile:hover{box-shadow:0 0 0 4px var(--glow-soft),var(--shadow)}}
+.pi{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;width:100%;height:100%;padding:8px 6px;min-width:0}
+@container (max-height:118px){.pq{display:none}.pi{gap:4px}.pav{width:38px!important;height:38px!important}}
+@container (max-height:96px){.pbar{display:none}}
+.x.addp{background:var(--accent);color:var(--accent-ink);box-shadow:0 2px 6px var(--glow-soft),0 4px 14px var(--glow)}
+.pav{width:clamp(40px,12vw,58px);height:clamp(40px,12vw,58px);border-radius:16px;background:color-mix(in srgb,var(--pc,var(--green)) 16%,var(--sheet));color:var(--pc,var(--green));display:grid;place-items:center;flex:none}.pav .i{width:55%;height:55%}
+.ptile b{font:700 clamp(.76rem,3.3vw,.95rem)/1.1 var(--display);letter-spacing:-.01em;text-align:center;overflow-wrap:break-word;hyphens:auto;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:100%}
+.pbar{width:68%;height:6px;border-radius:99px;background:var(--line);overflow:hidden;display:block}.pbar i{display:block;height:100%;background:var(--pc);border-radius:99px}
+.pq{font-size:.72rem;color:var(--muted);font-weight:600}
+.prow .grow,.prow .meter,.prow .small{display:block}
+.prow{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:0;text-align:left;cursor:pointer;color:inherit}
 .photos button{position:relative}
 .targets{list-style:none;margin:10px 0 0;padding:0}
 .targets li{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}.targets li:first-child{border-top:0}
@@ -440,23 +462,24 @@ addEventListener("online",()=>{if(!LOGIN)return;if(!sb)initAuth();else syncNow()
 setInterval(()=>{if(!document.hidden)syncNow()},60000);
 
 /* shell */
-const NAV=[["home","Overview","home"],["prods","Productions","grid"],["activity","Activity","pulse"],["more","Settings","sliders"]];
+const NAV=[["home","Productions","grid"],["overview","Overview","home"],["activity","Activity","pulse"],["more","Settings","sliders"]];
 function focusKey(){const a=document.activeElement;if(!a||!a.closest||!a.closest("#app")||a===document.body)return null;return{id:a.id,al:a.getAttribute("aria-label"),g:a.closest("[data-g]")?.dataset.g,dn:a.hasAttribute("data-done"),nv:a.dataset.nav,tb:a.dataset.tab,mv:a.dataset.mv,th:a.dataset.th}}
 function restoreFocus(k){if(!k)return;let e=null;if(k.id)e=document.getElementById(k.id);else if(k.nv)e=document.querySelector(`[data-nav="${k.nv}"]`);else if(k.tb)e=document.querySelector(`[data-tab="${k.tb}"]`);else if(k.mv)e=document.querySelector(`[data-mv="${k.mv}"]`);else if(k.th)e=document.querySelector(`[data-th="${k.th}"]`);else if(k.g){const sc=document.querySelector(`[data-g="${k.g}"]`);if(sc)e=k.dn?sc.querySelector("[data-done]"):[...sc.querySelectorAll("[aria-label]")].find(x=>x.getAttribute("aria-label")===k.al)}if(e)e.focus({preventScroll:true})}
 let lastRoute="";
 function render(){
   if(!user){authReady?authScreen():splash();return}
+  if(route==="prods")route="home";
   const fk=focusKey(),sy=lastRoute===route+tab?scrollY:0;
   const m=route.match(/^p\/(.+)/),p=m&&P(m[1]);
-  const cur=p?"prods":route;
-  $("#app").innerHTML=`<div class="wrap"><header class="top"><img class="brand" src="icons/productions-96.png" alt="" width="44" height="51"><h1 class="sr">MS Productions</h1><span class="grow"></span><span class="sync" id="sync" aria-live="polite"></span><button class="x" id="thm" aria-label="${isDark()?"Switch to light mode":"Switch to dark mode"}" title="${isDark()?"Light mode":"Dark mode"}">${ic(isDark()?"sun":"moon")}</button></header>
-  <main id="main" tabindex="-1">${p?prodView(p):{home,prods:prodsPage,activity:activityPage,more:morePage}[route]?.()||home()}</main></div>
+  const cur=p?"home":route;
+  $("#app").innerHTML=`<div class="wrap${!p&&route==="home"?" fit":""}"><header class="top"><img class="brand" src="icons/productions-96.png" alt="" width="44" height="51"><h1 class="sr">MS Productions</h1><span class="grow"></span><span class="sync" id="sync" aria-live="polite"></span>${!p&&route==="home"?`<button class="x addp" id="addp" aria-label="New production" title="New production">${ic("plus")}</button>`:""}<button class="x" id="thm" aria-label="${isDark()?"Switch to light mode":"Switch to dark mode"}" title="${isDark()?"Light mode":"Dark mode"}">${ic(isDark()?"sun":"moon")}</button></header>
+  <main id="main" tabindex="-1">${p?prodView(p):{home:homePage,overview:overviewPage,activity:activityPage,more:morePage}[route]?.()||homePage()}</main></div>
   <nav class="tabs" aria-label="Main">${NAV.map(([k,l,i])=>`<button data-nav="${k}" ${cur===k?'aria-current="page"':""}>${ic(i)}${l}</button>`).join("")}</nav>`;
   setSyncUi(syncState||"Sign in to sync");
   document.querySelectorAll("[data-nav]").forEach(b=>b.onclick=()=>nav(b.dataset.nav));
   $("#thm").onclick=()=>{theme(isDark()?"light":"dark");render()};
   hydrate();lastRoute=route+tab;
-  p?wireProd(p):({home:wireHome,prods:wireHome,activity(){},more:wireMore}[route]||wireHome)();
+  p?wireProd(p):({home:wireHome,overview:wireHome,activity(){},more:wireMore}[route]||wireHome)();
   scrollTo(0,sy);restoreFocus(fk);
 }
 
@@ -466,17 +489,25 @@ const card=p=>{const q=prodPct(p),o=p.goals.filter(g=>!g.done).length;
   return `<button class="hcard" style="--pc:${p.color}" data-open="${p.id}"><div class="avatar">${ic(p.icon)}</div><b>${esc(p.name)}</b>
   <div class="meter" role="progressbar" aria-valuenow="${q}" aria-valuemin="0" aria-valuemax="100" aria-label="${esc(p.name)} progress"><i style="width:${q}%"></i></div>
   <span class="small muted">${q}% · ${o?o+" open goal"+(o>1?"s":""):p.goals.length?"All done":"No goals yet"}</span></button>`};
-function home(){
-  const ps=prods(),all=ps.flatMap(p=>p.goals),open=all.filter(g=>!g.done).length,
-    pct=ps.length?Math.round(ps.reduce((a,p)=>a+prodPct(p),0)/ps.length):0,
-    photos=S.media.filter(m=>!m.del).length,f=feedItems().slice(0,5);
+const totals=()=>{const ps=prods(),all=ps.flatMap(p=>p.goals),open=all.filter(g=>!g.done).length;return{ps,all,open,pct:ps.length?Math.round(ps.reduce((a,p)=>a+prodPct(p),0)/ps.length):0,photos:S.media.filter(m=>!m.del).length}};
+/* first tab: every production on one screen */
+function homePage(){
+  const{ps,open,pct,photos}=totals();
+  return `<h2 class="sr">Productions</h2>
+  <div class="hbar"><div class="rg" style="--p:${pct}" role="img" aria-label="Overall progress ${pct} percent"><b>${pct}%</b></div>
+    <div class="st"><b>${open}</b><span>open goals</span></div><div class="st"><b>${photos}</b><span>photos</span></div>
+    <button class="btn small" id="rep" aria-label="Report">${ic("trend")}Report</button></div>
+  <div class="ptiles">${ps.map(p=>{const q=prodPct(p);return`<button class="ptile" style="--pc:${p.color}" data-open="${p.id}" aria-label="${esc(p.name)}, ${q} percent complete"><span class="pi"><span class="pav">${ic(p.icon)}</span><b>${esc(p.name)}</b><span class="pbar" aria-hidden="true"><i style="width:${q}%"></i></span><span class="pq">${q}%</span></span></button>`}).join("")}</div>`;
+}
+/* second tab: the detail */
+function overviewPage(){
+  const{ps,all,open,pct,photos}=totals(),f=feedItems().slice(0,5);
   return `<div class="page-h"><h2>Overview</h2><button class="btn small" id="rep" aria-label="Weekly report">${ic("trend")}Report</button></div>
   <div class="bento"><div class="tile hero s2"><div class="lbl">${ic("sparkle")}Overall progress</div><div class="big">${pct}%</div><div class="sub">${ps.length} productions</div><div class="meter"><i style="width:${pct}%"></i></div></div>
   <div class="tile green"><div class="lbl">${ic("target")}Open goals</div><div class="big">${open}</div><div class="sub">${all.length-open} done</div></div>
   <div class="tile sky"><div class="lbl">${ic("image")}Photos</div><div class="big">${photos}</div><div class="sub">across all</div></div></div>
-  <div class="page-h"><h2 style="font-size:1.3rem">Productions</h2></div><div class="hgrid">${ps.map(card).join("")}</div>
-  <div class="card"><h2>Recent activity</h2>${f.length?`<ul class="list">${f.map(actRow).join("")}</ul>`:`<div class="empty">${ic("pulse","xl")}<h3>Nothing yet</h3>Open a production and add a goal or a log note.</div>`}</div>
-  ${fab()}`;
+  <div class="card"><h2>Progress by production</h2><ul class="list">${ps.map(p=>{const q=prodPct(p),o=p.goals.filter(g=>!g.done).length;return`<li><button class="prow" style="--pc:${p.color}" data-open="${p.id}" aria-label="Open ${esc(p.name)}"><span class="avatar" style="color:${p.color}">${ic(p.icon)}</span><span class="grow"><b>${esc(p.name)}</b><span class="meter" style="margin:6px 0 2px"><i style="width:${q}%;background:${p.color}"></i></span><span class="small muted">${o?o+" open goal"+(o>1?"s":""):p.goals.length?"All done":"No goals yet"}</span></span><b class="amt">${q}%</b></button></li>`}).join("")}</ul></div>
+  <div class="card"><h2>Recent activity</h2>${f.length?`<ul class="list">${f.map(actRow).join("")}</ul>`:`<div class="empty">${ic("pulse","xl")}<h3>Nothing yet</h3>Open a production and add a goal or a log note.</div>`}</div>`;
 }
 const actRow=f=>`<li><div class="avatar" style="color:${f.p.color}">${ic(f.p.icon)}</div><div class="grow"><b>${esc(f.p.name)}</b> <span class="pill type">${f.k}</span><div>${esc(f.txt)}</div><div class="small muted">${fmt(f.t)}</div></div></li>`;
 const fab=()=>`<div class="fab-wrap"><button class="fab" id="addp" aria-label="New production">${ic("plus")}<span>New production</span></button></div>`;
@@ -484,7 +515,6 @@ function wireHome(){
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>nav("p/"+b.dataset.open));
   $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#rep")&&($("#rep").onclick=()=>reportSheet(null));
 }
-function prodsPage(){return `<div class="page-h"><h2>Productions</h2></div><div class="hgrid">${prods().map(card).join("")}</div>${fab()}`}
 function activityPage(){const f=feedItems().slice(0,60);return `<div class="page-h"><h2>Activity</h2></div><div class="card">${f.length?`<ul class="list">${f.map(actRow).join("")}</ul>`:`<div class="empty">${ic("pulse","xl")}<h3>No activity yet</h3>Comments and log entries from every production show up here.</div>`}</div>`}
 function morePage(){const t=theme();
   return `<div class="page-h"><h2>Settings</h2></div><div class="card"><h2>Appearance</h2><div class="segc" role="group" aria-label="Theme">${[["auto","Auto","device"],["light","Light","sun"],["dark","Dark","moon"]].map(([k,l,i])=>`<button data-th="${k}" aria-label="${l}" aria-pressed="${t===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div>
@@ -511,7 +541,7 @@ function prodSheet(p){
     wireMics(d);
     d.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{icn=b.dataset.e;d.querySelectorAll("[data-e]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
     d.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{co=b.dataset.c;d.querySelectorAll("[data-c]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
-    if(!isNew)$("#del").onclick=()=>{p.del=true;save(p);close();nav("prods");toast("Production deleted.",()=>{p.del=false;save(p);render()})};
+    if(!isNew)$("#del").onclick=()=>{p.del=true;save(p);close();nav("home");toast("Production deleted.",()=>{p.del=false;save(p);render()})};
     $("#ok").onclick=()=>{const n=$("#pn").value.trim();if(!n){$("#pn").focus();return}
       Object.assign(p,{name:n,icon:icn,color:co,desc:$("#pdsc").value.trim()});
       if(isNew){Object.assign(p,{id:uid(),members:[],goals:[],log:[],del:false});S.prods.push(p)}
@@ -530,7 +560,7 @@ function prodView(p){
   ${{goals:goalsTab,media:mediaTab,team:teamTab,log:logTab}[tab](p)}`;
 }
 function wireProd(p){
-  $("#back").onclick=()=>nav("prods");$("#rep").onclick=()=>reportSheet(p);$("#edp").onclick=()=>prodSheet(p);
+  $("#back").onclick=()=>nav("home");$("#rep").onclick=()=>reportSheet(p);$("#edp").onclick=()=>prodSheet(p);
   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;clearSel();render()});
   ({goals:wireGoals,media:wireMedia,team:wireTeam,log:wireLog})[tab](p);
 }
