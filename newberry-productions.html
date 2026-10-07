@@ -256,6 +256,25 @@ button,.ptile,[role=button]{touch-action:manipulation;-webkit-tap-highlight-colo
 button{-webkit-touch-callout:none}
 html{overscroll-behavior-y:contain}
 .sw[disabled]{opacity:.4}
+/* soft glow */
+.btn{box-shadow:0 1px 2px rgba(0,0,0,.04),0 3px 14px var(--glow-soft)}
+.btn:active{box-shadow:0 0 0 4px var(--glow-soft),0 4px 22px var(--glow)}
+.btn.danger{box-shadow:0 1px 2px rgba(0,0,0,.04),0 3px 14px rgba(179,38,30,.16)}
+.btn.primary{box-shadow:0 2px 6px var(--glow-soft),0 6px 22px var(--glow)}
+.x,.mic{box-shadow:0 2px 10px var(--glow-soft)}
+.x:active,.mic:active{box-shadow:0 0 0 4px var(--glow-soft),0 3px 16px var(--glow)}
+.x.glass{box-shadow:0 2px 12px rgba(255,255,255,.18)}
+.chip{box-shadow:0 2px 10px var(--glow-soft)}
+.tick[aria-pressed=false]{box-shadow:0 2px 8px var(--glow-soft)}
+.ed .btn,.ed .x,.ed .chip{box-shadow:0 2px 12px var(--glow-soft)}
+.ed .btn.primary{box-shadow:0 2px 6px var(--glow-soft),0 6px 22px var(--glow)}
+#fw-scrim{position:fixed;inset:0;z-index:89;pointer-events:none;background:radial-gradient(ellipse at 50% 30%,rgba(24,18,48,.62),rgba(6,4,16,.82));animation:scrimIn .4s ease-out both;transition:opacity .6s}
+@keyframes scrimIn{from{opacity:0}}
+#fw{position:fixed;inset:0;width:100%;height:100%;z-index:90;pointer-events:none}
+.fw-banner{position:fixed;left:50%;top:calc(18px + env(safe-area-inset-top));transform:translateX(-50%);z-index:95;display:flex;align-items:center;gap:12px;background:var(--sheet);color:var(--ink);border:1px solid var(--line);border-radius:22px;padding:12px 18px 12px 12px;box-shadow:0 0 0 5px var(--glow-green),0 14px 40px rgba(0,0,0,.35);max-width:min(92vw,420px);animation:bannerIn .5s cubic-bezier(.2,.9,.3,1.2) both}
+.fw-banner b{font:700 1.05rem var(--display)}
+.fw-ic{width:48px;height:48px;border-radius:16px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;flex:none}
+@keyframes bannerIn{from{opacity:0;transform:translate(-50%,-24px) scale(.9)}}
 .photos button{position:relative}
 .targets{list-style:none;margin:10px 0 0;padding:0}
 .targets li{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}.targets li:first-child{border-top:0}
@@ -347,6 +366,7 @@ eye:'<path d="M2 12s3.7-7 10-7 10 7 10 7-3.7 7-10 7S2 12 2 12z"/><circle cx="12"
 send:'<path d="M4 12l16-8-6 16-3-7z"/><path d="M11 13l9-9"/>',
 alert:'<path d="M12 4l10 17H2z"/><path d="M12 10v4M12 17.5h.01"/>',
 upload:'<path d="M12 16V5M7 9l5-5 5 5M4 20h16"/>',
+trophy:'<path d="M8 4h8v5a4 4 0 01-8 0z"/><path d="M8 6H4v1a4 4 0 004 4M16 6h4v1a4 4 0 01-4 4M12 13v4M8 20h8M9.5 17h5"/>',
 user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
 mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/>',
 pencil:'<path d="M4 20l1-4L16.5 4.5a2 2 0 013 3L8 19z"/>',
@@ -393,7 +413,8 @@ let S=load(),sm=loadSync(),user=null,sb=null,route="home",tab="goals",syncState=
 function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.prods)return d}catch{}
   const now=Date.now();return{prods:DEFAULTS.map(([name,icon,c],i)=>({id:"p"+i,name,icon,color:COLORS[c],desc:"",members:[],goals:[],log:[],del:false,u:now})),media:[]}}
 function loadSync(){try{return JSON.parse(localStorage.getItem(SYNC))||{}}catch{return{}}}
-function save(o){if(o)o.u=Date.now();try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem(SYNC,JSON.stringify(sm))}catch{toast("Storage is full. Delete some photos.")}scheduleSync()}
+const pctSeen={};
+function save(o){if(o)o.u=Date.now();if(o&&o.goals){const now=prodPct(o),was=pctSeen[o.id];if(was!==undefined&&was<100&&now===100&&o.goals.length)setTimeout(()=>fireworks(o.name),350);pctSeen[o.id]=now}try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem(SYNC,JSON.stringify(sm))}catch{toast("Storage is full. Delete some photos.")}scheduleSync()}
 const prods=()=>S.prods.filter(p=>!p.del);
 const P=id=>S.prods.find(p=>p.id===id);
 const goalPct=g=>g.targets&&g.targets.length?Math.round(g.targets.filter(t=>t.done).length/g.targets.length*100):g.done?100:g.pct||0;
@@ -512,6 +533,7 @@ let lastRoute="";
 function render(){
   if(!user){authReady?authScreen():splash();return}
   if(route==="prods")route="home";
+  prods().forEach(q=>{if(pctSeen[q.id]===undefined)pctSeen[q.id]=prodPct(q)});
   const fk=focusKey(),sy=lastRoute===route+tab?scrollY:0,fresh=lastRoute!==route+tab;
   const m=route.match(/^p\/(.+)/),p=m&&P(m[1]);
   const cur=p?"home":route;
@@ -562,11 +584,13 @@ function activityPage(){const f=feedItems().slice(0,60);return `<div class="page
 function morePage(){const t=theme();
   return `<div class="page-h"><h2>Settings</h2></div><div class="card"><h2>Appearance</h2><div class="segc" role="group" aria-label="Theme">${[["auto","Auto","device"],["light","Light","sun"],["dark","Dark","moon"]].map(([k,l,i])=>`<button data-th="${k}" aria-label="${l}" aria-pressed="${t===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div>
   <div class="card"><h2>Sound and touch</h2><div class="row between" style="margin-bottom:12px"><div><b>Sound effects</b><div class="small muted">Soft tones when you tick, add or finish</div></div><button type="button" role="switch" class="sw" id="fx-s" aria-label="Sound effects" aria-checked="${SFX.sound}"><i></i></button></div><div class="row between"><div><b>Vibration</b><div class="small muted">${navigator.vibrate?"A light buzz on taps and ticks":"Not supported on this device (iPhone does not allow it)"}</div></div><button type="button" role="switch" class="sw" id="fx-v" aria-label="Vibration" aria-checked="${SFX.vib&&!!navigator.vibrate}" ${navigator.vibrate?"":"disabled"}><i></i></button></div></div>
+  <div class="card"><h2>Celebration</h2><p class="muted" style="margin-top:0">Fireworks and sound play when every goal in a production is finished.</p><button class="btn" id="fw-test">${ic("sparkle")}Preview the fireworks</button></div>
   <div class="card"><h2>Voice dictation</h2><p class="muted" style="margin:0">${SR?"On. Tap the microphone next to any text box and speak.":"Not available in this browser. Try Chrome or Edge, or use your phone keyboard's microphone."}</p></div>
   <div class="card"><h2>App lock</h2><p class="muted" style="margin-top:0">Optional. Add a 3-digit PIN and the app asks for it when you open it on this device.${LOGIN?" You stay signed in either way.":""}</p>${getPin()?`<div class="row wr"><button class="btn" id="pinchg">Change PIN</button><button class="btn danger" id="pinoff">Remove PIN</button></div>`:`<button class="btn primary" id="pinset">${ic("lock")}Set a PIN</button>`}</div>
   <div class="card"><h2>Backup</h2><p class="muted" style="margin-top:0">Everything is stored on this device only while sign-in is off. Download a backup of your goals, targets, team and logs now and then. Photos and videos are not included.</p><div class="row wr"><button class="btn" id="bk-out">${ic("download")}Download backup</button><button class="btn" id="bk-in">${ic("upload")}Restore</button></div><input type="file" id="bk-f" accept="application/json,.json" class="sr" aria-label="Choose a backup file" tabindex="-1"></div>
   <div class="card"><h2>This device</h2><p class="muted" style="margin-top:0">${LOGIN?`Signed in as ${esc(user.email)}. You only need to sign in once on this device.`:"Sign-in is switched off for now, so cloud sync is paused. Everything you add is saved on this device only."}</p><div class="row wr">${LOGIN?`<button class="btn" id="out">${ic("logout")}Sign out</button>`:""}${getPin()?`<button class="btn" id="lk">${ic("lock")}Lock now</button>`:""}</div></div>`}
-function wireMore(){$("#fx-s").onclick=e=>{SFX.sound=!SFX.sound;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.sound);if(SFX.sound)fb("tick")};$("#fx-v").onclick=e=>{SFX.vib=!SFX.vib;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.vib);if(SFX.vib)fb("tick")};
+function wireMore(){$("#fw-test").onclick=()=>fireworks("Your production");
+  $("#fx-s").onclick=e=>{SFX.sound=!SFX.sound;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.sound);if(SFX.sound)fb("tick")};$("#fx-v").onclick=e=>{SFX.vib=!SFX.vib;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.vib);if(SFX.vib)fb("tick")};
   document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#pinset")&&($("#pinset").onclick=setPin);$("#pinchg")&&($("#pinchg").onclick=()=>{removePinThenSet()});$("#pinoff")&&($("#pinoff").onclick=removePin);$("#lk")&&($("#lk").onclick=lockNow);$("#out")&&($("#out").onclick=()=>{if(!confirm("Sign out of this device? You will need to sign in again."))return;if(sb)sb.auth.signOut();else{user=null;try{localStorage.removeItem(USERK)}catch{}render()}});
   $("#bk-out").onclick=()=>{const blob=new Blob([JSON.stringify({app:"ms-productions",v:1,at:new Date().toISOString(),prods:S.prods},null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ms-productions-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")};
   $("#bk-in").onclick=()=>$("#bk-f").click();
@@ -606,6 +630,39 @@ const audioCtx=()=>{try{AC=AC||new(window.AudioContext||window.webkitAudioContex
 function tone(f,t=0,d=.12,type="sine",g=.1){const c=audioCtx();if(!c)return;const o=c.createOscillator(),a=c.createGain(),n=c.currentTime+t;o.type=type;o.frequency.setValueAtTime(f,n);a.gain.setValueAtTime(0.0001,n);a.gain.linearRampToValueAtTime(g,n+.012);a.gain.exponentialRampToValueAtTime(.0001,n+d);o.connect(a);a.connect(c.destination);o.start(n);o.stop(n+d+.03)}
 const SND={tick:()=>{tone(660,0,.09,"triangle",.09);tone(990,.05,.11,"triangle",.07)},untick:()=>tone(440,0,.1,"triangle",.07),done:()=>[523,659,784,1047].forEach((f,i)=>tone(f,i*.085,.24,"sine",.1)),add:()=>{tone(520,0,.08,"sine",.08);tone(780,.06,.11,"sine",.08)},del:()=>{tone(300,0,.12,"sine",.08);tone(220,.08,.15,"sine",.07)},err:()=>{tone(190,0,.14,"square",.04);tone(160,.13,.17,"square",.04)}};
 const HAP={tap:6,tick:10,untick:8,done:[14,40,14,40,26],add:12,del:[18,30],err:[30,40,30]};
+/* fireworks celebration when a whole production reaches 100% */
+function noiseBurst(t=0,d=.5,fromHz=2600,toHz=300,g=.35){const c=audioCtx();if(!c)return;const n=c.createBuffer(1,Math.floor(c.sampleRate*d),c.sampleRate),a=n.getChannelData(0);for(let i=0;i<a.length;i++)a[i]=(Math.random()*2-1)*Math.pow(1-i/a.length,2);
+  const src=c.createBufferSource(),f=c.createBiquadFilter(),gn=c.createGain(),s=c.currentTime+t;src.buffer=n;f.type="lowpass";f.frequency.setValueAtTime(fromHz,s);f.frequency.exponentialRampToValueAtTime(toHz,s+d);gn.gain.setValueAtTime(g,s);gn.gain.exponentialRampToValueAtTime(.0001,s+d);src.connect(f);f.connect(gn);gn.connect(c.destination);src.start(s)}
+function sweep(f0,f1,t=0,d=.5,g=.05){const c=audioCtx();if(!c)return;const o=c.createOscillator(),gn=c.createGain(),s=c.currentTime+t;o.type="sine";o.frequency.setValueAtTime(f0,s);o.frequency.exponentialRampToValueAtTime(f1,s+d);gn.gain.setValueAtTime(.0001,s);gn.gain.linearRampToValueAtTime(g,s+.05);gn.gain.exponentialRampToValueAtTime(.0001,s+d);o.connect(gn);gn.connect(c.destination);o.start(s);o.stop(s+d+.03)}
+const boomSound=()=>{if(!SFX.sound)return;noiseBurst(0,.55,2400,260,.32);sweep(150,38,0,.5,.18);for(let i=0;i<5;i++)noiseBurst(.12+i*.07+Math.random()*.05,.05,5000,1500,.08)};
+const whistleSound=()=>{if(SFX.sound)sweep(380,1500,0,.55,.035)};
+function fireworks(title){
+  if(document.getElementById("fw"))return;
+  const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const b=document.createElement("div");b.className="fw-banner";b.setAttribute("role","status");
+  b.innerHTML=`<span class="fw-ic">${ic("trophy","lg")}</span><div><b>Production complete!</b><div class="small">${esc(title)} reached 100%</div></div>`;document.body.append(b);setTimeout(()=>b.remove(),5600);
+  if(SFX.vib){try{navigator.vibrate&&navigator.vibrate([30,60,30,60,60,90,120])}catch{}}
+  if(SFX.sound)[523,659,784,1047,1319].forEach((f,i)=>tone(f,i*.1,.3,"sine",.1));
+  if(reduce)return;
+  const sc=document.createElement("div");sc.id="fw-scrim";sc.setAttribute("aria-hidden","true");document.body.append(sc);
+  const cv=document.createElement("canvas");cv.id="fw";cv.setAttribute("aria-hidden","true");document.body.append(cv);
+  const dpr=Math.min(2,devicePixelRatio||1),W=cv.width=innerWidth*dpr,H=cv.height=innerHeight*dpr,g=cv.getContext("2d");
+  const PAL=["#ff5a5f","#ffd166","#06d6a0","#4cc9f0","#c77dff","#ff9f1c","#ffffff"];
+  const rockets=[],parts=[];let launched=0;const TOTAL=8,start=performance.now();
+  const launch=()=>{launched++;whistleSound();const x=(.15+Math.random()*.7)*W,ty=(.14+Math.random()*.34)*H;rockets.push({x,y:H,vx:(Math.random()-.5)*1.2*dpr,ty,col:PAL[Math.floor(Math.random()*PAL.length)]})};
+  const sched=[];for(let i=0;i<TOTAL;i++)sched.push(setTimeout(launch,200+i*480+Math.random()*180));
+  const explode=r=>{boomSound();const n=70+Math.floor(Math.random()*40),c2=PAL[Math.floor(Math.random()*PAL.length)],two=Math.random()<.4;
+    for(let i=0;i<n;i++){const a=Math.PI*2*i/n+Math.random()*.1,sp=(1.2+Math.random()*3.2)*dpr*(two&&i%2?.55:1);parts.push({x:r.x,y:r.y,vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,life:1,dec:.008+Math.random()*.01,col:two&&i%2?c2:r.col,s:(1.4+Math.random()*1.6)*dpr})}};
+  const frame=now=>{
+    g.globalCompositeOperation="destination-out";g.fillStyle="rgba(0,0,0,.2)";g.fillRect(0,0,W,H);g.globalCompositeOperation="lighter";
+    for(let i=rockets.length-1;i>=0;i--){const r=rockets[i];r.y-=7.5*dpr;r.x+=r.vx;g.fillStyle="#ffe9b0";g.beginPath();g.arc(r.x,r.y,2.2*dpr,0,7);g.fill();if(r.y<=r.ty){explode(r);rockets.splice(i,1)}}
+    for(let i=parts.length-1;i>=0;i--){const p=parts[i];p.vx*=.985;p.vy=p.vy*.985+.045*dpr;p.x+=p.vx;p.y+=p.vy;p.life-=p.dec;if(p.life<=0){parts.splice(i,1);continue}g.globalAlpha=Math.max(0,p.life);g.fillStyle=p.col;g.beginPath();g.arc(p.x,p.y,p.s*Math.max(.35,p.life),0,7);g.fill()}
+    g.globalAlpha=1;
+    if(launched<TOTAL||rockets.length||parts.length){requestAnimationFrame(frame)}else{cv.remove();sc.style.opacity=0;setTimeout(()=>sc.remove(),600)}
+  };
+  requestAnimationFrame(frame);
+  setTimeout(()=>{sched.forEach(clearTimeout);document.getElementById("fw")?.remove();document.getElementById("fw-scrim")?.remove()},9000);
+}
 function fb(k){if(SFX.vib){try{navigator.vibrate&&navigator.vibrate(HAP[k])}catch{}}if(SFX.sound&&SND[k])SND[k]()}
 
 const openG=new Set(),seenP=new Set();
