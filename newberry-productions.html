@@ -216,9 +216,42 @@ input[type=range]{width:100%;height:36px;accent-color:var(--green)}
 .pav{width:clamp(40px,12vw,58px);height:clamp(40px,12vw,58px);border-radius:16px;background:color-mix(in srgb,var(--pc,var(--green)) 16%,var(--sheet));color:var(--pc,var(--green));display:grid;place-items:center;flex:none}.pav .i{width:55%;height:55%}
 .ptile b{font:700 clamp(.76rem,3.3vw,.95rem)/1.1 var(--display);letter-spacing:-.01em;text-align:center;overflow-wrap:break-word;hyphens:auto;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;max-width:100%}
 .pbar{width:68%;height:6px;border-radius:99px;background:var(--line);overflow:hidden;display:block}.pbar i{display:block;height:100%;background:var(--pc);border-radius:99px}
+.pq,.amt,.big,.hbar .st b{font-variant-numeric:tabular-nums}
 .pq{font-size:.72rem;color:var(--muted);font-weight:600}
 .prow .grow,.prow .meter,.prow .small{display:block}
 .prow{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:0;text-align:left;cursor:pointer;color:inherit}
+/* v2 polish */
+.phero{background:linear-gradient(155deg,color-mix(in srgb,var(--pc) 88%,#000) 0%,color-mix(in srgb,var(--pc) 62%,#000) 100%);color:#fff;border-radius:28px;padding:12px 14px 14px;margin-bottom:12px;box-shadow:0 14px 34px color-mix(in srgb,var(--pc) 32%,transparent)}
+.ph-top{display:flex;align-items:center;gap:8px}
+.x.glass{background:rgba(255,255,255,.18);color:#fff;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.ph-main{display:flex;align-items:center;gap:12px;margin-top:6px}
+.ph-av{width:56px;height:56px;border-radius:18px;background:rgba(255,255,255,.2);display:grid;place-items:center;flex:none}.ph-av .i{width:30px;height:30px}
+.ph-main .ptitle{color:#fff;font-size:clamp(1.3rem,6vw,1.75rem)}
+.ph-d{margin:4px 0 0;font-size:.85rem;opacity:.92;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.ph-ring{width:60px;height:60px;border-radius:50%;background:conic-gradient(#fff calc(var(--p)*1%),rgba(255,255,255,.28) 0);display:grid;place-items:center;flex:none}
+.ph-ring b{width:46px;height:46px;border-radius:50%;background:color-mix(in srgb,var(--pc) 68%,#000);display:grid;place-items:center;font:700 .85rem var(--display);font-variant-numeric:tabular-nums}
+.ph-stats{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.ph-stats span{background:rgba(255,255,255,.17);border-radius:99px;padding:4px 12px;font-size:.8rem}.ph-stats b{font-family:var(--display);font-size:.95rem}.ph-stats .lt{background:rgba(190,40,30,.9)}
+.segwrap{position:sticky;top:env(safe-area-inset-top);z-index:6;margin:0 -16px 12px;padding:6px 16px;background:color-mix(in srgb,var(--paper) 86%,transparent);-webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px)}
+.segwrap .segc{margin:0}
+.gtoggle{flex:1;min-width:0;text-align:left;background:none;border:0;padding:0;color:inherit;cursor:pointer;min-height:44px;display:block}
+.gtoggle h3{font-size:1.05rem;overflow-wrap:break-word}
+.gmeta{display:block;margin-top:2px}
+.gchev{flex:none;color:var(--muted);transition:transform .2s;display:grid;place-items:center;width:20px}.gchev.open{transform:rotate(90deg)}
+.gbody{margin-top:6px;animation:fadeIn .2s}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-4px)}}
+.meter i{transform-origin:left}
+.enter .meter i{animation:grow .7s cubic-bezier(.2,.8,.2,1) both}
+@keyframes grow{from{transform:scaleX(0)}}
+.enter .ptile{animation:pop .4s cubic-bezier(.2,.9,.3,1.2) both;animation-delay:calc(var(--i,0)*40ms)}
+@keyframes pop{from{opacity:0;transform:translateY(10px) scale(.94)}}
+.enter .tabbody{animation:fadeIn .25s}
+.ptile{position:relative}
+.pbadge{position:absolute;top:8px;right:8px;min-width:22px;height:22px;padding:0 6px;border-radius:99px;background:#d33a2f;color:#fff;font:700 .72rem/22px var(--body);text-align:center;box-shadow:0 0 0 3px var(--sheet);display:grid;place-items:center;z-index:1}
+.pbadge.ok{background:var(--green);color:var(--paper)}
+.grab{width:42px;height:5px;border-radius:99px;background:var(--field);opacity:.45;margin:-6px auto 10px;touch-action:none}
+.sheet .hd{touch-action:none}
+
 .photos button{position:relative}
 .targets{list-style:none;margin:10px 0 0;padding:0}
 .targets li{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}.targets li:first-child{border-top:0}
@@ -380,13 +413,19 @@ function closeSheet(fb){ovPop("sheet",fb);if(listening)listening.stop();$("#laye
 function sheet(title,body,wire){
   const l=$("#layer");if(!sheetOpener&&!document.getElementById("lock"))sheetOpener=document.activeElement;
   if(sheetKey)removeEventListener("keydown",sheetKey);
-  l.innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title)}" tabindex="-1"><div class="hd"><h2>${esc(title)}</h2><button class="x" id="sx" aria-label="Close">${ic("x")}</button></div>${body}</div></div>`;
+  l.innerHTML=`<div class="scrim" id="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-label="${esc(title)}" tabindex="-1"><div class="grab" aria-hidden="true"></div><div class="hd"><h2>${esc(title)}</h2><button class="x" id="sx" aria-label="Close">${ic("x")}</button></div>${body}</div></div>`;
   document.body.classList.add("noscroll");
   if(!ovStack.some(x=>x.k==="sheet"))ovPush({k:"sheet",close:fb=>closeSheet(fb)});
   $("#sx").onclick=()=>closeSheet();$("#scrim").onclick=e=>{if(e.target.id==="scrim")closeSheet()};
   sheetKey=e=>{if(document.getElementById("lock"))return;if(e.key==="Escape")closeSheet();else if(e.key==="Tab"){const f=[...l.querySelectorAll("button,input,textarea,select,[tabindex='0']")].filter(x=>!x.disabled&&x.offsetParent);if(!f.length)return;const first=f[0],last=f.at(-1);if(e.shiftKey&&(document.activeElement===first||document.activeElement===l.querySelector(".sheet"))){e.preventDefault();last.focus()}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus()}}};
   addEventListener("keydown",sheetKey);
-  l.querySelector(".sheet").focus();wire&&wire(l,closeSheet);
+  const shEl=l.querySelector(".sheet");let y0=null,dy=0,t0=0;
+  [shEl.querySelector(".grab"),shEl.querySelector(".hd")].forEach(h=>{
+    h.addEventListener("pointerdown",e=>{if(e.target.closest("button"))return;y0=e.clientY;dy=0;t0=Date.now();try{h.setPointerCapture(e.pointerId)}catch{}shEl.style.animation="none";shEl.style.transition="none"});
+    h.addEventListener("pointermove",e=>{if(y0===null)return;dy=Math.max(0,e.clientY-y0);shEl.style.transform=`translateY(${dy}px)`});
+    const end=()=>{if(y0===null)return;const v=dy/(Date.now()-t0+1);y0=null;shEl.style.transition="transform .2s ease";if(dy>110||v>.6){shEl.style.transform="translateY(100%)";setTimeout(()=>closeSheet(),170)}else shEl.style.transform=""};
+    h.addEventListener("pointerup",end);h.addEventListener("pointercancel",end)});
+  shEl.focus();wire&&wire(l,closeSheet);
 }
 const isOpen=()=>!!$("#layer").firstChild;
 
@@ -469,10 +508,10 @@ let lastRoute="";
 function render(){
   if(!user){authReady?authScreen():splash();return}
   if(route==="prods")route="home";
-  const fk=focusKey(),sy=lastRoute===route+tab?scrollY:0;
+  const fk=focusKey(),sy=lastRoute===route+tab?scrollY:0,fresh=lastRoute!==route+tab;
   const m=route.match(/^p\/(.+)/),p=m&&P(m[1]);
   const cur=p?"home":route;
-  $("#app").innerHTML=`<div class="wrap${!p&&route==="home"?" fit":""}"><header class="top"><img class="brand" src="icons/productions-96.png" alt="" width="44" height="51"><h1 class="sr">MS Productions</h1><span class="grow"></span><span class="sync" id="sync" aria-live="polite"></span>${!p&&route==="home"?`<button class="x addp" id="addp" aria-label="New production" title="New production">${ic("plus")}</button>`:""}<button class="x" id="thm" aria-label="${isDark()?"Switch to light mode":"Switch to dark mode"}" title="${isDark()?"Light mode":"Dark mode"}">${ic(isDark()?"sun":"moon")}</button></header>
+  $("#app").innerHTML=`<div class="wrap${!p&&route==="home"?" fit":""}${fresh?" enter":""}"><header class="top"><img class="brand" src="icons/productions-96.png" alt="" width="44" height="51"><h1 class="sr">MS Productions</h1><span class="grow"></span><span class="sync" id="sync" aria-live="polite"></span>${!p&&route==="home"?`<button class="x addp" id="addp" aria-label="New production" title="New production">${ic("plus")}</button>`:""}<button class="x" id="thm" aria-label="${isDark()?"Switch to light mode":"Switch to dark mode"}" title="${isDark()?"Light mode":"Dark mode"}">${ic(isDark()?"sun":"moon")}</button></header>
   <main id="main" tabindex="-1">${p?prodView(p):{home:homePage,overview:overviewPage,activity:activityPage,more:morePage}[route]?.()||homePage()}</main></div>
   <nav class="tabs" aria-label="Main">${NAV.map(([k,l,i])=>`<button data-nav="${k}" ${cur===k?'aria-current="page"':""}>${ic(i)}${l}</button>`).join("")}</nav>`;
   setSyncUi(syncState||"Sign in to sync");
@@ -497,7 +536,7 @@ function homePage(){
   <div class="hbar"><div class="rg" style="--p:${pct}" role="img" aria-label="Overall progress ${pct} percent"><b>${pct}%</b></div>
     <div class="st"><b>${open}</b><span>open goals</span></div><div class="st"><b>${photos}</b><span>photos</span></div>
     <button class="btn small" id="rep" aria-label="Report">${ic("trend")}Report</button></div>
-  <div class="ptiles">${ps.map(p=>{const q=prodPct(p);return`<button class="ptile" style="--pc:${p.color}" data-open="${p.id}" aria-label="${esc(p.name)}, ${q} percent complete"><span class="pi"><span class="pav">${ic(p.icon)}</span><b>${esc(p.name)}</b><span class="pbar" aria-hidden="true"><i style="width:${q}%"></i></span><span class="pq">${q}%</span></span></button>`}).join("")}</div>`;
+  <div class="ptiles">${ps.map((p,ix)=>{const q=prodPct(p),lt=lateCount(p);return`<button class="ptile" style="--pc:${p.color};--i:${ix}" data-open="${p.id}" aria-label="${esc(p.name)}, ${q} percent complete${lt?", "+lt+" overdue":""}">${lt?`<span class="pbadge" aria-hidden="true">${lt}</span>`:q===100&&p.goals.length?`<span class="pbadge ok" aria-hidden="true">${ic("check","sm")}</span>`:""}<span class="pi"><span class="pav">${ic(p.icon)}</span><b>${esc(p.name)}</b><span class="pbar" aria-hidden="true"><i style="width:${q}%"></i></span><span class="pq">${q}%</span></span></button>`}).join("")}</div>`;
 }
 /* second tab: the detail */
 function overviewPage(){
@@ -551,13 +590,57 @@ function prodSheet(p){
 
 /* production view */
 const TABS=[["goals","Goals","target"],["media","Media","image"],["team","Team","users"],["log","Log","note"]];
+const lateCount=p=>{const t=todayStr();return p.goals.filter(g=>!g.done&&g.due&&g.due<t).length};
+const buzz=ms=>{try{navigator.vibrate&&navigator.vibrate(ms)}catch{}};
+const openG=new Set(),seenP=new Set();
 function prodView(p){
-  const q=prodPct(p);
-  return `<div class="row" style="margin-bottom:6px"><button class="x" id="back" aria-label="Back to productions">${ic("left")}</button><span class="grow"></span><button class="x" id="rep" aria-label="Weekly report">${ic("trend")}</button><button class="x" id="edp" aria-label="Edit production">${ic("pencil")}</button></div>
-  <div class="row" style="margin-bottom:14px"><div class="avatar" style="color:${p.color}">${ic(p.icon)}</div><h2 class="grow ptitle">${esc(p.name)}</h2></div>
-  <div class="tile" style="min-height:0;margin-bottom:14px"><div class="row between"><div class="lbl">${ic("target")}${q}% complete</div></div><div class="sub">${esc(p.desc||"Tap the pencil to add a description.")}</div><div class="meter" style="margin-top:8px"><i style="width:${q}%;background:${p.color}"></i></div></div>
-  <div class="segc" role="group" aria-label="Sections">${TABS.map(([k,l,i])=>`<button data-tab="${k}" aria-label="${l}" aria-pressed="${tab===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div>
-  ${{goals:goalsTab,media:mediaTab,team:teamTab,log:logTab}[tab](p)}`;
+  const q=prodPct(p),open=p.goals.filter(g=>!g.done).length,late=lateCount(p);
+  return `<div class="phero" style="--pc:${p.color}">
+    <div class="ph-top"><button class="x glass" id="back" aria-label="Back to productions">${ic("left")}</button><span class="grow"></span><button class="x glass" id="rep" aria-label="Weekly report">${ic("trend")}</button><button class="x glass" id="edp" aria-label="Edit production">${ic("pencil")}</button></div>
+    <div class="ph-main"><span class="ph-av">${ic(p.icon)}</span><div class="grow"><h2 class="ptitle">${esc(p.name)}</h2><p class="ph-d">${esc(p.desc||"Tap the pencil to add a description.")}</p></div>
+      <div class="ph-ring" style="--p:${q}" role="img" aria-label="${q} percent complete"><b>${q}%</b></div></div>
+    <div class="ph-stats"><span><b>${open}</b> open</span><span><b>${p.goals.length-open}</b> done</span>${late?`<span class="lt"><b>${late}</b> overdue</span>`:""}</div>
+  </div>
+  <div class="segwrap"><div class="segc" role="group" aria-label="Sections">${TABS.map(([k,l,i])=>`<button data-tab="${k}" aria-label="${l}" aria-pressed="${tab===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div>
+  <div class="tabbody">${{goals:goalsTab,media:mediaTab,team:teamTab,log:logTab}[tab](p)}</div>`;
+}
+function goalsTab(p){
+  const today=todayStr();
+  if(!seenP.has(p.id)){seenP.add(p.id);const f=p.goals.find(g=>!g.done)||p.goals[0];if(f)openG.add(f.id)}
+  return (p.goals.length?p.goals.map(g=>{const q=goalPct(g),nd=hasT(g)?g.targets.filter(t=>t.done).length:0,op=openG.has(g.id),late=!g.done&&g.due&&g.due<today;
+    return `<div class="card goal ${g.done?"done":""}" data-g="${g.id}">
+    <div class="row"><button class="tick" data-done aria-pressed="${!!g.done}" aria-label="${g.done?"Reopen":"Complete"} ${esc(g.title)}">${ic("check")}</button>
+      <button class="gtoggle" data-exp aria-expanded="${op}" aria-label="${esc(g.title)}, ${hasT(g)?nd+" of "+g.targets.length+" targets done":q+" percent"}. ${op?"Collapse":"Expand"}"><h3>${esc(g.title)}</h3>
+        <span class="gmeta small muted">${hasT(g)?`${nd} of ${g.targets.length} targets`:`${q}% done`}${g.due?` · ${ic("clock","sm")} ${new Date(g.due+"T12:00").toLocaleDateString(undefined,{day:"numeric",month:"short"})}`:""}${late?` <span class="pill late">Overdue</span>`:""}</span></button>
+      <button class="x" data-edg aria-label="Edit goal">${ic("pencil")}</button>
+      <span class="gchev ${op?"open":""}" aria-hidden="true">${ic("chev")}</span></div>
+    <div class="meter" style="margin:10px 0 0" role="progressbar" aria-valuenow="${q}" aria-valuemin="0" aria-valuemax="100" aria-label="${esc(g.title)} progress"><i style="width:${q}%"></i></div>
+    <div class="gbody" ${op?"":"hidden"}>
+    ${hasT(g)?`<ul class="targets">${g.targets.map(t=>`<li class="${t.done?"tdone":""}"><button class="tick sm" data-tt="${t.id}" aria-pressed="${!!t.done}" aria-label="${t.done?"Reopen":"Complete"} target ${esc(t.title)}">${ic("check","sm")}</button><span class="grow">${esc(t.title)}</span></li>`).join("")}</ul>`
+      :`<div class="note-warn">${ic("alert")}<div><b>No targets yet.</b> Break this goal into steps so progress can be tracked.</div><button class="btn small" data-edg>Add targets</button></div>`}
+    ${hasT(g)?`<div class="row" style="margin-top:8px"><input class="t" style="flex:1 1 6rem" type="text" data-ti placeholder="Add another target" aria-label="New target for ${esc(g.title)}">${micBtn()}<button class="btn icon" data-ta aria-label="Add target">${ic("plus")}</button></div>`:""}
+    ${g.comments.length?`<h4 class="eyebrow" style="margin:16px 0 4px">Comments</h4>`:""}
+    ${g.comments.map(c=>`<div class="cm">${esc(c.text)}<div class="small muted">${esc(c.by)} · ${fmt(c.t)}</div></div>`).join("")}
+    <div class="row" style="margin-top:10px"><input class="t" style="flex:1 1 6rem" type="text" data-ci placeholder="Add a comment" aria-label="Comment on ${esc(g.title)}">${micBtn()}<button class="btn primary icon" data-cs aria-label="Post comment">${ic("send")}</button></div></div></div>`}).join("")
+    :`<div class="empty">${ic("target","xl")}<h3>No goals yet</h3><p style="margin:0 0 14px">Set a main goal, then break it into targets.</p><button class="btn primary" id="e-add">${ic("plus")}Set your first goal</button></div>`)+(p.goals.length?fabBtn("addg","New goal"):"");
+}
+function wireGoals(p){
+  $("#addg")&&($("#addg").onclick=()=>goalSheet(p));$("#e-add")&&($("#e-add").onclick=()=>goalSheet(p));wireMics(document);
+  document.querySelectorAll("[data-g]").forEach(el=>{
+    const g=p.goals.find(x=>x.id===el.dataset.g);
+    el.querySelector("[data-exp]").onclick=e=>{const b=e.currentTarget,o=b.getAttribute("aria-expanded")!=="true";o?openG.add(g.id):openG.delete(g.id);b.setAttribute("aria-expanded",o);el.querySelector(".gbody").hidden=!o;el.querySelector(".gchev").classList.toggle("open",o)};
+    el.querySelector("[data-done]").onclick=()=>{
+      if(hasT(g)){const snap=g.targets.map(t=>({...t})),all=!g.done;g.targets.forEach(t=>{t.done=all;t.doneAt=all?(t.doneAt||Date.now()):0});if(syncGoal(g)){confetti();buzz([14,40,14])}else buzz(10);if(!all)g.doneAt=0;save(p);render();
+        toast(all?"All targets done.":"Goal reopened.",()=>{g.targets=snap;syncGoal(g);save(p);render()})}
+      else{g.done=!g.done;g.pct=g.done?100:0;g.doneAt=g.done?Date.now():0;if(g.done){confetti();buzz([14,40,14])}else buzz(10);save(p);render()}};
+    el.querySelectorAll("[data-tt]").forEach(b=>b.onclick=()=>{const t=g.targets.find(x=>x.id===b.dataset.tt);t.done=!t.done;t.doneAt=t.done?Date.now():0;const fin=syncGoal(g);if(fin){confetti();buzz([14,40,14])}else buzz(10);save(p);render()});
+    el.querySelectorAll("[data-edg]").forEach(b=>b.onclick=()=>goalSheet(p,g));
+    const ti=el.querySelector("[data-ti]"),addT=()=>{const v=ti.value.trim();if(!v)return;if(listening)listening.stop();g.targets.push({id:uid(),title:v,done:false,doneAt:0});syncGoal(g);save(p);render()};
+    if(ti){el.querySelector("[data-ta]").onclick=addT;ti.onkeydown=e=>{if(e.key==="Enter")addT()}}
+    const add=()=>{const t=el.querySelector("[data-ci]").value.trim();if(!t)return;if(listening)listening.stop();g.comments.push({id:uid(),text:t,by:who(),t:Date.now()});save(p);render()};
+    el.querySelector("[data-cs]").onclick=add;
+    el.querySelector("[data-ci]").onkeydown=e=>{if(e.key==="Enter")add()};
+  });
 }
 function wireProd(p){
   $("#back").onclick=()=>nav("home");$("#rep").onclick=()=>reportSheet(p);$("#edp").onclick=()=>prodSheet(p);
@@ -569,39 +652,6 @@ const fabBtn=(id,label)=>`<div class="fab-wrap"><button class="fab" id="${id}" a
 /* goals: every main goal is broken into targets; progress comes from the targets that are done */
 const hasT=g=>g.targets&&g.targets.length>0;
 function syncGoal(g){const was=g.done;if(hasT(g)){const d=g.targets.filter(t=>t.done).length;g.pct=Math.round(d/g.targets.length*100);g.done=d===g.targets.length}g.doneAt=g.done?(g.doneAt||Date.now()):0;return g.done&&!was}
-function goalsTab(p){
-  const today=new Date().toISOString().slice(0,10);
-  return (p.goals.length?p.goals.map(g=>{const q=goalPct(g),nd=hasT(g)?g.targets.filter(t=>t.done).length:0;
-    return `<div class="card goal ${g.done?"done":""}" data-g="${g.id}">
-    <div class="row"><button class="tick" data-done aria-pressed="${!!g.done}" aria-label="${g.done?"Reopen":"Complete"} ${esc(g.title)}">${ic("check")}</button><h3 class="grow" style="font-size:1.1rem">${esc(g.title)}</h3><button class="x" data-edg aria-label="Edit goal">${ic("pencil")}</button></div>
-    ${g.due?`<div class="small muted" style="margin-left:44px">${ic("clock","sm")} Due ${esc(g.due)} ${!g.done&&g.due<today?`<span class="pill late">Overdue</span>`:""}</div>`:""}
-    <div class="meter" style="margin:12px 0 4px" role="progressbar" aria-valuenow="${q}" aria-valuemin="0" aria-valuemax="100" aria-label="${esc(g.title)} progress"><i style="width:${q}%"></i></div>
-    <div class="small muted">${hasT(g)?`${nd} of ${g.targets.length} targets done · ${q}%`:`${q}%`}</div>
-    ${hasT(g)?`<ul class="targets">${g.targets.map(t=>`<li class="${t.done?"tdone":""}"><button class="tick sm" data-tt="${t.id}" aria-pressed="${!!t.done}" aria-label="${t.done?"Reopen":"Complete"} target ${esc(t.title)}">${ic("check","sm")}</button><span class="grow">${esc(t.title)}</span></li>`).join("")}</ul>`
-      :`<div class="note-warn">${ic("alert")}<div><b>No targets yet.</b> Break this goal into steps so progress can be tracked.</div><button class="btn small" data-edg>Add targets</button></div>`}
-    ${hasT(g)?`<div class="row" style="margin-top:8px"><input class="t" style="flex:1 1 6rem" type="text" data-ti placeholder="Add another target" aria-label="New target for ${esc(g.title)}">${micBtn()}<button class="btn icon" data-ta aria-label="Add target">${ic("plus")}</button></div>`:""}
-    ${g.comments.length?`<h4 class="eyebrow" style="margin:16px 0 4px">Comments</h4>`:""}
-    ${g.comments.map(c=>`<div class="cm">${esc(c.text)}<div class="small muted">${esc(c.by)} · ${fmt(c.t)}</div></div>`).join("")}
-    <div class="row" style="margin-top:10px"><input class="t" style="flex:1 1 6rem" type="text" data-ci placeholder="Add a comment" aria-label="Comment on ${esc(g.title)}">${micBtn()}<button class="btn primary icon" data-cs aria-label="Post comment">${ic("send")}</button></div></div>`}).join("")
-    :`<div class="empty">${ic("target","xl")}<h3>No goals yet</h3>Set a main goal and its targets.</div>`)+fabBtn("addg","New goal");
-}
-function wireGoals(p){
-  $("#addg").onclick=()=>goalSheet(p);wireMics(document);
-  document.querySelectorAll("[data-g]").forEach(el=>{
-    const g=p.goals.find(x=>x.id===el.dataset.g);
-    el.querySelector("[data-done]").onclick=()=>{
-      if(hasT(g)){const snap=g.targets.map(t=>({...t})),all=!g.done;g.targets.forEach(t=>{t.done=all;t.doneAt=all?(t.doneAt||Date.now()):0});if(syncGoal(g))confetti();if(!all)g.doneAt=0;save(p);render();
-        toast(all?"All targets done.":"Goal reopened.",()=>{g.targets=snap;syncGoal(g);save(p);render()})}
-      else{g.done=!g.done;g.pct=g.done?100:0;g.doneAt=g.done?Date.now():0;if(g.done)confetti();save(p);render()}};
-    el.querySelectorAll("[data-tt]").forEach(b=>b.onclick=()=>{const t=g.targets.find(x=>x.id===b.dataset.tt);t.done=!t.done;t.doneAt=t.done?Date.now():0;const fin=syncGoal(g);if(fin)confetti();save(p);render()});
-    el.querySelectorAll("[data-edg]").forEach(b=>b.onclick=()=>goalSheet(p,g));
-    const ti=el.querySelector("[data-ti]"),addT=()=>{const v=ti.value.trim();if(!v)return;if(listening)listening.stop();g.targets.push({id:uid(),title:v,done:false,doneAt:0});syncGoal(g);save(p);render()};
-    if(ti){el.querySelector("[data-ta]").onclick=addT;ti.onkeydown=e=>{if(e.key==="Enter")addT()}}
-    const add=()=>{const t=el.querySelector("[data-ci]").value.trim();if(!t)return;if(listening)listening.stop();g.comments.push({id:uid(),text:t,by:who(),t:Date.now()});save(p);render()};
-    el.querySelector("[data-cs]").onclick=add;
-    el.querySelector("[data-ci]").onkeydown=e=>{if(e.key==="Enter")add()};
-  });
-}
 function goalSheet(p,g){
   const isNew=!g;g=g||{title:"",due:""};const tl=(g.targets||[]).map(t=>({...t}));
   sheet(isNew?"New goal":"Edit goal",`<label class="f" for="gt">Main goal</label><div class="row"><input class="t" id="gt" type="text" value="${esc(g.title)}" placeholder="What do we want to achieve?">${micBtn()}</div>
@@ -665,7 +715,7 @@ function mediaTab(p){
   const ms=mediaOf(p),pics=ms.filter(m=>m.type!=="video");
   for(const id of [...sel])if(!ms.some(m=>m.id===id))sel.delete(id);
   let body;
-  if(!ms.length)body=`<div class="empty">${ic("image","xl")}<h3>No photos or videos yet</h3>Add one from the camera or gallery.</div>`;
+  if(!ms.length)body=`<div class="empty">${ic("image","xl")}<h3>No photos or videos yet</h3><p style="margin:0 0 14px">Capture the work as it happens.</p><button class="btn primary" id="e-pf">${ic("camera")}Add a photo or video</button></div>`;
   else if(mview==="grid")body=`<div class="photos">${ms.map(mthumb).join("")}</div>`;
   else{
     const first=pics.at(-1),last=pics[0],g={};ms.forEach(m=>(g[weekStart(m.t)]=g[weekStart(m.t)]||[]).push(m));
@@ -684,7 +734,7 @@ function mediaTab(p){
 function wireMedia(p){
   document.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{mview=b.dataset.mv;render()});
   $("#seltog")&&($("#seltog").onclick=()=>{selecting?clearSel():selecting=true;render()});
-  $("#addm")&&($("#addm").onclick=()=>$("#pf").click());
+  $("#addm")&&($("#addm").onclick=()=>$("#pf").click());$("#e-pf")&&($("#e-pf").onclick=()=>$("#pf").click());
   $("#pf").onchange=async e=>{
     let n=0;
     for(const f of e.target.files){
