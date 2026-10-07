@@ -252,6 +252,10 @@ input[type=range]{width:100%;height:36px;accent-color:var(--green)}
 .grab{width:42px;height:5px;border-radius:99px;background:var(--field);opacity:.45;margin:-6px auto 10px;touch-action:none}
 .sheet .hd{touch-action:none}
 
+button,.ptile,[role=button]{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+button{-webkit-touch-callout:none}
+html{overscroll-behavior-y:contain}
+.sw[disabled]{opacity:.4}
 .photos button{position:relative}
 .targets{list-style:none;margin:10px 0 0;padding:0}
 .targets li{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}.targets li:first-child{border-top:0}
@@ -399,7 +403,7 @@ const fmt=t=>new Date(t).toLocaleDateString(undefined,{day:"numeric",month:"shor
 
 function theme(m){if(m){try{m==="auto"?localStorage.removeItem(THEME):localStorage.setItem(THEME,m)}catch{}if(m==="auto")document.documentElement.removeAttribute("data-theme");else document.documentElement.setAttribute("data-theme",m)}let t="auto";try{t=localStorage.getItem(THEME)||"auto"}catch{}return t}
 const isDark=()=>document.documentElement.getAttribute("data-theme")==="dark"||(!document.documentElement.getAttribute("data-theme")&&matchMedia("(prefers-color-scheme: dark)").matches);
-function toast(msg,undo){document.querySelectorAll("#toasts .toast").forEach(x=>x.remove());const e=document.createElement("div");e.className="toast";e.textContent=msg;if(undo){const b=document.createElement("button");b.textContent="Undo";b.onclick=()=>{undo();e.remove()};e.append(b)}$("#toasts").append(e);setTimeout(()=>e.remove(),undo?6000:2500)}
+function toast(msg,undo){if(/couldn.t|isn.t right|too large|no space|failed|can.t share|too many/i.test(msg))fb("err");else if(undo&&/delet|remov/i.test(msg))fb("del");document.querySelectorAll("#toasts .toast").forEach(x=>x.remove());const e=document.createElement("div");e.className="toast";e.textContent=msg;if(undo){const b=document.createElement("button");b.textContent="Undo";b.onclick=()=>{undo();e.remove()};e.append(b)}$("#toasts").append(e);setTimeout(()=>e.remove(),undo?6000:2500)}
 function confetti(){const c=document.createElement("div");c.className="confetti";c.setAttribute("aria-hidden","true");for(let i=0;i<40;i++){const p=document.createElement("i");p.style.cssText=`left:${Math.random()*100}%;background:${COLORS[i%8]};animation-delay:${Math.random()*.4}s`;c.append(p)}document.body.append(c);setTimeout(()=>c.remove(),2400)}
 
 /* sheets */
@@ -515,7 +519,7 @@ function render(){
   <main id="main" tabindex="-1">${p?prodView(p):{home:homePage,overview:overviewPage,activity:activityPage,more:morePage}[route]?.()||homePage()}</main></div>
   <nav class="tabs" aria-label="Main">${NAV.map(([k,l,i])=>`<button data-nav="${k}" ${cur===k?'aria-current="page"':""}>${ic(i)}${l}</button>`).join("")}</nav>`;
   setSyncUi(syncState||"Sign in to sync");
-  document.querySelectorAll("[data-nav]").forEach(b=>b.onclick=()=>nav(b.dataset.nav));
+  document.querySelectorAll("[data-nav]").forEach(b=>b.onclick=()=>{fb("tap");nav(b.dataset.nav)});
   $("#thm").onclick=()=>{theme(isDark()?"light":"dark");render()};
   hydrate();lastRoute=route+tab;
   p?wireProd(p):({home:wireHome,overview:wireHome,activity(){},more:wireMore}[route]||wireHome)();
@@ -551,17 +555,19 @@ function overviewPage(){
 const actRow=f=>`<li><div class="avatar" style="color:${f.p.color}">${ic(f.p.icon)}</div><div class="grow"><b>${esc(f.p.name)}</b> <span class="pill type">${f.k}</span><div>${esc(f.txt)}</div><div class="small muted">${fmt(f.t)}</div></div></li>`;
 const fab=()=>`<div class="fab-wrap"><button class="fab" id="addp" aria-label="New production">${ic("plus")}<span>New production</span></button></div>`;
 function wireHome(){
-  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>nav("p/"+b.dataset.open));
+  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{fb("tap");nav("p/"+b.dataset.open)});
   $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#rep")&&($("#rep").onclick=()=>reportSheet(null));
 }
 function activityPage(){const f=feedItems().slice(0,60);return `<div class="page-h"><h2>Activity</h2></div><div class="card">${f.length?`<ul class="list">${f.map(actRow).join("")}</ul>`:`<div class="empty">${ic("pulse","xl")}<h3>No activity yet</h3>Comments and log entries from every production show up here.</div>`}</div>`}
 function morePage(){const t=theme();
   return `<div class="page-h"><h2>Settings</h2></div><div class="card"><h2>Appearance</h2><div class="segc" role="group" aria-label="Theme">${[["auto","Auto","device"],["light","Light","sun"],["dark","Dark","moon"]].map(([k,l,i])=>`<button data-th="${k}" aria-label="${l}" aria-pressed="${t===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div>
+  <div class="card"><h2>Sound and touch</h2><div class="row between" style="margin-bottom:12px"><div><b>Sound effects</b><div class="small muted">Soft tones when you tick, add or finish</div></div><button type="button" role="switch" class="sw" id="fx-s" aria-label="Sound effects" aria-checked="${SFX.sound}"><i></i></button></div><div class="row between"><div><b>Vibration</b><div class="small muted">${navigator.vibrate?"A light buzz on taps and ticks":"Not supported on this device (iPhone does not allow it)"}</div></div><button type="button" role="switch" class="sw" id="fx-v" aria-label="Vibration" aria-checked="${SFX.vib&&!!navigator.vibrate}" ${navigator.vibrate?"":"disabled"}><i></i></button></div></div>
   <div class="card"><h2>Voice dictation</h2><p class="muted" style="margin:0">${SR?"On. Tap the microphone next to any text box and speak.":"Not available in this browser. Try Chrome or Edge, or use your phone keyboard's microphone."}</p></div>
-  <div class="card"><h2>App lock</h2><p class="muted" style="margin-top:0">Optional. Add a 3-digit PIN and the app asks for it when you open it on this device. You stay signed in either way.</p>${getPin()?`<div class="row wr"><button class="btn" id="pinchg">Change PIN</button><button class="btn danger" id="pinoff">Remove PIN</button></div>`:`<button class="btn primary" id="pinset">${ic("lock")}Set a PIN</button>`}</div>
+  <div class="card"><h2>App lock</h2><p class="muted" style="margin-top:0">Optional. Add a 3-digit PIN and the app asks for it when you open it on this device.${LOGIN?" You stay signed in either way.":""}</p>${getPin()?`<div class="row wr"><button class="btn" id="pinchg">Change PIN</button><button class="btn danger" id="pinoff">Remove PIN</button></div>`:`<button class="btn primary" id="pinset">${ic("lock")}Set a PIN</button>`}</div>
   <div class="card"><h2>Backup</h2><p class="muted" style="margin-top:0">Everything is stored on this device only while sign-in is off. Download a backup of your goals, targets, team and logs now and then. Photos and videos are not included.</p><div class="row wr"><button class="btn" id="bk-out">${ic("download")}Download backup</button><button class="btn" id="bk-in">${ic("upload")}Restore</button></div><input type="file" id="bk-f" accept="application/json,.json" class="sr" aria-label="Choose a backup file" tabindex="-1"></div>
   <div class="card"><h2>This device</h2><p class="muted" style="margin-top:0">${LOGIN?`Signed in as ${esc(user.email)}. You only need to sign in once on this device.`:"Sign-in is switched off for now, so cloud sync is paused. Everything you add is saved on this device only."}</p><div class="row wr">${LOGIN?`<button class="btn" id="out">${ic("logout")}Sign out</button>`:""}${getPin()?`<button class="btn" id="lk">${ic("lock")}Lock now</button>`:""}</div></div>`}
-function wireMore(){document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#pinset")&&($("#pinset").onclick=setPin);$("#pinchg")&&($("#pinchg").onclick=()=>{removePinThenSet()});$("#pinoff")&&($("#pinoff").onclick=removePin);$("#lk")&&($("#lk").onclick=lockNow);$("#out")&&($("#out").onclick=()=>{if(!confirm("Sign out of this device? You will need to sign in again."))return;if(sb)sb.auth.signOut();else{user=null;try{localStorage.removeItem(USERK)}catch{}render()}});
+function wireMore(){$("#fx-s").onclick=e=>{SFX.sound=!SFX.sound;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.sound);if(SFX.sound)fb("tick")};$("#fx-v").onclick=e=>{SFX.vib=!SFX.vib;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.vib);if(SFX.vib)fb("tick")};
+  document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#pinset")&&($("#pinset").onclick=setPin);$("#pinchg")&&($("#pinchg").onclick=()=>{removePinThenSet()});$("#pinoff")&&($("#pinoff").onclick=removePin);$("#lk")&&($("#lk").onclick=lockNow);$("#out")&&($("#out").onclick=()=>{if(!confirm("Sign out of this device? You will need to sign in again."))return;if(sb)sb.auth.signOut();else{user=null;try{localStorage.removeItem(USERK)}catch{}render()}});
   $("#bk-out").onclick=()=>{const blob=new Blob([JSON.stringify({app:"ms-productions",v:1,at:new Date().toISOString(),prods:S.prods},null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ms-productions-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")};
   $("#bk-in").onclick=()=>$("#bk-f").click();
   $("#bk-f").onchange=async e=>{const file=e.target.files[0];if(!file)return;let d;try{d=JSON.parse(await file.text())}catch{toast("That file isn't a valid backup.");return}
@@ -591,7 +597,17 @@ function prodSheet(p){
 /* production view */
 const TABS=[["goals","Goals","target"],["media","Media","image"],["team","Team","users"],["log","Log","note"]];
 const lateCount=p=>{const t=todayStr();return p.goals.filter(g=>!g.done&&g.due&&g.due<t).length};
-const buzz=ms=>{try{navigator.vibrate&&navigator.vibrate(ms)}catch{}};
+/* sound + haptic feedback (sounds are synthesised, no files) */
+const FXK="ms-prod-fx";
+const SFX=(()=>{let o={sound:true,vib:true};try{o={...o,...JSON.parse(localStorage.getItem(FXK))}}catch{}return o})();
+const saveFx=()=>{try{localStorage.setItem(FXK,JSON.stringify(SFX))}catch{}};
+let AC=null;
+const audioCtx=()=>{try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();return AC}catch{return null}};
+function tone(f,t=0,d=.12,type="sine",g=.1){const c=audioCtx();if(!c)return;const o=c.createOscillator(),a=c.createGain(),n=c.currentTime+t;o.type=type;o.frequency.setValueAtTime(f,n);a.gain.setValueAtTime(0.0001,n);a.gain.linearRampToValueAtTime(g,n+.012);a.gain.exponentialRampToValueAtTime(.0001,n+d);o.connect(a);a.connect(c.destination);o.start(n);o.stop(n+d+.03)}
+const SND={tick:()=>{tone(660,0,.09,"triangle",.09);tone(990,.05,.11,"triangle",.07)},untick:()=>tone(440,0,.1,"triangle",.07),done:()=>[523,659,784,1047].forEach((f,i)=>tone(f,i*.085,.24,"sine",.1)),add:()=>{tone(520,0,.08,"sine",.08);tone(780,.06,.11,"sine",.08)},del:()=>{tone(300,0,.12,"sine",.08);tone(220,.08,.15,"sine",.07)},err:()=>{tone(190,0,.14,"square",.04);tone(160,.13,.17,"square",.04)}};
+const HAP={tap:6,tick:10,untick:8,done:[14,40,14,40,26],add:12,del:[18,30],err:[30,40,30]};
+function fb(k){if(SFX.vib){try{navigator.vibrate&&navigator.vibrate(HAP[k])}catch{}}if(SFX.sound&&SND[k])SND[k]()}
+
 const openG=new Set(),seenP=new Set();
 function prodView(p){
   const q=prodPct(p),open=p.goals.filter(g=>!g.done).length,late=lateCount(p);
@@ -630,14 +646,14 @@ function wireGoals(p){
     const g=p.goals.find(x=>x.id===el.dataset.g);
     el.querySelector("[data-exp]").onclick=e=>{const b=e.currentTarget,o=b.getAttribute("aria-expanded")!=="true";o?openG.add(g.id):openG.delete(g.id);b.setAttribute("aria-expanded",o);el.querySelector(".gbody").hidden=!o;el.querySelector(".gchev").classList.toggle("open",o)};
     el.querySelector("[data-done]").onclick=()=>{
-      if(hasT(g)){const snap=g.targets.map(t=>({...t})),all=!g.done;g.targets.forEach(t=>{t.done=all;t.doneAt=all?(t.doneAt||Date.now()):0});if(syncGoal(g)){confetti();buzz([14,40,14])}else buzz(10);if(!all)g.doneAt=0;save(p);render();
+      if(hasT(g)){const snap=g.targets.map(t=>({...t})),all=!g.done;g.targets.forEach(t=>{t.done=all;t.doneAt=all?(t.doneAt||Date.now()):0});if(syncGoal(g)){confetti();fb("done")}else fb("tick");if(!all)g.doneAt=0;save(p);render();
         toast(all?"All targets done.":"Goal reopened.",()=>{g.targets=snap;syncGoal(g);save(p);render()})}
-      else{g.done=!g.done;g.pct=g.done?100:0;g.doneAt=g.done?Date.now():0;if(g.done){confetti();buzz([14,40,14])}else buzz(10);save(p);render()}};
-    el.querySelectorAll("[data-tt]").forEach(b=>b.onclick=()=>{const t=g.targets.find(x=>x.id===b.dataset.tt);t.done=!t.done;t.doneAt=t.done?Date.now():0;const fin=syncGoal(g);if(fin){confetti();buzz([14,40,14])}else buzz(10);save(p);render()});
+      else{g.done=!g.done;g.pct=g.done?100:0;g.doneAt=g.done?Date.now():0;if(g.done){confetti();fb("done")}else fb("tick");save(p);render()}};
+    el.querySelectorAll("[data-tt]").forEach(b=>b.onclick=()=>{const t=g.targets.find(x=>x.id===b.dataset.tt);t.done=!t.done;t.doneAt=t.done?Date.now():0;const fin=syncGoal(g);if(fin){confetti();fb("done")}else fb(t.done?"tick":"untick");save(p);render()});
     el.querySelectorAll("[data-edg]").forEach(b=>b.onclick=()=>goalSheet(p,g));
-    const ti=el.querySelector("[data-ti]"),addT=()=>{const v=ti.value.trim();if(!v)return;if(listening)listening.stop();g.targets.push({id:uid(),title:v,done:false,doneAt:0});syncGoal(g);save(p);render()};
+    const ti=el.querySelector("[data-ti]"),addT=()=>{const v=ti.value.trim();if(!v)return;if(listening)listening.stop();g.targets.push({id:uid(),title:v,done:false,doneAt:0});syncGoal(g);save(p);fb("add");render()};
     if(ti){el.querySelector("[data-ta]").onclick=addT;ti.onkeydown=e=>{if(e.key==="Enter")addT()}}
-    const add=()=>{const t=el.querySelector("[data-ci]").value.trim();if(!t)return;if(listening)listening.stop();g.comments.push({id:uid(),text:t,by:who(),t:Date.now()});save(p);render()};
+    const add=()=>{const t=el.querySelector("[data-ci]").value.trim();if(!t)return;if(listening)listening.stop();g.comments.push({id:uid(),text:t,by:who(),t:Date.now()});save(p);fb("add");render()};
     el.querySelector("[data-cs]").onclick=add;
     el.querySelector("[data-ci]").onkeydown=e=>{if(e.key==="Enter")add()};
   });
@@ -676,7 +692,7 @@ function goalSheet(p,g){
       if(!targets.length){err("Add at least one target so progress can be tracked.");$("#tn").focus();return}
       g.title=t;g.due=$("#gd").value;g.targets=targets;
       if(isNew)Object.assign(g,{id:uid(),pct:0,done:false,comments:[]});
-      const fin=syncGoal(g);if(isNew)p.goals.push(g);if(fin)confetti();
+      const fin=syncGoal(g);if(isNew)p.goals.push(g);if(fin){confetti();fb("done")}else fb("add");
       save(p);close();render()};
   });
 }
@@ -744,7 +760,7 @@ function wireMedia(p){
       const id=uid();try{await mPut(id,b)}catch{toast("No space to store this on the device.");continue}
       S.media.push({id,pid:p.id,type:vid?"video":"photo",cap:"",t:Date.now(),by:who(),del:false,u:Date.now()});n++;
     }
-    if(n)save();render();
+    if(n){save();fb("add")}render();
   };
   if($("#s-wa"))$("#s-wa").onclick=()=>waSheet(p,[...sel]);
   if($("#s-ed"))$("#s-ed").onclick=()=>{const m=S.media.find(x=>x.id===[...sel][0]);m.type==="video"?videoEditSheet(p,m):editSheet(p,m)};
@@ -1020,7 +1036,7 @@ function teamTab(p){
 }
 function wireTeam(p){
   wireMics(document);
-  const add=()=>{const n=$("#mn").value.trim();if(!n)return;p.members.push(n);save(p);render()};
+  const add=()=>{const n=$("#mn").value.trim();if(!n)return;p.members.push(n);save(p);fb("add");render()};
   $("#ma").onclick=add;$("#mn").onkeydown=e=>{if(e.key==="Enter")add()};
   document.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{const[m]=p.members.splice(+b.dataset.rm,1);save(p);render();toast(m+" removed.")});
 }
@@ -1035,7 +1051,7 @@ function logTab(p){
 }
 function wireLog(p){
   wireMics(document);
-  $("#la").onclick=()=>{const t=$("#ln").value.trim();if(!t)return;if(listening)listening.stop();p.log.push({id:uid(),text:t,by:who(),t:Date.now()});save(p);render()};
+  $("#la").onclick=()=>{const t=$("#ln").value.trim();if(!t)return;if(listening)listening.stop();p.log.push({id:uid(),text:t,by:who(),t:Date.now()});save(p);fb("add");render()};
   document.querySelectorAll("[data-dl]").forEach(b=>b.onclick=()=>{const i=p.log.findIndex(l=>l.id===b.dataset.dl),[l]=p.log.splice(i,1);save(p);render();toast("Entry deleted.",()=>{p.log.splice(i,0,l);save(p);render()})});
 }
 
@@ -1069,7 +1085,7 @@ function pinPad({title,sub,cancel,forgot,onDone}){
     draw();busy=true;const r=await onDone(v);busy=false;v="";
     if(r==="ok"){l.remove();removeEventListener("keydown",kd)}
     else if(r&&typeof r==="object"){title=r.title;sub=r.sub;draw()}
-    else{fails++;if(fails>=5){until=Date.now()+30000;fails=0}draw(r||"That PIN isn't right.",true);navigator.vibrate&&navigator.vibrate(120)}
+    else{fails++;if(fails>=5){until=Date.now()+30000;fails=0}draw(r||"That PIN isn't right.",true);fb("err")}
   }
   const kd=e=>{if(/^\d$/.test(e.key))key(e.key);else if(e.key==="Backspace")key("b")};
   addEventListener("keydown",kd);draw();document.body.append(l);l.querySelector("[data-k]").focus();
