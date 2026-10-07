@@ -279,6 +279,11 @@ textarea.t.ta{min-height:48px;height:48px;resize:none;overflow:hidden;line-heigh
 .row:has(textarea.ta){align-items:flex-start}
 .vprompt{margin:10px 0;padding:12px;border-radius:16px;background:var(--green-soft);animation:fadeIn .2s}
 .vprompt p{margin:0 0 10px;font-weight:600}
+/* production tiles: soft green glow */
+.ptile{background:linear-gradient(165deg,var(--green-soft) 0%,var(--sheet) 70%);border-color:color-mix(in srgb,var(--green) 22%,var(--line));box-shadow:0 0 0 1px color-mix(in srgb,var(--green) 10%,transparent),0 8px 26px var(--glow-green)}
+@media (hover:hover){.ptile:hover{box-shadow:0 0 0 4px color-mix(in srgb,var(--green) 22%,transparent),0 10px 34px var(--glow-green)}}
+.ptile:active{box-shadow:0 0 0 5px color-mix(in srgb,var(--green) 26%,transparent),0 6px 22px var(--glow-green)}
+.ptile:focus-visible{box-shadow:0 0 0 4px color-mix(in srgb,var(--green) 30%,transparent),0 8px 26px var(--glow-green)}
 .photos button{position:relative}
 .targets{list-style:none;margin:10px 0 0;padding:0}
 .targets li{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}.targets li:first-child{border-top:0}
