@@ -367,6 +367,9 @@ send:'<path d="M4 12l16-8-6 16-3-7z"/><path d="M11 13l9-9"/>',
 alert:'<path d="M12 4l10 17H2z"/><path d="M12 10v4M12 17.5h.01"/>',
 upload:'<path d="M12 16V5M7 9l5-5 5 5M4 20h16"/>',
 trophy:'<path d="M8 4h8v5a4 4 0 01-8 0z"/><path d="M8 6H4v1a4 4 0 004 4M16 6h4v1a4 4 0 01-4 4M12 13v4M8 20h8M9.5 17h5"/>',
+bake:'<path d="M7 13a4 4 0 01-.4-7.9A4.5 4.5 0 0112 3a4.5 4.5 0 015.4 2.1A4 4 0 0117 13v6H7z"/><path d="M7 16h10"/>',
+coffee:'<path d="M4 8h12v6a5 5 0 01-5 5H9a5 5 0 01-5-5z"/><path d="M16 10h2a2 2 0 010 4h-2M7 3v2M10 3v2M13 3v2"/>',
+flame:'<path d="M12 3c1 3 5 5 5 10a5 5 0 01-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/>',
 user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
 mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/>',
 pencil:'<path d="M4 20l1-4L16.5 4.5a2 2 0 013 3L8 19z"/>',
@@ -395,7 +398,7 @@ flask:'<path d="M9 3h6M10 3v6l-5 9a2 2 0 002 3h10a2 2 0 002-3l-5-9V3"/><path d="
 tree:'<path d="M12 21v-6"/><path d="M12 15c-4 0-7-2.500-7-6 0-3 2.500-5 4-5 .5-1.500 2-2 3-2s2.500.5 3 2c1.500 0 4 2 4 5 0 3.500-3 6-7 6z"/>',
 book:'<path d="M5 4h10a3 3 0 013 3v13H8a3 3 0 01-3-3z"/><path d="M5 17a3 3 0 013-3h10"/>'
 };
-const PICONS=["wrench","film","sprout","scissors","bike","smile","utensils","hammer","coop","palette","music","flask","tree","book"];
+const PICONS=["wrench","film","sprout","scissors","bike","smile","utensils","bake","coffee","flame","hammer","coop","palette","music","flask","tree","book"];
 document.getElementById("sprite").innerHTML=Object.entries(ICONS).map(([k,v])=>`<symbol id="i-${k}" viewBox="0 0 24 24">${v}</symbol>`).join("");
 const ic=(n,c="")=>`<svg class="i ${c}" aria-hidden="true" focusable="false"><use href="#i-${n}"/></svg>`;
 
@@ -405,12 +408,19 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const COLORS=["#a65608","#2f7d4f","#2a6b8f","#b5527a","#7a5cc4","#b08a14","#1f8a80","#b3261e"];
-const DEFAULTS=[["Maintenance","wrench",0],["Media","film",2],["Gardening","sprout",1],["Crafts","scissors",3],["Mountain biking","bike",6],["Crèche","smile",5],["Cooking","utensils",7],["Construction","hammer",4],["Chicken Coop","coop",0]];
+const DEFAULTS=[["Maintenance","wrench",0],["Media","film",2],["Gardening","sprout",1],["Crafts","scissors",3],["Mountain biking","bike",6],["Crèche","smile",5],["Baking","bake",7],["Construction","hammer",4],["Chicken Coop","coop",0],["Spirit","flame",7],["Coffee","coffee",5]];
 /* sign-in is switched off for now: the app opens with a PIN and keeps data on this device. Set LOGIN=true to bring staff sign-in and cloud sync back. */
 /* sign-in is switched off for now: the app opens straight in and keeps data on this device. Set LOGIN=true to bring staff sign-in and cloud sync back. An optional PIN can still lock a device. */
 const LOGIN=false,PINLEN=3;
 let S=load(),sm=loadSync(),user=null,sb=null,route="home",tab="goals",syncState=LOGIN?"":"Saved on this device",authReady=false,listening=null;
-function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.prods)return d}catch{}
+function upgrade(d){
+  const now=Date.now();let ch=false;
+  const c=d.prods.find(p=>p.id==="p6"&&p.name==="Cooking");if(c){c.name="Baking";c.icon="bake";c.u=now;ch=true}
+  [["p9","Spirit","flame",7],["p10","Coffee","coffee",5]].forEach(([id,name,icon,ci])=>{if(!d.prods.some(p=>p.id===id)){d.prods.push({id,name,icon,color:COLORS[ci],desc:"",members:[],goals:[],log:[],del:false,u:now});ch=true}});
+  if(ch){try{localStorage.setItem(KEY,JSON.stringify(d))}catch{}}
+  return d;
+}
+function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.prods)return upgrade(d)}catch{}
   const now=Date.now();return{prods:DEFAULTS.map(([name,icon,c],i)=>({id:"p"+i,name,icon,color:COLORS[c],desc:"",members:[],goals:[],log:[],del:false,u:now})),media:[]}}
 function loadSync(){try{return JSON.parse(localStorage.getItem(SYNC))||{}}catch{return{}}}
 const pctSeen={};
