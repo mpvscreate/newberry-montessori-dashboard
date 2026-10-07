@@ -94,6 +94,8 @@ nav.tabs button[aria-current=page]{color:var(--green);background:var(--green-sof
 .btn:active{transform:scale(.98)}
 @media (hover:hover){.btn:hover{border-color:var(--accent);box-shadow:0 0 0 4px var(--glow-soft),0 4px 18px var(--glow-soft)}}
 .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 2px 6px var(--glow-soft),0 6px 22px var(--glow)}
+.btn,.x,.chip,.mic,.fab,.tick{transition:transform .45s cubic-bezier(.34,1.56,.64,1),box-shadow .25s ease,background .15s,border-color .2s}
+.btn:active,.x:active,.chip:active,.mic:active,.fab:active{transform:scale(.95);transition-duration:.1s}
 .btn{white-space:nowrap}.btn.icon{width:48px;padding:0;flex:none}.btn.grow{flex:1 1 auto;min-width:max-content}
 .btn.danger{color:var(--red)}.btn.block{width:100%}.btn.small{padding:6px 14px;min-height:44px;font-size:.92rem;border-radius:13px}
 .btn[disabled]{opacity:.55;box-shadow:none}
@@ -279,11 +281,24 @@ textarea.t.ta{min-height:48px;height:48px;resize:none;overflow:hidden;line-heigh
 .row:has(textarea.ta){align-items:flex-start}
 .vprompt{margin:10px 0;padding:12px;border-radius:16px;background:var(--green-soft);animation:fadeIn .2s}
 .vprompt p{margin:0 0 10px;font-weight:600}
-/* production tiles: soft green glow */
-.ptile{background:linear-gradient(165deg,var(--green-soft) 0%,var(--sheet) 70%);border-color:color-mix(in srgb,var(--green) 22%,var(--line));box-shadow:0 0 0 1px color-mix(in srgb,var(--green) 10%,transparent),0 8px 26px var(--glow-green)}
-@media (hover:hover){.ptile:hover{box-shadow:0 0 0 4px color-mix(in srgb,var(--green) 22%,transparent),0 10px 34px var(--glow-green)}}
-.ptile:active{box-shadow:0 0 0 5px color-mix(in srgb,var(--green) 26%,transparent),0 6px 22px var(--glow-green)}
-.ptile:focus-visible{box-shadow:0 0 0 4px color-mix(in srgb,var(--green) 30%,transparent),0 8px 26px var(--glow-green)}
+/* production tiles: soft pillows that push in when pressed */
+:root{--pil-hi:rgba(255,255,255,.95);--pil-lo:rgba(112,86,40,.20);--pil-in-lo:rgba(112,86,40,.22);--pil-in-hi:rgba(255,255,255,.85)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--pil-hi:rgba(255,255,255,.055);--pil-lo:rgba(0,0,0,.6);--pil-in-lo:rgba(0,0,0,.65);--pil-in-hi:rgba(255,255,255,.05)}}
+:root[data-theme="dark"]{--pil-hi:rgba(255,255,255,.055);--pil-lo:rgba(0,0,0,.6);--pil-in-lo:rgba(0,0,0,.65);--pil-in-hi:rgba(255,255,255,.05)}
+.ptile{border:0;background:linear-gradient(145deg,color-mix(in srgb,var(--paper) 55%,#fff) 0%,var(--paper) 55%,color-mix(in srgb,var(--paper) 93%,#7a6334) 100%);
+  box-shadow:9px 9px 20px var(--pil-lo),-7px -7px 16px var(--pil-hi),inset 1px 1px 2px var(--pil-hi),inset -2px -3px 6px rgba(120,95,50,.07);
+  transition:transform .5s cubic-bezier(.34,1.56,.64,1),box-shadow .35s ease;will-change:transform;-webkit-user-select:none;user-select:none}
+:root[data-theme="dark"] .ptile{background:linear-gradient(145deg,color-mix(in srgb,var(--paper) 90%,#fff) 0%,var(--paper) 55%,color-mix(in srgb,var(--paper) 80%,#000) 100%)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .ptile{background:linear-gradient(145deg,color-mix(in srgb,var(--paper) 90%,#fff) 0%,var(--paper) 55%,color-mix(in srgb,var(--paper) 80%,#000) 100%)}}
+@media (hover:hover){.ptile:hover{transform:translateY(-2px);box-shadow:11px 12px 24px var(--pil-lo),-8px -8px 18px var(--pil-hi),inset 1px 1px 2px var(--pil-hi)}}
+.ptile.down{transform:perspective(700px) rotateX(var(--rx,0deg)) rotateY(var(--ry,0deg)) scale(.955);transition:transform .12s ease-out,box-shadow .12s ease-out;
+  box-shadow:inset 6px 6px 13px var(--pil-in-lo),inset -5px -5px 11px var(--pil-in-hi),0 0 0 transparent}
+.ptile:focus-visible{outline:3px solid var(--green);outline-offset:3px}
+.ptile .pav{box-shadow:inset 1px 1px 3px rgba(255,255,255,.55),inset -2px -2px 5px rgba(0,0,0,.08),2px 3px 7px rgba(80,60,20,.12)}
+.ptile.down .pav{transform:scale(.94);transition:transform .12s}
+.pav{transition:transform .5s cubic-bezier(.34,1.56,.64,1)}
+.pbadge{box-shadow:0 0 0 3px var(--paper)}
+@media (prefers-reduced-motion:reduce){.ptile.down{transform:scale(.97)}}
 .photos button{position:relative}
 .targets{list-style:none;margin:10px 0 0;padding:0}
 .targets li{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}.targets li:first-child{border-top:0}
@@ -491,6 +506,14 @@ function wireMics(root){root.querySelectorAll("[data-mic]").forEach(b=>{
     listening=r;b.classList.add("on");b.setAttribute("aria-label","Stop dictating");r.start();
   }})}
 
+/* premium press: tiles tilt toward the finger and push in */
+(()=>{const calm=matchMedia("(prefers-reduced-motion: reduce)").matches;let cur=null;
+  const up=()=>{if(cur){cur.classList.remove("down");cur=null}};
+  document.addEventListener("pointerdown",e=>{const t=e.target.closest&&e.target.closest(".ptile");if(!t)return;cur=t;
+    if(!calm){const r=t.getBoundingClientRect(),x=((e.clientX-r.left)/r.width-.5)*2,y=((e.clientY-r.top)/r.height-.5)*2;t.style.setProperty("--ry",(x*7).toFixed(1)+"deg");t.style.setProperty("--rx",(-y*7).toFixed(1)+"deg")}
+    t.classList.add("down");if(SFX.vib){try{navigator.vibrate&&navigator.vibrate(5)}catch{}}},{passive:true});
+  ["pointerup","pointercancel","pointerleave","dragend","scroll"].forEach(ev=>document.addEventListener(ev,up,{passive:true,capture:true}));
+})();
 /* routing */
 const nav=r=>{location.hash="#/"+(r==="home"?"":r)};
 addEventListener("hashchange",()=>{if(listening)listening.stop();route=location.hash.slice(2)||"home";render();scrollTo(0,0)});
@@ -600,7 +623,7 @@ function overviewPage(){
 const actRow=f=>`<li><div class="avatar" style="color:${f.p.color}">${ic(f.p.icon)}</div><div class="grow"><b>${esc(f.p.name)}</b> <span class="pill type">${f.k}</span><div>${esc(f.txt)}</div><div class="small muted">${fmt(f.t)}</div></div></li>`;
 const fab=()=>`<div class="fab-wrap"><button class="fab" id="addp" aria-label="New production">${ic("plus")}<span>New production</span></button></div>`;
 function wireHome(){
-  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{fb("tap");nav("p/"+b.dataset.open)});
+  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{nav("p/"+b.dataset.open)});
   $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#rep")&&($("#rep").onclick=()=>reportSheet(null));
 }
 function activityPage(){const f=feedItems().slice(0,60);return `<div class="page-h"><h2>Activity</h2></div><div class="card">${f.length?`<ul class="list">${f.map(actRow).join("")}</ul>`:`<div class="empty">${ic("pulse","xl")}<h3>No activity yet</h3>Comments and log entries from every production show up here.</div>`}</div>`}
