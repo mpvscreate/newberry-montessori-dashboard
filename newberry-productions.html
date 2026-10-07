@@ -275,6 +275,8 @@ html{overscroll-behavior-y:contain}
 .fw-banner b{font:700 1.05rem var(--display)}
 .fw-ic{width:48px;height:48px;border-radius:16px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;flex:none}
 @keyframes bannerIn{from{opacity:0;transform:translate(-50%,-24px) scale(.9)}}
+textarea.t.ta{min-height:48px;height:48px;resize:none;overflow:hidden;line-height:1.35;padding:12px 14px;display:block}
+.row:has(textarea.ta){align-items:flex-start}
 .photos button{position:relative}
 .targets{list-style:none;margin:10px 0 0;padding:0}
 .targets li{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}.targets li:first-child{border-top:0}
@@ -460,10 +462,13 @@ function sheet(title,body,wire){
     h.addEventListener("pointermove",e=>{if(y0===null)return;dy=Math.max(0,e.clientY-y0);shEl.style.transform=`translateY(${dy}px)`});
     const end=()=>{if(y0===null)return;const v=dy/(Date.now()-t0+1);y0=null;shEl.style.transition="transform .2s ease";if(dy>110||v>.6){shEl.style.transform="translateY(100%)";setTimeout(()=>closeSheet(),170)}else shEl.style.transform=""};
     h.addEventListener("pointerup",end);h.addEventListener("pointercancel",end)});
-  shEl.focus();wire&&wire(l,closeSheet);
+  shEl.focus();wire&&wire(l,closeSheet);l.querySelectorAll(".ta").forEach(autosize);
 }
 const isOpen=()=>!!$("#layer").firstChild;
 
+/* text boxes that grow with what you type */
+function autosize(el){if(!el)return;el.style.height="auto";const h=Math.min(el.scrollHeight+2,220);el.style.height=h+"px";el.style.overflowY=el.scrollHeight+2>220?"auto":"hidden"}
+document.addEventListener("input",e=>{if(e.target.classList&&e.target.classList.contains("ta"))autosize(e.target)});
 /* voice */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 const micBtn=()=>SR?`<button type="button" class="mic" data-mic aria-label="Dictate with your voice" title="Tap and speak">${ic("mic")}</button>`:"";
@@ -473,7 +478,7 @@ function wireMics(root){root.querySelectorAll("[data-mic]").forEach(b=>{
     if(listening){listening.stop();return}
     const r=new SR();r.lang=navigator.language||"en-ZA";r.interimResults=true;r.continuous=true;
     const base=field.value?field.value.trimEnd()+" ":"";
-    r.onresult=e=>{let t="";for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;field.value=base+t};
+    r.onresult=e=>{let t="";for(let i=0;i<e.results.length;i++)t+=e.results[i][0].transcript;field.value=base+t;autosize(field)};
     r.onend=()=>{listening=null;b.classList.remove("on");b.setAttribute("aria-label","Dictate with your voice")};
     r.onerror=e=>toast(e.error==="not-allowed"?"Allow microphone access to dictate.":"Voice stopped: "+e.error);
     listening=r;b.classList.add("on");b.setAttribute("aria-label","Stop dictating");r.start();
@@ -555,6 +560,7 @@ function render(){
   $("#thm").onclick=()=>{theme(isDark()?"light":"dark");render()};
   hydrate();lastRoute=route+tab;
   p?wireProd(p):({home:wireHome,overview:wireHome,activity(){},more:wireMore}[route]||wireHome)();
+  document.querySelectorAll(".ta").forEach(autosize);
   scrollTo(0,sy);restoreFocus(fk);
 }
 
@@ -701,10 +707,10 @@ function goalsTab(p){
     <div class="gbody" ${op?"":"hidden"}>
     ${hasT(g)?`<ul class="targets">${g.targets.map(t=>`<li class="${t.done?"tdone":""}"><button class="tick sm" data-tt="${t.id}" aria-pressed="${!!t.done}" aria-label="${t.done?"Reopen":"Complete"} target ${esc(t.title)}">${ic("check","sm")}</button><span class="grow">${esc(t.title)}</span></li>`).join("")}</ul>`
       :`<div class="note-warn">${ic("alert")}<div><b>No targets yet.</b> Break this goal into steps so progress can be tracked.</div><button class="btn small" data-edg>Add targets</button></div>`}
-    ${hasT(g)?`<div class="row" style="margin-top:8px"><input class="t" style="flex:1 1 6rem" type="text" data-ti placeholder="Add another target" aria-label="New target for ${esc(g.title)}">${micBtn()}<button class="btn icon" data-ta aria-label="Add target">${ic("plus")}</button></div>`:""}
+    ${hasT(g)?`<div class="row" style="margin-top:8px"><textarea class="t ta" rows="1" style="flex:1 1 6rem" data-ti placeholder="Add another target" aria-label="New target for ${esc(g.title)}"></textarea>${micBtn()}<button class="btn icon" data-ta aria-label="Add target">${ic("plus")}</button></div>`:""}
     ${g.comments.length?`<h4 class="eyebrow" style="margin:16px 0 4px">Comments</h4>`:""}
     ${g.comments.map(c=>`<div class="cm">${esc(c.text)}<div class="small muted">${esc(c.by)} · ${fmt(c.t)}</div></div>`).join("")}
-    <div class="row" style="margin-top:10px"><input class="t" style="flex:1 1 6rem" type="text" data-ci placeholder="Add a comment" aria-label="Comment on ${esc(g.title)}">${micBtn()}<button class="btn primary icon" data-cs aria-label="Post comment">${ic("send")}</button></div></div></div>`}).join("")
+    <div class="row" style="margin-top:10px"><textarea class="t ta" rows="1" style="flex:1 1 6rem" data-ci placeholder="Add a comment" aria-label="Comment on ${esc(g.title)}"></textarea>${micBtn()}<button class="btn primary icon" data-cs aria-label="Post comment">${ic("send")}</button></div></div></div>`}).join("")
     :`<div class="empty">${ic("target","xl")}<h3>No goals yet</h3><p style="margin:0 0 14px">Set a main goal, then break it into targets.</p><button class="btn primary" id="e-add">${ic("plus")}Set your first goal</button></div>`)+(p.goals.length?fabBtn("addg","New goal"):"");
 }
 function wireGoals(p){
@@ -719,10 +725,10 @@ function wireGoals(p){
     el.querySelectorAll("[data-tt]").forEach(b=>b.onclick=()=>{const t=g.targets.find(x=>x.id===b.dataset.tt);t.done=!t.done;t.doneAt=t.done?Date.now():0;const fin=syncGoal(g);if(fin){confetti();fb("done")}else fb(t.done?"tick":"untick");save(p);render()});
     el.querySelectorAll("[data-edg]").forEach(b=>b.onclick=()=>goalSheet(p,g));
     const ti=el.querySelector("[data-ti]"),addT=()=>{const v=ti.value.trim();if(!v)return;if(listening)listening.stop();g.targets.push({id:uid(),title:v,done:false,doneAt:0});syncGoal(g);save(p);fb("add");render()};
-    if(ti){el.querySelector("[data-ta]").onclick=addT;ti.onkeydown=e=>{if(e.key==="Enter")addT()}}
+    if(ti){el.querySelector("[data-ta]").onclick=addT;ti.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();addT()}}}
     const add=()=>{const t=el.querySelector("[data-ci]").value.trim();if(!t)return;if(listening)listening.stop();g.comments.push({id:uid(),text:t,by:who(),t:Date.now()});save(p);fb("add");render()};
     el.querySelector("[data-cs]").onclick=add;
-    el.querySelector("[data-ci]").onkeydown=e=>{if(e.key==="Enter")add()};
+    el.querySelector("[data-ci]").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();add()}};
   });
 }
 function wireProd(p){
@@ -737,20 +743,20 @@ const hasT=g=>g.targets&&g.targets.length>0;
 function syncGoal(g){const was=g.done;if(hasT(g)){const d=g.targets.filter(t=>t.done).length;g.pct=Math.round(d/g.targets.length*100);g.done=d===g.targets.length}g.doneAt=g.done?(g.doneAt||Date.now()):0;return g.done&&!was}
 function goalSheet(p,g){
   const isNew=!g;g=g||{title:"",due:""};const tl=(g.targets||[]).map(t=>({...t}));
-  sheet(isNew?"New goal":"Edit goal",`<label class="f" for="gt">Main goal</label><div class="row"><input class="t" id="gt" type="text" value="${esc(g.title)}" placeholder="What do we want to achieve?">${micBtn()}</div>
+  sheet(isNew?"New goal":"Edit goal",`<label class="f" for="gt">Main goal</label><div class="row"><textarea class="t ta" rows="1" id="gt" placeholder="What do we want to achieve?">${esc(g.title)}</textarea>${micBtn()}</div>
   <label class="f" for="gd">Due date (optional)</label><input class="t" id="gd" type="date" value="${esc(g.due)}">
   <label class="f">Targets <span class="muted" style="font-weight:400">(at least one)</span></label>
   <p class="hint" style="margin:0 0 8px">Break the goal into small steps. The goal's progress grows as each target is done.</p>
   <div id="tl"></div>
-  <div class="row" style="margin-top:8px"><input class="t" id="tn" type="text" placeholder="Add a target" aria-label="New target">${micBtn()}<button class="btn icon" id="ta" type="button" aria-label="Add target">${ic("plus")}</button></div>
+  <div class="row" style="margin-top:8px"><textarea class="t ta" rows="1" id="tn" placeholder="Add a target" aria-label="New target"></textarea>${micBtn()}<button class="btn icon" id="ta" type="button" aria-label="Add target">${ic("plus")}</button></div>
   <p class="err" id="ge" role="alert" hidden></p>
   <div class="row" style="margin-top:22px">${isNew?"":`<button class="btn danger" id="del">${ic("trash")}Delete</button>`}<span class="grow"></span><button class="btn primary" id="ok">Save</button></div>`,(d,close)=>{
     wireMics(d);if(isNew)setTimeout(()=>$("#gt")&&$("#gt").focus(),60);$("#gt").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();$("#tn").focus()}};
     const err=m=>{const e=$("#ge");e.textContent=m;e.hidden=!m};
-    const draw=()=>{$("#tl").innerHTML=tl.map((t,i)=>`<div class="row" style="margin-bottom:8px"><input class="t" data-i="${i}" type="text" value="${esc(t.title)}" aria-label="Target ${i+1}"><button class="x" data-rm="${i}" type="button" aria-label="Remove target ${i+1}">${ic("x")}</button></div>`).join("");
-      d.querySelectorAll("[data-i]").forEach(inp=>inp.oninput=()=>{tl[+inp.dataset.i].title=inp.value});
+    const draw=()=>{$("#tl").innerHTML=tl.map((t,i)=>`<div class="row" style="margin-bottom:8px"><textarea class="t ta" rows="1" data-i="${i}" aria-label="Target ${i+1}">${esc(t.title)}</textarea><button class="x" data-rm="${i}" type="button" aria-label="Remove target ${i+1}">${ic("x")}</button></div>`).join("");
+      d.querySelectorAll("[data-i]").forEach(inp=>{autosize(inp);inp.oninput=()=>{tl[+inp.dataset.i].title=inp.value};inp.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();$("#tn").focus()}}});
       d.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{tl.splice(+b.dataset.rm,1);draw()})};
-    const add=()=>{const v=$("#tn").value.trim();if(!v){$("#tn").focus();return false}if(listening)listening.stop();tl.push({id:uid(),title:v,done:false,doneAt:0});$("#tn").value="";err("");draw();$("#tn").focus();return true};
+    const add=()=>{const v=$("#tn").value.trim();if(!v){$("#tn").focus();return false}if(listening)listening.stop();tl.push({id:uid(),title:v,done:false,doneAt:0});$("#tn").value="";autosize($("#tn"));err("");draw();$("#tn").focus();return true};
     draw();$("#ta").onclick=add;$("#tn").onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();add()}};
     if(!isNew)$("#del").onclick=()=>{const i=p.goals.indexOf(g);p.goals.splice(i,1);save(p);close();render();toast("Goal deleted.",()=>{p.goals.splice(i,0,g);save(p);render()})};
     $("#ok").onclick=()=>{const t=$("#gt").value.trim();if(!t){err("Give the goal a name.");$("#gt").focus();return}
@@ -836,7 +842,7 @@ function wireMedia(p){
   document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{
     const m=S.media.find(x=>x.id===b.dataset.m);
     if(selecting){sel.has(m.id)?sel.delete(m.id):sel.add(m.id);render();return}
-    sheet(m.type==="video"?"Video":"Photo",`${m.type==="video"?`<video data-mid="${m.id}" controls playsinline style="width:100%;border-radius:16px;margin-top:8px;background:#000"></video>`:`<img data-mid="${m.id}" alt="" style="width:100%;border-radius:16px;margin-top:8px">`}<label class="f" for="mc">Caption</label><div class="row"><input class="t" id="mc" type="text" value="${esc(m.cap)}">${micBtn()}</div>
+    sheet(m.type==="video"?"Video":"Photo",`${m.type==="video"?`<video data-mid="${m.id}" controls playsinline style="width:100%;border-radius:16px;margin-top:8px;background:#000"></video>`:`<img data-mid="${m.id}" alt="" style="width:100%;border-radius:16px;margin-top:8px">`}<label class="f" for="mc">Caption</label><div class="row"><textarea class="t ta" rows="1" id="mc">${esc(m.cap)}</textarea>${micBtn()}</div>
     <p class="muted small">${esc(m.by)} · ${fmt(m.t)}</p><div class="row"><button class="btn danger" id="del">${ic("trash")}Delete</button><span class="grow"></span><button class="btn primary" id="ok">Save</button></div>`,(d,close)=>{
       hydrate(d);wireMics(d);$("#ok").onclick=()=>{m.cap=$("#mc").value.trim();save(m);close();render()};
       $("#del").onclick=()=>{m.del=true;save(m);close();render();if(user&&sb)sb.storage.from("flock-media").remove(["ms/"+m.id]).catch(()=>{});if(sm.up)delete sm.up[m.id];
