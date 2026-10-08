@@ -606,7 +606,7 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
 const COLORS=["#a65608","#2f7d4f","#2a6b8f","#b5527a","#7a5cc4","#b08a14","#1f8a80","#b3261e"];
-const DEFAULTS=[["Maintenance","wrench",0],["Media","film",2],["Gardening","sprout",1],["Crafts","scissors",3],["Mountain biking","bike",6],["Crèche","smile",5],["Baking","bake",7],["Construction","hammer",4],["Chicken Coop","coop",0],["Spirit","flame",7],["Coffee","coffee",5]];
+const DEFAULTS=[["Maintenance","wrench",0],["Media","film",2],["Gardening","sprout",1],["Crafts","scissors",3],["Mountain biking","bike",6],["Crèche","smile",5],["Baking","bake",7],["Construction","hammer",4],["Chicken Coop","coop",0],["Spirit","flame",7],["EM","coffee",5]];
 /* sign-in is switched off for now: the app opens with a PIN and keeps data on this device. Set LOGIN=true to bring staff sign-in and cloud sync back. */
 /* sign-in is switched off for now: the app opens straight in and keeps data on this device. Set LOGIN=true to bring staff sign-in and cloud sync back. An optional PIN can still lock a device. */
 const LOGIN=false,PINLEN=3;
@@ -614,7 +614,8 @@ let S=load(),sm=loadSync(),user=null,sb=null,route="home",tab="story",syncState=
 function upgrade(d){
   const now=Date.now();let ch=false;
   const c=d.prods.find(p=>p.id==="p6"&&p.name==="Cooking");if(c){c.name="Baking";c.icon="bake";c.u=now;ch=true}
-  [["p9","Spirit","flame",7],["p10","Coffee","coffee",5]].forEach(([id,name,icon,ci])=>{if(!d.prods.some(p=>p.id===id)){d.prods.push({id,name,icon,color:COLORS[ci],desc:"",members:[],goals:[],log:[],del:false,u:now});ch=true}});
+  const cf=d.prods.find(p=>p.id==="p10"&&p.name==="Coffee");if(cf){cf.name="EM";cf.u=now;ch=true}
+  [["p9","Spirit","flame",7],["p10","EM","coffee",5]].forEach(([id,name,icon,ci])=>{if(!d.prods.some(p=>p.id===id)){d.prods.push({id,name,icon,color:COLORS[ci],desc:"",members:[],goals:[],log:[],del:false,u:now});ch=true}});
   if(ch){try{localStorage.setItem(KEY,JSON.stringify(d))}catch{}}
   return d;
 }
@@ -996,7 +997,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.4.1";
+const APP_VER="5.4.2";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
