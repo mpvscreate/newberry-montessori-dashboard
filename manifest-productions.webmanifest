@@ -1,9 +1,10 @@
 {
   "name": "MS Productions",
   "short_name": "Productions",
+  "id": "/newberry-productions.html",
   "description": "Goals, targets, photos, team and progress for every Middle School production.",
   "start_url": "./newberry-productions.html",
-  "scope": "./",
+  "scope": "/newberry-productions.html",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#fbf6ec",
