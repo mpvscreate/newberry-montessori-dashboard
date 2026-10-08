@@ -440,6 +440,9 @@ nav.tabs button.cap .i{width:30px;height:30px;stroke-width:2.2}
 .vbar:active{transform:scale(.97);transition-duration:.09s;box-shadow:inset 5px 5px 11px var(--pil-in-lo),inset -4px -4px 9px var(--pil-in-hi)}
 .txt-wrap{position:relative}.txt-wrap .txt-card{padding-right:56px}
 .txt-mic{position:absolute;right:6px;bottom:6px;z-index:1;width:40px;height:40px}
+.cbadge{position:absolute;left:8px;bottom:8px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#fff;z-index:1}
+.cbadge.c-no{background:#d33a2f}
+.ready .acc-ic{flex:none}
 .photos button{position:relative}
 .targets{list-style:none;margin:10px 0 0;padding:0}
 .targets li{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}.targets li:first-child{border-top:0}
@@ -681,8 +684,10 @@ async function addFiles(pid,files){
 }
 function openMediaSheet(m){
   sheet(m.type==="video"?"Video":"Photo",`${m.type==="video"?`<video data-mid="${m.id}" controls playsinline style="width:100%;border-radius:16px;margin-top:8px;background:#000"></video>`:`<img data-mid="${m.id}" alt="" style="width:100%;border-radius:16px;margin-top:8px">`}<label class="f" for="mc">Caption</label><div class="row"><textarea class="t ta" rows="1" id="mc">${esc(m.cap)}</textarea>${micBtn()}</div>
+  <label class="f">Consent to share</label><div class="chips" id="mcon" role="group" aria-label="Consent to share">${CONSENT.map(([k,l])=>`<button type="button" class="chip" data-c="${k}" aria-pressed="${m.consent===k}">${l}</button>`).join("")}</div>
   <p class="muted small">${esc(m.by)} · ${fmt(m.t)}</p><div class="row"><button class="btn danger" id="del">${ic("trash")}Delete</button><span class="grow"></span><button class="btn primary" id="ok">Done</button></div>`,(d,close)=>{
-    hydrate(d);wireMics(d);$("#ok").onclick=()=>{m.cap=$("#mc").value.trim();save(m);close();render()};
+    hydrate(d);wireMics(d);d.querySelectorAll("#mcon .chip").forEach(b=>b.onclick=()=>{const was=b.getAttribute("aria-pressed")==="true";d.querySelectorAll("#mcon .chip").forEach(x=>x.setAttribute("aria-pressed","false"));b.setAttribute("aria-pressed",String(!was))});
+    $("#ok").onclick=()=>{m.cap=$("#mc").value.trim();const cc=d.querySelector("#mcon [aria-pressed=true]");m.consent=cc?cc.dataset.c:"";save(m);close();render()};
     $("#del").onclick=()=>{m.del=true;save(m);close();render();if(user&&sb)sb.storage.from("flock-media").remove(["ms/"+m.id]).catch(()=>{});if(sm.up)delete sm.up[m.id];
       toast("Deleted.",()=>{m.del=false;save(m);render()})}});
 }
@@ -707,7 +712,7 @@ function storyItems(p){
 function storyCard(x){
   const ex=storyCardExtra(x);if(ex)return ex;
   if(x.k==="log")return `<div class="sitem"><span class="sic">${ic("note")}</span><div class="sbody"><div>${esc(x.l.text)}</div><div class="small muted">${esc(x.l.by)} · ${tmOf(x.t)}</div></div><button class="x sm" data-dl="${x.l.id}" aria-label="Delete update">${ic("trash")}</button></div>`;
-  if(x.k==="media")return `<div class="sitem media"><button class="smedia" data-m="${x.m.id}" aria-label="Open ${x.m.type==="video"?"video":"photo"} ${esc(x.m.cap||"")}">${x.m.type==="video"?`<video data-mid="${x.m.id}" muted playsinline preload="metadata"></video><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${x.m.id}" alt="${esc(x.m.cap||"Photo")}" loading="lazy">`}</button>${x.m.cap?`<div class="scap">${esc(x.m.cap)}</div>`:""}<div class="small muted">${esc(x.m.by)} · ${tmOf(x.t)}</div></div>`;
+  if(x.k==="media")return `<div class="sitem media"><button class="smedia" data-m="${x.m.id}" aria-label="Open ${x.m.type==="video"?"video":"photo"} ${esc(x.m.cap||"")}">${x.m.type==="video"?`<video data-mid="${x.m.id}" muted playsinline preload="metadata"></video><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${x.m.id}" alt="${esc(x.m.cap||"Photo")}" loading="lazy">`}${consBadge(x.m)}</button>${x.m.cap?`<div class="scap">${esc(x.m.cap)}</div>`:""}<div class="small muted">${esc(x.m.by)} · ${tmOf(x.t)}</div></div>`;
   if(x.k==="goal")return `<div class="sitem win"><span class="sic ok">${ic("trophy")}</span><div class="sbody"><b>Goal finished</b><div>${esc(x.g.title)}</div><div class="small muted">${tmOf(x.t)}</div></div></div>`;
   if(x.k==="target")return `<div class="sitem"><span class="sic ok">${ic("check")}</span><div class="sbody">Target done: ${esc(x.tg.title)}${x.tg.who?` <span class="small muted">· ${esc(x.tg.who)}</span>`:""}<div class="small muted">${esc(x.g.title)} · ${tmOf(x.t)}</div></div></div>`;
   return `<div class="sitem"><span class="sic">${ic("chat")}</span><div class="sbody">${esc(x.c.text)}<div class="small muted">${esc(x.g.title)} · ${esc(x.c.by)} · ${tmOf(x.t)}</div></div></div>`;
@@ -790,7 +795,7 @@ function canRun(c){return BOOK_KINDS.includes(c.kind)||c.kind==="tick"||(c.kind=
 function runCommand(c){
   if(BOOK_KINDS.includes(c.kind))return runBook(c);
   const{p}=c;let msg="";
-  if(c.kind==="tick"){const g=c.g,t=c.t;t.done=true;t.doneAt=Date.now();const fin=syncGoal(g);save(p);if(fin){confetti();fb("done")}else fb("tick");msg=`Ticked "${t.title}"`}
+  if(c.kind==="tick"){if(gateBlocks(p)){closeSheet();setTimeout(()=>gateSheet(p),150);return}const g=c.g,t=c.t;t.done=true;t.doneAt=Date.now();const fin=syncGoal(g);save(p);if(fin){confetti();fb("done")}else fb("tick");msg=`Ticked "${t.title}"`}
   else if(c.kind==="addTarget"){c.g.targets.push({id:uid(),title:c.text,done:false,doneAt:0});syncGoal(c.g);save(p);fb("add");msg=`Target added to ${p.name}`}
   else if(c.kind==="note"){p.log.push({id:uid(),text:c.text,by:who(),t:Date.now()});save(p);fb("add");msg=`Update posted in ${p.name}`}
   else if(c.kind==="goal"){closeSheet();goalSheet(p,null,c.text);return}
@@ -969,7 +974,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.1";
+const APP_VER="5.2";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1126,7 +1131,7 @@ function planTab(p){
     <h3 class="sub-h">Risks and difficulties</h3><div class="bk-list">${p.risks.map(r=>bkRow("risk:"+r.id,esc(r.risk),"",esc(r.manage||""))).join("")}</div>${addBtn("risk:new","Risk")}
     ${txtCard(p,"perms","Permissions, training or supervision needed before starting","For example: training on how to use a jigsaw")}
     ${txtCard(p,"waste","How we will reduce waste and care for our work space","Tap to write")}`;
-  return setupCard(p)+voiceBar(p,"plan")+
+  return setupCard(p)+carryCard(p)+voiceBar(p,"plan")+
     acc(p,"team","users","Team and roles",`${p.members.length} member${p.members.length===1?"":"s"} · ${p.roles.length} role${p.roles.length===1?"":"s"}`,stp(p.members.length>0&&p.roles.length>0,p.members.length>0&&p.roles.length>0?"Done":"To do"),team)+
     acc(p,"ideas","sparkle","Ideas and observation",p.txt.chosen?esc(p.txt.chosen).slice(0,50):"What does the community need?",stp(!!(p.ideas.length||p.txt.chosen),p.ideas.length||p.txt.chosen?"Done":"To do"),ideas)+
     acc(p,"prop","book","Project proposal",statusLbl,stp(pr.status==="approved",statusLbl),prop)+
@@ -1213,11 +1218,11 @@ BA.refl=(p,id)=>{
 };
 BA.sess=(p,id)=>{
   const ex=id==="new"?null:byId(p.weeks,id),open=[];p.goals.forEach(g=>(g.targets||[]).forEach(t=>{if(!t.done)open.push({task:t.title,who:t.who||"",result:""})}));
-  const def={label:"Week "+(p.weeks.length+1),date:todayStr(),recorder:who(),present:p.members.slice(),tasks:open.slice(0,5),tools:false};
+  const wm=weekMoney(p,todayStr()),def={label:"Week "+(p.weeks.length+1),date:todayStr(),recorder:who(),present:p.members.slice(),tasks:open.slice(0,5),tools:false,spent:wm.spent?String(wm.spent):"",income:wm.income?String(wm.income):"",receipts:wm.receipts};
   formSheet({title:ex?"Edit session":"New session",data:ex||def,done:"Save session",
-    fields:[{t:"head",l:"This session"},{k:"label",t:"text",l:"Week or session",req:true},{k:"date",t:"date",l:"Date"},{k:"recorder",t:"text",l:"Recorder",sug:p.members,mic:true},{k:"present",t:"chips",l:"Present",o:p.members},
+    fields:[...(prevNext(p)?[{t:"note",l:"Last time you planned: "+prevNext(p)}]:[]),{t:"head",l:"This session"},{k:"label",t:"text",l:"Week or session",req:true},{k:"date",t:"date",l:"Date"},{k:"recorder",t:"text",l:"Recorder",sug:p.members,mic:true},{k:"present",t:"chips",l:"Present",o:p.members},
       {t:"head",l:"Plan"},{k:"priorities",t:"area",l:"Our priorities for this session"},{k:"tasks",t:"rows",l:"Tasks and progress",cols:[{k:"task",l:"Task"},{k:"who",l:"Person"},{k:"result",l:"Progress or result"}]},
-      {t:"head",l:"What happened"},{k:"problem",t:"area",l:"Problem we met and how we responded"},{k:"spent",t:"num",l:"Money spent (R)"},{k:"income",t:"num",l:"Income (R)"},{k:"receipts",t:"text",l:"Receipt numbers"},{k:"learned",t:"area",l:"What we learned or improved"},{k:"next",t:"area",l:"Next steps and who will do them"},
+      {t:"head",l:"What happened"},{t:"note",l:"Money is filled in from your expenditure and income records for the 7 days up to the session date. You can change it."},{k:"problem",t:"area",l:"Problem we met and how we responded"},{k:"spent",t:"num",l:"Money spent (R)"},{k:"income",t:"num",l:"Income (R)"},{k:"receipts",t:"text",l:"Receipt numbers"},{k:"learned",t:"area",l:"What we learned or improved"},{k:"next",t:"area",l:"Next steps and who will do them"},
       {t:"head",l:"Close up"},{k:"tools",t:"switch",l:"Tools returned and space cared for"},{k:"checked",t:"text",l:"Checked by",sug:p.members,mic:true}],
     onSave:v=>{if(ex)Object.assign(ex,v);else p.weeks.push({id:uid(),...v});save(p);fb("done");render();if(!ex)toast("Session saved.")},
     onDelete:ex?()=>{const i=p.weeks.indexOf(ex);p.weeks.splice(i,1);save(p);render();toast("Session deleted.",()=>{p.weeks.splice(i,0,ex);save(p);render()})}:null});
@@ -1229,7 +1234,7 @@ BA.evid=(p,id)=>{
 BA.target=(p,id)=>{
   const [gid,tid]=id.split("."),g=byId(p.goals,gid),t=g&&(g.targets||[]).find(x=>x.id===tid);if(!t)return;
   formSheet({title:"Task",fields:[{k:"title",t:"area",l:"Task or milestone",req:true},memberField(p,"who","Person"),{k:"due",t:"date",l:"Due date"},{k:"st",t:"select",l:"Status",o:STATUS}],data:{title:t.title,who:t.who||"",due:t.due||"",st:t.done?"Complete":(t.st||"Not started")},
-    onSave:v=>{t.title=v.title;t.who=v.who;t.due=v.due;const was=t.done;t.done=v.st==="Complete";t.st=t.done?"":v.st;if(t.done&&!was)t.doneAt=Date.now();if(!t.done)t.doneAt=0;const fin=syncGoal(g);save(p);if(fin){confetti();fb("done")}else fb("tick");render()},
+    onSave:v=>{if(v.st!=="Not started"&&gateBlocks(p)){gateSheet(p);return false}t.title=v.title;t.who=v.who;t.due=v.due;const was=t.done;t.done=v.st==="Complete";t.st=t.done?"":v.st;if(t.done&&!was)t.doneAt=Date.now();if(!t.done)t.doneAt=0;const fin=syncGoal(g);save(p);if(fin){confetti();fb("done")}else fb("tick");render()},
     onDelete:()=>{const i=g.targets.indexOf(t);g.targets.splice(i,1);syncGoal(g);save(p);render();toast("Task deleted.",()=>{g.targets.splice(i,0,t);syncGoal(g);save(p);render()})}});
 };
 
@@ -1243,7 +1248,7 @@ function workTab(p){
   const dots=Array.from({length:9},(_,i)=>`<span class="dot9 ${i<wk.length?"on":""}" aria-hidden="true"></span>`).join("");
   const sess=`<div class="row" style="margin-bottom:10px"><div class="dots9" role="img" aria-label="${wk.length} of 9 weekly records">${dots}</div><span class="small muted grow">${wk.length} of 9 weeks recorded</span></div><div class="bk-list">${wk.map(w=>bkRow("sess:"+w.id,esc(w.label||"Session"),w.spent?rands(toNum(w.spent)):"",`${dShort(w.date)} · ${(w.present||[]).length} present${w.recorder?" · "+esc(w.recorder):""}`)).join("")}</div>${addBtn("sess:new","Record a session")}`;
   const ev=`<p class="small muted" style="margin:0 0 8px">Check the quality of finished tasks and keep evidence: a photo, a sample or feedback.</p>${done.length?`<div class="bk-list">${done.map(({g,t})=>bkRow("evid:"+g.id+"."+t.id,esc(t.title),t.chk?stp(true,"Checked by "+esc(t.chk)):stp(false,"Needs checking"),`${esc(g.title)}${t.doneAt?" · "+dShort(new Date(t.doneAt).toISOString().slice(0,10)):""}`)).join("")}</div>`:`<div class="empty" style="padding:10px 0">Finish a task and it appears here for checking.</div>`}${txtCard(p,"served","Feedback from the people our work served or customers","Tap to write")}`;
-  return voiceBar(p,"work")+acc(p,"plan","target","Action plan",`${p.goals.length} milestone${p.goals.length===1?"":"s"}`,stp(nT>0&&dT===nT,nT?`${dT}/${nT} done`:"To do"),plan)+
+  return voiceBar(p,"work")+readyCard(p)+acc(p,"plan","target","Action plan",`${p.goals.length} milestone${p.goals.length===1?"":"s"}`,stp(nT>0&&dT===nT,nT?`${dT}/${nT} done`:"To do"),plan)+
     acc(p,"sess","calendar","Weekly records",`${wk.length} of 9 recorded`,stp(wk.length>0,wk.length?wk.length+" saved":"To do"),sess)+
     acc(p,"evid","check","Completed work and evidence",`${done.filter(x=>x.t.chk).length} of ${dT} checked`,stp(dT>0&&done.every(x=>x.t.chk),dT?`${done.filter(x=>x.t.chk).length}/${dT} checked`:"None yet"),ev);
 }
@@ -1281,7 +1286,7 @@ function wrapTab(p){
   return voiceBar(p,"wrap")+acc(p,"rev","flag","End of term review",R.completed||p.txt.achieved?"In progress":"Look back on the term",stp(!!p.txt.achieved&&!!p.txt.compare,p.txt.achieved&&p.txt.compare?"Done":"To do"),rev)+
     acc(p,"refl","user","Individual reflections",`${refl.filter(r=>r.done).length} of ${p.members.length} written`,stp(refl.length>0&&refl.every(r=>r.done),refl.length?`${refl.filter(r=>r.done).length}/${refl.length}`:"No members"),rf)+
     acc(p,"hand","users","Handover to the next team",H.to?"Handed over":"Leave it ready to continue",stp(!!H.to,H.to?"Done":"To do"),hand)+
-    `<div class="card"><h2>Project book</h2><p class="muted" style="margin:0 0 12px">Everything you recorded, laid out like the printed Production Team Project Book. Print it or save it as a PDF.</p><button class="btn primary" id="book-x">${ic("printer")}Export project book</button></div>`;
+    `<div class="card"><h2>Project book</h2><p class="muted" style="margin:0 0 12px">Everything you recorded, laid out like the printed Production Team Project Book. Print it or save it as a PDF.</p><button class="btn primary" id="book-x">${ic("printer")}Export project book</button></div>`+nextTermCard(p);
 }
 
 /* ---------- wiring ---------- */
@@ -1362,6 +1367,72 @@ async function exportBook(p){
   root.querySelector("#bk-x").onclick=()=>close();
   root.querySelector("#bk-p").onclick=()=>{try{fr.contentWindow.focus();fr.contentWindow.print()}catch{toast("Use Download file, then print it from your browser.")}};
   root.querySelector("#bk-d").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([html],{type:"text/html"}));a.download=p.name.replace(/[^\w]+/g,"-")+"-project-book.html";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)};
+}
+
+/* ================= v5.2: money-linked weekly record, next term, start check, photo consent ================= */
+const BOOK_KEYS=["info","txt","roles","ideas","res","risks","prop","bud","exp","inc","weeks","refl","hand","rev","minfo"];
+function weekMoney(p,ds){
+  const end=new Date((ds||todayStr())+"T23:59:59").getTime(),start=end-7*864e5+1,at=e=>e.date?new Date(e.date+"T12:00").getTime():0;
+  const ex=p.exp.filter(e=>{const t=at(e);return t>=start&&t<=end}),inc=p.inc.filter(e=>{const t=at(e);return t>=start&&t<=end});
+  return{spent:ex.reduce((a,e)=>a+toNum(e.amount),0),income:inc.reduce((a,e)=>a+toNum(e.amount),0),receipts:ex.map(e=>e.receipt).filter(Boolean).join(", ")};
+}
+const prevNext=p=>{const w=[...p.weeks].sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")))[0];return w&&w.next?w.next:""};
+
+/* next term */
+function nextTermLabel(p){const m=/Term\s*(\d)\D*(\d{4})/i.exec(p.info.term||"");if(m){let t=+m[1],y=+m[2];t++;if(t>4){t=1;y++}return"Term "+t+" "+y}const d=new Date(),mo=d.getMonth();return"Term "+(mo<3?1:mo<6?2:mo<9?3:4)+" "+d.getFullYear()}
+function rollTerm(p,label){
+  ensureBook(p);
+  const snap={id:uid(),label:p.info.term||"Previous term",at:Date.now(),members:p.members.slice(),goals:JSON.parse(JSON.stringify(p.goals))};
+  BOOK_KEYS.forEach(k=>snap[k]=JSON.parse(JSON.stringify(p[k])));
+  (p.terms=p.terms||[]).push(snap);
+  p.carry={from:snap.label,work:p.txt.hwork||"",people:p.txt.hpeople||"",funds:p.hand.funds||""};
+  const carried=p.hand.res.map(r=>({id:uid(),item:r.item,src:"Have",who:""}));
+  p.txt={};p.roles=[];p.ideas=[];p.risks=[];p.prop={};p.bud={items:[]};p.exp=[];p.inc=[];p.weeks=[];p.refl={};p.rev={};p.hand={res:[]};p.res=carried;p.ready=null;
+  p.info={term:label,mentor:p.info.mentor||"",gate:p.info.gate};
+  p.goals=p.goals.filter(g=>!g.done);p.goals.forEach(g=>{if(g.targets&&g.targets.length){g.targets=g.targets.filter(t=>!t.done);syncGoal(g)}});
+}
+BA.roll=p=>formSheet({title:"Start next term",done:"Start next term",
+  fields:[{t:"note",l:"This term's book is saved under Past terms and can still be exported. Carried over: team members, unfinished milestones and tasks, and the handover items and notes. Everything else starts fresh."},{k:"term",t:"text",l:"New term",req:true,mic:false}],data:{term:nextTermLabel(p)},
+  onSave:v=>{const backup=JSON.stringify(p);rollTerm(p,v.term);save(p);fb("done");tab="plan";render();toast("New term started. Last term is under Past terms.",()=>{const o=JSON.parse(backup);Object.keys(p).forEach(k=>delete p[k]);Object.assign(p,o);save(p);render()})}});
+BA.pastterm=(p,id)=>{const sn=(p.terms||[]).find(x=>x.id===id);if(!sn)return;const q={id:p.id,name:p.name,members:sn.members,goals:sn.goals};BOOK_KEYS.forEach(k=>q[k]=sn[k]);ensureBook(q);exportBook(q)};
+BA.carry=p=>{p.carry=null;save(p);render()};
+const carryCard=p=>p.carry?`<div class="hintcard"><div class="row between"><b>Handed over from ${esc(p.carry.from)}</b><button class="linkbtn" data-ba="carry:go" style="min-height:32px">Dismiss</button></div>${p.carry.work?`<p><span class="small muted">Work still to complete</span><br>${esc(p.carry.work)}</p>`:""}${p.carry.people?`<p><span class="small muted">People to consult</span><br>${esc(p.carry.people)}</p>`:""}${p.carry.funds?`<p><span class="small muted">Funds or stock</span><br>${esc(p.carry.funds)}</p>`:""}</div>`:"";
+const nextTermCard=p=>`<div class="card"><h2>Next term</h2><p class="muted" style="margin:0 0 12px">Finished this term? Save this book and start a fresh one for the next team. Unfinished work and handover items carry over.</p><button class="btn" data-ba="roll:go">${ic("calendar")}Start next term</button>${p.terms&&p.terms.length?`<h3 class="sub-h">Past terms</h3><div class="bk-list">${p.terms.slice().reverse().map(t=>bkRow("pastterm:"+t.id,esc(t.label),"",new Date(t.at).toLocaleDateString()+" · open project book")).join("")}</div>`:""}</div>`;
+
+/* ready-to-start check */
+function readiness(p){return[
+  {id:"prop",l:"Proposal approved by the educator",done:p.prop.status==="approved",acc:"prop",tab:"plan"},
+  {id:"risk",l:"Risks written down",done:p.risks.length>0,acc:"res",tab:"plan"},
+  {id:"perm",l:"Permissions or training noted",done:!!(p.txt.perms||(p.ready&&p.ready.noPerms)),acc:"res",tab:"plan"},
+  {id:"bud",l:"Budget approved",done:toNum(p.bud.approved)>0,acc:"bud",tab:"money"}]}
+const isReady=p=>readiness(p).every(x=>x.done)||!!(p.ready&&p.ready.override);
+const gateBlocks=p=>!!(p.info&&p.info.gate)&&!isReady(p);
+const guard=p=>{if(gateBlocks(p)){gateSheet(p);return true}return false};
+function gateSheet(p){
+  const rd=readiness(p);
+  sheet("Not ready to start yet",`<p class="muted" style="margin:4px 0 10px">Finish these before the team starts building.</p>${rd.map(x=>`<button class="trow" data-fix="${x.id}" data-t="${x.tab}" data-a="${x.acc}" data-done="${x.done?1:0}"><span class="avatar" style="color:${x.done?"var(--green)":"var(--red)"}">${ic(x.done?"check":"alert")}</span><span class="grow"><b>${esc(x.l)}</b></span>${x.done?"":ic("chev","sm")}</button>`).join("")}<div class="row wr" style="margin-top:14px"><button class="btn small" id="g-ov">${ic("lock")}Educator override</button></div>`,(d,close)=>{
+    d.querySelectorAll("[data-fix]").forEach(b=>b.onclick=()=>{if(b.dataset.done==="1")return;close();setTimeout(()=>openAccAndGo(p,b.dataset.a,b.dataset.t),150)});
+    d.querySelector("#g-ov").onclick=()=>{close();setTimeout(()=>BA.override(p),150)};
+  });
+}
+BA.override=p=>formSheet({title:"Educator override",done:"Allow building",fields:[{t:"note",l:"Only an educator should do this. The team can start building even though some checks are not finished."},{k:"by",t:"text",l:"Educator name",req:true,mic:false}],data:{},onSave:v=>{p.ready=Object.assign(p.ready||{},{override:true,by:v.by,on:todayStr()});save(p);render();toast("Building allowed by "+v.by+".")}});
+BA.gate=p=>{p.info.gate=!p.info.gate;save(p);fb("tick");render()};
+BA.noperm=p=>{p.ready=Object.assign(p.ready||{},{noPerms:true});save(p);fb("tick");render()};
+function readyCard(p){
+  const rd=readiness(p),ok=isReady(p),todo=rd.filter(x=>!x.done).length,on=!!(p.info&&p.info.gate);
+  return `<div class="card ready"><div class="row"><span class="acc-ic" style="${ok?"":"background:var(--amber-soft);color:var(--amber)"}">${ic(ok?"check":"shield")}</span><div class="grow"><b style="font:700 1.05rem var(--display)">${ok?"Ready to build":"Ready to start?"}</b><div class="small muted">${ok?(todo&&p.ready&&p.ready.override?"Allowed by "+esc(p.ready.by||"the educator"):"Proposal, risks, permissions and budget are in place."):todo+" check"+(todo===1?"":"s")+" still to do"}</div></div></div>
+  ${todo?`<div class="bk-list" style="margin-top:8px">${rd.map(x=>`<button class="bk-row" data-step="${x.acc}" data-stab="${x.tab}"><span class="grow">${x.done?ic("check","sm"):ic("alert","sm")} ${esc(x.l)}</span>${ic("chev","sm")}</button>`).join("")}</div>${rd.some(x=>x.id==="perm"&&!x.done)?`<button class="btn small" data-ba="noperm:go" style="margin-top:8px">No permissions or training needed</button>`:""}`:""}
+  <div class="row between" style="margin-top:12px"><div><b>Lock tasks until ready</b><div class="small muted">Tasks can't be started or finished until the checks are done.</div></div><button type="button" role="switch" class="sw" data-ba="gate:go" aria-label="Lock tasks until ready" aria-checked="${on}"><i></i></button></div></div>`;
+}
+
+/* photo consent */
+const CONSENT=[["ok","Approved to share"],["no","Do not share"],["na","No people shown"]];
+const consBadge=m=>m.consent?`<span class="cbadge c-${m.consent}" aria-hidden="true">${ic(m.consent==="no"?"x":"shield","sm")}</span>`:"";
+function consentSheet(ids){
+  sheet("Consent to share",`<p class="muted" style="margin:4px 0 12px">For ${ids.length} selected item${ids.length>1?"s":""}. Only share photos of people who agreed.</p><div class="chips" id="cs" role="group" aria-label="Consent">${CONSENT.map(([k,l])=>`<button type="button" class="chip" data-c="${k}" aria-pressed="false">${l}</button>`).join("")}</div><button class="btn primary block" id="cs-ok" style="margin-top:18px">Apply</button>`,(d,close)=>{
+    d.querySelectorAll("#cs .chip").forEach(b=>b.onclick=()=>d.querySelectorAll("#cs .chip").forEach(x=>x.setAttribute("aria-pressed",String(x===b))));
+    d.querySelector("#cs-ok").onclick=()=>{const c=d.querySelector("#cs [aria-pressed=true]");if(!c){toast("Choose an option first.");return}ids.forEach(id=>{const m=S.media.find(x=>x.id===id);if(m){m.consent=c.dataset.c;save(m)}});fb("tick");close();render()};
+  });
 }
 
 /* routing */
@@ -1607,13 +1678,14 @@ function wireGoals(p){
     const g=p.goals.find(x=>x.id===el.dataset.g);
     el.querySelector("[data-exp]").onclick=e=>{const b=e.currentTarget,o=b.getAttribute("aria-expanded")!=="true";o?openG.add(g.id):openG.delete(g.id);b.setAttribute("aria-expanded",o);el.querySelector(".gbody").hidden=!o;el.querySelector(".gchev").classList.toggle("open",o)};
     el.querySelector("[data-done]").onclick=()=>{
+      if(guard(p))return;
       if(hasT(g)){const snap=g.targets.map(t=>({...t})),all=!g.done;g.targets.forEach(t=>{t.done=all;t.doneAt=all?(t.doneAt||Date.now()):0});if(syncGoal(g)){confetti();fb("done")}else fb("tick");if(!all)g.doneAt=0;save(p);render();
         toast(all?"All targets done.":"Goal reopened.",()=>{g.targets=snap;syncGoal(g);save(p);render()})}
       else{g.done=!g.done;g.pct=g.done?100:0;g.doneAt=g.done?Date.now():0;if(g.done){confetti();fb("done")}else fb("tick");save(p);render()}};
-    el.querySelectorAll("[data-tt]").forEach(b=>b.onclick=()=>{const t=g.targets.find(x=>x.id===b.dataset.tt);t.done=!t.done;t.doneAt=t.done?Date.now():0;const fin=syncGoal(g);if(fin){confetti();fb("done")}else fb(t.done?"tick":"untick");save(p);render()});
+    el.querySelectorAll("[data-tt]").forEach(b=>b.onclick=()=>{if(guard(p))return;const t=g.targets.find(x=>x.id===b.dataset.tt);t.done=!t.done;t.doneAt=t.done?Date.now():0;const fin=syncGoal(g);if(fin){confetti();fb("done")}else fb(t.done?"tick":"untick");save(p);render()});
     el.querySelectorAll("[data-edg]").forEach(b=>b.onclick=()=>goalSheet(p,g));
     el.querySelectorAll("[data-te]").forEach(b=>b.onclick=()=>BA.target(p,b.dataset.te));
-    el.querySelectorAll("[data-stc]").forEach(b=>b.onclick=()=>{const t=g.targets.find(x=>x.id===b.dataset.stc.split(".")[1]),c=["Not started","In progress","Waiting"],i=c.indexOf(t.st||"Not started");t.st=c[(i+1)%3];save(p);fb("tick");render()});
+    el.querySelectorAll("[data-stc]").forEach(b=>b.onclick=()=>{if(guard(p))return;const t=g.targets.find(x=>x.id===b.dataset.stc.split(".")[1]),c=["Not started","In progress","Waiting"],i=c.indexOf(t.st||"Not started");t.st=c[(i+1)%3];save(p);fb("tick");render()});
     el.querySelectorAll("[data-as]").forEach(b=>b.onclick=()=>assignSheet(p,g,g.targets.find(x=>x.id===b.dataset.as)));
     const ti=el.querySelector("[data-ti]"),addT=()=>{const v=ti.value.trim();if(!v)return;if(listening)listening.stop();g.targets.push({id:uid(),title:v,done:false,doneAt:0});syncGoal(g);save(p);fb("add");render()};
     if(ti){el.querySelector("[data-ta]").onclick=addT;ti.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();addT()}}}
@@ -1704,7 +1776,7 @@ function toBlob(file){return new Promise(res=>{const im=new Image(),u=URL.create
 
 let mview="grid",selecting=false,selScope="";const sel=new Set();
 const mediaOf=p=>S.media.filter(m=>m.pid===p.id&&!m.del).sort((a,b)=>b.t-a.t);
-const mthumb=m=>`<button data-m="${m.id}" ${selecting?`aria-pressed="${sel.has(m.id)}"`:""} class="${sel.has(m.id)?"sel":""}" aria-label="${selecting?"Select ":"Open "}${m.type==="video"?"video":"photo"} ${esc(m.cap||"")}">${m.type==="video"?`<video data-mid="${m.id}" muted playsinline preload="metadata"></video><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${m.id}" alt="${esc(m.cap||"Photo")}" loading="lazy">`}${selecting?`<span class="ck">${ic("check","sm")}</span>`:""}</button>`;
+const mthumb=m=>`<button data-m="${m.id}" ${selecting?`aria-pressed="${sel.has(m.id)}"`:""} class="${sel.has(m.id)?"sel":""}" aria-label="${selecting?"Select ":"Open "}${m.type==="video"?"video":"photo"} ${esc(m.cap||"")}">${m.type==="video"?`<video data-mid="${m.id}" muted playsinline preload="metadata"></video><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${m.id}" alt="${esc(m.cap||"Photo")}" loading="lazy">`}${consBadge(m)}${selecting?`<span class="ck">${ic("check","sm")}</span>`:""}</button>`;
 function weekStart(t){const d=new Date(t);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime()}
 function clearSel(){selecting=false;sel.clear()}
 function mediaTab(p){
@@ -1724,7 +1796,7 @@ function mediaTab(p){
   ${ms.length?`<button class="btn small" id="seltog" aria-pressed="${selecting}">${ic(selecting?"x":"check")}${selecting?"Done":"Select"}</button>`:""}</div>`+body+
   `<input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1">`+
   (selecting?(n?`<div style="height:80px" aria-hidden="true"></div><div class="selbar" role="toolbar" aria-label="Actions for selected media"><span class="selcount" aria-live="polite">${n} selected</span>
-    <button class="btn primary small" id="s-wa">${ic("chat")}WhatsApp</button>
+    <button class="btn primary small" id="s-wa">${ic("chat")}WhatsApp</button><button class="btn small" id="s-con">${ic("shield")}Consent</button>
     ${n===1?`<button class="btn small" id="s-ed">${ic("sliders")}Edit</button>`:""}
     <button class="btn small danger" id="s-del" aria-label="Delete selected">${ic("trash")}</button></div>`:`<p class="hint" style="text-align:center">Tap photos or videos to select them.</p>`):fabBtn("addm","Add photo or video"));
 }
@@ -1735,6 +1807,7 @@ function wireMedia(p){
   $("#addm")&&($("#addm").onclick=()=>$("#pf").click());$("#e-pf")&&($("#e-pf").onclick=()=>$("#pf").click());
   $("#pf").onchange=async e=>{const n=await addFiles(p.id,e.target.files);if(n){save();fb("add")}render()};
   if($("#s-wa"))$("#s-wa").onclick=()=>waSheet(p,[...sel]);
+  if($("#s-con"))$("#s-con").onclick=()=>consentSheet([...sel]);
   if($("#s-ed"))$("#s-ed").onclick=()=>{const m=S.media.find(x=>x.id===[...sel][0]);m.type==="video"?videoEditSheet(p,m):editSheet(p,m)};
   if($("#s-del"))$("#s-del").onclick=()=>{const ids=[...sel],ms=ids.map(id=>S.media.find(m=>m.id===id));ms.forEach(m=>{m.del=true;save(m);if(user&&sb)sb.storage.from("flock-media").remove(["ms/"+m.id]).catch(()=>{});if(sm.up)delete sm.up[m.id]});clearSel();render();
     toast(ms.length+" deleted.",()=>{ms.forEach(m=>{m.del=false;save(m)});render()})};
@@ -1758,10 +1831,11 @@ function waSheet(p,ids){
   const ms=ids.map(id=>S.media.find(m=>m.id===id)).filter(Boolean);
   const caps=ms.map(m=>m.cap).filter(Boolean);
   let text=`${p.name} update`+(caps.length?"\n"+caps.map(c=>"- "+c).join("\n"):"")+"\n\nNewberry Middle School Project";
+  const cNo=ms.filter(m=>m.consent==="no").length,cUn=ms.filter(m=>!m.consent).length;
   sheet("Send on WhatsApp",`<div class="chips" style="gap:6px;margin:10px 0">${ms.slice(0,8).map(m=>`<span style="width:56px;height:56px;border-radius:12px;overflow:hidden;display:block;background:var(--line)">${m.type==="video"?`<video data-mid="${m.id}" muted playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover"></video>`:`<img data-mid="${m.id}" alt="" style="width:100%;height:100%;object-fit:cover">`}</span>`).join("")}${ms.length>8?`<span class="muted small">+${ms.length-8} more</span>`:""}</div>
   <p class="muted small" style="margin:0">${ms.length} item${ms.length>1?"s":""} selected</p>
   <label class="f" for="wm">Your message</label><div class="row" style="align-items:flex-start"><textarea class="t" id="wm" rows="6">${esc(text)}</textarea>${micBtn()}</div>
-  <button class="btn primary block" id="wsend" style="margin-top:16px">${ic("share")}Share with photos</button><div class="row" style="margin-top:10px"><button class="btn grow" id="wtxt">${ic("chat")}Message only</button><button class="btn grow" id="wcp">${ic("copy")}Copy</button></div>
+  ${cNo?`<div class="warncard" style="margin-top:12px">${ic("alert")}<span>${cNo} selected item${cNo>1?"s are":" is"} marked Do not share. Remove ${cNo>1?"them":"it"} before sharing photos.</span></div>`:cUn?`<div class="hintcard" style="background:var(--amber-soft)"><p>${cUn} item${cUn>1?"s haven't":" hasn't"} had a consent check. Make sure everyone shown agreed.</p></div>`:""}<button class="btn primary block" id="wsend" ${cNo?"disabled":""} style="margin-top:16px">${ic("share")}Share with photos</button><div class="row" style="margin-top:10px"><button class="btn grow" id="wtxt">${ic("chat")}Message only</button><button class="btn grow" id="wcp">${ic("copy")}Copy</button></div>
   <p class="hint">"Share with photos" opens your phone's share menu. Choose WhatsApp, then the chat or group.</p>`,(d,close)=>{
     hydrate(d);wireMics(d);const msg=()=>$("#wm").value.trim();
     $("#wsend").onclick=async()=>{const b=$("#wsend");b.disabled=true;
