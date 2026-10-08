@@ -474,7 +474,8 @@ nav.tabs button.cap .i{width:30px;height:30px;stroke-width:2.2}
 .photos button.sel img,.photos button.sel video{opacity:.7}
 .ck{position:absolute;left:8px;top:8px;width:28px;height:28px;border-radius:50%;border:2px solid #fff;background:rgba(0,0,0,.35);color:transparent;display:grid;place-items:center}
 .photos button.sel .ck{background:var(--green);border-color:var(--green);color:#fff}
-.selbar{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:31;background:var(--sheet);border:1px solid var(--line);border-radius:22px;box-shadow:0 8px 28px rgba(0,0,0,.28);padding:10px 12px;display:flex;align-items:center;gap:8px;max-width:560px;margin:0 auto;animation:up .18s ease-out}
+.selbar{position:fixed;left:12px;right:12px;bottom:calc(84px + env(safe-area-inset-bottom));z-index:31;background:var(--sheet);border:1px solid var(--line);border-radius:22px;box-shadow:0 8px 28px rgba(0,0,0,.28);padding:10px 12px;display:flex;flex-direction:column;gap:8px;max-width:560px;margin:0 auto;animation:up .18s ease-out}
+.selrow{display:flex;align-items:center;gap:8px}.selacts{display:flex;gap:8px}.selacts .btn{flex:1 1 0;min-width:0;padding:6px 8px;justify-content:center;white-space:nowrap}
 .selcount{font-weight:700;flex:1;white-space:nowrap}
 @media (min-width:900px){.selbar{bottom:24px;left:calc(var(--rail) + 12px)}}
 .row .t{min-width:0}
@@ -995,7 +996,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.4";
+const APP_VER="5.4.1";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1975,10 +1976,8 @@ function mediaTab(p){
   return `<button class="linkbtn" data-back="story" style="margin:-4px 0 6px">${"\u2190"} Back to story</button><div class="row" style="margin-bottom:14px"><div class="segc grow" role="group" aria-label="Media view" style="margin:0;max-width:260px"><button data-mv="grid" aria-label="Grid" aria-pressed="${mview==="grid"}">${ic("grid")}<span>Grid</span></button><button data-mv="time" aria-label="Timeline" aria-pressed="${mview==="time"}">${ic("clock")}<span>Timeline</span></button></div>
   ${ms.length?`<button class="btn small" id="seltog" aria-pressed="${selecting}">${ic(selecting?"x":"check")}${selecting?"Done":"Select"}</button>`:""}</div>`+body+
   `<input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1">`+
-  (selecting?(n?`<div style="height:80px" aria-hidden="true"></div><div class="selbar" role="toolbar" aria-label="Actions for selected media"><span class="selcount" aria-live="polite">${n} selected</span>
-    <button class="btn primary small" id="s-wa">${ic("chat")}WhatsApp</button><button class="btn small" id="s-con">${ic("shield")}Consent</button>
-    ${n===1?`<button class="btn small" id="s-ed">${ic("sliders")}Edit</button>`:""}
-    <button class="btn small danger" id="s-del" aria-label="Delete selected">${ic("trash")}</button></div>`:`<p class="hint" style="text-align:center">Tap photos or videos to select them.</p>`):fabBtn("addm","Add photo or video"));
+  (selecting?(n?`<div style="height:130px" aria-hidden="true"></div><div class="selbar" role="toolbar" aria-label="Actions for selected media"><div class="selrow"><span class="selcount" aria-live="polite">${n} selected</span><button class="btn small danger" id="s-del" aria-label="Delete selected">${ic("trash")}</button></div>
+    <div class="selacts"><button class="btn primary small" id="s-wa">${ic("chat")}WhatsApp</button>${n===1?`<button class="btn small" id="s-ed">${ic("sliders")}Edit photo</button>`:""}<button class="btn small" id="s-con">${ic("shield")}Consent</button></div></div>`:`<p class="hint" style="text-align:center">Tap photos or videos to select them.</p>`):fabBtn("addm","Add photo or video"));
 }
 function wireMedia(p){
   document.querySelectorAll("[data-back]").forEach(b=>b.onclick=()=>{tab=b.dataset.back;render()});
