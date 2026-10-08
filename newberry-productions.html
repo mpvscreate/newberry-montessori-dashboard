@@ -551,6 +551,17 @@ kbd{font:600 .85rem var(--body);min-width:34px;text-align:center;padding:4px 8px
   .acc-h .stp{grid-column:2;grid-row:2;justify-self:start}
   .acc-h .gchev{grid-column:3;grid-row:1/3}
 }
+/* v5.5.1: PIN reset and short screens */
+#lkreset{position:fixed;inset:0;z-index:110;background:color-mix(in srgb,var(--paper) 94%,transparent);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;padding:24px;overflow:auto}
+.lkbox{width:100%;max-width:380px;background:var(--sheet);border-radius:24px;padding:22px;box-shadow:var(--shadow)}
+@media (max-height:700px){
+  #lock{padding:12px}
+  .lk-card .avatar{width:48px!important;height:48px!important}
+  .lk-card h2{margin-top:6px!important;font-size:1.2rem}
+  .lk-dots{margin:10px 0 12px}
+  .lk-pad{grid-template-columns:repeat(3,62px);gap:10px}
+  .lk-pad button{width:62px;height:62px;font-size:1.45rem}
+}
 </style>
 </head>
 <body>
@@ -1048,7 +1059,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.5.0";
+const APP_VER="5.5.1";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -2405,14 +2416,33 @@ function pinPad({title,sub,cancel,forgot,onDone}){
     else if(r&&typeof r==="object"){title=r.title;sub=r.sub;draw()}
     else{fails++;if(fails>=5){until=Date.now()+30000;fails=0}draw(r||"That PIN isn't right.",true);fb("err")}
   }
-  const kd=e=>{if(/^\d$/.test(e.key))key(e.key);else if(e.key==="Backspace")key("b")};
+  const kd=e=>{if(/INPUT|TEXTAREA/.test((e.target&&e.target.tagName)||""))return;if(/^\d$/.test(e.key))key(e.key);else if(e.key==="Backspace")key("b")};
   addEventListener("keydown",kd);draw();document.body.append(l);l.querySelector("[data-k]").focus();
 }
 function lockNow(){
   if(!getPin()||!user||document.getElementById("lock"))return;
   pinPad({title:"Enter your PIN",sub:"MS Productions is locked",forgot:forgotPin,onDone:async pin=>(await checkPin(pin))?"ok":"That PIN isn't right."});
 }
-async function forgotPin(){
+function forgotPin(){
+  if(LOGIN)return forgotPinSignIn();
+  if(document.getElementById("lkreset"))return;
+  const o=document.createElement("div");o.id="lkreset";o.setAttribute("role","dialog");o.setAttribute("aria-modal","true");o.setAttribute("aria-label","Reset PIN");
+  o.innerHTML=`<div class="lkbox"><h2 style="margin:0 0 6px">Reset your PIN</h2><p class="muted small" style="margin:0 0 14px">Type the school code to turn the PIN off on this device. Ask your educator if you do not have it.</p><label class="f" for="lkr-c">School code</label><input class="t" id="lkr-c" type="text" autocomplete="off" autocapitalize="none" spellcheck="false"><p class="err" id="lkr-e" role="alert" hidden></p><div class="row" style="margin-top:16px"><button class="btn" id="lkr-x" type="button">Cancel</button><span class="grow"></span><button class="btn primary" id="lkr-ok" type="button">Turn PIN off</button></div></div>`;
+  document.body.append(o);
+  const err=m=>{const e=o.querySelector("#lkr-e");e.textContent=m;e.hidden=!m};
+  const done=()=>{try{localStorage.removeItem(PINK)}catch{}o.remove();document.getElementById("lock")?.remove();toast("PIN turned off. You can set a new one in Settings.");render()};
+  const go=async()=>{const c=o.querySelector("#lkr-c").value;if(normCode(c).length<6){err("Type the full school code.");return}
+    const b=o.querySelector("#lkr-ok");b.disabled=true;err("");
+    try{const h=await sha256(normCode(c));let known="";try{known=(JSON.parse(localStorage.getItem(SPK))||{}).space||""}catch{}
+      if(known&&h===known){done();return}
+      if(!navigator.onLine){err("Connect to the internet to check the code.");b.disabled=false;return}
+      const r=await liveConnect(c);
+      if(!r.err){done();return}
+      err(/isn.t right/.test(r.err)?"That code isn't right.":r.err);b.disabled=false;
+    }catch{err("Couldn't check the code. Try again.");b.disabled=false}};
+  o.querySelector("#lkr-ok").onclick=go;o.querySelector("#lkr-c").onkeydown=e=>{if(e.key==="Enter")go();e.stopPropagation()};o.querySelector("#lkr-x").onclick=()=>o.remove();setTimeout(()=>o.querySelector("#lkr-c").focus(),60);
+}
+async function forgotPinSignIn(){
   if(!navigator.onLine||!sb){toast("Connect to the internet to reset your PIN.");return}
   if(!confirm("Sign out and sign in again with your staff account to remove the PIN?"))return;
   try{localStorage.setItem(RESETK,"1");localStorage.removeItem(USERK)}catch{}
