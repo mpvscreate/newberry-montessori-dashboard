@@ -755,7 +755,7 @@ async function addFiles(pid,files){
   let n=0;
   for(const f of files){
     const vid=f.type.startsWith("video/");
-    if(vid&&f.size>MAXVID){toast("Video too large. Keep clips under 45 MB (about 30 seconds).");continue}
+    if(vid&&f.size>MAXVID){toast(`Video too large. Keep clips under ${MAXVID_MB} MB (about 15 to 20 seconds).`);continue}
     const b=vid?f:await toBlob(f);if(!b){toast("Couldn't read that file.");continue}
     const id=uid();try{await mPut(id,b)}catch{toast("No space to store this on the device.");continue}
     S.media.push({id,pid,type:vid?"video":"photo",cap:"",t:Date.now(),by:who(),del:false,u:Date.now()});n++;
@@ -1059,7 +1059,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.5.1";
+const APP_VER="5.5.2";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1160,7 +1160,7 @@ function formSheet({title,fields,data,onSave,onDelete,done}){
 async function addFilesIds(pid,files,tag){
   const ids=[];
   for(const f of files){
-    const vid=f.type.startsWith("video/");if(vid&&f.size>MAXVID){toast("Video too large. Keep clips under 45 MB.");continue}
+    const vid=f.type.startsWith("video/");if(vid&&f.size>MAXVID){toast(`Video too large. Keep clips under ${MAXVID_MB} MB.`);continue}
     const b=vid?f:await toBlob(f);if(!b){toast("Couldn't read that file.");continue}
     const id=uid();try{await mPut(id,b)}catch{toast("No space to store this on the device.");continue}
     S.media.push({id,pid,type:vid?"video":"photo",cap:"",tag:tag||"",t:Date.now(),by:who(),del:false,u:Date.now()});ids.push(id);
@@ -2040,7 +2040,7 @@ const mdb=()=>new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error(
 const mPut=async(id,b)=>{const d=await mdb();return new Promise((res,rej)=>{const t=d.transaction("media","readwrite");t.objectStore("media").put(b,id);t.oncomplete=res;t.onerror=()=>rej(t.error)})};
 const mGet=async id=>{const d=await mdb();return new Promise((res,rej)=>{const q=d.transaction("media").objectStore("media").get(id);q.onsuccess=()=>res(q.result||null);q.onerror=()=>rej(q.error)})};
 const mDel=async id=>{const d=await mdb();return new Promise(res=>{const t=d.transaction("media","readwrite");t.objectStore("media").delete(id);t.oncomplete=res;t.onerror=res})};
-const mcache=new Map(),MAXVID=45*1024*1024;
+const mcache=new Map(),MAXVID_MB=20,MAXVID=MAXVID_MB*1024*1024;
 async function loadMedia(id){
   if(mcache.has(id))return mcache.get(id);
   let b=await mGet(id).catch(()=>null);
@@ -2349,7 +2349,7 @@ async function videoEditSheet(p,m){
       await new Promise(res=>{const tick=()=>{frame();const pr=Math.min(1,(v.currentTime-t0)/Math.max(.1,t1-t0));$("#ed-bar").style.width=Math.round(pr*100)+"%";$("#ed-pm").textContent="Saving… "+Math.round(pr*100)+"%. Keep this screen open";if(v.currentTime>=t1-.03||v.ended){v.pause();setTimeout(()=>{rec.stop();res()},150)}else requestAnimationFrame(tick)};tick()});
       await done;const blob=new Blob(chunks,{type:rec.mimeType||mime||"video/webm"});
       if(!blob.size)throw new Error("empty");
-      if(blob.size>MAXVID){toast("The edited video is over 45 MB. Trim it shorter.");throw new Error("big")}
+      if(blob.size>MAXVID){toast(`The edited video is over ${MAXVID_MB} MB. Trim it shorter.`);throw new Error("big")}
       const id=uid();await mPut(id,blob);
       S.media.push({id,pid:m.pid,type:"video",cap:m.cap,t:replace?m.t:Date.now(),by:who(),del:false,u:Date.now()});
       if(replace){m.del=true;save(m);if(LV.on&&sb)sb.storage.from("ms-media").remove([mediaPath(m.id)]).catch(()=>{});if(sm.up)delete sm.up[m.id]}else save();
