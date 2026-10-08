@@ -508,6 +508,16 @@ main:focus{outline:none}
 .rep img{display:block;width:100%;border-radius:18px;box-shadow:var(--shadow)}
 .chips .chip{padding:8px 14px}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+/* desktop rail: tidy */
+@media (min-width:900px){
+  nav.tabs{align-items:stretch}
+  nav.tabs button{width:100%;text-align:left}
+  nav.tabs button.cap{display:flex;align-items:center;justify-content:center;gap:10px;margin:0 0 12px;padding:0 16px;font-size:1rem;font-weight:700}
+  nav.tabs button.cap::after{content:"Add or capture"}
+  nav.tabs button.cap .i{width:24px;height:24px;flex:none}
+  header.top .addp{display:none}
+  header.top{gap:10px}
+}
 </style>
 </head>
 <body>
@@ -997,7 +1007,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.4.2";
+const APP_VER="5.4.3";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
