@@ -455,9 +455,10 @@ nav.tabs button.cap .i{width:30px;height:30px;stroke-width:2.2}
 .mc-area{fill:color-mix(in srgb,var(--green) 16%,transparent);stroke:none}
 .mc-dot{fill:var(--sheet);stroke:var(--green);stroke-width:2}
 .mc-bl{stroke:var(--muted);stroke-width:1.4;stroke-dasharray:4 4}
-@media (min-width:1000px){
+@media (min-width:1240px){
   .wrap.prodwide{max-width:1180px}
-  .pv{display:grid;grid-template-columns:320px minmax(0,1fr);gap:26px;align-items:start}
+  .pv-side .ptitle{font-size:1.3rem;overflow-wrap:normal}
+  .pv{display:grid;grid-template-columns:340px minmax(0,1fr);gap:26px;align-items:start}
   .pv-side{position:sticky;top:16px}
   .pv-side .segwrap{position:static;margin:0;padding:0;background:none;-webkit-backdrop-filter:none;backdrop-filter:none}
   .pv-side .segc{grid-auto-flow:row;grid-auto-columns:auto;gap:4px}
@@ -1022,7 +1023,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.4.6";
+const APP_VER="5.4.7";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
