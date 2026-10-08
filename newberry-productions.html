@@ -709,7 +709,7 @@ function openMediaSheet(m){
   <p class="muted small">${esc(m.by)} · ${fmt(m.t)}</p><div class="row"><button class="btn danger" id="del">${ic("trash")}Delete</button><span class="grow"></span><button class="btn primary" id="ok">Done</button></div>`,(d,close)=>{
     hydrate(d);wireMics(d);d.querySelectorAll("#mcon .chip").forEach(b=>b.onclick=()=>{const was=b.getAttribute("aria-pressed")==="true";d.querySelectorAll("#mcon .chip").forEach(x=>x.setAttribute("aria-pressed","false"));b.setAttribute("aria-pressed",String(!was))});
     $("#ok").onclick=()=>{m.cap=$("#mc").value.trim();const cc=d.querySelector("#mcon [aria-pressed=true]");m.consent=cc?cc.dataset.c:"";save(m);close();render()};
-    $("#del").onclick=()=>{m.del=true;save(m);close();render();if(user&&sb)sb.storage.from("flock-media").remove(["ms/"+m.id]).catch(()=>{});if(sm.up)delete sm.up[m.id];
+    $("#del").onclick=()=>{m.del=true;save(m);close();render();if(LV.on&&sb)sb.storage.from("ms-media").remove([mediaPath(m.id)]).catch(()=>{});if(sm.up)delete sm.up[m.id];
       toast("Deleted.",()=>{m.del=false;save(m);render()})}});
 }
 
@@ -995,7 +995,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.3";
+const APP_VER="5.4";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1499,31 +1499,176 @@ function authScreen(msg){
     const{error}=await sb.auth.signInWithPassword({email:$("#em").value.trim(),password:$("#pw").value});
     if(error)authScreen(/invalid/i.test(error.message)?"That email or password isn't right.":error.message)};
 }
-let st;function scheduleSync(){clearTimeout(st);if(user)st=setTimeout(syncNow,1200)}
-async function syncNow(){
-  if(!user||!sb)return;setSyncUi("Syncing…");
-  try{
-    const{data,error}=await sb.from("flock_records").select("kind,id,data,deleted,u").in("kind",["ms_prod","ms_media"]);
-    if(error)throw error;
-    sm.rem=sm.rem||{};let changed=false;
-    for(const r of data){
-      const k=r.kind+"|"+r.id;sm.rem[k]=r.u;
-      const list=r.kind==="ms_prod"?S.prods:S.media,i=list.findIndex(x=>x.id===r.id),loc=list[i];
-      if(!loc||(loc.u||0)<r.u){const rec={...r.data,del:r.deleted||r.data?.del||false,u:r.u};if(i>=0)list[i]=rec;else list.push(rec);changed=true}
-    }
-    const rows=[];
-    [["ms_prod",S.prods],["ms_media",S.media]].forEach(([kind,list])=>list.forEach(x=>{
-      if((x.u||0)>(sm.rem[kind+"|"+x.id]||0))rows.push({kind,id:x.id,data:x,deleted:!!x.del,u:x.u||Date.now()})}));
-    for(let i=0;i<rows.length;i+=20){const{error:e}=await sb.rpc("flock_upsert",{rows:rows.slice(i,i+20)});if(e)throw e;rows.slice(i,i+20).forEach(r=>sm.rem[r.kind+"|"+r.id]=r.u)}
-    await pushMedia();
-    localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem(SYNC,JSON.stringify(sm));
-    setSyncUi("Synced");
-    if(changed&&!isOpen()&&!/INPUT|TEXTAREA/.test(document.activeElement?.tagName))render();
-  }catch(e){console.warn(e);setSyncUi(navigator.onLine?"Sync problem":"Offline, saved here")}
+/* ================= v5.4: live sync (shared school code) ================= */
+const SPK="ms-prod-space";
+const LV={on:false,space:"",ch:null,busy:false,again:false,pend:false,poll:null,at:0};
+const normCode=c=>String(c||"").toLowerCase().replace(/[^a-z0-9]/g,"");
+async function sha256(s){const b=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("")}
+const mediaPath=id=>LV.space+"/"+id;
+const canon=v=>Array.isArray(v)?"["+v.map(canon).join(",")+"]":v&&typeof v==="object"?"{"+Object.keys(v).filter(k=>v[k]!==undefined).sort().map(k=>JSON.stringify(k)+":"+canon(v[k])).join(",")+"}":JSON.stringify(v);
+const hashOf=r=>{const s=canon(r);let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return h+":"+s.length};
+const persistSync=()=>{try{localStorage.setItem(SYNC,JSON.stringify(sm))}catch{}};
+const metaOf=()=>sm.lv=sm.lv||{};
+const LISTS=[["goals","g"],["log","lg"],["exp","ex"],["inc","in"],["weeks","wk"],["ideas","id"],["res","rs"],["risks","rk"],["roles","rl"],["terms","tm"]];
+const strip=(o,drop)=>{const c={};for(const k in o){if(k==="u"||drop.includes(k))continue;c[k]=o[k]}return c};
+/* every small piece of data is its own record, so two people editing different things never collide */
+function recs(){
+  const m=new Map();
+  S.prods.forEach(p=>{
+    ensureBook(p);const P=p.id;
+    m.set("p|"+P,{...strip(p,["goals","log","exp","inc","weeks","ideas","res","risks","roles","terms","txt","refl","bud","hand"]),bud:strip(p.bud,["items"]),hand:strip(p.hand,["res"])});
+    Object.keys(p.txt).forEach(k=>m.set("t|"+P+"|"+k,{v:p.txt[k]}));
+    Object.keys(p.refl).forEach(k=>m.set("r|"+P+"|"+k,{v:p.refl[k]}));
+    LISTS.forEach(([f,kd])=>(p[f]||[]).forEach(it=>{
+      if(!it||!it.id)return;
+      if(kd==="g"){m.set("g|"+P+"|"+it.id,strip(it,["targets","comments"]));(it.targets||[]).forEach(t=>m.set("tg|"+P+"|"+it.id+"|"+t.id,strip(t,[])));(it.comments||[]).forEach(c=>m.set("cm|"+P+"|"+it.id+"|"+c.id,strip(c,[])))}
+      else m.set(kd+"|"+P+"|"+it.id,strip(it,[]));
+    }));
+    p.bud.items.forEach(it=>m.set("bi|"+P+"|"+it.id,strip(it,[])));
+    p.hand.res.forEach(it=>m.set("hr|"+P+"|"+it.id,strip(it,[])));
+  });
+  S.media.forEach(x=>m.set("md|"+x.id,strip(x,[])));
+  return m;
 }
-function setSyncUi(t){syncState=t;const e=$("#sync");if(e)e.innerHTML=ic(t==="Synced"||t==="Syncing…"?"cloud":t==="Saved on this device"?"device":"cloudoff","sm")+`<span class="st">${esc(t)}</span>`;e.title=t}
-addEventListener("online",()=>{if(!LOGIN)return;if(!sb)initAuth();else syncNow()});
-setInterval(()=>{if(!document.hidden)syncNow()},60000);
+const idxOf=(a,id)=>a.findIndex(x=>x.id===id);
+function placeRec(key,data,del,u){
+  const seg=key.split("|"),kd=seg[0];
+  if(kd==="md"){const i=idxOf(S.media,seg[1]);if(del){if(i>=0)S.media.splice(i,1)}else{const r={...data,u};if(i>=0)S.media[i]=r;else S.media.push(r)}return}
+  let p=P(seg[1]);
+  if(kd==="p"){
+    if(del)return;
+    if(!p){p={id:seg[1],goals:[],log:[],exp:[],inc:[],weeks:[],ideas:[],res:[],risks:[],roles:[],terms:[],txt:{},refl:{},bud:{items:[]},hand:{res:[]}};S.prods.push(p)}
+    ensureBook(p);const items=p.bud.items,hres=p.hand.res;Object.assign(p,data,{u});p.bud={...(data.bud||{}),items};p.hand={...(data.hand||{}),res:hres};return;
+  }
+  if(!p)return;ensureBook(p);
+  if(kd==="t"){if(del)delete p.txt[seg[2]];else p.txt[seg[2]]=data.v;return}
+  if(kd==="r"){if(del)delete p.refl[seg[2]];else p.refl[seg[2]]=data.v;return}
+  let arr;
+  if(kd==="bi")arr=p.bud.items;else if(kd==="hr")arr=p.hand.res;
+  else if(kd==="tg"||kd==="cm"){const g=p.goals.find(x=>x.id===seg[2]);if(!g)return;arr=kd==="tg"?(g.targets=g.targets||[]):(g.comments=g.comments||[])}
+  else{const f=(LISTS.find(x=>x[1]===kd)||[])[0];if(!f)return;arr=p[f]=p[f]||[]}
+  const id=seg[seg.length-1],i=idxOf(arr,id);
+  if(del){if(i>=0)arr.splice(i,1);return}
+  const rec={...data};
+  if(kd==="g"){rec.targets=i>=0?(arr[i].targets||[]):[];rec.comments=i>=0?(arr[i].comments||[]):[]}
+  if(i>=0)arr[i]=rec;else{arr.push(rec);arr.sort((a,b)=>(idT(a.id)||0)-(idT(b.id)||0))}
+}
+/* notice what changed since the last sync */
+function scan(){
+  const cur=recs(),now=Date.now(),M=metaOf();
+  for(const [k,r] of cur){const h=hashOf(r),m=M[k]||(M[k]={});if(m.del)m.del=false;if(m.h!==h){m.h=h;m.u=now}}
+  for(const k of Object.keys(M)){if(cur.has(k))continue;const m=M[k];if(m.s===undefined){delete M[k];continue}if(m.s!=="x"&&!m.del){m.del=true;m.u=now}}
+  return cur;
+}
+const isDirty=(m,cur,k)=>m.del?m.s!=="x":(cur.has(k)&&m.h!==undefined&&m.s!==m.h);
+function applyRows(rows,force){
+  const M=metaOf(),rank=k=>k.startsWith("p|")?0:k.startsWith("g|")?1:2;
+  rows=rows.slice().sort((a,b)=>rank(a.k)-rank(b.k));
+  const cur0=recs(),touched=[];let n=0;
+  for(const r of rows){
+    const m=M[r.k]||(M[r.k]={}),rh=r.deleted?"x":hashOf(r.data);
+    if(!r.deleted&&m.h===rh){m.s=rh;m.u=Math.max(m.u||0,r.u);continue}
+    if(!force&&m.s===rh)continue;
+    if(!force&&isDirty(m,cur0,r.k)&&(m.u||0)>=r.u)continue;
+    placeRec(r.k,r.data,r.deleted,r.u);touched.push(r);n++;
+  }
+  const cur=recs();
+  for(const r of touched){if(r.deleted)M[r.k]={s:"x",del:true,u:r.u};else{const h=hashOf(cur.get(r.k)||r.data);M[r.k]={h,s:h,u:r.u}}}
+  return n;
+}
+async function pushAll(){
+  const cur=scan(),M=metaOf(),rows=[];
+  for(const [k,m] of Object.entries(M)){if(!isDirty(m,cur,k))continue;rows.push(m.del?{k,data:null,deleted:true,u:m.u}:{k,data:cur.get(k),deleted:false,u:m.u})}
+  for(let i=0;i<rows.length;i+=60){const part=rows.slice(i,i+60),{error}=await sb.rpc("ms_push",{s:LV.space,rows:part});if(error)throw error;part.forEach(r=>{const m=M[r.k];if(m){if(r.deleted)m.s="x";else m.s=m.h}})}
+  persistSync();await pushMedia();
+  if(rows.length&&LV.ch){try{LV.ch.send({type:"broadcast",event:"ping",payload:{}})}catch{}}
+  return rows.length;
+}
+async function pullAll(force){
+  scan();let changed=0,since=sm.since||null,guard=0;
+  for(;;){
+    const{data,error}=await sb.rpc("ms_pull",{s:LV.space,since});if(error)throw error;
+    if(!data.length)break;
+    changed+=applyRows(data,force);const last=data[data.length-1].updated_at;sm.since=last;
+    if(data.length<3000||last===since||++guard>20)break;since=last;
+  }
+  persistSync();
+  if(changed){try{localStorage.setItem(KEY,JSON.stringify(S))}catch{}}
+  return changed;
+}
+const safeToRender=()=>!document.querySelector("#layer>*")&&!document.querySelector(".ed")&&!/INPUT|TEXTAREA/.test((document.activeElement&&document.activeElement.tagName)||"");
+function softRender(){if(safeToRender())render();else LV.pend=true}
+setInterval(()=>{if(LV.pend&&safeToRender()){LV.pend=false;render()}},1500);
+async function syncNow(){
+  if(!LV.on||!sb)return;
+  if(!navigator.onLine){setSyncUi("Offline, saved here");return}
+  if(LV.busy){LV.again=true;return}
+  LV.busy=true;setSyncUi("Syncing…");
+  try{await pushAll();const ch=await pullAll();LV.at=Date.now();setSyncUi("Live");if(ch)softRender()}
+  catch(e){console.warn("sync",e);setSyncUi(navigator.onLine?"Sync problem":"Offline, saved here")}
+  finally{LV.busy=false;if(LV.again){LV.again=false;setTimeout(syncNow,300)}}
+}
+async function ensureSb(){if(sb)return true;await loadSb();if(!window.supabase)return false;sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:false,autoRefreshToken:false}});return true}
+function openChannel(){try{if(LV.ch)sb.removeChannel(LV.ch);LV.ch=sb.channel("ms-"+LV.space.slice(0,20)).on("broadcast",{event:"ping"},()=>setTimeout(syncNow,200)).subscribe()}catch(e){console.warn(e)}}
+function startPoll(){clearInterval(LV.poll);LV.poll=setInterval(()=>{if(!document.hidden&&LV.on)syncNow()},12000)}
+function liveStart(space){LV.space=space;LV.on=true;try{localStorage.setItem(SPK,JSON.stringify({space}))}catch{}setSyncUi("Syncing…");openChannel();startPoll();syncNow()}
+function liveStop(){LV.on=false;clearInterval(LV.poll);if(LV.ch&&sb){try{sb.removeChannel(LV.ch)}catch{}}LV.ch=null;try{localStorage.removeItem(SPK)}catch{}sm.lv={};sm.since=null;sm.up={};persistSync();setSyncUi("Saved on this device")}
+async function liveConnect(code){
+  if(!navigator.onLine)return{err:"Connect to the internet first."};
+  const space=await sha256(normCode(code));
+  if(!await ensureSb())return{err:"Couldn't load the sync service. Check your internet."};
+  const{data,error}=await sb.rpc("ms_pull",{s:space,since:null});
+  if(error)return{err:/bad code/i.test(error.message)?"That code isn't right.":"Couldn't connect. Try again."};
+  return{space,rows:data};
+}
+function connectSheet(){
+  sheet("Connect with school code",`<p class="muted" style="margin:4px 0 12px">Everyone who types the same code shares the same productions, live. Ask your educator for the code.</p><label class="f" for="lv-c">School code</label><input class="t" id="lv-c" type="text" autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="for example: maple-river-sun-27"><p class="err" id="lv-e" role="alert" hidden></p><button class="btn primary block" id="lv-go" style="margin-top:16px">${ic("cloud")}Connect</button>`,(d,close)=>{
+    const err=m=>{const e=d.querySelector("#lv-e");e.textContent=m;e.hidden=!m};
+    const go=async()=>{const c=d.querySelector("#lv-c").value.trim();if(normCode(c).length<6){err("Type the full school code.");return}
+      const b=d.querySelector("#lv-go");b.disabled=true;b.textContent="Connecting…";err("");
+      const r=await liveConnect(c);b.disabled=false;b.innerHTML=ic("cloud")+"Connect";
+      if(r.err){err(r.err);return}
+      close();
+      if(!r.rows.length){sm.lv={};sm.since=null;sm.up={};liveStart(r.space);toast("Connected. This device's data is being shared.");return}
+      choiceSheet(r);
+    };
+    d.querySelector("#lv-go").onclick=go;d.querySelector("#lv-c").onkeydown=e=>{if(e.key==="Enter")go()};setTimeout(()=>d.querySelector("#lv-c").focus(),80);
+  });
+}
+function choiceSheet(r){
+  const np=r.rows.filter(x=>x.k.startsWith("p|")&&!x.deleted).length;
+  setTimeout(()=>sheet("Your team already has data",`<p class="muted" style="margin:4px 0 14px">The cloud has ${np} production${np===1?"":"s"} saved. What should this device do?</p><button class="btn primary block" id="ch-use">${ic("download")}Use the cloud data (recommended)</button><p class="hint" style="margin:6px 0 14px">Replaces what is on this device. A copy of this device's data is kept first.</p><button class="btn block" id="ch-merge">${ic("copy")}Merge both</button><p class="hint" style="margin:6px 0 0">Keeps the cloud's version of anything in both, and adds this device's extra items.</p>`,(d,close)=>{
+    const finish=async force=>{
+      d.querySelector("#ch-use").disabled=d.querySelector("#ch-merge").disabled=true;
+      try{
+        sm.lv={};sm.since=null;sm.up={};
+        if(force==="replace"){try{localStorage.setItem("ms-prod-prebackup",JSON.stringify(S))}catch{}S.prods=[];S.media=[]}
+        else scan();
+        LV.space=r.space;applyRows(r.rows,true);
+        if(r.rows.length>=3000){LV.on=true;await pullAll(true)}
+        S.prods.forEach(ensureBook);try{localStorage.setItem(KEY,JSON.stringify(S))}catch{}persistSync();
+        close();liveStart(r.space);render();toast(force==="replace"?"Connected. This device now shows your team's data.":"Connected. Both sets of data are merged.");
+      }catch(e){console.warn(e);toast("Couldn't finish connecting. Try again.");close()}
+    };
+    d.querySelector("#ch-use").onclick=()=>finish("replace");d.querySelector("#ch-merge").onclick=()=>finish("merge");
+  }),250);
+}
+function liveCard(){
+  return LV.on?`<div class="card"><h2>Live sync</h2><p class="muted" style="margin-top:0">This device is connected. Changes show up on every other connected device within seconds. If you are offline, your work is kept and syncs when you are back.</p><div class="row wr"><button class="btn" id="lv-now">${ic("cloud")}Sync now</button><button class="btn danger" id="lv-off">Disconnect this device</button></div></div>`
+    :`<div class="card"><h2>Live sync</h2><p class="muted" style="margin-top:0">Connect every phone and laptop with your school code so the whole team shares the same productions, live.</p><button class="btn primary" id="lv-on">${ic("cloud")}Connect with school code</button></div>`;
+}
+function wireLive(){
+  const on=$("#lv-on"),now=$("#lv-now"),off=$("#lv-off");
+  if(on)on.onclick=connectSheet;
+  if(now)now.onclick=()=>{syncNow();toast("Syncing…")};
+  if(off)off.onclick=()=>{if(!confirm("Disconnect this device? Your data stays here, but it stops syncing."))return;liveStop();render();toast("Disconnected.")};
+}
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&LV.on)syncNow()});
+
+let st;function scheduleSync(){clearTimeout(st);if(LV.on)st=setTimeout(syncNow,1200)}
+function setSyncUi(t){syncState=t;const e=$("#sync");if(e)e.innerHTML=ic(t==="Live"||t==="Syncing…"?"cloud":t==="Saved on this device"?"device":"cloudoff","sm")+`<span class="st">${esc(t)}</span>`;e.title=t}
+addEventListener("online",()=>{if(LV.on)syncNow()});
+try{const sp=JSON.parse(localStorage.getItem(SPK));if(sp&&sp.space)ensureSb().then(ok=>{if(ok)liveStart(sp.space);else setSyncUi("Offline, saved here")})}catch{}
 
 /* shell */
 const NAV=[["home","Productions","grid"],["overview","Overview","home"],["activity","Activity","pulse"],["more","Settings","sliders"]];
@@ -1591,13 +1736,14 @@ function activityPage(){const f=feedItems().slice(0,60);return `<div class="page
 function morePage(){const t=theme();
   return `<div class="page-h"><h2>Settings</h2></div><div class="card"><h2>Appearance</h2><div class="segc" role="group" aria-label="Theme">${[["auto","Auto","device"],["light","Light","sun"],["dark","Dark","moon"]].map(([k,l,i])=>`<button data-th="${k}" aria-label="${l}" aria-pressed="${t===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div>
   <div class="card"><h2>Sound and touch</h2><div class="row between" style="margin-bottom:12px"><div><b>Sound effects</b><div class="small muted">Soft tones when you tick, add or finish</div></div><button type="button" role="switch" class="sw" id="fx-s" aria-label="Sound effects" aria-checked="${SFX.sound}"><i></i></button></div><div class="row between"><div><b>Vibration</b><div class="small muted">${navigator.vibrate?"A light buzz on taps and ticks":"Not supported on this device (iPhone does not allow it)"}</div></div><button type="button" role="switch" class="sw" id="fx-v" aria-label="Vibration" aria-checked="${SFX.vib&&!!navigator.vibrate}" ${navigator.vibrate?"":"disabled"}><i></i></button></div></div>
+  ${liveCard()}
   <div class="card"><h2>Classroom display</h2><p class="muted" style="margin-top:0">Show progress and the latest photos full screen on a classroom TV or tablet. It stays awake and updates itself.</p><button class="btn" id="kiosk">${ic("device")}Start classroom display</button></div>
   <div class="card"><h2>Celebration</h2><p class="muted" style="margin-top:0">Fireworks and sound play when every goal in a production is finished.</p><button class="btn" id="fw-test">${ic("sparkle")}Preview the fireworks</button></div>
   <div class="card"><h2>Voice dictation</h2><p class="muted" style="margin:0">${SR?"On. Tap the microphone next to any text box and speak.":"Not available in this browser. Try Chrome or Edge, or use your phone keyboard's microphone."}</p></div>
   <div class="card"><h2>App lock</h2><p class="muted" style="margin-top:0">Optional. Add a 3-digit PIN and the app asks for it when you open it on this device.${LOGIN?" You stay signed in either way.":""}</p>${getPin()?`<div class="row wr"><button class="btn" id="pinchg">Change PIN</button><button class="btn danger" id="pinoff">Remove PIN</button></div>`:`<button class="btn primary" id="pinset">${ic("lock")}Set a PIN</button>`}</div>
-  <div class="card"><h2>Backup</h2><p class="muted" style="margin-top:0">Everything is stored on this device only while sign-in is off. Download a backup of your goals, targets, team and logs now and then. Photos and videos are not included.</p><div class="row wr"><button class="btn" id="bk-out">${ic("download")}Download backup</button><button class="btn" id="bk-in">${ic("upload")}Restore</button></div><input type="file" id="bk-f" accept="application/json,.json" class="sr" aria-label="Choose a backup file" tabindex="-1"></div>
-  <div class="card"><h2>This device</h2><p class="muted" style="margin-top:0">${LOGIN?`Signed in as ${esc(user.email)}. You only need to sign in once on this device.`:"Sign-in is switched off for now, so cloud sync is paused. Everything you add is saved on this device only."}</p><div class="row wr">${LOGIN?`<button class="btn" id="out">${ic("logout")}Sign out</button>`:""}${getPin()?`<button class="btn" id="lk">${ic("lock")}Lock now</button>`:""}</div></div>`}
-function wireMore(){$("#fw-test").onclick=()=>fireworks("Your production");$("#kiosk").onclick=startKiosk;
+  <div class="card"><h2>Backup</h2><p class="muted" style="margin-top:0">Download a backup of your goals, targets, team and logs now and then. Photos and videos are not included.</p><div class="row wr"><button class="btn" id="bk-out">${ic("download")}Download backup</button><button class="btn" id="bk-in">${ic("upload")}Restore</button></div><input type="file" id="bk-f" accept="application/json,.json" class="sr" aria-label="Choose a backup file" tabindex="-1"></div>
+  <div class="card"><h2>This device</h2><p class="muted" style="margin-top:0">${LOGIN?`Signed in as ${esc(user.email)}. You only need to sign in once on this device.`:LV.on?"Connected with your school code. Everything you add is shared live.":"Not connected. Everything you add is saved on this device only."}</p><div class="row wr">${LOGIN?`<button class="btn" id="out">${ic("logout")}Sign out</button>`:""}${getPin()?`<button class="btn" id="lk">${ic("lock")}Lock now</button>`:""}</div></div>`}
+function wireMore(){wireLive();$("#fw-test").onclick=()=>fireworks("Your production");$("#kiosk").onclick=startKiosk;
   $("#fx-s").onclick=e=>{SFX.sound=!SFX.sound;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.sound);if(SFX.sound)fb("tick")};$("#fx-v").onclick=e=>{SFX.vib=!SFX.vib;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.vib);if(SFX.vib)fb("tick")};
   document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#pinset")&&($("#pinset").onclick=setPin);$("#pinchg")&&($("#pinchg").onclick=()=>{removePinThenSet()});$("#pinoff")&&($("#pinoff").onclick=removePin);$("#lk")&&($("#lk").onclick=lockNow);$("#out")&&($("#out").onclick=()=>{if(!confirm("Sign out of this device? You will need to sign in again."))return;if(sb)sb.auth.signOut();else{user=null;try{localStorage.removeItem(USERK)}catch{}render()}});
   $("#bk-out").onclick=()=>{const blob=new Blob([JSON.stringify({app:"ms-productions",v:1,at:new Date().toISOString(),prods:S.prods},null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ms-productions-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")};
@@ -1784,7 +1930,7 @@ function goalSheet(p,g,pre){
   });
 }
 
-/* media: photos and videos live in IndexedDB on the device and in the shared "flock-media" bucket (under ms/) */
+/* media: photos and videos live in IndexedDB on the device and in the "ms-media" bucket (under the school space) */
 const mdb=()=>new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error("no storage"));const r=indexedDB.open("ms-prod-media",1);r.onupgradeneeded=()=>r.result.createObjectStore("media");r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)});
 const mPut=async(id,b)=>{const d=await mdb();return new Promise((res,rej)=>{const t=d.transaction("media","readwrite");t.objectStore("media").put(b,id);t.oncomplete=res;t.onerror=()=>rej(t.error)})};
 const mGet=async id=>{const d=await mdb();return new Promise((res,rej)=>{const q=d.transaction("media").objectStore("media").get(id);q.onsuccess=()=>res(q.result||null);q.onerror=()=>rej(q.error)})};
@@ -1793,14 +1939,14 @@ const mcache=new Map(),MAXVID=45*1024*1024;
 async function loadMedia(id){
   if(mcache.has(id))return mcache.get(id);
   let b=await mGet(id).catch(()=>null);
-  if(!b&&user&&sb){const{data}=await sb.storage.from("flock-media").download("ms/"+id).catch(()=>({}));if(data){b=data;mPut(id,b).catch(()=>{})}}
+  if(!b&&LV.on&&sb){const{data}=await sb.storage.from("ms-media").download(mediaPath(id)).catch(()=>({}));if(data){b=data;mPut(id,b).catch(()=>{})}}
   if(!b)return null;const u=URL.createObjectURL(b);mcache.set(id,u);return u;
 }
 async function pushMedia(){
   sm.up=sm.up||{};
   for(const m of S.media){
     if(m.del||sm.up[m.id])continue;const b=await mGet(m.id).catch(()=>null);if(!b)continue;
-    const{error}=await sb.storage.from("flock-media").upload("ms/"+m.id,b,{upsert:true,contentType:b.type||"application/octet-stream"});
+    const{error}=await sb.storage.from("ms-media").upload(mediaPath(m.id),b,{upsert:true,contentType:b.type||"application/octet-stream"});
     if(error)throw error;sm.up[m.id]=1;
   }
 }
@@ -1843,7 +1989,7 @@ function wireMedia(p){
   if($("#s-wa"))$("#s-wa").onclick=()=>waSheet(p,[...sel]);
   if($("#s-con"))$("#s-con").onclick=()=>consentSheet([...sel]);
   if($("#s-ed"))$("#s-ed").onclick=()=>{const m=S.media.find(x=>x.id===[...sel][0]);m.type==="video"?videoEditSheet(p,m):editSheet(p,m)};
-  if($("#s-del"))$("#s-del").onclick=()=>{const ids=[...sel],ms=ids.map(id=>S.media.find(m=>m.id===id));ms.forEach(m=>{m.del=true;save(m);if(user&&sb)sb.storage.from("flock-media").remove(["ms/"+m.id]).catch(()=>{});if(sm.up)delete sm.up[m.id]});clearSel();render();
+  if($("#s-del"))$("#s-del").onclick=()=>{const ids=[...sel],ms=ids.map(id=>S.media.find(m=>m.id===id));ms.forEach(m=>{m.del=true;save(m);if(LV.on&&sb)sb.storage.from("ms-media").remove([mediaPath(m.id)]).catch(()=>{});if(sm.up)delete sm.up[m.id]});clearSel();render();
     toast(ms.length+" deleted.",()=>{ms.forEach(m=>{m.del=false;save(m)});render()})};
   document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{
     const m=S.media.find(x=>x.id===b.dataset.m);
@@ -2022,7 +2168,7 @@ async function editSheet(p,m){
     const blob=await new Promise(r=>fin.toBlob(r,"image/jpeg",.88));if(!blob){ed.busy(false);toast("Couldn't save the edit.");return}
     const id=uid();try{await mPut(id,blob)}catch{ed.busy(false);toast("No space to store this on the device.");return}
     S.media.push({id,pid:m.pid,type:"photo",cap:m.cap,t:replace?m.t:Date.now(),by:who(),del:false,u:Date.now()});
-    if(replace){m.del=true;save(m);if(user&&sb)sb.storage.from("flock-media").remove(["ms/"+m.id]).catch(()=>{});if(sm.up)delete sm.up[m.id]}else save();
+    if(replace){m.del=true;save(m);if(LV.on&&sb)sb.storage.from("ms-media").remove([mediaPath(m.id)]).catch(()=>{});if(sm.up)delete sm.up[m.id]}else save();
     sel.clear();sel.add(id);ed.busy(false);ed.close();render();toast(replace?"Original replaced.":"Saved as a new copy.");
   };
 }
@@ -2099,7 +2245,7 @@ async function videoEditSheet(p,m){
       if(blob.size>MAXVID){toast("The edited video is over 45 MB. Trim it shorter.");throw new Error("big")}
       const id=uid();await mPut(id,blob);
       S.media.push({id,pid:m.pid,type:"video",cap:m.cap,t:replace?m.t:Date.now(),by:who(),del:false,u:Date.now()});
-      if(replace){m.del=true;save(m);if(user&&sb)sb.storage.from("flock-media").remove(["ms/"+m.id]).catch(()=>{});if(sm.up)delete sm.up[m.id]}else save();
+      if(replace){m.del=true;save(m);if(LV.on&&sb)sb.storage.from("ms-media").remove([mediaPath(m.id)]).catch(()=>{});if(sm.up)delete sm.up[m.id]}else save();
       sel.clear();sel.add(id);busy=false;ed.busy(false);ed.close();render();toast(replace?"Original replaced.":"Saved as a new copy.");
     }catch(e){console.warn(e);busy=false;ed.busy(false);$("#ed-prog").hidden=true;$("#ed-play").hidden=false;if(e.message!=="big")toast("Couldn't save the video in this browser.")}
   };
