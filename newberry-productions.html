@@ -384,6 +384,57 @@ nav.tabs button.cap .i{width:30px;height:30px;stroke-width:2.2}
 
 @media (min-width:900px){.ptiles{min-height:calc(100dvh - 190px - var(--st,0px))}}
 .upd{position:fixed;left:12px;right:12px;top:calc(10px + env(safe-area-inset-top));z-index:98;max-width:460px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px 10px 18px;border-radius:20px;font-weight:600;color:var(--ink);background:linear-gradient(145deg,var(--pb-top),var(--pb-bot));box-shadow:6px 8px 18px var(--pil-lo),-4px -4px 10px var(--pil-hi),0 0 0 2px var(--green);animation:fadeIn .3s}
+/* v5: project book */
+.acc{padding:0;overflow:hidden}
+.acc-h{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:12px 14px;text-align:left;cursor:pointer;color:inherit;min-height:66px}
+.acc-ic{width:42px;height:42px;border-radius:14px;background:var(--green-soft);color:var(--green);display:grid;place-items:center;flex:none}
+.acc-h b{font:700 1.05rem var(--display);letter-spacing:-.01em}
+.acc-b{padding:2px 16px 16px;animation:fadeIn .2s}
+.stp{display:inline-flex;align-items:center;gap:4px;font-size:.72rem;font-weight:700;border-radius:99px;padding:3px 10px;background:var(--line);color:var(--muted);white-space:nowrap;flex:none}
+.stp.ok{background:var(--green-soft);color:var(--green)}
+.bk-list{display:flex;flex-direction:column}
+.bk-row{display:flex;align-items:center;gap:10px;width:100%;border:0;border-top:1px solid var(--line);background:none;padding:12px 2px;text-align:left;cursor:pointer;color:inherit;min-height:54px}
+.bk-list .bk-row:first-child{border-top:0}
+.bk-meta{font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap;text-align:right}
+.bk-add{margin-top:10px}
+.bk-line{display:flex;flex-direction:column;gap:2px;padding:10px 0;border-top:1px solid var(--line);overflow-wrap:anywhere}
+.txt-card{display:block;width:100%;text-align:left;border:0;border-radius:18px;padding:12px 40px 12px 14px;margin-top:12px;cursor:pointer;color:inherit;position:relative;background:linear-gradient(145deg,var(--pb-top),var(--pb-bot));box-shadow:inset 2px 2px 6px var(--pil-in-lo),inset -2px -2px 6px var(--pil-in-hi)}
+.txt-card .txt-v{display:block;margin-top:2px;white-space:pre-wrap;overflow-wrap:anywhere}
+.txt-card.empty .txt-v{color:var(--muted)}
+.txt-e{position:absolute;right:14px;top:14px;color:var(--muted)}
+.hintcard{background:var(--green-soft);border-radius:16px;padding:12px 14px;margin:10px 0}.hintcard p{margin:4px 0}
+.okcard{display:flex;gap:8px;align-items:center;background:var(--green-soft);color:var(--green);border-radius:14px;padding:10px 14px;margin-top:10px;font-weight:700}
+.warncard{display:flex;gap:8px;background:var(--red-soft);color:var(--red);border-radius:14px;padding:10px 14px;margin-top:12px;font-weight:600}
+.prop-flow{display:flex;gap:6px;margin-bottom:12px}
+.pf{flex:1;text-align:center;padding:6px 4px;border-radius:99px;font-size:.78rem;font-weight:700;background:var(--line);color:var(--muted)}
+.pf.on{background:var(--green);color:var(--paper)}
+.prop-sum h3{font-size:1.1rem;margin-bottom:6px}.prop-sum p{margin:6px 0}
+.ring-sm{--p:0;width:58px;height:58px;border-radius:50%;background:conic-gradient(var(--green) calc(var(--p)*1%),var(--line) 0);display:grid;place-items:center;flex:none}
+.ring-sm b{width:44px;height:44px;border-radius:50%;background:var(--sheet);display:grid;place-items:center;font:700 .8rem var(--display)}
+.ring-sm.big{width:78px;height:78px}.ring-sm.big b{width:62px;height:62px;font-size:1rem}
+.money.over .ring-sm{background:conic-gradient(var(--red) calc(var(--p)*1%),var(--line) 0)}
+.money-big{font:700 1.9rem/1.1 var(--display);font-variant-numeric:tabular-nums}
+.m3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:14px}
+.m3 div{background:var(--paper);border-radius:14px;padding:8px 10px;display:flex;flex-direction:column;min-width:0}
+.m3 span{font-size:.72rem;color:var(--muted)}.m3 b{font:700 .92rem var(--display);font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.pos{color:var(--green)}.neg{color:var(--red)}
+.sumbox{margin-top:12px;border-radius:16px;padding:6px 14px;background:var(--paper)}
+.sumbox div{display:flex;justify-content:space-between;gap:10px;padding:8px 0;border-top:1px solid var(--line)}
+.sumbox div:first-child{border-top:0}.sumbox span{color:var(--muted)}.sumbox b{font-variant-numeric:tabular-nums;text-align:right}
+.dots9{display:flex;gap:6px}.dot9{width:14px;height:14px;border-radius:50%;background:var(--line)}.dot9.on{background:var(--green)}
+.frow{display:grid;gap:8px;padding:10px 46px 10px 10px;border-radius:16px;background:var(--paper);margin-bottom:8px;position:relative}
+.frow .frm{position:absolute;right:6px;top:6px}
+.stc{border:0;border-radius:99px;padding:4px 10px;font-size:.72rem;font-weight:700;cursor:pointer;white-space:nowrap;flex:none;background:var(--line);color:var(--muted)}
+.stc.st-Complete{background:var(--green-soft);color:var(--green)}.stc.st-In{background:var(--sky-soft);color:var(--sky)}.stc.st-Waiting{background:var(--amber-soft);color:var(--amber)}
+.ttl{background:none;border:0;padding:0;text-align:left;color:inherit;cursor:pointer;min-width:0;font:inherit}
+.bk-frame{flex:1;width:100%;border:0;background:#fff}
+.bk-bar{display:flex;align-items:center;gap:12px;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:var(--sheet)}
+.stepchip{flex:none}
+.segwrap .segc button{padding:0 2px;flex-direction:column;gap:2px;min-height:54px;font-size:.66rem;line-height:1.1}
+.segwrap .segc button span{display:block!important}
+.stepchip[aria-pressed=true]{background:linear-gradient(145deg,color-mix(in srgb,var(--green) 85%,#000),var(--green));color:#fff;box-shadow:inset 3px 3px 8px rgba(0,0,0,.28),inset -2px -2px 6px rgba(255,255,255,.2)}
+
+.tick[aria-pressed=false]{box-shadow:3px 4px 9px var(--pil-lo),-2px -2px 7px var(--pil-hi),inset 0 0 0 2px color-mix(in srgb,var(--field) 60%,transparent)}
 .photos button{position:relative}
 .targets{list-style:none;margin:10px 0 0;padding:0}
 .targets li{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}.targets li:first-child{border-top:0}
@@ -479,6 +530,14 @@ trophy:'<path d="M8 4h8v5a4 4 0 01-8 0z"/><path d="M8 6H4v1a4 4 0 004 4M16 6h4v1
 bake:'<path d="M7 13a4 4 0 01-.4-7.9A4.5 4.5 0 0112 3a4.5 4.5 0 015.4 2.1A4 4 0 0117 13v6H7z"/><path d="M7 16h10"/>',
 coffee:'<path d="M4 8h12v6a5 5 0 01-5 5H9a5 5 0 01-5-5z"/><path d="M16 10h2a2 2 0 010 4h-2M7 3v2M10 3v2M13 3v2"/>',
 flame:'<path d="M12 3c1 3 5 5 5 10a5 5 0 01-10 0c0-2 1-3 2-4 0 2 1 3 2 3 0-3-1-5 1-9z"/>',
+shield:'<path d="M12 3l8 3v6c0 5-3.5 8-8 9-4.5-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+cash:'<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>',
+flag:'<path d="M5 21V4M5 4h11l-2 4 2 4H5"/>',
+printer:'<path d="M7 9V3h10v6M7 17H5a2 2 0 01-2-2v-4a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2h-2M7 14h10v7H7z"/>',
+list:'<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+calendar:'<rect x="3.5" y="5" width="17" height="15" rx="2"/><path d="M3.5 10h17M8 3v4M16 3v4"/>',
+receipt:'<path d="M6 3h12v18l-3-2-3 2-3-2-3 2zM9 8h6M9 12h6"/>',
+compass:'<circle cx="12" cy="12" r="9"/><path d="M15.500 8.500l-2 5-5 2 2-5z"/>',
 user:'<circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-7 8-7s8 2.6 8 7"/>',
 mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/>',
 pencil:'<path d="M4 20l1-4L16.5 4.5a2 2 0 013 3L8 19z"/>',
@@ -628,7 +687,11 @@ const dayLabel=t=>{const d=new Date(t),n=new Date(),a=new Date(d.getFullYear(),d
 function storyItems(p){
   const it=[];
   p.log.forEach(l=>it.push({t:l.t,k:"log",l}));
-  mediaOf(p).forEach(m=>it.push({t:m.t,k:"media",m}));
+  mediaOf(p).filter(m=>m.tag!=="receipt").forEach(m=>it.push({t:m.t,k:"media",m}));
+  (p.weeks||[]).forEach(w=>it.push({t:dtOf(w.date,w.id),k:"sess",w}));
+  (p.exp||[]).forEach(e=>it.push({t:dtOf(e.date,e.id),k:"exp",e}));
+  (p.inc||[]).forEach(e=>it.push({t:dtOf(e.date,e.id),k:"inc",e}));
+  if(p.prop&&p.prop.status==="approved"&&p.prop.approvedOn)it.push({t:dtOf(p.prop.approvedOn),k:"approved",p});
   p.goals.forEach(g=>{
     if(g.done&&g.doneAt)it.push({t:g.doneAt,k:"goal",g});
     (g.targets||[]).forEach(tg=>{if(tg.done&&tg.doneAt&&!(g.done&&g.doneAt&&Math.abs(g.doneAt-tg.doneAt)<3000))it.push({t:tg.doneAt,k:"target",g,tg})});
@@ -637,6 +700,7 @@ function storyItems(p){
   return it.sort((a,b)=>b.t-a.t);
 }
 function storyCard(x){
+  const ex=storyCardExtra(x);if(ex)return ex;
   if(x.k==="log")return `<div class="sitem"><span class="sic">${ic("note")}</span><div class="sbody"><div>${esc(x.l.text)}</div><div class="small muted">${esc(x.l.by)} · ${tmOf(x.t)}</div></div><button class="x sm" data-dl="${x.l.id}" aria-label="Delete update">${ic("trash")}</button></div>`;
   if(x.k==="media")return `<div class="sitem media"><button class="smedia" data-m="${x.m.id}" aria-label="Open ${x.m.type==="video"?"video":"photo"} ${esc(x.m.cap||"")}">${x.m.type==="video"?`<video data-mid="${x.m.id}" muted playsinline preload="metadata"></video><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${x.m.id}" alt="${esc(x.m.cap||"Photo")}" loading="lazy">`}</button>${x.m.cap?`<div class="scap">${esc(x.m.cap)}</div>`:""}<div class="small muted">${esc(x.m.by)} · ${tmOf(x.t)}</div></div>`;
   if(x.k==="goal")return `<div class="sitem win"><span class="sic ok">${ic("trophy")}</span><div class="sbody"><b>Goal finished</b><div>${esc(x.g.title)}</div><div class="small muted">${tmOf(x.t)}</div></div></div>`;
@@ -648,7 +712,7 @@ function storyTab(p){
   items.forEach(x=>{const l=dayLabel(x.t);if(l!==day){html+=`<h3 class="sday">${l}</h3>`;day=l}html+=storyCard(x)});
   const first=pics.at(-1),last=pics[0];
   return `<div class="card composer"><div class="row"><textarea class="t ta" rows="1" id="sc-t" enterkeyhint="send" placeholder="Add an update for ${esc(p.name)}" aria-label="Add an update"></textarea>${micBtn()}<button class="btn primary icon" id="sc-post" aria-label="Post update">${ic("send")}</button></div>
-    <div class="row wr" style="margin-top:10px"><button class="btn small" id="sc-ph">${ic("camera")}Photo or video</button><button class="btn small" id="sc-rec">${ic("trend")}Share this week</button></div>
+    <div class="row wr" style="margin-top:10px"><button class="btn small" id="sc-ph">${ic("camera")}Photo or video</button><button class="btn small" id="sc-gal">${ic("image")}Gallery</button><button class="btn small" id="sc-rec">${ic("trend")}Share this week</button></div>
     <input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"></div>`+
   (pics.length>1?`<div class="card"><h2>Before and now</h2><div class="cmp"><figure><img data-mid="${first.id}" alt="Earliest photo"><figcaption>Before · ${new Date(first.t).toLocaleDateString(undefined,{day:"numeric",month:"short"})}</figcaption></figure><figure><img data-mid="${last.id}" alt="Latest photo"><figcaption>Now · ${new Date(last.t).toLocaleDateString(undefined,{day:"numeric",month:"short"})}</figcaption></figure></div></div>`:"")+
   (items.length?`<div class="story">${html}</div>`:`<div class="empty">${ic("pulse","xl")}<h3>Your story starts here</h3><p style="margin:0">Post an update, add a photo, or finish a target. It all shows up here as a diary.</p></div>`);
@@ -658,7 +722,7 @@ function wireStory(p){
   const post=()=>{const t=$("#sc-t").value.trim();if(!t){$("#sc-t").focus();return}if(listening)listening.stop();p.log.push({id:uid(),text:t,by:who(),t:Date.now()});save(p);fb("add");render()};
   $("#sc-post").onclick=post;
   $("#sc-t").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();post()}};
-  $("#sc-ph").onclick=()=>$("#pf").click();
+  $("#sc-ph").onclick=()=>$("#pf").click();$("#sc-gal").onclick=()=>{tab="media";render()};
   $("#pf").onchange=async e=>{const n=await addFiles(p.id,e.target.files);if(n){save();fb("add")}render()};
   $("#sc-rec").onclick=()=>reportSheet(p);
   document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>openMediaSheet(S.media.find(x=>x.id===b.dataset.m)));
@@ -840,11 +904,397 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="4.0";
+const APP_VER="5.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
 setTimeout(checkUpdate,4000);setInterval(checkUpdate,600000);document.addEventListener("visibilitychange",()=>{if(!document.hidden)checkUpdate()});
+/* ================= v5: the production team project book ================= */
+const rands=n=>{n=+n||0;return (n<0?"-":"")+"R "+Math.abs(n).toLocaleString("en-ZA",{minimumFractionDigits:2,maximumFractionDigits:2})};
+const toNum=v=>{const n=parseFloat(String(v==null?"":v).replace(/\s/g,"").replace(",","."));return isFinite(n)?n:0};
+const dShort=ds=>ds?new Date(ds+"T12:00").toLocaleDateString(undefined,{day:"numeric",month:"short"}):"";
+const dLong=ds=>ds?new Date(ds+"T12:00").toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"}):"";
+const ROLES=["Coordinator","Recorder","Finance","Materials and tools","Quality and safety","Communication"];
+const STATUS=["Not started","In progress","Waiting","Complete"];
+const TEAM_IDEAS=[
+  [/baking/i,"Baking","Plan a lunch or sale, cost a recipe, reduce waste. Cater for parent evenings and school functions.","Food hygiene, allergens, adult guidance and the true cost per item."],
+  [/cr[eè]che/i,"Crèche","Create story sessions, simple games or learning resources for younger children. An end of year play.","Age suitability, agreed routines and adult supervision."],
+  [/craft/i,"Craft","Make useful items, or design products for a school market.","Prototypes, material use, durability and fair pricing."],
+  [/construction/i,"Construction","Design and build an approved item for a real school need, like benches or tables.","Measurements, drawings, tools and educator approval."],
+  [/maintenance/i,"Maintenance","Audit a space, report faults and complete suitable approved repairs.","Work within your skills and record what still needs a specialist."],
+  [/mountain|bik/i,"Mountain biking","Plan skills sessions, equipment checks or an approved route project. The bike park is above the Middle school field.","Adult oversight, route permission and equipment readiness."],
+  [/media/i,"Media","Produce a newsletter, photo story or account of the term's work.","Consent, accuracy, credits and approval before sharing."],
+  [/garden/i,"Garden","Plan beds, grow food, compost or improve a shared green space. The edible curriculum cube design.","Seasonal needs, water use, plant care and harvest records."],
+  [/spirit/i,"Spirit","Welcome new learners, strengthen belonging or organise a community activity.","Include different voices and assess the value to the community."],
+  [/chicken|coop/i,"Chicken coop","Daily management of the chicken coop, egg sales, cleaning and making what the coop needs.",""]
+];
+const teamIdeas=p=>{const r=TEAM_IDEAS.find(x=>x[0].test(p.name));return r?{name:r[1],idea:r[2],watch:r[3]}:null};
+function ensureBook(p){
+  p.txt=p.txt||{};p.roles=p.roles||[];p.ideas=p.ideas||[];p.res=p.res||[];p.risks=p.risks||[];p.prop=p.prop||{};
+  p.bud=p.bud||{};p.bud.items=p.bud.items||[];p.exp=p.exp||[];p.inc=p.inc||[];p.weeks=p.weeks||[];
+  p.refl=p.refl||{};p.hand=p.hand||{};p.hand.res=p.hand.res||[];p.rev=p.rev||{};p.info=p.info||{};p.minfo=p.minfo||{};
+}
+const bud=p=>{const planned=p.bud.items.reduce((a,i)=>a+toNum(i.qty)*toNum(i.unit),0),approved=toNum(p.bud.approved),spent=p.exp.reduce((a,e)=>a+toNum(e.amount),0),income=p.inc.reduce((a,e)=>a+toNum(e.amount),0);return{planned,approved,expInc:toNum(p.bud.income),spent,income,left:approved-spent,surplus:income-spent}};
+
+/* ---------- accordion sections ---------- */
+const openAcc=new Set();
+const stp=(done,txt)=>`<span class="stp ${done?"ok":""}">${done?ic("check","sm"):""}${esc(txt)}</span>`;
+function acc(p,id,icon,title,sub,state,body){
+  const key=p.id+":"+id,op=openAcc.has(key);
+  return `<section class="card acc ${op?"open":""}" id="acc-${id}" data-acc="${key}"><button class="acc-h" data-accb="${key}" aria-expanded="${op}"><span class="acc-ic">${ic(icon)}</span><span class="grow"><b>${esc(title)}</b><span class="small muted" style="display:block">${esc(sub)}</span></span>${state}<span class="gchev ${op?"open":""}" aria-hidden="true">${ic("chev")}</span></button><div class="acc-b" ${op?"":"hidden"}>${body}</div></section>`;
+}
+const bkRow=(act,main,meta,sub)=>`<button class="bk-row" data-ba="${act}"><span class="grow"><b>${main}</b>${sub?`<span class="small muted" style="display:block">${sub}</span>`:""}</span>${meta?`<span class="bk-meta">${meta}</span>`:""}${ic("chev","sm")}</button>`;
+const addBtn=(act,label)=>`<button class="btn small bk-add" data-ba="${act}">${ic("plus")}${label}</button>`;
+const txtCard=(p,k,label,hint)=>{const v=p.txt[k];return `<button class="txt-card ${v?"":"empty"}" data-txt="${k}"><span class="small muted">${esc(label)}</span><span class="txt-v">${v?esc(v):esc(hint||"Tap to write")}</span><span class="txt-e" aria-hidden="true">${ic("pencil","sm")}</span></button>`};
+
+/* ---------- one form sheet for everything ---------- */
+function formSheet({title,fields,data,onSave,onDelete,done}){
+  const v=JSON.parse(JSON.stringify(data||{}));
+  const fh=f=>{
+    const id="f-"+f.k,val=v[f.k];
+    if(f.t==="head")return `<h3 class="sub-h">${esc(f.l)}</h3>`;
+    if(f.t==="note")return `<p class="hint" style="margin:0 0 8px">${esc(f.l)}</p>`;
+    const lab=`<label class="f" for="${id}">${esc(f.l)}</label>`;
+    if(f.t==="area")return lab+`<div class="row"><textarea class="t ta" rows="2" id="${id}" placeholder="${esc(f.ph||"")}">${esc(val||"")}</textarea>${micBtn()}</div>`;
+    if(f.t==="text")return lab+`<div class="row"><input class="t" id="${id}" type="text" value="${esc(val||"")}" placeholder="${esc(f.ph||"")}">${f.mic?micBtn():""}</div>`+(f.sug?`<div class="chips fsug" data-for="${id}" style="margin-top:8px">${f.sug.map(o=>`<button type="button" class="chip" data-s="${esc(o)}">${esc(o)}</button>`).join("")}</div>`:"");
+    if(f.t==="num")return lab+`<input class="t" id="${id}" type="text" inputmode="decimal" value="${val==null?"":esc(val)}" placeholder="${esc(f.ph||"0")}">`;
+    if(f.t==="date")return lab+`<input class="t" id="${id}" type="date" value="${esc(val||"")}">`;
+    if(f.t==="select")return lab+`<div class="chips fsel" id="${id}" role="group" aria-label="${esc(f.l)}">${f.o.map(o=>`<button type="button" class="chip" data-v="${esc(o)}" aria-pressed="${val===o}">${esc(o)}</button>`).join("")}</div>`;
+    if(f.t==="chips")return lab+(f.o.length?`<div class="chips fmul" id="${id}" role="group" aria-label="${esc(f.l)}">${f.o.map(o=>`<button type="button" class="chip" data-v="${esc(o)}" aria-pressed="${(val||[]).includes(o)}">${esc(o)}</button>`).join("")}</div>`:`<p class="hint">${esc(f.empty||"Add team members first.")}</p>`);
+    if(f.t==="switch")return `<div class="row between" style="margin-top:14px"><b>${esc(f.l)}</b><button type="button" role="switch" class="sw" id="${id}" aria-label="${esc(f.l)}" aria-checked="${!!val}"><i></i></button></div>`;
+    if(f.t==="photo")return lab+`<div class="row"><button type="button" class="btn small" id="${id}-b">${ic("camera")}${esc(f.btn||"Add photo")}</button><span class="small muted" id="${id}-s">${val?"Photo attached":""}</span></div><input type="file" accept="image/*" id="${id}-f" class="sr" tabindex="-1" aria-label="${esc(f.l)}">`;
+    if(f.t==="rows")return lab+`<div id="${id}"></div><button class="btn small" type="button" id="${id}-add" style="margin-top:4px">${ic("plus")}Add row</button>`;
+    return "";
+  };
+  sheet(title,fields.map(fh).join("")+`<p class="err" id="fs-err" role="alert" hidden></p><div class="row" style="margin-top:22px">${onDelete?`<button class="btn danger" id="fs-del" type="button">${ic("trash")}Delete</button>`:""}<span class="grow"></span><button class="btn primary" id="fs-ok" type="button">${esc(done||"Done")}</button></div>`,(d,close)=>{
+    wireMics(d);d.querySelectorAll(".ta").forEach(autosize);
+    d.querySelectorAll(".fsel").forEach(g=>g.querySelectorAll(".chip").forEach(b=>b.onclick=()=>{const was=b.getAttribute("aria-pressed")==="true";g.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed","false"));b.setAttribute("aria-pressed",String(!was))}));
+    d.querySelectorAll(".fmul .chip").forEach(b=>b.onclick=()=>b.setAttribute("aria-pressed",String(b.getAttribute("aria-pressed")!=="true")));
+    d.querySelectorAll(".fsug").forEach(g=>g.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{const i=d.querySelector("#"+g.dataset.for);i.value=b.dataset.s;i.focus()}));
+    d.querySelectorAll('.sw[id^="f-"]').forEach(b=>b.onclick=()=>b.setAttribute("aria-checked",String(b.getAttribute("aria-checked")!=="true")));
+    fields.filter(f=>f.t==="photo").forEach(f=>{const id="f-"+f.k;d.querySelector("#"+id+"-b").onclick=()=>d.querySelector("#"+id+"-f").click();
+      d.querySelector("#"+id+"-f").onchange=async e=>{const ids=await addFilesIds(f.pid,e.target.files,f.tag);if(ids.length){v[f.k]=ids[0];d.querySelector("#"+id+"-s").textContent="Photo attached"}}});
+    const rowsState={};
+    fields.filter(f=>f.t==="rows").forEach(f=>{
+      const id="f-"+f.k;rowsState[f.k]=(v[f.k]||[]).map(r=>({...r}));if(!rowsState[f.k].length)rowsState[f.k].push({});
+      const pull=()=>d.querySelectorAll("#"+id+" .frow").forEach((el,i)=>{f.cols.forEach(c=>{rowsState[f.k][i][c.k]=el.querySelector('[data-c="'+c.k+'"]').value})});
+      const draw=()=>{d.querySelector("#"+id).innerHTML=rowsState[f.k].map((r,i)=>`<div class="frow">${f.cols.map(c=>`<input class="t" data-c="${c.k}" type="text" value="${esc(r[c.k]||"")}" placeholder="${esc(c.l)}" aria-label="${esc(c.l)} ${i+1}">`).join("")}<button type="button" class="x sm frm" data-i="${i}" aria-label="Remove row ${i+1}">${ic("x")}</button></div>`).join("");
+        d.querySelectorAll("#"+id+" .frm").forEach(b=>b.onclick=()=>{pull();rowsState[f.k].splice(+b.dataset.i,1);if(!rowsState[f.k].length)rowsState[f.k].push({});draw()})};
+      draw();d.querySelector("#"+id+"-add").onclick=()=>{pull();rowsState[f.k].push({});draw();const ins=d.querySelectorAll("#"+id+" .frow");ins[ins.length-1].querySelector("input").focus()};
+      f._pull=pull;
+    });
+    const err=m=>{const e=d.querySelector("#fs-err");e.textContent=m;e.hidden=!m};
+    d.querySelector("#fs-ok").onclick=()=>{
+      for(const f of fields){const id="f-"+f.k,el=d.querySelector("#"+id);if(!el&&f.t!=="photo"&&f.t!=="rows")continue;
+        if(f.t==="area"||f.t==="text"||f.t==="date")v[f.k]=el.value.trim();
+        else if(f.t==="num")v[f.k]=el.value.trim();
+        else if(f.t==="select"){const b=el.querySelector('[aria-pressed="true"]');v[f.k]=b?b.dataset.v:""}
+        else if(f.t==="chips")v[f.k]=[...el.querySelectorAll('[aria-pressed="true"]')].map(b=>b.dataset.v);
+        else if(f.t==="switch")v[f.k]=el.getAttribute("aria-checked")==="true";
+        else if(f.t==="rows"){f._pull();v[f.k]=rowsState[f.k].filter(r=>Object.values(r).some(x=>String(x||"").trim()))}
+        if(f.req&&!String(v[f.k]==null?"":v[f.k]).trim()){err(f.req===true?"Please fill in "+f.l.toLowerCase()+".":f.req);el&&el.focus&&el.focus();return}
+      }
+      if(listening)listening.stop();
+      if(onSave(v)===false)return;
+      close();
+    };
+    if(onDelete)d.querySelector("#fs-del").onclick=()=>{onDelete();close()};
+  });
+}
+async function addFilesIds(pid,files,tag){
+  const ids=[];
+  for(const f of files){
+    const vid=f.type.startsWith("video/");if(vid&&f.size>MAXVID){toast("Video too large. Keep clips under 45 MB.");continue}
+    const b=vid?f:await toBlob(f);if(!b){toast("Couldn't read that file.");continue}
+    const id=uid();try{await mPut(id,b)}catch{toast("No space to store this on the device.");continue}
+    S.media.push({id,pid,type:vid?"video":"photo",cap:"",tag:tag||"",t:Date.now(),by:who(),del:false,u:Date.now()});ids.push(id);
+  }
+  return ids;
+}
+const memberNames=p=>p.members.slice();
+const mark=(p)=>{save(p);render()};
+
+/* ---------- Plan tab ---------- */
+function setupSteps(p){
+  const pr=p.prop;
+  return [
+    {id:"team",l:"Team and roles",done:p.members.length>0&&p.roles.length>0},
+    {id:"ideas",l:"Ideas",done:!!(p.ideas.length||p.txt.chosen)},
+    {id:"prop",l:"Proposal approved",done:pr.status==="approved"},
+    {id:"res",l:"Resources and safety",done:!!(p.res.length||p.risks.length)},
+    {id:"plan",l:"Action plan",done:p.goals.length>0,tab:"work"},
+    {id:"bud",l:"Budget",done:p.bud.items.length>0&&toNum(p.bud.approved)>0,tab:"money"}
+  ];
+}
+function setupCard(p){
+  const st=setupSteps(p),n=st.filter(s=>s.done).length,pct=Math.round(n/st.length*100);
+  return `<div class="card setup"><div class="row"><div class="ring-sm" style="--p:${pct}" role="img" aria-label="${n} of ${st.length} set up"><b>${n}/${st.length}</b></div><div class="grow"><h2 style="font-size:1.15rem">${n===st.length?"Ready to build":"Set up your term"}</h2><p class="small muted" style="margin:2px 0 0">${n===st.length?"Everything from the project book is in place.":"Follow the steps below, one at a time."}</p></div></div>
+  <div class="chips" style="margin-top:12px;flex-wrap:nowrap;overflow-x:auto;padding-bottom:4px">${st.map(s=>`<button class="chip stepchip" data-step="${s.id}" data-stab="${s.tab||"plan"}" aria-pressed="${s.done}">${s.done?ic("check","sm"):""}${esc(s.l)}</button>`).join("")}</div>
+  <div class="row between small" style="margin-top:12px"><span class="muted">Term: <b>${esc(p.info.term||"not set")}</b> · Mentor: <b>${esc(p.info.mentor||"not set")}</b></span><button class="linkbtn" data-ba="info:edit" style="min-height:32px;padding:0 4px">Edit</button></div></div>`;
+}
+function planTab(p){
+  const ti=teamIdeas(p),pr=p.prop,statusLbl={"":"Draft",draft:"Draft",submitted:"Waiting for educator",approved:"Approved"}[pr.status||""];
+  const team=`<div class="chips" style="margin-bottom:12px">${p.members.map((m,i)=>`<button class="chip static mem" data-ba="member:${i}">${ic("user","sm")}${esc(m)}</button>`).join("")}${addBtn("member:new","Member")}</div>
+    ${p.members.some(m=>(p.minfo[m]||{}).strength||(p.minfo[m]||{}).skill)?`<div class="bk-list">${p.members.filter(m=>(p.minfo[m]||{}).strength||(p.minfo[m]||{}).skill).map(m=>`<div class="bk-line"><b>${esc(m)}</b><span class="small muted">${esc((p.minfo[m]||{}).strength||"")}${(p.minfo[m]||{}).skill?" · practising: "+esc(p.minfo[m].skill):""}</span></div>`).join("")}</div>`:""}
+    <h3 class="sub-h">Roles</h3><div class="bk-list">${p.roles.map(r=>bkRow("role:"+r.id,esc(r.role),esc(r.who||"Unassigned"),r.review?"Review "+dShort(r.review):"")).join("")}</div>${addBtn("role:new","Role")}
+    ${txtCard(p,"decide","How we make decisions and solve disagreements","Tap to write")}`;
+  const ideas=`${ti?`<div class="hintcard"><b>Ideas for ${esc(ti.name)}</b><p>${esc(ti.idea)}</p>${ti.watch?`<p class="small muted"><b>Watch for:</b> ${esc(ti.watch)}</p>`:""}</div>`:""}
+    ${txtCard(p,"community","What does our community need from us?","Tap to write")}
+    ${txtCard(p,"noticed","What we noticed and who we consulted","Look, listen and speak to the people who will use your work")}
+    <h3 class="sub-h">Project ideas</h3><div class="bk-list">${p.ideas.map(i=>bkRow("idea:"+i.id,esc(i.idea),"",esc(i.who||""))).join("")}</div>${addBtn("idea:new","Idea")}
+    ${txtCard(p,"chosen","Our chosen idea and why it matters","Tap to write")}
+    ${txtCard(p,"findout","What we need to find out first","Tap to write")}
+    ${txtCard(p,"success","What would meaningful success look like?","Tap to write")}`;
+  const prop=`<div class="prop-flow" role="list">${["Draft","Waiting","Approved"].map((s,i)=>{const cur=(pr.status==="approved"?2:pr.status==="submitted"?1:0);return `<span class="pf ${i<=cur?"on":""}" role="listitem">${s}</span>`}).join("")}</div>
+    ${pr.title?`<div class="prop-sum"><h3>${esc(pr.title)}</h3>${[["The need",pr.need],["What we will make, do or provide",pr.make],["Who benefits",pr.who],["How we will know it worked",pr.success]].filter(x=>x[1]).map(x=>`<p><span class="small muted">${x[0]}</span><br>${esc(x[1])}</p>`).join("")}<p class="small muted">Target ${pr.due?dLong(pr.due):"date not set"} · Proposed budget ${pr.budget?rands(toNum(pr.budget)):"not set"}</p></div>`:`<p class="muted" style="margin:0 0 10px">Write your project proposal for your educator to approve.</p>`}
+    <div class="row wr"><button class="btn small primary" data-ba="prop:edit">${ic("pencil")}${pr.title?"Edit proposal":"Write proposal"}</button>${pr.title&&pr.status!=="approved"?`<button class="btn small" data-ba="prop:status">${ic("check")}${pr.status==="submitted"?"Educator decision":"Submit for approval"}</button>`:""}</div>
+    ${pr.status==="approved"?`<div class="okcard">${ic("check")} Approved${pr.approval?" by "+esc(pr.approval):""}${pr.approvedOn?" on "+dLong(pr.approvedOn):""}</div>`:""}
+    ${pr.feedback||pr.changes?`<div class="hintcard">${pr.feedback?`<p><b>Educator feedback</b><br>${esc(pr.feedback)}</p>`:""}${pr.changes?`<p><b>Agreed changes</b><br>${esc(pr.changes)}</p>`:""}</div>`:""}`;
+  const sk=mediaOf(p).filter(m=>m.tag==="sketch");
+  const design=`${txtCard(p,"research","What we researched and where we found it","Tap to write")}
+    <h3 class="sub-h">Sketch or plan</h3>${sk.length?`<div class="photos" style="margin-bottom:10px">${sk.map(m=>`<button data-m="${m.id}" aria-label="Open sketch ${esc(m.cap||"")}"><img data-mid="${m.id}" alt="Sketch" loading="lazy"></button>`).join("")}</div>`:`<p class="muted small" style="margin:0 0 8px">Photograph a drawing, measurements, a recipe, a route or a layout.</p>`}
+    <button class="btn small" data-ba="sketch:new">${ic("camera")}Add a sketch</button><input type="file" id="sk-f" accept="image/*" class="sr" tabindex="-1" aria-label="Choose a sketch photo">
+    ${txtCard(p,"newskill","New skill we need and who can help us learn it","Tap to write")}
+    ${txtCard(p,"trial","Our trial or prototype and what we changed","Tap to write")}`;
+  const res=`<h3 class="sub-h" style="margin-top:0">Materials, tools and resources</h3><div class="bk-list">${p.res.map(r=>bkRow("res:"+r.id,esc(r.item),esc(r.src||""),esc(r.who||""))).join("")}</div>${addBtn("res:new","Resource")}
+    <h3 class="sub-h">Risks and difficulties</h3><div class="bk-list">${p.risks.map(r=>bkRow("risk:"+r.id,esc(r.risk),"",esc(r.manage||""))).join("")}</div>${addBtn("risk:new","Risk")}
+    ${txtCard(p,"perms","Permissions, training or supervision needed before starting","For example: training on how to use a jigsaw")}
+    ${txtCard(p,"waste","How we will reduce waste and care for our work space","Tap to write")}`;
+  return setupCard(p)+
+    acc(p,"team","users","Team and roles",`${p.members.length} member${p.members.length===1?"":"s"} · ${p.roles.length} role${p.roles.length===1?"":"s"}`,stp(p.members.length>0&&p.roles.length>0,p.members.length>0&&p.roles.length>0?"Done":"To do"),team)+
+    acc(p,"ideas","sparkle","Ideas and observation",p.txt.chosen?esc(p.txt.chosen).slice(0,50):"What does the community need?",stp(!!(p.ideas.length||p.txt.chosen),p.ideas.length||p.txt.chosen?"Done":"To do"),ideas)+
+    acc(p,"prop","book","Project proposal",statusLbl,stp(pr.status==="approved",statusLbl),prop)+
+    acc(p,"design","palette","Research and design",sk.length?sk.length+" sketch"+(sk.length>1?"es":""):"Sketches, skills, prototype",stp(!!(p.txt.research||sk.length),p.txt.research||sk.length?"Started":"To do"),design)+
+    acc(p,"res","shield","Resources and safety",`${p.res.length} resource${p.res.length===1?"":"s"} · ${p.risks.length} risk${p.risks.length===1?"":"s"}`,stp(!!(p.res.length||p.risks.length),p.res.length||p.risks.length?"Started":"To do"),res);
+}
+
+/* ---------- text blocks ---------- */
+const TXT={
+  decide:["How we make decisions and solve disagreements","How will we decide things together, and what will we do when we disagree?"],
+  community:["What does our community need from us?","Who needs help, and what would make a real difference?"],
+  noticed:["What we noticed and who we consulted","Look, listen and speak to the people who will use or benefit from your work."],
+  chosen:["Our chosen idea and why it matters","Which idea did we pick, and why is it important?"],
+  findout:["What we need to find out first","What do we still need to learn before we start?"],
+  success:["What would meaningful success look like?","How will we know the project worked?"],
+  research:["What we researched and where we found it","Websites, books, people, visits."],
+  newskill:["New skill we need and who can help us learn it","What do we need to learn, and who can teach us?"],
+  trial:["Our trial or prototype and what we changed","What did we test, and what did we improve?"],
+  perms:["Permissions, training or supervision needed","For example: training on how to use a jigsaw."],
+  waste:["How we will reduce waste and care for our work space","Ideas for reusing materials, cleaning up and sharing the space."],
+  deps:["What must happen first and what depends on another task","Which tasks have to wait for others?"],
+  served:["Feedback from the people our work served or customers","What did they say? Quote them if you can."],
+  funding:["How we will fund the project or reduce costs","Sales, donations, reusing materials, cheaper options."],
+  bchanges:["Changes to the budget and who approved them","Write what changed, why, and who agreed."],
+  tells:["What the figures tell us about our project","Did we spend wisely? What would we change?"],
+  surplus:["What happened to any surplus stock or remaining funds","Where did the money or stock go?"],
+  achieved:["What we achieved and who benefited","Be specific about what was made or done."],
+  compare:["How our result compares with our original success criteria","Look back at your proposal. What did we meet, and what did we miss?"],
+  shared:["How we shared work and handled difficulties","How did the team work together?"],
+  change:["What we would change next time","What would we do differently?"],
+  hwork:["Work still to complete and suggested next steps","Leave enough for the next group to continue responsibly."],
+  hpeople:["People to consult and useful advice","Names, roles and tips."]
+};
+function txtSheet(p,k){
+  const [label,hint]=TXT[k]||[k,""];
+  formSheet({title:label.length>34?"Write it down":label,fields:[{k:"v",t:"area",l:label,ph:hint}],data:{v:p.txt[k]||""},onSave:v=>{p.txt[k]=v.v;save(p);fb("add");render()}});
+}
+
+/* ---------- action handlers (one per list in the book) ---------- */
+const BA={};
+const byId=(arr,id)=>arr.find(x=>x.id===id);
+function listForm(p,arr,id,{title,fields,def,key}){
+  const ex=id==="new"?null:byId(arr,id);
+  formSheet({title:(ex?"Edit ":"New ")+title,fields,data:ex||(def?def():{}),
+    onSave:v=>{if(ex)Object.assign(ex,v);else arr.push({id:uid(),...v});save(p);fb("add");render()},
+    onDelete:ex?()=>{const i=arr.indexOf(ex);arr.splice(i,1);save(p);render();toast(title+" deleted.",()=>{arr.splice(i,0,ex);save(p);render()})}:null});
+}
+const memberField=(p,k,l)=>({k,t:"select",l,o:p.members,empty:"Add team members first."});
+BA.info=(p)=>{const m=new Date().getMonth(),t=m<3?1:m<6?2:m<9?3:4;formSheet({title:"Team details",fields:[{k:"term",t:"text",l:"Term and year",ph:"Term "+t+" "+new Date().getFullYear()},{k:"mentor",t:"text",l:"Educator or mentor",mic:true}],data:p.info,onSave:v=>{Object.assign(p.info,v);save(p);render()}})};
+BA.member=(p,id)=>{
+  const i=id==="new"?-1:+id,old=i>=0?p.members[i]:null,inf=old?(p.minfo[old]||{}):{};
+  formSheet({title:old?"Edit team member":"New team member",fields:[{k:"name",t:"text",l:"Name",req:true,mic:true},{k:"strength",t:"text",l:"Strength or interest",mic:true},{k:"skill",t:"text",l:"Skill to practise",mic:true}],data:{name:old||"",strength:inf.strength||"",skill:inf.skill||""},
+    onSave:v=>{if(old){if(v.name!==old){p.members[i]=v.name;p.minfo[v.name]=p.minfo[old];delete p.minfo[old];p.goals.forEach(g=>(g.targets||[]).forEach(t=>{if(t.who===old)t.who=v.name}));p.roles.forEach(r=>{if(r.who===old)r.who=v.name})}}else{if(p.members.includes(v.name)){toast("That name is already in the team.");return false}p.members.push(v.name)}
+      p.minfo[v.name]={strength:v.strength,skill:v.skill};save(p);fb("add");render()},
+    onDelete:old?()=>{p.members.splice(i,1);save(p);render();toast(old+" removed.")}:null});
+};
+BA.role=(p,id)=>listForm(p,p.roles,id,{title:"role",fields:[{k:"role",t:"text",l:"Role and responsibility",req:true,sug:ROLES.filter(r=>!p.roles.some(x=>x.role===r)),mic:true},memberField(p,"who","Person"),{k:"review",t:"date",l:"Review or rotation date"}]});
+BA.idea=(p,id)=>listForm(p,p.ideas,id,{title:"idea",fields:[{k:"idea",t:"area",l:"Project idea",req:true},{k:"who",t:"area",l:"Who benefits and how"},{k:"res",t:"area",l:"Resources or challenges"}]});
+BA.res=(p,id)=>listForm(p,p.res,id,{title:"resource",fields:[{k:"item",t:"text",l:"Material, tool or resource",req:true,mic:true},{k:"src",t:"select",l:"Have, borrow or buy",o:["Have","Borrow","Buy"]},memberField(p,"who","Person responsible")]});
+BA.risk=(p,id)=>listForm(p,p.risks,id,{title:"risk",fields:[{k:"risk",t:"area",l:"Possible risk or difficulty",req:true},{k:"manage",t:"area",l:"How we will manage it"},{k:"adult",t:"text",l:"Adult help needed",mic:true}]});
+BA.bud=(p,id)=>listForm(p,p.bud.items,id,{title:"budget item",fields:[{k:"item",t:"text",l:"Item or service",req:true,mic:true},{k:"qty",t:"num",l:"Quantity",ph:"1"},{k:"unit",t:"num",l:"Cost per unit (R)",ph:"0.00"}]});
+BA.hres=(p,id)=>listForm(p,p.hand.res,id,{title:"handover item",fields:[{k:"item",t:"text",l:"Resource, tool, stock or file",req:true,mic:true},{k:"loc",t:"text",l:"Location",mic:true},{k:"cond",t:"text",l:"Condition or action needed",mic:true}]});
+BA.budset=(p)=>formSheet({title:"Budget details",fields:[{k:"approved",t:"num",l:"Approved budget (R)"},{k:"income",t:"num",l:"Expected income, if any (R)"},{k:"agreedBy",t:"text",l:"Budget agreed by",mic:true},{k:"agreedOn",t:"date",l:"Date agreed"}],data:{approved:p.bud.approved||"",income:p.bud.income||"",agreedBy:p.bud.agreedBy||"",agreedOn:p.bud.agreedOn||""},onSave:v=>{Object.assign(p.bud,v);save(p);fb("add");render()}});
+const nextReceipt=p=>{const n=p.exp.map(e=>parseInt(e.receipt,10)).filter(x=>isFinite(x));return String((n.length?Math.max(...n):0)+1)};
+BA.exp=(p,id)=>listForm(p,p.exp,id,{title:"expense",def:()=>({date:todayStr(),receipt:nextReceipt(p),by:who()}),fields:[{k:"date",t:"date",l:"Date"},{k:"item",t:"text",l:"Item and supplier",req:true,mic:true},{k:"receipt",t:"text",l:"Receipt number"},{k:"by",t:"text",l:"Paid by",sug:p.members,mic:true},{k:"amount",t:"num",l:"Amount (R)",req:"Enter the amount you paid.",ph:"0.00"},{k:"media",t:"photo",l:"Receipt photo",btn:"Photograph the receipt",pid:p.id,tag:"receipt"}]});
+BA.inc=(p,id)=>listForm(p,p.inc,id,{title:"income",def:()=>({date:todayStr(),by:who()}),fields:[{k:"date",t:"date",l:"Date"},{k:"source",t:"text",l:"Source or item sold",req:true,mic:true},{k:"qty",t:"num",l:"Quantity",ph:"1"},{k:"amount",t:"num",l:"Money received (R)",req:"Enter the amount received.",ph:"0.00"},{k:"by",t:"text",l:"Recorded by",sug:p.members,mic:true}]});
+BA.prop=(p,id)=>{
+  if(id==="status"){
+    if(p.prop.status!=="submitted"){p.prop.status="submitted";save(p);fb("add");render();toast("Proposal submitted. Waiting for your educator.");return}
+    formSheet({title:"Educator decision",fields:[{k:"feedback",t:"area",l:"Educator feedback"},{k:"changes",t:"area",l:"Agreed changes"},{k:"decision",t:"select",l:"Decision",o:["Approved","Needs changes"]},{k:"approval",t:"text",l:"Educator name",mic:true},{k:"approvedOn",t:"date",l:"Date"}],data:{...p.prop,decision:"",approvedOn:p.prop.approvedOn||todayStr()},
+      onSave:v=>{if(v.decision==="Approved"&&!v.approval){toast("Enter the educator's name to approve.");return false}Object.assign(p.prop,{feedback:v.feedback,changes:v.changes,approval:v.approval,approvedOn:v.approvedOn});if(v.decision==="Approved"){p.prop.status="approved";confetti();fb("done")}else if(v.decision==="Needs changes")p.prop.status="draft";save(p);render()}});
+    return;
+  }
+  formSheet({title:"Project proposal",fields:[{k:"title",t:"text",l:"Project title",req:true,mic:true},{k:"need",t:"area",l:"The need we are responding to"},{k:"make",t:"area",l:"What we will make, do or provide"},{k:"who",t:"area",l:"Who will use or benefit from the result"},{k:"success",t:"area",l:"How we will know the work is successful"},{k:"due",t:"date",l:"Target completion date"},{k:"budget",t:"num",l:"Proposed budget (R)"}],data:{...p.prop,budget:p.prop.budget||(bud(p).planned?bud(p).planned.toFixed(2):"")},onSave:v=>{Object.assign(p.prop,v);if(v.budget&&!p.bud.approved&&p.prop.status==="approved")p.bud.approved=v.budget;save(p);fb("add");render()}});
+};
+BA.sketch=(p)=>{$("#sk-f").click()};
+BA.hand=(p)=>formSheet({title:"Hand over",fields:[{k:"funds",t:"area",l:"Funds or stock handed over"},{k:"by",t:"text",l:"Handed over by",sug:p.members,mic:true},{k:"byOn",t:"date",l:"Date"},{k:"to",t:"text",l:"Received by",mic:true},{k:"toOn",t:"date",l:"Date"}],data:p.hand,onSave:v=>{Object.assign(p.hand,v);save(p);fb("add");render()}});
+BA.rev=(p)=>formSheet({title:"Finishing the term",fields:[{k:"completed",t:"text",l:"Project completed",ph:"Date or yes, no, partly"},{k:"remaining",t:"area",l:"Remaining work"},{k:"feedback",t:"area",l:"Educator feedback"}],data:p.rev,onSave:v=>{Object.assign(p.rev,v);save(p);fb("add");render()}});
+BA.refl=(p,id)=>{
+  const name=p.members[+id],r=p.refl[name]||{};
+  formSheet({title:"Reflection: "+name,fields:[{k:"contrib",t:"area",l:"My contribution and evidence of it"},{k:"skill",t:"area",l:"A practical skill I developed"},{k:"reliab",t:"area",l:"How I showed reliability, initiative or care for others"},{k:"challenge",t:"area",l:"A challenge and what I learned from it"},{k:"next",t:"area",l:"My next learning goal"}],data:r,onSave:v=>{p.refl[name]=v;save(p);fb("add");render()}});
+};
+BA.sess=(p,id)=>{
+  const ex=id==="new"?null:byId(p.weeks,id),open=[];p.goals.forEach(g=>(g.targets||[]).forEach(t=>{if(!t.done)open.push({task:t.title,who:t.who||"",result:""})}));
+  const def={label:"Week "+(p.weeks.length+1),date:todayStr(),recorder:who(),present:p.members.slice(),tasks:open.slice(0,5),tools:false};
+  formSheet({title:ex?"Edit session":"New session",data:ex||def,done:"Save session",
+    fields:[{t:"head",l:"This session"},{k:"label",t:"text",l:"Week or session",req:true},{k:"date",t:"date",l:"Date"},{k:"recorder",t:"text",l:"Recorder",sug:p.members,mic:true},{k:"present",t:"chips",l:"Present",o:p.members},
+      {t:"head",l:"Plan"},{k:"priorities",t:"area",l:"Our priorities for this session"},{k:"tasks",t:"rows",l:"Tasks and progress",cols:[{k:"task",l:"Task"},{k:"who",l:"Person"},{k:"result",l:"Progress or result"}]},
+      {t:"head",l:"What happened"},{k:"problem",t:"area",l:"Problem we met and how we responded"},{k:"spent",t:"num",l:"Money spent (R)"},{k:"income",t:"num",l:"Income (R)"},{k:"receipts",t:"text",l:"Receipt numbers"},{k:"learned",t:"area",l:"What we learned or improved"},{k:"next",t:"area",l:"Next steps and who will do them"},
+      {t:"head",l:"Close up"},{k:"tools",t:"switch",l:"Tools returned and space cared for"},{k:"checked",t:"text",l:"Checked by",sug:p.members,mic:true}],
+    onSave:v=>{if(ex)Object.assign(ex,v);else p.weeks.push({id:uid(),...v});save(p);fb("done");render();if(!ex)toast("Session saved.")},
+    onDelete:ex?()=>{const i=p.weeks.indexOf(ex);p.weeks.splice(i,1);save(p);render();toast("Session deleted.",()=>{p.weeks.splice(i,0,ex);save(p);render()})}:null});
+};
+BA.evid=(p,id)=>{
+  const [gid,tid]=id.split("."),g=byId(p.goals,gid),t=g&&(g.targets||[]).find(x=>x.id===tid);if(!t)return;
+  formSheet({title:"Check and evidence",fields:[{k:"chk",t:"text",l:"Checked by",sug:p.members,req:"Enter who checked the quality.",mic:true},{k:"fb",t:"area",l:"Evidence or feedback"},{k:"ev",t:"photo",l:"Photo evidence",btn:"Add a photo",pid:p.id,tag:"evidence"}],data:{chk:t.chk||"",fb:t.fb||"",ev:t.ev||""},onSave:v=>{Object.assign(t,{chk:v.chk,fb:v.fb,ev:v.ev});save(p);fb("tick");render()}});
+};
+BA.target=(p,id)=>{
+  const [gid,tid]=id.split("."),g=byId(p.goals,gid),t=g&&(g.targets||[]).find(x=>x.id===tid);if(!t)return;
+  formSheet({title:"Task",fields:[{k:"title",t:"area",l:"Task or milestone",req:true},memberField(p,"who","Person"),{k:"due",t:"date",l:"Due date"},{k:"st",t:"select",l:"Status",o:STATUS}],data:{title:t.title,who:t.who||"",due:t.due||"",st:t.done?"Complete":(t.st||"Not started")},
+    onSave:v=>{t.title=v.title;t.who=v.who;t.due=v.due;const was=t.done;t.done=v.st==="Complete";t.st=t.done?"":v.st;if(t.done&&!was)t.doneAt=Date.now();if(!t.done)t.doneAt=0;const fin=syncGoal(g);save(p);if(fin){confetti();fb("done")}else fb("tick");render()},
+    onDelete:()=>{const i=g.targets.indexOf(t);g.targets.splice(i,1);syncGoal(g);save(p);render();toast("Task deleted.",()=>{g.targets.splice(i,0,t);syncGoal(g);save(p);render()})}});
+};
+
+/* ---------- Work tab ---------- */
+function workTab(p){
+  const wk=[...p.weeks].sort((a,b)=>String(b.date||"").localeCompare(String(a.date||""))),done=[];
+  p.goals.forEach(g=>(g.targets||[]).forEach(t=>{if(t.done)done.push({g,t})}));
+  done.sort((a,b)=>(b.t.doneAt||0)-(a.t.doneAt||0));
+  const nT=p.goals.reduce((a,g)=>a+(g.targets||[]).length,0),dT=done.length;
+  const plan=`<div class="row between" style="margin-bottom:10px"><span class="small muted">${p.goals.length} milestone${p.goals.length===1?"":"s"} · ${dT} of ${nT} tasks complete</span><button class="btn small primary" id="addg2">${ic("plus")}Milestone</button></div>${goalsHTML(p,false)}${txtCard(p,"deps","What must happen first and what depends on another task","Tap to write")}`;
+  const dots=Array.from({length:9},(_,i)=>`<span class="dot9 ${i<wk.length?"on":""}" aria-hidden="true"></span>`).join("");
+  const sess=`<div class="row" style="margin-bottom:10px"><div class="dots9" role="img" aria-label="${wk.length} of 9 weekly records">${dots}</div><span class="small muted grow">${wk.length} of 9 weeks recorded</span></div><div class="bk-list">${wk.map(w=>bkRow("sess:"+w.id,esc(w.label||"Session"),w.spent?rands(toNum(w.spent)):"",`${dShort(w.date)} · ${(w.present||[]).length} present${w.recorder?" · "+esc(w.recorder):""}`)).join("")}</div>${addBtn("sess:new","Record a session")}`;
+  const ev=`<p class="small muted" style="margin:0 0 8px">Check the quality of finished tasks and keep evidence: a photo, a sample or feedback.</p>${done.length?`<div class="bk-list">${done.map(({g,t})=>bkRow("evid:"+g.id+"."+t.id,esc(t.title),t.chk?stp(true,"Checked by "+esc(t.chk)):stp(false,"Needs checking"),`${esc(g.title)}${t.doneAt?" · "+dShort(new Date(t.doneAt).toISOString().slice(0,10)):""}`)).join("")}</div>`:`<div class="empty" style="padding:10px 0">Finish a task and it appears here for checking.</div>`}${txtCard(p,"served","Feedback from the people our work served or customers","Tap to write")}`;
+  return acc(p,"plan","target","Action plan",`${p.goals.length} milestone${p.goals.length===1?"":"s"}`,stp(nT>0&&dT===nT,nT?`${dT}/${nT} done`:"To do"),plan)+
+    acc(p,"sess","calendar","Weekly records",`${wk.length} of 9 recorded`,stp(wk.length>0,wk.length?wk.length+" saved":"To do"),sess)+
+    acc(p,"evid","check","Completed work and evidence",`${done.filter(x=>x.t.chk).length} of ${dT} checked`,stp(dT>0&&done.every(x=>x.t.chk),dT?`${done.filter(x=>x.t.chk).length}/${dT} checked`:"None yet"),ev);
+}
+
+/* ---------- Money tab ---------- */
+function moneyTab(p){
+  const b=bud(p),over=b.approved>0&&b.spent>b.approved,pct=b.approved>0?Math.min(100,Math.round(b.spent/b.approved*100)):0;
+  const hero=`<div class="card money ${over?"over":""}"><div class="row"><div class="ring-sm big" style="--p:${pct}" role="img" aria-label="${pct} percent of the budget spent"><b>${pct}%</b></div><div class="grow"><div class="small muted">Budget remaining</div><div class="money-big">${rands(b.left)}</div><div class="small muted">of ${b.approved?rands(b.approved):"no approved budget yet"}</div></div></div>
+    ${over?`<div class="warncard">${ic("alert")} You have spent more than the approved budget. Talk to your educator before buying more.</div>`:""}
+    <div class="m3"><div><span>Spent</span><b>${rands(b.spent)}</b></div><div><span>Income</span><b>${rands(b.income)}</b></div><div><span>${b.surplus>=0?"Surplus":"Shortfall"}</span><b class="${b.surplus>=0?"pos":"neg"}">${rands(Math.abs(b.surplus))}</b></div></div></div>`;
+  const plan=`<div class="bk-list">${p.bud.items.map(i=>bkRow("bud:"+i.id,esc(i.item),rands(toNum(i.qty)*toNum(i.unit)),`${toNum(i.qty)||0} × ${rands(toNum(i.unit))}`)).join("")}</div>${addBtn("bud:new","Item")}
+    <div class="sumbox"><div><span>Total planned costs</span><b>${rands(b.planned)}</b></div><div><span>Approved budget</span><b>${rands(b.approved)}</b></div><div><span>Expected income</span><b>${rands(b.expInc)}</b></div><div><span>Expected ${b.expInc-b.planned>=0?"surplus":"shortfall"}</span><b>${rands(Math.abs(b.expInc-b.planned))}</b></div></div>
+    <p class="small muted" style="margin:6px 0 10px">${p.bud.agreedBy?"Budget agreed by "+esc(p.bud.agreedBy)+(p.bud.agreedOn?" on "+dLong(p.bud.agreedOn):""):"Budget not agreed yet."}</p>
+    <button class="btn small" data-ba="budset:edit">${ic("pencil")}Approved budget and sign-off</button>${txtCard(p,"funding","How we will fund the project or reduce costs","Tap to write")}`;
+  const ex=[...p.exp].sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+  const exp=`<div class="bk-list">${ex.map(e=>bkRow("exp:"+e.id,esc(e.item),rands(toNum(e.amount)),`${dShort(e.date)}${e.receipt?" · receipt "+esc(e.receipt):""}${e.by?" · "+esc(e.by):""}${e.media?" · photo":""}`)).join("")}</div>${addBtn("exp:new","Expense")}
+    <div class="sumbox"><div><span>Total spent</span><b>${rands(b.spent)}</b></div><div><span>Budget remaining</span><b class="${b.left<0&&b.approved?"neg":""}">${rands(b.left)}</b></div></div>${txtCard(p,"bchanges","Changes to the budget and who approved them","Tap to write")}`;
+  const ic2=[...p.inc].sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
+  const inc=`<div class="bk-list">${ic2.map(e=>bkRow("inc:"+e.id,esc(e.source),rands(toNum(e.amount)),`${dShort(e.date)}${toNum(e.qty)?" · "+toNum(e.qty)+" sold":""}${e.by?" · "+esc(e.by):""}`)).join("")}</div>${addBtn("inc:new","Income")}
+    <div class="sumbox"><div><span>Total income</span><b>${rands(b.income)}</b></div><div><span>Total spent</span><b>${rands(b.spent)}</b></div><div><span>Actual ${b.surplus>=0?"surplus":"shortfall"}</span><b class="${b.surplus>=0?"pos":"neg"}">${rands(Math.abs(b.surplus))}</b></div></div>${txtCard(p,"tells","What the figures tell us about our project","Tap to write")}${txtCard(p,"surplus","What happened to any surplus stock or remaining funds","Tap to write")}`;
+  return hero+
+    acc(p,"bud","list","Planned budget",`${p.bud.items.length} item${p.bud.items.length===1?"":"s"} · ${rands(b.planned)}`,stp(p.bud.items.length>0&&b.approved>0,b.approved?"Approved":"To do"),plan)+
+    acc(p,"exp","receipt","Expenditure record",`${p.exp.length} purchase${p.exp.length===1?"":"s"} · ${rands(b.spent)}`,stp(p.exp.length>0,p.exp.length?p.exp.length+" saved":"None yet"),exp)+
+    acc(p,"inc","cash","Income and review",`${p.inc.length} entr${p.inc.length===1?"y":"ies"} · ${rands(b.income)}`,stp(p.inc.length>0,p.inc.length?p.inc.length+" saved":"None yet"),inc);
+}
+
+/* ---------- Wrap-up tab ---------- */
+function wrapTab(p){
+  const R=p.rev,refl=p.members.map((m,i)=>({m,i,done:!!(p.refl[m]&&(p.refl[m].contrib||p.refl[m].skill))}));
+  const rev=`${["achieved","compare","shared","change"].map(k=>txtCard(p,k,TXT[k][0],TXT[k][1])).join("")}<div class="bk-line"><span class="small muted">Project completed</span><b>${esc(R.completed||"Not yet")}</b></div><div class="bk-line"><span class="small muted">Remaining work</span><b>${esc(R.remaining||"None noted")}</b></div>${R.feedback?`<div class="hintcard"><p><b>Educator feedback</b><br>${esc(R.feedback)}</p></div>`:""}<button class="btn small" data-ba="rev:edit">${ic("pencil")}Completed, remaining work and feedback</button>`;
+  const rf=p.members.length?`<p class="small muted" style="margin:0 0 8px">Each member writes about their own work, with examples.</p><div class="bk-list">${refl.map(r=>bkRow("refl:"+r.i,esc(r.m),r.done?stp(true,"Written"):stp(false,"To do"),"")).join("")}</div>`:`<p class="muted small">Add team members first (Plan tab).</p>`;
+  const H=p.hand;
+  const hand=`${txtCard(p,"hwork",TXT.hwork[0],TXT.hwork[1])}<h3 class="sub-h">Resources, tools, stock and files</h3><div class="bk-list">${H.res.map(r=>bkRow("hres:"+r.id,esc(r.item),"",`${esc(r.loc||"")}${r.cond?" · "+esc(r.cond):""}`)).join("")}</div>${addBtn("hres:new","Item")}${txtCard(p,"hpeople",TXT.hpeople[0],TXT.hpeople[1])}
+    <div class="bk-line"><span class="small muted">Funds or stock handed over</span><b>${esc(H.funds||"Not noted")}</b></div><div class="bk-line"><span class="small muted">Handed over by</span><b>${esc(H.by||"-")}${H.byOn?" · "+dLong(H.byOn):""}</b></div><div class="bk-line"><span class="small muted">Received by</span><b>${esc(H.to||"-")}${H.toOn?" · "+dLong(H.toOn):""}</b></div><button class="btn small" data-ba="hand:edit">${ic("pencil")}Hand over sign-off</button>`;
+  return acc(p,"rev","flag","End of term review",R.completed||p.txt.achieved?"In progress":"Look back on the term",stp(!!p.txt.achieved&&!!p.txt.compare,p.txt.achieved&&p.txt.compare?"Done":"To do"),rev)+
+    acc(p,"refl","user","Individual reflections",`${refl.filter(r=>r.done).length} of ${p.members.length} written`,stp(refl.length>0&&refl.every(r=>r.done),refl.length?`${refl.filter(r=>r.done).length}/${refl.length}`:"No members"),rf)+
+    acc(p,"hand","users","Handover to the next team",H.to?"Handed over":"Leave it ready to continue",stp(!!H.to,H.to?"Done":"To do"),hand)+
+    `<div class="card"><h2>Project book</h2><p class="muted" style="margin:0 0 12px">Everything you recorded, laid out like the printed Production Team Project Book. Print it or save it as a PDF.</p><button class="btn primary" id="book-x">${ic("printer")}Export project book</button></div>`;
+}
+
+/* ---------- wiring ---------- */
+function openAccAndGo(p,id,t){openAcc.add(p.id+":"+id);if(t&&t!==tab){tab=t;render()}else render();setTimeout(()=>{const e=document.getElementById("acc-"+id);if(e)e.scrollIntoView({block:"start",behavior:"smooth"})},60)}
+function wireBook(p){
+  document.querySelectorAll("[data-accb]").forEach(b=>b.onclick=()=>{const k=b.dataset.accb,sec=b.closest(".acc"),o=!openAcc.has(k);o?openAcc.add(k):openAcc.delete(k);sec.classList.toggle("open",o);b.setAttribute("aria-expanded",o);sec.querySelector(".acc-b").hidden=!o;b.querySelector(".gchev").classList.toggle("open",o);fb("tap")});
+  document.querySelectorAll("[data-txt]").forEach(b=>b.onclick=()=>txtSheet(p,b.dataset.txt));
+  document.querySelectorAll("[data-ba]").forEach(b=>b.onclick=()=>{const i=b.dataset.ba.indexOf(":"),a=b.dataset.ba.slice(0,i),id=b.dataset.ba.slice(i+1);BA[a]&&BA[a](p,id)});
+  document.querySelectorAll("[data-step]").forEach(b=>b.onclick=()=>openAccAndGo(p,b.dataset.step,b.dataset.stab));
+  document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>openMediaSheet(S.media.find(x=>x.id===b.dataset.m)));
+  const sk=$("#sk-f");if(sk)sk.onchange=async e=>{const ids=await addFilesIds(p.id,e.target.files,"sketch");if(ids.length){save();fb("add");render()}};
+  const g2=$("#addg2");if(g2)g2.onclick=()=>goalSheet(p);
+  const bx=$("#book-x");if(bx)bx.onclick=()=>exportBook(p);
+  document.querySelectorAll(".ta").forEach(autosize);
+}
+
+/* ---------- story: money, sessions and approvals join the diary ---------- */
+const stOf=t=>t.done?"Complete":(t.st||"Not started");
+const dtOf=(ds,id)=>ds?new Date(ds+"T12:00").getTime():idT(id);
+function storyCardExtra(x){
+  if(x.k==="sess")return `<div class="sitem"><span class="sic">${ic("calendar")}</span><div class="sbody"><b>${esc(x.w.label||"Session")} recorded</b><div class="small muted">${(x.w.present||[]).length} present${x.w.recorder?" · recorded by "+esc(x.w.recorder):""}${toNum(x.w.spent)?" · spent "+rands(toNum(x.w.spent)):""}</div></div></div>`;
+  if(x.k==="exp")return `<div class="sitem"><span class="sic">${ic("receipt")}</span><div class="sbody">Spent <b>${rands(toNum(x.e.amount))}</b> on ${esc(x.e.item)}<div class="small muted">${x.e.by?esc(x.e.by)+" · ":""}${x.e.receipt?"receipt "+esc(x.e.receipt):""}</div></div></div>`;
+  if(x.k==="inc")return `<div class="sitem win"><span class="sic ok">${ic("cash")}</span><div class="sbody">Received <b>${rands(toNum(x.e.amount))}</b> from ${esc(x.e.source)}<div class="small muted">${x.e.by?esc(x.e.by):""}</div></div></div>`;
+  if(x.k==="approved")return `<div class="sitem win"><span class="sic ok">${ic("check")}</span><div class="sbody"><b>Proposal approved</b><div>${esc(x.p.prop.title||"")}</div><div class="small muted">${x.p.prop.approval?"by "+esc(x.p.prop.approval):""}</div></div></div>`;
+  return "";
+}
+
+/* ---------- export the project book ---------- */
+async function blobData(id){const b=await mGet(id).catch(()=>null);if(!b)return"";return new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.onerror=()=>r("");fr.readAsDataURL(b)})}
+function bookHTML(p,imgs){
+  const e=esc,term=p.info.term||"",b=bud(p);
+  const lines=(n)=>Array.from({length:n},()=>'<div class="ln"></div>').join("");
+  const fl=(label,val,n=2)=>`<div class="fl"><div class="fl-l">${e(label)}</div>${val?`<div class="fl-v">${e(val).replace(/\n/g,"<br>")}</div>`:lines(n)}</div>`;
+  const tbl=(heads,rows,min=6)=>{const r=rows.slice();while(r.length<min)r.push(heads.map(()=>""));return `<table><thead><tr>${heads.map(h=>`<th>${e(h)}</th>`).join("")}</tr></thead><tbody>${r.map(row=>`<tr>${row.map(c=>`<td>${c==null?"":c}</td>`).join("")}</tr>`).join("")}</tbody></table>`};
+  const pg=(title,intro,body)=>`<section class="pg"><div class="hd"><span>Newberry House Middle School • Production teams</span></div><h2>${e(title)}</h2>${intro?`<p class="intro">${e(intro)}</p>`:""}${body}</section>`;
+  const T=k=>p.txt[k]||"";
+  const tasks=[];p.goals.forEach(g=>(g.targets||[]).forEach(t=>tasks.push([e(g.title+": "+t.title),e(t.who||""),t.due?dLong(t.due):"",e(stOf(t))])));
+  const sk=mediaOf(p).filter(m=>m.tag==="sketch").map(m=>imgs[m.id]).filter(Boolean);
+  const doneRows=[];p.goals.forEach(g=>(g.targets||[]).forEach(t=>{if(t.done)doneRows.push([e(t.title),t.doneAt?dLong(new Date(t.doneAt).toISOString().slice(0,10)):"",e(t.chk||""),(t.ev&&imgs[t.ev]?`<img class="ev" src="${imgs[t.ev]}" alt="">`:"")+e(t.fb||"")])}));
+  const weeks=[...p.weeks].sort((a,b2)=>String(a.date||"").localeCompare(String(b2.date||"")));
+  const total=(a,f)=>a.reduce((s,x)=>s+f(x),0);
+  let h="";
+  h+=`<section class="pg cover"><div class="cv-k">MIDDLE SCHOOL</div><h1>Production Team Project Book</h1><p>Term planning and records</p><p><b>Newberry House Middle School</b></p><div class="cv-f"><div class="fl-l">Production team</div><div class="fl-v big">${e(p.name)}</div></div><div class="cv-f"><div class="fl-l">Term and year</div><div class="fl-v">${e(term)||lines(1)}</div></div><div class="cv-f"><div class="fl-l">Team members</div><div class="fl-v">${p.members.length?p.members.map(e).join("<br>"):lines(3)}</div></div><div class="cv-f"><div class="fl-l">Educator or mentor</div><div class="fl-v">${e(p.info.mentor)||lines(1)}</div></div></section>`;
+  h+=pg("Our team and responsibilities","Share real responsibility. Rotate roles where useful so that everyone develops new skills.",tbl(["Member","Strength or interest","Skill to practise"],p.members.map(m=>[e(m),e((p.minfo[m]||{}).strength||""),e((p.minfo[m]||{}).skill||"")]),7)+`<h3>Roles</h3>`+tbl(["Role and responsibility","Person","Review or rotation date"],p.roles.map(r=>[e(r.role),e(r.who||""),r.review?dLong(r.review):""]),6)+fl("How we will make decisions and resolve disagreements",T("decide")));
+  h+=pg("Observe and generate ideas","Look, listen and speak to the people who will use or benefit from your work before choosing a project.",fl("What does our community need from us",T("community"))+fl("What we noticed and who we consulted",T("noticed"),4)+tbl(["Project idea","Who benefits and how","Resources or challenges"],p.ideas.map(i=>[e(i.idea),e(i.who||""),e(i.res||"")]),5)+fl("Our chosen idea and why it matters",T("chosen"))+fl("What we need to find out first",T("findout"))+fl("What would meaningful success look like",T("success")));
+  const P=p.prop;
+  h+=pg("Our project proposal","",fl("Project title",P.title,1)+fl("The need we are responding to",P.need)+fl("What we will make, do or provide",P.make)+fl("Who will use or benefit from the result",P.who)+fl("How we will know the work is successful",P.success)+`<p><b>Target completion date</b> ${P.due?dLong(P.due):"____________"} &nbsp; <b>Proposed budget</b> ${P.budget?rands(toNum(P.budget)):"R ____________"}</p>`+fl("Educator feedback",P.feedback)+fl("Agreed changes",P.changes)+`<p><b>Educator approval</b> ${e(P.approval||"____________________")} &nbsp; <b>Date</b> ${P.approvedOn?dLong(P.approvedOn):"__________"}${P.status==="approved"?" &nbsp; (approved)":""}</p>`);
+  h+=pg("Design research and skills","Use this space for sketches, measurements, recipes, routes, layouts or activity plans.",fl("What we researched and where we found it",T("research"))+`<div class="fl"><div class="fl-l">Sketch or plan</div>${sk.length?sk.map(s=>`<img class="sk" src="${s}" alt="">`).join(""):'<div class="blank"></div>'}</div>`+fl("New skill we need and who can help us learn it",T("newskill"))+fl("Our trial or prototype and what we changed",T("trial")));
+  h+=pg("Resources and responsible work","",tbl(["Material, tool or resource","Have, borrow or buy","Person responsible"],p.res.map(r=>[e(r.item),e(r.src||""),e(r.who||"")]),6)+`<h3>Risks</h3>`+tbl(["Possible risk or difficulty","How we will manage it","Adult help needed"],p.risks.map(r=>[e(r.risk),e(r.manage||""),e(r.adult||"")]),4)+fl("Permissions, training or supervision needed before starting",T("perms"))+fl("How we will reduce waste and care for our work space",T("waste"),3));
+  h+=pg("Project action plan","Break the project into manageable steps. Update status as work progresses.",tbl(["Task or milestone","Person","Due date","Status"],tasks,10)+`<p class="small">Status options: Not started • In progress • Waiting • Complete</p>`+fl("What must happen first and what depends on another task",T("deps"),4));
+  h+=pg("Planned budget","Use rand throughout. Check prices before spending and agree on purchases with your educator.",tbl(["Item or service","Quantity","Cost per unit R","Total R"],p.bud.items.map(i=>[e(i.item),String(toNum(i.qty)||""),rands(toNum(i.unit)),rands(toNum(i.qty)*toNum(i.unit))]),9)+`<p><b>Total planned costs</b> ${rands(b.planned)}<br><b>Approved budget</b> ${rands(b.approved)}<br><b>Expected income</b> ${rands(b.expInc)}<br><b>Expected ${b.expInc-b.planned>=0?"surplus":"shortfall"}</b> ${rands(Math.abs(b.expInc-b.planned))}</p>`+fl("How we will fund the project or reduce costs",T("funding"))+`<p><b>Budget agreed by</b> ${e(p.bud.agreedBy||"____________")} &nbsp; <b>Date</b> ${p.bud.agreedOn?dLong(p.bud.agreedOn):"__________"}</p>`);
+  h+=pg("Expenditure record","Record every purchase. Keep receipts together and number them to match this record.",tbl(["Date","Item and supplier","Receipt number","Paid by","Amount R"],[...p.exp].sort((a,b2)=>String(a.date||"").localeCompare(String(b2.date||""))).map(x=>[x.date?dLong(x.date):"",e(x.item),e(x.receipt||""),e(x.by||""),rands(toNum(x.amount))]),12)+`<p><b>Total spent</b> ${rands(b.spent)} &nbsp; <b>Budget remaining</b> ${rands(b.left)}</p>`+fl("Changes to the budget and who approved them",T("bchanges"),3));
+  h+=pg("Income and financial review","Complete the income record if your team sells products, receives funding or collects money.",tbl(["Date","Source or item sold","Quantity","Money received R","Recorded by"],[...p.inc].sort((a,b2)=>String(a.date||"").localeCompare(String(b2.date||""))).map(x=>[x.date?dLong(x.date):"",e(x.source),String(toNum(x.qty)||""),rands(toNum(x.amount)),e(x.by||"")]),8)+`<p><b>Total income received</b> ${rands(b.income)} &nbsp; <b>Total expenditure</b> ${rands(b.spent)}<br><b>Actual ${b.surplus>=0?"surplus":"shortfall"}</b> ${rands(Math.abs(b.surplus))}</p>`+fl("What the figures tell us about our project",T("tells"))+fl("What happened to any surplus stock or remaining funds",T("surplus"),1));
+  const wlist=weeks.length?weeks:[{}];
+  wlist.forEach(w=>{h+=pg("Weekly production record","",`<p><b>Week or session</b> ${e(w.label||"__________")} &nbsp; <b>Date</b> ${w.date?dLong(w.date):"__________"} &nbsp; <b>Recorder</b> ${e(w.recorder||"__________")}</p><p><b>Present</b> ${e((w.present||[]).join(", "))||"____________________"}</p>`+fl("Our priorities for this session",w.priorities,3)+tbl(["Task","Person","Progress or result"],(w.tasks||[]).map(t=>[e(t.task||""),e(t.who||""),e(t.result||"")]),5)+fl("Problem we encountered and how we responded",w.problem,3)+`<p><b>Money spent</b> ${w.spent?rands(toNum(w.spent)):"R _______"} &nbsp; <b>Income</b> ${w.income?rands(toNum(w.income)):"R _______"} &nbsp; <b>Receipt numbers</b> ${e(w.receipts||"_______")}</p>`+fl("What we learned or improved",w.learned,2)+fl("Next steps and who will do them",w.next,1)+`<p><b>Tools returned and space cared for</b> ${w.tools?"Yes":"_______"} &nbsp; <b>Checked by</b> ${e(w.checked||"__________")}</p>`)});
+  h+=pg("Completed work and evidence","Record finished tasks and check quality before marking them complete.",tbl(["Completed task or result","Date","Checked by","Evidence or feedback"],doneRows,8)+fl("Feedback from the people our work served or customers",T("served"),4));
+  h+=pg("Our end of term review","",fl("What we achieved and who benefited",T("achieved"),4)+fl("How our result compares with our original success criteria",T("compare"),4)+fl("How we shared work and handled difficulties",T("shared"),3)+fl("What we would change next time",T("change"),2)+`<p><b>Project completed</b> ${e(p.rev.completed||"__________")} &nbsp; <b>Remaining work</b> ${e(p.rev.remaining||"__________")}</p>`+fl("Educator feedback",p.rev.feedback,1));
+  (p.members.length?p.members:[""]).forEach(m=>{const r=p.refl[m]||{};h+=pg("Individual reflection","Give specific examples from your own work.",`<p><b>Name</b> ${e(m||"______________")} &nbsp; <b>Production</b> ${e(p.name)}</p>`+fl("My contribution and evidence of it",r.contrib,3)+fl("A practical skill I developed",r.skill,3)+fl("How I showed reliability, initiative or care for others",r.reliab,2)+fl("A challenge and what I learned from it",r.challenge,2)+fl("My next learning goal",r.next,2))});
+  const H=p.hand;
+  h+=pg("Handover to the next team","Leave enough information for another group to continue your work responsibly.",fl("Work still to complete and suggested next steps",T("hwork"),3)+tbl(["Resource, tool, stock or file","Location","Condition or action needed"],H.res.map(r=>[e(r.item),e(r.loc||""),e(r.cond||"")]),5)+fl("People to consult and useful advice",T("hpeople"),3)+`<p><b>Funds or stock handed over</b> ${e(H.funds||"____________")}</p><p><b>Handed over by</b> ${e(H.by||"____________")} &nbsp; <b>Date</b> ${H.byOn?dLong(H.byOn):"________"}<br><b>Received by</b> ${e(H.to||"____________")} &nbsp; <b>Date</b> ${H.toOn?dLong(H.toOn):"________"}</p>`);
+  const css=`@page{size:A4;margin:14mm}*{box-sizing:border-box}body{font:11pt/1.45 "Instrument Sans",system-ui,sans-serif;color:#1d1a12;margin:0}h1{font:700 26pt "Bricolage Grotesque",system-ui,sans-serif;margin:8pt 0}h2{font:700 17pt "Bricolage Grotesque",system-ui,sans-serif;color:#0b6a4c;margin:6pt 0 4pt}h3{font-size:12pt;color:#0b6a4c;margin:12pt 0 4pt}.pg{page-break-after:always;padding:2pt 0 10pt}.pg:last-child{page-break-after:auto}.hd{font-size:8.5pt;color:#6c6250;border-bottom:1px solid #d8d0bd;padding-bottom:4pt;margin-bottom:6pt}.intro{color:#5b5442;margin:0 0 8pt}.fl{margin:8pt 0}.fl-l{font-weight:700;font-size:10pt;color:#3d3727}.fl-v{border-left:3px solid #1f9f78;padding:2pt 0 2pt 8pt;margin-top:2pt}.ln{border-bottom:1px solid #9d957f;height:17pt}table{width:100%;border-collapse:collapse;margin:6pt 0}th,td{border:1px solid #b9b19c;padding:4pt 6pt;text-align:left;vertical-align:top;font-size:10pt;height:20pt}th{background:#e8f4ee;color:#0b4f3a}.cover{text-align:left;padding-top:40pt}.cv-k{letter-spacing:.14em;color:#0b6a4c;font-weight:700}.cv-f{margin:14pt 0}.fl-v.big{font:700 20pt "Bricolage Grotesque",sans-serif;border:0;padding:0}.sk{max-width:100%;max-height:110mm;display:block;margin:6pt 0;border-radius:6pt}.ev{max-width:36mm;display:block;margin-bottom:3pt;border-radius:4pt}.blank{height:90mm;border:1px dashed #b9b19c;border-radius:6pt}.small{font-size:9pt;color:#6c6250}p{margin:5pt 0}`;
+  return `<!doctype html><html lang="en-ZA"><head><meta charset="utf-8"><title>${e(p.name)} project book</title><style>${css}</style></head><body>${h}</body></html>`;
+}
+async function exportBook(p){
+  toast("Preparing your project book…");
+  const imgs={},ids=new Set();
+  mediaOf(p).filter(m=>m.tag==="sketch").slice(0,8).forEach(m=>ids.add(m.id));
+  p.goals.forEach(g=>(g.targets||[]).forEach(t=>{if(t.ev)ids.add(t.ev)}));
+  for(const id of ids)imgs[id]=await blobData(id);
+  const html=bookHTML(p,imgs),root=document.createElement("div");
+  root.className="ed bookview";root.setAttribute("role","dialog");root.setAttribute("aria-modal","true");root.setAttribute("aria-label","Project book");
+  root.innerHTML=`<div class="ed-top"><button class="x" id="bk-x" aria-label="Close project book">${ic("x")}</button><h2>Project book</h2><button class="btn primary small" id="bk-p">${ic("printer")}Print or PDF</button></div><iframe id="bk-f" title="Project book preview" class="bk-frame"></iframe><div class="bk-bar"><button class="btn small" id="bk-d">${ic("download")}Download file</button><span class="small muted">Tip: choose Save as PDF in the print window.</span></div>`;
+  document.body.append(root);document.body.classList.add("noscroll");
+  const fr=root.querySelector("#bk-f");fr.srcdoc=html;
+  const close=fb=>{ovPop("book",fb);root.remove();if(!document.querySelector(".scrim"))document.body.classList.remove("noscroll")};
+  ovPush({k:"book",close:fb=>close(fb)});
+  root.querySelector("#bk-x").onclick=()=>close();
+  root.querySelector("#bk-p").onclick=()=>{try{fr.contentWindow.focus();fr.contentWindow.print()}catch{toast("Use Download file, then print it from your browser.")}};
+  root.querySelector("#bk-d").onclick=()=>{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([html],{type:"text/html"}));a.download=p.name.replace(/[^\w]+/g,"-")+"-project-book.html";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000)};
+}
+
 /* routing */
 const nav=r=>{if(ovSkip>0){setTimeout(()=>nav(r),60);return}location.hash="#/"+(r==="home"?"":r)};
 addEventListener("hashchange",()=>{if(listening)listening.stop();route=location.hash.slice(2)||"home";render();scrollTo(0,0)});
@@ -912,7 +1362,7 @@ function render(){
   if(route==="prods")route="home";
   if(route!=="display")stopKiosk();
   if(route==="display"){$("#app").innerHTML=kioskHTML();hydrate();wireKiosk();document.documentElement.style.setProperty("--ptint","transparent");lastRoute="display";return}
-  prods().forEach(q=>{if(pctSeen[q.id]===undefined)pctSeen[q.id]=prodPct(q)});
+  prods().forEach(q=>{ensureBook(q);if(pctSeen[q.id]===undefined)pctSeen[q.id]=prodPct(q)});
   const fk=focusKey(),sy=lastRoute===route+tab?scrollY:0,fresh=lastRoute!==route+tab;
   const m=route.match(/^p\/(.+)/),p=m&&P(m[1]);
   const cur=p?"home":route;
@@ -1003,7 +1453,7 @@ function prodSheet(p){
 }
 
 /* production view */
-const TABS=[["story","Story","pulse"],["goals","Goals","target"],["media","Media","image"],["team","Team","users"]];
+const TABS=[["story","Story","pulse"],["plan","Plan","compass"],["work","Work","hammer"],["money","Money","cash"],["wrap","Wrap-up","flag"]];
 const lateCount=p=>{const t=todayStr();return p.goals.filter(g=>!g.done&&g.due&&g.due<t).length};
 /* sound + haptic feedback (sounds are synthesised, no files) */
 const FXK="ms-prod-fx";
@@ -1059,9 +1509,10 @@ function prodView(p){
     <div class="ph-stats"><span><b>${open}</b> open</span><span><b>${p.goals.length-open}</b> done</span>${late?`<span class="lt"><b>${late}</b> overdue</span>`:""}</div>
   </div>
   <div class="segwrap"><div class="segc" role="group" aria-label="Sections">${TABS.map(([k,l,i])=>`<button data-tab="${k}" aria-label="${l}" aria-pressed="${tab===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div>
-  <div class="tabbody">${{story:storyTab,goals:goalsTab,media:mediaTab,team:teamTab,log:logTab}[tab](p)}</div>`;
+  <div class="tabbody">${{story:storyTab,plan:planTab,work:workTab,money:moneyTab,wrap:wrapTab,goals:goalsTab,media:mediaTab,team:teamTab,log:logTab}[tab](p)}</div>`;
 }
-function goalsTab(p){
+function goalsTab(p){return goalsHTML(p,true)}
+function goalsHTML(p,fab){
   const today=todayStr();
   if(!seenP.has(p.id)){seenP.add(p.id);const f=p.goals.find(g=>!g.done)||p.goals[0];if(f)openG.add(f.id)}
   return (p.goals.length?p.goals.map(g=>{const q=goalPct(g),nd=hasT(g)?g.targets.filter(t=>t.done).length:0,op=openG.has(g.id),late=!g.done&&g.due&&g.due<today;
@@ -1073,13 +1524,13 @@ function goalsTab(p){
       <span class="gchev ${op?"open":""}" aria-hidden="true">${ic("chev")}</span></div>
     <div class="meter" style="margin:10px 0 0" role="progressbar" aria-valuenow="${q}" aria-valuemin="0" aria-valuemax="100" aria-label="${esc(g.title)} progress"><i style="width:${q}%"></i></div>
     <div class="gbody" ${op?"":"hidden"}>
-    ${hasT(g)?`<ul class="targets">${g.targets.map(t=>`<li class="${t.done?"tdone":""}"><button class="tick sm" data-tt="${t.id}" aria-pressed="${!!t.done}" aria-label="${t.done?"Reopen":"Complete"} target ${esc(t.title)}">${ic("check","sm")}</button><span class="grow">${esc(t.title)}${t.who?` <span class="small muted">· ${esc(t.who)}</span>`:""}</span><button class="asg" data-as="${t.id}" aria-label="${t.who?"Assigned to "+esc(t.who)+". Change":"Assign "+esc(t.title)}">${t.who?`<span class="ini">${esc(initials(t.who))}</span>`:ic("user","sm")}</button></li>`).join("")}</ul>`
+    ${hasT(g)?`<ul class="targets">${g.targets.map(t=>`<li class="${t.done?"tdone":""}"><button class="tick sm" data-tt="${t.id}" aria-pressed="${!!t.done}" aria-label="${t.done?"Reopen":"Complete"} target ${esc(t.title)}">${ic("check","sm")}</button><button class="ttl grow" data-te="${g.id}.${t.id}">${esc(t.title)}<span class="small muted" style="display:block">${t.who?esc(t.who):""}${t.due?(t.who?" · ":"")+"due "+dShort(t.due):""}</span></button>${t.done?"":`<button class="stc st-${stOf(t).split(" ")[0]}" data-stc="${g.id}.${t.id}" aria-label="Status: ${stOf(t)}. Tap to change">${stOf(t)}</button>`}<button class="asg" data-as="${t.id}" aria-label="${t.who?"Assigned to "+esc(t.who)+". Change":"Assign "+esc(t.title)}">${t.who?`<span class="ini">${esc(initials(t.who))}</span>`:ic("user","sm")}</button></li>`).join("")}</ul>`
       :`<div class="note-warn">${ic("alert")}<div><b>No targets yet.</b> Break this goal into steps so progress can be tracked.</div><button class="btn small" data-edg>Add targets</button></div>`}
     ${hasT(g)?`<div class="row" style="margin-top:8px"><textarea class="t ta" rows="1" style="flex:1 1 6rem" data-ti placeholder="Add another target" aria-label="New target for ${esc(g.title)}"></textarea>${micBtn()}<button class="btn icon" data-ta aria-label="Add target">${ic("plus")}</button></div>`:""}
     ${g.comments.length?`<h4 class="eyebrow" style="margin:16px 0 4px">Comments</h4>`:""}
     ${g.comments.map(c=>`<div class="cm">${esc(c.text)}<div class="small muted">${esc(c.by)} · ${fmt(c.t)}</div></div>`).join("")}
     <div class="row" style="margin-top:10px"><textarea class="t ta" rows="1" style="flex:1 1 6rem" data-ci placeholder="Add a comment" aria-label="Comment on ${esc(g.title)}"></textarea>${micBtn()}<button class="btn primary icon" data-cs aria-label="Post comment">${ic("send")}</button></div></div></div>`}).join("")
-    :`<div class="empty">${ic("target","xl")}<h3>No goals yet</h3><p style="margin:0 0 14px">Set a main goal, then break it into targets.</p><button class="btn primary" id="e-add">${ic("plus")}Set your first goal</button></div>`)+(p.goals.length?fabBtn("addg","New goal"):"");
+    :`<div class="empty">${ic("target","xl")}<h3>No goals yet</h3><p style="margin:0 0 14px">Set a main goal, then break it into targets.</p><button class="btn primary" id="e-add">${ic("plus")}Set your first goal</button></div>`)+(p.goals.length&&fab?fabBtn("addg","New goal"):"");
 }
 function wireGoals(p){
   $("#addg")&&($("#addg").onclick=()=>goalSheet(p));$("#e-add")&&($("#e-add").onclick=()=>goalSheet(p));wireMics(document);
@@ -1092,6 +1543,8 @@ function wireGoals(p){
       else{g.done=!g.done;g.pct=g.done?100:0;g.doneAt=g.done?Date.now():0;if(g.done){confetti();fb("done")}else fb("tick");save(p);render()}};
     el.querySelectorAll("[data-tt]").forEach(b=>b.onclick=()=>{const t=g.targets.find(x=>x.id===b.dataset.tt);t.done=!t.done;t.doneAt=t.done?Date.now():0;const fin=syncGoal(g);if(fin){confetti();fb("done")}else fb(t.done?"tick":"untick");save(p);render()});
     el.querySelectorAll("[data-edg]").forEach(b=>b.onclick=()=>goalSheet(p,g));
+    el.querySelectorAll("[data-te]").forEach(b=>b.onclick=()=>BA.target(p,b.dataset.te));
+    el.querySelectorAll("[data-stc]").forEach(b=>b.onclick=()=>{const t=g.targets.find(x=>x.id===b.dataset.stc.split(".")[1]),c=["Not started","In progress","Waiting"],i=c.indexOf(t.st||"Not started");t.st=c[(i+1)%3];save(p);fb("tick");render()});
     el.querySelectorAll("[data-as]").forEach(b=>b.onclick=()=>assignSheet(p,g,g.targets.find(x=>x.id===b.dataset.as)));
     const ti=el.querySelector("[data-ti]"),addT=()=>{const v=ti.value.trim();if(!v)return;if(listening)listening.stop();g.targets.push({id:uid(),title:v,done:false,doneAt:0});syncGoal(g);save(p);fb("add");render()};
     if(ti){el.querySelector("[data-ta]").onclick=addT;ti.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();addT()}}}
@@ -1103,7 +1556,7 @@ function wireGoals(p){
 function wireProd(p){
   $("#back").onclick=()=>nav("home");$("#rep").onclick=()=>reportSheet(p);$("#edp").onclick=()=>prodSheet(p);
   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;clearSel();render()});
-  ({story:wireStory,goals:wireGoals,media:wireMedia,team:wireTeam,log:wireLog})[tab](p);
+  ({story:wireStory,plan:wireBook,work:q=>{wireBook(q);wireGoals(q)},money:wireBook,wrap:wireBook,goals:wireGoals,media:wireMedia,team:wireTeam,log:wireLog})[tab](p);
 }
 const fabBtn=(id,label)=>`<div class="fab-wrap"><button class="fab" id="${id}" aria-label="${label}">${ic("plus")}<span>${label}</span></button></div>`;
 
@@ -1198,7 +1651,7 @@ function mediaTab(p){
       Object.entries(g).sort((a,b)=>b[0]-a[0]).map(([w,l])=>`<div class="card"><h2>Week of ${new Date(+w).toLocaleDateString(undefined,{day:"numeric",month:"short"})}</h2><div class="small muted" style="margin:-6px 0 10px">${l.length} item${l.length>1?"s":""}</div><div class="photos">${l.map(mthumb).join("")}</div></div>`).join("");
   }
   const n=sel.size,onePhoto=n===1&&ms.find(m=>m.id===[...sel][0])?.type!=="video";
-  return `<div class="row" style="margin-bottom:14px"><div class="segc grow" role="group" aria-label="Media view" style="margin:0;max-width:260px"><button data-mv="grid" aria-label="Grid" aria-pressed="${mview==="grid"}">${ic("grid")}<span>Grid</span></button><button data-mv="time" aria-label="Timeline" aria-pressed="${mview==="time"}">${ic("clock")}<span>Timeline</span></button></div>
+  return `<button class="linkbtn" data-back="story" style="margin:-4px 0 6px">${"\u2190"} Back to story</button><div class="row" style="margin-bottom:14px"><div class="segc grow" role="group" aria-label="Media view" style="margin:0;max-width:260px"><button data-mv="grid" aria-label="Grid" aria-pressed="${mview==="grid"}">${ic("grid")}<span>Grid</span></button><button data-mv="time" aria-label="Timeline" aria-pressed="${mview==="time"}">${ic("clock")}<span>Timeline</span></button></div>
   ${ms.length?`<button class="btn small" id="seltog" aria-pressed="${selecting}">${ic(selecting?"x":"check")}${selecting?"Done":"Select"}</button>`:""}</div>`+body+
   `<input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1">`+
   (selecting?(n?`<div style="height:80px" aria-hidden="true"></div><div class="selbar" role="toolbar" aria-label="Actions for selected media"><span class="selcount" aria-live="polite">${n} selected</span>
@@ -1207,6 +1660,7 @@ function mediaTab(p){
     <button class="btn small danger" id="s-del" aria-label="Delete selected">${ic("trash")}</button></div>`:`<p class="hint" style="text-align:center">Tap photos or videos to select them.</p>`):fabBtn("addm","Add photo or video"));
 }
 function wireMedia(p){
+  document.querySelectorAll("[data-back]").forEach(b=>b.onclick=()=>{tab=b.dataset.back;render()});
   document.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{mview=b.dataset.mv;render()});
   $("#seltog")&&($("#seltog").onclick=()=>{selecting?clearSel():selecting=true;render()});
   $("#addm")&&($("#addm").onclick=()=>$("#pf").click());$("#e-pf")&&($("#e-pf").onclick=()=>$("#pf").click());
@@ -1580,19 +2034,20 @@ function repStats(p,from,to){
   const list=p?[p]:prods(),inR=t=>t>=from&&t<=to;
   const items=list.map(q=>({name:q.name,color:q.color,pct:prodPct(q),done:q.goals.filter(g=>g.done&&inR(g.doneAt||0)).length,
     notes:q.log.filter(l=>inR(l.t)).length+q.goals.reduce((a,g)=>a+g.comments.filter(c=>inR(c.t)).length,0),
-    photos:S.media.filter(m=>m.pid===q.id&&!m.del&&inR(m.t)).length,
+    photos:S.media.filter(m=>m.pid===q.id&&!m.del&&inR(m.t)).length,spent:(q.exp||[]).filter(e=>e.date&&inR(new Date(e.date+"T12:00").getTime())).reduce((a,e)=>a+toNum(e.amount),0),inc:(q.inc||[]).filter(e=>e.date&&inR(new Date(e.date+"T12:00").getTime())).reduce((a,e)=>a+toNum(e.amount),0),
     hl:[...q.goals.filter(g=>g.done&&inR(g.doneAt||0)).map(g=>({t:g.doneAt,s:"Goal done: "+g.title})),...q.goals.flatMap(g=>(g.targets||[]).filter(t=>t.done&&inR(t.doneAt||0)&&!(g.done&&inR(g.doneAt||0))).map(t=>({t:t.doneAt,s:"Target done: "+t.title+" ("+g.title+")"}))),...q.log.filter(l=>inR(l.t)).map(l=>({t:l.t,s:l.text})),...q.goals.flatMap(g=>g.comments.filter(c=>inR(c.t)).map(c=>({t:c.t,s:g.title+": "+c.text})))]}));
   const sum=k=>items.reduce((a,i)=>a+i[k],0);
-  return{from,to,p,items,done:sum("done"),notes:sum("notes"),photos:sum("photos"),pct:items.length?Math.round(items.reduce((a,i)=>a+i.pct,0)/items.length):0,
+  return{from,to,p,items,done:sum("done"),spent:sum("spent"),income:sum("inc"),notes:sum("notes"),photos:sum("photos"),pct:items.length?Math.round(items.reduce((a,i)=>a+i.pct,0)/items.length):0,
     long:(to-from)>8*864e5,hl:items.flatMap(i=>i.hl.map(h=>({...h,n:items.length>1?i.name:""}))).sort((a,b)=>b.t-a.t).slice(0,12)};
 }
 function repText(st){
   const head=`${st.long?"Progress report":"Weekly update"}, ${dmy2(st.from)} to ${dmy2(st.to)}`;
   const top=st.p?`${st.p.name}: ${st.pct}% complete.`:`All productions: ${st.pct}% complete on average.`;
   const nums=`${st.done} goal${st.done===1?"":"s"} finished, ${st.photos} new photo${st.photos===1?"":"s"} or video${st.photos===1?"":"s"}, ${st.notes} update${st.notes===1?"":"s"}.`;
+  const money=(st.spent||st.income)?`Money: spent ${rands(st.spent)}, income ${rands(st.income)}.`:"";
   const hl=st.hl.length?"Highlights:\n"+st.hl.slice(0,st.long?8:4).map(h=>"- "+(h.n?h.n+": ":"")+h.s).join("\n"):"Nothing logged in this period yet.";
   const rows=st.p?"":"\n\n"+st.items.map(i=>`${i.name}: ${i.pct}%`).join("\n");
-  return [head,top,nums].join("\n")+rows+"\n\n"+hl+"\n\nNewberry Middle School Project";
+  return [head,top,nums,money].filter(Boolean).join("\n")+rows+"\n\n"+hl+"\n\nNewberry Middle School Project";
 }
 async function repCard(st){
   const W=1080,H=1350,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
