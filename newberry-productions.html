@@ -443,6 +443,27 @@ nav.tabs button.cap .i{width:30px;height:30px;stroke-width:2.2}
 .cbadge{position:absolute;left:8px;bottom:8px;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#fff;z-index:1}
 .cbadge.c-no{background:#d33a2f}
 .ready .acc-ic{flex:none}
+.mchart{margin-top:16px}
+.mc-h{display:flex;justify-content:space-between;gap:10px;font-size:.84rem;margin:12px 0 5px}.mc-h span{color:var(--muted);font-weight:600}.mc-h b{font-variant-numeric:tabular-nums;text-align:right}
+.mc-track{position:relative;height:14px;border-radius:99px;background:var(--line);overflow:hidden}
+.mc-track i{display:block;height:100%;border-radius:99px;transition:width .6s}
+.mc-spent.ok{background:var(--green)}.mc-spent.warn{background:#e0a020}.mc-spent.over{background:#d33a2f}.mc-inc{background:var(--sky)}
+.mc-track .mc-mark{position:absolute;top:0;bottom:0;height:auto;width:3px;border-radius:0;background:var(--ink);opacity:.45;transition:none}
+.mc-warn{display:flex;gap:8px;align-items:flex-start;margin:10px 0 0;padding:8px 12px;border-radius:12px;background:var(--amber-soft);color:var(--amber);font-weight:600;font-size:.88rem}
+.mc-spark{display:block;width:100%;height:64px;margin-top:14px}
+.mc-line{fill:none;stroke:var(--green);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+.mc-area{fill:color-mix(in srgb,var(--green) 16%,transparent);stroke:none}
+.mc-dot{fill:var(--sheet);stroke:var(--green);stroke-width:2}
+.mc-bl{stroke:var(--muted);stroke-width:1.4;stroke-dasharray:4 4}
+@media (min-width:1000px){
+  .wrap.prodwide{max-width:1180px}
+  .pv{display:grid;grid-template-columns:320px minmax(0,1fr);gap:26px;align-items:start}
+  .pv-side{position:sticky;top:16px}
+  .pv-side .segwrap{position:static;margin:0;padding:0;background:none;-webkit-backdrop-filter:none;backdrop-filter:none}
+  .pv-side .segc{grid-auto-flow:row;grid-auto-columns:auto;gap:4px}
+  .pv-side .segwrap .segc button{flex-direction:row;justify-content:flex-start;gap:12px;min-height:50px;padding:0 16px;font-size:.95rem}
+  .tabbody{min-width:0}
+}
 .photos button{position:relative}
 .targets{list-style:none;margin:10px 0 0;padding:0}
 .targets li{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}.targets li:first-child{border-top:0}
@@ -974,7 +995,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.2";
+const APP_VER="5.3";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1253,12 +1274,25 @@ function workTab(p){
     acc(p,"evid","check","Completed work and evidence",`${done.filter(x=>x.t.chk).length} of ${dT} checked`,stp(dT>0&&done.every(x=>x.t.chk),dT?`${done.filter(x=>x.t.chk).length}/${dT} checked`:"None yet"),ev);
 }
 
+/* ---------- money chart ---------- */
+function moneyChart(p,b){
+  const base=b.approved>0?b.approved:Math.max(b.planned,b.spent,b.income,1),pc=v=>Math.max(0,Math.min(100,Math.round(v/base*100)));
+  const cls=b.approved>0?(b.spent>b.approved?"over":b.spent>=0.8*b.approved?"warn":"ok"):"ok";
+  const ex=[...p.exp].filter(e=>e.date).sort((a,c)=>a.date.localeCompare(c.date));let run=0;const pts=ex.map(e=>{run+=toNum(e.amount);return[new Date(e.date+"T12:00").getTime(),run]});
+  const W=300,H=64,top=Math.max(base,run*1.05,1);let spark="";
+  if(pts.length){const t0=pts[0][0],t1=pts[pts.length-1][0],X=t=>pts.length<2||t1===t0?W/2:6+(t-t0)/(t1-t0)*(W-12),Y=v=>H-4-(v/top)*(H-10);
+    const d=pts.map(([t,v],i)=>(i?"L":"M")+X(t).toFixed(1)+" "+Y(v).toFixed(1)).join(" ");
+    spark=`<svg class="mc-spark" viewBox="0 0 ${W} ${H}" role="img" aria-label="Spending over time, total ${rands(run)}">${b.approved>0?`<line x1="0" x2="${W}" y1="${Y(b.approved).toFixed(1)}" y2="${Y(b.approved).toFixed(1)}" class="mc-bl"/>`:""}${pts.length>1?`<path d="${d} L${X(pts[pts.length-1][0]).toFixed(1)} ${H-4} L${X(pts[0][0]).toFixed(1)} ${H-4} Z" class="mc-area"/>`:""}<path d="${d}" class="mc-line"/>${pts.map(([t,v])=>`<circle cx="${X(t).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="3.2" class="mc-dot"/>`).join("")}</svg><div class="small muted" style="display:flex;justify-content:space-between"><span>${dShort(ex[0].date)}</span><span>Spending over time${b.approved>0?" · dashed line is the budget":""}</span><span>${dShort(ex[ex.length-1].date)}</span></div>`}
+  return `<div class="mchart"><div class="mc-h"><span>Spent</span><b>${rands(b.spent)}${b.approved>0?" of "+rands(b.approved):""}</b></div><div class="mc-track" role="img" aria-label="${pc(b.spent)} percent of the budget spent"><i class="mc-spent ${cls}" style="width:${pc(b.spent)}%"></i>${b.approved>0?'<i class="mc-mark" style="left:80%"></i>':""}</div>
+  <div class="mc-h"><span>Income</span><b>${rands(b.income)}</b></div><div class="mc-track" role="img" aria-label="Income ${rands(b.income)}"><i class="mc-inc" style="width:${pc(b.income)}%"></i></div>
+  ${cls==="warn"?`<p class="mc-warn">${ic("alert")} 80% of the budget is spent. Check with your educator before buying more.</p>`:""}${b.approved>0?"":'<p class="small muted" style="margin:8px 0 0">Set an approved budget to see how much is left.</p>'}${spark}</div>`;
+}
 /* ---------- Money tab ---------- */
 function moneyTab(p){
   const b=bud(p),over=b.approved>0&&b.spent>b.approved,pct=b.approved>0?Math.min(100,Math.round(b.spent/b.approved*100)):0;
   const hero=`<div class="card money ${over?"over":""}"><div class="row"><div class="ring-sm big" style="--p:${pct}" role="img" aria-label="${pct} percent of the budget spent"><b>${pct}%</b></div><div class="grow"><div class="small muted">Budget remaining</div><div class="money-big">${rands(b.left)}</div><div class="small muted">of ${b.approved?rands(b.approved):"no approved budget yet"}</div></div></div>
     ${over?`<div class="warncard">${ic("alert")} You have spent more than the approved budget. Talk to your educator before buying more.</div>`:""}
-    <div class="m3"><div><span>Spent</span><b>${rands(b.spent)}</b></div><div><span>Income</span><b>${rands(b.income)}</b></div><div><span>${b.surplus>=0?"Surplus":"Shortfall"}</span><b class="${b.surplus>=0?"pos":"neg"}">${rands(Math.abs(b.surplus))}</b></div></div></div>`;
+    <div class="m3"><div><span>Spent</span><b>${rands(b.spent)}</b></div><div><span>Income</span><b>${rands(b.income)}</b></div><div><span>${b.surplus>=0?"Surplus":"Shortfall"}</span><b class="${b.surplus>=0?"pos":"neg"}">${rands(Math.abs(b.surplus))}</b></div></div>${moneyChart(p,b)}</div>`;
   const plan=`<div class="bk-list">${p.bud.items.map(i=>bkRow("bud:"+i.id,esc(i.item),rands(toNum(i.qty)*toNum(i.unit)),`${toNum(i.qty)||0} × ${rands(toNum(i.unit))}`)).join("")}</div>${addBtn("bud:new","Item")}
     <div class="sumbox"><div><span>Total planned costs</span><b>${rands(b.planned)}</b></div><div><span>Approved budget</span><b>${rands(b.approved)}</b></div><div><span>Expected income</span><b>${rands(b.expInc)}</b></div><div><span>Expected ${b.expInc-b.planned>=0?"surplus":"shortfall"}</span><b>${rands(Math.abs(b.expInc-b.planned))}</b></div></div>
     <p class="small muted" style="margin:6px 0 10px">${p.bud.agreedBy?"Budget agreed by "+esc(p.bud.agreedBy)+(p.bud.agreedOn?" on "+dLong(p.bud.agreedOn):""):"Budget not agreed yet."}</p>
@@ -1507,7 +1541,7 @@ function render(){
   const m=route.match(/^p\/(.+)/),p=m&&P(m[1]);
   const cur=p?"home":route;
   document.documentElement.style.setProperty("--ptint",p?p.color:"transparent");
-  $("#app").innerHTML=`<div class="wrap${!p&&route==="home"?" fit":""}${fresh?" enter":""}"><header class="top"><img class="brand" src="icons/productions-96.png" alt="" width="44" height="51"><h1 class="sr">MS Productions</h1><span class="grow"></span><span class="sync" id="sync" aria-live="polite"></span>${!p&&route==="home"?`<button class="x addp" id="addp" aria-label="New production" title="New production">${ic("plus")}</button>`:""}<button class="x" id="thm" aria-label="${isDark()?"Switch to light mode":"Switch to dark mode"}" title="${isDark()?"Light mode":"Dark mode"}">${ic(isDark()?"sun":"moon")}</button></header>
+  $("#app").innerHTML=`<div class="wrap${!p&&route==="home"?" fit":""}${p?" prodwide":""}${fresh?" enter":""}"><header class="top"><img class="brand" src="icons/productions-96.png" alt="" width="44" height="51"><h1 class="sr">MS Productions</h1><span class="grow"></span><span class="sync" id="sync" aria-live="polite"></span>${!p&&route==="home"?`<button class="x addp" id="addp" aria-label="New production" title="New production">${ic("plus")}</button>`:""}<button class="x" id="thm" aria-label="${isDark()?"Switch to light mode":"Switch to dark mode"}" title="${isDark()?"Light mode":"Dark mode"}">${ic(isDark()?"sun":"moon")}</button></header>
   <main id="main" tabindex="-1">${p?prodView(p):{home:homePage,overview:overviewPage,activity:activityPage,more:morePage}[route]?.()||homePage()}</main></div>
   <nav class="tabs" aria-label="Main">${NAV.slice(0,2).map(navBtn(cur)).join("")}<button class="cap btn primary" id="cap" aria-label="Capture: photo, note, goal, target or voice">${ic("plus")}</button>${NAV.slice(2).map(navBtn(cur)).join("")}</nav>`;
   setSyncUi(syncState||"Sign in to sync");
@@ -1642,14 +1676,14 @@ function fb(k){if(SFX.vib){try{navigator.vibrate&&navigator.vibrate(HAP[k])}catc
 const openG=new Set(),seenP=new Set();
 function prodView(p){
   const q=prodPct(p),open=p.goals.filter(g=>!g.done).length,late=lateCount(p);
-  return `<div class="phero" style="--pc:${p.color}">
+  return `<div class="pv"><div class="pv-side"><div class="phero" style="--pc:${p.color}">
     <div class="ph-top"><button class="x glass" id="back" aria-label="Back to productions">${ic("left")}</button><span class="grow"></span><button class="x glass" id="rep" aria-label="Weekly report">${ic("trend")}</button><button class="x glass" id="edp" aria-label="Edit production">${ic("pencil")}</button></div>
     <div class="ph-main"><span class="ph-av">${ic(p.icon)}</span><div class="grow"><h2 class="ptitle">${esc(p.name)}</h2><p class="ph-d">${esc(p.desc||"Tap the pencil to add a description.")}</p></div>
       <div class="ph-ring" style="--p:${q}" role="img" aria-label="${q} percent complete"><b>${q}%</b></div></div>
     <div class="ph-stats"><span><b>${open}</b> open</span><span><b>${p.goals.length-open}</b> done</span>${late?`<span class="lt"><b>${late}</b> overdue</span>`:""}</div>
   </div>
-  <div class="segwrap"><div class="segc" role="group" aria-label="Sections">${TABS.map(([k,l,i])=>`<button data-tab="${k}" aria-label="${l}" aria-pressed="${tab===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div>
-  <div class="tabbody">${{story:storyTab,plan:planTab,work:workTab,money:moneyTab,wrap:wrapTab,goals:goalsTab,media:mediaTab,team:teamTab,log:logTab}[tab](p)}</div>`;
+  <div class="segwrap"><div class="segc" role="group" aria-label="Sections">${TABS.map(([k,l,i])=>`<button data-tab="${k}" aria-label="${l}" aria-pressed="${tab===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div></div>
+  <div class="tabbody">${{story:storyTab,plan:planTab,work:workTab,money:moneyTab,wrap:wrapTab,goals:goalsTab,media:mediaTab,team:teamTab,log:logTab}[tab](p)}</div></div>`;
 }
 function goalsTab(p){return goalsHTML(p,true)}
 function goalsHTML(p,fab){
