@@ -524,6 +524,7 @@ main:focus{outline:none}
   .ptiles{grid-template-columns:repeat(auto-fill,minmax(200px,1fr));grid-auto-rows:minmax(170px,auto);min-height:0;gap:18px;align-content:start}
   .ptile{min-height:170px}
 }
+.ptile b{display:block;white-space:nowrap;-webkit-line-clamp:unset;-webkit-box-orient:unset;font-size:clamp(.6rem,10.5cqw,.95rem);hyphens:none;overflow-wrap:normal;text-overflow:ellipsis;overflow:hidden;max-width:100%}
 </style>
 </head>
 <body>
@@ -1013,7 +1014,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.4.4";
+const APP_VER="5.4.5";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
