@@ -330,6 +330,19 @@ nav.tabs button[aria-current=page]{background:var(--green-soft);box-shadow:inset
   box-shadow:inset 5px 5px 11px var(--pil-in-lo),inset -4px -4px 9px var(--pil-in-hi)}
 .btn.primary:active,.fab:active,.x.addp:active{box-shadow:inset 5px 5px 12px rgba(0,0,0,.38),inset -3px -3px 8px rgba(255,255,255,.2)}
 .x.glass:active,.hbar .btn:active{box-shadow:inset 3px 3px 8px rgba(0,0,0,.28),inset -2px -2px 6px rgba(255,255,255,.2)}
+.composer .row{align-items:flex-start}
+.story{padding-bottom:20px}
+.sday{font-size:.82rem;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:18px 4px 8px;font-family:var(--body);font-weight:700}
+.sitem{display:flex;align-items:flex-start;gap:12px;background:var(--sheet);border:1px solid var(--line);border-radius:20px;padding:12px 12px 12px 14px;margin-bottom:10px;box-shadow:var(--shadow);animation:fadeIn .25s}
+.sic{width:34px;height:34px;border-radius:12px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);flex:none}
+.sic.ok{background:var(--green-soft);color:var(--green)}
+.sbody{flex:1;min-width:0;overflow-wrap:anywhere}
+.sitem.win{background:linear-gradient(150deg,var(--green-soft),var(--sheet));border-color:color-mix(in srgb,var(--green) 30%,var(--line))}
+.sitem.media{display:block;padding:8px}
+.smedia{position:relative;display:block;width:100%;aspect-ratio:4/3;border:0;border-radius:14px;overflow:hidden;padding:0;background:var(--line);cursor:pointer}
+.smedia img,.smedia video{width:100%;height:100%;object-fit:cover;display:block}
+.scap{padding:8px 6px 0;font-weight:600}.sitem.media .small{padding:2px 6px 2px}
+.x.sm{width:36px;height:36px;flex:none}.x.sm .i{width:1em;height:1em}
 .photos button{position:relative}
 .targets{list-style:none;margin:10px 0 0;padding:0}
 .targets li{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}.targets li:first-child{border-top:0}
@@ -467,7 +480,7 @@ const DEFAULTS=[["Maintenance","wrench",0],["Media","film",2],["Gardening","spro
 /* sign-in is switched off for now: the app opens with a PIN and keeps data on this device. Set LOGIN=true to bring staff sign-in and cloud sync back. */
 /* sign-in is switched off for now: the app opens straight in and keeps data on this device. Set LOGIN=true to bring staff sign-in and cloud sync back. An optional PIN can still lock a device. */
 const LOGIN=false,PINLEN=3;
-let S=load(),sm=loadSync(),user=null,sb=null,route="home",tab="goals",syncState=LOGIN?"":"Saved on this device",authReady=false,listening=null;
+let S=load(),sm=loadSync(),user=null,sb=null,route="home",tab="story",syncState=LOGIN?"":"Saved on this device",authReady=false,listening=null;
 function upgrade(d){
   const now=Date.now();let ch=false;
   const c=d.prods.find(p=>p.id==="p6"&&p.name==="Cooking");if(c){c.name="Baking";c.icon="bake";c.u=now;ch=true}
@@ -546,8 +559,72 @@ function wireMics(root){root.querySelectorAll("[data-mic]").forEach(b=>{
   ["pointerup","pointercancel","pointerleave","dragend","scroll"].forEach(ev=>document.addEventListener(ev,up,{passive:true,capture:true}));
 })();
 document.addEventListener("touchstart",()=>{},{passive:true});
+/* ---------- v3: shared helpers ---------- */
+const tmOf=t=>new Date(t).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
+async function addFiles(pid,files){
+  let n=0;
+  for(const f of files){
+    const vid=f.type.startsWith("video/");
+    if(vid&&f.size>MAXVID){toast("Video too large. Keep clips under 45 MB (about 30 seconds).");continue}
+    const b=vid?f:await toBlob(f);if(!b){toast("Couldn't read that file.");continue}
+    const id=uid();try{await mPut(id,b)}catch{toast("No space to store this on the device.");continue}
+    S.media.push({id,pid,type:vid?"video":"photo",cap:"",t:Date.now(),by:who(),del:false,u:Date.now()});n++;
+  }
+  return n;
+}
+function openMediaSheet(m){
+  sheet(m.type==="video"?"Video":"Photo",`${m.type==="video"?`<video data-mid="${m.id}" controls playsinline style="width:100%;border-radius:16px;margin-top:8px;background:#000"></video>`:`<img data-mid="${m.id}" alt="" style="width:100%;border-radius:16px;margin-top:8px">`}<label class="f" for="mc">Caption</label><div class="row"><textarea class="t ta" rows="1" id="mc">${esc(m.cap)}</textarea>${micBtn()}</div>
+  <p class="muted small">${esc(m.by)} · ${fmt(m.t)}</p><div class="row"><button class="btn danger" id="del">${ic("trash")}Delete</button><span class="grow"></span><button class="btn primary" id="ok">Done</button></div>`,(d,close)=>{
+    hydrate(d);wireMics(d);$("#ok").onclick=()=>{m.cap=$("#mc").value.trim();save(m);close();render()};
+    $("#del").onclick=()=>{m.del=true;save(m);close();render();if(user&&sb)sb.storage.from("flock-media").remove(["ms/"+m.id]).catch(()=>{});if(sm.up)delete sm.up[m.id];
+      toast("Deleted.",()=>{m.del=false;save(m);render()})}});
+}
+
+/* ---------- v3: story (a production's diary) ---------- */
+const dayLabel=t=>{const d=new Date(t),n=new Date(),a=new Date(d.getFullYear(),d.getMonth(),d.getDate()).getTime(),b=new Date(n.getFullYear(),n.getMonth(),n.getDate()).getTime(),df=Math.round((b-a)/864e5);return df===0?"Today":df===1?"Yesterday":d.toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"short"})};
+function storyItems(p){
+  const it=[];
+  p.log.forEach(l=>it.push({t:l.t,k:"log",l}));
+  mediaOf(p).forEach(m=>it.push({t:m.t,k:"media",m}));
+  p.goals.forEach(g=>{
+    if(g.done&&g.doneAt)it.push({t:g.doneAt,k:"goal",g});
+    (g.targets||[]).forEach(tg=>{if(tg.done&&tg.doneAt&&!(g.done&&g.doneAt&&Math.abs(g.doneAt-tg.doneAt)<3000))it.push({t:tg.doneAt,k:"target",g,tg})});
+    g.comments.forEach(c=>it.push({t:c.t,k:"comment",g,c}));
+  });
+  return it.sort((a,b)=>b.t-a.t);
+}
+function storyCard(x){
+  if(x.k==="log")return `<div class="sitem"><span class="sic">${ic("note")}</span><div class="sbody"><div>${esc(x.l.text)}</div><div class="small muted">${esc(x.l.by)} · ${tmOf(x.t)}</div></div><button class="x sm" data-dl="${x.l.id}" aria-label="Delete update">${ic("trash")}</button></div>`;
+  if(x.k==="media")return `<div class="sitem media"><button class="smedia" data-m="${x.m.id}" aria-label="Open ${x.m.type==="video"?"video":"photo"} ${esc(x.m.cap||"")}">${x.m.type==="video"?`<video data-mid="${x.m.id}" muted playsinline preload="metadata"></video><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${x.m.id}" alt="${esc(x.m.cap||"Photo")}" loading="lazy">`}</button>${x.m.cap?`<div class="scap">${esc(x.m.cap)}</div>`:""}<div class="small muted">${esc(x.m.by)} · ${tmOf(x.t)}</div></div>`;
+  if(x.k==="goal")return `<div class="sitem win"><span class="sic ok">${ic("trophy")}</span><div class="sbody"><b>Goal finished</b><div>${esc(x.g.title)}</div><div class="small muted">${tmOf(x.t)}</div></div></div>`;
+  if(x.k==="target")return `<div class="sitem"><span class="sic ok">${ic("check")}</span><div class="sbody">Target done: ${esc(x.tg.title)}${x.tg.who?` <span class="small muted">· ${esc(x.tg.who)}</span>`:""}<div class="small muted">${esc(x.g.title)} · ${tmOf(x.t)}</div></div></div>`;
+  return `<div class="sitem"><span class="sic">${ic("chat")}</span><div class="sbody">${esc(x.c.text)}<div class="small muted">${esc(x.g.title)} · ${esc(x.c.by)} · ${tmOf(x.t)}</div></div></div>`;
+}
+function storyTab(p){
+  const items=storyItems(p),pics=mediaOf(p).filter(m=>m.type!=="video");let day="",html="";
+  items.forEach(x=>{const l=dayLabel(x.t);if(l!==day){html+=`<h3 class="sday">${l}</h3>`;day=l}html+=storyCard(x)});
+  const first=pics.at(-1),last=pics[0];
+  return `<div class="card composer"><div class="row"><textarea class="t ta" rows="1" id="sc-t" enterkeyhint="send" placeholder="Add an update for ${esc(p.name)}" aria-label="Add an update"></textarea>${micBtn()}<button class="btn primary icon" id="sc-post" aria-label="Post update">${ic("send")}</button></div>
+    <div class="row wr" style="margin-top:10px"><button class="btn small" id="sc-ph">${ic("camera")}Photo or video</button><button class="btn small" id="sc-rec">${ic("trend")}Share this week</button></div>
+    <input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"></div>`+
+  (pics.length>1?`<div class="card"><h2>Before and now</h2><div class="cmp"><figure><img data-mid="${first.id}" alt="Earliest photo"><figcaption>Before · ${new Date(first.t).toLocaleDateString(undefined,{day:"numeric",month:"short"})}</figcaption></figure><figure><img data-mid="${last.id}" alt="Latest photo"><figcaption>Now · ${new Date(last.t).toLocaleDateString(undefined,{day:"numeric",month:"short"})}</figcaption></figure></div></div>`:"")+
+  (items.length?`<div class="story">${html}</div>`:`<div class="empty">${ic("pulse","xl")}<h3>Your story starts here</h3><p style="margin:0">Post an update, add a photo, or finish a target. It all shows up here as a diary.</p></div>`);
+}
+function wireStory(p){
+  wireMics(document);
+  const post=()=>{const t=$("#sc-t").value.trim();if(!t){$("#sc-t").focus();return}if(listening)listening.stop();p.log.push({id:uid(),text:t,by:who(),t:Date.now()});save(p);fb("add");render()};
+  $("#sc-post").onclick=post;
+  $("#sc-t").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();post()}};
+  $("#sc-ph").onclick=()=>$("#pf").click();
+  $("#pf").onchange=async e=>{const n=await addFiles(p.id,e.target.files);if(n){save();fb("add")}render()};
+  $("#sc-rec").onclick=()=>reportSheet(p);
+  document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>openMediaSheet(S.media.find(x=>x.id===b.dataset.m)));
+  document.querySelectorAll("[data-dl]").forEach(b=>b.onclick=()=>{const i=p.log.findIndex(l=>l.id===b.dataset.dl),[l]=p.log.splice(i,1);save(p);render();toast("Update deleted.",()=>{p.log.splice(i,0,l);save(p);render()})});
+}
+
+
 /* routing */
-const nav=r=>{location.hash="#/"+(r==="home"?"":r)};
+const nav=r=>{if(ovSkip>0){setTimeout(()=>nav(r),60);return}location.hash="#/"+(r==="home"?"":r)};
 addEventListener("hashchange",()=>{if(listening)listening.stop();route=location.hash.slice(2)||"home";render();scrollTo(0,0)});
 route=location.hash.slice(2)||"home";
 
@@ -697,7 +774,7 @@ function prodSheet(p){
 }
 
 /* production view */
-const TABS=[["goals","Goals","target"],["media","Media","image"],["team","Team","users"],["log","Log","note"]];
+const TABS=[["story","Story","pulse"],["goals","Goals","target"],["media","Media","image"],["team","Team","users"]];
 const lateCount=p=>{const t=todayStr();return p.goals.filter(g=>!g.done&&g.due&&g.due<t).length};
 /* sound + haptic feedback (sounds are synthesised, no files) */
 const FXK="ms-prod-fx";
@@ -753,7 +830,7 @@ function prodView(p){
     <div class="ph-stats"><span><b>${open}</b> open</span><span><b>${p.goals.length-open}</b> done</span>${late?`<span class="lt"><b>${late}</b> overdue</span>`:""}</div>
   </div>
   <div class="segwrap"><div class="segc" role="group" aria-label="Sections">${TABS.map(([k,l,i])=>`<button data-tab="${k}" aria-label="${l}" aria-pressed="${tab===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div>
-  <div class="tabbody">${{goals:goalsTab,media:mediaTab,team:teamTab,log:logTab}[tab](p)}</div>`;
+  <div class="tabbody">${{story:storyTab,goals:goalsTab,media:mediaTab,team:teamTab,log:logTab}[tab](p)}</div>`;
 }
 function goalsTab(p){
   const today=todayStr();
@@ -796,7 +873,7 @@ function wireGoals(p){
 function wireProd(p){
   $("#back").onclick=()=>nav("home");$("#rep").onclick=()=>reportSheet(p);$("#edp").onclick=()=>prodSheet(p);
   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;clearSel();render()});
-  ({goals:wireGoals,media:wireMedia,team:wireTeam,log:wireLog})[tab](p);
+  ({story:wireStory,goals:wireGoals,media:wireMedia,team:wireTeam,log:wireLog})[tab](p);
 }
 const fabBtn=(id,label)=>`<div class="fab-wrap"><button class="fab" id="${id}" aria-label="${label}">${ic("plus")}<span>${label}</span></button></div>`;
 
