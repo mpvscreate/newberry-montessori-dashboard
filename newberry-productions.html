@@ -1059,7 +1059,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.5.2";
+const APP_VER="5.5.3";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1878,7 +1878,7 @@ function prodSheet(p){
 }
 
 /* production view */
-const TABS=[["story","Story","pulse"],["plan","Plan","compass"],["work","Work","hammer"],["money","Money","cash"],["wrap","Wrap-up","flag"]];
+const TABS=[["plan","Plan","compass"],["work","Work","hammer"],["money","Money","cash"],["story","Story","pulse"],["wrap","Wrap-up","flag"]];
 const lateCount=p=>{const t=todayStr();return p.goals.filter(g=>!g.done&&g.due&&g.due<t).length};
 /* sound + haptic feedback (sounds are synthesised, no files) */
 const FXK="ms-prod-fx";
