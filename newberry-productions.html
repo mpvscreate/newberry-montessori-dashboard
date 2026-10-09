@@ -257,6 +257,10 @@ input[type=range]{width:100%;height:36px;accent-color:var(--green)}
 button,.ptile,[role=button]{touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 button{-webkit-touch-callout:none}
 html{overscroll-behavior-y:contain}
+.ptr{position:fixed;top:0;left:50%;z-index:90;width:40px;height:40px;margin-left:-20px;border-radius:50%;background:var(--sheet,#fff);box-shadow:0 4px 16px rgba(0,0,0,.25);display:grid;place-items:center;opacity:0;transform:translateY(-50px);pointer-events:none}
+.ptr svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.ptr.spin svg{animation:ptrspin .8s linear infinite}
+@keyframes ptrspin{to{transform:rotate(360deg)}}
 .sw[disabled]{opacity:.4}
 /* soft glow */
 .btn{box-shadow:0 1px 2px rgba(0,0,0,.04),0 3px 14px var(--glow-soft)}
@@ -755,7 +759,7 @@ async function addFiles(pid,files){
   let n=0;
   for(const f of files){
     const vid=f.type.startsWith("video/");
-    if(vid&&f.size>MAXVID){toast("Video too large. Keep clips under 45 MB (about 30 seconds).");continue}
+    if(vid&&f.size>MAXVID){toast(`Video too large. Keep clips under ${MAXVID_MB} MB (about 15 to 20 seconds).`);continue}
     const b=vid?f:await toBlob(f);if(!b){toast("Couldn't read that file.");continue}
     const id=uid();try{await mPut(id,b)}catch{toast("No space to store this on the device.");continue}
     S.media.push({id,pid,type:vid?"video":"photo",cap:"",t:Date.now(),by:who(),del:false,u:Date.now()});n++;
@@ -1059,7 +1063,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.5.1";
+const APP_VER="5.5.4";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1160,7 +1164,7 @@ function formSheet({title,fields,data,onSave,onDelete,done}){
 async function addFilesIds(pid,files,tag){
   const ids=[];
   for(const f of files){
-    const vid=f.type.startsWith("video/");if(vid&&f.size>MAXVID){toast("Video too large. Keep clips under 45 MB.");continue}
+    const vid=f.type.startsWith("video/");if(vid&&f.size>MAXVID){toast(`Video too large. Keep clips under ${MAXVID_MB} MB.`);continue}
     const b=vid?f:await toBlob(f);if(!b){toast("Couldn't read that file.");continue}
     const id=uid();try{await mPut(id,b)}catch{toast("No space to store this on the device.");continue}
     S.media.push({id,pid,type:vid?"video":"photo",cap:"",tag:tag||"",t:Date.now(),by:who(),del:false,u:Date.now()});ids.push(id);
@@ -1878,7 +1882,7 @@ function prodSheet(p){
 }
 
 /* production view */
-const TABS=[["story","Story","pulse"],["plan","Plan","compass"],["work","Work","hammer"],["money","Money","cash"],["wrap","Wrap-up","flag"]];
+const TABS=[["plan","Plan","compass"],["work","Work","hammer"],["money","Money","cash"],["story","Story","pulse"],["wrap","Wrap-up","flag"]];
 const lateCount=p=>{const t=todayStr();return p.goals.filter(g=>!g.done&&g.due&&g.due<t).length};
 /* sound + haptic feedback (sounds are synthesised, no files) */
 const FXK="ms-prod-fx";
@@ -2040,7 +2044,7 @@ const mdb=()=>new Promise((res,rej)=>{if(!window.indexedDB)return rej(new Error(
 const mPut=async(id,b)=>{const d=await mdb();return new Promise((res,rej)=>{const t=d.transaction("media","readwrite");t.objectStore("media").put(b,id);t.oncomplete=res;t.onerror=()=>rej(t.error)})};
 const mGet=async id=>{const d=await mdb();return new Promise((res,rej)=>{const q=d.transaction("media").objectStore("media").get(id);q.onsuccess=()=>res(q.result||null);q.onerror=()=>rej(q.error)})};
 const mDel=async id=>{const d=await mdb();return new Promise(res=>{const t=d.transaction("media","readwrite");t.objectStore("media").delete(id);t.oncomplete=res;t.onerror=res})};
-const mcache=new Map(),MAXVID=45*1024*1024;
+const mcache=new Map(),MAXVID_MB=20,MAXVID=MAXVID_MB*1024*1024;
 async function loadMedia(id){
   if(mcache.has(id))return mcache.get(id);
   let b=await mGet(id).catch(()=>null);
@@ -2349,7 +2353,7 @@ async function videoEditSheet(p,m){
       await new Promise(res=>{const tick=()=>{frame();const pr=Math.min(1,(v.currentTime-t0)/Math.max(.1,t1-t0));$("#ed-bar").style.width=Math.round(pr*100)+"%";$("#ed-pm").textContent="Saving… "+Math.round(pr*100)+"%. Keep this screen open";if(v.currentTime>=t1-.03||v.ended){v.pause();setTimeout(()=>{rec.stop();res()},150)}else requestAnimationFrame(tick)};tick()});
       await done;const blob=new Blob(chunks,{type:rec.mimeType||mime||"video/webm"});
       if(!blob.size)throw new Error("empty");
-      if(blob.size>MAXVID){toast("The edited video is over 45 MB. Trim it shorter.");throw new Error("big")}
+      if(blob.size>MAXVID){toast(`The edited video is over ${MAXVID_MB} MB. Trim it shorter.`);throw new Error("big")}
       const id=uid();await mPut(id,blob);
       S.media.push({id,pid:m.pid,type:"video",cap:m.cap,t:replace?m.t:Date.now(),by:who(),del:false,u:Date.now()});
       if(replace){m.del=true;save(m);if(LV.on&&sb)sb.storage.from("ms-media").remove([mediaPath(m.id)]).catch(()=>{});if(sm.up)delete sm.up[m.id]}else save();
@@ -2559,6 +2563,18 @@ function reportSheet(p){
   });
 }
 
+/* pull down at the top of the page to refresh the app (clears old cached copies, then reloads) */
+(function(){const ind=document.createElement("div");ind.className="ptr";ind.setAttribute("aria-hidden","true");ind.innerHTML='<svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.3-5.7"/><path d="M20 4v5h-5"/></svg>';document.body.append(ind);
+  let y0=null,d=0,busy=false;const MAX=110,GO=70;
+  const set=(v,a)=>{ind.style.transition=a?"transform .2s,opacity .2s":"none";ind.style.opacity=Math.min(1,v/GO);ind.style.transform="translateY("+(v-50)+"px) rotate("+v*3+"deg)"};
+  addEventListener("touchstart",e=>{y0=null;if(busy||e.touches.length!==1||scrollY>0||document.querySelector("#layer>*,.ed,.upd")||e.target.closest(".sheet,.ed,input,textarea,select"))return;y0=e.touches[0].clientY;d=0},{passive:true});
+  addEventListener("touchmove",e=>{if(y0===null)return;const dy=e.touches[0].clientY-y0;if(dy<=0||scrollY>0){if(d)set(0,true);d=0;return}d=Math.min(MAX,dy*.5);set(d)},{passive:true});
+  const end=async()=>{if(y0===null)return;y0=null;if(d<GO*.9){d=0;set(0,true);return}
+    busy=true;ind.classList.add("spin");set(GO*.7,true);
+    try{if(navigator.onLine){const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()));location.reload();return}
+      await syncNow();render()}catch{location.reload();return}
+    ind.classList.remove("spin");d=0;set(0,true);busy=false};
+  addEventListener("touchend",end);addEventListener("touchcancel",end)})();
 if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js").catch(()=>{});
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist()}catch{}
 if(!LOGIN){user={email:"staff@local",local:true};authReady=true}
