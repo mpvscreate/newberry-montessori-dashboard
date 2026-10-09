@@ -669,7 +669,7 @@ const DEFAULTS=[["Maintenance","wrench",0],["Media","film",2],["Gardening","spro
 /* sign-in is switched off for now: the app opens with a PIN and keeps data on this device. Set LOGIN=true to bring staff sign-in and cloud sync back. */
 /* sign-in is switched off for now: the app opens straight in and keeps data on this device. Set LOGIN=true to bring staff sign-in and cloud sync back. An optional PIN can still lock a device. */
 const LOGIN=false,PINLEN=3;
-let S=load(),sm=loadSync(),user=null,sb=null,route="home",tab="story",syncState=LOGIN?"":"Saved on this device",authReady=false,listening=null;
+let S=load(),sm=loadSync(),user=null,sb=null,route="home",tab="plan",syncState=LOGIN?"":"Saved on this device",authReady=false,listening=null;
 function upgrade(d){
   const now=Date.now();let ch=false;
   const c=d.prods.find(p=>p.id==="p6"&&p.name==="Cooking");if(c){c.name="Baking";c.icon="bake";c.u=now;ch=true}
@@ -1063,7 +1063,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.5.4";
+const APP_VER="5.5.5";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1837,7 +1837,7 @@ function overviewPage(){
 const actRow=f=>`<li><div class="avatar" style="color:${f.p.color}">${ic(f.p.icon)}</div><div class="grow"><b>${esc(f.p.name)}</b> <span class="pill type">${f.k}</span><div>${esc(f.txt)}</div><div class="small muted">${fmt(f.t)}</div></div></li>`;
 const fab=()=>`<div class="fab-wrap"><button class="fab" id="addp" aria-label="New production">${ic("plus")}<span>New production</span></button></div>`;
 function wireHome(){
-  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{nav("p/"+b.dataset.open)});
+  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{tab="plan";nav("p/"+b.dataset.open)});
   $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#rep")&&($("#rep").onclick=()=>reportSheet(null));$("#today")&&($("#today").onclick=todaySheet);
 }
 function activityPage(){const f=feedItems().slice(0,60);return `<div class="page-h"><h2>Activity</h2></div><div class="card">${f.length?`<ul class="list">${f.map(actRow).join("")}</ul>`:`<div class="empty">${ic("pulse","xl")}<h3>No activity yet</h3>Comments and log entries from every production show up here.</div>`}</div>`}
