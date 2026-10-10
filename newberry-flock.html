@@ -822,7 +822,7 @@ function more(){
 function act(a,id){
   const A={
     go:()=>go(id),gofeed:()=>{careSub="feed";go("care")},gosales:()=>{eggSub="sales";go("eggs")},
-    logeggs:()=>eggSheet(),sfilter:()=>{storyFilter=id;render()},reorder:()=>reorderSheet(id),trng:()=>{trendRange=+id;render()},sound:()=>{try{localStorage.setItem(SND_KEY,soundOn()?"off":"on")}catch{}render();if(soundOn())cluck(3,.12)},quickcare:()=>quickCare(),sell:()=>sellSheet(),buy:()=>purchaseSheet(),newhen:()=>henForm(),hen:()=>henDetail(id),
+    logeggs:()=>eggSheet(),exportstory:()=>exportSheet(),sfilter:()=>{storyFilter=id;render()},reorder:()=>reorderSheet(id),trng:()=>{trendRange=+id;render()},sound:()=>{try{localStorage.setItem(SND_KEY,soundOn()?"off":"on")}catch{}render();if(soundOn())cluck(3,.12)},quickcare:()=>quickCare(),sell:()=>sellSheet(),buy:()=>purchaseSheet(),newhen:()=>henForm(),hen:()=>henDetail(id),
     hfst:()=>{henFilter.st=id;render()},
     eggsub:()=>{eggSub=id;render()},caresub:()=>{careSub=id;render()},
     cdprev:()=>{careDate=addDays(careDate,-1);render()},cdnext:()=>{if(careDate<today()){careDate=addDays(careDate,1);render()}},
@@ -1267,7 +1267,8 @@ function updates(){
   const chips=`<div class="chips scroll" role="group" aria-label="Show" style="margin:0 0 10px">${[["all","Everything"],["media","Photos & videos"],["moments","Milestones"]].map(([k,l])=>`<button class="chip" data-act="sfilter" data-id="${k}" aria-pressed="${storyFilter===k}">${l}</button>`).join("")}</div>`;
   return `<div class="page-h"><h2>Our story</h2><button class="btn primary small" data-act="newupd">${ic("plus")}Add</button></div>
   <p class="muted" style="margin:-6px 0 14px">The journey of our hens and coop. Add photos, videos and notes, and send any of them to parents on WhatsApp. Milestones appear on their own.</p>
-  <div class="row" style="margin-bottom:12px"><button class="btn grow" data-act="weekly">${ic("trend")}Weekly report</button>${S.settings.groupLink?`<a class="btn grow" href="${esc(S.settings.groupLink)}" target="_blank" rel="noopener">${ic("users")}WhatsApp group</a>`:""}</div>
+  <div class="row" style="margin-bottom:12px"><button class="btn grow" data-act="weekly">${ic("trend")}Weekly report</button><button class="btn grow" data-act="exportstory">${ic("download")}Export PDF</button></div>
+  ${S.settings.groupLink?`<a class="btn block" href="${esc(S.settings.groupLink)}" target="_blank" rel="noopener" style="margin-bottom:12px">${ic("users")}Open our WhatsApp group</a>`:""}
   ${chips}
   ${rows?`<ul class="list tl">${rows}</ul>`:`<div class="card empty">${ic("camera","xl")}<h3>${S.updates.length?"Nothing here yet":"Tell the story of your hens"}</h3><p>${S.updates.length?"Try another filter.":"Add a photo or video of the coop, the hens or egg day. Milestones such as your first eggs and sales appear here on their own."}</p>${S.updates.length?"":`<button class="btn primary" data-act="newupd">${ic("plus")}Add the first entry</button>`}</div>`}`;
 }
@@ -1369,6 +1370,163 @@ async function sendUpdate(id){
   const r=await shareNow(text,files);
   if(r==="shared"){u.shared=today();save();render();toast("Shared. Thank you for keeping the community in the loop.")}
   else if(r==="fallback")fallbackSheet(text,files);
+}
+
+/* ---------- export our story as a PDF book (built here, no libraries) ---------- */
+const HW=[278,278,355,556,556,889,667,191,333,333,389,584,278,333,278,278,556,556,556,556,556,556,556,556,556,556,278,278,584,584,584,556,1015,667,667,722,722,667,611,778,722,278,500,667,556,833,722,778,667,778,722,667,611,722,667,944,667,667,611,278,278,278,469,556,333,556,556,500,556,556,278,556,556,222,222,500,222,833,556,556,556,556,333,500,278,556,500,722,500,500,500,334,260,334,584];
+const WIN={"‘":145,"’":146,"“":147,"”":148,"•":149,"–":150,"—":151,"…":133,"€":128," ":32};
+function winAnsi(s){let o="";for(const ch of String(s)){const c=ch.codePointAt(0);if(WIN[ch])o+=String.fromCharCode(WIN[ch]);else if(c>=32&&c<=126||c>=160&&c<=255)o+=ch;else if(c===9||c===10)o+=" "}return o}
+const pdfCharW=(ch,bold)=>{const c=ch.charCodeAt(0);let w=c>=32&&c<=126?HW[c-32]:c===146||c===145?222:c===150?556:c===151||c===133?1000:c===149?350:c===183?278:556;return w*(bold?1.06:1)};
+const pdfTextW=(s,size,bold)=>{let w=0;for(const ch of s)w+=pdfCharW(ch,bold);return w*size/1000};
+function pdfWrap(text,size,bold,maxW){
+  const out=[];
+  for(const para of winAnsi(text).split(/\n/)){
+    let line="";
+    for(const word of para.split(/ +/)){
+      const t=line?line+" "+word:word;
+      if(pdfTextW(t,size,bold)<=maxW||!line)line=t;else{out.push(line);line=word}
+      while(pdfTextW(line,size,bold)>maxW&&line.length>1){let k=line.length-1;while(k>1&&pdfTextW(line.slice(0,k),size,bold)>maxW)k--;out.push(line.slice(0,k));line=line.slice(k)}
+    }
+    out.push(line);
+  }
+  return out;
+}
+const pdfEsc=s=>s.replace(/[\\()]/g,"\\$&");
+const toLatin=s=>{const u=new Uint8Array(s.length);for(let i=0;i<s.length;i++)u[i]=s.charCodeAt(i)&255;return u};
+async function jpegOf(blob,max=1400){
+  try{const bm=await createImageBitmap(blob),k=Math.min(1,max/Math.max(bm.width,bm.height)),c=document.createElement("canvas");c.width=Math.max(1,Math.round(bm.width*k));c.height=Math.max(1,Math.round(bm.height*k));
+    const g=c.getContext("2d");g.fillStyle="#fff";g.fillRect(0,0,c.width,c.height);g.drawImage(bm,0,0,c.width,c.height);
+    const b=await new Promise(r=>c.toBlob(r,"image/jpeg",.8));if(!b)return null;return{w:c.width,h:c.height,bytes:new Uint8Array(await b.arrayBuffer())}}catch{return null}
+}
+function videoFrame(blob){
+  return new Promise(res=>{
+    const url=URL.createObjectURL(blob),v=document.createElement("video");let done=false;
+    const fin=r=>{if(done)return;done=true;URL.revokeObjectURL(url);res(r)};
+    v.muted=true;v.playsInline=true;v.preload="auto";v.src=url;
+    v.onloadeddata=()=>{try{v.currentTime=Math.min(.1,(v.duration||1)/2)}catch{fin(null)}};
+    v.onseeked=async()=>{try{const c=document.createElement("canvas"),k=Math.min(1,1000/Math.max(v.videoWidth,v.videoHeight));c.width=Math.round(v.videoWidth*k);c.height=Math.round(v.videoHeight*k);
+      const g=c.getContext("2d");g.drawImage(v,0,0,c.width,c.height);
+      const b=await new Promise(r=>c.toBlob(r,"image/jpeg",.8));fin(b?{w:c.width,h:c.height,bytes:new Uint8Array(await b.arrayBuffer()),video:true}:null)}catch{fin(null)}};
+    v.onerror=()=>fin(null);setTimeout(()=>fin(null),4000);
+  });
+}
+async function buildStoryPdf(opts,progress){
+  const from=opts.from||"0000-00-00",to=opts.to||"9999-12-31";
+  const entries=S.updates.filter(u=>(u.date||"")>=from&&(u.date||"")<=to).map(u=>({kind:"entry",date:u.date,u}));
+  const moments=opts.moments?storyMoments().filter(m=>m.date>=from&&m.date<=to).map(m=>({kind:"moment",...m})):[];
+  const items=[...entries,...moments].sort((a,b)=>a.date.localeCompare(b.date)||(a.kind==="entry"?-1:1));
+  /* prepare pictures one at a time */
+  const imgs=[],imgOf=new Map();let total=0,n=0;entries.forEach(e=>total+=itemIds(e.u).length);
+  for(const e of entries)for(const id of itemIds(e.u)){
+    progress?.(`Preparing photos ${++n} of ${total}`);
+    const m=await loadMedia(id).catch(()=>null);if(!m){imgOf.set(id,null);continue}
+    const j=m.blob.type.startsWith("video")?await videoFrame(m.blob):await jpegOf(m.blob);
+    if(j){imgs.push(j);imgOf.set(id,{idx:imgs.length-1,w:j.w,h:j.h,video:!!j.video})}else imgOf.set(id,{missing:true,video:m.blob.type.startsWith("video")});
+  }
+  progress?.("Laying out the pages");
+  const W=595,H=842,M=48,CW=W-2*M,pages=[];let cur=null,y=0;
+  const accent=[.65,.34,.03],ink=[.13,.11,.07],mute=[.42,.38,.31];
+  const newPage=()=>{cur={ops:[],imgs:new Set()};pages.push(cur);y=M};
+  const text=(s,x,yTop,size,bold,col)=>{cur.ops.push(`BT /${bold?"F2":"F1"} ${size} Tf ${col[0]} ${col[1]} ${col[2]} rg ${x.toFixed(1)} ${(H-yTop-size*.8).toFixed(1)} Td (${pdfEsc(winAnsi(s))}) Tj ET`)};
+  const room=h=>y+h<=H-M-10;
+  const para=(s,size,bold,col,lead,x=M,w=CW)=>{for(const ln of pdfWrap(s,size,bold,w)){if(!room(lead))newPage();text(ln,x,y,size,bold,col);y+=lead}};
+  const put=(idx,x,yTop,w,h)=>{cur.imgs.add(idx);cur.ops.push(`q ${w.toFixed(1)} 0 0 ${h.toFixed(1)} ${x.toFixed(1)} ${(H-yTop-h).toFixed(1)} cm /I${idx} Do Q`)};
+  const rect=(x,yTop,w,h,col)=>cur.ops.push(`${col[0]} ${col[1]} ${col[2]} rg ${x.toFixed(1)} ${(H-yTop-h).toFixed(1)} ${w.toFixed(1)} ${h.toFixed(1)} re f`);
+  const long=d=>new Date(d+"T12:00").toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long",year:"numeric"});
+  /* cover */
+  newPage();rect(0,0,W,12,accent);
+  y=120;para(S.settings.signature||"Newberry House Middle School Project",15,true,mute,20);
+  y+=6;para("Our story",46,true,accent,52);
+  y+=2;para("The journey of our hens and our coop",16,false,ink,22);
+  const dates=items.map(i=>i.date);const span=dates.length?`${long(dates[0])} to ${long(dates.at(-1))}`:"";
+  if(span){y+=4;para(span,11,false,mute,16)}
+  y+=14;const firstImg=entries.flatMap(e=>itemIds(e.u)).map(id=>imgOf.get(id)).find(x=>x&&x.idx!==undefined&&!x.video);
+  if(firstImg){const w=CW,h=Math.min(330,w*firstImg.h/firstImg.w),ww=h===330?330*firstImg.w/firstImg.h:w;put(firstImg.idx,M+(CW-ww)/2,y,ww,h);y+=h+18}
+  const eggsTotal=sum(S.eggs,e=>e.count);
+  para(`${entries.length} entr${entries.length===1?"y":"ies"}  ·  ${S.hens.length} hen${S.hens.length===1?"":"s"}  ·  ${num(eggsTotal)} eggs laid so far`,11,false,ink,16);
+  cur.ops.push(`BT /F1 9 Tf ${mute.join(" ")} rg ${M} 40 Td (${pdfEsc("Made with Newberry Flock on "+long(today()))}) Tj ET`);
+  /* story */
+  let lastMonth="";newPage();
+  for(const it of items){
+    const mo=it.date.slice(0,7);
+    if(mo!==lastMonth){lastMonth=mo;if(!room(70))newPage();y+=8;text(storyMonth(it.date),M,y,17,true,accent);y+=22;rect(M,y,CW,1,[.88,.85,.78]);y+=14}
+    if(it.kind==="moment"){if(!room(22))newPage();text("•",M+2,y,11,true,accent);text(it.text,M+16,y,11,false,ink);const tw=pdfTextW(winAnsi(it.text),11,false);text(dlabel(it.date),M+16+tw+10,y+1,9,false,mute);y+=20;continue}
+    const u=it.u,pics0=itemIds(u).map(id=>imgOf.get(id)).filter(Boolean),h0=pics0.length?Math.min(pics0.length===1?330:230,pics0[0].missing?60:(pics0.length===1?CW:(CW-8)/2)*pics0[0].h/pics0[0].w):0;if(!room(70+h0))newPage();
+    text(long(u.date),M,y,9.5,false,mute);y+=15;
+    if(u.title)para(u.title,15,true,ink,19);
+    if(u.text){y+=2;para(u.text,11,false,ink,15)}
+    const pics=itemIds(u).map(id=>imgOf.get(id)).filter(Boolean);
+    if(pics.length){
+      y+=8;const cols=pics.length===1?1:2,gap=8,cw=(CW-gap*(cols-1))/cols,maxH=cols===1?330:230;
+      for(let i=0;i<pics.length;i+=cols){
+        const row=pics.slice(i,i+cols).map(p=>{if(p.missing){const h=60;return{p,w:cw,h}}let w=cw,h=w*p.h/p.w;if(h>maxH){h=maxH;w=h*p.w/p.h}return{p,w,h}});
+        const rh=Math.max(...row.map(r=>r.h));if(!room(rh))newPage();
+        row.forEach((r,k)=>{const x=M+k*(cw+gap)+(cw-r.w)/2;
+          if(r.p.missing){rect(x,y,cw,60,[.95,.92,.86]);text(r.p.video?"Video (not shown)":"Photo not on this device",x+10,y+24,9.5,false,mute)}
+          else{put(r.p.idx,x,y,r.w,r.h);if(r.p.video){const cx=x+r.w/2,cy=y+r.h/2;cur.ops.push(`0 0 0 rg ${(cx-14).toFixed(1)} ${(H-cy-14).toFixed(1)} 28 28 re f 1 1 1 rg ${(cx-5).toFixed(1)} ${(H-cy-9).toFixed(1)} m ${(cx+9).toFixed(1)} ${(H-cy).toFixed(1)} l ${(cx-5).toFixed(1)} ${(H-cy+9).toFixed(1)} l f`)}}});
+        y+=rh+gap;
+      }
+    }
+    y+=16;
+  }
+  if(!items.length){newPage();para("There is nothing in this date range yet.",12,false,mute,18)}
+  /* page numbers */
+  pages.forEach((p,i)=>{if(i===0)return;p.ops.push(`BT /F1 9 Tf ${mute.join(" ")} rg ${M} 24 Td (${pdfEsc(winAnsi((S.settings.signature||"Our story")+"  ·  page "+(i+1)+" of "+pages.length))}) Tj ET`)});
+  /* write the file */
+  const parts=[];let off=0;const offs=[];const put0=b=>{const u=typeof b==="string"?toLatin(b):b;parts.push(u);off+=u.length};
+  const ni=imgs.length,base=5+ni,obj=(id,body)=>{offs[id]=off;put0(`${id} 0 obj\n`);body();put0("\nendobj\n")};
+  put0(new Uint8Array([37,80,68,70,45,49,46,52,10,37,226,227,207,211,10]));
+  obj(1,()=>put0("<< /Type /Catalog /Pages 2 0 R >>"));
+  obj(2,()=>put0(`<< /Type /Pages /Kids [${pages.map((_,k)=>`${base+2*k+1} 0 R`).join(" ")}] /Count ${pages.length} >>`));
+  obj(3,()=>put0("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>"));
+  obj(4,()=>put0("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>"));
+  imgs.forEach((im,k)=>obj(5+k,()=>{put0(`<< /Type /XObject /Subtype /Image /Width ${im.w} /Height ${im.h} /ColorSpace /DeviceRGB /BitsPerComponent 8 /Filter /DCTDecode /Length ${im.bytes.length} >>\nstream\n`);put0(im.bytes);put0("\nendstream")}));
+  pages.forEach((p,k)=>{
+    const content=toLatin(p.ops.join("\n"));
+    obj(base+2*k,()=>{put0(`<< /Length ${content.length} >>\nstream\n`);put0(content);put0("\nendstream")});
+    obj(base+2*k+1,()=>put0(`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >> /XObject << ${[...p.imgs].map(i=>`/I${i} ${5+i} 0 R`).join(" ")} >> >> /Contents ${base+2*k} 0 R >>`));
+  });
+  const infoId=base+2*pages.length;obj(infoId,()=>put0(`<< /Title (${pdfEsc(winAnsi("Our story"))}) /Creator (Newberry Flock) >>`));
+  const xref=off,count=infoId+1;put0(`xref\n0 ${count}\n0000000000 65535 f \n`);
+  for(let i=1;i<count;i++)put0(String(offs[i]).padStart(10,"0")+" 00000 n \n");
+  put0(`trailer\n<< /Size ${count} /Root 1 0 R /Info ${infoId} 0 R >>\nstartxref\n${xref}\n%%EOF`);
+  const blob=new Blob(parts,{type:"application/pdf"});
+  return{file:new File([blob],`our-story-${today()}.pdf`,{type:"application/pdf"}),pages:pages.length,entries:entries.length,moments:moments.length,photos:imgs.length};
+}
+function exportSheet(){
+  const yr=today().slice(0,4),RANGES=[["all","Everything"],["year","This year"],["d90","Last 90 days"],["custom","Choose dates"]];
+  const m={range:"all",from:addDays(today(),-90),to:today(),moments:true,busy:false,msg:"",result:null};
+  const bounds=()=>m.range==="year"?[yr+"-01-01",today()]:m.range==="d90"?[addDays(today(),-89),today()]:m.range==="custom"?[m.from,m.to]:["0000-00-00","9999-12-31"];
+  const count=()=>{const[a,b]=bounds(),es=S.updates.filter(u=>(u.date||"")>=a&&(u.date||"")<=b);return{e:es.length,p:sum(es,u=>itemIds(u).length)}};
+  sheet("Export our story",`<div id="ex"></div>`,(sh,close)=>{
+    const root=sh.querySelector("#ex");
+    const draw=()=>{
+      const c=count();
+      redraw(sh,root,`<p class="muted" style="margin:6px 0 4px">Creates a PDF book of your story in date order, with photos, notes and milestones. Videos appear as a still picture.</p>
+      <label class="f">Which part of the story?</label><div class="chips" role="group" aria-label="Range">${RANGES.map(([k,l])=>`<button type="button" class="chip" data-f="r-${k}" data-r="${k}" aria-pressed="${m.range===k}">${l}</button>`).join("")}</div>
+      ${m.range==="custom"?`<div class="row" style="margin-top:10px"><div class="grow"><label class="f" for="xf">From</label><input id="xf" class="t" type="date" value="${m.from}" max="${today()}"></div><div class="grow"><label class="f" for="xt">To</label><input id="xt" class="t" type="date" value="${m.to}" max="${today()}"></div></div>`:""}
+      <label class="f">Milestones</label><div class="segc" style="margin:0" role="group" aria-label="Milestones"><button type="button" data-f="m1" data-mm="1" aria-pressed="${m.moments}">Include</button><button type="button" data-f="m0" data-mm="0" aria-pressed="${!m.moments}">Leave out</button></div>
+      <p class="hint" style="margin-top:10px">${c.e} entr${c.e===1?"y":"ies"} and ${c.p} photo${c.p===1?"":"s"} or video${c.p===1?"":"s"} in this range.</p>
+      ${m.msg?`<p class="hint" role="status" aria-live="polite" style="margin:6px 0"><b>${esc(m.msg)}</b></p>`:""}
+      ${m.result?`<div class="warn" style="background:var(--green-soft);color:var(--green)">${ic("check")}<span><b>Your story book is ready.</b> ${m.result.pages} page${m.result.pages===1?"":"s"}, ${(m.result.file.size/1048576).toFixed(1)} MB.</span></div>`:""}
+      <div class="foot">${m.result?`<button type="button" class="btn primary block" id="xs">${ic("share")}Share or save the PDF</button><button type="button" class="btn block" id="xd" style="margin-top:8px">${ic("download")}Download</button>`
+        :`<button type="button" class="btn primary block" id="xm" ${m.busy?"disabled":""}>${ic("download")}${m.busy?"Creating…":"Create PDF"}</button>`}</div>`);
+      root.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{m.range=b.dataset.r;m.result=null;draw()});
+      root.querySelectorAll("[data-mm]").forEach(b=>b.onclick=()=>{m.moments=b.dataset.mm==="1";m.result=null;draw()});
+      root.querySelector("#xf")?.addEventListener("change",e=>{m.from=e.target.value||m.from;m.result=null;draw()});root.querySelector("#xt")?.addEventListener("change",e=>{m.to=e.target.value||m.to;m.result=null;draw()});
+      root.querySelector("#xm")?.addEventListener("click",async()=>{
+        const[a,b]=bounds();if(a>b){m.msg="The start date is after the end date.";draw();return}
+        m.busy=true;m.msg="Starting…";draw();
+        try{m.result=await buildStoryPdf({from:a,to:b,moments:m.moments},t=>{m.msg=t;const p=root.querySelector("[role=status] b");if(p)p.textContent=t});m.msg=""}
+        catch(err){m.msg="Couldn’t create the PDF. Try a shorter date range.";console.error(err)}
+        m.busy=false;draw()});
+      root.querySelector("#xs")?.addEventListener("click",async()=>{const f=m.result.file;
+        try{if(navigator.canShare?.({files:[f]})){await navigator.share({files:[f],title:"Our story"});return}}catch(e){if(e.name==="AbortError")return}
+        dl(f.name,f,"application/pdf")});
+      root.querySelector("#xd")?.addEventListener("click",()=>dl(m.result.file.name,m.result.file,"application/pdf"));
+    };
+    draw();
+  });
 }
 
 /* ---------- cloud sync (Supabase) ---------- */
