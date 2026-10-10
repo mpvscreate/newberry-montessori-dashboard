@@ -84,7 +84,7 @@ nav.tabs .dot{position:absolute;top:6px;left:50%;margin-left:8px;width:9px;heigh
 .qa button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:84px;padding:12px 6px;border-radius:22px;border:1px solid var(--line);background:var(--sheet);color:var(--ink);font:700 .95rem var(--body);cursor:pointer;box-shadow:var(--shadow);text-align:center;transition:transform .08s,box-shadow .25s}
 .qa button:active{transform:scale(.97)}
 .qa button.main{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 2px 6px var(--glow-soft),0 6px 22px var(--glow)}
-.qa button small{font:500 .74rem var(--body);opacity:.8}
+.qa button small{font:500 .74rem var(--body);opacity:1;color:var(--muted)}.qa button.main small{color:inherit;opacity:.92}.qa button.done small{color:var(--green)}
 .qa button.done{border-color:var(--green);color:var(--green)}
 .bento{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:16px}
 @media (min-width:720px){.bento{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}}
@@ -96,8 +96,8 @@ button.tile{cursor:pointer;transition:transform .08s,box-shadow .25s}button.tile
 .tile .big{font:700 clamp(1.9rem,6vw,2.5rem)/1 var(--display);letter-spacing:-.035em;font-variant-numeric:tabular-nums}
 .tile .sub{font-size:.82rem;color:var(--muted)}
 .s2{grid-column:span 2}.s4{grid-column:1/-1}.r2{grid-row:span 2}
-.tile.hero{background:linear-gradient(150deg,#c46a0d 0%,#a65608 55%,#8a4505 100%);color:#fff;border-color:transparent;box-shadow:0 12px 36px var(--glow)}
-.tile.hero .lbl,.tile.hero .sub{color:rgba(255,255,255,.85)}.tile.hero .lbl .i{color:#fff}
+.tile.hero{background:linear-gradient(150deg,#a85408 0%,#984c07 55%,#7f4004 100%);color:#fff;border-color:transparent;box-shadow:0 12px 36px var(--glow)}
+.tile.hero .lbl,.tile.hero .sub{color:rgba(255,255,255,.93)}.tile.hero .lbl .i{color:#fff}
 .tile.hero .big{font-size:clamp(3.4rem,13vw,4.6rem)}
 .tile.warm{background:linear-gradient(160deg,var(--accent-soft),var(--sheet) 70%)}
 .tile.green{background:linear-gradient(160deg,var(--green-soft),var(--sheet) 70%)}
@@ -124,7 +124,7 @@ button.tile{cursor:pointer;transition:transform .08s,box-shadow .25s}button.tile
 .btn.good{background:var(--green-soft);color:var(--green);border-color:transparent}
 .btn.danger{color:var(--red)}
 .btn.grow{flex:1 1 auto;min-width:max-content}
-.btn.small{padding:6px 14px;min-height:44px;font-size:.92rem;border-radius:13px}.btn.block{width:100%}.btn.icon{padding:0;width:44px}
+.btn.small{padding:6px 14px;min-height:44px;font-size:.92rem;border-radius:13px}.btn.block{width:100%}.btn.icon{padding:0;width:44px;flex:none}
 .btn.ghost{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.5);color:#fff}
 .btn[disabled]{opacity:.55;box-shadow:none}
 .chips{display:flex;flex-wrap:wrap;gap:8px}
@@ -147,11 +147,11 @@ input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
 .stepper{display:flex;align-items:center;gap:10px}
 .stepper button{width:56px;height:56px;border-radius:50%;border:1.5px solid var(--field);background:var(--sheet);cursor:pointer;display:grid;place-items:center;flex:none}
 .stepper button:active{transform:scale(.94)}
-.stepper input{width:100%;text-align:center;font:700 2.3rem var(--display);letter-spacing:-.03em;border:0;background:none;min-width:0}
+.stepper input{width:100%;text-align:center;font:700 2.3rem var(--display);letter-spacing:-.03em;border:0;background:none;min-width:0;min-height:48px}
 .total{display:flex;justify-content:space-between;align-items:baseline;background:var(--paper);padding:14px 16px;border-radius:16px;margin:16px 0 12px}
 .total b{font:700 1.9rem var(--display);letter-spacing:-.03em}
 .pill{display:inline-flex;align-items:center;gap:5px;padding:3px 11px;border-radius:99px;font-size:.78rem;font-weight:600;background:var(--green-soft);color:var(--green);white-space:nowrap}
-.pill.watch{background:var(--amber-soft);color:var(--amber)}.pill.unwell{background:var(--red-soft);color:var(--red)}.pill.gone{background:var(--line);color:var(--muted)}.pill.type{background:var(--accent-soft);color:var(--accent)}.pill.sky{background:var(--sky-soft);color:var(--sky)}
+.pill.watch{background:var(--amber-soft);color:var(--amber)}.pill.unwell{background:var(--red-soft);color:var(--red)}.pill.gone{background:var(--line);color:var(--muted)}.pill.type{background:var(--accent-soft);color:color-mix(in srgb,var(--accent) 78%,var(--ink))}.pill.sky{background:var(--sky-soft);color:var(--sky)}
 .warn{display:flex;gap:8px;background:var(--amber-soft);padding:10px 12px;border-radius:12px;font-size:.9rem;margin-top:10px}.warn .i{color:var(--accent);margin-top:2px}
 
 /* lists + hens */
@@ -181,10 +181,11 @@ input.zoom{flex:1;min-width:0;accent-color:var(--accent);height:32px}
 table.dt{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:8px}table.dt th,table.dt td{padding:6px 4px;text-align:right;border-top:1px solid var(--line)}table.dt th:first-child,table.dt td:first-child{text-align:left}
 details.tv summary{cursor:pointer;color:var(--muted);font-size:.85rem;margin-top:8px;min-height:32px;display:flex;align-items:center}
 .list li.rowtap{cursor:pointer}.list li.rowtap:active{opacity:.75}
+.streak{display:grid;grid-template-columns:1fr 1fr;gap:18px}@media (max-width:420px){.streak{grid-template-columns:1fr}}
 .pop{position:fixed;z-index:90;background:var(--sheet);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 36px rgba(0,0,0,.35);padding:6px;min-width:150px;animation:up .12s ease-out}
 .pop button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;color:var(--ink);font:600 1rem var(--body);padding:0 14px;min-height:48px;border-radius:12px;cursor:pointer;text-align:left}
 .pop button:hover,.pop button:focus-visible{background:var(--accent-soft)}.pop button.danger{color:var(--red)}
-.avatar{width:46px;height:46px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none;overflow:hidden;font:700 1.1rem var(--display)}
+.avatar{width:46px;height:46px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none;overflow:hidden;font:700 1.2rem var(--display)}
 .avatar img{width:100%;height:100%;object-fit:cover}.avatar.green{background:var(--green-soft);color:var(--green)}
 .amt{font:700 1.1rem var(--display);white-space:nowrap}
 .hgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
@@ -209,7 +210,7 @@ details.tv summary{cursor:pointer;color:var(--muted);font-size:.85rem;margin-top
 @keyframes up{from{transform:translateY(24px);opacity:0}}
 @media (min-width:640px){.scrim{align-items:center}.sheet{border-radius:28px}}
 .x{border:0;background:var(--paper);width:44px;height:44px;border-radius:50%;cursor:pointer;display:grid;place-items:center}
-#toasts{position:fixed;left:0;right:0;bottom:92px;display:flex;justify-content:center;z-index:60;pointer-events:none;padding:0 12px}
+#toasts{position:fixed;left:0;right:0;bottom:calc(150px + env(safe-area-inset-bottom));display:flex;justify-content:center;z-index:60;pointer-events:none;padding:0 12px}
 @media (min-width:900px){#toasts{bottom:24px;padding-left:var(--rail)}}
 .toast{pointer-events:auto;background:var(--ink);color:var(--paper);padding:12px 12px 12px 18px;border-radius:16px;display:flex;gap:14px;align-items:center;box-shadow:0 8px 28px rgba(0,0,0,.3);max-width:min(92vw,480px);animation:up .2s ease-out}
 .toast button{background:none;border:0;color:inherit;font-weight:700;cursor:pointer;padding:10px 12px;border-radius:10px;text-decoration:underline;min-height:44px}
@@ -686,6 +687,23 @@ function render(){
   v.querySelectorAll("[data-fedfeed]").forEach(el=>el.addEventListener("change",()=>{const c=checkOf(careDate,el.dataset.fedfeed);setCheck(el.dataset.fedfeed,{feed:el.value});render()}));
   v.querySelectorAll("[data-cnote]").forEach(el=>el.addEventListener("change",()=>setCheck(el.dataset.cnote,{note:el.value.trim()})));
 }
+const dayDone=d=>{const p=checksProgress(d);return p.total>0&&p.done===p.total};
+function checkStreak(){let d=today(),n=0;if(!dayDone(d))d=addDays(d,-1);while(dayDone(d)&&n<3650){n++;d=addDays(d,-1)}return n}
+const MILESTONES=[100,250,500,1000,2500,5000,10000,25000];
+function eggMilestone(){
+  const total=sum(S.eggs,e=>e.count),next=MILESTONES.find(x=>x>total)||Math.ceil((total+1)/10000)*10000,prev=[...MILESTONES].reverse().find(x=>x<=total)||0;
+  let when=null;if(prev){let run=0;for(const e of [...S.eggs].sort((a,b)=>a.date.localeCompare(b.date))){run+=e.count;if(run>=prev){when=e.date;break}}}
+  return{total,next,prev,pct:(total-prev)/(next-prev),recent:when&&when>=addDays(today(),-13)?when:null};
+}
+function streakTile(){
+  if(!S.eggs.length&&!S.hens.length)return "";
+  const st=checkStreak(),ms=eggMilestone(),todayDone=dayDone(today());
+  return `<section class="tile s4 warm" style="min-height:0" aria-label="Streak and milestones"><div class="streak">
+    <div><div class="lbl">${ic("sparkle")}Check streak</div><div class="big">${st}<span class="small muted" style="font:500 .9rem var(--body)"> day${st===1?"":"s"}</span></div>
+      <div class="sub">${st===0?"Finish all of today’s checks to start a streak.":todayDone?"All of today’s checks are done.":"Finish today’s checks to keep it going."}</div></div>
+    <div><div class="lbl">${ic("egg")}Next milestone</div><div class="big">${num(ms.next)}<span class="small muted" style="font:500 .9rem var(--body)"> eggs</span></div>
+      <div class="sub">${ms.recent?`You passed ${num(ms.prev)} eggs on ${dlabel(ms.recent)}. `:""}${num(ms.total)} laid so far, ${num(ms.next-ms.total)} to go.</div><div class="meter"><i style="width:${Math.max(4,Math.min(100,ms.pct*100))}%"></i></div></div></div></section>`;
+}
 function home(){
   const t=today(),y=addDays(t,-1),e0=eggsOn(t),e1=eggsOn(y),d=e0-e1;
   const days=range(7),vals=days.map(eggsOn),mx=Math.max(1,...vals);
@@ -714,6 +732,7 @@ function home(){
     <button class="tile s2" data-act="goprofit"><div class="lbl">${ic("cash")}Sales this month</div><div class="big">${money(rev)}</div><div class="sub">${(()=>{const p=periodStats(mStart,t);return `Costs ${money(p.costs)} · <b style="color:${p.profit<0?"var(--red)":"var(--green)"}">Profit ${money(p.profit)}</b>`})()}${owed()>0?` · <b style="color:var(--red)">${money(owed())}</b> unpaid`:""}</div></button>
     <section class="tile s2 ${att.length?"alert":"green"}"><div class="lbl">${ic("pulse")}Hen health</div>
       ${att.length?`<ul class="list" style="margin:2px 0 0">${att.slice(0,3).map(h=>`<li class="tap" data-act="hen" data-id="${h.id}" tabindex="0" role="button" style="padding:6px 0;border:0">${avatarHtml(h)}<div class="grow"><b>${esc(h.name)}</b><div class="small muted">${esc(coopName(h.coop))}</div></div>${statusPill(h.status)}</li>`).join("")}</ul>`:`<div class="big" style="font-size:1.7rem">${S.hens.length?"All clear":"No hens yet"}</div><div class="sub">${S.hens.length?`${activeHens().length} hens, none needing attention`:"Add your first hen"}</div>`}</section>
+    ${streakTile()}
     <button class="tile s4" data-act="updates" style="min-height:0;flex-direction:row;align-items:center;gap:14px"><div class="avatar">${ic("share")}</div><div class="grow"><b style="font:700 1.1rem var(--display)">Share an update</b><div class="sub">${S.updates.length?`Last update ${dlabel(updList()[0].date)}. Keep the community involved.`:"Send a photo or video to parents and the community on WhatsApp"}</div></div>${ic("chev")}</button>
     <button class="tile s4 green" data-act="guide" style="min-height:0;flex-direction:row;align-items:center;gap:14px"><div class="avatar green">${ic("leaf")}</div><div class="grow"><b style="font:700 1.1rem var(--display)">Health guide</b><div class="sub">Organic treatments and prevention for common hen problems</div></div>${ic("chev")}</button>
     <section class="tile s4"><div class="lbl">${ic("trend")}Eggs per day, last 30 days</div>${trendChart(range(30).map(eggsOn),"Line chart of eggs collected per day over the last 30 days")}<div class="sub">${num(sum(range(30),eggsOn))} eggs in 30 days · average ${num(sum(range(30),eggsOn)/30,1)} a day</div></section>
@@ -752,7 +771,7 @@ function care(){
     const dl=minDaysLeft(),low=dl!==null&&dl<S.settings.lowFeedDays,cpd=costPerDozen();
     return `<div class="page-h"><h2>Care</h2></div>${seg}
     <div class="row" style="margin-bottom:14px"><button class="btn primary grow" data-act="buy">${ic("bag")}Feed bought</button><button class="btn grow" data-act="newexp">${ic("plus")}Other cost</button></div>
-    ${low?`<div class="warn" role="alert" style="margin:0 0 14px">${ic("alert")}<span><b>Feed is running low.</b> About ${Math.floor(dl)} day${Math.floor(dl)===1?"":"s"} left at the current pace. Time to reorder.</span></div>`:""}
+    ${low?`<div class="warn" role="alert" style="margin:0 0 14px">${ic("alert")}<span><b>Feed is running low.</b> About ${Math.floor(dl)} day${Math.floor(dl)===1?"":"s"} left at the current pace. Time to reorder.<br><button type="button" class="btn small primary" data-act="reorder" data-id="${(S.feeds.map(f=>[f.id,daysLeft(f.id)]).filter(x=>x[1]!==null).sort((a,b)=>a[1]-b[1])[0]||[S.feeds[0]?.id])[0]}" style="margin-top:10px">${ic("chat")}Order on WhatsApp</button></span></div>`:""}
     ${S.feeds.length?`<div class="bento" style="grid-template-columns:repeat(2,1fr)">${S.feeds.map(f=>{const st=feedStock(f.id),d=daysLeft(f.id),lw=d!==null&&d<S.settings.lowFeedDays;return `<section class="tile ${lw?"alert":"warm"}"><div class="lbl">${ic("grain")}${esc(f.name)}</div><div class="big">${num(Math.max(0,st),1)}<span class="small muted" style="font:500 .9rem var(--body)"> kg</span></div><div class="sub">${d===null?"Log daily feeding to estimate days left":`About ${Math.floor(d)} days left`}</div><div class="meter ${lw?"low":""}"><i style="width:${d===null?0:Math.min(100,d/30*100)}%"></i></div></section>`}).join("")}${cpd?`<section class="tile green"><div class="lbl">${ic("cash")}Feed cost per dozen</div><div class="big">${money(cpd)}</div><div class="sub">last 30 days</div></section>`:""}</div>`:""}
     <section class="card"><h2>Purchases</h2>${S.purchases.length?`<ul class="list">${[...S.purchases].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,30).map(p=>`<li><div class="avatar">${ic("bag")}</div><div class="grow"><b>${esc(feedName(p.feed))} · ${num(p.kg,1)} kg</b><div class="small muted">${dlabel(p.date)}${p.supplier?" · "+esc(p.supplier):""}${p.organic?` <span style="color:var(--green)" title="Organic" aria-label="Organic">${ic("leaf","sm")}</span>`:""}</div></div><div class="end"><div class="amt">${money(p.cost)}</div><div class="small muted">${p.kg>0&&p.cost>0?money(p.cost/p.kg)+"/kg":""}</div></div><button class="btn small icon" data-act="editbuy" data-id="${p.id}" aria-label="Edit this purchase">${ic("pencil")}</button><button class="btn small icon danger" data-act="delbuy" data-id="${p.id}" aria-label="Delete this purchase">${ic("trash")}</button></li>`).join("")}</ul>`:`<div class="empty">${ic("bag","xl")}<h3>No feed recorded</h3><p>Log each bag you buy. With daily feeding ticks, the app estimates how many days are left.</p><button class="btn primary" data-act="buy">${ic("bag")}Log a purchase</button></div>`}</section>
     <section class="card"><div class="row between" style="margin-bottom:6px"><h2 style="margin:0">Other costs</h2><button class="btn small" data-act="goprofit">${ic("trend")}See profit</button></div><p class="hint" style="margin:0 0 8px">Setup, vet, bedding, equipment and repairs. Setup costs are tracked on their own, so they don’t distort your monthly profit.</p>${(()=>{const ex=[...S.expenses].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,15);return ex.length?`<ul class="list">${ex.map(e=>`<li><div class="avatar">${ic("bag")}</div><div class="grow"><b>${esc(e.category)}</b><div class="small muted">${dlabel(e.date)}${e.note?" · "+esc(e.note):""}</div></div><span class="amt">${money(e.amount)}</span><button class="btn small icon" data-act="editexp" data-id="${e.id}" aria-label="Edit this cost">${ic("pencil")}</button><button class="btn small icon danger" data-act="delexp" data-id="${e.id}" aria-label="Delete this cost">${ic("trash")}</button></li>`).join("")}</ul>`:`<div class="empty">${ic("bag","xl")}<h3>No other costs yet</h3><p>Coop build, fencing, hens, vet visits, bedding. Add them to see your real profit.</p><button class="btn primary" data-act="newexp">${ic("plus")}Add a cost</button></div>`})()}</section>`;
@@ -777,7 +796,7 @@ function more(){
 function act(a,id){
   const A={
     go:()=>go(id),gofeed:()=>{careSub="feed";go("care")},gosales:()=>{eggSub="sales";go("eggs")},
-    logeggs:()=>eggSheet(),trng:()=>{trendRange=+id;render()},sound:()=>{try{localStorage.setItem(SND_KEY,soundOn()?"off":"on")}catch{}render();if(soundOn())cluck(3,.12)},quickcare:()=>quickCare(),sell:()=>sellSheet(),buy:()=>purchaseSheet(),newhen:()=>henForm(),hen:()=>henDetail(id),
+    logeggs:()=>eggSheet(),reorder:()=>reorderSheet(id),trng:()=>{trendRange=+id;render()},sound:()=>{try{localStorage.setItem(SND_KEY,soundOn()?"off":"on")}catch{}render();if(soundOn())cluck(3,.12)},quickcare:()=>quickCare(),sell:()=>sellSheet(),buy:()=>purchaseSheet(),newhen:()=>henForm(),hen:()=>henDetail(id),
     hfst:()=>{henFilter.st=id;render()},
     eggsub:()=>{eggSub=id;render()},caresub:()=>{careSub=id;render()},
     cdprev:()=>{careDate=addDays(careDate,-1);render()},cdnext:()=>{if(careDate<today()){careDate=addDays(careDate,1);render()}},
@@ -1426,7 +1445,7 @@ function syncSheet(){
   });
 }
 const syncPrompt=()=>{if(!sb||user||localStorage.getItem("flock-sync-dismiss"))return "";
-  return `<div class="note-card" style="margin:0 0 14px">${ic("cloud")}<span><b>Share with other staff.</b> Sign in to sync this flock’s data across phones. <button class="linkbtn" style="padding:0;min-height:0" data-act="sync">Sign in</button> · <button class="linkbtn" style="padding:0;min-height:0;font-weight:500" data-act="syncdismiss">Not now</button></span></div>`};
+  return `<div class="note-card" style="margin:0 0 14px">${ic("cloud")}<span><b>Share with other staff.</b> Sign in to sync this flock’s data across phones.<span class="row" style="gap:8px;margin-top:2px"><button class="linkbtn" data-act="sync">Sign in</button><button class="linkbtn" style="font-weight:500" data-act="syncdismiss">Not now</button></span></span></div>`};
 const updList=()=>[...S.updates].sort((a,b)=>(b.date||"").localeCompare(a.date||""));
 
 /* ---------- app lock (PIN on this device) ---------- */
@@ -1963,16 +1982,32 @@ function installApp(){
   <div class="foot"><button class="btn primary block" id="ok">Got it</button></div>`,(sh,close)=>{sh.querySelector("#ok").onclick=close});
 }
 
+/* South African numbers: 082 123 4567 and +27 82 123 4567 both become 27821234567 */
+const waPhone=p=>{let d=String(p||"").replace(/\D/g,"");if(d.startsWith("00"))d=d.slice(2);else if(d.startsWith("0"))d="27"+d.slice(1);return d.length>=9?d:""};
+function reorderSheet(feedId){
+  const feed=S.feeds.find(f=>f.id===feedId)||S.feeds[0];if(!feed){toast("Add a feed first.");return}
+  const buys=S.purchases.filter(p=>p.feed===feed.id).sort((a,b)=>b.date.localeCompare(a.date)),last=buys[0],m={kg:last?+last.kg:25,supplier:last?.supplier||""};
+  const text=()=>`Hi${m.supplier?" "+m.supplier:""}, this is ${S.settings.signature||"the Newberry school flock"}. We would like to order ${num(m.kg,1)} kg of ${feed.name}. Please let us know the price and when it can be delivered. Thank you!`;
+  sheet("Order feed",`<form id="f" novalidate><label class="f" for="rk">How many kg?</label><input id="rk" class="t" type="number" inputmode="decimal" min="1" step="1" value="${m.kg}">
+    <div class="eyebrow" style="margin:14px 0 6px">Message</div><textarea id="rt" class="t" rows="5"></textarea>
+    <p class="hint">${waPhone(S.settings.supplierPhone)?`Opens a chat with your supplier (${esc(S.settings.supplierPhone)}).`:"No supplier number saved, so WhatsApp will ask you to choose a chat. Save it under More, Coop, prices & alerts."}</p>
+    <div class="foot"><button class="btn primary block" id="go">${ic("chat")}Open WhatsApp</button></div></form>`,(sh,close)=>{
+    const rt=sh.querySelector("#rt"),rk=sh.querySelector("#rk");let edited=false;rt.value=text();
+    rk.oninput=()=>{m.kg=Math.max(0,parseFloat(rk.value)||0);if(!edited)rt.value=text()};rt.oninput=()=>edited=true;
+    sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const n=waPhone(S.settings.supplierPhone);window.open("https://wa.me/"+n+"?text="+encodeURIComponent(rt.value.trim()),"_blank","noopener");close()};
+  });
+}
 function pricesSheet(){
   sheet("Prices & alerts",`<form id="f"><label class="f" for="cn">Coop name</label><input id="cn" class="t" maxlength="40" value="${esc(S.coops[0].name)}"><label class="f" for="p1">Price per dozen, individuals (R)</label><input id="p1" class="t" type="number" inputmode="decimal" step="1" min="0" value="${S.settings.price}">
   <label class="f" for="p2">Price per dozen, restaurants (R)</label><input id="p2" class="t" type="number" inputmode="decimal" step="1" min="0" value="${S.settings.priceRest}">
   ${costHint()}
   <label class="f" for="p3">Warn me when feed will last fewer than (days)</label><input id="p3" class="t" type="number" inputmode="numeric" min="1" value="${S.settings.lowFeedDays}">
+  <label class="f" for="sp">Feed supplier’s WhatsApp number <span class="muted">(optional)</span></label><input id="sp" class="t" type="tel" inputmode="tel" value="${esc(S.settings.supplierPhone||"")}" placeholder="e.g. 082 123 4567"><p class="hint">Used by the Order on WhatsApp button when feed runs low.</p>
   <h3 style="margin-top:22px;font-size:1.1rem">WhatsApp updates</h3>
   <label class="f" for="sg">Sign-off added to every update</label><input id="sg" class="t" maxlength="80" value="${esc(S.settings.signature)}" placeholder="e.g. Newberry House Middle School Project">
   <label class="f" for="gl">WhatsApp group or channel link <span class="muted">(optional)</span></label><input id="gl" class="t" type="url" inputmode="url" value="${esc(S.settings.groupLink)}" placeholder="https://chat.whatsapp.com/…"><p class="hint">Adds an “Open our WhatsApp group” button on the Updates screen.</p>
   <div class="foot"><button class="btn primary block">Save</button></div></form>`,(sh,close)=>{
-    sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const gl=sh.querySelector("#gl").value.trim();if(gl&&!/^https:\/\//i.test(gl)){toast("The WhatsApp link must start with https://");return}S.coops[0].name=sh.querySelector("#cn").value.trim()||S.coops[0].name;S.settings={...S.settings,price:+sh.querySelector("#p1").value||0,priceRest:+sh.querySelector("#p2").value||0,lowFeedDays:Math.max(1,+sh.querySelector("#p3").value||7),signature:sh.querySelector("#sg").value.trim(),groupLink:gl};save();close();render();toast("Saved.")};
+    sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const gl=sh.querySelector("#gl").value.trim();if(gl&&!/^https:\/\//i.test(gl)){toast("The WhatsApp link must start with https://");return}S.coops[0].name=sh.querySelector("#cn").value.trim()||S.coops[0].name;S.settings={...S.settings,price:+sh.querySelector("#p1").value||0,priceRest:+sh.querySelector("#p2").value||0,lowFeedDays:Math.max(1,+sh.querySelector("#p3").value||7),signature:sh.querySelector("#sg").value.trim(),groupLink:gl,supplierPhone:sh.querySelector("#sp").value.trim()};save();close();render();toast("Saved.")};
   });
 }
 function dataSheet(){
