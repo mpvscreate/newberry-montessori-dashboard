@@ -617,6 +617,13 @@ kbd{font:600 .85rem var(--body);min-width:34px;text-align:center;padding:4px 8px
 .cmps .cmp-l{position:absolute;bottom:10px;background:rgba(0,0,0,.65);color:#fff;border-radius:99px;padding:3px 10px;font-size:.78rem;font-weight:600;pointer-events:none}.cmp-l.l{left:10px}.cmp-l.r{right:10px}
 .cmps input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:ew-resize;touch-action:pan-y}
 .cmps:focus-within{outline:3px solid var(--green);outline-offset:2px}
+/* v5.6.2: choose the before and now photos */
+.cp-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin-bottom:6px}
+.cp-t{position:relative;border:0;padding:0;border-radius:14px;overflow:hidden;aspect-ratio:1;background:var(--line);cursor:pointer;outline:3px solid transparent;outline-offset:-3px}
+.cp-t img{width:100%;height:100%;object-fit:cover;display:block}
+.cp-t span{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.65);color:#fff;border-radius:99px;padding:2px 8px;font-size:.7rem;font-weight:600}
+.cp-t[aria-checked=true]{outline-color:var(--green)}
+.cp-t[aria-checked=true]::after{content:"";position:absolute;right:6px;top:6px;width:22px;height:22px;border-radius:50%;background:var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E") center/14px no-repeat}
 </style>
 </head>
 <body>
@@ -863,7 +870,7 @@ function storyTab(p){
   return `<div class="card composer"><div class="row"><textarea class="t ta" rows="1" id="sc-t" enterkeyhint="send" placeholder="Add an update for ${esc(p.name)}" aria-label="Add an update"></textarea>${micBtn()}<button class="btn primary icon" id="sc-post" aria-label="Post update">${ic("send")}</button></div>
     <div class="row wr" style="margin-top:10px"><button class="btn small" id="sc-ph">${ic("camera")}Photo or video</button><button class="btn small" id="sc-gal">${ic("image")}Gallery</button><button class="btn small" id="sc-rec">${ic("trend")}Share this week</button></div>
     <input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"></div>`+
-  (pics.length>1?`${beforeNow(first,last)}`:"")+
+  (pics.length>1?`${beforeNow(p,pics)}`:"")+
   (items.length?`<div class="story">${html}</div>`:(p.members.length&&p.goals.length&&p.prop&&p.prop.title?`<div class="empty">${ic("pulse","xl")}<h3>Your story starts here</h3><p style="margin:0">Post an update, add a photo, or finish a target. It all shows up here as a diary.</p></div>`:startCard(p)));
 }
 function wireStory(p){
@@ -1125,7 +1132,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.6.1";
+const APP_VER="5.6.2";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -2170,9 +2177,22 @@ function scrollHint(el){
   if(getComputedStyle(el).overflowX!=="auto")return;el.addEventListener("scroll",upd,{passive:true});upd();
 }
 const shortDate=t=>new Date(t).toLocaleDateString(undefined,{day:"numeric",month:"short"});
-const beforeNow=(first,last)=>`<div class="card"><h2>Before and now</h2><div class="cmps" id="cmps"><img data-mid="${last.id}" alt="Latest photo"><img class="cmp-b" data-mid="${first.id}" alt="Earliest photo"><span class="cmp-line" aria-hidden="true"></span><span class="cmp-knob" aria-hidden="true">${ic("left","sm")}${ic("chev","sm")}</span><span class="cmp-l l">Before · ${shortDate(first.t)}</span><span class="cmp-l r">Now · ${shortDate(last.t)}</span><input type="range" min="0" max="100" value="50" aria-label="Slide to compare the earliest and latest photo"></div><p class="small muted" style="margin:8px 0 0">Drag the handle, or use the arrow keys, to compare.</p></div>`;
+const cmpPair=(p,pics)=>{const c=p.cmp||{},a=pics.find(m=>m.id===c.a),b=pics.find(m=>m.id===c.b);return{first:a||pics.at(-1),last:b||pics[0],custom:!!(a&&b)}};
+const beforeNow=(p,pics)=>{const{first,last,custom}=cmpPair(p,pics);return `<div class="card"><div class="row between" style="margin-bottom:10px"><h2 style="margin:0;font-size:1.15rem;white-space:nowrap">Before and now</h2><button class="btn small" data-cmp="${p.id}" aria-label="Choose the before and now photos">${ic("image")}Choose photos</button></div><div class="cmps" id="cmps"><img data-mid="${last.id}" alt="Latest photo"><img class="cmp-b" data-mid="${first.id}" alt="Earliest photo"><span class="cmp-line" aria-hidden="true"></span><span class="cmp-knob" aria-hidden="true">${ic("left","sm")}${ic("chev","sm")}</span><span class="cmp-l l">Before · ${shortDate(first.t)}</span><span class="cmp-l r">Now · ${shortDate(last.t)}</span><input type="range" min="0" max="100" value="50" aria-label="Slide to compare the earliest and latest photo"></div><p class="small muted" style="margin:8px 0 0">Drag the handle, or use the arrow keys, to compare.${custom?" Using the photos you chose.":""}</p></div>`};
+function cmpSheet(p){
+  const pics=mediaOf(p).filter(m=>m.type!=="video").sort((a,b)=>a.t-b.t);
+  if(pics.length<2){toast("Add at least two photos first.");return}
+  const cur=cmpPair(p,pics);let A=cur.first.id,B=cur.last.id;
+  const grid=(k,sel)=>`<div class="cp-g" role="radiogroup" aria-label="${k==="a"?"Before photo":"Now photo"}">${pics.map(m=>`<button type="button" class="cp-t" role="radio" aria-checked="${m.id===sel}" aria-label="${esc(m.cap||"Photo")}, ${shortDate(m.t)}" data-k="${k}" data-id="${m.id}"><img data-mid="${m.id}" alt=""><span>${shortDate(m.t)}</span></button>`).join("")}</div>`;
+  sheet("Choose photos",`<p class="muted small" style="margin:4px 0 8px">Pick the photo to show as Before and the one to show as Now.</p><h3 class="sub-h">Before</h3>${grid("a",A)}<h3 class="sub-h">Now</h3>${grid("b",B)}<p class="err" id="cp-e" role="alert" hidden></p><div class="row wr" style="margin-top:18px"><button class="btn" id="cp-auto" type="button">Use automatic</button><span class="grow"></span><button class="btn primary" id="cp-ok" type="button">Done</button></div>`,(d,close)=>{
+    hydrate(d);
+    d.querySelectorAll(".cp-t").forEach(b=>b.onclick=()=>{const k=b.dataset.k;if(k==="a")A=b.dataset.id;else B=b.dataset.id;d.querySelectorAll('.cp-t[data-k="'+k+'"]').forEach(x=>x.setAttribute("aria-checked",String(x===b)));d.querySelector("#cp-e").hidden=true;fb("tick")});
+    d.querySelector("#cp-ok").onclick=()=>{if(A===B){const e=d.querySelector("#cp-e");e.textContent="Choose two different photos.";e.hidden=false;return}p.cmp={a:A,b:B};save(p);fb("done");close();render()};
+    d.querySelector("#cp-auto").onclick=()=>{delete p.cmp;save(p);close();render();toast("Back to automatic: first and latest photo.")};
+  });
+}
 function wireCmp(c){const r=c.querySelector("input");if(!r||c.dataset.w)return;c.dataset.w="1";const set=()=>c.style.setProperty("--x",r.value+"%");r.addEventListener("input",set);set()}
-function hydrate(root=document){root.querySelectorAll(".cmps").forEach(wireCmp);root.querySelectorAll("[data-mid]").forEach(async el=>{const u=await loadMedia(el.dataset.mid);if(u)el.src=el.tagName==="VIDEO"&&!el.controls?u+"#t=0.1":u})}
+function hydrate(root=document){root.querySelectorAll(".cmps").forEach(wireCmp);root.querySelectorAll("[data-cmp]").forEach(b=>{if(b.dataset.w)return;b.dataset.w="1";b.onclick=()=>{const q=P(b.dataset.cmp);if(q)cmpSheet(q)}});root.querySelectorAll("[data-mid]").forEach(async el=>{const u=await loadMedia(el.dataset.mid);if(u)el.src=el.tagName==="VIDEO"&&!el.controls?u+"#t=0.1":u})}
 async function migrateMedia(){let n=0;for(const m of S.media){if(!m.data)continue;try{const b=await (await fetch(m.data)).blob();await mPut(m.id,b);delete m.data;m.type=m.type||"photo";n++}catch{}}if(n){save();if(!isOpen())render()}}
 function toBlob(file){return new Promise(res=>{const im=new Image(),u=URL.createObjectURL(file);im.onload=()=>{const s=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(res,"image/jpeg",.75)};im.onerror=()=>res(null);im.src=u})}
 
@@ -2190,7 +2210,7 @@ function mediaTab(p){
   else if(mview==="grid")body=`<div class="photos">${ms.map(mthumb).join("")}</div>`;
   else{
     const first=pics.at(-1),last=pics[0],g={};ms.forEach(m=>(g[weekStart(m.t)]=g[weekStart(m.t)]||[]).push(m));
-    body=(pics.length>1?`${beforeNow(first,last)}`:"")+
+    body=(pics.length>1?`${beforeNow(p,pics)}`:"")+
       Object.entries(g).sort((a,b)=>b[0]-a[0]).map(([w,l])=>`<div class="card"><h2>Week of ${new Date(+w).toLocaleDateString(undefined,{day:"numeric",month:"short"})}</h2><div class="small muted" style="margin:-6px 0 10px">${l.length} item${l.length>1?"s":""}</div><div class="photos">${l.map(mthumb).join("")}</div></div>`).join("");
   }
   const n=sel.size,onePhoto=n===1&&ms.find(m=>m.id===[...sel][0])?.type!=="video";
