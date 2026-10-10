@@ -181,6 +181,10 @@ input.zoom{flex:1;min-width:0;accent-color:var(--accent);height:32px}
 table.dt{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:8px}table.dt th,table.dt td{padding:6px 4px;text-align:right;border-top:1px solid var(--line)}table.dt th:first-child,table.dt td:first-child{text-align:left}
 details.tv summary{cursor:pointer;color:var(--muted);font-size:.85rem;margin-top:8px;min-height:32px;display:flex;align-items:center}
 .list li.rowtap{cursor:pointer}.list li.rowtap:active{opacity:.75}
+.tile.hod{flex-direction:row;align-items:center;gap:16px;min-height:0;margin-bottom:16px;background:linear-gradient(135deg,var(--accent-soft),var(--sheet) 70%)}
+.hod-pic{border:0;background:none;padding:0;cursor:pointer;flex:none;border-radius:50%;box-shadow:0 0 0 4px var(--sheet),0 0 0 6px var(--accent);transition:transform .15s}.hod-pic:active{transform:scale(.95) rotate(-3deg)}
+.hod h3{margin:0}.hod p{overflow-wrap:anywhere}
+@media (max-width:340px){.tile.hod{flex-direction:column;align-items:flex-start}}
 .streak{display:grid;grid-template-columns:1fr 1fr;gap:18px}@media (max-width:420px){.streak{grid-template-columns:1fr}}
 .pop{position:fixed;z-index:90;background:var(--sheet);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 36px rgba(0,0,0,.35);padding:6px;min-width:150px;animation:up .12s ease-out}
 .pop button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;color:var(--ink);font:600 1rem var(--body);padding:0 14px;min-height:48px;border-radius:12px;cursor:pointer;text-align:left}
@@ -687,6 +691,21 @@ function render(){
   v.querySelectorAll("[data-fedfeed]").forEach(el=>el.addEventListener("change",()=>{const c=checkOf(careDate,el.dataset.fedfeed);setCheck(el.dataset.fedfeed,{feed:el.value});render()}));
   v.querySelectorAll("[data-cnote]").forEach(el=>el.addEventListener("change",()=>setCheck(el.dataset.cnote,{note:el.value.trim()})));
 }
+/* ---------- hen of the day ---------- */
+const HEN_PROMPTS=[n=>`Is ${n} first to the feeder today?`,n=>`Spot anything special about ${n} today?`,n=>`What is ${n}’s favourite treat?`,n=>`Where does ${n} like to lay and rest?`,n=>`Give ${n} a nickname for the week.`,n=>`Who is ${n}’s best friend in the coop?`,n=>`Is ${n} loud or quiet today?`,n=>`Take a photo of ${n} doing her favourite thing.`,n=>`How do you tell ${n} apart from the others?`,n=>`What would ${n} say if she could talk?`];
+function henOfDay(){
+  const hs=activeHens().slice().sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0);if(!hs.length)return null;
+  const day=Math.floor(new Date(today()+"T12:00").getTime()/864e5);return{h:hs[day%hs.length],day};
+}
+function henDayCard(){
+  const x=henOfDay();if(!x)return "";const{h,day}=x,care=h.status==="unwell"||h.status==="watch";
+  const prompt=care?`${h.name} needs a little extra care. How is she today?`:!h.photo?`${h.name} needs a photo! Add one so everyone can meet her.`:HEN_PROMPTS[day%HEN_PROMPTS.length](h.name);
+  const meta=[h.breed,h.born?ageText(h.born):""].filter(Boolean).join(" · ");
+  return `<section class="tile hod" aria-label="Hen of the day">
+    <button type="button" class="hod-pic" data-act="hodhi" data-id="${h.id}" aria-label="Open ${esc(h.name)}’s page"><span class="avatar" style="width:96px;height:96px;font-size:2.2rem">${h.photo?`<img src="${h.photo}" alt="">`:esc(h.name[0].toUpperCase())}</span></button>
+    <div class="grow"><div class="eyebrow">Hen of the day</div><h3 style="font-size:1.5rem;margin:4px 0 2px">${esc(h.name)}</h3>${meta?`<div class="small muted">${esc(meta)}</div>`:""}<p style="margin:8px 0 10px">${esc(prompt)}</p>
+      <div class="row wr" style="gap:8px"><button class="btn small primary" data-act="hodnote" data-id="${h.id}">${ic("pencil")}${care?"Health note":"Add a note"}</button>${!h.photo?`<button class="btn small" data-act="hodphoto" data-id="${h.id}">${ic("camera")}Add photo</button>`:care?"":`<button class="btn small" data-act="hodshare" data-id="${h.id}">${ic("chat")}Share her</button>`}</div></div></section>`;
+}
 const dayDone=d=>{const p=checksProgress(d);return p.total>0&&p.done===p.total};
 function checkStreak(){let d=today(),n=0;if(!dayDone(d))d=addDays(d,-1);while(dayDone(d)&&n<3650){n++;d=addDays(d,-1)}return n}
 const MILESTONES=[100,250,500,1000,2500,5000,10000,25000];
@@ -720,6 +739,7 @@ function home(){
     <button class="${careDone?"done":""}" data-act="quickcare" type="button">${ic(careDone?"check":"drop","lg")}Fed &amp; watered<small>${careDone?"Done today":"One tap"}</small></button>
     <button data-act="sell" type="button">${ic("cash","lg")}Quick sale<small>${money(S.settings.price)} a dozen</small></button>
   </div>
+  ${henDayCard()}
   <div class="bento">
     <section class="tile hero s2 r2" aria-label="Eggs today"><div class="lbl">${ic("egg")}Eggs today</div><div class="big">${e0}</div>
       <span class="chip-d">${ic(d>=0?"up":"down","sm")}${d===0?"Same as yesterday":Math.abs(d)+(d>0?" more":" fewer")+" than yesterday"}</span>
@@ -796,7 +816,8 @@ function more(){
 function act(a,id){
   const A={
     go:()=>go(id),gofeed:()=>{careSub="feed";go("care")},gosales:()=>{eggSub="sales";go("eggs")},
-    logeggs:()=>eggSheet(),reorder:()=>reorderSheet(id),trng:()=>{trendRange=+id;render()},sound:()=>{try{localStorage.setItem(SND_KEY,soundOn()?"off":"on")}catch{}render();if(soundOn())cluck(3,.12)},quickcare:()=>quickCare(),sell:()=>sellSheet(),buy:()=>purchaseSheet(),newhen:()=>henForm(),hen:()=>henDetail(id),
+    logeggs:()=>eggSheet(),hodhi:()=>{cluck(2);henDetail(id)},hodnote:()=>{const h=hen(id);healthSheet(id,null,"",h&&(h.status==="unwell"||h.status==="watch")?"checkup":"note")},hodphoto:()=>henForm(hen(id)),hodshare:()=>{const h=hen(id);if(!h)return;cluck(2);
+      updSheet(null,{title:`Meet ${h.name}`,text:`Hen of the day: ${h.name}${h.breed?`, our ${h.breed}`:""}${h.born?`, ${ageText(h.born)}`:""}.${h.note?" "+h.note.trim().replace(/\.?$/,"."):""}`,photo:h.photo})},reorder:()=>reorderSheet(id),trng:()=>{trendRange=+id;render()},sound:()=>{try{localStorage.setItem(SND_KEY,soundOn()?"off":"on")}catch{}render();if(soundOn())cluck(3,.12)},quickcare:()=>quickCare(),sell:()=>sellSheet(),buy:()=>purchaseSheet(),newhen:()=>henForm(),hen:()=>henDetail(id),
     hfst:()=>{henFilter.st=id;render()},
     eggsub:()=>{eggSub=id;render()},caresub:()=>{careSub=id;render()},
     cdprev:()=>{careDate=addDays(careDate,-1);render()},cdnext:()=>{if(careDate<today()){careDate=addDays(careDate,1);render()}},
@@ -1062,9 +1083,9 @@ function henDetail(id){
     sh.querySelector("#del").onclick=()=>{close();confirmSheet(`Delete ${h.name}?`,"Her profile and health log are removed. Egg totals stay.","Delete hen",()=>{const hi=S.hens.findIndex(x=>x.id===id),notes=S.health.filter(x=>x.hen===id);S.hens.splice(hi,1);S.health=S.health.filter(x=>x.hen!==id);save();render();toast(`${h.name} deleted.`,()=>{S.hens.splice(hi,0,h);S.health.push(...notes)})})};
   });
 }
-function healthSheet(pre,rec,prefill){
+function healthSheet(pre,rec,prefill,startType){
   if(!S.hens.length){toast("Add a hen first.");return henForm()}
-  const m={hen:rec?.hen||pre||S.hens[0].id,type:rec?.type||"checkup",text:rec?.text||prefill||"",date:rec?.date||today(),product:rec?.product||"",hold:rec?.hold||0,err:""};
+  const m={hen:rec?.hen||pre||S.hens[0].id,type:rec?.type||startType||"checkup",text:rec?.text||prefill||"",date:rec?.date||today(),product:rec?.product||"",hold:rec?.hold||0,err:""};
   sheet(rec?"Edit health note":"Health note",`<form id="f" novalidate></form>`,(sh,close)=>{
     const f=sh.querySelector("#f"),keep=()=>{const g=i=>f.querySelector(i);m.text=g("#tx").value;m.date=g("#dt").value||today();if(g("#pr"))m.product=g("#pr").value;if(g("#hd"))m.hold=Math.max(0,parseInt(g("#hd").value)||0);m.hen=g("#hs").value};
     const draw=()=>{redraw(sh,f,`
@@ -1217,8 +1238,9 @@ function hydrateMedia(){
     el.innerHTML=m?(m.blob.type.startsWith("video")?`<video src="${m.url}" controls playsinline preload="metadata" aria-label="${esc(el.dataset.alt)}"></video>`:`<img src="${m.url}" alt="${esc(el.dataset.alt)}">`):`<div class="mmiss">${ic("image","lg")}<span>This photo or video isn’t on this device</span></div>`;
   });
 }
-async function updSheet(rec){
-  const m={title:rec?.title||"",text:rec?.text||"",date:rec?.date||today(),file:null,url:null,keep:!!rec?.media,err:"",orig:null,psize:getPsize()};
+async function updSheet(rec,pre){
+  const m={title:rec?.title||pre?.title||"",text:rec?.text||pre?.text||"",date:rec?.date||today(),file:null,url:null,keep:!!rec?.media,err:"",orig:null,psize:getPsize()};
+  if(pre?.photo){try{const b=await(await fetch(pre.photo)).blob();m.file=new File([b],"hen.jpg",{type:b.type||"image/jpeg"});m.url=URL.createObjectURL(m.file)}catch{}}
   let existing=null;if(rec?.media)existing=await loadMedia(rec.media).catch(()=>null);
   sheet(rec?"Edit update":"New update",`<form id="f" novalidate></form>`,(sh,close)=>{
     const f=sh.querySelector("#f");
