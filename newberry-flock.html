@@ -195,11 +195,11 @@ html{overscroll-behavior-y:contain}
 #ptr.spin{opacity:1;animation:ptrspin .9s linear infinite}
 @keyframes ptrspin{to{rotate:360deg}}
 @media (prefers-reduced-motion:reduce){#ptr.spin{animation:none}}
-.fab-wrap{position:fixed;right:16px;bottom:calc(88px + env(safe-area-inset-bottom));z-index:30;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
-@media (min-width:900px){.fab-wrap{right:28px;bottom:28px}}
-.fab{width:60px;height:60px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;cursor:pointer;box-shadow:0 0 0 6px var(--glow-soft),0 8px 28px var(--glow);transition:transform .2s,box-shadow .25s}
-.fab .i{width:28px;height:28px;stroke-width:2}.fab[aria-expanded=true]{transform:rotate(45deg)}
-.fab-menu{display:flex;flex-direction:column;align-items:flex-end;gap:10px}
+.fab-wrap{position:fixed;left:16px;bottom:calc(88px + env(safe-area-inset-bottom));z-index:30;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
+@media (min-width:900px){.fab-wrap{left:calc(var(--rail) + 28px);bottom:28px}}
+.fab{width:48px;height:48px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;cursor:pointer;box-shadow:0 0 0 5px var(--glow-soft),0 6px 22px var(--glow);transition:transform .2s,box-shadow .25s}
+.fab .i{width:24px;height:24px;stroke-width:2}.fab[aria-expanded=true]{transform:rotate(45deg)}
+.fab-menu{display:flex;flex-direction:column;align-items:flex-start;gap:10px}
 .fab-item{display:inline-flex;align-items:center;gap:10px;border:0;border-radius:99px;background:var(--sheet);color:var(--ink);padding:0 20px 0 14px;min-height:52px;font-weight:600;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.25);animation:up .15s ease-out}.fab-item .i{color:var(--accent)}
 .fab-scrim{position:fixed;inset:0;z-index:29;background:rgba(25,15,0,.35)}
 .note-card{display:flex;gap:10px;background:var(--sky-soft);border-radius:16px;padding:12px 14px;font-size:.88rem;margin-bottom:12px}.note-card .i{color:var(--sky);margin-top:2px}
@@ -550,7 +550,9 @@ function sheet(title,html,onMount){
   l.querySelector(".scrim").onclick=e=>{if(e.target.classList.contains("scrim"))close()};
   sh.addEventListener("keydown",e=>{if(e.key!=="Tab")return;const f=[...sh.querySelectorAll('button:not([disabled]),[href],input:not([disabled]):not([type=hidden]),select,textarea')].filter(x=>x.offsetParent);if(!f.length)return;const a=f[0],z=f[f.length-1];
     if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}});
-  onMount?.(sh,close);(sh.querySelector("[data-autofocus]")||sh).focus({preventScroll:true});return close;
+  onMount?.(sh,close);
+  if(!sh.querySelector(".foot,form,#yes,#re")){const d=document.createElement("div");d.className="foot";d.innerHTML='<button type="button" class="btn primary block" data-done>Done</button>';sh.append(d);d.firstChild.onclick=close}
+  (sh.querySelector("[data-autofocus]")||sh).focus({preventScroll:true});return close;
 }
 function redraw(sh,target,html){const a=document.activeElement,sel=a&&sh.contains(a)?(a.id?"#"+a.id:a.dataset.f?`[data-f="${a.dataset.f}"]`:null):null;target.innerHTML=html;if(sel)target.querySelector(sel)?.focus({preventScroll:true})}
 function confirmSheet(title,msg,ok,fn){sheet(title,`<p class="muted" style="margin:6px 0 18px">${esc(msg)}</p><div class="row"><button class="btn grow" id="no" type="button">Cancel</button><button class="btn grow" id="yes" type="button" style="background:var(--red);border-color:var(--red);color:#fff">${esc(ok)}</button></div>`,(sh,close)=>{sh.querySelector("#no").onclick=close;sh.querySelector("#yes").onclick=()=>{close();fn()};sh.querySelector("#no").focus()})}
@@ -1054,9 +1056,11 @@ const mPut=(id,b)=>mTx("readwrite",s=>s.put(b,id)),mGet=id=>mTx("readonly",s=>s.
 const mediaCache=new Map();
 async function loadMedia(id){if(mediaCache.has(id))return mediaCache.get(id);let b=await mGet(id).catch(()=>null);if(!b&&user){const{data}=await sb.storage.from("flock-media").download(id);if(data){b=data;mPut(id,b).catch(()=>{})}}if(!b)return null;const o={blob:b,url:URL.createObjectURL(b)};mediaCache.set(id,o);return o}
 function dropMedia(id){const o=mediaCache.get(id);if(o)URL.revokeObjectURL(o.url);mediaCache.delete(id)}
-async function prepPhoto(file){
-  if(!file.type.startsWith("image/"))return file;
-  try{const bm=await createImageBitmap(file),k=Math.min(1,1280/Math.max(bm.width,bm.height)),c=document.createElement("canvas");c.width=Math.round(bm.width*k);c.height=Math.round(bm.height*k);c.getContext("2d").drawImage(bm,0,0,c.width,c.height);
+const PSIZES={s:["Small",640],m:["Medium",1280],l:["Large",1920],o:["Original",0]};
+const getPsize=()=>{try{const v=localStorage.getItem("flock-psize");return PSIZES[v]?v:"m"}catch{return"m"}};
+async function prepPhoto(file,max=1280){
+  if(!file.type.startsWith("image/")||!max)return file;
+  try{const bm=await createImageBitmap(file),k=Math.min(1,max/Math.max(bm.width,bm.height)),c=document.createElement("canvas");c.width=Math.round(bm.width*k);c.height=Math.round(bm.height*k);c.getContext("2d").drawImage(bm,0,0,c.width,c.height);
     const b=await new Promise(r=>c.toBlob(r,"image/jpeg",.82));return b?new File([b],"photo.jpg",{type:"image/jpeg"}):file}catch{return file}
 }
 function mkFile(blob,date){const t=blob.type||"";const ext=t.includes("video")?(t.includes("quicktime")?"mov":t.includes("webm")?"webm":"mp4"):"jpg";return new File([blob],`newberry-update-${date}.${ext}`,{type:t})}
@@ -1101,7 +1105,7 @@ function hydrateMedia(){
   });
 }
 async function updSheet(rec){
-  const m={title:rec?.title||"",text:rec?.text||"",date:rec?.date||today(),file:null,url:null,keep:!!rec?.media,err:""};
+  const m={title:rec?.title||"",text:rec?.text||"",date:rec?.date||today(),file:null,url:null,keep:!!rec?.media,err:"",orig:null,psize:getPsize()};
   let existing=null;if(rec?.media)existing=await loadMedia(rec.media).catch(()=>null);
   sheet(rec?"Edit update":"New update",`<form id="f" novalidate></form>`,(sh,close)=>{
     const f=sh.querySelector("#f");
@@ -1112,7 +1116,8 @@ async function updSheet(rec){
       const c=cur(),t=composeText({title:m.title.trim(),text:m.text.trim()});
       redraw(sh,f,`
       <div style="margin-top:10px">${c?`<div class="mthumb">${c.type.startsWith("video")?`<video src="${c.url}" controls playsinline preload="metadata"></video>`:`<img src="${c.url}" alt="Selected photo">`}</div>
-        <div class="row" style="margin-top:8px"><span class="small muted grow">${c.type.startsWith("video")?"Video":"Photo"} · ${mb(c.size)}</span><button type="button" class="btn small" id="pick">Change</button><button type="button" class="btn small danger" id="rmv">Remove</button></div>`
+        <div class="row" style="margin-top:8px"><span class="small muted grow">${c.type.startsWith("video")?"Video":"Photo"} · ${mb(c.size)}</span><button type="button" class="btn small" id="pick">Change</button><button type="button" class="btn small danger" id="rmv">Remove</button></div>
+        ${m.orig&&m.file&&c.type.startsWith("image")?`<div class="chips" role="group" aria-label="Photo size" style="margin-top:8px">${Object.entries(PSIZES).map(([k,[l]])=>`<button type="button" class="chip" data-ps="${k}" aria-pressed="${m.psize===k}">${l}</button>`).join("")}</div><p class="hint" style="margin:6px 0 0">Smaller photos send faster on WhatsApp and use less data. Medium suits most photos.</p>`:""}`
         :`<button type="button" class="pickbox" id="pick">${ic("camera","xl")}<b>Add a photo or video</b><span class="small muted">Take one now or choose from your gallery</span></button>`}
         <input id="fl" type="file" accept="image/*,video/*" hidden>
         ${c&&c.type.startsWith("video")&&c.size>16*1048576?`<div class="warn">${ic("alert")}<span>This video is large. WhatsApp sends short clips (under about 30 seconds) fastest.</span></div>`:""}</div>
@@ -1125,7 +1130,9 @@ async function updSheet(rec){
       f.querySelector("#pick").onclick=()=>f.querySelector("#fl").click();
       f.querySelector("#fl").onchange=async e=>{keep();const file=e.target.files[0];if(!file)return;
         if(file.size>200*1048576){m.err="That file is too large. Try a shorter video.";draw();return}
-        m.err="";m.file=await prepPhoto(file);if(m.url)URL.revokeObjectURL(m.url);m.url=URL.createObjectURL(m.file);draw()};
+        m.err="";m.orig=file.type.startsWith("image/")?file:null;m.file=await prepPhoto(file,PSIZES[m.psize][1]);if(m.url)URL.revokeObjectURL(m.url);m.url=URL.createObjectURL(m.file);draw()};
+      f.querySelectorAll("[data-ps]").forEach(b=>b.onclick=async()=>{keep();m.psize=b.dataset.ps;try{localStorage.setItem("flock-psize",m.psize)}catch{}
+        m.file=await prepPhoto(m.orig,PSIZES[m.psize][1]);if(m.url)URL.revokeObjectURL(m.url);m.url=URL.createObjectURL(m.file);draw()});
       f.querySelector("#rmv")?.addEventListener("click",()=>{keep();m.file=null;m.keep=false;draw()});
       f.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{keep();const wk=sum(range(7),eggsOn),all=sum(S.eggs,e=>e.count);
         const add={week:`This week our hens laid ${wk} eggs, about ${num(wk/7,1)} a day.`,total:`So far our hens have laid ${num(all)} eggs (${num(all/12)} dozen).`,thanks:"Thank you to everyone who supports our hens and our school project!"}[b.dataset.q];
