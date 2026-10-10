@@ -706,7 +706,7 @@ function care(){
 function more(){
   const row=(i,t,s,a)=>`<li class="tap" data-act="${a}" tabindex="0" role="button"><div class="avatar">${ic(i)}</div><div class="grow"><b>${t}</b><div class="small muted">${s}</div></div>${ic("chev")}</li>`;
   return `<div class="page-h"><h2>More</h2></div><section class="card"><ul class="list">
-  ${row("moon","Appearance",({auto:"Auto, follows your phone",light:"Light",dark:"Dark"})[getTheme()],"theme")}${row("bird","Hen sounds",soundOn()?"On · cluck when naming, crow on refresh":"Off","sound")}${row("lock","App lock",lockOn()?`On · locks ${autoText()}`:"Ask for a PIN to open the app","applock")}${row("cloud","Cloud sync",user?`Signed in as ${esc(user.email||"")}`:"Sign in to share data with other staff","sync")}${standalone()?"":row("download","Install the app","Add the Flock icon to your home screen","install")}${row("leaf","Health guide",S.guide.length+" conditions · organic treatments & prevention","guide")}${row("users","Customers",S.customers.length+" saved","custs")}${row("sliders","Coop, prices & alerts",`${esc(S.coops[0].name)} · ${money(S.settings.price)} per dozen · feed alert at ${S.settings.lowFeedDays} days`,"prices")}${row("download","Backup & data","Download, restore or export","data")}</ul></section>
+  ${row("moon","Appearance",({auto:"Auto, follows your phone",light:"Light",dark:"Dark"})[getTheme()],"theme")}${row("bird","Sounds",soundOn()?"On · hen sounds, cash sound on sales":"Off","sound")}${row("lock","App lock",lockOn()?`On · locks ${autoText()}`:"Ask for a PIN to open the app","applock")}${row("cloud","Cloud sync",user?`Signed in as ${esc(user.email||"")}`:"Sign in to share data with other staff","sync")}${standalone()?"":row("download","Install the app","Add the Flock icon to your home screen","install")}${row("leaf","Health guide",S.guide.length+" conditions · organic treatments & prevention","guide")}${row("users","Customers",S.customers.length+" saved","custs")}${row("sliders","Coop, prices & alerts",`${esc(S.coops[0].name)} · ${money(S.settings.price)} per dozen · feed alert at ${S.settings.lowFeedDays} days`,"prices")}${row("download","Backup & data","Download, restore or export","data")}</ul></section>
   <p class="hint" style="text-align:center">Your data is saved on this device only. Download a backup now and then.${saveOK?"":" <b style='color:var(--red)'>Storage is full.</b>"}</p>`;
 }
 
@@ -811,7 +811,7 @@ function sellSheet(pre,rec){
     f.onsubmit=e=>{e.preventDefault();const dv=parseFloat(f.querySelector("#doz").value);if(dv>0)m.doz=dv;const pv=parseFloat(f.querySelector("#pz").value);m.date=f.querySelector("#sd").value||today();
       const vals={date:m.date,cust:m.cust,eggs:Math.round(m.doz*12),price:isNaN(pv)?priceFor():pv,paid:m.paid};
       if(rec){const u=undoEdit(rec,vals);save();close();render();toast("Sale updated.",u);return}
-      const s={id:uid(),...vals};S.sales.push(s);save();close();render();toast(`Sold ${dz(s.eggs)} · ${money(saleTotal(s))}`,()=>S.sales.splice(S.sales.indexOf(s),1))};
+      const s={id:uid(),...vals};S.sales.push(s);save();close();render();kaching();toast(`Sold ${dz(s.eggs)} · ${money(saleTotal(s))}`,()=>S.sales.splice(S.sales.indexOf(s),1))};
     draw();
   });
 }
@@ -857,6 +857,22 @@ function playChicken(from,to){
     const t=AC.currentTime+.01,dur=Math.min(to,chickBuf.duration)-from,src=AC.createBufferSource(),g=AC.createGain();
     src.buffer=chickBuf;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(1,t+.02);g.gain.setValueAtTime(1,t+dur-.1);g.gain.linearRampToValueAtTime(0,t+dur);
     src.connect(g);g.connect(AC.destination);src.start(t,from,dur);return true}catch{return false}
+}
+let moneyBuf=null,moneyLoad=null;
+function loadMoney(){
+  if(moneyLoad||!soundOn())return;
+  try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();
+    moneyLoad=fetch("sounds/money.mp3").then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(ab=>AC.decodeAudioData(ab)).then(b=>{moneyBuf=b}).catch(()=>{moneyLoad=null})}catch{}
+}
+/* played when eggs are sold: the recorded cash sound, or two bright tones if it hasn't loaded */
+function kaching(){
+  if(!soundOn())return;
+  loadMoney();
+  try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();
+    const t=AC.currentTime+.02;
+    if(moneyBuf){const src=AC.createBufferSource(),g=AC.createGain();src.buffer=moneyBuf;g.gain.setValueAtTime(1,t);g.gain.setValueAtTime(1,t+moneyBuf.duration-.08);g.gain.linearRampToValueAtTime(0,t+moneyBuf.duration);src.connect(g);g.connect(AC.destination);src.start(t);return}
+    [[0,1318.5],[.09,1975.5]].forEach(([d,fr])=>{const o=AC.createOscillator(),g=AC.createGain();o.type="triangle";o.frequency.value=fr;g.gain.setValueAtTime(.0001,t+d);g.gain.exponentialRampToValueAtTime(.25,t+d+.01);g.gain.exponentialRampToValueAtTime(.0001,t+d+.5);o.connect(g);g.connect(AC.destination);o.start(t+d);o.stop(t+d+.52)})
+  }catch{}
 }
 function cluck(n=1,gap=.14){
   if(!soundOn())return;
@@ -1783,7 +1799,7 @@ function sample(){
   save();render();toast("Sample data loaded.");
 }
 
-initMeta();scan();persistSync();setSync(syncState);loadChicken();
+initMeta();scan();persistSync();setSync(syncState);loadChicken();loadMoney();
 $("#sync").onclick=()=>{if(!sb){toast("Connecting…");initAuth();return}user?syncSheet():signInSheet()};
 applyTheme();
 render();
