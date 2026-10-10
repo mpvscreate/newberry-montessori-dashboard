@@ -566,6 +566,12 @@ kbd{font:600 .85rem var(--body);min-width:34px;text-align:center;padding:4px 8px
   .lk-pad{grid-template-columns:repeat(3,62px);gap:10px}
   .lk-pad button{width:62px;height:62px;font-size:1.45rem}
 }
+/* v5.5.6: tidier spending chart */
+.mc-trend{margin-top:16px;padding-top:14px;border-top:1px solid var(--line)}
+.mc-th{display:flex;justify-content:space-between;align-items:baseline;gap:10px;flex-wrap:wrap}.mc-th b{font-size:.9rem}.mc-th span{white-space:nowrap}
+.mc-trend .mc-spark{margin-top:10px}
+.mc-leg{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:.78rem;color:var(--muted)}
+.mc-key{display:inline-block;width:20px;border-top:2px dashed var(--muted);flex:none}
 </style>
 </head>
 <body>
@@ -1063,7 +1069,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.5.5";
+const APP_VER="5.5.6";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1348,9 +1354,9 @@ function moneyChart(p,b){
   const cls=b.approved>0?(b.spent>b.approved?"over":b.spent>=0.8*b.approved?"warn":"ok"):"ok";
   const ex=[...p.exp].filter(e=>e.date).sort((a,c)=>a.date.localeCompare(c.date));let run=0;const pts=ex.map(e=>{run+=toNum(e.amount);return[new Date(e.date+"T12:00").getTime(),run]});
   const W=300,H=64,top=Math.max(base,run*1.05,1);let spark="";
-  if(pts.length){const t0=pts[0][0],t1=pts[pts.length-1][0],X=t=>pts.length<2||t1===t0?W/2:6+(t-t0)/(t1-t0)*(W-12),Y=v=>H-4-(v/top)*(H-10);
+  if(new Set(pts.map(x=>x[0])).size>=2){const t0=pts[0][0],t1=pts[pts.length-1][0],X=t=>pts.length<2||t1===t0?W/2:6+(t-t0)/(t1-t0)*(W-12),Y=v=>H-4-(v/top)*(H-10);
     const d=pts.map(([t,v],i)=>(i?"L":"M")+X(t).toFixed(1)+" "+Y(v).toFixed(1)).join(" ");
-    spark=`<svg class="mc-spark" viewBox="0 0 ${W} ${H}" role="img" aria-label="Spending over time, total ${rands(run)}">${b.approved>0?`<line x1="0" x2="${W}" y1="${Y(b.approved).toFixed(1)}" y2="${Y(b.approved).toFixed(1)}" class="mc-bl"/>`:""}${pts.length>1?`<path d="${d} L${X(pts[pts.length-1][0]).toFixed(1)} ${H-4} L${X(pts[0][0]).toFixed(1)} ${H-4} Z" class="mc-area"/>`:""}<path d="${d}" class="mc-line"/>${pts.map(([t,v])=>`<circle cx="${X(t).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="3.2" class="mc-dot"/>`).join("")}</svg><div class="small muted" style="display:flex;justify-content:space-between"><span>${dShort(ex[0].date)}</span><span>Spending over time${b.approved>0?" · dashed line is the budget":""}</span><span>${dShort(ex[ex.length-1].date)}</span></div>`}
+    spark=`<div class="mc-trend"><div class="mc-th"><b>Spending over time</b><span class="small muted">${dShort(ex[0].date)} to ${dShort(ex[ex.length-1].date)}</span></div><svg class="mc-spark" viewBox="0 0 ${W} ${H}" role="img" aria-label="Spending over time, total ${rands(run)}">${b.approved>0?`<line x1="0" x2="${W}" y1="${Y(b.approved).toFixed(1)}" y2="${Y(b.approved).toFixed(1)}" class="mc-bl"/>`:""}${pts.length>1?`<path d="${d} L${X(pts[pts.length-1][0]).toFixed(1)} ${H-4} L${X(pts[0][0]).toFixed(1)} ${H-4} Z" class="mc-area"/>`:""}<path d="${d}" class="mc-line"/>${pts.map(([t,v])=>`<circle cx="${X(t).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="3.2" class="mc-dot"/>`).join("")}</svg>${b.approved>0?`<div class="mc-leg"><i class="mc-key"></i>Dashed line is the approved budget</div>`:""}</div>`}
   return `<div class="mchart"><div class="mc-h"><span>Spent</span><b>${rands(b.spent)}${b.approved>0?" of "+rands(b.approved):""}</b></div><div class="mc-track" role="img" aria-label="${pc(b.spent)} percent of the budget spent"><i class="mc-spent ${cls}" style="width:${pc(b.spent)}%"></i>${b.approved>0?'<i class="mc-mark" style="left:80%"></i>':""}</div>
   <div class="mc-h"><span>Income</span><b>${rands(b.income)}</b></div><div class="mc-track" role="img" aria-label="Income ${rands(b.income)}"><i class="mc-inc" style="width:${pc(b.income)}%"></i></div>
   ${cls==="warn"?`<p class="mc-warn">${ic("alert")} 80% of the budget is spent. Check with your educator before buying more.</p>`:""}${b.approved>0?"":'<p class="small muted" style="margin:8px 0 0">Set an approved budget to see how much is left.</p>'}${spark}</div>`;
