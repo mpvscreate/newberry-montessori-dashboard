@@ -26,6 +26,7 @@
   --green:#276b36; --green-soft:#e2f1e3; --red:#b3261e; --red-soft:#fbe5e2; --amber:#8a5a00; --amber-soft:#fbf0d2; --sky:#2a6b8f; --sky-soft:#e0eff6;
   --glow:rgba(166,86,8,.36); --glow-soft:rgba(166,86,8,.16); --glow-green:rgba(39,107,54,.28);
   --shadow:0 1px 2px rgba(70,45,10,.05),0 10px 30px rgba(70,45,10,.07);
+  --c1:#1f78b4; --c2:#c4600a;
   --display:"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif;
   --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif; --rail:236px;
 }
@@ -33,12 +34,12 @@
   --paper:#14110c; --sheet:#1e1a13; --ink:#f4ecdc; --muted:#b1a68e; --line:#342e22; --field:#7d7258;
   --accent:#f2a54f; --accent-ink:#1d1203; --accent-soft:#3b2a12; --accent-2:#f6c07f;
   --green:#8fd29a; --green-soft:#1f3322; --red:#f4a99d; --red-soft:#3d201c; --amber:#f0c978; --amber-soft:#3a2e14; --sky:#8cc6e4; --sky-soft:#1b2f3a;
-  --glow:rgba(242,165,79,.4); --glow-soft:rgba(242,165,79,.2); --glow-green:rgba(143,210,154,.28);   --shadow:none; color-scheme:dark}}
+  --glow:rgba(242,165,79,.4); --glow-soft:rgba(242,165,79,.2); --glow-green:rgba(143,210,154,.28);   --shadow:none; --c1:#3b93de; --c2:#c9701a; color-scheme:dark}}
 :root[data-theme="dark"]{
   --paper:#14110c; --sheet:#1e1a13; --ink:#f4ecdc; --muted:#b1a68e; --line:#342e22; --field:#7d7258;
   --accent:#f2a54f; --accent-ink:#1d1203; --accent-soft:#3b2a12; --accent-2:#f6c07f;
   --green:#8fd29a; --green-soft:#1f3322; --red:#f4a99d; --red-soft:#3d201c; --amber:#f0c978; --amber-soft:#3a2e14; --sky:#8cc6e4; --sky-soft:#1b2f3a;
-  --glow:rgba(242,165,79,.4); --glow-soft:rgba(242,165,79,.2); --glow-green:rgba(143,210,154,.28);   --shadow:none; color-scheme:dark}
+  --glow:rgba(242,165,79,.4); --glow-soft:rgba(242,165,79,.2); --glow-green:rgba(143,210,154,.28);   --shadow:none; --c1:#3b93de; --c2:#c9701a; color-scheme:dark}
 :root[data-theme="light"]{color-scheme:light}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
@@ -155,13 +156,33 @@ input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
 
 /* lists + hens */
 .list{list-style:none;margin:0;padding:0}
-.list li{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line);flex-wrap:wrap}
-.list li:first-child{border-top:0}.list li .grow{flex:1 1 9rem;overflow-wrap:anywhere}.list li .end{margin-left:auto;text-align:right}
+.list li{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line);flex-wrap:nowrap}
+.list li:first-child{border-top:0}.list li .grow{flex:1 1 0;min-width:0;overflow-wrap:anywhere}.list li>.btn,.list li .end,.list li .amt{flex:none}.list li .end{margin-left:auto;text-align:right}
 .list li.tap{cursor:pointer;border-radius:12px}
 .crop{position:relative;width:min(100%,320px);aspect-ratio:1;margin:12px auto 0;border-radius:24px;overflow:hidden;background:#000;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
 .crop:active{cursor:grabbing}.crop canvas{width:100%;height:100%;display:block}
 .cropring{position:absolute;inset:0;pointer-events:none;border-radius:50%;box-shadow:0 0 0 999px rgba(0,0,0,.55);border:2px solid rgba(255,255,255,.85)}
 input.zoom{flex:1;min-width:0;accent-color:var(--accent);height:32px}
+.chart{display:block;width:100%;height:auto;touch-action:pan-y;overflow:visible}
+.chart text{font-family:var(--body);fill:var(--muted);font-size:12px}
+.chart .grid{stroke:var(--line);stroke-width:1}.chart .base{stroke:var(--field);stroke-width:1}
+.chart .hl{fill:var(--accent-soft);opacity:.55}
+.chart .c1{fill:var(--c1)}.chart .c2{fill:var(--c2)}
+.chart .pline{fill:none;stroke:var(--ink);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.chart .pdot{fill:var(--ink);stroke:var(--sheet);stroke-width:2}
+.chart .eb{fill:var(--accent);opacity:.28}.chart .al{fill:none;stroke:var(--accent);stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.chart .adot{fill:var(--accent);stroke:var(--sheet);stroke-width:2}
+.chart .val{fill:var(--ink);font-weight:700;font-size:13px}
+.lg{display:flex;flex-wrap:wrap;gap:6px 16px;margin:2px 0 8px;font-size:.85rem;color:var(--muted)}
+.lg span{display:inline-flex;align-items:center;gap:6px}.lg i{display:inline-block;width:12px;height:12px;border-radius:3px}
+.lg i.ln{height:3px;width:16px;border-radius:2px}
+.chart-read{min-height:2.6em;margin:6px 0 0;font-size:.92rem;line-height:1.35}
+.chart-read b{font-weight:700}
+table.dt{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:8px}table.dt th,table.dt td{padding:6px 4px;text-align:right;border-top:1px solid var(--line)}table.dt th:first-child,table.dt td:first-child{text-align:left}
+details.tv summary{cursor:pointer;color:var(--muted);font-size:.85rem;margin-top:8px;min-height:32px;display:flex;align-items:center}
+.pop{position:fixed;z-index:90;background:var(--sheet);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 36px rgba(0,0,0,.35);padding:6px;min-width:150px;animation:up .12s ease-out}
+.pop button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;color:var(--ink);font:600 1rem var(--body);padding:0 14px;min-height:48px;border-radius:12px;cursor:pointer;text-align:left}
+.pop button:hover,.pop button:focus-visible{background:var(--accent-soft)}.pop button.danger{color:var(--red)}
 .avatar{width:46px;height:46px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none;overflow:hidden;font:700 1.1rem var(--display)}
 .avatar img{width:100%;height:100%;object-fit:cover}.avatar.green{background:var(--green-soft);color:var(--green)}
 .amt{font:700 1.1rem var(--display);white-space:nowrap}
@@ -475,8 +496,9 @@ const GUIDE_DEFAULT=[
 
 /* ---------- data (browser only: no sign-in yet) ---------- */
 const KEY="newberry-flock-v1";
-const DEF=()=>({settings:{price:55,priceRest:45,lowFeedDays:7,signature:"Newberry Middle School Project",groupLink:"",targetMargin:30,restDiscount:15,priceRound:5},coops:[{id:"c1",name:"Main coop"}],hens:[],eggs:[],customers:[],sales:[],feeds:[],purchases:[],checks:{},health:[],guide:structuredClone(GUIDE_DEFAULT),updates:[],adjust:[],expenses:[]});
+const DEF=()=>({settings:{price:55,priceRest:45,lowFeedDays:7,signature:"Newberry House Middle School Project",groupLink:"",targetMargin:30,restDiscount:15,priceRound:5},coops:[{id:"c1",name:"Main coop"}],hens:[],eggs:[],customers:[],sales:[],feeds:[],purchases:[],checks:{},health:[],guide:structuredClone(GUIDE_DEFAULT),updates:[],adjust:[],expenses:[]});
 let S;try{S={...DEF(),...JSON.parse(localStorage.getItem(KEY))}}catch{S=DEF()}
+if(S.settings?.signature==="Newberry Middle School Project")S.settings={...S.settings,signature:"Newberry House Middle School Project"};
 S.settings={...DEF().settings,...S.settings};if(!S.coops?.length)S.coops=DEF().coops;
 if(S.coops.length>1)S.coops=[S.coops[0]];S.hens.forEach(h=>h.coop=S.coops[0].id);S.eggs.forEach(e=>e.coop=S.coops[0].id);
 let saveOK=true;
@@ -549,16 +571,37 @@ function sheet(title,html,onMount){
   const fit=()=>{if(!vv)return;scrim.style.height=vv.height+"px";scrim.style.top=vv.offsetTop+"px";sh.style.maxHeight=(vv.height-12)+"px"};
   vv?.addEventListener("resize",fit);vv?.addEventListener("scroll",fit);fit();
   sh.addEventListener("focusin",e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))setTimeout(()=>e.target.scrollIntoView({block:"center",behavior:"smooth"}),300)});
-  const close=()=>{vv?.removeEventListener("resize",fit);vv?.removeEventListener("scroll",fit);l.innerHTML="";document.body.classList.remove("lock");[$("#app"),$("nav.tabs")].forEach(e=>e.inert=false);$("#fab-wrap").hidden=false;closeSheet=null;lastFocus?.isConnected&&lastFocus.focus()};
+  const close=()=>{closePop();vv?.removeEventListener("resize",fit);vv?.removeEventListener("scroll",fit);l.innerHTML="";document.body.classList.remove("lock");[$("#app"),$("nav.tabs")].forEach(e=>e.inert=false);$("#fab-wrap").hidden=false;closeSheet=null;lastFocus?.isConnected&&lastFocus.focus()};
   closeSheet=close;l.querySelector(".x").onclick=close;
   l.querySelector(".scrim").onclick=e=>{if(e.target.classList.contains("scrim"))close()};
   sh.addEventListener("keydown",e=>{if(e.key!=="Tab")return;const f=[...sh.querySelectorAll('button:not([disabled]),[href],input:not([disabled]):not([type=hidden]),select,textarea')].filter(x=>x.offsetParent);if(!f.length)return;const a=f[0],z=f[f.length-1];
     if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}});
-  onMount?.(sh,close);
+  onMount?.(sh,close);compactRows(sh);
   if(!sh.querySelector(".foot,form,#yes,#re")){const d=document.createElement("div");d.className="foot";d.innerHTML='<button type="button" class="btn primary block" data-done>Done</button>';sh.append(d);d.firstChild.onclick=close}
   (sh.querySelector("[data-autofocus]")||sh).focus({preventScroll:true});return close;
 }
-function redraw(sh,target,html){const a=document.activeElement,sel=a&&sh.contains(a)?(a.id?"#"+a.id:a.dataset.f?`[data-f="${a.dataset.f}"]`:null):null;target.innerHTML=html;if(sel)target.querySelector(sel)?.focus({preventScroll:true})}
+function closePop(){document.querySelector(".pop")?.remove();document.removeEventListener("pointerdown",popOutside,true);document.removeEventListener("keydown",popKey,true)}
+const popOutside=e=>{if(!e.target.closest(".pop"))closePop()};
+const popKey=e=>{if(e.key==="Escape"){e.stopPropagation();e.preventDefault();closePop()}};
+/* each row with an edit button and a delete button gets one ⋯ button that opens Edit / Delete; the original buttons stay (hidden) so every existing handler keeps working */
+function compactRows(root){
+  root.querySelectorAll(".list li").forEach(li=>{
+    if(li.querySelector("[data-menu]"))return;
+    const eb=li.querySelector('button[data-act^="edit"],button[data-edit]'),db=li.querySelector('button.danger[data-act^="del"],button.danger[data-del],button.danger[data-delh]');
+    if(!eb||!db)return;
+    const m=document.createElement("button");m.type="button";m.className="btn small icon";m.dataset.menu="1";m.setAttribute("aria-label","More actions");m.setAttribute("aria-haspopup","menu");m.innerHTML=ic("dots");
+    eb.hidden=true;db.hidden=true;db.after(m);
+    m.addEventListener("click",e=>{e.stopPropagation();closePop();
+      const p=document.createElement("div");p.className="pop";p.setAttribute("role","menu");
+      p.innerHTML=`<button type="button" role="menuitem" data-pe>${ic("pencil")}Edit</button><button type="button" role="menuitem" class="danger" data-pd>${ic("trash")}Delete</button>`;
+      document.body.append(p);const r=m.getBoundingClientRect(),w=p.offsetWidth,h=p.offsetHeight;
+      p.style.left=Math.max(8,Math.min(innerWidth-w-8,r.right-w))+"px";p.style.top=(r.bottom+6+h>innerHeight-8?Math.max(8,r.top-6-h):r.bottom+6)+"px";
+      p.querySelector("[data-pe]").onclick=()=>{closePop();eb.click()};p.querySelector("[data-pd]").onclick=()=>{closePop();db.click()};
+      document.addEventListener("pointerdown",popOutside,true);document.addEventListener("keydown",popKey,true);p.querySelector("[data-pe]").focus();
+    });
+  });
+}
+function redraw(sh,target,html){const a=document.activeElement,sel=a&&sh.contains(a)?(a.id?"#"+a.id:a.dataset.f?`[data-f="${a.dataset.f}"]`:null):null;target.innerHTML=html;compactRows(target);if(sel)target.querySelector(sel)?.focus({preventScroll:true})}
 function confirmSheet(title,msg,ok,fn){sheet(title,`<p class="muted" style="margin:6px 0 18px">${esc(msg)}</p><div class="row"><button class="btn grow" id="no" type="button">Cancel</button><button class="btn grow" id="yes" type="button" style="background:var(--red);border-color:var(--red);color:#fff">${esc(ok)}</button></div>`,(sh,close)=>{sh.querySelector("#no").onclick=close;sh.querySelector("#yes").onclick=()=>{close();fn()};sh.querySelector("#no").focus()})}
 function setFab(o){$("#fab").setAttribute("aria-expanded",o);$("#fab-menu").hidden=!o;document.querySelector(".fab-scrim")?.remove();if(o){const s=document.createElement("div");s.className="fab-scrim";s.onclick=()=>setFab(false);document.body.append(s)}}
 $("#fab").onclick=()=>setFab($("#fab").getAttribute("aria-expanded")!=="true");
@@ -595,7 +638,7 @@ async function refreshApp(){
   addEventListener("touchend",end);addEventListener("touchcancel",end);
 })();
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&Date.now()-lastVerCheck>10*6e4)newVersion().then(n=>{if(n)updateNotice()})});
-function go(t){tab=t;render();scrollTo(0,0);$("#view").focus({preventScroll:true})}
+function go(t){closePop();tab=t;render();scrollTo(0,0);$("#view").focus({preventScroll:true})}
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>go(b.dataset.tab));
 
 /* ---------- small svg widgets ---------- */
@@ -619,8 +662,10 @@ function render(){
   $("#cdot").hidden=!(attention().length||(dl!==null&&dl<S.settings.lowFeedDays));
   document.title=`${TABS.find(t=>t[0]===tab)[1]} · Newberry Flock`;
   const v=$("#view");v.innerHTML=({home,hens,eggs,care,updates,more})[tab]();
+  compactRows(v);
   v.querySelectorAll("[data-act]").forEach(el=>el.addEventListener("click",()=>act(el.dataset.act,el.dataset.id,el)));
   v.querySelectorAll("li.tap").forEach(el=>el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click()}}));
+  v.querySelectorAll("svg.chart").forEach(wireChart);
   if(tab==="updates")hydrateMedia();
   /* keep the chosen filter visible inside swipeable chip rows */
   v.querySelectorAll(".chips.scroll").forEach(row=>{const on=row.querySelector('[aria-pressed="true"]');if(on&&row.scrollWidth>row.clientWidth)row.scrollLeft=on.offsetLeft-(row.clientWidth-on.offsetWidth)/2});
@@ -679,11 +724,12 @@ function eggs(){
     const un=S.sales.filter(s=>!s.paid);
     return `<div class="page-h"><h2>Eggs</h2><button class="btn primary small" data-act="sell">${ic("cash")}Sell eggs</button></div>${seg}
     <div class="bento" style="grid-template-columns:repeat(2,1fr)"><button class="tile ${stock()<0?"alert":"green"}" data-act="stock"><div class="lbl">${ic("basket")}In stock</div><div class="big">${Math.max(0,stock())}</div><div class="sub">${stock()<0?`Sales are ${-stock()} eggs ahead. Tap to fix.`:`eggs · ${Math.floor(stock()/12)} dozen · tap to count`}</div></button><section class="tile ${owed()>0?"alert":""}"><div class="lbl">${ic("clock")}To be paid</div><div class="big">${money(owed())}</div><div class="sub">${un.length} unpaid sale${un.length===1?"":"s"}</div></section></div>
-    <section class="card">${S.sales.length?`<ul class="list">${[...S.sales].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,60).map(s=>`<li>${avatarHtml(null,cust(s.cust)?.type==="restaurant"?"green":"")}<div class="grow"><b>${esc(custName(s.cust))}</b><div class="small muted">${dz(s.eggs)} · ${dlabel(s.date)}</div></div><div class="end"><div class="amt">${money(saleTotal(s))}</div>${s.paid?`<div class="small muted">Paid</div>`:`<button class="btn good small" data-act="paid" data-id="${s.id}">${ic("check")}Mark paid</button>`}</div><button class="btn small icon" data-act="editsale" data-id="${s.id}" aria-label="Edit this sale">${ic("pencil")}</button><button class="btn small icon danger" data-act="delsale" data-id="${s.id}" aria-label="Delete this sale">${ic("trash")}</button></li>`).join("")}</ul>`:`<div class="empty">${ic("cash","xl")}<h3>No sales yet</h3><p>Record your first sale to start tracking income.</p><button class="btn primary" data-act="sell">${ic("cash")}Sell eggs</button></div>`}</section>`;
+    <section class="card">${S.sales.length?`<ul class="list">${[...S.sales].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,60).map(s=>`<li>${avatarHtml(null,cust(s.cust)?.type==="restaurant"?"green":"")}<div class="grow"><b>${esc(custName(s.cust))}</b><div class="small muted">${dz(s.eggs)} · ${dlabel(s.date)}</div></div><div class="end"><div class="amt">${money(saleTotal(s))}</div>${s.paid?`<div class="small muted">Paid</div>`:`<button class="btn good small" data-act="paid" data-id="${s.id}" aria-label="Mark this sale as paid">${ic("check")}Paid</button>`}</div><button class="btn small icon" data-act="editsale" data-id="${s.id}" aria-label="Edit this sale">${ic("pencil")}</button><button class="btn small icon danger" data-act="delsale" data-id="${s.id}" aria-label="Delete this sale">${ic("trash")}</button></li>`).join("")}</ul>`:`<div class="empty">${ic("cash","xl")}<h3>No sales yet</h3><p>Record your first sale to start tracking income.</p><button class="btn primary" data-act="sell">${ic("cash")}Sell eggs</button></div>`}</section>`;
   }
   const dayList=[...S.eggs].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,60);
   return `<div class="page-h"><h2>Eggs</h2><button class="btn primary small" data-act="logeggs">${ic("plus")}Log eggs</button></div>${seg}
   <div class="bento" style="grid-template-columns:repeat(2,1fr)"><section class="tile warm"><div class="lbl">${ic("egg")}This week</div><div class="big">${sum(range(7),eggsOn)}</div><div class="sub">eggs · ${num(sum(range(7),eggsOn)/7,1)} a day</div></section><section class="tile"><div class="lbl">${ic("alert")}Cracked (30 days)</div><div class="big">${sum(S.eggs.filter(e=>e.date>=addDays(today(),-29)),e=>e.cracked||0)}</div><div class="sub">eggs lost</div></section></div>
+  ${trendCard()}
   <section class="card">${dayList.length?`<ul class="list">${dayList.map(e=>`<li><div class="avatar">${ic("egg")}</div><div class="grow"><b>${dlabel(e.date)}</b><div class="small muted">${e.count} egg${e.count===1?"":"s"}${e.cracked?` · ${e.cracked} cracked`:""}</div></div><span class="amt">${e.count}</span><button class="btn small icon" data-act="editegg" data-id="${e.id}" aria-label="Edit egg entry for ${dlabel(e.date)}">${ic("pencil")}</button><button class="btn small icon danger" data-act="delegg" data-id="${e.id}" aria-label="Delete egg entry for ${dlabel(e.date)}">${ic("trash")}</button></li>`).join("")}</ul>`:`<div class="empty">${ic("egg","xl")}<h3>No eggs logged yet</h3><p>Log today’s collection. It takes ten seconds.</p><button class="btn primary" data-act="logeggs">${ic("plus")}Log eggs</button></div>`}</section>`;
 }
 
@@ -720,7 +766,7 @@ function more(){
 function act(a,id){
   const A={
     go:()=>go(id),gofeed:()=>{careSub="feed";go("care")},gosales:()=>{eggSub="sales";go("eggs")},
-    logeggs:()=>eggSheet(),sound:()=>{try{localStorage.setItem(SND_KEY,soundOn()?"off":"on")}catch{}render();if(soundOn())cluck(3,.12)},quickcare:()=>quickCare(),sell:()=>sellSheet(),buy:()=>purchaseSheet(),newhen:()=>henForm(),hen:()=>henDetail(id),
+    logeggs:()=>eggSheet(),trng:()=>{trendRange=+id;render()},sound:()=>{try{localStorage.setItem(SND_KEY,soundOn()?"off":"on")}catch{}render();if(soundOn())cluck(3,.12)},quickcare:()=>quickCare(),sell:()=>sellSheet(),buy:()=>purchaseSheet(),newhen:()=>henForm(),hen:()=>henDetail(id),
     hfst:()=>{henFilter.st=id;render()},
     eggsub:()=>{eggSub=id;render()},caresub:()=>{careSub=id;render()},
     cdprev:()=>{careDate=addDays(careDate,-1);render()},cdnext:()=>{if(careDate<today()){careDate=addDays(careDate,1);render()}},
@@ -1592,6 +1638,73 @@ function setupTile(){
   const back=Math.max(0,all.profit),pct=Math.min(1,back/all.setup),done=back>=all.setup;
   return `<section class="tile s2 ${done?"green":""}" style="margin-bottom:16px;min-height:0"><div class="lbl">${ic("coop")}Setup costs paid back</div><div class="big">${Math.round(pct*100)}%</div><div class="sub">${money(back)} of ${money(all.setup)} one-off setup. Setup is kept out of monthly profit so it doesn’t distort it.</div><div class="meter"><i style="width:${Math.max(3,pct*100)}%"></i></div></section>`;
 }
+/* ---------- charts ---------- */
+const CH={};
+const chartW=()=>Math.max(300,Math.min(640,Math.round(((document.querySelector("#view")||{}).clientWidth||390)-34)));
+const niceMax=v=>{if(!(v>0))return 100;const p=10**Math.floor(Math.log10(v)),n=v/p;return(n<=1?1:n<=2?2:n<=5?5:10)*p};
+const rShort=v=>{const a=Math.abs(v);return(v<0?"−":"")+"R"+(a>=1000?(a/1000).toFixed(a>=10000?0:1).replace(".0","")+"k":Math.round(a))};
+const topBar=(x,y,w,h,r)=>{r=Math.min(r,w/2,h);return h<=0?"":`M${x} ${y+h}V${y+r}Q${x} ${y} ${x+r} ${y}H${x+w-r}Q${x+w} ${y} ${x+w} ${y+r}V${y+h}Z`};
+const botBar=(x,y,w,h,r)=>{r=Math.min(r,w/2,h);return h<=0?"":`M${x} ${y}H${x+w}V${y+h-r}Q${x+w} ${y+h} ${x+w-r} ${y+h}H${x+r}Q${x} ${y+h} ${x} ${y+h-r}Z`};
+function profitChart(){
+  const t=new Date(),months=[];
+  for(let i=5;i>=0;i--){const d=new Date(t.getFullYear(),t.getMonth()-i,1),p=periodStats(iso(d),i===0?today():iso(new Date(d.getFullYear(),d.getMonth()+1,0)));
+    months.push({label:d.toLocaleDateString("en-ZA",{month:"short"}),full:d.toLocaleDateString("en-ZA",{month:"long",year:"numeric"}),inc:p.income,cost:p.costs,prof:p.profit})}
+  if(!months.some(x=>x.inc||x.cost))return `<section class="card"><h2>Income and costs</h2><p class="muted" style="margin:0">A chart of your last six months appears here once you record sales or costs.</p></section>`;
+  CH.profit={kind:"profit",months};
+  const W=chartW(),H=230,L=44,R=8,T=18,B=30,pw=W-L-R,ph=H-T-B,hi=niceMax(Math.max(...months.flatMap(x=>[x.inc,x.cost,x.prof]),1)),mn=Math.min(0,...months.map(x=>x.prof)),lo=mn<0?-niceMax(-mn):0;
+  const y=v=>T+ph-(v-lo)/(hi-lo)*ph,gw=pw/months.length,bw=Math.min(26,gw*.3),ticks=lo<0?[lo,0,hi/2,hi]:[0,hi/2,hi];
+  const grid=ticks.map(v=>`<line class="${v===0?"base":"grid"}" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${rShort(v)}</text>`).join("");
+  const bars=months.map((m,i)=>{const cx=L+gw*(i+.5);return `<path class="c1" d="${topBar(cx-bw-1,y(m.inc),bw,y(0)-y(m.inc),4)}"/><path class="c2" d="${topBar(cx+1,y(m.cost),bw,y(0)-y(m.cost),4)}"/><text x="${cx}" y="${H-8}" text-anchor="middle">${m.label}</text>`}).join("");
+  const pts=months.map((m,i)=>[L+gw*(i+.5),y(m.prof)]),last=pts.at(-1);
+  return `<section class="card"><h2>Income and costs</h2><p class="hint" style="margin:2px 0 8px">Last six months. Setup costs are not included.</p>
+  <div class="lg"><span><i style="background:var(--c1)"></i>Income</span><span><i style="background:var(--c2)"></i>Costs</span><span><i class="ln" style="background:var(--ink)"></i>Profit</span></div>
+  <svg class="chart" data-ch="profit" viewBox="0 0 ${W} ${H}" role="img" aria-label="Income, costs and profit for the last six months. Details are in the table below the chart.">
+    <rect class="hl" id="hl-profit" x="${L}" y="${T}" width="${gw}" height="${ph}" rx="8"/>${grid}${bars}
+    <path class="pline" d="${pts.map((p,i)=>(i?"L":"M")+p[0]+" "+p[1]).join("")}"/>${pts.map(p=>`<circle class="pdot" cx="${p[0]}" cy="${p[1]}" r="5"/>`).join("")}
+    <text class="val" x="${Math.min(last[0],W-R-14)}" y="${Math.min(last[1],y(months.at(-1).inc),y(months.at(-1).cost))-12}" text-anchor="middle">${rShort(months.at(-1).prof)}</text>
+    <rect x="${L}" y="0" width="${pw}" height="${H}" fill="transparent" data-hit="1" data-l="${L}" data-gw="${gw}" data-n="${months.length}" data-w="${W}"/>
+  </svg>
+  <p class="chart-read" id="rd-profit" aria-live="polite"></p>
+  <details class="tv"><summary>View as table</summary><table class="dt"><thead><tr><th>Month</th><th>Income</th><th>Costs</th><th>Profit</th></tr></thead><tbody>${months.map(m=>`<tr><td>${m.full}</td><td>${money(m.inc)}</td><td>${money(m.cost)}</td><td>${money(m.prof)}</td></tr>`).join("")}</tbody></table></details></section>`;
+}
+let trendRange=30;
+function trendCard(){
+  const days=range(trendRange),vals=days.map(eggsOn),n=days.length,total=sum(vals,x=>x);
+  const chips=`<div class="chips" role="group" aria-label="Chart range" style="margin:0 0 8px">${[30,90].map(k=>`<button class="chip" data-act="trng" data-id="${k}" aria-pressed="${trendRange===k}">${k} days</button>`).join("")}</div>`;
+  if(!total)return `<section class="card"><h2>Trend</h2>${chips}<p class="muted" style="margin:0">Log some eggs and your trend chart appears here.</p></section>`;
+  const avg=vals.map((_,i)=>{const a=vals.slice(Math.max(0,i-6),i+1);return sum(a,x=>x)/a.length});
+  CH.trend={kind:"trend",days,vals,avg};
+  const W=chartW(),H=200,L=34,R=8,T=16,B=28,pw=W-L-R,ph=H-T-B,hi=niceMax(Math.max(...vals,...avg)*1.05),y=v=>T+ph-v/hi*ph,gw=pw/n,bw=Math.max(2,gw*.6);
+  const grid=[0,hi/2,hi].map(v=>`<line class="${v===0?"base":"grid"}" x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${Math.round(v)}</text>`).join("");
+  const bars=vals.map((v,i)=>`<path class="eb" d="${topBar(L+gw*i+(gw-bw)/2,y(v),bw,y(0)-y(v),Math.min(3,bw/2))}"/>`).join("");
+  const step=trendRange===30?7:14,xl=days.map((d,i)=>(n-1-i)%step===0?`<text x="${L+gw*(i+.5)}" y="${H-8}" text-anchor="middle">${dm(d)}</text>`:"").join("");
+  const pts=avg.map((v,i)=>[L+gw*(i+.5),y(v)]),last=pts.at(-1);
+  /* tendency: last 7 days against the 7 days before */
+  const a7=sum(vals.slice(-7),x=>x)/7,p7=sum(vals.slice(-14,-7),x=>x)/7,ch=p7>0?(a7-p7)/p7:null;
+  const dir=ch===null?"":Math.abs(ch)<.03?"flat":ch>0?"up":"down";
+  const wk=[0,0,0,0,0,0,0],wc=[0,0,0,0,0,0,0];days.forEach((d,i)=>{const k=(new Date(d+"T12:00").getDay()+6)%7;wk[k]+=vals[i];wc[k]++});
+  const wa=wk.map((v,k)=>wc[k]?v/wc[k]:0),bk=wa.indexOf(Math.max(...wa)),WD=["Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"];
+  const summary=`<div class="row" style="gap:10px;margin:2px 0 6px;align-items:flex-start">${dir?`<span class="pill ${dir==="down"?"watch":""}">${ic(dir==="down"?"down":dir==="up"?"up":"check","sm")}${dir==="flat"?"Steady":Math.round(Math.abs(ch)*100)+"% "+(dir==="up"?"up":"down")}</span>`:""}<div class="small muted grow">Last 7 days: ${num(a7,1)} eggs a day${p7>0?`, against ${num(p7,1)} the week before`:""}. Busiest day: ${WD[bk]} (${num(wa[bk],1)} on average).</div></div>`;
+  return `<section class="card"><h2>Trend</h2>${chips}${summary}
+  <div class="lg"><span><i style="background:var(--accent);opacity:.3"></i>Eggs per day</span><span><i class="ln" style="background:var(--accent)"></i>7-day average</span></div>
+  <svg class="chart" data-ch="trend" viewBox="0 0 ${W} ${H}" role="img" aria-label="Eggs per day over the last ${trendRange} days with a 7-day average line. The last 7 days averaged ${num(a7,1)} a day.">
+    <rect class="hl" id="hl-trend" x="${L}" y="${T}" width="${gw}" height="${ph}"/>${grid}${bars}${xl}
+    <path class="al" d="${pts.map((p,i)=>(i?"L":"M")+p[0].toFixed(1)+" "+p[1].toFixed(1)).join("")}"/>
+    <circle class="adot" cx="${last[0]}" cy="${last[1]}" r="5"/><text class="val" x="${Math.min(last[0],W-22)}" y="${last[1]-12}" text-anchor="middle">${num(avg.at(-1),1)}</text>
+    <rect x="${L}" y="0" width="${pw}" height="${H}" fill="transparent" data-hit="1" data-l="${L}" data-gw="${gw}" data-n="${n}" data-w="${W}"/>
+  </svg>
+  <p class="chart-read" id="rd-trend" aria-live="polite"></p></section>`;
+}
+function wireChart(svg){
+  const id=svg.dataset.ch,d=CH[id],hit=svg.querySelector("[data-hit]"),hl=svg.querySelector("#hl-"+id),rd=document.getElementById("rd-"+id);if(!d||!hit||!hl||!rd)return;
+  const L=+hit.dataset.l,gw=+hit.dataset.gw,n=+hit.dataset.n,W=+hit.dataset.w;
+  const show=i=>{i=Math.max(0,Math.min(n-1,i));hl.setAttribute("x",L+gw*i);
+    if(id==="profit"){const m=d.months[i];rd.innerHTML=`<b>${esc(m.full)}</b><br>Income ${money(m.inc)} · Costs ${money(m.cost)} · <b>Profit ${money(m.prof)}</b>`}
+    else{rd.innerHTML=`<b>${dlabel(d.days[i])}</b><br>${d.vals[i]} egg${d.vals[i]===1?"":"s"} · 7-day average ${num(d.avg[i],1)}`}};
+  const at=e=>{const r=svg.getBoundingClientRect();return Math.floor(((e.clientX-r.left)/r.width*W-L)/gw)};
+  hit.addEventListener("pointermove",e=>show(at(e)));hit.addEventListener("pointerdown",e=>show(at(e)));hit.addEventListener("click",e=>show(at(e)));
+  show(n-1);
+}
 function profitView(seg){
   const[from,to]=periodRange(profPeriod),p=periodStats(from,to),label=PERIODS.find(x=>x[0]===profPeriod)[1];
   const cats=Object.entries(p.byCat).sort((a,b)=>b[1]-a[1]),top=cats[0]?.[1]||1;
@@ -1604,6 +1717,7 @@ function profitView(seg){
     <section class="tile s2 ${p.profit<0?"alert":"warm"}"><div class="lbl">${ic("trend")}Profit · ${label.toLowerCase()}</div><div class="big">${money(p.profit)}</div>
       <div class="sub">${p.profitPerDoz!==null?`${money(p.profitPerDoz)} profit per dozen sold`:"Sell some eggs to see profit per dozen"}${p.costPerDoz!==null?` · it costs about ${money(p.costPerDoz)} to produce a dozen`:""}</div></section>
   </div>
+  ${profitChart()}
   ${setupTile()}
   ${priceCard()}
   <section class="card"><h2>Where the money goes</h2>${cats.length?`<div class="cbars">${cats.map(([c,v])=>`<div class="cbar"><span>${esc(c)}</span><b class="amt">${money(v)}</b><div class="tr"><i style="width:${Math.max(3,v/top*100)}%"></i></div></div>`).join("")}</div>`:`<p class="muted" style="margin:0">No costs in this period yet. Feed you log under Care → Feed counts automatically. Add anything else with <b>Add expense</b>.</p>`}
@@ -1670,7 +1784,9 @@ async function drawCard(st,aud,photo){
   const gr=g.createLinearGradient(0,0,W,520);gr.addColorStop(0,"#c46a0d");gr.addColorStop(1,"#8a4505");g.fillStyle=gr;
   g.beginPath();g.moveTo(0,0);g.lineTo(W,0);g.lineTo(W,440);g.arcTo(W,520,W-80,520,80);g.lineTo(80,520);g.arcTo(0,520,0,440,80);g.closePath();g.fill();
   try{const img=await new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src="icons/flock-192.png"});g.drawImage(img,60,56,112,112)}catch{}
-  g.fillStyle="#fff";g.font=`700 42px ${D}`;g.textBaseline="alphabetic";g.fillText("Newberry Middle School Project",196,102);
+  g.fillStyle="#fff";g.textBaseline="alphabetic";
+  const title="Newberry House Middle School Project";let fs0=42;g.font=`700 ${fs0}px ${D}`;while(g.measureText(title).width>824&&fs0>26){fs0--;g.font=`700 ${fs0}px ${D}`}
+  g.fillText(title,196,102);
   g.globalAlpha=.88;g.font=`500 34px ${B}`;g.fillText(`Weekly update · ${dm(st.from)} to ${dm(st.to)}`,196,152);g.globalAlpha=1;
   g.font=`700 250px ${D}`;g.fillText(String(st.total),56,420);const nw=g.measureText(String(st.total)).width;
   g.font=`600 54px ${B}`;g.fillText("eggs laid",56+nw+28,330);g.globalAlpha=.88;g.font=`500 38px ${B}`;g.fillText(`about ${num(st.avg,1)} a day`,56+nw+28,386);g.globalAlpha=1;
@@ -1700,7 +1816,7 @@ async function weeklySheet(){
       const st=m.st,PER=[["last7","Last 7 days"],["this","This week"],["last","Last week"]];
       redraw(sh,root,`
       <label class="f">Period</label><div class="chips" role="group" aria-label="Period">${PER.map(([k,l])=>`<button type="button" class="chip" data-f="p-${k}" data-p="${k}" aria-pressed="${m.period===k}">${l}</button>`).join("")}</div>
-      <label class="f">Who is it for?</label><div class="segc" style="margin:0" role="group" aria-label="Audience"><button type="button" data-f="a-c" data-a="community" aria-pressed="${m.aud==="community"}">Parents &amp; community</button><button type="button" data-f="a-s" data-a="staff" aria-pressed="${m.aud==="staff"}">Staff (with money)</button></div>
+      <label class="f">Who is it for?</label><div class="segc" style="margin:0" role="group" aria-label="Audience"><button type="button" data-f="a-c" data-a="community" aria-pressed="${m.aud==="community"}">Parents &amp; community</button><button type="button" data-f="a-s" data-a="staff" aria-pressed="${m.aud==="staff"}">Staff</button></div>
       <label class="f">Photo <span class="muted">(optional)</span></label><input id="wph" type="file" accept="image/*" hidden>
       ${m.pimg?`<div class="crop" id="pbox" style="width:100%;aspect-ratio:16/9;border-radius:20px"><canvas id="pcv" width="960" height="540" role="img" aria-label="Report photo. Drag to move it."></canvas></div>
         <div class="row" style="margin:10px 0 0"><label class="small muted" for="pz">Zoom</label><input id="pz" class="zoom" type="range" min="1" max="3" step="0.01" value="${m.pz}"></div>
@@ -1838,7 +1954,7 @@ function pricesSheet(){
   ${costHint()}
   <label class="f" for="p3">Warn me when feed will last fewer than (days)</label><input id="p3" class="t" type="number" inputmode="numeric" min="1" value="${S.settings.lowFeedDays}">
   <h3 style="margin-top:22px;font-size:1.1rem">WhatsApp updates</h3>
-  <label class="f" for="sg">Sign-off added to every update</label><input id="sg" class="t" maxlength="80" value="${esc(S.settings.signature)}" placeholder="e.g. Newberry Middle School Project">
+  <label class="f" for="sg">Sign-off added to every update</label><input id="sg" class="t" maxlength="80" value="${esc(S.settings.signature)}" placeholder="e.g. Newberry House Middle School Project">
   <label class="f" for="gl">WhatsApp group or channel link <span class="muted">(optional)</span></label><input id="gl" class="t" type="url" inputmode="url" value="${esc(S.settings.groupLink)}" placeholder="https://chat.whatsapp.com/…"><p class="hint">Adds an “Open our WhatsApp group” button on the Updates screen.</p>
   <div class="foot"><button class="btn primary block">Save</button></div></form>`,(sh,close)=>{
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const gl=sh.querySelector("#gl").value.trim();if(gl&&!/^https:\/\//i.test(gl)){toast("The WhatsApp link must start with https://");return}S.coops[0].name=sh.querySelector("#cn").value.trim()||S.coops[0].name;S.settings={...S.settings,price:+sh.querySelector("#p1").value||0,priceRest:+sh.querySelector("#p2").value||0,lowFeedDays:Math.max(1,+sh.querySelector("#p3").value||7),signature:sh.querySelector("#sg").value.trim(),groupLink:gl};save();close();render();toast("Saved.")};
