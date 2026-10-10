@@ -1655,8 +1655,14 @@ function weekText(st,aud){
   const care=[st.feedDays!==null?`Feed left: about ${Math.floor(st.feedDays)} days.`:"",st.watch.length?`Hens to keep an eye on: ${st.watch.map(h=>`${h.name} (${h.status})`).join(", ")}.`:"All hens are doing well."].filter(Boolean).join(" ");
   return [head,eggs,money1,care].join("\n\n");
 }
-async function drawCard(st,aud){
-  const W=1080,H=1350,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
+/* draw img to fill the box (x,y,w,h), then zoom (z>=1) and shift (ox,oy as fractions of the box) */
+const coverMax=(img,w,h,z)=>{const b=Math.max(w/img.width,h/img.height)*z;return[Math.max(0,(img.width*b-w)/(2*w)),Math.max(0,(img.height*b-h)/(2*h))]};
+function coverDraw(ctx,img,x,y,w,h,z,ox,oy){
+  const b=Math.max(w/img.width,h/img.height)*z,dw=img.width*b,dh=img.height*b,mx=(dw-w)/2,my=(dh-h)/2;
+  ctx.drawImage(img,x+(w-dw)/2+Math.max(-mx,Math.min(mx,ox*w)),y+(h-dh)/2+Math.max(-my,Math.min(my,oy*h)),dw,dh);
+}
+async function drawCard(st,aud,photo){
+  const W=1080,H=photo?1950:1350,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
   try{await Promise.all([document.fonts.load('700 120px "Bricolage Grotesque"'),document.fonts.load('600 40px "Instrument Sans"')])}catch{}
   const D='"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif',B='"Instrument Sans",system-ui,sans-serif';
   const rr=(x,y,w,h,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()};
@@ -1668,6 +1674,7 @@ async function drawCard(st,aud){
   g.globalAlpha=.88;g.font=`500 34px ${B}`;g.fillText(`Weekly update · ${dm(st.from)} to ${dm(st.to)}`,196,152);g.globalAlpha=1;
   g.font=`700 250px ${D}`;g.fillText(String(st.total),56,420);const nw=g.measureText(String(st.total)).width;
   g.font=`600 54px ${B}`;g.fillText("eggs laid",56+nw+28,330);g.globalAlpha=.88;g.font=`500 38px ${B}`;g.fillText(`about ${num(st.avg,1)} a day`,56+nw+28,386);g.globalAlpha=1;
+  if(photo){g.save();rr(60,560,960,540,36);g.clip();g.fillStyle="#000";g.fillRect(60,560,960,540);coverDraw(g,photo.img,60,560,960,540,photo.z,photo.ox,photo.oy);g.restore();g.translate(0,600)}
   /* bars */
   const n=st.days.length,areaX=60,areaW=960,gap=18,bw=(areaW-gap*(n-1))/n,top=640,base=1010,mx=Math.max(1,...st.eggs);
   g.fillStyle="#6c6250";g.font=`600 30px ${B}`;g.textAlign="center";
@@ -1686,7 +1693,7 @@ async function drawCard(st,aud){
   return new Promise(r=>c.toBlob(r,"image/png"));
 }
 async function weeklySheet(){
-  const m={period:"last7",aud:"community",text:"",blob:null,url:null,edited:false,busy:true,token:0};
+  const m={period:"last7",aud:"community",text:"",blob:null,url:null,edited:false,busy:true,token:0,pimg:null,pz:1,pox:0,poy:0};
   sheet("Weekly report",`<div id="wr"></div>`,(sh,close)=>{
     const root=sh.querySelector("#wr");
     const draw=()=>{
@@ -1694,12 +1701,41 @@ async function weeklySheet(){
       redraw(sh,root,`
       <label class="f">Period</label><div class="chips" role="group" aria-label="Period">${PER.map(([k,l])=>`<button type="button" class="chip" data-f="p-${k}" data-p="${k}" aria-pressed="${m.period===k}">${l}</button>`).join("")}</div>
       <label class="f">Who is it for?</label><div class="segc" style="margin:0" role="group" aria-label="Audience"><button type="button" data-f="a-c" data-a="community" aria-pressed="${m.aud==="community"}">Parents &amp; community</button><button type="button" data-f="a-s" data-a="staff" aria-pressed="${m.aud==="staff"}">Staff (with money)</button></div>
-      <div style="margin-top:14px">${m.url?`<img src="${m.url}" alt="Weekly report card" style="display:block;width:100%;border-radius:18px;box-shadow:var(--shadow)">`:`<div class="skel" style="aspect-ratio:4/5"></div>`}</div>
+      <label class="f">Photo <span class="muted">(optional)</span></label><input id="wph" type="file" accept="image/*" hidden>
+      ${m.pimg?`<div class="crop" id="pbox" style="width:100%;aspect-ratio:16/9;border-radius:20px"><canvas id="pcv" width="960" height="540" role="img" aria-label="Report photo. Drag to move it."></canvas></div>
+        <div class="row" style="margin:10px 0 0"><label class="small muted" for="pz">Zoom</label><input id="pz" class="zoom" type="range" min="1" max="3" step="0.01" value="${m.pz}"></div>
+        <p class="hint" style="margin:6px 0 8px">Drag to position the photo. Pinch or use the slider to zoom.</p>
+        <div class="row"><button type="button" class="btn small" id="phpick">${ic("image")}Change photo</button><button type="button" class="btn small danger" id="phrm">Remove</button></div>`
+        :`<button type="button" class="btn block" id="phpick">${ic("image")}Add a photo to the report</button><p class="hint" style="margin:6px 0 0">The photo goes above the egg chart. Good for a picture of the hens or the eggs.</p>`}
+      <div style="margin-top:14px">${m.url?`<img src="${m.url}" alt="Weekly report card" style="display:block;width:100%;border-radius:18px;box-shadow:var(--shadow)">`:`<div class="skel" style="aspect-ratio:${m.pimg?"1080/1950":"4/5"}"></div>`}</div>
       ${st&&st.total===0?`<div class="warn">${ic("alert")}<span>No eggs are logged for this period. Pick another period, or log the eggs first.</span></div>`:""}
       <label class="f" for="wt">Message</label><textarea id="wt" class="t" rows="7">${esc(m.text)}</textarea>
       <p class="hint">${S.settings.signature?`Your sign-off “${esc(S.settings.signature)}” is added when you send.`:"Add a sign-off under More, Coop, prices & alerts."}</p>
       <div class="foot"><button class="btn primary block" id="send" ${m.busy?"disabled":""}>${ic("chat")}Send on WhatsApp</button>
       <div class="row wr" style="margin-top:10px;justify-content:center"><button type="button" class="linkbtn" id="sv">Save to Updates</button><button type="button" class="linkbtn" id="cp">Copy text</button><button type="button" class="linkbtn" id="dl">Save image</button></div></div>`);
+      const pick=root.querySelector("#phpick"),pin=root.querySelector("#wph");
+      pick.onclick=()=>pin.click();
+      pin.onchange=async e=>{const file=e.target.files[0];if(!file)return;m.text=root.querySelector("#wt").value;
+        const f2=await prepPhoto(file,1600),url=URL.createObjectURL(f2),i=new Image();
+        await new Promise(r=>{i.onload=r;i.onerror=r;i.src=url});if(!i.width)return;
+        m.pimg=i;m.pz=1;m.pox=0;m.poy=0;build(true)};
+      root.querySelector("#phrm")?.addEventListener("click",()=>{m.text=root.querySelector("#wt").value;m.pimg=null;build(true)});
+      const pbox=root.querySelector("#pbox");
+      if(pbox){
+        const cv=root.querySelector("#pcv"),zs=root.querySelector("#pz"),ps=new Map();let pd=0,tm=null;
+        const paint=()=>{const mo=coverMax(m.pimg,960,540,m.pz);m.pox=Math.max(-mo[0],Math.min(mo[0],m.pox));m.poy=Math.max(-mo[1],Math.min(mo[1],m.poy));
+          const g=cv.getContext("2d");g.fillStyle="#000";g.fillRect(0,0,960,540);coverDraw(g,m.pimg,0,0,960,540,m.pz,m.pox,m.poy)};
+        const later=()=>{clearTimeout(tm);tm=setTimeout(()=>{m.text=root.querySelector("#wt")?.value??m.text;build(true)},350)};
+        const setZoom=z=>{m.pz=Math.max(1,Math.min(3,z));zs.value=m.pz;paint();later()};
+        paint();
+        pbox.onpointerdown=e=>{try{pbox.setPointerCapture(e.pointerId)}catch{}ps.set(e.pointerId,[e.clientX,e.clientY]);pd=0};
+        pbox.onpointermove=e=>{if(!ps.has(e.pointerId))return;const prev=ps.get(e.pointerId);ps.set(e.pointerId,[e.clientX,e.clientY]);
+          if(ps.size===1){m.pox+=(e.clientX-prev[0])/pbox.clientWidth;m.poy+=(e.clientY-prev[1])/pbox.clientHeight;paint();later()}
+          else if(ps.size===2){const[a,b]=[...ps.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(pd)setZoom(m.pz*d/pd);pd=d}};
+        const up=e=>{ps.delete(e.pointerId);pd=0};pbox.onpointerup=up;pbox.onpointercancel=up;
+        pbox.addEventListener("wheel",e=>{e.preventDefault();setZoom(m.pz*(e.deltaY<0?1.06:.94))},{passive:false});
+        zs.oninput=()=>setZoom(+zs.value);
+      }
       root.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{m.period=b.dataset.p;build()});
       root.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{m.aud=b.dataset.a;build()});
       root.querySelector("#wt").oninput=e=>{m.text=e.target.value;m.edited=true};
@@ -1714,10 +1750,10 @@ async function weeklySheet(){
       root.querySelector("#cp").onclick=()=>{(navigator.clipboard?.writeText(composeText({text:m.text}))||Promise.reject()).then(()=>toast("Message copied."),()=>toast("Couldn’t copy. Select the text and copy it manually."))};
       root.querySelector("#dl").onclick=()=>{if(!m.blob)return;const a=document.createElement("a");a.href=m.url;a.download=file().name;a.click()};
     };
-    const build=async()=>{
-      const tok=++m.token,[from,to]=weekRange(m.period);m.st=weekStats(from,to);
-      m.text=weekText(m.st,m.aud);m.edited=false;m.busy=true;if(m.url)URL.revokeObjectURL(m.url);m.blob=null;m.url=null;draw();
-      const blob=await drawCard(m.st,m.aud);if(tok!==m.token)return;
+    const build=async keepText=>{
+      const tok=++m.token,[from,to]=weekRange(m.period),prev=m.text;m.st=weekStats(from,to);
+      m.text=keepText===true?prev:weekText(m.st,m.aud);if(keepText!==true)m.edited=false;m.busy=true;if(m.url)URL.revokeObjectURL(m.url);m.blob=null;m.url=null;draw();
+      const blob=await drawCard(m.st,m.aud,m.pimg?{img:m.pimg,z:m.pz,ox:m.pox,oy:m.poy}:null);if(tok!==m.token)return;
       m.blob=blob;m.url=URL.createObjectURL(blob);m.busy=false;draw();
     };
     build();
