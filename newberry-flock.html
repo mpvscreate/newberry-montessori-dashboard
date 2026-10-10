@@ -181,10 +181,6 @@ input.zoom{flex:1;min-width:0;accent-color:var(--accent);height:32px}
 table.dt{width:100%;border-collapse:collapse;font-size:.85rem;margin-top:8px}table.dt th,table.dt td{padding:6px 4px;text-align:right;border-top:1px solid var(--line)}table.dt th:first-child,table.dt td:first-child{text-align:left}
 details.tv summary{cursor:pointer;color:var(--muted);font-size:.85rem;margin-top:8px;min-height:32px;display:flex;align-items:center}
 .list li.rowtap{cursor:pointer}.list li.rowtap:active{opacity:.75}
-.tile.hod{flex-direction:row;align-items:center;gap:16px;min-height:0;margin-bottom:16px;background:linear-gradient(135deg,var(--accent-soft),var(--sheet) 70%)}
-.hod-pic{border:0;background:none;padding:0;cursor:pointer;flex:none;border-radius:50%;box-shadow:0 0 0 4px var(--sheet),0 0 0 6px var(--accent);transition:transform .15s}.hod-pic:active{transform:scale(.95) rotate(-3deg)}
-.hod h3{margin:0}.hod p{overflow-wrap:anywhere}
-@media (max-width:340px){.tile.hod{flex-direction:column;align-items:flex-start}}
 .streak{display:grid;grid-template-columns:1fr 1fr;gap:18px}@media (max-width:420px){.streak{grid-template-columns:1fr}}
 .pop{position:fixed;z-index:90;background:var(--sheet);border:1px solid var(--line);border-radius:18px;box-shadow:0 12px 36px rgba(0,0,0,.35);padding:6px;min-width:150px;animation:up .12s ease-out}
 .pop button{display:flex;align-items:center;gap:10px;width:100%;border:0;background:none;color:var(--ink);font:600 1rem var(--body);padding:0 14px;min-height:48px;border-radius:12px;cursor:pointer;text-align:left}
@@ -244,6 +240,32 @@ html{overscroll-behavior-y:contain}
 .gbody{padding:0 16px 16px}
 .gh{display:flex;gap:8px;align-items:center;font:700 .95rem var(--display);margin:16px 0 6px;color:var(--accent)}
 .gbody{max-width:68ch}.gl{margin:0;padding-left:20px}.gl li{margin:5px 0}.gl.vet li::marker{color:var(--red)}
+.list.tl{margin-top:4px;position:relative}
+.list.tl::before{content:"";position:absolute;left:11px;top:8px;bottom:8px;width:2px;background:var(--line)}
+.list.tl li{display:block;border:0;padding:0 0 16px 36px;position:relative}
+.tl-mh{font:700 .95rem var(--display);color:var(--muted);padding-top:6px!important;padding-bottom:10px!important}
+.tl .dot{position:absolute;left:3px;top:16px;width:18px;height:18px;border-radius:50%;background:var(--accent);border:3px solid var(--paper);box-shadow:0 0 0 2px var(--accent)}
+.tl .moment .dot{display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);width:24px;height:24px;left:0;top:0;border:0;box-shadow:none}
+.tl-m{display:flex;flex-direction:column;gap:1px;padding-top:1px}
+.tl-card{background:var(--sheet);border:1px solid var(--line);border-radius:22px;padding:14px;box-shadow:var(--shadow)}
+.tl-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.mg{display:grid;gap:3px;border-radius:16px;overflow:hidden;margin-bottom:10px;grid-template-columns:1fr 1fr}
+.mg.n1{grid-template-columns:1fr}.mg.n1 .mtile{aspect-ratio:4/3}.mg .mtile{aspect-ratio:1}.mg.n3 .mtile:first-child{grid-column:1/-1;aspect-ratio:16/10}
+.mtile{position:relative;border:0;padding:0;background:var(--accent-soft);cursor:pointer;overflow:hidden;display:block;width:100%;color:inherit}
+.mtile img,.mtile video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:block;background:#000}
+.mtile .skel{position:absolute;inset:0}.mtile .mmiss{position:absolute;inset:0}
+.mtile.vid::after,.etile .play{content:"";position:absolute;left:50%;top:50%;width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:rgba(0,0,0,.55) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23fff'%3E%3Cpath d='M9 6.5v11l9-5.5z'/%3E%3C/svg%3E") center/22px no-repeat;pointer-events:none}
+.mtile .more{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.55);color:#fff;font:700 1.6rem var(--display);z-index:2}
+.egrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.egrid.empty{grid-template-columns:1fr}
+.etile{position:relative;aspect-ratio:1;border-radius:14px;overflow:hidden;background:var(--accent-soft)}.etile img,.etile video{width:100%;height:100%;object-fit:cover;display:block}
+.etile .rm{position:absolute;top:4px;right:4px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;display:grid;place-items:center;cursor:pointer}
+.eadd{aspect-ratio:1;border:2px dashed var(--field);border-radius:14px;background:var(--paper);color:var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:600 .8rem var(--body);cursor:pointer;padding:6px;text-align:center}
+.egrid.empty .eadd{aspect-ratio:auto;padding:26px 14px;font-size:1.05rem}
+#lbx{position:fixed;inset:0;z-index:95;background:rgba(8,6,3,.96);display:grid;place-items:center}
+#lbx .lb-body{display:grid;place-items:center;width:100%;max-height:78vh}#lbx img,#lbx video{max-width:100vw;max-height:78vh;object-fit:contain;display:block}
+#lbx .lb-b{position:absolute;width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;display:grid;place-items:center;cursor:pointer}
+#lbx .lb-x{top:calc(env(safe-area-inset-top,0px) + 12px);right:12px}#lbx .lb-n{top:50%;margin-top:-24px}#lbx .prev{left:8px}#lbx .next{right:8px}
+#lbx .lb-cap{position:absolute;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);color:#fff;text-align:center;font-size:.95rem}
 .mthumb{aspect-ratio:4/3;border-radius:20px;overflow:hidden;background:var(--accent-soft)}
 .mthumb img,.mthumb video{display:block;width:100%;height:100%;object-fit:cover;background:#000}
 .mmiss{height:100%;display:grid;place-content:center;justify-items:center;gap:6px;color:var(--muted);text-align:center;padding:12px}
@@ -555,10 +577,10 @@ const costPerDozen=()=>{const from=addDays(today(),-29),cost=sum(S.purchases.fil
 
 /* ---------- ui chrome ---------- */
 let tab="home",eggSub="log",careSub="daily",careDate=today(),henFilter={coop:"all",st:"all"};
-const TABS=[["home","Today","home"],["hens","Hens","bird"],["eggs","Eggs","egg"],["care","Care","pulse"],["updates","Updates","camera"],["more","More","dots"]];
+const TABS=[["home","Today","home"],["hens","Hens","bird"],["eggs","Eggs","egg"],["care","Care","pulse"],["updates","Story","book"],["more","More","dots"]];
 $("nav.tabs").innerHTML=TABS.map(([k,l,i])=>`<button data-tab="${k}">${ic(i)}<span>${l}</span>${k==="care"?'<i class="dot" id="cdot" hidden></i>':""}</button>`).join("");
 $("#today").textContent=new Date().toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long"});
-$("#fab-menu").innerHTML=[["egg","egg","Log eggs"],["cash","cash","Sell eggs"],["clip","clip","Daily check"],["bag","bag","Feed bought"],["pulse","pulse","Health note"],["book","book","Health guide"],["share","share","Share update"],["bird","bird","Add hen"]].map(([k,i,l])=>`<button class="fab-item" data-fab="${k}">${ic(i)}${l}</button>`).join("");
+$("#fab-menu").innerHTML=[["egg","egg","Log eggs"],["cash","cash","Sell eggs"],["clip","clip","Daily check"],["bag","bag","Feed bought"],["pulse","pulse","Health note"],["book","book","Health guide"],["share","share","Add to story"],["bird","bird","Add hen"]].map(([k,i,l])=>`<button class="fab-item" data-fab="${k}">${ic(i)}${l}</button>`).join("");
 
 const undoEdit=(rec,vals)=>{const old={...rec};Object.assign(rec,vals);return()=>{Object.keys(rec).forEach(k=>delete rec[k]);Object.assign(rec,old)}};
 let toastT;
@@ -691,21 +713,6 @@ function render(){
   v.querySelectorAll("[data-fedfeed]").forEach(el=>el.addEventListener("change",()=>{const c=checkOf(careDate,el.dataset.fedfeed);setCheck(el.dataset.fedfeed,{feed:el.value});render()}));
   v.querySelectorAll("[data-cnote]").forEach(el=>el.addEventListener("change",()=>setCheck(el.dataset.cnote,{note:el.value.trim()})));
 }
-/* ---------- hen of the day ---------- */
-const HEN_PROMPTS=[n=>`Is ${n} first to the feeder today?`,n=>`Spot anything special about ${n} today?`,n=>`What is ${n}’s favourite treat?`,n=>`Where does ${n} like to lay and rest?`,n=>`Give ${n} a nickname for the week.`,n=>`Who is ${n}’s best friend in the coop?`,n=>`Is ${n} loud or quiet today?`,n=>`Take a photo of ${n} doing her favourite thing.`,n=>`How do you tell ${n} apart from the others?`,n=>`What would ${n} say if she could talk?`];
-function henOfDay(){
-  const hs=activeHens().slice().sort((a,b)=>a.id<b.id?-1:a.id>b.id?1:0);if(!hs.length)return null;
-  const day=Math.floor(new Date(today()+"T12:00").getTime()/864e5);return{h:hs[day%hs.length],day};
-}
-function henDayCard(){
-  const x=henOfDay();if(!x)return "";const{h,day}=x,care=h.status==="unwell"||h.status==="watch";
-  const prompt=care?`${h.name} needs a little extra care. How is she today?`:!h.photo?`${h.name} needs a photo! Add one so everyone can meet her.`:HEN_PROMPTS[day%HEN_PROMPTS.length](h.name);
-  const meta=[h.breed,h.born?ageText(h.born):""].filter(Boolean).join(" · ");
-  return `<section class="tile hod" aria-label="Hen of the day">
-    <button type="button" class="hod-pic" data-act="hodhi" data-id="${h.id}" aria-label="Open ${esc(h.name)}’s page"><span class="avatar" style="width:96px;height:96px;font-size:2.2rem">${h.photo?`<img src="${h.photo}" alt="">`:esc(h.name[0].toUpperCase())}</span></button>
-    <div class="grow"><div class="eyebrow">Hen of the day</div><h3 style="font-size:1.5rem;margin:4px 0 2px">${esc(h.name)}</h3>${meta?`<div class="small muted">${esc(meta)}</div>`:""}<p style="margin:8px 0 10px">${esc(prompt)}</p>
-      <div class="row wr" style="gap:8px"><button class="btn small primary" data-act="hodnote" data-id="${h.id}">${ic("pencil")}${care?"Health note":"Add a note"}</button>${!h.photo?`<button class="btn small" data-act="hodphoto" data-id="${h.id}">${ic("camera")}Add photo</button>`:care?"":`<button class="btn small" data-act="hodshare" data-id="${h.id}">${ic("chat")}Share her</button>`}</div></div></section>`;
-}
 const dayDone=d=>{const p=checksProgress(d);return p.total>0&&p.done===p.total};
 function checkStreak(){let d=today(),n=0;if(!dayDone(d))d=addDays(d,-1);while(dayDone(d)&&n<3650){n++;d=addDays(d,-1)}return n}
 const MILESTONES=[100,250,500,1000,2500,5000,10000,25000];
@@ -739,7 +746,6 @@ function home(){
     <button class="${careDone?"done":""}" data-act="quickcare" type="button">${ic(careDone?"check":"drop","lg")}Fed &amp; watered<small>${careDone?"Done today":"One tap"}</small></button>
     <button data-act="sell" type="button">${ic("cash","lg")}Quick sale<small>${money(S.settings.price)} a dozen</small></button>
   </div>
-  ${henDayCard()}
   <div class="bento">
     <section class="tile hero s2 r2" aria-label="Eggs today"><div class="lbl">${ic("egg")}Eggs today</div><div class="big">${e0}</div>
       <span class="chip-d">${ic(d>=0?"up":"down","sm")}${d===0?"Same as yesterday":Math.abs(d)+(d>0?" more":" fewer")+" than yesterday"}</span>
@@ -753,7 +759,7 @@ function home(){
     <section class="tile s2 ${att.length?"alert":"green"}"><div class="lbl">${ic("pulse")}Hen health</div>
       ${att.length?`<ul class="list" style="margin:2px 0 0">${att.slice(0,3).map(h=>`<li class="tap" data-act="hen" data-id="${h.id}" tabindex="0" role="button" style="padding:6px 0;border:0">${avatarHtml(h)}<div class="grow"><b>${esc(h.name)}</b><div class="small muted">${esc(coopName(h.coop))}</div></div>${statusPill(h.status)}</li>`).join("")}</ul>`:`<div class="big" style="font-size:1.7rem">${S.hens.length?"All clear":"No hens yet"}</div><div class="sub">${S.hens.length?`${activeHens().length} hens, none needing attention`:"Add your first hen"}</div>`}</section>
     ${streakTile()}
-    <button class="tile s4" data-act="updates" style="min-height:0;flex-direction:row;align-items:center;gap:14px"><div class="avatar">${ic("share")}</div><div class="grow"><b style="font:700 1.1rem var(--display)">Share an update</b><div class="sub">${S.updates.length?`Last update ${dlabel(updList()[0].date)}. Keep the community involved.`:"Send a photo or video to parents and the community on WhatsApp"}</div></div>${ic("chev")}</button>
+    <button class="tile s4" data-act="updates" style="min-height:0;flex-direction:row;align-items:center;gap:14px"><div class="avatar">${ic("share")}</div><div class="grow"><b style="font:700 1.1rem var(--display)">Our story</b><div class="sub">${S.updates.length?`Last entry ${dlabel(updList()[0].date)}. Add a photo, video or note.`:"Start our story with a photo, video or note"}</div></div>${ic("chev")}</button>
     <button class="tile s4 green" data-act="guide" style="min-height:0;flex-direction:row;align-items:center;gap:14px"><div class="avatar green">${ic("leaf")}</div><div class="grow"><b style="font:700 1.1rem var(--display)">Health guide</b><div class="sub">Organic treatments and prevention for common hen problems</div></div>${ic("chev")}</button>
     <section class="tile s4"><div class="lbl">${ic("trend")}Eggs per day, last 30 days</div>${trendChart(range(30).map(eggsOn),"Line chart of eggs collected per day over the last 30 days")}<div class="sub">${num(sum(range(30),eggsOn))} eggs in 30 days · average ${num(sum(range(30),eggsOn)/30,1)} a day</div></section>
   </div>`;
@@ -816,8 +822,7 @@ function more(){
 function act(a,id){
   const A={
     go:()=>go(id),gofeed:()=>{careSub="feed";go("care")},gosales:()=>{eggSub="sales";go("eggs")},
-    logeggs:()=>eggSheet(),hodhi:()=>{cluck(2);henDetail(id)},hodnote:()=>{const h=hen(id);healthSheet(id,null,"",h&&(h.status==="unwell"||h.status==="watch")?"checkup":"note")},hodphoto:()=>henForm(hen(id)),hodshare:()=>{const h=hen(id);if(!h)return;cluck(2);
-      updSheet(null,{title:`Meet ${h.name}`,text:`Hen of the day: ${h.name}${h.breed?`, our ${h.breed}`:""}${h.born?`, ${ageText(h.born)}`:""}.${h.note?" "+h.note.trim().replace(/\.?$/,"."):""}`,photo:h.photo})},reorder:()=>reorderSheet(id),trng:()=>{trendRange=+id;render()},sound:()=>{try{localStorage.setItem(SND_KEY,soundOn()?"off":"on")}catch{}render();if(soundOn())cluck(3,.12)},quickcare:()=>quickCare(),sell:()=>sellSheet(),buy:()=>purchaseSheet(),newhen:()=>henForm(),hen:()=>henDetail(id),
+    logeggs:()=>eggSheet(),sfilter:()=>{storyFilter=id;render()},reorder:()=>reorderSheet(id),trng:()=>{trendRange=+id;render()},sound:()=>{try{localStorage.setItem(SND_KEY,soundOn()?"off":"on")}catch{}render();if(soundOn())cluck(3,.12)},quickcare:()=>quickCare(),sell:()=>sellSheet(),buy:()=>purchaseSheet(),newhen:()=>henForm(),hen:()=>henDetail(id),
     hfst:()=>{henFilter.st=id;render()},
     eggsub:()=>{eggSub=id;render()},caresub:()=>{careSub=id;render()},
     cdprev:()=>{careDate=addDays(careDate,-1);render()},cdnext:()=>{if(careDate<today()){careDate=addDays(careDate,1);render()}},
@@ -828,7 +833,7 @@ function act(a,id){
     delbuy:()=>{const i=S.purchases.findIndex(p=>p.id===id),[p]=S.purchases.splice(i,1);save();render();toast("Purchase deleted.",()=>S.purchases.splice(i,0,p))},
     custs:()=>custSheet(),applyprice:()=>applyPrice(id),setpm:()=>setPriceOpt(id),goprofit:()=>{eggSub="money";go("eggs")},weekly:()=>weeklySheet(),pperiod:()=>{profPeriod=id;render()},newexp:()=>expSheet(),editexp:()=>expSheet(S.expenses.find(x=>x.id===id)),
     delexp:()=>{const i=S.expenses.findIndex(x=>x.id===id),[r]=S.expenses.splice(i,1);save();render();toast("Expense deleted.",()=>S.expenses.splice(i,0,r))},stock:()=>stockSheet(),theme:()=>themeSheet(),applock:()=>lockSheet(),sync:()=>{if(!sb){toast("Connecting…");initAuth();return}user?syncSheet():signInSheet()},syncdismiss:()=>{try{localStorage.setItem("flock-sync-dismiss","1")}catch{}render()},install:()=>installApp(),updates:()=>go("updates"),newupd:()=>updSheet(),editupd:()=>updSheet(S.updates.find(x=>x.id===id)),shareupd:()=>sendUpdate(id),
-    delupd:()=>{const u=S.updates.find(x=>x.id===id);confirmSheet("Delete this update?","The message and its photo or video are removed from this device.","Delete update",()=>{S.updates=S.updates.filter(x=>x.id!==id);if(u.media){mDel(u.media).catch(()=>{});dropMedia(u.media);removeCloudMedia(u.media)}save();render();toast("Update deleted.")})},guide:()=>openGuide(),gcat:()=>{guideCat=id;render()},gclear:()=>{guideQ="";guideCat="all";render()},newguide:()=>guideForm(),editguide:()=>guideForm(S.guide.find(g=>g.id===id)),
+    delupd:()=>{const u=S.updates.find(x=>x.id===id);confirmSheet("Delete this story entry?","The message and all its photos and videos are removed from this device.","Delete entry",()=>{S.updates=S.updates.filter(x=>x.id!==id);itemIds(u).forEach(m=>{mDel(m).catch(()=>{});dropMedia(m);removeCloudMedia(m)});save();render();toast("Story entry deleted.")})},guide:()=>openGuide(),gcat:()=>{guideCat=id;render()},gclear:()=>{guideQ="";guideCat="all";render()},newguide:()=>guideForm(),editguide:()=>guideForm(S.guide.find(g=>g.id===id)),
     logguide:()=>healthSheet(null,null,S.guide.find(g=>g.id===id).name+": "),
     delguide:()=>{const g=S.guide.find(x=>x.id===id);confirmSheet("Delete "+g.name+"?","This removes the entry from your guide. You can restore the defaults later.","Delete entry",()=>{const i=S.guide.findIndex(x=>x.id===id),[r]=S.guide.splice(i,1);save();render();toast("Entry deleted.",()=>S.guide.splice(i,0,r))})},
     resetguide:()=>confirmSheet("Restore the default guide?","Built-in entries return to their original text. Entries you added yourself are kept.","Restore",()=>{const mine=S.guide.filter(g=>g.custom);S.guide=[...structuredClone(GUIDE_DEFAULT),...mine];save();render();toast("Default guide restored.")}),
@@ -1083,9 +1088,9 @@ function henDetail(id){
     sh.querySelector("#del").onclick=()=>{close();confirmSheet(`Delete ${h.name}?`,"Her profile and health log are removed. Egg totals stay.","Delete hen",()=>{const hi=S.hens.findIndex(x=>x.id===id),notes=S.health.filter(x=>x.hen===id);S.hens.splice(hi,1);S.health=S.health.filter(x=>x.hen!==id);save();render();toast(`${h.name} deleted.`,()=>{S.hens.splice(hi,0,h);S.health.push(...notes)})})};
   });
 }
-function healthSheet(pre,rec,prefill,startType){
+function healthSheet(pre,rec,prefill){
   if(!S.hens.length){toast("Add a hen first.");return henForm()}
-  const m={hen:rec?.hen||pre||S.hens[0].id,type:rec?.type||startType||"checkup",text:rec?.text||prefill||"",date:rec?.date||today(),product:rec?.product||"",hold:rec?.hold||0,err:""};
+  const m={hen:rec?.hen||pre||S.hens[0].id,type:rec?.type||"checkup",text:rec?.text||prefill||"",date:rec?.date||today(),product:rec?.product||"",hold:rec?.hold||0,err:""};
   sheet(rec?"Edit health note":"Health note",`<form id="f" novalidate></form>`,(sh,close)=>{
     const f=sh.querySelector("#f"),keep=()=>{const g=i=>f.querySelector(i);m.text=g("#tx").value;m.date=g("#dt").value||today();if(g("#pr"))m.product=g("#pr").value;if(g("#hd"))m.hold=Math.max(0,parseInt(g("#hd").value)||0);m.hen=g("#hs").value};
     const draw=()=>{redraw(sh,f,`
@@ -1197,113 +1202,173 @@ async function prepPhoto(file,max=1280){
   try{const bm=await createImageBitmap(file),k=Math.min(1,max/Math.max(bm.width,bm.height)),c=document.createElement("canvas");c.width=Math.round(bm.width*k);c.height=Math.round(bm.height*k);c.getContext("2d").drawImage(bm,0,0,c.width,c.height);
     const b=await new Promise(r=>c.toBlob(r,"image/jpeg",.82));return b?new File([b],"photo.jpg",{type:"image/jpeg"}):file}catch{return file}
 }
-function mkFile(blob,date){const t=blob.type||"";const ext=t.includes("video")?(t.includes("quicktime")?"mov":t.includes("webm")?"webm":"mp4"):"jpg";return new File([blob],`newberry-update-${date}.${ext}`,{type:t})}
+function mkFile(blob,date,i=0){const t=blob.type||"";const ext=t.includes("video")?(t.includes("quicktime")?"mov":t.includes("webm")?"webm":"mp4"):"jpg";return new File([blob],`newberry-story-${date}${i?"-"+(i+1):""}.${ext}`,{type:t})}
 const composeText=u=>[u.title,u.text,S.settings.signature].map(x=>(x||"").trim()).filter(Boolean).join("\n\n");
-async function shareNow(text,file){
+async function shareNow(text,files){
+  const fl=[].concat(files||[]).filter(Boolean);
   try{
-    if(file&&navigator.canShare?.({files:[file]})){await navigator.share({files:[file],text});return "shared"}
-    if(!file&&navigator.share){await navigator.share({text});return "shared"}
+    if(fl.length&&navigator.canShare?.({files:fl})){await navigator.share({files:fl,text});return "shared"}
+    if(!fl.length&&navigator.share){await navigator.share({text});return "shared"}
   }catch(e){if(e.name==="AbortError")return "cancelled"}
   return "fallback";
 }
-function fallbackSheet(text,file){
+function fallbackSheet(text,files){
+  const fl=[].concat(files||[]).filter(Boolean),noun=fl.length>1?"photos and videos":fl[0]&&fl[0].type.startsWith("video")?"video":"photo";
   sheet("Send on WhatsApp",`<p class="muted" style="margin:6px 0 14px">This device can’t attach a photo or video straight from a web page. Do these in order. On a phone, the Send button attaches it for you.</p>
   <div class="tasks">
-  ${file?`<button class="btn block" id="sv">${ic("download")}1. Save the ${file.type.startsWith("video")?"video":"photo"}</button>`:""}
-  <button class="btn primary block" id="wa">${ic("chat")}${file?"2":"1"}. Open WhatsApp with the message</button>
+  ${fl.length?`<button class="btn block" id="sv">${ic("download")}1. Save the ${noun}</button>`:""}
+  <button class="btn primary block" id="wa">${ic("chat")}${fl.length?"2":"1"}. Open WhatsApp with the message</button>
   <button class="btn block" id="cp">${ic("copy")}Copy the message</button>
   ${S.settings.groupLink?`<a class="btn block" href="${esc(S.settings.groupLink)}" target="_blank" rel="noopener">${ic("users")}Open our WhatsApp group</a>`:""}
   </div>
-  ${file?`<p class="hint">In WhatsApp, tap the attach (paperclip) button and choose the saved ${file.type.startsWith("video")?"video":"photo"}.</p>`:""}`,(sh)=>{
-    sh.querySelector("#sv")?.addEventListener("click",()=>{const a=document.createElement("a");a.href=URL.createObjectURL(file);a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)});
+  ${fl.length?`<p class="hint">In WhatsApp, tap the attach (paperclip) button and choose the saved ${noun}.</p>`:""}`,(sh)=>{
+    sh.querySelector("#sv")?.addEventListener("click",()=>{fl.forEach((file,i)=>setTimeout(()=>{const a=document.createElement("a");a.href=URL.createObjectURL(file);a.download=file.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),2000)},i*400))});
     sh.querySelector("#wa").onclick=()=>window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank","noopener");
     sh.querySelector("#cp").onclick=()=>{(navigator.clipboard?.writeText(text)||Promise.reject()).then(()=>toast("Message copied."),()=>toast("Couldn’t copy. Select the text and copy it manually."))};
   });
 }
+
+/* ---------- our story: a timeline of entries (photos, videos, notes) and automatic milestones ---------- */
+let storyFilter="all";
+const itemIds=u=>[u.media,...(u.more||[])].filter(Boolean);
+const storyMonth=d=>new Date(d+"T12:00").toLocaleDateString("en-ZA",{month:"long",year:"numeric"});
+function storyMoments(){
+  const out=[];
+  S.hens.forEach(h=>{if(h.born&&h.born<=today())out.push({date:h.born,icon:"bird",text:`${h.name} joined the flock${h.breed?` (${h.breed})`:""}`})});
+  const eggs=[...S.eggs].sort((a,b)=>a.date.localeCompare(b.date));
+  if(eggs.length){
+    out.push({date:eggs[0].date,icon:"egg",text:`First eggs logged: ${eggs[0].count}`});
+    let run=0,i=0;for(const e of eggs){run+=e.count;while(i<MILESTONES.length&&run>=MILESTONES[i]){out.push({date:e.date,icon:"sparkle",text:`${num(MILESTONES[i])} eggs laid`});i++}}
+  }
+  const sales=[...S.sales].sort((a,b)=>a.date.localeCompare(b.date));
+  if(sales.length){
+    out.push({date:sales[0].date,icon:"cash",text:`First sale: ${dz(sales[0].eggs)}`});
+    const IM=[1000,5000,10000,25000,50000];let inc=0,j=0;for(const s of sales){inc+=saleTotal(s);while(j<IM.length&&inc>=IM[j]){out.push({date:s.date,icon:"trend",text:`${money(IM[j])} earned from egg sales`});j++}}
+  }
+  return out;
+}
+function storyEntry(u){
+  const ids=itemIds(u),n=ids.length;
+  const grid=n?`<div class="mg n${Math.min(n,4)}">${ids.slice(0,4).map((id,i)=>`<button type="button" class="mtile" data-mid="${id}" data-lb="${u.id}|${i}" data-alt="${esc(u.title||"Story photo")}" aria-label="Open ${n>1?`item ${i+1} of ${n}`:"photo or video"}"><span class="skel"></span>${i===3&&n>4?`<span class="more">+${n-3}</span>`:""}</button>`).join("")}</div>`:"";
+  return `<li class="tle entry"><span class="dot" aria-hidden="true"></span><div class="tl-card">
+    <div class="tl-head"><span class="small muted grow">${dlabel(u.date)}</span>${u.shared?`<span class="pill">${ic("check","sm")}Shared</span>`:""}<button type="button" hidden data-act="editupd" data-id="${u.id}">Edit</button><button type="button" hidden class="danger" data-act="delupd" data-id="${u.id}">Delete</button></div>
+    ${grid}${u.title?`<h3 style="font-size:1.2rem;margin-bottom:4px">${esc(u.title)}</h3>`:""}${u.text?`<p style="margin:0;white-space:pre-line">${esc(u.text)}</p>`:""}
+    <button type="button" class="btn small" data-act="shareupd" data-id="${u.id}" style="margin-top:12px">${ic("chat")}Send on WhatsApp</button></div></li>`;
+}
 function updates(){
-  return `<div class="page-h"><h2>Updates</h2><button class="btn primary small" data-act="newupd">${ic("plus")}New update</button></div>
-  <p class="muted" style="margin:-6px 0 14px">Share short photo or video updates with parents and the community on WhatsApp.</p>
-  <button class="btn block" data-act="weekly" style="margin-bottom:14px">${ic("trend")}Create this week’s report</button>
-  ${S.settings.groupLink?`<a class="btn block" href="${esc(S.settings.groupLink)}" target="_blank" rel="noopener" style="margin-bottom:14px">${ic("users")}Open our WhatsApp group</a>`:""}
-  ${S.updates.length?updList().map(u=>`<article class="card upd">
-    ${u.media?`<div class="mthumb" data-mid="${u.media}" data-alt="${esc(u.title||"Update")}"><div class="skel" style="height:100%"></div></div>`:""}
-    <div class="row between" style="margin:12px 0 4px"><span class="small muted">${dlabel(u.date)}</span>${u.shared?`<span class="pill">${ic("check","sm")}Shared ${dlabel(u.shared).toLowerCase()}</span>`:`<span class="pill gone">Not shared yet</span>`}</div>
-    ${u.title?`<h3 style="font-size:1.25rem;margin-bottom:4px">${esc(u.title)}</h3>`:""}${u.text?`<p style="margin:0;white-space:pre-line">${esc(u.text)}</p>`:""}
-    <button class="btn primary block" data-act="shareupd" data-id="${u.id}" style="margin-top:14px">${ic("chat")}Send on WhatsApp</button><div class="row" style="margin-top:8px"><button class="btn small grow" data-act="editupd" data-id="${u.id}">${ic("pencil")}Edit</button><button class="btn small grow danger" data-act="delupd" data-id="${u.id}">${ic("trash")}Delete</button></div></article>`).join("")
-  :`<div class="card empty">${ic("camera","xl")}<h3>Keep your community involved</h3><p>Snap a photo or short video of the hens, the coop or egg day. Add a line or two and send it to parents on WhatsApp.</p><button class="btn primary" data-act="newupd">${ic("plus")}Create your first update</button></div>`}`;
+  const entries=updList().map(u=>({kind:"entry",date:u.date||today(),u})),moments=storyMoments().map(m=>({kind:"moment",...m}));
+  let items=storyFilter==="moments"?moments:storyFilter==="media"?entries.filter(x=>itemIds(x.u).length):[...entries,...moments];
+  items.sort((a,b)=>b.date.localeCompare(a.date)||(a.kind==="entry"?-1:1));
+  let last="";
+  const rows=items.map(it=>{
+    const mo=it.date.slice(0,7),head=mo!==last?`<li class="tl-mh">${storyMonth(it.date)}</li>`:"";last=mo;
+    return head+(it.kind==="entry"?storyEntry(it.u):`<li class="tle moment"><span class="dot" aria-hidden="true">${ic(it.icon,"sm")}</span><div class="tl-m"><b>${esc(it.text)}</b><span class="small muted">${dlabel(it.date)}</span></div></li>`);
+  }).join("");
+  const chips=`<div class="chips scroll" role="group" aria-label="Show" style="margin:0 0 10px">${[["all","Everything"],["media","Photos & videos"],["moments","Milestones"]].map(([k,l])=>`<button class="chip" data-act="sfilter" data-id="${k}" aria-pressed="${storyFilter===k}">${l}</button>`).join("")}</div>`;
+  return `<div class="page-h"><h2>Our story</h2><button class="btn primary small" data-act="newupd">${ic("plus")}Add</button></div>
+  <p class="muted" style="margin:-6px 0 14px">The journey of our hens and coop. Add photos, videos and notes, and send any of them to parents on WhatsApp. Milestones appear on their own.</p>
+  <div class="row" style="margin-bottom:12px"><button class="btn grow" data-act="weekly">${ic("trend")}Weekly report</button>${S.settings.groupLink?`<a class="btn grow" href="${esc(S.settings.groupLink)}" target="_blank" rel="noopener">${ic("users")}WhatsApp group</a>`:""}</div>
+  ${chips}
+  ${rows?`<ul class="list tl">${rows}</ul>`:`<div class="card empty">${ic("camera","xl")}<h3>${S.updates.length?"Nothing here yet":"Tell the story of your hens"}</h3><p>${S.updates.length?"Try another filter.":"Add a photo or video of the coop, the hens or egg day. Milestones such as your first eggs and sales appear here on their own."}</p>${S.updates.length?"":`<button class="btn primary" data-act="newupd">${ic("plus")}Add the first entry</button>`}</div>`}`;
 }
 function hydrateMedia(){
   document.querySelectorAll("[data-mid]").forEach(async el=>{
     const m=await loadMedia(el.dataset.mid).catch(()=>null);if(!el.isConnected)return;
-    el.innerHTML=m?(m.blob.type.startsWith("video")?`<video src="${m.url}" controls playsinline preload="metadata" aria-label="${esc(el.dataset.alt)}"></video>`:`<img src="${m.url}" alt="${esc(el.dataset.alt)}">`):`<div class="mmiss">${ic("image","lg")}<span>This photo or video isn’t on this device</span></div>`;
+    el.querySelector(".skel")?.remove();
+    if(!m){el.insertAdjacentHTML("afterbegin",`<span class="mmiss">${ic("image","lg")}<span>Not on this device</span></span>`);return}
+    if(m.blob.type.startsWith("video")){el.classList.add("vid");el.insertAdjacentHTML("afterbegin",`<video src="${m.url}#t=0.1" muted playsinline preload="metadata" aria-hidden="true"></video>`)}
+    else el.insertAdjacentHTML("afterbegin",`<img src="${m.url}" alt="${esc(el.dataset.alt)}">`);
   });
+  document.querySelectorAll("[data-lb]").forEach(b=>b.addEventListener("click",e=>{e.stopPropagation();const[id,i]=b.dataset.lb.split("|");openLightbox(id,+i)}));
+}
+/* full-screen viewer for the photos and videos in one entry */
+function closeLightbox(){const el=document.getElementById("lbx");if(!el)return;el.remove();document.removeEventListener("keydown",lbKey,true);document.body.classList.remove("lock");[$("#app"),$("nav.tabs")].forEach(e=>e.inert=false);$("#fab-wrap").hidden=false}
+let lbKey=()=>{};
+function openLightbox(entryId,start){
+  const u=S.updates.find(x=>x.id===entryId);if(!u)return;const ids=itemIds(u);if(!ids.length)return;closeLightbox();closePop();
+  const el=document.createElement("div");el.id="lbx";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label",u.title||"Story photos");
+  el.innerHTML=`<button type="button" class="lb-b lb-x" aria-label="Close viewer">${ic("x")}</button><div class="lb-body"></div>${ids.length>1?`<button type="button" class="lb-b lb-n prev" aria-label="Previous">${ic("left")}</button><button type="button" class="lb-b lb-n next" aria-label="Next">${ic("chev")}</button>`:""}<div class="lb-cap"></div>`;
+  document.body.append(el);document.body.classList.add("lock");[$("#app"),$("nav.tabs")].forEach(e=>e.inert=true);$("#fab-wrap").hidden=true;
+  const body=el.querySelector(".lb-body"),cap=el.querySelector(".lb-cap");let i=start;
+  const show=async k=>{i=(k+ids.length)%ids.length;body.innerHTML='<span class="skel" style="width:70vw;height:40vh"></span>';
+    const m=await loadMedia(ids[i]).catch(()=>null);if(!el.isConnected)return;
+    body.innerHTML=m?(m.blob.type.startsWith("video")?`<video src="${m.url}" controls autoplay playsinline></video>`:`<img src="${m.url}" alt="${esc(u.title||"Story photo")}">`):`<div class="mmiss" style="color:#fff">${ic("image","lg")}<span>This photo or video isn’t on this device</span></div>`;
+    cap.textContent=`${ids.length>1?`${i+1} of ${ids.length}`:""}${u.title?`${ids.length>1?" · ":""}${u.title}`:""}`};
+  el.querySelector(".lb-x").onclick=closeLightbox;el.querySelector(".prev")?.addEventListener("click",()=>show(i-1));el.querySelector(".next")?.addEventListener("click",()=>show(i+1));
+  el.addEventListener("click",e=>{if(e.target===el||e.target===body)closeLightbox()});
+  let x0=null;el.addEventListener("touchstart",e=>{x0=e.touches.length===1?e.touches[0].clientX:null},{passive:true});
+  el.addEventListener("touchend",e=>{if(x0===null||ids.length<2)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)>60)show(i+(dx<0?1:-1))},{passive:true});
+  lbKey=e=>{if(e.key==="Escape"){e.stopPropagation();e.preventDefault();closeLightbox()}else if(e.key==="ArrowRight"&&ids.length>1)show(i+1);else if(e.key==="ArrowLeft"&&ids.length>1)show(i-1)};
+  document.addEventListener("keydown",lbKey,true);show(start);el.querySelector(".lb-x").focus();
 }
 async function updSheet(rec,pre){
-  const m={title:rec?.title||pre?.title||"",text:rec?.text||pre?.text||"",date:rec?.date||today(),file:null,url:null,keep:!!rec?.media,err:"",orig:null,psize:getPsize()};
-  if(pre?.photo){try{const b=await(await fetch(pre.photo)).blob();m.file=new File([b],"hen.jpg",{type:b.type||"image/jpeg"});m.url=URL.createObjectURL(m.file)}catch{}}
-  let existing=null;if(rec?.media)existing=await loadMedia(rec.media).catch(()=>null);
-  sheet(rec?"Edit update":"New update",`<form id="f" novalidate></form>`,(sh,close)=>{
+  const m={title:rec?.title||pre?.title||"",text:rec?.text||pre?.text||"",date:rec?.date||today(),items:[],err:"",psize:getPsize()},MAX=6;
+  if(rec)for(const id of itemIds(rec)){const o=await loadMedia(id).catch(()=>null);m.items.push({id,file:null,orig:null,blob:o?o.blob:null,url:o?o.url:null,type:o?o.blob.type:"",size:o?o.blob.size:0})}
+  sheet(rec?"Edit story entry":"Add to our story",`<form id="f" novalidate></form>`,(sh,close)=>{
     const f=sh.querySelector("#f");
-    const keep=()=>{const g=i=>f.querySelector(i);if(g("#ut")){m.title=g("#ut").value;m.text=g("#ux").value}};
-    const cur=()=>m.file?{type:m.file.type,url:m.url,size:m.file.size}:(m.keep&&existing?{type:existing.blob.type,url:existing.url,size:existing.blob.size}:null);
-    const mb=n=>(n/1048576).toFixed(n>1e7?0:1)+" MB";
+    const keep=()=>{const g=i=>f.querySelector(i);if(g("#ut")){m.title=g("#ut").value;m.text=g("#ux").value;m.date=g("#ud").value||m.date}};
+    const tile=(it,i)=>`<div class="etile">${it.url?(it.type.startsWith("video")?`<video src="${it.url}#t=0.1" muted playsinline preload="metadata"></video><span class="play"></span>`:`<img src="${it.url}" alt="Photo ${i+1}">`):`<div class="mmiss">${ic("image")}</div>`}<button type="button" class="rm" data-rm="${i}" aria-label="Remove item ${i+1}">${ic("x","sm")}</button></div>`;
     const draw=()=>{
-      const c=cur(),t=composeText({title:m.title.trim(),text:m.text.trim()});
+      const t=composeText({title:m.title.trim(),text:m.text.trim()}),hasImg=m.items.some(x=>x.orig),big=m.items.some(x=>x.type.startsWith("video")&&x.size>16*1048576);
       redraw(sh,f,`
-      <div style="margin-top:10px">${c?`<div class="mthumb">${c.type.startsWith("video")?`<video src="${c.url}" controls playsinline preload="metadata"></video>`:`<img src="${c.url}" alt="Selected photo">`}</div>
-        <div class="row" style="margin-top:8px"><span class="small muted grow">${c.type.startsWith("video")?"Video":"Photo"} · ${mb(c.size)}</span><button type="button" class="btn small" id="pick">Change</button><button type="button" class="btn small danger" id="rmv">Remove</button></div>
-        ${m.orig&&m.file&&c.type.startsWith("image")?`<div class="chips" role="group" aria-label="Photo size" style="margin-top:8px">${Object.entries(PSIZES).map(([k,[l]])=>`<button type="button" class="chip" data-ps="${k}" aria-pressed="${m.psize===k}">${l}</button>`).join("")}</div><p class="hint" style="margin:6px 0 0">Smaller photos send faster on WhatsApp and use less data. Medium suits most photos.</p>`:""}`
-        :`<button type="button" class="pickbox" id="pick">${ic("camera","xl")}<b>Add a photo or video</b><span class="small muted">Take one now or choose from your gallery</span></button>`}
-        <input id="fl" type="file" accept="image/*,video/*" hidden>
-        ${c&&c.type.startsWith("video")&&c.size>16*1048576?`<div class="warn">${ic("alert")}<span>This video is large. WhatsApp sends short clips (under about 30 seconds) fastest.</span></div>`:""}</div>
-      <label class="f" for="ut">Title <span class="muted">(optional)</span></label><input id="ut" data-autofocus class="t" maxlength="80" placeholder="e.g. Meet our newest hen" value="${esc(m.title)}">
-      <label class="f" for="ux">Message</label><textarea id="ux" class="t" rows="3" maxlength="600" placeholder="Two or three short lines read best on WhatsApp.">${esc(m.text)}</textarea>
+      <div style="margin-top:10px"><div class="egrid ${m.items.length?"":"empty"}">${m.items.map(tile).join("")}${m.items.length<MAX?`<button type="button" class="eadd" id="pick">${ic("camera","lg")}<span>${m.items.length?"Add more":"Add photos or videos"}</span>${m.items.length?"":`<span class="small muted" style="font-weight:400">Take one now or choose from your gallery. Up to ${MAX}.</span>`}</button>`:""}</div>
+        <input id="fl" type="file" accept="image/*,video/*" multiple hidden>
+        ${hasImg?`<div class="chips" role="group" aria-label="Photo size" style="margin-top:10px">${Object.entries(PSIZES).map(([k,[l]])=>`<button type="button" class="chip" data-ps="${k}" aria-pressed="${m.psize===k}">${l}</button>`).join("")}</div><p class="hint" style="margin:6px 0 0">Photo size. Smaller photos send faster on WhatsApp. Medium suits most.</p>`:""}
+        ${big?`<div class="warn">${ic("alert")}<span>A video here is large. WhatsApp sends short clips (under about 30 seconds) fastest.</span></div>`:""}</div>
+      <label class="f" for="ut">Title <span class="muted">(optional)</span></label><input id="ut" data-autofocus class="t" maxlength="80" placeholder="e.g. Coop building day" value="${esc(m.title)}">
+      <label class="f" for="ux">Message</label><textarea id="ux" class="t" rows="3" maxlength="600" placeholder="What happened? Two or three short lines read best.">${esc(m.text)}</textarea>
       <div class="chips" style="margin-top:8px" role="group" aria-label="Quick add"><button type="button" class="chip" data-q="week">${ic("egg","sm")}This week’s eggs</button><button type="button" class="chip" data-q="total">${ic("trend","sm")}Total so far</button><button type="button" class="chip" data-q="thanks">${ic("pulse","sm")}Thank you</button></div>
+      <label class="f" for="ud">When did this happen?</label>${dateChips(m.date)}<input id="ud" class="t" type="date" value="${m.date}" max="${today()}">
       ${m.err?`<p class="err" role="alert">${ic("alert")}${esc(m.err)}</p>`:""}
-      <div class="eyebrow" style="margin:16px 0 6px">What will be sent</div><div class="msgprev">${t?esc(t):'<span class="muted">Your message appears here.</span>'}</div>
-      <div class="foot"><button class="btn primary block" id="go">${ic("chat")}${rec?"Save & send on WhatsApp":"Send on WhatsApp"}</button><button type="button" class="linkbtn" id="later" style="display:block;margin:2px auto 0">Save without sending</button></div>`);
-      f.querySelector("#pick").onclick=()=>f.querySelector("#fl").click();
-      f.querySelector("#fl").onchange=async e=>{keep();const file=e.target.files[0];if(!file)return;
-        if(file.size>200*1048576){m.err="That file is too large. Try a shorter video.";draw();return}
-        m.err="";m.orig=file.type.startsWith("image/")?file:null;m.file=await prepPhoto(file,PSIZES[m.psize][1]);if(m.url)URL.revokeObjectURL(m.url);m.url=URL.createObjectURL(m.file);draw()};
+      <div class="eyebrow" style="margin:16px 0 6px">WhatsApp message</div><div class="msgprev">${t?esc(t):'<span class="muted">Your message appears here.</span>'}</div>
+      <div class="foot"><button class="btn primary block" id="sv">${ic("check")}${rec?"Save changes":"Save to story"}</button><button type="button" class="btn block" id="go" style="margin-top:8px">${ic("chat")}${rec?"Save & send on WhatsApp":"Save & send on WhatsApp"}</button></div>`);
+      f.querySelector("#pick")?.addEventListener("click",()=>f.querySelector("#fl").click());
+      f.querySelector("#fl").onchange=async e=>{keep();m.err="";const files=[...e.target.files].slice(0,MAX-m.items.length);
+        for(const file of files){if(file.size>200*1048576){m.err="A file was too large and was skipped. Try a shorter video.";continue}
+          const pf=await prepPhoto(file,PSIZES[m.psize][1]);m.items.push({id:null,file:pf,orig:file.type.startsWith("image/")?file:null,blob:pf,url:URL.createObjectURL(pf),type:pf.type,size:pf.size})}
+        draw()};
       f.querySelectorAll("[data-ps]").forEach(b=>b.onclick=async()=>{keep();m.psize=b.dataset.ps;try{localStorage.setItem("flock-psize",m.psize)}catch{}
-        m.file=await prepPhoto(m.orig,PSIZES[m.psize][1]);if(m.url)URL.revokeObjectURL(m.url);m.url=URL.createObjectURL(m.file);draw()});
-      f.querySelector("#rmv")?.addEventListener("click",()=>{keep();m.file=null;m.keep=false;draw()});
+        for(const it of m.items)if(it.orig){const pf=await prepPhoto(it.orig,PSIZES[m.psize][1]);URL.revokeObjectURL(it.url);Object.assign(it,{file:pf,blob:pf,url:URL.createObjectURL(pf),type:pf.type,size:pf.size})}
+        draw()});
+      f.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{keep();const it=m.items.splice(+b.dataset.rm,1)[0];if(it&&it.file&&it.url)URL.revokeObjectURL(it.url);draw()});
+      f.querySelectorAll("[data-dc]").forEach(b=>b.onclick=()=>{keep();m.date=b.dataset.dc;draw()});
+      f.querySelector("#ud").onchange=()=>{keep();draw()};
+      f.querySelector("#go").onclick=()=>run(true);
       f.querySelectorAll("[data-q]").forEach(b=>b.onclick=()=>{keep();const wk=sum(range(7),eggsOn),all=sum(S.eggs,e=>e.count);
         const add={week:`This week our hens laid ${wk} eggs, about ${num(wk/7,1)} a day.`,total:`So far our hens have laid ${num(all)} eggs (${num(all/12)} dozen).`,thanks:"Thank you to everyone who supports our hens and our school project!"}[b.dataset.q];
         m.text=(m.text.trim()?m.text.trim()+"\n":"")+add;draw()});
     };
     const run=async send=>{
-      keep();const file=m.file||(m.keep&&existing?mkFile(existing.blob,m.date):null);
-      if(!m.title.trim()&&!m.text.trim()&&!file){m.err="Add a photo, video or message first.";draw();return}
+      keep();
+      if(!m.title.trim()&&!m.text.trim()&&!m.items.length){m.err="Add a photo, video or message first.";draw();return}
       const data={title:m.title.trim(),text:m.text.trim(),date:m.date},text=composeText(data);
-      const sharing=send?shareNow(text,file):null;          /* started first, inside the tap, so the phone allows it */
-      const id=rec?.id||uid();let media=rec?.media||null;
+      const files=m.items.map((it,i)=>it.file||(it.blob?mkFile(it.blob,m.date,i):null)).filter(Boolean);
+      const sharing=send?shareNow(text,files):null;          /* started first, inside the tap, so the phone allows it */
+      const id=rec?.id||uid(),keepIds=new Set(m.items.filter(x=>x.id).map(x=>x.id)),ids=[];
       try{
-        if(m.file){await mPut(id,m.file);dropMedia(id);media=id;queueMedia(id)}
-        else if(!m.keep&&rec?.media){await mDel(rec.media);dropMedia(rec.media);removeCloudMedia(rec.media);media=null}
-      }catch{toast("Couldn’t keep the photo or video on this browser. The message was saved.")}
-      const obj={id,...data,media,shared:rec?.shared||null};
+        if(rec)for(const old of itemIds(rec))if(!keepIds.has(old)){await mDel(old).catch(()=>{});dropMedia(old);removeCloudMedia(old)}
+        for(const it of m.items){if(it.id){ids.push(it.id);continue}const nid=uid();await mPut(nid,it.file);queueMedia(nid);ids.push(nid)}
+      }catch{toast("Couldn’t keep every photo or video on this browser. The message was saved.")}
+      const obj={id,...data,media:ids[0]||null,more:ids.slice(1),shared:rec?.shared||null};
       if(rec)Object.assign(rec,obj);else S.updates.unshift(obj);
       save();close();tab="updates";render();scrollTo(0,0);
-      if(!sharing){toast("Update saved.");return}
+      if(!sharing){toast(rec?"Story entry updated.":"Added to our story.");return}
       const r=await sharing;
       if(r==="shared"){obj.shared=today();save();render();toast("Shared. Thank you for keeping the community in the loop.")}
-      else if(r==="fallback")fallbackSheet(text,file);
+      else if(r==="fallback")fallbackSheet(text,files);
     };
-    f.onsubmit=e=>{e.preventDefault();run(true)};
+    f.onsubmit=e=>{e.preventDefault();run(false)};
     draw();
-    f.addEventListener("click",e=>{if(e.target.closest("#later"))run(false)});
   });
 }
 async function sendUpdate(id){
-  const u=S.updates.find(x=>x.id===id);if(!u)return;
-  const c=u.media?mediaCache.get(u.media):null;
-  if(u.media&&!c){await loadMedia(u.media).catch(()=>null);toast("Photo loaded. Tap Send again.");return}
-  const file=c?mkFile(c.blob,u.date):null,text=composeText(u);
-  const r=await shareNow(text,file);
+  const u=S.updates.find(x=>x.id===id);if(!u)return;const ids=itemIds(u);
+  const need=ids.filter(i=>!mediaCache.has(i));
+  if(need.length){await Promise.all(need.map(i=>loadMedia(i).catch(()=>null)));if(ids.every(i=>mediaCache.has(i))){toast("Photos loaded. Tap Send again.");return}}
+  const files=ids.filter(i=>mediaCache.has(i)).map((i,k)=>mkFile(mediaCache.get(i).blob,u.date,k)),text=composeText(u);
+  const r=await shareNow(text,files);
   if(r==="shared"){u.shared=today();save();render();toast("Shared. Thank you for keeping the community in the loop.")}
-  else if(r==="fallback")fallbackSheet(text,file);
+  else if(r==="fallback")fallbackSheet(text,files);
 }
 
 /* ---------- cloud sync (Supabase) ---------- */
@@ -1884,7 +1949,7 @@ async function weeklySheet(){
       <label class="f" for="wt">Message</label><textarea id="wt" class="t" rows="7">${esc(m.text)}</textarea>
       <p class="hint">${S.settings.signature?`Your sign-off “${esc(S.settings.signature)}” is added when you send.`:"Add a sign-off under More, Coop, prices & alerts."}</p>
       <div class="foot"><button class="btn primary block" id="send" ${m.busy?"disabled":""}>${ic("chat")}Send on WhatsApp</button>
-      <div class="row wr" style="margin-top:10px;justify-content:center"><button type="button" class="linkbtn" id="sv">Save to Updates</button><button type="button" class="linkbtn" id="cp">Copy text</button><button type="button" class="linkbtn" id="dl">Save image</button></div></div>`);
+      <div class="row wr" style="margin-top:10px;justify-content:center"><button type="button" class="linkbtn" id="sv">Save to story</button><button type="button" class="linkbtn" id="cp">Copy text</button><button type="button" class="linkbtn" id="dl">Save image</button></div></div>`);
       const pick=root.querySelector("#phpick"),pin=root.querySelector("#wph");
       pick.onclick=()=>pin.click();
       pin.onchange=async e=>{const file=e.target.files[0];if(!file)return;m.text=root.querySelector("#wt").value;
@@ -1918,7 +1983,7 @@ async function weeklySheet(){
       root.querySelector("#sv").onclick=async()=>{
         if(!m.blob)return;const id=uid();
         try{await mPut(id,m.blob);queueMedia(id)}catch{toast("Couldn’t keep the image on this browser. The text was saved.")}
-        S.updates.unshift({id,title:`Weekly report: ${dm(m.st.from)} to ${dm(m.st.to)}`,text:m.text,date:today(),media:id,shared:null});save();close();tab="updates";render();toast("Saved to Updates.")};
+        S.updates.unshift({id,title:`Weekly report: ${dm(m.st.from)} to ${dm(m.st.to)}`,text:m.text,date:today(),media:id,shared:null});save();close();tab="updates";render();toast("Saved to your story.")};
       root.querySelector("#cp").onclick=()=>{(navigator.clipboard?.writeText(composeText({text:m.text}))||Promise.reject()).then(()=>toast("Message copied."),()=>toast("Couldn’t copy. Select the text and copy it manually."))};
       root.querySelector("#dl").onclick=()=>{if(!m.blob)return;const a=document.createElement("a");a.href=m.url;a.download=file().name;a.click()};
     };
