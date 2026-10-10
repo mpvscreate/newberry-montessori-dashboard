@@ -258,6 +258,7 @@ html{overscroll-behavior-y:contain}
 .mtile .more{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.55);color:#fff;font:700 1.6rem var(--display);z-index:2}
 .egrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.egrid.empty{grid-template-columns:1fr}
 .etile{position:relative;aspect-ratio:1;border-radius:14px;overflow:hidden;background:var(--accent-soft)}.etile img,.etile video{width:100%;height:100%;object-fit:cover;display:block}
+.etile .fr{position:absolute;left:4px;bottom:4px;min-height:36px;padding:0 10px;border-radius:99px;border:0;background:rgba(0,0,0,.68);color:#fff;font:600 .78rem var(--body);display:inline-flex;align-items:center;gap:4px;cursor:pointer}
 .etile .rm{position:absolute;top:4px;right:4px;width:36px;height:36px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;display:grid;place-items:center;cursor:pointer}
 .eadd{aspect-ratio:1;border:2px dashed var(--field);border-radius:14px;background:var(--paper);color:var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:600 .8rem var(--body);cursor:pointer;padding:6px;text-align:center}
 .egrid.empty .eadd{aspect-ratio:auto;padding:26px 14px;font-size:1.05rem}
@@ -1302,14 +1303,52 @@ function openLightbox(entryId,start){
   lbKey=e=>{if(e.key==="Escape"){e.stopPropagation();e.preventDefault();closeLightbox()}else if(e.key==="ArrowRight"&&ids.length>1)show(i+1);else if(e.key==="ArrowLeft"&&ids.length>1)show(i-1)};
   document.addEventListener("keydown",lbKey,true);show(start);el.querySelector(".lb-x").focus();
 }
+async function frameRender(src,fr,maxPx){
+  try{const bm=await createImageBitmap(src),[aw,ah]=fr.ar,long=Math.min(maxPx||2400,Math.max(bm.width,bm.height));
+    const W=aw>=ah?long:Math.round(long*aw/ah),H=aw>=ah?Math.round(long*ah/aw):long,c=document.createElement("canvas");c.width=W;c.height=H;
+    const g=c.getContext("2d");g.fillStyle="#000";g.fillRect(0,0,W,H);coverDraw(g,bm,0,0,W,H,fr.z,fr.ox,fr.oy);
+    const b=await new Promise(r=>c.toBlob(r,"image/jpeg",.85));return b?new File([b],"photo.jpg",{type:"image/jpeg"}):null}catch{return null}
+}
+const FRAME_SHAPES=[["Wide",[4,3]],["Square",[1,1]],["Tall",[3,4]],["Cinema",[16,9]]];
 async function updSheet(rec,pre){
   const m={title:rec?.title||pre?.title||"",text:rec?.text||pre?.text||"",date:rec?.date||today(),items:[],err:"",psize:getPsize()},MAX=6;
   if(rec)for(const id of itemIds(rec)){const o=await loadMedia(id).catch(()=>null);m.items.push({id,file:null,orig:null,blob:o?o.blob:null,url:o?o.url:null,type:o?o.blob.type:"",size:o?o.blob.size:0})}
   sheet(rec?"Edit story entry":"Add to our story",`<form id="f" novalidate></form>`,(sh,close)=>{
     const f=sh.querySelector("#f");
     const keep=()=>{const g=i=>f.querySelector(i);if(g("#ut")){m.title=g("#ut").value;m.text=g("#ux").value;m.date=g("#ud").value||m.date}};
-    const tile=(it,i)=>`<div class="etile">${it.url?(it.type.startsWith("video")?`<video src="${it.url}#t=0.1" muted playsinline preload="metadata"></video><span class="play"></span>`:`<img src="${it.url}" alt="Photo ${i+1}">`):`<div class="mmiss">${ic("image")}</div>`}<button type="button" class="rm" data-rm="${i}" aria-label="Remove item ${i+1}">${ic("x","sm")}</button></div>`;
+    const tile=(it,i)=>`<div class="etile">${it.url?(it.type.startsWith("video")?`<video src="${it.url}#t=0.1" muted playsinline preload="metadata"></video><span class="play"></span>`:`<img src="${it.url}" alt="Photo ${i+1}">`):`<div class="mmiss">${ic("image")}</div>`}${it.url&&!it.type.startsWith("video")?`<button type="button" class="fr" data-fr="${i}" aria-label="Position and zoom photo ${i+1}">${ic("pencil","sm")}Frame</button>`:""}<button type="button" class="rm" data-rm="${i}" aria-label="Remove item ${i+1}">${ic("x","sm")}</button></div>`;
+    m.fr=null;
+    const openFrame=async i=>{const it=m.items[i],src=it.orig||it.file||it.blob;let bm;try{bm=await createImageBitmap(src)}catch{toast("Couldn’t open that photo.");return}
+      const fr=it.frame||{ar:[4,3],z:1,ox:0,oy:0};m.fr={i,bm,src,ar:fr.ar,z:fr.z,ox:fr.ox,oy:fr.oy};draw()};
+    const drawFrame=()=>{
+      const F=m.fr,[aw,ah]=F.ar,CWd=720,CHt=Math.round(720*ah/aw);
+      redraw(sh,f,`<p class="muted" style="margin:6px 0 0">Choose what shows in the picture. Drag to move it. Pinch or use the slider to zoom.</p>
+        <div class="chips" role="group" aria-label="Shape" style="margin-top:10px">${FRAME_SHAPES.map(([l,a])=>`<button type="button" class="chip" data-ar="${a.join(":")}" aria-pressed="${a[0]===aw&&a[1]===ah}">${l}</button>`).join("")}</div>
+        <div class="crop" id="fbox" style="width:100%;max-width:${ah>aw?340:480}px;aspect-ratio:${aw}/${ah};border-radius:18px"><canvas id="fcv" width="${CWd}" height="${CHt}" role="img" aria-label="Photo. Drag to move it."></canvas></div>
+        <div class="row" style="margin:12px 0 0"><label class="small muted" for="fz">Zoom</label><input id="fz" class="zoom" type="range" min="1" max="3" step="0.01" value="${F.z}"></div>
+        <div class="foot"><button type="button" class="btn primary block" id="fok">${ic("check")}Use this picture</button><button type="button" class="linkbtn" id="fno" style="display:block;margin:2px auto 0">Cancel</button></div>`);
+      const box=f.querySelector("#fbox"),cv=f.querySelector("#fcv"),zs=f.querySelector("#fz"),ps=new Map();let pd=0;
+      const paint=()=>{const mo=coverMax(F.bm,CWd,CHt,F.z);F.ox=Math.max(-mo[0],Math.min(mo[0],F.ox));F.oy=Math.max(-mo[1],Math.min(mo[1],F.oy));const g=cv.getContext("2d");g.fillStyle="#000";g.fillRect(0,0,CWd,CHt);coverDraw(g,F.bm,0,0,CWd,CHt,F.z,F.ox,F.oy)};
+      const setZoom=z=>{F.z=Math.max(1,Math.min(3,z));zs.value=F.z;paint()};
+      paint();
+      box.onpointerdown=e=>{try{box.setPointerCapture(e.pointerId)}catch{}ps.set(e.pointerId,[e.clientX,e.clientY]);pd=0};
+      box.onpointermove=e=>{if(!ps.has(e.pointerId))return;const prev=ps.get(e.pointerId);ps.set(e.pointerId,[e.clientX,e.clientY]);
+        if(ps.size===1){F.ox+=(e.clientX-prev[0])/box.clientWidth;F.oy+=(e.clientY-prev[1])/box.clientHeight;paint()}
+        else if(ps.size===2){const[a,b]=[...ps.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(pd)setZoom(F.z*d/pd);pd=d}};
+      const up=e=>{ps.delete(e.pointerId);pd=0};box.onpointerup=up;box.onpointercancel=up;
+      box.addEventListener("wheel",e=>{e.preventDefault();setZoom(F.z*(e.deltaY<0?1.06:.94))},{passive:false});
+      zs.oninput=()=>setZoom(+zs.value);
+      f.querySelectorAll("[data-ar]").forEach(b=>b.onclick=()=>{F.ar=b.dataset.ar.split(":").map(Number);drawFrame()});
+      f.querySelector("#fno").onclick=()=>{m.fr=null;draw()};
+      f.querySelector("#fok").onclick=async()=>{const it=m.items[F.i];f.querySelector("#fok").disabled=true;
+        const file=await frameRender(F.src,{ar:F.ar,z:F.z,ox:F.ox,oy:F.oy},PSIZES[m.psize][1]||2400);
+        if(!file){m.fr=null;draw();return}
+        if(it.file&&it.url)URL.revokeObjectURL(it.url);
+        Object.assign(it,{id:null,file,blob:file,url:URL.createObjectURL(file),type:"image/jpeg",size:file.size,orig:F.src,frame:{ar:F.ar,z:F.z,ox:F.ox,oy:F.oy}});
+        m.fr=null;draw()};
+    };
     const draw=()=>{
+      if(m.fr)return drawFrame();
       const t=composeText({title:m.title.trim(),text:m.text.trim()}),hasImg=m.items.some(x=>x.orig),big=m.items.some(x=>x.type.startsWith("video")&&x.size>16*1048576);
       redraw(sh,f,`
       <div style="margin-top:10px"><div class="egrid ${m.items.length?"":"empty"}">${m.items.map(tile).join("")}${m.items.length<MAX?`<button type="button" class="eadd" id="pick">${ic("camera","lg")}<span>${m.items.length?"Add more":"Add photos or videos"}</span>${m.items.length?"":`<span class="small muted" style="font-weight:400">Take one now or choose from your gallery. Up to ${MAX}.</span>`}</button>`:""}</div>
@@ -1329,8 +1368,9 @@ async function updSheet(rec,pre){
           const pf=await prepPhoto(file,PSIZES[m.psize][1]);m.items.push({id:null,file:pf,orig:file.type.startsWith("image/")?file:null,blob:pf,url:URL.createObjectURL(pf),type:pf.type,size:pf.size})}
         draw()};
       f.querySelectorAll("[data-ps]").forEach(b=>b.onclick=async()=>{keep();m.psize=b.dataset.ps;try{localStorage.setItem("flock-psize",m.psize)}catch{}
-        for(const it of m.items)if(it.orig){const pf=await prepPhoto(it.orig,PSIZES[m.psize][1]);URL.revokeObjectURL(it.url);Object.assign(it,{file:pf,blob:pf,url:URL.createObjectURL(pf),type:pf.type,size:pf.size})}
+        for(const it of m.items)if(it.orig){const pf=it.frame?await frameRender(it.orig,it.frame,PSIZES[m.psize][1]||2400):await prepPhoto(it.orig,PSIZES[m.psize][1]);if(!pf)continue;if(it.file&&it.url)URL.revokeObjectURL(it.url);Object.assign(it,{file:pf,blob:pf,url:URL.createObjectURL(pf),type:pf.type,size:pf.size})}
         draw()});
+      f.querySelectorAll("[data-fr]").forEach(b=>b.onclick=()=>{keep();openFrame(+b.dataset.fr)});
       f.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{keep();const it=m.items.splice(+b.dataset.rm,1)[0];if(it&&it.file&&it.url)URL.revokeObjectURL(it.url);draw()});
       f.querySelectorAll("[data-dc]").forEach(b=>b.onclick=()=>{keep();m.date=b.dataset.dc;draw()});
       f.querySelector("#ud").onchange=()=>{keep();draw()};
