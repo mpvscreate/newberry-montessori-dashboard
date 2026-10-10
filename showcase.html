@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en-ZA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<title>Production showcase</title>
+<link rel="icon" type="image/png" sizes="32x32" href="icons/productions-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/productions-apple-180.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400..700&display=swap">
+<style>
+:root{--paper:#fbf6ec;--sheet:#fff;--ink:#221c11;--muted:#6c6250;--line:#ece3cf;--green:#0b7a55;--sky:#2a6b8f;--amber:#e0a020;--red:#b3261e;--shadow:0 1px 2px rgba(70,45,10,.05),0 10px 30px rgba(70,45,10,.08);--display:"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif;--body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;--pc:#a65608}
+@media (prefers-color-scheme:dark){:root{--paper:#14110c;--sheet:#1e1a13;--ink:#f4ecdc;--muted:#b1a68e;--line:#342e22;--green:#4fd1a1;--sky:#6db7e0;--shadow:0 10px 30px rgba(0,0,0,.4)}}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 1rem/1.5 var(--body)}
+h1,h2,h3{font-family:var(--display);letter-spacing:-.02em;margin:0}
+main{max-width:760px;margin:0 auto;padding:0 16px calc(40px + env(safe-area-inset-bottom));overflow-x:hidden}
+.load,.err{text-align:center;color:var(--muted);padding:80px 16px}
+.hero{margin:0 -16px 18px;padding:calc(28px + env(safe-area-inset-top)) 20px 26px;color:#fff;background:linear-gradient(145deg,color-mix(in srgb,var(--pc) 88%,#fff),color-mix(in srgb,var(--pc) 70%,#000));border-radius:0 0 34px 34px;box-shadow:var(--shadow)}
+@media (min-width:780px){.hero{margin:16px 0 22px;border-radius:34px}}
+.brand{display:flex;align-items:center;gap:10px;font-size:.85rem;opacity:.92;margin-bottom:18px}.brand img{height:30px;width:auto;border-radius:6px}
+.hrow{display:flex;align-items:center;gap:14px}.hrow>div:nth-child(2){flex:1;min-width:0}
+.pav{width:56px;height:56px;border-radius:18px;background:rgba(255,255,255,.2);display:grid;place-items:center;flex:none}.pav svg{width:34px;height:34px;fill:none;stroke:#fff;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.hero h1{font-size:clamp(1.5rem,6vw,2.4rem);line-height:1.1;overflow-wrap:anywhere}.hero p{margin:6px 0 0;opacity:.92}
+.term{display:inline-block;margin-top:8px;font-size:.8rem;font-weight:600;background:rgba(255,255,255,.2);border-radius:99px;padding:3px 12px}
+.ring{width:72px;height:72px;flex:none;margin-left:auto;position:relative}.ring svg{width:100%;height:100%;transform:rotate(-90deg)}.ring b{position:absolute;inset:0;display:grid;place-items:center;font:700 1.1rem var(--display)}
+.stats{display:grid;grid-template-columns:1fr 1fr 1.7fr;gap:10px;margin-bottom:16px}
+.stat{background:var(--sheet);border-radius:20px;padding:12px 14px;box-shadow:var(--shadow);min-width:0}.stat b{display:block;font:700 1.6rem/1.1 var(--display);font-variant-numeric:tabular-nums}.stat b.sm{font-size:1rem;line-height:1.25;overflow-wrap:anywhere}.stat span{font-size:.8rem;color:var(--muted)}
+.card{background:var(--sheet);border-radius:26px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}.card h2{font-size:1.2rem;margin-bottom:12px}
+.cmps{--x:50%;position:relative;border-radius:18px;overflow:hidden;aspect-ratio:4/3;background:var(--line);-webkit-user-select:none;user-select:none}
+.cmps img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.cmps .b{clip-path:inset(0 calc(100% - var(--x)) 0 0)}
+.cl{position:absolute;top:0;bottom:0;left:var(--x);width:3px;margin-left:-1.5px;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.25)}
+.kn{position:absolute;top:50%;left:var(--x);width:44px;height:44px;margin:-22px 0 0 -22px;border-radius:50%;background:#fff;color:#221c11;box-shadow:0 2px 10px rgba(0,0,0,.35);display:grid;place-items:center;font-weight:700}
+.tg{position:absolute;bottom:10px;background:rgba(0,0,0,.65);color:#fff;border-radius:99px;padding:3px 10px;font-size:.78rem;font-weight:600;pointer-events:none}.tg.l{left:10px}.tg.r{right:10px}
+.cmps input{position:absolute;inset:0;width:100%;height:100%;margin:0;opacity:0;cursor:ew-resize;touch-action:pan-y}.cmps:focus-within{outline:3px solid var(--green);outline-offset:2px}
+.hint{font-size:.82rem;color:var(--muted);margin:8px 0 0}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.grid button{border:0;padding:0;border-radius:16px;overflow:hidden;aspect-ratio:1;background:var(--line);cursor:pointer;position:relative}.grid img{width:100%;height:100%;object-fit:cover;display:block}
+.goal{padding:10px 0;border-top:1px solid var(--line)}.goal:first-of-type{border-top:0}.goal .t{display:flex;justify-content:space-between;gap:10px}.goal .t span{font-weight:600}.goal .t em{font-style:normal;color:var(--muted);font-variant-numeric:tabular-nums}
+.meter{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin-top:6px}.meter i{display:block;height:100%;border-radius:99px;background:var(--pc);min-width:0}
+.done li{margin:4px 0}.done{padding-left:20px;margin:6px 0 0;color:var(--muted)}
+.m3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}.m3 div{background:var(--paper);border-radius:16px;padding:10px 12px}.m3 span{display:block;font-size:.78rem;color:var(--muted)}.m3 b{font:700 1.02rem var(--display);font-variant-numeric:tabular-nums}.pos{color:var(--green)}.neg{color:var(--red)}
+.chart{display:block;width:100%;height:150px}.chart path{fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.keys{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--muted);margin-top:8px}.keys i{display:inline-block;width:16px;border-top:3px solid;vertical-align:middle;margin-right:6px;border-radius:2px}
+blockquote{margin:0 0 12px;padding:2px 0 2px 14px;border-left:4px solid var(--pc)}blockquote small{display:block;color:var(--muted);margin-bottom:2px}
+footer{text-align:center;color:var(--muted);font-size:.82rem;padding:10px 0}
+.lb{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px}.lb[hidden]{display:none}
+.lb img{max-width:100%;max-height:78vh;border-radius:14px}.lb p{color:#fff;margin:12px 0 0;text-align:center}
+.lb button{position:absolute;border:0;background:rgba(255,255,255,.18);color:#fff;width:48px;height:48px;border-radius:50%;font-size:1.4rem;cursor:pointer}.lb .x{top:calc(12px + env(safe-area-inset-top));right:12px}.lb .p{left:10px;top:50%}.lb .n{right:10px;top:50%}
+@media (prefers-reduced-motion:no-preference){.card,.stat{animation:in .4s ease both}@keyframes in{from{opacity:0;transform:translateY(8px)}}}
+</style>
+</head>
+<body>
+<main id="app"><p class="load">Loading the showcase…</p></main>
+<div class="lb" id="lb" hidden role="dialog" aria-modal="true" aria-label="Photo"><button class="x" id="lb-x" aria-label="Close">&times;</button><button class="p" id="lb-p" aria-label="Previous photo">&lsaquo;</button><img id="lb-i" alt=""><p id="lb-c"></p><button class="n" id="lb-n" aria-label="Next photo">&rsaquo;</button></div>
+<script>
+(function(){
+const SB="https://oikwudpqmbnssttatlhc.supabase.co",KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pa3d1ZHBxbWJuc3N0dGF0bGhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTMzODEsImV4cCI6MjA5NTY4OTM4MX0.p6I9qlvre5TjF3qOVjAIBus3_PNrbvCF2cMXHe3uiXw";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num=v=>{v=Number(v);return isFinite(v)?v:0};
+const rands=n=>"R "+num(n).toLocaleString("en-ZA",{minimumFractionDigits:2,maximumFractionDigits:2});
+const dShort=t=>new Date(t).toLocaleDateString("en-ZA",{day:"numeric",month:"short"});
+const tok=(location.hash||"").slice(1).replace(/[^A-Za-z0-9_-]/g,"");
+const app=$("#app");
+async function rpc(fn,body){const r=await fetch(SB+"/rest/v1/rpc/"+fn,{method:"POST",headers:{apikey:KEY,Authorization:"Bearer "+KEY,"Content-Type":"application/json"},body:JSON.stringify(body)});if(!r.ok)throw new Error("http "+r.status);return r.json()}
+/* the icon comes from the database, so only plain drawing shapes are let through */
+function cleanIcon(markup){
+  const ok={path:["d"],circle:["cx","cy","r"],rect:["x","y","width","height","rx","ry"],line:["x1","y1","x2","y2"],polyline:["points"],polygon:["points"],ellipse:["cx","cy","rx","ry"]},NS="http://www.w3.org/2000/svg";
+  const svg=document.createElementNS(NS,"svg");svg.setAttribute("viewBox","0 0 24 24");svg.setAttribute("aria-hidden","true");
+  try{const doc=new DOMParser().parseFromString('<svg xmlns="'+NS+'">'+String(markup||"")+'</svg>',"image/svg+xml");
+    [...doc.documentElement.children].forEach(n=>{const t=n.localName;if(!ok[t])return;const e=document.createElementNS(NS,t);ok[t].forEach(a=>{const v=n.getAttribute(a);if(v!==null&&/^[-0-9a-zA-Z.,\s]*$/.test(v))e.setAttribute(a,v)});svg.append(e)})}catch(e){}
+  return svg;
+}
+const imgs={};
+async function loadImg(id){if(imgs[id])return imgs[id];try{const u=await rpc("ms_showcase_img",{t:tok,i:id});if(typeof u==="string"&&u.indexOf("data:image/")===0){imgs[id]=u;return u}}catch(e){}return null}
+async function fillImgs(root){
+  const els=[...root.querySelectorAll("img[data-id]")],q=els.slice();
+  const worker=async()=>{while(q.length){const el=q.shift(),u=await loadImg(el.dataset.id);if(u&&el.isConnected){el.src=u;el.removeAttribute("data-id")}}};
+  await Promise.all([worker(),worker(),worker(),worker()]);
+}
+function ringSvg(p,col){const r=34,C=2*Math.PI*r;return '<svg viewBox="0 0 84 84" aria-hidden="true"><circle cx="42" cy="42" r="'+r+'" fill="none" stroke="rgba(255,255,255,.28)" stroke-width="9"/><circle cx="42" cy="42" r="'+r+'" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-dasharray="'+(C*p/100).toFixed(1)+" "+C.toFixed(1)+'"/></svg>'}
+function moneyBlock(m){
+  const pf=num(m.inc)-num(m.sp);let chart="";const rows=(m.rows||[]).filter(r=>r&&r.d);
+  if(rows.length>=2){
+    const W=600,H=170,T=10,B=10,pfs=rows.map(r=>num(r.inc)-num(r.sp)),hi=Math.max(1,num(m.approved),...rows.map(r=>Math.max(num(r.sp),num(r.inc))))*1.06,lo=Math.min(0,...pfs)*1.12;
+    const t0=new Date(rows[0].d+"T12:00").getTime(),t1=new Date(rows[rows.length-1].d+"T12:00").getTime()||t0+1;
+    const X=d=>((new Date(d+"T12:00").getTime()-t0)/Math.max(1,t1-t0)*(W-4)+2).toFixed(1),Y=v=>(T+(hi-v)/(hi-lo)*(H-T-B)).toFixed(1);
+    const ln=f=>rows.map((r,i)=>(i?"L":"M")+X(r.d)+" "+Y(f(r))).join(" ");
+    chart='<svg class="chart" viewBox="0 0 '+W+" "+H+'" preserveAspectRatio="none" role="img" aria-label="Money over time">'+(lo<0?'<line x1="0" x2="'+W+'" y1="'+Y(0)+'" y2="'+Y(0)+'" stroke="#999" stroke-width="1"/>':"")+(num(m.approved)>0?'<line x1="0" x2="'+W+'" y1="'+Y(num(m.approved))+'" y2="'+Y(num(m.approved))+'" stroke="#8a8f98" stroke-width="1.5" stroke-dasharray="6 6"/>':"")+'<path stroke="#2f7fb0" d="'+ln(r=>num(r.inc))+'"/><path stroke="#e0a020" d="'+ln(r=>num(r.sp))+'"/><path stroke="#1f9f78" style="stroke-width:3.4" d="'+ln(r=>num(r.inc)-num(r.sp))+'"/></svg><div class="keys"><span><i style="border-color:#2f7fb0"></i>Money in</span><span><i style="border-color:#e0a020"></i>Money spent</span><span><i style="border-color:#1f9f78"></i>'+(pf>=0?"Profit":"Loss")+"</span>"+(num(m.approved)>0?'<span><i style="border-color:#8a8f98;border-top-style:dashed;border-top-width:2px"></i>Budget</span>':"")+"</div>";
+  }
+  return '<section class="card"><h2>Money</h2><div class="m3"><div><span>Money in</span><b>'+rands(m.inc)+'</b></div><div><span>Spent</span><b>'+rands(m.sp)+'</b></div><div><span>'+(pf>=0?"Profit":"Loss")+'</span><b class="'+(pf>=0?"pos":"neg")+'">'+rands(Math.abs(pf))+"</b></div></div>"+chart+"</section>";
+}
+function render(d){
+  const col=/^#[0-9a-fA-F]{3,8}$/.test(d.color||"")?d.color:"#a65608";
+  document.documentElement.style.setProperty("--pc",col);document.title=(d.name||"Production")+" · Showcase";
+  const pct=Math.max(0,Math.min(100,Math.round(num(d.pct))));
+  const photos=Array.isArray(d.photos)?d.photos:[],byId={};photos.forEach(p=>byId[p.id]=p);
+  const pair=d.pair&&byId[d.pair.a]&&byId[d.pair.b]?d.pair:null;
+  let h='<header class="hero"><div class="brand"><img src="icons/productions-96.png" alt="" height="30"><span>Newberry House Middle School · Production teams</span></div><div class="hrow"><div class="pav" id="pav"></div><div><h1>'+esc(d.name)+"</h1>"+(d.term?'<span class="term">'+esc(d.term)+"</span>":"")+'</div><div class="ring" role="img" aria-label="'+pct+' percent complete">'+ringSvg(pct)+"<b>"+pct+"%</b></div></div>"+(d.desc?"<p>"+esc(d.desc)+"</p>":"")+"</header>";
+  h+='<div class="stats"><div class="stat"><b>'+num(d.done)+"</b><span>goals done</span></div><div class=\"stat\"><b>"+num(d.open)+"</b><span>still to do</span></div><div class=\"stat\"><b class=\"sm\">"+esc(d.team||"")+"</b><span>team</span></div></div>";
+  if(pair)h+='<section class="card"><h2>Before and now</h2><div class="cmps" id="cmps"><img data-id="'+esc(pair.b)+'" alt="Now"><img class="b" data-id="'+esc(pair.a)+'" alt="Before"><span class="cl"></span><span class="kn" aria-hidden="true">&lsaquo;&rsaquo;</span><span class="tg l">Before · '+esc(dShort(byId[pair.a].t))+'</span><span class="tg r">Now · '+esc(dShort(byId[pair.b].t))+'</span><input type="range" min="0" max="100" value="50" aria-label="Slide to compare before and now"></div><p class="hint">Drag the handle to compare.</p></section>';
+  if(photos.length)h+='<section class="card"><h2>Photos</h2><div class="grid">'+photos.map((p,i)=>'<button data-i="'+i+'" aria-label="Open photo '+(i+1)+(p.cap?": "+esc(p.cap):"")+'"><img data-id="'+esc(p.id)+'" alt="'+esc(p.cap||"Production photo")+'"></button>').join("")+"</div></section>";
+  const goals=Array.isArray(d.goals)?d.goals:[];
+  if(goals.length||(d.doneTargets||[]).length){h+='<section class="card"><h2>Our goals</h2>'+goals.map(g=>'<div class="goal"><div class="t"><span>'+esc(g.t)+"</span><em>"+(g.done?"Done":Math.round(num(g.pct))+"%")+'</em></div><div class="meter"><i style="width:'+(g.done?100:Math.max(0,Math.min(100,num(g.pct))))+'%"></i></div></div>').join("")+((d.doneTargets||[]).length?'<h3 style="font-size:1rem;margin-top:14px">Recently finished</h3><ul class="done">'+d.doneTargets.map(t=>"<li>"+esc(t)+"</li>").join("")+"</ul>":"")+"</section>"}
+  if(d.money)h+=moneyBlock(d.money);
+  if(d.learned&&(d.learned.achieved||d.learned.chosen)){h+='<section class="card"><h2>What we learned</h2>'+(d.learned.chosen?"<blockquote><small>Our idea and why it matters</small>"+esc(d.learned.chosen)+"</blockquote>":"")+(d.learned.achieved?"<blockquote><small>What we achieved</small>"+esc(d.learned.achieved)+"</blockquote>":"")+"</section>"}
+  h+="<footer>Made by the production team"+(d.updated?" · Updated "+esc(new Date(d.updated).toLocaleDateString("en-ZA",{day:"numeric",month:"long",year:"numeric"})):"")+"<br>Questions about this page? Please contact the school.</footer>";
+  app.innerHTML=h;
+  const pav=$("#pav");if(pav)pav.append(cleanIcon(d.icon));
+  const c=$("#cmps");if(c){const r=c.querySelector("input"),set=()=>c.style.setProperty("--x",r.value+"%");r.addEventListener("input",set);set()}
+  /* lightbox */
+  let cur=0;const lb=$("#lb"),show=async i=>{cur=(i+photos.length)%photos.length;const p=photos[cur],u=await loadImg(p.id);$("#lb-i").src=u||"";$("#lb-i").alt=p.cap||"Production photo";$("#lb-c").textContent=p.cap||"";lb.hidden=false;$("#lb-x").focus()};
+  app.querySelectorAll(".grid button").forEach(b=>b.onclick=()=>show(+b.dataset.i));
+  $("#lb-x").onclick=()=>{lb.hidden=true};$("#lb-p").onclick=()=>show(cur-1);$("#lb-n").onclick=()=>show(cur+1);
+  lb.onclick=e=>{if(e.target===lb)lb.hidden=true};
+  document.onkeydown=e=>{if(lb.hidden)return;if(e.key==="Escape")lb.hidden=true;else if(e.key==="ArrowLeft")show(cur-1);else if(e.key==="ArrowRight")show(cur+1)};
+  fillImgs(app);
+}
+(async function(){
+  if(tok.length<20){app.innerHTML='<p class="err">This showcase link is not complete. Please ask for the link again.</p>';return}
+  try{const d=await rpc("ms_showcase_get",{t:tok});
+    if(!d||typeof d!=="object"){app.innerHTML='<p class="err">This showcase is not available. It may have been turned off.</p>';return}
+    render(d);
+  }catch(e){app.innerHTML='<p class="err">Could not load the showcase. Please check your internet and try again.</p>'}
+})();
+})();
+</script>
+</body>
+</html>

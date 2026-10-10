@@ -624,6 +624,8 @@ kbd{font:600 .85rem var(--body);min-width:34px;text-align:center;padding:4px 8px
 .cp-t span{position:absolute;left:6px;bottom:6px;background:rgba(0,0,0,.65);color:#fff;border-radius:99px;padding:2px 8px;font-size:.7rem;font-weight:600}
 .cp-t[aria-checked=true]{outline-color:var(--green)}
 .cp-t[aria-checked=true]::after{content:"";position:absolute;right:6px;top:6px;width:22px;height:22px;border-radius:50%;background:var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E") center/14px no-repeat}
+/* v5.7.0: showcase */
+#sc .t[readonly]{font-size:.9rem}
 </style>
 </head>
 <body>
@@ -740,7 +742,7 @@ function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.prods)
   const now=Date.now();return{prods:DEFAULTS.map(([name,icon,c],i)=>({id:"p"+i,name,icon,color:COLORS[c],desc:"",members:[],goals:[],log:[],del:false,u:now})),media:[]}}
 function loadSync(){try{return JSON.parse(localStorage.getItem(SYNC))||{}}catch{return{}}}
 const pctSeen={};
-function save(o){if(o)o.u=Date.now();if(o&&o.goals){const now=prodPct(o),was=pctSeen[o.id];if(was!==undefined&&was<100&&now===100&&o.goals.length)setTimeout(()=>fireworks(o.name),350);pctSeen[o.id]=now}try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem(SYNC,JSON.stringify(sm))}catch{toast("Storage is full. Delete some photos.")}scheduleSync()}
+function save(o){if(o)o.u=Date.now();if(o&&o.goals){const now=prodPct(o),was=pctSeen[o.id];if(was!==undefined&&was<100&&now===100&&o.goals.length)setTimeout(()=>fireworks(o.name),350);pctSeen[o.id]=now}try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem(SYNC,JSON.stringify(sm))}catch{toast("Storage is full. Delete some photos.")}scheduleSync();scAuto(o)}
 const prods=()=>S.prods.filter(p=>!p.del);
 const P=id=>S.prods.find(p=>p.id===id);
 const goalPct=g=>g.targets&&g.targets.length?Math.round(g.targets.filter(t=>t.done).length/g.targets.length*100):g.done?100:g.pct||0;
@@ -1132,7 +1134,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.6.2";
+const APP_VER="5.7.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1496,7 +1498,7 @@ function wrapTab(p){
   return voiceBar(p,"wrap")+acc(p,"rev","flag","End of term review",R.completed||p.txt.achieved?"In progress":"Look back on the term",stp(!!p.txt.achieved&&!!p.txt.compare,p.txt.achieved&&p.txt.compare?"Done":"To do"),rev)+
     acc(p,"refl","user","Individual reflections",`${refl.filter(r=>r.done).length} of ${p.members.length} written`,stp(refl.length>0&&refl.every(r=>r.done),refl.length?`${refl.filter(r=>r.done).length}/${refl.length}`:"No members"),rf)+
     acc(p,"hand","users","Handover to the next team",H.to?"Handed over":"Leave it ready to continue",stp(!!H.to,H.to?"Done":"To do"),hand)+
-    `<div class="card"><h2>Project book</h2><p class="muted" style="margin:0 0 12px">Everything you recorded, laid out like the printed Production Team Project Book. Print it or save it as a PDF.</p><button class="btn primary" id="book-x">${ic("printer")}Export project book</button></div>`+nextTermCard(p);
+    showcaseCard(p)+`<div class="card"><h2>Project book</h2><p class="muted" style="margin:0 0 12px">Everything you recorded, laid out like the printed Production Team Project Book. Print it or save it as a PDF.</p><button class="btn primary" id="book-x">${ic("printer")}Export project book</button></div>`+nextTermCard(p);
 }
 
 /* ---------- wiring ---------- */
@@ -2179,6 +2181,88 @@ function scrollHint(el){
 const shortDate=t=>new Date(t).toLocaleDateString(undefined,{day:"numeric",month:"short"});
 const cmpPair=(p,pics)=>{const c=p.cmp||{},a=pics.find(m=>m.id===c.a),b=pics.find(m=>m.id===c.b);return{first:a||pics.at(-1),last:b||pics[0],custom:!!(a&&b)}};
 const beforeNow=(p,pics)=>{const{first,last,custom}=cmpPair(p,pics);return `<div class="card"><div class="row between" style="margin-bottom:10px"><h2 style="margin:0;font-size:1.15rem;white-space:nowrap">Before and now</h2><button class="btn small" data-cmp="${p.id}" aria-label="Choose the before and now photos">${ic("image")}Choose photos</button></div><div class="cmps" id="cmps"><img data-mid="${last.id}" alt="Latest photo"><img class="cmp-b" data-mid="${first.id}" alt="Earliest photo"><span class="cmp-line" aria-hidden="true"></span><span class="cmp-knob" aria-hidden="true">${ic("left","sm")}${ic("chev","sm")}</span><span class="cmp-l l">Before · ${shortDate(first.t)}</span><span class="cmp-l r">Now · ${shortDate(last.t)}</span><input type="range" min="0" max="100" value="50" aria-label="Slide to compare the earliest and latest photo"></div><p class="small muted" style="margin:8px 0 0">Drag the handle, or use the arrow keys, to compare.${custom?" Using the photos you chose.":""}</p></div>`};
+/* ---------- showcase: a public, read-only page for each production ---------- */
+let sct={};
+function scAuto(o){const p=o&&(o.goals?o:P(o.pid));if(!p||!p.showcase||!p.showcase.on)return;clearTimeout(sct[p.id]);sct[p.id]=setTimeout(()=>scPublish(p,true),20000)}
+const scUrl=p=>location.origin+location.pathname.replace(/[^/]*$/,"")+"showcase.html#"+p.showcase.token;
+const scToken=()=>{const a=new Uint8Array(24);crypto.getRandomValues(a);return[...a].map(x=>"abcdefghijklmnopqrstuvwxyz0123456789"[x%36]).join("")};
+const scStatus=o=>{const t=(sm.scAt||{})[o.token];if(!t)return"Not published yet.";const m=Math.round((Date.now()-t)/60000);return"Last updated "+(m<1?"just now":m<60?m+" min ago":new Date(t).toLocaleString([],{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}))+"."};
+function scBuild(p){
+  ensureBook(p);const o=p.showcase||{},b=bud(p);
+  const apNew=mediaOf(p).filter(m=>m.type!=="video"&&m.consent==="ok"),ap=apNew.slice().sort((a,c)=>a.t-c.t);
+  let pair=null;if(apNew.length>=2){const c=cmpPair(p,apNew);pair={a:c.first.id,b:c.last.id}}
+  const ids=new Set(ap.slice(-12).map(m=>m.id));if(pair){ids.add(pair.a);ids.add(pair.b)}
+  const photos=ap.filter(m=>ids.has(m.id)).map(m=>({id:m.id,cap:String(m.cap||"").slice(0,90),t:m.t}));
+  const doneT=p.goals.flatMap(g=>(g.targets||[]).filter(t=>t.done).map(t=>({t:String(t.title||"").slice(0,100),at:t.doneAt||0}))).sort((a,c)=>c.at-a.at).slice(0,8).map(x=>x.t);
+  const first=m=>String(m).trim().split(/\s+/)[0];
+  const team=o.names&&p.members.length?p.members.slice(0,10).map(first).join(", ")+(p.members.length>10?" and more":""):p.members.length?p.members.length+" student"+(p.members.length===1?"":"s"):"Our team";
+  const d={v:1,name:p.name,icon:ICONS[p.icon]||"",color:p.color,desc:String(p.desc||"").slice(0,240),term:(p.info&&p.info.term)||"",pct:prodPct(p),done:p.goals.filter(g=>g.done).length,open:p.goals.filter(g=>!g.done).length,team,pair,photos,doneTargets:doneT,updated:Date.now(),
+    goals:p.goals.slice(0,15).map(g=>({t:String(g.title||"").slice(0,120),done:!!g.done,pct:goalPct(g)}))};
+  if(o.money){
+    const days=[...new Set([...p.exp,...p.inc].filter(e=>e.date).map(e=>e.date))].sort(),sumTo=(arr,x)=>Math.round(arr.filter(e=>e.date&&e.date<=x).reduce((a,e)=>a+toNum(e.amount),0)*100)/100;
+    d.money={inc:b.income,sp:b.spent,approved:b.approved,rows:days.slice(-60).map(x=>({d:x,inc:sumTo(p.inc,x),sp:sumTo(p.exp,x)}))};
+  }
+  if(o.learned)d.learned={achieved:String(p.txt.achieved||"").slice(0,600),chosen:String(p.txt.chosen||"").slice(0,400)};
+  return d;
+}
+async function scImage(id){
+  const u=await loadMedia(id);if(!u)return null;
+  const bl=await (await fetch(u)).blob(),bmp=await createImageBitmap(bl).catch(()=>null);if(!bmp)return null;
+  for(const[mx,q]of[[1000,.72],[800,.65],[640,.55]]){const k=Math.min(1,mx/Math.max(bmp.width,bmp.height)),c=document.createElement("canvas");c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);const url=c.toDataURL("image/jpeg",q);if(url.length<380000)return url}
+  return null;
+}
+async function scPublish(p,quiet){
+  const o=p.showcase;if(!o||!o.on||!o.token)return false;
+  if(!LV.on||!LV.space||!await ensureSb()){if(!quiet)toast("Connect this device with the school code first.");return false}
+  try{
+    const d=scBuild(p),r=await sb.rpc("ms_showcase_put",{s:LV.space,t:o.token,p:p.id,d});if(r.error)throw r.error;
+    sm.sc=sm.sc||{};const up=sm.sc[o.token]=sm.sc[o.token]||[];
+    for(const ph of d.photos){if(up.includes(ph.id))continue;const url=await scImage(ph.id);if(!url)continue;const q=await sb.rpc("ms_showcase_put_img",{s:LV.space,t:o.token,i:ph.id,d:url});if(q.error)throw q.error;up.push(ph.id)}
+    const keep=d.photos.map(x=>x.id);await sb.rpc("ms_showcase_prune",{s:LV.space,t:o.token,keep});
+    sm.sc[o.token]=up.filter(id=>keep.includes(id));(sm.scAt=sm.scAt||{})[o.token]=Date.now();persistSync();
+    return true;
+  }catch(e){console.warn("showcase",e);if(!quiet)toast(/bad code/i.test(e.message||"")?"The school code on this device is not valid.":"Couldn't update the showcase. Check your internet.");return false}
+}
+async function scOff(p){
+  const o=p.showcase;if(!o)return;const t=o.token;
+  try{if(t&&LV.on&&LV.space&&await ensureSb()){const r=await sb.rpc("ms_showcase_off",{s:LV.space,t});if(r.error)throw r.error}else if(t){toast("Connect with the school code to remove the page.");return false}}catch(e){toast("Couldn't turn the showcase off. Check your internet.");return false}
+  if(sm.sc)delete sm.sc[t];if(sm.scAt)delete sm.scAt[t];persistSync();o.on=false;o.token="";save(p);return true;
+}
+function showcaseSheet(p){
+  const o=p.showcase=p.showcase||{on:false,token:"",money:false,learned:false,names:false};
+  sheet("Showcase page",`<div id="sc"></div>`,(d,close)=>{
+    const root=d.querySelector("#sc");let busy=false;
+    const nOk=()=>mediaOf(p).filter(m=>m.type!=="video"&&m.consent==="ok").length;
+    const sw=(k,t,sub)=>`<div class="row between" style="margin:12px 0"><div><b>${t}</b><div class="small muted">${sub}</div></div><button type="button" role="switch" class="sw" data-k="${k}" aria-label="${t}" aria-checked="${!!o[k]}"><i></i></button></div>`;
+    const err=m=>{const e=root.querySelector("#sc-e");if(e){e.textContent=m;e.hidden=!m}};
+    const draw=()=>{
+      const url=o.on?scUrl(p):"",n=nOk();
+      root.innerHTML=`<p class="muted small" style="margin:4px 0 6px">${o.on?"Anyone with this link can see a read-only page about "+esc(p.name)+". It updates itself as you work.":"Share a read-only page with families and the community. Only photos marked Approved to share are shown. Updates, comments and student names never appear unless you switch first names on."}</p>
+      ${o.on?`<label class="f" for="sc-u">Your link</label><input class="t" id="sc-u" readonly value="${esc(url)}"><div class="row wr" style="margin-top:10px"><button class="btn small" id="sc-cp" type="button">${ic("copy")}Copy link</button><button class="btn small" id="sc-sh" type="button">${ic("share")}Share</button><button class="btn small" id="sc-pv" type="button">${ic("eye")}Preview</button></div><p class="small muted" id="sc-st" style="margin:10px 0 0">${scStatus(o)}</p>`:""}
+      <h3 class="sub-h">What to show</h3>${sw("money","Money","Income, spending and profit or loss")}${sw("learned","What we learned","Your chosen idea and what you achieved, from the Plan and Wrap-up tabs")}${sw("names","First names","Show the team's first names. Off shows only how many students.")}
+      <p class="small muted">${n} photo${n===1?"":"s"} marked Approved to share ${n===1?"will":"will"} appear (up to 14). Set consent in the Gallery.</p><p class="err" id="sc-e" role="alert" hidden></p>
+      <div class="row wr" style="margin-top:16px">${o.on?`<button class="btn danger" id="sc-off" type="button">Turn off</button><span class="grow"></span><button class="btn primary" id="sc-up" type="button">Update now</button>`:`<button class="btn primary grow" id="sc-on" type="button">Turn on and create link</button>`}</div>`;
+      wire();
+    };
+    const run=async(btn,label,fn)=>{if(busy)return;busy=true;const t=btn.innerHTML;btn.disabled=true;btn.textContent=label;try{await fn()}finally{busy=false;if(btn.isConnected){btn.disabled=false;btn.innerHTML=t}}};
+    const wire=()=>{
+      root.querySelectorAll(".sw").forEach(b=>b.onclick=async()=>{const k=b.dataset.k;o[k]=!o[k];b.setAttribute("aria-checked",String(!!o[k]));fb("tick");save(p);if(o.on){const ok=await scPublish(p,true);const st=root.querySelector("#sc-st");if(st)st.textContent=ok?scStatus(o):"Could not update yet. It will retry."}});
+      const on=root.querySelector("#sc-on");if(on)on.onclick=()=>run(on,"Creating link…",async()=>{
+        if(!LV.on){err("Connect this device with the school code first (Settings, then Live sync).");return}
+        err("");o.on=true;o.token=scToken();const ok=await scPublish(p,true);
+        if(!ok){o.on=false;o.token="";err("Couldn't create the page. Check your internet and the school code, then try again.");return}
+        save(p);fb("done");draw();toast("Showcase is live. Copy the link to share it.")});
+      const up=root.querySelector("#sc-up");if(up)up.onclick=()=>run(up,"Updating…",async()=>{const ok=await scPublish(p);const st=root.querySelector("#sc-st");if(st&&ok){st.textContent=scStatus(o);toast("Showcase updated.")}});
+      const off=root.querySelector("#sc-off");if(off){let armed=0;off.onclick=()=>{if(!armed){armed=1;off.textContent="Tap again to turn off";setTimeout(()=>{if(off.isConnected){armed=0;off.innerHTML="Turn off"}},4000);return}run(off,"Turning off…",async()=>{if(await scOff(p)){fb("del");draw();toast("Showcase turned off. The old link no longer works.")}})}}
+      const cp=root.querySelector("#sc-cp");if(cp)cp.onclick=()=>navigator.clipboard.writeText(scUrl(p)).then(()=>toast("Link copied."),()=>{root.querySelector("#sc-u").select();toast("Select the link and copy it.")});
+      const sh=root.querySelector("#sc-sh");if(sh)sh.onclick=async()=>{try{if(navigator.share)await navigator.share({title:p.name+" showcase",text:"See what our production team has been doing:",url:scUrl(p)});else cp.click()}catch{}};
+      const pv=root.querySelector("#sc-pv");if(pv)pv.onclick=()=>window.open(scUrl(p),"_blank","noopener");
+    };
+    draw();
+  });
+}
+BA.showcase=p=>showcaseSheet(p);
+const showcaseCard=p=>{const on=!!(p.showcase&&p.showcase.on);return `<div class="card"><h2>Showcase page</h2><p class="muted" style="margin:0 0 12px">${on?"Live. Families and the community can open your link any time. It updates as you add photos and finish goals.":"Share a read-only page with families and the community. You choose what appears, and only photos approved to share are shown."}</p><button class="btn ${on?"":"primary"}" data-ba="showcase:go">${ic("share")}${on?"Manage showcase":"Set up showcase"}</button></div>`};
 function cmpSheet(p){
   const pics=mediaOf(p).filter(m=>m.type!=="video").sort((a,b)=>a.t-b.t);
   if(pics.length<2){toast("Add at least two photos first.");return}
