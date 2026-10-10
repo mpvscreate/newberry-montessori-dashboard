@@ -189,6 +189,12 @@ input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
 .toast button{background:none;border:0;color:inherit;font-weight:700;cursor:pointer;padding:10px 12px;border-radius:10px;text-decoration:underline;min-height:44px}
 
 /* fab */
+html{overscroll-behavior-y:contain}
+#ptr{position:fixed;top:calc(env(safe-area-inset-top,0px) + 4px);left:50%;transform:translate(-50%,-60px);opacity:0;z-index:60;width:44px;height:44px;border-radius:50%;background:var(--sheet);color:var(--accent);border:1px solid var(--line);box-shadow:var(--shadow),0 4px 16px var(--glow-soft);display:grid;place-items:center;pointer-events:none;transition:transform .2s,opacity .2s}
+#ptr.ready{background:var(--accent);color:var(--accent-ink)}
+#ptr.spin{opacity:1;animation:ptrspin .9s linear infinite}
+@keyframes ptrspin{to{rotate:360deg}}
+@media (prefers-reduced-motion:reduce){#ptr.spin{animation:none}}
 .fab-wrap{position:fixed;right:16px;bottom:calc(88px + env(safe-area-inset-bottom));z-index:30;display:flex;flex-direction:column;align-items:flex-end;gap:10px}
 @media (min-width:900px){.fab-wrap{right:28px;bottom:28px}}
 .fab{width:60px;height:60px;border-radius:50%;border:0;background:var(--accent);color:var(--accent-ink);display:grid;place-items:center;cursor:pointer;box-shadow:0 0 0 6px var(--glow-soft),0 8px 28px var(--glow);transition:transform .2s,box-shadow .25s}
@@ -553,6 +559,36 @@ $("#fab").onclick=()=>setFab($("#fab").getAttribute("aria-expanded")!=="true");
 document.querySelectorAll("[data-fab]").forEach(b=>b.onclick=()=>{setFab(false);quick(b.dataset.fab)});
 function quick(k){({egg:()=>eggSheet(),cash:()=>sellSheet(),clip:()=>{careDate=today();careSub="daily";go("care")},bag:()=>purchaseSheet(),pulse:()=>healthSheet(),book:()=>openGuide(),share:()=>updSheet(),bird:()=>henForm()})[k]()}
 addEventListener("keydown",e=>{if(e.key==="Escape"){if(closeSheet)closeSheet();else if($("#fab").getAttribute("aria-expanded")==="true"){setFab(false);$("#fab").focus()}}});
+/* ---------- pull down to refresh, and a notice when a new version is out ---------- */
+const verSig=async()=>{try{const r=await fetch(location.pathname,{method:"HEAD",cache:"no-store"});return r.headers.get("etag")||r.headers.get("last-modified")||r.headers.get("content-length")||""}catch{return""}};
+let baseSig="",lastVerCheck=0;verSig().then(v=>baseSig=v);
+async function newVersion(){lastVerCheck=Date.now();const v=await verSig();return!!(baseSig&&v&&v!==baseSig)}
+function updateNotice(){clearTimeout(toastT);const t=document.createElement("div");t.className="toast";
+  t.innerHTML=`<span>A new version of the app is ready.</span><button type="button">Update</button>`;
+  t.querySelector("button").onclick=()=>location.reload();$("#toasts").replaceChildren(t)}
+let refreshing=false;
+async function refreshApp(){
+  if(refreshing)return;refreshing=true;const el=$("#ptr");el.classList.add("spin");el.style.transform="translate(-50%,56px)";
+  const t0=Date.now();
+  try{await syncNow()}catch{}
+  render();
+  const nv=await newVersion();
+  await new Promise(r=>setTimeout(r,Math.max(0,700-(Date.now()-t0))));
+  el.classList.remove("spin");el.style.transform="";el.style.opacity="";refreshing=false;
+  if(nv)updateNotice();else{crow();toast(user?"Synced. Everything is up to date.":"Refreshed. You have the latest version.")}
+}
+(()=>{const el=document.createElement("div");el.id="ptr";el.setAttribute("aria-hidden","true");el.innerHTML=ic("down");document.body.append(el);
+  let y0=null,pull=0;const T=70,blocked=()=>document.body.classList.contains("lock")||refreshing;
+  addEventListener("touchstart",e=>{y0=(scrollY<=0&&!blocked()&&e.touches.length===1)?e.touches[0].clientY:null;pull=0},{passive:true});
+  addEventListener("touchmove",e=>{if(y0===null)return;const dy=e.touches[0].clientY-y0;
+    if(dy<=0||scrollY>0){if(pull>0){pull=0;el.style.transform="";el.style.opacity=""}return}
+    if(dy>8&&e.cancelable)e.preventDefault();
+    pull=Math.min(dy*.5,96);el.style.opacity=Math.min(1,pull/40);el.style.transform=`translate(-50%,${pull-8}px) rotate(${pull>=T/1.4?180:0}deg)`;
+    el.classList.toggle("ready",pull>=T/1.4)},{passive:false});
+  const end=()=>{if(y0===null)return;const go=pull>=T/1.4;y0=null;el.classList.remove("ready");if(go)refreshApp();else{el.style.transform="";el.style.opacity=""}pull=0};
+  addEventListener("touchend",end);addEventListener("touchcancel",end);
+})();
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&Date.now()-lastVerCheck>10*6e4)newVersion().then(n=>{if(n)updateNotice()})});
 function go(t){tab=t;render();scrollTo(0,0);$("#view").focus({preventScroll:true})}
 document.querySelectorAll("nav.tabs button").forEach(b=>b.onclick=()=>go(b.dataset.tab));
 
@@ -670,7 +706,7 @@ function care(){
 function more(){
   const row=(i,t,s,a)=>`<li class="tap" data-act="${a}" tabindex="0" role="button"><div class="avatar">${ic(i)}</div><div class="grow"><b>${t}</b><div class="small muted">${s}</div></div>${ic("chev")}</li>`;
   return `<div class="page-h"><h2>More</h2></div><section class="card"><ul class="list">
-  ${row("moon","Appearance",({auto:"Auto, follows your phone",light:"Light",dark:"Dark"})[getTheme()],"theme")}${row("lock","App lock",lockOn()?`On · locks ${autoText()}`:"Ask for a PIN to open the app","applock")}${row("cloud","Cloud sync",user?`Signed in as ${esc(user.email||"")}`:"Sign in to share data with other staff","sync")}${standalone()?"":row("download","Install the app","Add the Flock icon to your home screen","install")}${row("leaf","Health guide",S.guide.length+" conditions · organic treatments & prevention","guide")}${row("users","Customers",S.customers.length+" saved","custs")}${row("sliders","Coop, prices & alerts",`${esc(S.coops[0].name)} · ${money(S.settings.price)} per dozen · feed alert at ${S.settings.lowFeedDays} days`,"prices")}${row("download","Backup & data","Download, restore or export","data")}</ul></section>
+  ${row("moon","Appearance",({auto:"Auto, follows your phone",light:"Light",dark:"Dark"})[getTheme()],"theme")}${row("bird","Hen sounds",soundOn()?"On · cluck when naming, crow on refresh":"Off","sound")}${row("lock","App lock",lockOn()?`On · locks ${autoText()}`:"Ask for a PIN to open the app","applock")}${row("cloud","Cloud sync",user?`Signed in as ${esc(user.email||"")}`:"Sign in to share data with other staff","sync")}${standalone()?"":row("download","Install the app","Add the Flock icon to your home screen","install")}${row("leaf","Health guide",S.guide.length+" conditions · organic treatments & prevention","guide")}${row("users","Customers",S.customers.length+" saved","custs")}${row("sliders","Coop, prices & alerts",`${esc(S.coops[0].name)} · ${money(S.settings.price)} per dozen · feed alert at ${S.settings.lowFeedDays} days`,"prices")}${row("download","Backup & data","Download, restore or export","data")}</ul></section>
   <p class="hint" style="text-align:center">Your data is saved on this device only. Download a backup now and then.${saveOK?"":" <b style='color:var(--red)'>Storage is full.</b>"}</p>`;
 }
 
@@ -678,7 +714,7 @@ function more(){
 function act(a,id){
   const A={
     go:()=>go(id),gofeed:()=>{careSub="feed";go("care")},gosales:()=>{eggSub="sales";go("eggs")},
-    logeggs:()=>eggSheet(),quickcare:()=>quickCare(),sell:()=>sellSheet(),buy:()=>purchaseSheet(),newhen:()=>henForm(),hen:()=>henDetail(id),
+    logeggs:()=>eggSheet(),sound:()=>{try{localStorage.setItem(SND_KEY,soundOn()?"off":"on")}catch{}render();if(soundOn())cluck(3,.12)},quickcare:()=>quickCare(),sell:()=>sellSheet(),buy:()=>purchaseSheet(),newhen:()=>henForm(),hen:()=>henDetail(id),
     hfst:()=>{henFilter.st=id;render()},
     eggsub:()=>{eggSub=id;render()},caresub:()=>{careSub=id;render()},
     cdprev:()=>{careDate=addDays(careDate,-1);render()},cdnext:()=>{if(careDate<today()){careDate=addDays(careDate,1);render()}},
@@ -806,10 +842,39 @@ function custSheet(){
 
 function resizePhoto(file,max=360){return new Promise(res=>{const img=new Image(),u=URL.createObjectURL(file);img.onload=()=>{const k=Math.min(1,max/Math.max(img.width,img.height)),c=document.createElement("canvas");c.width=Math.round(img.width*k);c.height=Math.round(img.height*k);c.getContext("2d").drawImage(img,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c.toDataURL("image/jpeg",.78))};img.onerror=()=>res(null);img.src=u})}
 const BREEDS=["Rhode Island Red","Sussex","Leghorn","Orpington","Plymouth Rock","Australorp","Boschveld","Koekoek","Bantam","Mixed breed"];
+/* hen sounds: a soft synthesised cluck, no audio files */
+const SND_KEY="flock-sound",soundOn=()=>{try{return localStorage.getItem(SND_KEY)!=="off"}catch{return true}};
+let AC;
+function cluck(n=1,gap=.14){
+  if(!soundOn())return;
+  try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();
+    const t0=AC.currentTime+.02;
+    for(let i=0;i<n;i++){const t=t0+i*gap,last=i===n-1&&n>1,o=AC.createOscillator(),fl=AC.createBiquadFilter(),g=AC.createGain(),base=360+Math.random()*70;
+      o.type="sawtooth";o.frequency.setValueAtTime(base*(last?2:1.5),t);o.frequency.exponentialRampToValueAtTime(base*.7,t+(last?.16:.09));
+      fl.type="bandpass";fl.frequency.value=950;fl.Q.value=2.2;
+      g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(last?.26:.2,t+.015);g.gain.exponentialRampToValueAtTime(.0001,t+(last?.2:.11));
+      o.connect(fl);fl.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+.22)}
+  }catch{}
+}
+/* rooster: cock-a-doodle-doo, four sliding notes with a little wobble */
+function crow(){
+  if(!soundOn())return;
+  try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();
+    const t0=AC.currentTime+.03;
+    const note=(at,f0,f1,dur,vol)=>{const t=t0+at,o=AC.createOscillator(),lfo=AC.createOscillator(),lg=AC.createGain(),a=AC.createBiquadFilter(),b=AC.createBiquadFilter(),g=AC.createGain();
+      o.type="sawtooth";o.frequency.setValueAtTime(f0,t);o.frequency.linearRampToValueAtTime(f1,t+dur);
+      lfo.frequency.value=26;lg.gain.value=f0*.035;lfo.connect(lg);lg.connect(o.frequency);
+      a.type="bandpass";a.frequency.value=1250;a.Q.value=3;b.type="peaking";b.frequency.value=2700;b.gain.value=7;
+      g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.03);g.gain.setValueAtTime(vol,t+dur-.05);g.gain.exponentialRampToValueAtTime(.0001,t+dur);
+      o.connect(a);a.connect(b);b.connect(g);g.connect(AC.destination);o.start(t);lfo.start(t);o.stop(t+dur+.02);lfo.stop(t+dur+.02)};
+    note(0,520,760,.16,.2);note(.2,700,820,.11,.2);note(.34,860,1060,.3,.24);note(.68,1020,520,.6,.24);
+  }catch{}
+}
 function henForm(h){
   const m={name:h?.name||"",breed:h?.breed||"",coop:h?.coop||S.coops[0].id,born:h?.born||"",note:h?.note||"",photo:h?.photo||null,err:""};
   sheet(h?`Edit ${h.name}`:"Add a hen",`<form id="f" novalidate></form>`,(sh,close)=>{
     const f=sh.querySelector("#f"),keep=()=>{const g=i=>f.querySelector(i);m.name=g("#hn").value;m.breed=g("#hb").value;m.born=g("#ha").value;m.note=g("#hnote").value};
+    let clucked=!!m.name;
     const draw=()=>{
       redraw(sh,f,`
       <div class="row" style="margin:10px 0 0"><div class="avatar" style="width:72px;height:72px;font-size:1.6rem">${m.photo?`<img src="${m.photo}" alt="Photo">`:m.name?esc(m.name[0].toUpperCase()):ic("bird","lg")}</div><div><input id="hfl" type="file" accept="image/*" hidden><button type="button" class="btn small" id="hpick">${ic("image")}${m.photo?"Change photo":"Add photo"}</button>${m.photo?`<button type="button" class="btn small danger" id="hrm" style="margin-left:6px">Remove</button>`:""}</div></div>
@@ -818,13 +883,14 @@ function henForm(h){
       <label class="f" for="ha">Hatched or arrived <span class="muted">(optional)</span></label><input id="ha" class="t" type="date" value="${m.born}" max="${today()}">
       <label class="f" for="hnote">Notes <span class="muted">(optional)</span></label><textarea id="hnote" class="t" rows="2" maxlength="300" placeholder="Personality, markings…">${esc(m.note)}</textarea>
       <div class="foot"><button class="btn primary block" id="go">${h?"Save changes":"Add hen"}</button></div>`);
+      f.querySelector("#hn").addEventListener("input",e=>{if(!clucked&&e.target.value.trim()){clucked=true;cluck(2)}});
       f.querySelector("#hpick").onclick=()=>f.querySelector("#hfl").click();
       f.querySelector("#hfl").onchange=async e=>{keep();const file=e.target.files[0];if(!file)return;m.photo=await resizePhoto(file);draw()};
       f.querySelector("#hrm")?.addEventListener("click",()=>{keep();m.photo=null;draw()});
     };
     f.onsubmit=e=>{e.preventDefault();keep();if(!m.name.trim()){m.err="Please give her a name.";draw();f.querySelector("#hn").focus();return}
       const rec={name:m.name.trim(),breed:m.breed.trim(),coop:m.coop,born:m.born,note:m.note.trim(),photo:m.photo};
-      let u;if(h)u=undoEdit(h,rec);else{const nh={id:uid(),status:"healthy",...rec};S.hens.push(nh);u=()=>S.hens.splice(S.hens.indexOf(nh),1)}save();close();render();toast(h?"Hen updated.":`${rec.name} joined the flock.`,u)};
+      let u;if(h)u=undoEdit(h,rec);else{const nh={id:uid(),status:"healthy",...rec};S.hens.push(nh);u=()=>S.hens.splice(S.hens.indexOf(nh),1);cluck(3,.12)}save();close();render();toast(h?"Hen updated.":`${rec.name} joined the flock.`,u)};
     draw();
   });
 }
