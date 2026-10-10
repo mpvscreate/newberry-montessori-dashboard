@@ -79,6 +79,12 @@ nav.tabs .dot{position:absolute;top:6px;left:50%;margin-left:8px;width:9px;heigh
 @media (hover:hover){nav.tabs button:hover:not([aria-current]){background:var(--accent-soft);color:var(--accent)}}
 
 /* bento */
+.qa{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:0 0 14px}
+.qa button{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:84px;padding:12px 6px;border-radius:22px;border:1px solid var(--line);background:var(--sheet);color:var(--ink);font:700 .95rem var(--body);cursor:pointer;box-shadow:var(--shadow);text-align:center;transition:transform .08s,box-shadow .25s}
+.qa button:active{transform:scale(.97)}
+.qa button.main{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 2px 6px var(--glow-soft),0 6px 22px var(--glow)}
+.qa button small{font:500 .74rem var(--body);opacity:.8}
+.qa button.done{border-color:var(--green);color:var(--green)}
 .bento{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:16px}
 @media (min-width:720px){.bento{grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}}
 .tile{position:relative;background:var(--sheet);border:1px solid var(--line);border-radius:26px;padding:16px;box-shadow:var(--shadow);text-align:left;display:flex;flex-direction:column;gap:6px;min-height:132px;overflow:hidden;color:inherit}
@@ -516,12 +522,13 @@ $("nav.tabs").innerHTML=TABS.map(([k,l,i])=>`<button data-tab="${k}">${ic(i)}<sp
 $("#today").textContent=new Date().toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long"});
 $("#fab-menu").innerHTML=[["egg","egg","Log eggs"],["cash","cash","Sell eggs"],["clip","clip","Daily check"],["bag","bag","Feed bought"],["pulse","pulse","Health note"],["book","book","Health guide"],["share","share","Share update"],["bird","bird","Add hen"]].map(([k,i,l])=>`<button class="fab-item" data-fab="${k}">${ic(i)}${l}</button>`).join("");
 
+const undoEdit=(rec,vals)=>{const old={...rec};Object.assign(rec,vals);return()=>{Object.keys(rec).forEach(k=>delete rec[k]);Object.assign(rec,old)}};
 let toastT;
 function toast(msg,undo){
   clearTimeout(toastT);const t=document.createElement("div");t.className="toast";
   t.innerHTML=`<span>${esc(msg)}</span>${undo?"<button>Undo</button>":""}`;
   if(undo)t.querySelector("button").onclick=()=>{undo();t.remove();save();render()};
-  $("#toasts").replaceChildren(t);toastT=setTimeout(()=>t.remove(),6000);
+  $("#toasts").replaceChildren(t);toastT=setTimeout(()=>t.remove(),undo?9000:6000);
 }
 let closeSheet=null,lastFocus=null;
 function sheet(title,html,onMount){
@@ -586,17 +593,22 @@ function home(){
   const days=range(7),vals=days.map(eggsOn),mx=Math.max(1,...vals);
   const st=stock(),cap=Math.max(st,72),rate=layRate(),cp=checksProgress(t),dl=minDaysLeft(),low=dl!==null&&dl<S.settings.lowFeedDays;
   const mStart=iso(new Date(new Date().getFullYear(),new Date().getMonth(),1)),rev=sum(S.sales.filter(s=>s.date>=mStart),saleTotal),att=attention(),cpd=costPerDozen();
-  const empty=!S.hens.length&&!S.eggs.length&&!S.sales.length;
+  const empty=!S.hens.length&&!S.eggs.length&&!S.sales.length,c0=checkOf(t,S.coops[0].id),careDone=+c0.fed>0&&!!c0.water;
   const hh=new Date().getHours(),greet=hh<12?"Good morning":hh<17?"Good afternoon":"Good evening";
   return `<div class="page-h"><h2>${greet}</h2></div>
   ${empty?`<div class="card empty">${ic("egg","xl")}<h3>Welcome to Newberry Flock</h3><p>Add your hens, then log eggs, feed and daily checks.<br>Want to look around first? Load some sample data.</p><div class="row wr" style="justify-content:center"><button class="btn primary" data-act="newhen">${ic("plus")}Add a hen</button><button class="btn" data-act="sample">${ic("sparkle")}Load sample data</button></div></div>`:""}
   ${syncPrompt()}
   ${holdBanner()}
+  <div class="qa" role="group" aria-label="Quick actions">
+    <button class="main" data-act="logeggs" type="button">${ic("egg","lg")}Log eggs<small>${e0?e0+" today":"Not yet today"}</small></button>
+    <button class="${careDone?"done":""}" data-act="quickcare" type="button">${ic(careDone?"check":"drop","lg")}Fed &amp; watered<small>${careDone?"Done today":"One tap"}</small></button>
+    <button data-act="sell" type="button">${ic("cash","lg")}Quick sale<small>${money(S.settings.price)} a dozen</small></button>
+  </div>
   <div class="bento">
     <section class="tile hero s2 r2" aria-label="Eggs today"><div class="lbl">${ic("egg")}Eggs today</div><div class="big">${e0}</div>
       <span class="chip-d">${ic(d>=0?"up":"down","sm")}${d===0?"Same as yesterday":Math.abs(d)+(d>0?" more":" fewer")+" than yesterday"}</span>
       <div class="bars" role="img" aria-label="Eggs per day, last 7 days: ${vals.join(", ")}">${days.map((dd,i)=>`<div class="${i===6?"now":""}"><i style="height:${Math.max(6,vals[i]/mx*100)}%"></i><span>${new Date(dd+"T12:00").toLocaleDateString("en-ZA",{weekday:"narrow"})}</span></div>`).join("")}</div>
-      <button class="btn ghost small" data-act="logeggs" style="margin-top:6px">${ic("plus")}Log eggs</button></section>
+</section>
     <button class="tile ${st<0?"alert":"green"}" data-act="stock"><div class="lbl">${ic("basket")}In stock</div><div class="big">${Math.max(0,Math.floor(st/12))}<span class="small muted" style="font:500 .9rem var(--body)"> dozen</span></div><div class="sub">${st<0?`Sales are ${-st} eggs ahead of what’s logged. Tap to fix.`:`${st} eggs ready to sell · tap to count`}</div><div class="meter ${st<=12?"low":st<=36?"mid":""}"><i style="width:${Math.min(100,Math.max(4,st/cap*100))}%"></i></div></button>
     <section class="tile warm"><div class="lbl">${ic("trend")}Laying rate</div><div class="ringbox">${ring(rate,"var(--accent)")}<div class="c">${rate===null?"–":Math.round(rate*100)+"%"}</div></div><div class="sub">${rate===null?"Add hens to see this":"7-day average · "+layingHens().length+" laying hens"}</div></section>
     <button class="tile sky" data-act="go" data-id="care"><div class="lbl">${ic("clip")}Daily checks</div><div class="ringbox">${ring(cp.total?cp.done/cp.total:0,"var(--sky)")}<div class="c">${cp.done}/${cp.total}</div></div><div class="sub">${cp.total&&cp.done===cp.total?"All done today":"Tap to tick off"}</div></button>
@@ -635,14 +647,16 @@ function eggs(){
 
 
 function care(){
-  const seg=`<div class="segc" role="group" aria-label="Section"><button aria-pressed="${careSub==="daily"}" data-act="caresub" data-id="daily">Daily checks</button><button aria-pressed="${careSub==="feed"}" data-act="caresub" data-id="feed">Feed</button><button aria-pressed="${careSub==="guide"}" data-act="caresub" data-id="guide">Guide</button></div>`;
+  const seg=`<div class="segc" role="group" aria-label="Section"><button aria-pressed="${careSub==="daily"}" data-act="caresub" data-id="daily">Daily checks</button><button aria-pressed="${careSub==="feed"}" data-act="caresub" data-id="feed">Feed & costs</button><button aria-pressed="${careSub==="guide"}" data-act="caresub" data-id="guide">Guide</button></div>`;
   if(careSub==="guide")return careGuide(seg);
   if(careSub==="feed"){
     const dl=minDaysLeft(),low=dl!==null&&dl<S.settings.lowFeedDays,cpd=costPerDozen();
-    return `<div class="page-h"><h2>Care</h2><button class="btn primary small" data-act="buy">${ic("bag")}Feed bought</button></div>${seg}
+    return `<div class="page-h"><h2>Care</h2></div>${seg}
+    <div class="row" style="margin-bottom:14px"><button class="btn primary grow" data-act="buy">${ic("bag")}Feed bought</button><button class="btn grow" data-act="newexp">${ic("plus")}Other cost</button></div>
     ${low?`<div class="warn" role="alert" style="margin:0 0 14px">${ic("alert")}<span><b>Feed is running low.</b> About ${Math.floor(dl)} day${Math.floor(dl)===1?"":"s"} left at the current pace. Time to reorder.</span></div>`:""}
     ${S.feeds.length?`<div class="bento" style="grid-template-columns:repeat(2,1fr)">${S.feeds.map(f=>{const st=feedStock(f.id),d=daysLeft(f.id),lw=d!==null&&d<S.settings.lowFeedDays;return `<section class="tile ${lw?"alert":"warm"}"><div class="lbl">${ic("grain")}${esc(f.name)}</div><div class="big">${num(Math.max(0,st),1)}<span class="small muted" style="font:500 .9rem var(--body)"> kg</span></div><div class="sub">${d===null?"Log daily feeding to estimate days left":`About ${Math.floor(d)} days left`}</div><div class="meter ${lw?"low":""}"><i style="width:${d===null?0:Math.min(100,d/30*100)}%"></i></div></section>`}).join("")}${cpd?`<section class="tile green"><div class="lbl">${ic("cash")}Feed cost per dozen</div><div class="big">${money(cpd)}</div><div class="sub">last 30 days</div></section>`:""}</div>`:""}
-    <section class="card"><h2>Purchases</h2>${S.purchases.length?`<ul class="list">${[...S.purchases].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,30).map(p=>`<li><div class="avatar">${ic("bag")}</div><div class="grow"><b>${esc(feedName(p.feed))} · ${num(p.kg,1)} kg</b><div class="small muted">${dlabel(p.date)}${p.supplier?" · "+esc(p.supplier):""}${p.organic?` · <span class="pill sky">Organic</span>`:""}${p.cert?" · cert "+esc(p.cert):""}</div></div><div class="end"><div class="amt">${money(p.cost)}</div><div class="small muted">${p.kg>0&&p.cost>0?money(p.cost/p.kg)+"/kg":""}</div></div><button class="btn small icon" data-act="editbuy" data-id="${p.id}" aria-label="Edit this purchase">${ic("pencil")}</button><button class="btn small icon danger" data-act="delbuy" data-id="${p.id}" aria-label="Delete this purchase">${ic("trash")}</button></li>`).join("")}</ul>`:`<div class="empty">${ic("bag","xl")}<h3>No feed recorded</h3><p>Log each bag you buy. With daily feeding ticks, the app estimates how many days are left.</p><button class="btn primary" data-act="buy">${ic("bag")}Log a purchase</button></div>`}</section>`;
+    <section class="card"><h2>Purchases</h2>${S.purchases.length?`<ul class="list">${[...S.purchases].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,30).map(p=>`<li><div class="avatar">${ic("bag")}</div><div class="grow"><b>${esc(feedName(p.feed))} · ${num(p.kg,1)} kg</b><div class="small muted">${dlabel(p.date)}${p.supplier?" · "+esc(p.supplier):""}${p.organic?` · <span class="pill sky">Organic</span>`:""}${p.cert?" · cert "+esc(p.cert):""}</div></div><div class="end"><div class="amt">${money(p.cost)}</div><div class="small muted">${p.kg>0&&p.cost>0?money(p.cost/p.kg)+"/kg":""}</div></div><button class="btn small icon" data-act="editbuy" data-id="${p.id}" aria-label="Edit this purchase">${ic("pencil")}</button><button class="btn small icon danger" data-act="delbuy" data-id="${p.id}" aria-label="Delete this purchase">${ic("trash")}</button></li>`).join("")}</ul>`:`<div class="empty">${ic("bag","xl")}<h3>No feed recorded</h3><p>Log each bag you buy. With daily feeding ticks, the app estimates how many days are left.</p><button class="btn primary" data-act="buy">${ic("bag")}Log a purchase</button></div>`}</section>
+    <section class="card"><div class="row between" style="margin-bottom:6px"><h2 style="margin:0">Other costs</h2><button class="btn small" data-act="goprofit">${ic("trend")}See profit</button></div><p class="hint" style="margin:0 0 8px">Setup, vet, bedding, equipment and repairs. Setup costs are tracked on their own, so they don’t distort your monthly profit.</p>${(()=>{const ex=[...S.expenses].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,15);return ex.length?`<ul class="list">${ex.map(e=>`<li><div class="avatar">${ic("bag")}</div><div class="grow"><b>${esc(e.category)}</b><div class="small muted">${dlabel(e.date)}${e.note?" · "+esc(e.note):""}</div></div><span class="amt">${money(e.amount)}</span><button class="btn small icon" data-act="editexp" data-id="${e.id}" aria-label="Edit this cost">${ic("pencil")}</button><button class="btn small icon danger" data-act="delexp" data-id="${e.id}" aria-label="Delete this cost">${ic("trash")}</button></li>`).join("")}</ul>`:`<div class="empty">${ic("bag","xl")}<h3>No other costs yet</h3><p>Coop build, fencing, hens, vet visits, bedding. Add them to see your real profit.</p><button class="btn primary" data-act="newexp">${ic("plus")}Add a cost</button></div>`})()}</section>`;
   }
   const d=careDate,prog=checksProgress(d);
   return `<div class="page-h"><h2>Care</h2></div>${seg}
@@ -664,7 +678,7 @@ function more(){
 function act(a,id){
   const A={
     go:()=>go(id),gofeed:()=>{careSub="feed";go("care")},gosales:()=>{eggSub="sales";go("eggs")},
-    logeggs:()=>eggSheet(),sell:()=>sellSheet(),buy:()=>purchaseSheet(),newhen:()=>henForm(),hen:()=>henDetail(id),
+    logeggs:()=>eggSheet(),quickcare:()=>quickCare(),sell:()=>sellSheet(),buy:()=>purchaseSheet(),newhen:()=>henForm(),hen:()=>henDetail(id),
     hfst:()=>{henFilter.st=id;render()},
     eggsub:()=>{eggSub=id;render()},caresub:()=>{careSub=id;render()},
     cdprev:()=>{careDate=addDays(careDate,-1);render()},cdnext:()=>{if(careDate<today()){careDate=addDays(careDate,1);render()}},
@@ -685,6 +699,13 @@ function act(a,id){
     delegg:()=>{const i=S.eggs.findIndex(x=>x.id===id),[r]=S.eggs.splice(i,1);save();render();toast("Egg entry deleted.",()=>S.eggs.splice(i,0,r))},prices:()=>pricesSheet(),data:()=>dataSheet(),sample:()=>sample()
   };A[a]?.();
 }
+function quickCare(){const t=today(),co=S.coops[0].id;careDate=t;const c=checkOf(t,co);
+  if(+c.fed>0&&c.water){go("care");return}
+  const kg=c.lastKg||lastKg(co);
+  if(!kg){careSub="daily";go("care");toast("Tick Fed and enter the kilograms. After that it is one tap.");return}
+  const old=structuredClone(S.checks[t]?.[co]||{});
+  setCheck(co,{fed:+c.fed>0?c.fed:kg,feed:c.feed||S.feeds[0]?.id,water:true});render();
+  toast(`Fed (${num(kg,1)} kg) and fresh water done.`,()=>{S.checks[t][co]=old})}
 function lastKg(co){for(const d of Object.keys(S.checks).sort().reverse()){const c=S.checks[d][co];if(c?.fed>0)return c.fed}return 0}
 function setCheck(co,patch){S.checks[careDate]=S.checks[careDate]||{};S.checks[careDate][co]={...S.checks[careDate][co],...patch};save()}
 function setFed(co,v){const kg=Math.max(0,parseFloat(v)||0);setCheck(co,{fed:kg});render()}
@@ -713,7 +734,7 @@ function eggSheet(rec){
       f.querySelector("#eg").onchange=()=>{keep();draw()};f.querySelector("#br").onchange=()=>{keep();draw()};
     };
     f.onsubmit=e=>{e.preventDefault();keep();if(m.count<=0){m.tried=true;draw();f.querySelector("#eg").focus();return}
-      if(rec){Object.assign(rec,{date:m.date,count:m.count,cracked:m.cracked});save();close();render();toast("Entry updated.");return}
+      if(rec){const u=undoEdit(rec,{date:m.date,count:m.count,cracked:m.cracked});save();close();render();toast("Entry updated.",u);return}
       const r={id:uid(),date:m.date,coop:m.coop,count:m.count,cracked:m.cracked};S.eggs.push(r);save();close();render();toast(`Logged ${m.count} eggs (${m.count-m.cracked} sellable).`,()=>S.eggs.splice(S.eggs.indexOf(r),1))};
     draw();
   });
@@ -753,7 +774,7 @@ function sellSheet(pre,rec){
     };
     f.onsubmit=e=>{e.preventDefault();const dv=parseFloat(f.querySelector("#doz").value);if(dv>0)m.doz=dv;const pv=parseFloat(f.querySelector("#pz").value);m.date=f.querySelector("#sd").value||today();
       const vals={date:m.date,cust:m.cust,eggs:Math.round(m.doz*12),price:isNaN(pv)?priceFor():pv,paid:m.paid};
-      if(rec){Object.assign(rec,vals);save();close();render();toast("Sale updated.");return}
+      if(rec){const u=undoEdit(rec,vals);save();close();render();toast("Sale updated.",u);return}
       const s={id:uid(),...vals};S.sales.push(s);save();close();render();toast(`Sold ${dz(s.eggs)} · ${money(saleTotal(s))}`,()=>S.sales.splice(S.sales.indexOf(s),1))};
     draw();
   });
@@ -770,7 +791,7 @@ function custForm(after,rec){
     sh.querySelectorAll("[data-t]").forEach(b=>b.onclick=()=>{m.type=b.dataset.t;sh.querySelectorAll("[data-t]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const nm=sh.querySelector("#nm"),name=nm.value.trim();if(!name){nm.setAttribute("aria-invalid","true");sh.querySelector("#e-nm").hidden=false;nm.focus();return}
       const vals={type:m.type,name,phone:sh.querySelector("#ph").value.trim()};
-      if(rec){Object.assign(rec,vals);save();close();render();after?.(rec.id);toast("Customer updated.");return}
+      if(rec){const u=undoEdit(rec,vals);save();close();render();after?.(rec.id);toast("Customer updated.",u);return}
       const c={id:uid(),...vals};S.customers.push(c);save();close();render();after?.(c.id)};
   });
 }
@@ -778,7 +799,7 @@ function custSheet(){
   sheet("Customers",`<ul class="list" style="margin:8px 0 14px">${S.customers.map(c=>`<li><div class="avatar ${c.type==="restaurant"?"green":""}">${ic(c.type==="restaurant"?"utensils":"user")}</div><div class="grow"><b>${esc(c.name)}</b><div class="small muted">${c.type==="restaurant"?"Restaurant":"Individual"}${c.phone?" · "+esc(c.phone):""}</div></div><button class="btn small icon" data-edit="${c.id}" aria-label="Edit ${esc(c.name)}">${ic("pencil")}</button><button class="btn small icon danger" data-del="${c.id}" aria-label="Delete ${esc(c.name)}">${ic("trash")}</button></li>`).join("")||`<li class="muted">No customers yet.</li>`}</ul><button class="btn primary block" id="add">${ic("plus")}Add customer</button>`,(sh,close)=>{
     sh.querySelector("#add").onclick=()=>{close();custForm(()=>custSheet())};
     sh.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>{const c=cust(b.dataset.edit);close();custForm(()=>custSheet(),c)});
-    sh.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const id=b.dataset.del,c=cust(id);close();confirmSheet(`Delete ${c.name}?`,"Their past sales stay in your records as walk-in sales.","Delete customer",()=>{S.sales.forEach(s=>{if(s.cust===id)s.cust=null});S.customers=S.customers.filter(x=>x.id!==id);save();render();toast("Customer deleted.")})});
+    sh.querySelectorAll("[data-del]").forEach(b=>b.onclick=()=>{const id=b.dataset.del,c=cust(id);close();confirmSheet(`Delete ${c.name}?`,"Their past sales stay in your records as walk-in sales.","Delete customer",()=>{const ci=S.customers.findIndex(x=>x.id===id),linked=S.sales.filter(s=>s.cust===id);linked.forEach(s=>s.cust=null);S.customers.splice(ci,1);save();render();toast("Customer deleted.",()=>{S.customers.splice(ci,0,c);linked.forEach(s=>s.cust=id)})})});
   });
 }
 
@@ -803,7 +824,7 @@ function henForm(h){
     };
     f.onsubmit=e=>{e.preventDefault();keep();if(!m.name.trim()){m.err="Please give her a name.";draw();f.querySelector("#hn").focus();return}
       const rec={name:m.name.trim(),breed:m.breed.trim(),coop:m.coop,born:m.born,note:m.note.trim(),photo:m.photo};
-      if(h)Object.assign(h,rec);else S.hens.push({id:uid(),status:"healthy",...rec});save();close();render();toast(h?"Hen updated.":`${rec.name} joined the flock.`)};
+      let u;if(h)u=undoEdit(h,rec);else{const nh={id:uid(),status:"healthy",...rec};S.hens.push(nh);u=()=>S.hens.splice(S.hens.indexOf(nh),1)}save();close();render();toast(h?"Hen updated.":`${rec.name} joined the flock.`,u)};
     draw();
   });
 }
@@ -826,7 +847,7 @@ function henDetail(id){
     sh.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>{close();healthSheet(null,S.health.find(x=>x.id===b.dataset.edit))});
     sh.querySelectorAll("[data-delh]").forEach(b=>b.onclick=()=>{const hid=b.dataset.delh,i=S.health.findIndex(x=>x.id===hid),[r]=S.health.splice(i,1);save();close();render();toast("Health note deleted.",()=>S.health.splice(i,0,r))});
     sh.querySelector("#edit").onclick=()=>{close();henForm(h)};
-    sh.querySelector("#del").onclick=()=>{close();confirmSheet(`Delete ${h.name}?`,"Her profile and health log are removed. Egg totals stay.","Delete hen",()=>{S.hens=S.hens.filter(x=>x.id!==id);S.health=S.health.filter(x=>x.hen!==id);save();render();toast(`${h.name} deleted.`)})};
+    sh.querySelector("#del").onclick=()=>{close();confirmSheet(`Delete ${h.name}?`,"Her profile and health log are removed. Egg totals stay.","Delete hen",()=>{const hi=S.hens.findIndex(x=>x.id===id),notes=S.health.filter(x=>x.hen===id);S.hens.splice(hi,1);S.health=S.health.filter(x=>x.hen!==id);save();render();toast(`${h.name} deleted.`,()=>{S.hens.splice(hi,0,h);S.health.push(...notes)})})};
   });
 }
 function healthSheet(pre,rec,prefill){
@@ -848,11 +869,11 @@ function healthSheet(pre,rec,prefill){
       f.querySelectorAll("[data-ty]").forEach(b=>b.onclick=()=>{keep();m.type=b.dataset.ty;draw()});};
     f.onsubmit=e=>{e.preventDefault();keep();if(!m.text.trim()){m.err="Please describe what happened.";draw();f.querySelector("#tx").focus();return}
       const vals={hen:m.hen,type:m.type,text:m.text.trim(),date:m.date,product:m.type==="treatment"?m.product.trim():"",hold:m.type==="treatment"?m.hold:0,holdUntil:m.type==="treatment"&&m.hold>0?addDays(m.date,m.hold):null};
-      if(rec){Object.assign(rec,vals);save();close();render();toast("Health note updated.");return}
-      S.health.push({id:uid(),...vals});const h=hen(m.hen);let extra="";
+      if(rec){const u=undoEdit(rec,vals);save();close();render();toast("Health note updated.",u);return}
+      const nr={id:uid(),...vals};S.health.push(nr);const h=hen(m.hen),prev=h.status;let extra="";
       if((m.type==="illness"||m.type==="injury")&&h.status==="healthy"){h.status="unwell";extra=` ${h.name} is now marked unwell.`}
       if(vals.holdUntil)extra+=` Her eggs are on hold until ${new Date(vals.holdUntil+"T12:00").toLocaleDateString("en-ZA",{day:"numeric",month:"short"})}.`;
-      save();close();render();toast("Health note saved."+extra)};
+      save();close();render();toast("Health note saved."+extra,()=>{S.health.splice(S.health.indexOf(nr),1);h.status=prev})};
     draw();
   });
 }
@@ -876,7 +897,7 @@ function purchaseSheet(rec){
       if(!feed){if(!m.newFeed.trim()){m.err="Please name this feed.";draw();f.querySelector("#nf").focus();return}feed=uid();S.feeds.push({id:feed,name:m.newFeed.trim()})}
       if(!(m.kg>0)){toast("Enter how many kilograms you bought.");return}
       const vals={date:m.date,feed,kg:m.kg,cost:parseFloat(m.cost)||0,supplier:m.supplier.trim(),organic:m.organic,cert:m.cert.trim()};
-      if(rec){Object.assign(rec,vals);save();close();render();toast("Purchase updated.");return}
+      if(rec){const u=undoEdit(rec,vals);save();close();render();toast("Purchase updated.",u);return}
       S.purchases.push({id:uid(),...vals});save();close();render();toast(`Added ${num(m.kg,1)} kg to feed stock.`)};
     draw();
   });
@@ -1401,7 +1422,8 @@ function stockSheet(){
 }
 
 /* ---------- costs & profit ---------- */
-const EXP_CATS=["Vet & medicine","Bedding & supplies","Equipment","Coop & repairs","Other"];
+const EXP_CATS=["Vet & medicine","Bedding & supplies","Equipment","Coop & repairs","Setup: coop & fencing","Setup: hens & chicks","Other"];
+const isSetup=c=>/^Setup/.test(c||"");
 let profPeriod="month";
 const PERIODS=[["month","This month"],["last","Last month"],["d90","90 days"],["all","All time"]];
 function periodRange(k){
@@ -1422,11 +1444,16 @@ function periodStats(from,to){
     if(kg>0&&bought>0){feed+=kg*(paid/bought);usedAny=true}
   }
   if(!usedAny)feed=sum(S.purchases.filter(p=>inR(p.date)),p=>+p.cost||0);
-  const ex=(S.expenses||[]).filter(e=>inR(e.date)),other=sum(ex,e=>+e.amount||0);
-  const byCat={};if(feed>0)byCat["Feed"]=feed;ex.forEach(e=>{byCat[e.category]=(byCat[e.category]||0)+(+e.amount||0)});
+  const ex=(S.expenses||[]).filter(e=>inR(e.date)),run=ex.filter(e=>!isSetup(e.category)),other=sum(run,e=>+e.amount||0),setup=sum(ex.filter(e=>isSetup(e.category)),e=>+e.amount||0);
+  const byCat={};if(feed>0)byCat["Feed"]=feed;run.forEach(e=>{byCat[e.category]=(byCat[e.category]||0)+(+e.amount||0)});
   const costs=feed+other,laid=sum(S.eggs.filter(e=>inR(e.date)),e=>e.count-(e.cracked||0)),soldEggs=sum(sales,s=>s.eggs);
-  return{income,feed,other,costs,profit:income-costs,byCat,expenses:ex,dozLaid:laid/12,dozSold:soldEggs/12,
+  return{income,feed,other,setup,costs,profit:income-costs,byCat,expenses:ex,dozLaid:laid/12,dozSold:soldEggs/12,
     costPerDoz:laid>0?costs/(laid/12):null,profitPerDoz:soldEggs>0?(income-costs)/(soldEggs/12):null};
+}
+function setupTile(){
+  const all=periodStats("0000-00-00","9999-12-31");if(!(all.setup>0))return"";
+  const back=Math.max(0,all.profit),pct=Math.min(1,back/all.setup),done=back>=all.setup;
+  return `<section class="tile s2 ${done?"green":""}" style="margin-bottom:16px;min-height:0"><div class="lbl">${ic("coop")}Setup costs paid back</div><div class="big">${Math.round(pct*100)}%</div><div class="sub">${money(back)} of ${money(all.setup)} one-off setup. Setup is kept out of monthly profit so it doesn’t distort it.</div><div class="meter"><i style="width:${Math.max(3,pct*100)}%"></i></div></section>`;
 }
 function profitView(seg){
   const[from,to]=periodRange(profPeriod),p=periodStats(from,to),label=PERIODS.find(x=>x[0]===profPeriod)[1];
@@ -1440,6 +1467,7 @@ function profitView(seg){
     <section class="tile s2 ${p.profit<0?"alert":"warm"}"><div class="lbl">${ic("trend")}Profit · ${label.toLowerCase()}</div><div class="big">${money(p.profit)}</div>
       <div class="sub">${p.profitPerDoz!==null?`${money(p.profitPerDoz)} profit per dozen sold`:"Sell some eggs to see profit per dozen"}${p.costPerDoz!==null?` · it costs about ${money(p.costPerDoz)} to produce a dozen`:""}</div></section>
   </div>
+  ${setupTile()}
   ${priceCard()}
   <section class="card"><h2>Where the money goes</h2>${cats.length?`<div class="cbars">${cats.map(([c,v])=>`<div class="cbar"><span>${esc(c)}</span><b class="amt">${money(v)}</b><div class="tr"><i style="width:${Math.max(3,v/top*100)}%"></i></div></div>`).join("")}</div>`:`<p class="muted" style="margin:0">No costs in this period yet. Feed you log under Care → Feed counts automatically. Add anything else with <b>Add expense</b>.</p>`}
     <p class="hint">Feed is counted as it’s used, at your average price per kg, so one big delivery doesn’t distort a month. This needs the “Fed” kilograms in Daily checks. Without them, bags count on the day you buy them.</p></section>
@@ -1454,13 +1482,13 @@ function expSheet(rec){
       <label class="f" for="am">Amount (R)</label><input id="am" data-autofocus class="t" type="number" inputmode="decimal" min="0" step="1" value="${esc(m.amount)}" ${m.err?'aria-invalid="true" aria-describedby="e-am"':""}>${m.err?`<p class="err" id="e-am" role="alert">${ic("alert")}${m.err}</p>`:""}
       <label class="f" for="nt">Note <span class="muted">(optional)</span></label><input id="nt" class="t" maxlength="80" value="${esc(m.note)}" placeholder="e.g. Wood shavings, vet visit">
       <label class="f" for="dt">Date</label><input id="dt" class="t" type="date" value="${m.date}" max="${today()}">
-      <p class="hint">Feed bought is already counted from Care → Feed. Don’t add it again here.</p>
+      <p class="hint">${isSetup(m.category)?"One-off setup cost. It’s tracked separately and not counted in monthly profit.":"Feed bought is already counted from Care → Feed &amp; costs. Don’t add it again here."}</p>
       <div class="foot"><button class="btn primary block" id="go">${rec?"Save changes":"Save expense"}</button></div>`);
       f.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{keep();m.category=b.dataset.c;draw()})};
     f.onsubmit=e=>{e.preventDefault();keep();const a=parseFloat(m.amount);
       if(!(a>0)){m.err="Enter how much it cost.";draw();f.querySelector("#am").focus();return}
       const vals={date:m.date,category:m.category,amount:a,note:m.note.trim()};
-      if(rec){Object.assign(rec,vals);save();close();render();toast("Expense updated.");return}
+      if(rec){const u=undoEdit(rec,vals);save();close();render();toast("Expense updated.",u);return}
       const r={id:uid(),...vals};S.expenses.push(r);save();close();render();toast(`Added ${money(a)} to costs.`,()=>S.expenses.splice(S.expenses.indexOf(r),1))};
     draw();
   });
