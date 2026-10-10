@@ -844,9 +844,23 @@ function resizePhoto(file,max=360){return new Promise(res=>{const img=new Image(
 const BREEDS=["Rhode Island Red","Sussex","Leghorn","Orpington","Plymouth Rock","Australorp","Boschveld","Koekoek","Bantam","Mixed breed"];
 /* hen sounds: a soft synthesised cluck, no audio files */
 const SND_KEY="flock-sound",soundOn=()=>{try{return localStorage.getItem(SND_KEY)!=="off"}catch{return true}};
-let AC;
+let AC,chickBuf=null,chickLoad=null;
+/* the real recording (sounds/chicken.mp3) is played in short slices; the synthesised sounds below are the fallback */
+function loadChicken(){
+  if(chickLoad||!soundOn())return;
+  try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();
+    chickLoad=fetch("sounds/chicken.mp3").then(r=>{if(!r.ok)throw 0;return r.arrayBuffer()}).then(ab=>AC.decodeAudioData(ab)).then(b=>{chickBuf=b}).catch(()=>{chickLoad=null})}catch{}
+}
+function playChicken(from,to){
+  if(!chickBuf||!AC)return false;
+  try{if(AC.state==="suspended")AC.resume();
+    const t=AC.currentTime+.01,dur=Math.min(to,chickBuf.duration)-from,src=AC.createBufferSource(),g=AC.createGain();
+    src.buffer=chickBuf;g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(1,t+.02);g.gain.setValueAtTime(1,t+dur-.1);g.gain.linearRampToValueAtTime(0,t+dur);
+    src.connect(g);g.connect(AC.destination);src.start(t,from,dur);return true}catch{return false}
+}
 function cluck(n=1,gap=.14){
   if(!soundOn())return;
+  loadChicken();if(playChicken(...(n>=3?[1.25,3.1]:[0,.75])))return;
   try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();
     const t0=AC.currentTime+.02;
     for(let i=0;i<n;i++){const t=t0+i*gap,last=i===n-1&&n>1,o=AC.createOscillator(),fl=AC.createBiquadFilter(),g=AC.createGain(),base=360+Math.random()*70;
@@ -859,6 +873,7 @@ function cluck(n=1,gap=.14){
 /* rooster: cock-a-doodle-doo, four sliding notes with a little wobble */
 function crow(){
   if(!soundOn())return;
+  loadChicken();if(playChicken(3,4.95))return;
   try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();if(AC.state==="suspended")AC.resume();
     const t0=AC.currentTime+.03;
     const note=(at,f0,f1,dur,vol)=>{const t=t0+at,o=AC.createOscillator(),lfo=AC.createOscillator(),lg=AC.createGain(),a=AC.createBiquadFilter(),b=AC.createBiquadFilter(),g=AC.createGain();
@@ -1768,7 +1783,7 @@ function sample(){
   save();render();toast("Sample data loaded.");
 }
 
-initMeta();scan();persistSync();setSync(syncState);
+initMeta();scan();persistSync();setSync(syncState);loadChicken();
 $("#sync").onclick=()=>{if(!sb){toast("Connecting…");initAuth();return}user?syncSheet():signInSheet()};
 applyTheme();
 render();
