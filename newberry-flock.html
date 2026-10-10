@@ -158,6 +158,10 @@ input[type=date]::-webkit-date-and-time-value{text-align:left;margin:0}
 .list li{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line);flex-wrap:wrap}
 .list li:first-child{border-top:0}.list li .grow{flex:1 1 9rem;overflow-wrap:anywhere}.list li .end{margin-left:auto;text-align:right}
 .list li.tap{cursor:pointer;border-radius:12px}
+.crop{position:relative;width:min(100%,320px);aspect-ratio:1;margin:12px auto 0;border-radius:24px;overflow:hidden;background:#000;touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}
+.crop:active{cursor:grabbing}.crop canvas{width:100%;height:100%;display:block}
+.cropring{position:absolute;inset:0;pointer-events:none;border-radius:50%;box-shadow:0 0 0 999px rgba(0,0,0,.55);border:2px solid rgba(255,255,255,.85)}
+input.zoom{flex:1;min-width:0;accent-color:var(--accent);height:32px}
 .avatar{width:46px;height:46px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none;overflow:hidden;font:700 1.1rem var(--display)}
 .avatar img{width:100%;height:100%;object-fit:cover}.avatar.green{background:var(--green-soft);color:var(--green)}
 .amt{font:700 1.1rem var(--display);white-space:nowrap}
@@ -903,14 +907,26 @@ function crow(){
     note(0,520,760,.16,.2);note(.2,700,820,.11,.2);note(.34,860,1060,.3,.24);note(.68,1020,520,.6,.24);
   }catch{}
 }
+/* photo framing: the picture is drawn "cover" into a square, then zoomed and shifted; offsets are fractions of the frame */
+const cropMax=(img,z)=>{const m=Math.min(img.width,img.height);return[(img.width/m*z-1)/2,(img.height/m*z-1)/2]};
+function cropDraw(ctx,img,size,z,ox,oy){
+  const base=size/Math.min(img.width,img.height)*z,dw=img.width*base,dh=img.height*base,mx=(dw-size)/2,my=(dh-size)/2;
+  ctx.fillStyle="#000";ctx.fillRect(0,0,size,size);
+  ctx.drawImage(img,(size-dw)/2+Math.max(-mx,Math.min(mx,ox*size)),(size-dh)/2+Math.max(-my,Math.min(my,oy*size)),dw,dh);
+}
 function henForm(h){
-  const m={name:h?.name||"",breed:h?.breed||"",coop:h?.coop||S.coops[0].id,born:h?.born||"",note:h?.note||"",photo:h?.photo||null,err:""};
+  const m={name:h?.name||"",breed:h?.breed||"",coop:h?.coop||S.coops[0].id,born:h?.born||"",note:h?.note||"",photo:h?.photo||null,src:h?.photo||null,zoom:1,ox:0,oy:0,dirty:false,err:""};
   sheet(h?`Edit ${h.name}`:"Add a hen",`<form id="f" novalidate></form>`,(sh,close)=>{
     const f=sh.querySelector("#f"),keep=()=>{const g=i=>f.querySelector(i);m.name=g("#hn").value;m.breed=g("#hb").value;m.born=g("#ha").value;m.note=g("#hnote").value};
-    let clucked=!!m.name;
+    let clucked=!!m.name,img=null,imgFor=null;
     const draw=()=>{
       redraw(sh,f,`
-      <div class="row" style="margin:10px 0 0"><div class="avatar" style="width:72px;height:72px;font-size:1.6rem">${m.photo?`<img src="${m.photo}" alt="Photo">`:m.name?esc(m.name[0].toUpperCase()):ic("bird","lg")}</div><div><input id="hfl" type="file" accept="image/*" hidden><button type="button" class="btn small" id="hpick">${ic("image")}${m.photo?"Change photo":"Add photo"}</button>${m.photo?`<button type="button" class="btn small danger" id="hrm" style="margin-left:6px">Remove</button>`:""}</div></div>
+      <input id="hfl" type="file" accept="image/*" hidden>
+      ${m.src?`<div class="crop" id="cropbox"><canvas id="crop" width="600" height="600" role="img" aria-label="Photo of the hen. Drag to move it."></canvas><div class="cropring"></div></div>
+        <div class="row" style="margin:12px 0 0"><label class="small muted" for="cz">Zoom</label><input id="cz" class="zoom" type="range" min="1" max="3" step="0.01" value="${m.zoom}"></div>
+        <p class="hint" style="margin:6px 0 10px">Drag the photo to position it inside the circle. Pinch or use the slider to zoom.</p>
+        <div class="row"><button type="button" class="btn small" id="hpick">${ic("image")}Change photo</button><button type="button" class="btn small danger" id="hrm">Remove</button></div>`
+      :`<button type="button" class="pickbox" id="hpick" style="margin-top:10px">${ic("camera","xl")}<b>Add a photo</b><span class="small muted">Take one now or choose from your gallery, then drag and zoom to fit</span></button>`}
       <label class="f" for="hn">Name</label><input id="hn" data-autofocus class="t" maxlength="40" placeholder="e.g. Henrietta" value="${esc(m.name)}" autocomplete="off" ${m.err?'aria-invalid="true" aria-describedby="e-hn"':""}>${m.err?`<p class="err" id="e-hn" role="alert">${ic("alert")}${m.err}</p>`:""}
       <label class="f" for="hb">Breed <span class="muted">(optional)</span></label><input id="hb" class="t" list="bl" maxlength="40" value="${esc(m.breed)}" autocomplete="off"><datalist id="bl">${BREEDS.map(b=>`<option value="${b}">`).join("")}</datalist>
       <label class="f" for="ha">Hatched or arrived <span class="muted">(optional)</span></label><input id="ha" class="t" type="date" value="${m.born}" max="${today()}">
@@ -918,11 +934,28 @@ function henForm(h){
       <div class="foot"><button class="btn primary block" id="go">${h?"Save changes":"Add hen"}</button></div>`);
       f.querySelector("#hn").addEventListener("input",e=>{if(!clucked&&e.target.value.trim()){clucked=true;cluck(2)}});
       f.querySelector("#hpick").onclick=()=>f.querySelector("#hfl").click();
-      f.querySelector("#hfl").onchange=async e=>{keep();const file=e.target.files[0];if(!file)return;m.photo=await resizePhoto(file);draw()};
-      f.querySelector("#hrm")?.addEventListener("click",()=>{keep();m.photo=null;draw()});
+      f.querySelector("#hfl").onchange=async e=>{keep();const file=e.target.files[0];if(!file)return;const d=await resizePhoto(file,1000);if(!d)return;m.src=d;m.photo=d;m.zoom=1;m.ox=0;m.oy=0;m.dirty=true;draw()};
+      f.querySelector("#hrm")?.addEventListener("click",()=>{keep();m.photo=null;m.src=null;img=null;imgFor=null;draw()});
+      const box=f.querySelector("#cropbox");
+      if(box){
+        const cv=f.querySelector("#crop"),zs=f.querySelector("#cz"),ps=new Map();let pd=0;
+        const paint=()=>{if(!img)return;const mo=cropMax(img,m.zoom);m.ox=Math.max(-mo[0],Math.min(mo[0],m.ox));m.oy=Math.max(-mo[1],Math.min(mo[1],m.oy));cropDraw(cv.getContext("2d"),img,600,m.zoom,m.ox,m.oy)};
+        const setZoom=z=>{m.zoom=Math.max(1,Math.min(3,z));m.dirty=true;zs.value=m.zoom;paint()};
+        const ready=i=>{img=i;imgFor=m.src;paint()};
+        if(img&&imgFor===m.src)paint();else{const i=new Image();i.onload=()=>ready(i);i.src=m.src}
+        box.onpointerdown=e=>{try{box.setPointerCapture(e.pointerId)}catch{}ps.set(e.pointerId,[e.clientX,e.clientY]);pd=0};
+        box.onpointermove=e=>{if(!ps.has(e.pointerId)||!img)return;const prev=ps.get(e.pointerId);ps.set(e.pointerId,[e.clientX,e.clientY]);
+          if(ps.size===1){const w=box.clientWidth;m.ox+=(e.clientX-prev[0])/w;m.oy+=(e.clientY-prev[1])/w;m.dirty=true;paint()}
+          else if(ps.size===2){const[a,b]=[...ps.values()],d=Math.hypot(a[0]-b[0],a[1]-b[1]);if(pd)setZoom(m.zoom*d/pd);pd=d}};
+        const up=e=>{ps.delete(e.pointerId);pd=0};box.onpointerup=up;box.onpointercancel=up;
+        box.addEventListener("wheel",e=>{e.preventDefault();setZoom(m.zoom*(e.deltaY<0?1.06:.94))},{passive:false});
+        zs.oninput=()=>setZoom(+zs.value);
+      }
     };
     f.onsubmit=e=>{e.preventDefault();keep();if(!m.name.trim()){m.err="Please give her a name.";draw();f.querySelector("#hn").focus();return}
-      const rec={name:m.name.trim(),breed:m.breed.trim(),coop:m.coop,born:m.born,note:m.note.trim(),photo:m.photo};
+      let photo=m.src?m.photo:null;
+      if(m.src&&m.dirty&&img){const c=document.createElement("canvas"),out=Math.min(480,Math.min(img.width,img.height));c.width=c.height=out;cropDraw(c.getContext("2d"),img,out,m.zoom,m.ox,m.oy);photo=c.toDataURL("image/jpeg",.85)}
+      const rec={name:m.name.trim(),breed:m.breed.trim(),coop:m.coop,born:m.born,note:m.note.trim(),photo};
       let u;if(h)u=undoEdit(h,rec);else{const nh={id:uid(),status:"healthy",...rec};S.hens.push(nh);u=()=>S.hens.splice(S.hens.indexOf(nh),1);cluck(3,.12)}save();close();render();toast(h?"Hen updated.":`${rec.name} joined the flock.`,u)};
     draw();
   });
