@@ -572,6 +572,17 @@ kbd{font:600 .85rem var(--body);min-width:34px;text-align:center;padding:4px 8px
 .mc-trend .mc-spark{margin-top:10px}
 .mc-leg{display:flex;align-items:center;gap:8px;margin-top:6px;font-size:.78rem;color:var(--muted)}
 .mc-key{display:inline-block;width:20px;border-top:2px dashed var(--muted);flex:none}
+/* v5.5.8: money over time chart */
+.mc-trend .mc-spark{display:block;width:100%;height:150px;margin-top:10px;overflow:visible}
+.mc-l{fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
+.mc-l.inc{stroke:var(--sky,#2f7fb0)}.mc-l.sp{stroke:#e0a020}.mc-l.pft{stroke:var(--green);stroke-width:3.4}
+.mc-zero{stroke:var(--muted);stroke-width:1;opacity:.6;vector-effect:non-scaling-stroke}
+.mc-trend .mc-bl{vector-effect:non-scaling-stroke}
+.mc-keys{display:flex;flex-wrap:wrap;gap:6px 16px;margin-top:10px;font-size:.82rem;color:var(--muted)}
+.mc-keys span{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}.mc-keys b{color:var(--ink);font-variant-numeric:tabular-nums}.mc-keys b.neg{color:var(--red)}.mc-keys b.pos{color:var(--green)}
+.mc-keys .k{display:inline-block;width:18px;height:0;border-top:3px solid;border-radius:2px;flex:none}
+.mc-keys .k.inc{border-color:var(--sky,#2f7fb0)}.mc-keys .k.sp{border-color:#e0a020}.mc-keys .k.pft{border-color:var(--green);border-top-width:4px}.mc-keys .k.bl{border-top:2px dashed var(--muted)}
+@media (min-width:900px){.mc-trend .mc-spark{height:190px}}
 </style>
 </head>
 <body>
@@ -1069,7 +1080,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.5.7";
+const APP_VER="5.5.8";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1352,11 +1363,17 @@ function workTab(p){
 function moneyChart(p,b){
   const base=b.approved>0?b.approved:Math.max(b.planned,b.spent,b.income,1),pc=v=>Math.max(0,Math.min(100,Math.round(v/base*100)));
   const cls=b.approved>0?(b.spent>b.approved?"over":b.spent>=0.8*b.approved?"warn":"ok"):"ok";
-  const ex=[...p.exp].filter(e=>e.date).sort((a,c)=>a.date.localeCompare(c.date));let run=0;const pts=ex.map(e=>{run+=toNum(e.amount);return[new Date(e.date+"T12:00").getTime(),run]});
-  const W=300,H=64,top=Math.max(base,run*1.05,1);let spark="";
-  if(new Set(pts.map(x=>x[0])).size>=2){const t0=pts[0][0],t1=pts[pts.length-1][0],X=t=>pts.length<2||t1===t0?W/2:6+(t-t0)/(t1-t0)*(W-12),Y=v=>H-4-(v/top)*(H-10);
-    const d=pts.map(([t,v],i)=>(i?"L":"M")+X(t).toFixed(1)+" "+Y(v).toFixed(1)).join(" ");
-    spark=`<div class="mc-trend"><div class="mc-th"><b>Spending over time</b><span class="small muted">${dShort(ex[0].date)} to ${dShort(ex[ex.length-1].date)}</span></div><svg class="mc-spark" viewBox="0 0 ${W} ${H}" role="img" aria-label="Spending over time, total ${rands(run)}">${b.approved>0?`<line x1="0" x2="${W}" y1="${Y(b.approved).toFixed(1)}" y2="${Y(b.approved).toFixed(1)}" class="mc-bl"/>`:""}${pts.length>1?`<path d="${d} L${X(pts[pts.length-1][0]).toFixed(1)} ${H-4} L${X(pts[0][0]).toFixed(1)} ${H-4} Z" class="mc-area"/>`:""}<path d="${d}" class="mc-line"/>${pts.map(([t,v])=>`<circle cx="${X(t).toFixed(1)}" cy="${Y(v).toFixed(1)}" r="3.2" class="mc-dot"/>`).join("")}</svg>${b.approved>0?`<div class="mc-leg"><i class="mc-key"></i>Dashed line is the approved budget</div>`:""}</div>`}
+  const days=[...new Set([...p.exp,...p.inc].filter(e=>e.date).map(e=>e.date))].sort();let spark="";
+  if(days.length>=2){
+    const sumTo=(arr,d)=>arr.filter(e=>e.date&&e.date<=d).reduce((x,e)=>x+toNum(e.amount),0);
+    const rows=days.map(d=>{const sp=sumTo(p.exp,d),inc=sumTo(p.inc,d);return{d,sp,inc,pf:inc-sp}});
+    const W=600,H=170,T=10,B=10,hi=Math.max(1,b.approved>0?b.approved:0,...rows.map(r=>Math.max(r.sp,r.inc)))*1.06,lo=Math.min(0,...rows.map(r=>r.pf))*1.12;
+    const t0=new Date(days[0]+"T12:00").getTime(),t1=new Date(days[days.length-1]+"T12:00").getTime();
+    const X=d=>((new Date(d+"T12:00").getTime()-t0)/(t1-t0)*(W-4)+2).toFixed(1),Y=v=>(T+(hi-v)/(hi-lo)*(H-T-B)).toFixed(1);
+    const ln=k=>rows.map((r,i)=>(i?"L":"M")+X(r.d)+" "+Y(r[k])).join(" "),last=rows[rows.length-1];
+    spark=`<div class="mc-trend"><div class="mc-th"><b>Money over time</b><span class="small muted">${dShort(days[0])} to ${dShort(days[days.length-1])}</span></div>
+    <svg class="mc-spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img" aria-label="Money over time. Income ${rands(last.inc)}, spent ${rands(last.sp)}, ${last.pf>=0?"profit":"loss"} ${rands(Math.abs(last.pf))}">${lo<0?`<line class="mc-zero" x1="0" x2="${W}" y1="${Y(0)}" y2="${Y(0)}"/>`:""}${b.approved>0?`<line class="mc-bl" x1="0" x2="${W}" y1="${Y(b.approved)}" y2="${Y(b.approved)}"/>`:""}<path class="mc-l inc" d="${ln("inc")}"/><path class="mc-l sp" d="${ln("sp")}"/><path class="mc-l pft" d="${ln("pf")}"/></svg>
+    <div class="mc-keys"><span><i class="k inc"></i>Income <b>${rands(last.inc)}</b></span><span><i class="k sp"></i>Spent <b>${rands(last.sp)}</b></span><span><i class="k pft"></i>${last.pf>=0?"Profit":"Loss"} <b class="${last.pf>=0?"pos":"neg"}">${rands(Math.abs(last.pf))}</b></span>${b.approved>0?`<span><i class="k bl"></i>Budget <b>${rands(b.approved)}</b></span>`:""}</div></div>`}
   return `<div class="mchart"><div class="mc-h"><span>Spent</span><b>${rands(b.spent)}${b.approved>0?" of "+rands(b.approved):""}</b></div><div class="mc-track" role="img" aria-label="${pc(b.spent)} percent of the budget spent"><i class="mc-spent ${cls}" style="width:${pc(b.spent)}%"></i>${b.approved>0?'<i class="mc-mark" style="left:80%"></i>':""}</div>
   <div class="mc-h"><span>Income</span><b>${rands(b.income)}</b></div><div class="mc-track" role="img" aria-label="Income ${rands(b.income)}"><i class="mc-inc" style="width:${pc(b.income)}%"></i></div>
   ${cls==="warn"?`<p class="mc-warn">${ic("alert")} 80% of the budget is spent. Check with your educator before buying more.</p>`:""}${b.approved>0?"":'<p class="small muted" style="margin:8px 0 0">Set an approved budget to see how much is left.</p>'}${spark}</div>`;
