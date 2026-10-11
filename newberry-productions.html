@@ -1134,7 +1134,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.7.0";
+const APP_VER="5.8.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1781,6 +1781,7 @@ function applyRows(rows,force){
   rows=rows.slice().sort((a,b)=>rank(a.k)-rank(b.k));
   const cur0=recs(),touched=[];let n=0;
   for(const r of rows){
+    if(r.k==="x|epoch"){if(force&&r.data&&r.data.n>(sm.epoch||0))sm.epoch=r.data.n;continue}
     const m=M[r.k]||(M[r.k]={}),rh=r.deleted?"x":hashOf(r.data);
     if(!r.deleted&&m.h===rh){m.s=rh;m.u=Math.max(m.u||0,r.u);continue}
     if(!force&&m.s===rh)continue;
@@ -1803,7 +1804,9 @@ async function pullAll(force){
   scan();let changed=0,since=sm.since||null,guard=0;
   for(;;){
     const{data,error}=await sb.rpc("ms_pull",{s:LV.space,since});if(error)throw error;
-    if(!data.length)break;
+    if(!data.length||!LV.on||LV.hold)break;
+    const ep=!force&&data.find(r=>r.k==="x|epoch"&&!r.deleted&&r.data&&r.data.n>(sm.epoch||0));
+    if(ep){await freshLocal(ep.data.n);since=null;changed++;guard++;if(guard>20)break;continue}
     changed+=applyRows(data,force);const last=data[data.length-1].updated_at;sm.since=last;
     if(data.length<3000||last===since||++guard>20)break;since=last;
   }
@@ -1815,11 +1818,11 @@ const safeToRender=()=>!document.querySelector("#layer>*")&&!document.querySelec
 function softRender(){if(safeToRender())render();else LV.pend=true}
 setInterval(()=>{if(LV.pend&&safeToRender()){LV.pend=false;render()}},1500);
 async function syncNow(){
-  if(!LV.on||!sb)return;
+  if(!LV.on||!sb||LV.hold)return;
   if(!navigator.onLine){setSyncUi("Offline, saved here");return}
   if(LV.busy){LV.again=true;return}
   LV.busy=true;setSyncUi("Syncing…");
-  try{await pushAll();const ch=await pullAll();LV.at=Date.now();setSyncUi("Live");if(ch)softRender()}
+  try{const ch=await pullAll();await pushAll();LV.at=Date.now();setSyncUi("Live");if(ch)softRender()}
   catch(e){console.warn("sync",e);setSyncUi(navigator.onLine?"Sync problem":"Offline, saved here")}
   finally{LV.busy=false;if(LV.again){LV.again=false;setTimeout(syncNow,300)}}
 }
@@ -1966,8 +1969,9 @@ function morePage(){const t=theme();
   <div class="card"><h2>Voice dictation</h2><p class="muted small" style="margin:0">${SR?"On. Tap the microphone next to any text box and speak.":"Not available in this browser. Try Chrome or Edge, or use your phone keyboard's microphone."}</p></div>
   <div class="card"><h2>App lock</h2><p class="muted small" style="margin-top:0">Optional. Add a 3-digit PIN and the app asks for it when you open it on this device.${LOGIN?" You stay signed in either way.":""}</p>${getPin()?`<div class="row wr"><button class="btn" id="pinchg">Change PIN</button><button class="btn danger" id="pinoff">Remove PIN</button></div>`:`<button class="btn primary" id="pinset">${ic("lock")}Set a PIN</button>`}</div>
   <div class="card"><h2>Backup</h2><p class="muted small" style="margin-top:0">Download a backup of your goals, targets, team and logs now and then. Photos and videos are not included.</p><div class="row wr"><button class="btn" id="bk-out">${ic("download")}Download backup</button><button class="btn" id="bk-in">${ic("upload")}Restore</button></div><input type="file" id="bk-f" accept="application/json,.json" class="sr" aria-label="Choose a backup file" tabindex="-1"></div>
+  <div class="card"><h2>Start fresh</h2><p class="muted small" style="margin-top:0">Clear all productions, goals, photos and records to begin a new year. A backup copy stays on this device.</p><button class="btn danger" id="fresh">Start fresh…</button></div>
   <div class="card"><h2>This device</h2><p class="muted small" style="margin-top:0">${LOGIN?`Signed in as ${esc(user.email)}. You only need to sign in once on this device.`:LV.on?"Connected with your school code. Everything you add is shared live.":"Not connected. Everything you add is saved on this device only."}</p><div class="row wr">${LOGIN?`<button class="btn" id="out">${ic("logout")}Sign out</button>`:""}${getPin()?`<button class="btn" id="lk">${ic("lock")}Lock now</button>`:""}</div></div>`}
-function wireMore(){wireLive();$("#fw-test").onclick=()=>fireworks("Your production");$("#kiosk").onclick=startKiosk;
+function wireMore(){wireLive();$("#fresh").onclick=freshSheet;$("#fw-test").onclick=()=>fireworks("Your production");$("#kiosk").onclick=startKiosk;
   $("#fx-s").onclick=e=>{SFX.sound=!SFX.sound;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.sound);if(SFX.sound)fb("tick")};$("#fx-v").onclick=e=>{SFX.vib=!SFX.vib;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.vib);if(SFX.vib)fb("tick")};
   document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#pinset")&&($("#pinset").onclick=setPin);$("#pinchg")&&($("#pinchg").onclick=()=>{removePinThenSet()});$("#pinoff")&&($("#pinoff").onclick=removePin);$("#lk")&&($("#lk").onclick=lockNow);$("#out")&&($("#out").onclick=()=>{if(!confirm("Sign out of this device? You will need to sign in again."))return;if(sb)sb.auth.signOut();else{user=null;try{localStorage.removeItem(USERK)}catch{}render()}});
   $("#bk-out").onclick=()=>{const blob=new Blob([JSON.stringify({app:"ms-productions",v:1,at:new Date().toISOString(),prods:S.prods},null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ms-productions-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")};
@@ -2181,6 +2185,59 @@ function scrollHint(el){
 const shortDate=t=>new Date(t).toLocaleDateString(undefined,{day:"numeric",month:"short"});
 const cmpPair=(p,pics)=>{const c=p.cmp||{},a=pics.find(m=>m.id===c.a),b=pics.find(m=>m.id===c.b);return{first:a||pics.at(-1),last:b||pics[0],custom:!!(a&&b)}};
 const beforeNow=(p,pics)=>{const{first,last,custom}=cmpPair(p,pics);return `<div class="card"><div class="row between" style="margin-bottom:10px"><h2 style="margin:0;font-size:1.15rem;white-space:nowrap">Before and now</h2><button class="btn small" data-cmp="${p.id}" aria-label="Choose the before and now photos">${ic("image")}Choose photos</button></div><div class="cmps" id="cmps"><img data-mid="${last.id}" alt="Latest photo"><img class="cmp-b" data-mid="${first.id}" alt="Earliest photo"><span class="cmp-line" aria-hidden="true"></span><span class="cmp-knob" aria-hidden="true">${ic("left","sm")}${ic("chev","sm")}</span><span class="cmp-l l">Before · ${shortDate(first.t)}</span><span class="cmp-l r">Now · ${shortDate(last.t)}</span><input type="range" min="0" max="100" value="50" aria-label="Slide to compare the earliest and latest photo"></div><p class="small muted" style="margin:8px 0 0">Drag the handle, or use the arrow keys, to compare.${custom?" Using the photos you chose.":""}</p></div>`};
+/* ---------- start fresh ---------- */
+function freshData(){const now=Date.now();return{prods:DEFAULTS.map(([name,icon,c],i)=>({id:"p"+i,name,icon,color:COLORS[c],desc:"",members:[],goals:[],log:[],del:false,u:now})),media:[]}}
+async function freshLocal(epoch){
+  try{localStorage.setItem("ms-prod-prebackup",JSON.stringify(S))}catch{}
+  S=freshData();
+  try{const d=await mdb();await new Promise(res=>{const t=d.transaction("media","readwrite");t.objectStore("media").clear();t.oncomplete=res;t.onerror=res})}catch{}
+  mcache.forEach(u=>{try{URL.revokeObjectURL(u)}catch{}});mcache.clear();
+  sm.lv={};sm.since=null;sm.up={};sm.sc={};sm.scAt={};sm.epoch=epoch||0;
+  try{localStorage.setItem(KEY,JSON.stringify(S))}catch{}
+  persistSync();route="home";tab="plan";render();
+}
+async function wipeCloud(){
+  if(!await ensureSb())throw new Error("offline");
+  for(const p of S.prods){if(p.showcase&&p.showcase.on){if(!await scOff(p))throw new Error("showcase")}}
+  const now=Date.now(),rows=new Map();let since=null;
+  for(let g=0;g<20;g++){const{data,error}=await sb.rpc("ms_pull",{s:LV.space,since});if(error)throw error;if(!data.length)break;data.forEach(r=>{if(!r.deleted&&r.k!=="x|epoch")rows.set(r.k,{k:r.k,data:null,deleted:true,u:now})});const last=data[data.length-1].updated_at;if(data.length<3000||last===since)break;since=last}
+  const all=[...rows.values(),{k:"x|epoch",data:{n:now},deleted:false,u:now}];
+  for(let i=0;i<all.length;i+=60){const{error}=await sb.rpc("ms_push",{s:LV.space,rows:all.slice(i,i+60)});if(error)throw error}
+  const{data:files}=await sb.storage.from("ms-media").list(LV.space,{limit:1000});
+  if(files&&files.length)await sb.storage.from("ms-media").remove(files.map(x=>LV.space+"/"+x.name));
+  return now;
+}
+function backupNow(){const blob=new Blob([JSON.stringify({app:"ms-productions",v:1,at:new Date().toISOString(),prods:S.prods},null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ms-productions-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")}
+const quiesce=async()=>{LV.hold=true;for(let i=0;i<80&&LV.busy;i++)await new Promise(r=>setTimeout(r,100))};
+function freshSheet(){
+  let scope=LV.on?"all":"device",typed="";
+  sheet("Start fresh",`<div id="fr"></div>`,(d,close)=>{
+    const root=d.querySelector("#fr");let busy=false;
+    const err=m=>{const e=root.querySelector("#fr-e");if(e){e.textContent=m;e.hidden=!m}};
+    const draw=()=>{
+      root.innerHTML=`<p class="muted small" style="margin:4px 0 10px">This clears every production's goals, targets, updates, photos, money and notes, and sets everything back to blank. It can't be undone. A backup copy of the old data stays on this device.</p>
+      ${LV.on?`<div class="chips" role="radiogroup" aria-label="Who to reset"><button type="button" class="chip" role="radio" data-sc="all" aria-checked="${scope==="all"}" aria-pressed="${scope==="all"}">Everyone</button><button type="button" class="chip" role="radio" data-sc="device" aria-checked="${scope==="device"}" aria-pressed="${scope==="device"}">This device only</button></div><p class="small muted" style="margin:8px 0 0">${scope==="all"?"Clears the cloud copy and every connected device the next time it syncs. Showcase pages are turned off.":"This device disconnects from live sync so the old data doesn't come back. You can reconnect afterwards."}</p>`:""}
+      <div class="row wr" style="margin-top:12px"><button class="btn small" id="fr-bk" type="button">${ic("download")}Download a backup first</button></div>
+      <label class="f" for="fr-t" style="margin-top:14px">Type RESET to confirm</label><input class="t" id="fr-t" autocomplete="off" autocapitalize="characters" spellcheck="false" value="${esc(typed)}"><p class="err" id="fr-e" role="alert" hidden></p>
+      <div class="row wr" style="margin-top:16px"><button class="btn" id="fr-x" type="button">Cancel</button><span class="grow"></span><button class="btn danger" id="fr-go" type="button" ${typed.trim().toUpperCase()==="RESET"?"":"disabled"}>Start fresh</button></div>`;
+      wire();
+    };
+    const wire=()=>{
+      root.querySelectorAll("[data-sc]").forEach(b=>b.onclick=()=>{scope=b.dataset.sc;draw()});
+      root.querySelector("#fr-bk").onclick=backupNow;root.querySelector("#fr-x").onclick=close;
+      const t=root.querySelector("#fr-t"),go=root.querySelector("#fr-go");
+      t.oninput=()=>{typed=t.value;go.disabled=typed.trim().toUpperCase()!=="RESET"};
+      go.onclick=async()=>{if(busy)return;busy=true;go.disabled=true;go.textContent="Clearing…";err("");
+        try{
+          let epoch=sm.epoch||0;await quiesce();
+          if(LV.on&&scope==="all")epoch=await wipeCloud();else if(LV.on)liveStop();
+          await freshLocal(epoch);close();fb("done");toast("Fresh start. A backup of the old data is kept on this device.");
+          LV.hold=false;if(LV.on)syncNow();
+        }catch(e){console.warn(e);LV.hold=false;busy=false;go.disabled=false;go.textContent="Start fresh";err("Couldn't finish. Check your internet and try again. Nothing was lost.")}};
+    };
+    draw();
+  });
+}
 /* ---------- showcase: a public, read-only page for each production ---------- */
 let sct={};
 function scAuto(o){const p=o&&(o.goals?o:P(o.pid));if(!p||!p.showcase||!p.showcase.on)return;clearTimeout(sct[p.id]);sct[p.id]=setTimeout(()=>scPublish(p,true),20000)}
