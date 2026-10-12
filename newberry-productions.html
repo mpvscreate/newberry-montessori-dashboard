@@ -627,6 +627,12 @@ kbd{font:600 .85rem var(--body);min-width:34px;text-align:center;padding:4px 8px
 /* v5.7.0: showcase */
 #sc .t[readonly]{font-size:.9rem}
 .sc-sub{margin:0 0 4px 14px;padding-left:12px;border-left:3px solid var(--line)}
+/* v5.10.0: school showcase */
+.sh-l{display:grid;gap:6px;margin-top:10px}
+.sh-r{display:flex;align-items:center;gap:12px;width:100%;border:1.5px solid var(--line);background:var(--sheet);border-radius:16px;padding:8px 12px;cursor:pointer;color:inherit;font:inherit;text-align:left;min-height:48px}
+.sh-r[aria-checked=true]{border-color:var(--green);background:var(--green-soft)}
+.sh-ck{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;flex:none;color:#fff}
+.sh-r[aria-checked=true] .sh-ck{background:var(--green);border-color:var(--green)}
 </style>
 </head>
 <body>
@@ -743,7 +749,7 @@ function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.prods)
   const now=Date.now();return{prods:DEFAULTS.map(([name,icon,c],i)=>({id:"p"+i,name,icon,color:COLORS[c],desc:"",members:[],goals:[],log:[],del:false,u:now})),media:[]}}
 function loadSync(){try{return JSON.parse(localStorage.getItem(SYNC))||{}}catch{return{}}}
 const pctSeen={};
-function save(o){if(o)o.u=Date.now();if(o&&o.goals){const now=prodPct(o),was=pctSeen[o.id];if(was!==undefined&&was<100&&now===100&&o.goals.length)setTimeout(()=>fireworks(o.name),350);pctSeen[o.id]=now}try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem(SYNC,JSON.stringify(sm))}catch{toast("Storage is full. Delete some photos.")}scheduleSync();scAuto(o)}
+function save(o){if(o)o.u=Date.now();if(o&&o.goals){const now=prodPct(o),was=pctSeen[o.id];if(was!==undefined&&was<100&&now===100&&o.goals.length)setTimeout(()=>fireworks(o.name),350);pctSeen[o.id]=now}try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem(SYNC,JSON.stringify(sm))}catch{toast("Storage is full. Delete some photos.")}scheduleSync();scAuto(o);schAuto()}
 const prods=()=>S.prods.filter(p=>!p.del);
 const P=id=>S.prods.find(p=>p.id===id);
 const goalPct=g=>g.targets&&g.targets.length?Math.round(g.targets.filter(t=>t.done).length/g.targets.length*100):g.done?100:g.pct||0;
@@ -1135,7 +1141,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.9.0";
+const APP_VER="5.10.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1744,11 +1750,13 @@ function recs(){
     p.hand.res.forEach(it=>m.set("hr|"+P+"|"+it.id,strip(it,[])));
   });
   S.media.forEach(x=>m.set("md|"+x.id,strip(x,[])));
+  if(S.sch)m.set("sc|school",strip(S.sch,[]));
   return m;
 }
 const idxOf=(a,id)=>a.findIndex(x=>x.id===id);
 function placeRec(key,data,del,u){
   const seg=key.split("|"),kd=seg[0];
+  if(kd==="sc"){if(del)S.sch=null;else S.sch={...data};return}
   if(kd==="md"){const i=idxOf(S.media,seg[1]);if(del){if(i>=0)S.media.splice(i,1)}else{const r={...data,u};if(i>=0)S.media[i]=r;else S.media.push(r)}return}
   let p=P(seg[1]);
   if(kd==="p"){
@@ -1946,7 +1954,7 @@ function rankCard(ps){
 }
 function overviewPage(){
   const{ps,all,open,pct,photos}=totals(),f=feedItems().slice(0,5);
-  return `<div class="page-h"><h2>Overview</h2><button class="btn small" id="rep" aria-label="Weekly report">${ic("trend")}Report</button></div>
+  return `<div class="page-h"><h2>Overview</h2><div class="row"><button class="btn small" id="sch-btn" aria-label="School showcase">${ic("share")}Showcase</button><button class="btn small" id="rep" aria-label="Weekly report">${ic("trend")}Report</button></div></div>
   <div class="bento"><div class="tile hero s2"><div class="lbl">${ic("sparkle")}Overall progress</div><div class="big">${pct}%</div><div class="sub">${ps.length} productions</div><div class="meter"><i style="width:${pct}%"></i></div></div>
   <div class="tile green"><div class="lbl">${ic("target")}Open goals</div><div class="big">${open}</div><div class="sub">${all.length-open} done</div></div>
   <div class="tile sky"><div class="lbl">${ic("image")}Photos</div><div class="big">${photos}</div><div class="sub">across all</div></div></div>
@@ -1957,7 +1965,7 @@ const actRow=f=>`<li><div class="avatar" style="color:${f.p.color}">${ic(f.p.ico
 const fab=()=>`<div class="fab-wrap"><button class="fab" id="addp" aria-label="New production">${ic("plus")}<span>New production</span></button></div>`;
 function wireHome(){
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{tab="plan";nav("p/"+b.dataset.open)});
-  $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#rep")&&($("#rep").onclick=()=>reportSheet(null));$("#today")&&($("#today").onclick=todaySheet);
+  $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#rep")&&($("#rep").onclick=()=>reportSheet(null));$("#sch-btn")&&($("#sch-btn").onclick=schoolShowcaseSheet);$("#today")&&($("#today").onclick=todaySheet);
 }
 function activityPage(){const f=feedItems().slice(0,60);return `<div class="page-h"><h2>Activity</h2></div><div class="card">${f.length?`<ul class="list">${f.map(actRow).join("")}</ul>`:`<div class="empty">${ic("pulse","xl")}<h3>No activity yet</h3>Comments and log entries from every production show up here.</div>`}</div>`}
 function morePage(){const t=theme();
@@ -1970,9 +1978,10 @@ function morePage(){const t=theme();
   <div class="card"><h2>Voice dictation</h2><p class="muted small" style="margin:0">${SR?"On. Tap the microphone next to any text box and speak.":"Not available in this browser. Try Chrome or Edge, or use your phone keyboard's microphone."}</p></div>
   <div class="card"><h2>App lock</h2><p class="muted small" style="margin-top:0">Optional. Add a 3-digit PIN and the app asks for it when you open it on this device.${LOGIN?" You stay signed in either way.":""}</p>${getPin()?`<div class="row wr"><button class="btn" id="pinchg">Change PIN</button><button class="btn danger" id="pinoff">Remove PIN</button></div>`:`<button class="btn primary" id="pinset">${ic("lock")}Set a PIN</button>`}</div>
   <div class="card"><h2>Backup</h2><p class="muted small" style="margin-top:0">Download a backup of your goals, targets, team and logs now and then. Photos and videos are not included.</p><div class="row wr"><button class="btn" id="bk-out">${ic("download")}Download backup</button><button class="btn" id="bk-in">${ic("upload")}Restore</button></div><input type="file" id="bk-f" accept="application/json,.json" class="sr" aria-label="Choose a backup file" tabindex="-1"></div>
+  <div class="card"><h2>School showcase</h2><p class="muted small" style="margin-top:0">One public link for families and the community, showing every production or only the ones you choose.</p><button class="btn" id="sch-open">${ic("share")}${S.sch&&S.sch.on?"Manage school showcase":"Set up school showcase"}</button></div>
   <div class="card"><h2>Start fresh</h2><p class="muted small" style="margin-top:0">Clear all productions, goals, photos and records to begin a new year. A backup copy stays on this device.</p><button class="btn danger" id="fresh">Start fresh…</button></div>
   <div class="card"><h2>This device</h2><p class="muted small" style="margin-top:0">${LOGIN?`Signed in as ${esc(user.email)}. You only need to sign in once on this device.`:LV.on?"Connected with your school code. Everything you add is shared live.":"Not connected. Everything you add is saved on this device only."}</p><div class="row wr">${LOGIN?`<button class="btn" id="out">${ic("logout")}Sign out</button>`:""}${getPin()?`<button class="btn" id="lk">${ic("lock")}Lock now</button>`:""}</div></div>`}
-function wireMore(){wireLive();$("#fresh").onclick=freshSheet;$("#fw-test").onclick=()=>fireworks("Your production");$("#kiosk").onclick=startKiosk;
+function wireMore(){wireLive();$("#sch-open").onclick=schoolShowcaseSheet;$("#fresh").onclick=freshSheet;$("#fw-test").onclick=()=>fireworks("Your production");$("#kiosk").onclick=startKiosk;
   $("#fx-s").onclick=e=>{SFX.sound=!SFX.sound;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.sound);if(SFX.sound)fb("tick")};$("#fx-v").onclick=e=>{SFX.vib=!SFX.vib;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.vib);if(SFX.vib)fb("tick")};
   document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#pinset")&&($("#pinset").onclick=setPin);$("#pinchg")&&($("#pinchg").onclick=()=>{removePinThenSet()});$("#pinoff")&&($("#pinoff").onclick=removePin);$("#lk")&&($("#lk").onclick=lockNow);$("#out")&&($("#out").onclick=()=>{if(!confirm("Sign out of this device? You will need to sign in again."))return;if(sb)sb.auth.signOut();else{user=null;try{localStorage.removeItem(USERK)}catch{}render()}});
   $("#bk-out").onclick=()=>{const blob=new Blob([JSON.stringify({app:"ms-productions",v:1,at:new Date().toISOString(),prods:S.prods},null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ms-productions-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")};
@@ -2200,6 +2209,7 @@ async function freshLocal(epoch){
 async function wipeCloud(){
   if(!await ensureSb())throw new Error("offline");
   for(const p of S.prods){if(p.showcase&&p.showcase.on){if(!await scOff(p))throw new Error("showcase")}}
+  if(S.sch&&S.sch.on){if(!await schOff())throw new Error("showcase")}
   const now=Date.now(),rows=new Map();let since=null;
   for(let g=0;g<20;g++){const{data,error}=await sb.rpc("ms_pull",{s:LV.space,since});if(error)throw error;if(!data.length)break;data.forEach(r=>{if(!r.deleted&&r.k!=="x|epoch")rows.set(r.k,{k:r.k,data:null,deleted:true,u:now})});const last=data[data.length-1].updated_at;if(data.length<3000||last===since)break;since=last}
   const all=[...rows.values(),{k:"x|epoch",data:{n:now},deleted:false,u:now}];
@@ -2235,6 +2245,75 @@ function freshSheet(){
           await freshLocal(epoch);close();fb("done");toast("Fresh start. A backup of the old data is kept on this device.");
           LV.hold=false;if(LV.on)syncNow();
         }catch(e){console.warn(e);LV.hold=false;busy=false;go.disabled=false;go.textContent="Start fresh";err("Couldn't finish. Check your internet and try again. Nothing was lost.")}};
+    };
+    draw();
+  });
+}
+/* ---------- school showcase: one link for every production, or a chosen few ---------- */
+let sct2=null;
+function schAuto(){if(!S.sch||!S.sch.on)return;clearTimeout(sct2);sct2=setTimeout(()=>schPublish(true),25000)}
+const schUrl=()=>location.origin+location.pathname.replace(/[^/]*$/,"")+"showcase.html#"+S.sch.token;
+const schList=()=>{const o=S.sch||{};return prods().filter(p=>o.mode!=="selected"||(o.ids||[]).includes(p.id))};
+function schBuild(){
+  const cut=(v,n)=>String(v==null?"":v).trim().slice(0,n);
+  const items=schList().map(p=>{ensureBook(p);
+    const ap=mediaOf(p).filter(m=>m.type!=="video"&&m.consent==="ok"),cover=ap[0]||null;
+    return{id:p.id,name:p.name,icon:ICONS[p.icon]||"",color:p.color,desc:cut(p.desc,120),pct:prodPct(p),done:p.goals.filter(g=>g.done).length,open:p.goals.filter(g=>!g.done).length,students:p.members.length,
+      cover:cover?{id:cover.id,cap:cut(cover.cap,80)}:null,link:(p.showcase&&p.showcase.on&&p.showcase.token)||""}});
+  return{v:2,kind:"school",title:"Our production teams",updated:Date.now(),count:items.length,pct:items.length?Math.round(items.reduce((a,i)=>a+i.pct,0)/items.length):0,done:items.reduce((a,i)=>a+i.done,0),open:items.reduce((a,i)=>a+i.open,0),students:items.reduce((a,i)=>a+i.students,0),items};
+}
+async function schPublish(quiet){
+  const o=S.sch;if(!o||!o.on||!o.token)return false;
+  if(!LV.on||!LV.space||!await ensureSb()){if(!quiet)toast("Connect this device with the school code first.");return false}
+  try{
+    const d=schBuild();if(!d.items.length){if(!quiet)toast("Choose at least one production.");return false}
+    const r=await sb.rpc("ms_showcase_put",{s:LV.space,t:o.token,p:"school",d});if(r.error)throw r.error;
+    sm.sc=sm.sc||{};const up=sm.sc[o.token]=sm.sc[o.token]||[],ids=d.items.filter(i=>i.cover).map(i=>i.cover.id).slice(0,20);
+    for(const id of ids){if(up.includes(id))continue;const url=await scImage(id);if(!url)continue;const q=await sb.rpc("ms_showcase_put_img",{s:LV.space,t:o.token,i:id,d:url});if(q.error)throw q.error;up.push(id)}
+    await sb.rpc("ms_showcase_prune",{s:LV.space,t:o.token,keep:ids});
+    sm.sc[o.token]=up.filter(id=>ids.includes(id));(sm.scAt=sm.scAt||{})[o.token]=Date.now();persistSync();
+    return true;
+  }catch(e){console.warn("school showcase",e);if(!quiet)toast(/bad code/i.test(e.message||"")?"The school code on this device is not valid.":"Couldn't update the showcase. Check your internet.");return false}
+}
+async function schOff(){
+  const o=S.sch;if(!o)return true;const t=o.token;
+  try{if(t&&LV.on&&LV.space&&await ensureSb()){const r=await sb.rpc("ms_showcase_off",{s:LV.space,t});if(r.error)throw r.error}else if(t){toast("Connect with the school code to remove the page.");return false}}catch(e){toast("Couldn't turn the showcase off. Check your internet.");return false}
+  if(sm.sc)delete sm.sc[t];if(sm.scAt)delete sm.scAt[t];persistSync();o.on=false;o.token="";save();return true;
+}
+function schoolShowcaseSheet(){
+  const o=S.sch=S.sch||{on:false,token:"",mode:"all",ids:[]};
+  sheet("School showcase",`<div id="sh"></div>`,(d,close)=>{
+    const root=d.querySelector("#sh");let busy=false;
+    const err=m=>{const e=root.querySelector("#sh-e");if(e){e.textContent=m;e.hidden=!m}};
+    const draw=()=>{
+      const all=prods(),n=schList().length,url=o.on?schUrl():"";
+      root.innerHTML=`<p class="muted small" style="margin:4px 0 8px">${o.on?"Anyone with this link can see a read-only page about the productions you chose. It updates itself as teams work.":"One link for families and the community. It shows each production's progress, goals done and an approved photo. Each card links to that team's own showcase page if they have turned theirs on."}</p>
+      ${o.on?`<label class="f" for="sh-u">Your link</label><input class="t" id="sh-u" readonly value="${esc(url)}"><div class="row wr" style="margin-top:10px"><button class="btn small" id="sh-cp" type="button">${ic("copy")}Copy link</button><button class="btn small" id="sh-sh" type="button">${ic("share")}Share</button><button class="btn small" id="sh-pv" type="button">${ic("eye")}Preview</button></div><p class="small muted" id="sh-st" style="margin:10px 0 0">${scStatus(o)}</p>`:""}
+      <h3 class="sub-h">Which productions</h3>
+      <div class="chips" role="radiogroup" aria-label="Which productions"><button type="button" class="chip" role="radio" data-m="all" aria-checked="${o.mode!=="selected"}" aria-pressed="${o.mode!=="selected"}">All productions (${all.length})</button><button type="button" class="chip" role="radio" data-m="selected" aria-checked="${o.mode==="selected"}" aria-pressed="${o.mode==="selected"}">Selected only</button></div>
+      ${o.mode==="selected"?`<div class="sh-l" role="group" aria-label="Choose productions">${all.map(p=>{const on=(o.ids||[]).includes(p.id);return`<button type="button" class="sh-r" role="checkbox" data-id="${p.id}" aria-checked="${on}"><span class="avatar" style="color:${p.color}">${ic(p.icon)}</span><span class="grow">${esc(p.name)}</span><span class="sh-ck" aria-hidden="true">${on?ic("check","sm"):""}</span></button>`}).join("")}</div><div class="row wr" style="margin-top:8px"><button class="btn small" id="sh-all" type="button">Select all</button><button class="btn small" id="sh-none" type="button">Clear</button></div>`:""}
+      <p class="small muted" style="margin:10px 0 0">${n} production${n===1?"":"s"} will be shown. Only photos marked Approved to share are used, and only as one cover photo per team.</p><p class="err" id="sh-e" role="alert" hidden></p>
+      <div class="row wr" style="margin-top:16px">${o.on?`<button class="btn danger" id="sh-off" type="button">Turn off</button><span class="grow"></span><button class="btn primary" id="sh-up" type="button">Update now</button>`:`<button class="btn primary grow" id="sh-on" type="button">Turn on and create link</button>`}</div>`;
+      wire();
+    };
+    const changed=async()=>{save();if(o.on){const ok=await schPublish(true);const st=root.querySelector("#sh-st");if(st)st.textContent=ok?scStatus(o):"Could not update yet. It will retry."}};
+    const run=async(btn,label,fn)=>{if(busy)return;busy=true;const t=btn.innerHTML;btn.disabled=true;btn.textContent=label;try{await fn()}finally{busy=false;if(btn.isConnected){btn.disabled=false;btn.innerHTML=t}}};
+    const wire=()=>{
+      root.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{o.mode=b.dataset.m;fb("tick");draw();changed()});
+      root.querySelectorAll(".sh-r").forEach(b=>b.onclick=()=>{const id=b.dataset.id;o.ids=o.ids||[];o.ids=o.ids.includes(id)?o.ids.filter(x=>x!==id):[...o.ids,id];fb("tick");draw();changed()});
+      const a=root.querySelector("#sh-all");if(a)a.onclick=()=>{o.ids=prods().map(p=>p.id);draw();changed()};
+      const c=root.querySelector("#sh-none");if(c)c.onclick=()=>{o.ids=[];draw();changed()};
+      const on=root.querySelector("#sh-on");if(on)on.onclick=()=>run(on,"Creating link…",async()=>{
+        if(!LV.on){err("Connect this device with the school code first (Settings, then Live sync).");return}
+        if(!schList().length){err("Choose at least one production.");return}
+        err("");o.on=true;o.token=scToken();const ok=await schPublish(true);
+        if(!ok){o.on=false;o.token="";err("Couldn't create the page. Check your internet and the school code, then try again.");return}
+        save();fb("done");draw();toast("School showcase is live. Copy the link to share it.")});
+      const up=root.querySelector("#sh-up");if(up)up.onclick=()=>run(up,"Updating…",async()=>{if(!schList().length){err("Choose at least one production.");return}err("");const ok=await schPublish();const st=root.querySelector("#sh-st");if(st&&ok){st.textContent=scStatus(o);toast("Showcase updated.")}});
+      const off=root.querySelector("#sh-off");if(off){let armed=0;off.onclick=()=>{if(!armed){armed=1;off.textContent="Tap again to turn off";setTimeout(()=>{if(off.isConnected){armed=0;off.innerHTML="Turn off"}},4000);return}run(off,"Turning off…",async()=>{if(await schOff()){fb("del");draw();toast("School showcase turned off. The old link no longer works.")}})}}
+      const cp=root.querySelector("#sh-cp");if(cp)cp.onclick=()=>navigator.clipboard.writeText(schUrl()).then(()=>toast("Link copied."),()=>{root.querySelector("#sh-u").select();toast("Select the link and copy it.")});
+      const sh=root.querySelector("#sh-sh");if(sh)sh.onclick=async()=>{try{if(navigator.share)await navigator.share({title:"Our production teams",text:"See what our production teams have been doing:",url:schUrl()});else cp.click()}catch{}};
+      const pv=root.querySelector("#sh-pv");if(pv)pv.onclick=()=>window.open(schUrl(),"_blank","noopener");
     };
     draw();
   });
