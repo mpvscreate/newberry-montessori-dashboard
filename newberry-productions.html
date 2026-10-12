@@ -633,6 +633,10 @@ kbd{font:600 .85rem var(--body);min-width:34px;text-align:center;padding:4px 8px
 .sh-r[aria-checked=true]{border-color:var(--green);background:var(--green-soft)}
 .sh-ck{width:24px;height:24px;border-radius:50%;border:2px solid var(--line);display:grid;place-items:center;flex:none;color:#fff}
 .sh-r[aria-checked=true] .sh-ck{background:var(--green);border-color:var(--green)}
+/* v5.11.0: recently deleted, poster, digest */
+.bin-r{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}.bin-r:first-of-type{border-top:0}
+.bin-r .avatar{flex:none}
+.page-h{flex-wrap:wrap}.page-h .row.wr{gap:8px}
 </style>
 </head>
 <body>
@@ -749,7 +753,7 @@ function load(){try{const d=JSON.parse(localStorage.getItem(KEY));if(d&&d.prods)
   const now=Date.now();return{prods:DEFAULTS.map(([name,icon,c],i)=>({id:"p"+i,name,icon,color:COLORS[c],desc:"",members:[],goals:[],log:[],del:false,u:now})),media:[]}}
 function loadSync(){try{return JSON.parse(localStorage.getItem(SYNC))||{}}catch{return{}}}
 const pctSeen={};
-function save(o){if(o)o.u=Date.now();if(o&&o.goals){const now=prodPct(o),was=pctSeen[o.id];if(was!==undefined&&was<100&&now===100&&o.goals.length)setTimeout(()=>fireworks(o.name),350);pctSeen[o.id]=now}try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem(SYNC,JSON.stringify(sm))}catch{toast("Storage is full. Delete some photos.")}scheduleSync();scAuto(o);schAuto()}
+function save(o){if(o)o.u=Date.now();if(o&&o.goals){const now=prodPct(o),was=pctSeen[o.id];if(was!==undefined&&was<100&&now===100&&o.goals.length)setTimeout(()=>fireworks(o.name),350);pctSeen[o.id]=now}try{localStorage.setItem(KEY,JSON.stringify(S));localStorage.setItem(SYNC,JSON.stringify(sm))}catch{toast("Storage is full. Delete some photos.")}scheduleSync();scAuto(o);schAuto();try{binScan()}catch(e){console.warn("bin",e)}}
 const prods=()=>S.prods.filter(p=>!p.del);
 const P=id=>S.prods.find(p=>p.id===id);
 const goalPct=g=>g.targets&&g.targets.length?Math.round(g.targets.filter(t=>t.done).length/g.targets.length*100):g.done?100:g.pct||0;
@@ -839,7 +843,7 @@ function openMediaSheet(m){
   <p class="muted small">${esc(m.by)} · ${fmt(m.t)}</p><div class="row"><button class="btn danger" id="del">${ic("trash")}Delete</button><span class="grow"></span><button class="btn primary" id="ok">Done</button></div>`,(d,close)=>{
     hydrate(d);wireMics(d);d.querySelectorAll("#mcon .chip").forEach(b=>b.onclick=()=>{const was=b.getAttribute("aria-pressed")==="true";d.querySelectorAll("#mcon .chip").forEach(x=>x.setAttribute("aria-pressed","false"));b.setAttribute("aria-pressed",String(!was))});
     $("#ok").onclick=()=>{m.cap=$("#mc").value.trim();const cc=d.querySelector("#mcon [aria-pressed=true]");m.consent=cc?cc.dataset.c:"";save(m);close();render()};
-    $("#del").onclick=()=>{m.del=true;save(m);close();render();if(LV.on&&sb)sb.storage.from("ms-media").remove([mediaPath(m.id)]).catch(()=>{});if(sm.up)delete sm.up[m.id];
+    $("#del").onclick=()=>{m.del=true;m.delAt=Date.now();save(m);close();render();if(sm.up)delete sm.up[m.id];
       toast("Deleted.",()=>{m.del=false;save(m);render()})}});
 }
 
@@ -1095,12 +1099,13 @@ function todaySheet(){
   const d=todayData();
   const row=(x,sub)=>`<button class="trow" data-go="${x.p.id}"><span class="avatar" style="color:${x.p.color}">${ic(x.p.icon)}</span><span class="grow"><b>${esc(x.g?x.g.title:x.p.name)}</b><span class="small muted" style="display:block">${esc(x.p.name)}${sub?" · "+sub:""}</span></span>${ic("chev","sm")}</button>`;
   const fd=ds=>new Date(ds+"T12:00").toLocaleDateString(undefined,{day:"numeric",month:"short"});
-  sheet("Today",`${d.recap?`<div class="vprompt" style="margin-top:6px"><p>${ic("trophy")} Your weekly recap is ready to share.</p><button class="btn small primary" id="t-recap" type="button">Create recap</button></div>`:""}
+  sheet("Today",`${d.recap?`<div class="vprompt" style="margin-top:6px"><p>${ic("trophy")} Your weekly recap is ready to share.</p><div class="row wr"><button class="btn small primary" id="t-recap" type="button">Create recap</button><button class="btn small" id="t-dg" type="button">Draft digest</button></div></div>`:""}
     ${d.late.length?`<h3 class="sub-h">Overdue</h3>${d.late.map(x=>row(x,"was due "+fd(x.g.due))).join("")}`:""}
     ${d.soon.length?`<h3 class="sub-h">Due this week</h3>${d.soon.map(x=>row(x,"due "+fd(x.g.due))).join("")}`:""}
     ${d.quiet.length?`<h3 class="sub-h">Gone quiet</h3><p class="small muted" style="margin:0 0 6px">No updates for over a week.</p>${d.quiet.map(x=>row(x,"last update "+dayLabel(x.last).toLowerCase())).join("")}`:""}
     ${d.any?"":`<div class="empty"><h3>All caught up</h3>Nothing overdue or quiet right now.</div>`}`,(dd,close)=>{
     dd.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{close();tab="goals";nav("p/"+b.dataset.go)});
+    const dg=dd.querySelector("#t-dg");if(dg)dg.onclick=()=>{close();setTimeout(digestSheet,150)};
     const r=dd.querySelector("#t-recap");if(r)r.onclick=()=>{try{localStorage.setItem(RECAPK,String(weekStart(Date.now())+1))}catch{}close();render();reportSheet(null)};
   });
 }
@@ -1141,7 +1146,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.10.0";
+const APP_VER="5.11.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1613,7 +1618,7 @@ function rollTerm(p,label){
 }
 BA.roll=p=>formSheet({title:"Start next term",done:"Start next term",
   fields:[{t:"note",l:"This term's book is saved under Past terms and can still be exported. Carried over: team members, unfinished milestones and tasks, and the handover items and notes. Everything else starts fresh."},{k:"term",t:"text",l:"New term",req:true,mic:false}],data:{term:nextTermLabel(p)},
-  onSave:v=>{const backup=JSON.stringify(p);rollTerm(p,v.term);save(p);fb("done");tab="plan";render();toast("New term started. Last term is under Past terms.",()=>{const o=JSON.parse(backup);Object.keys(p).forEach(k=>delete p[k]);Object.assign(p,o);save(p);render()})}});
+  onSave:v=>{const backup=JSON.stringify(p);rollTerm(p,v.term);binSnap();save(p);fb("done");tab="plan";render();toast("New term started. Last term is under Past terms.",()=>{const o=JSON.parse(backup);Object.keys(p).forEach(k=>delete p[k]);Object.assign(p,o);save(p);render()})}});
 BA.pastterm=(p,id)=>{const sn=(p.terms||[]).find(x=>x.id===id);if(!sn)return;const q={id:p.id,name:p.name,members:sn.members,goals:sn.goals};BOOK_KEYS.forEach(k=>q[k]=sn[k]);ensureBook(q);exportBook(q)};
 BA.carry=p=>{p.carry=null;save(p);render()};
 const carryCard=p=>p.carry?`<div class="hintcard"><div class="row between"><b>Handed over from ${esc(p.carry.from)}</b><button class="linkbtn" data-ba="carry:go" style="min-height:32px">Dismiss</button></div>${p.carry.work?`<p><span class="small muted">Work still to complete</span><br>${esc(p.carry.work)}</p>`:""}${p.carry.people?`<p><span class="small muted">People to consult</span><br>${esc(p.carry.people)}</p>`:""}${p.carry.funds?`<p><span class="small muted">Funds or stock</span><br>${esc(p.carry.funds)}</p>`:""}</div>`:"";
@@ -1820,7 +1825,7 @@ async function pullAll(force){
     if(data.length<3000||last===since||++guard>20)break;since=last;
   }
   persistSync();
-  if(changed){try{localStorage.setItem(KEY,JSON.stringify(S))}catch{}}
+  if(changed){binSnap();try{localStorage.setItem(KEY,JSON.stringify(S))}catch{}}
   return changed;
 }
 const safeToRender=()=>!document.querySelector("#layer>*")&&!document.querySelector(".ed")&&!/INPUT|TEXTAREA/.test((document.activeElement&&document.activeElement.tagName)||"");
@@ -1831,13 +1836,14 @@ async function syncNow(){
   if(!navigator.onLine){setSyncUi("Offline, saved here");return}
   if(LV.busy){LV.again=true;return}
   LV.busy=true;setSyncUi("Syncing…");
-  try{const ch=await pullAll();await pushAll();LV.at=Date.now();setSyncUi("Live");if(ch)softRender()}
+  try{const ch=await pullAll();await pushAll();LV.at=Date.now();setSyncUi("Live");binPurge();if(ch)softRender()}
   catch(e){console.warn("sync",e);setSyncUi(navigator.onLine?"Sync problem":"Offline, saved here")}
   finally{LV.busy=false;if(LV.again){LV.again=false;setTimeout(syncNow,300)}}
 }
 async function ensureSb(){if(sb)return true;await loadSb();if(!window.supabase)return false;sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:false,autoRefreshToken:false}});return true}
 function openChannel(){try{if(LV.ch)sb.removeChannel(LV.ch);LV.ch=sb.channel("ms-"+LV.space.slice(0,20)).on("broadcast",{event:"ping"},()=>setTimeout(syncNow,200)).subscribe()}catch(e){console.warn(e)}}
 function startPoll(){clearInterval(LV.poll);LV.poll=setInterval(()=>{if(!document.hidden&&LV.on)syncNow()},12000)}
+setTimeout(()=>{try{binPurge()}catch{}},6000);
 function liveStart(space){LV.space=space;LV.on=true;try{localStorage.setItem(SPK,JSON.stringify({space}))}catch{}setSyncUi("Syncing…");openChannel();startPoll();syncNow()}
 function liveStop(){LV.on=false;clearInterval(LV.poll);if(LV.ch&&sb){try{sb.removeChannel(LV.ch)}catch{}}LV.ch=null;try{localStorage.removeItem(SPK)}catch{}sm.lv={};sm.since=null;sm.up={};persistSync();setSyncUi("Saved on this device")}
 async function liveConnect(code){
@@ -1954,7 +1960,7 @@ function rankCard(ps){
 }
 function overviewPage(){
   const{ps,all,open,pct,photos}=totals(),f=feedItems().slice(0,5);
-  return `<div class="page-h"><h2>Overview</h2><div class="row"><button class="btn small" id="sch-btn" aria-label="School showcase">${ic("share")}Showcase</button><button class="btn small" id="rep" aria-label="Weekly report">${ic("trend")}Report</button></div></div>
+  return `<div class="page-h"><h2>Overview</h2><div class="row wr"><button class="btn small" id="dg-btn" aria-label="Weekly digest">${ic("chat")}Digest</button><button class="btn small" id="sch-btn" aria-label="School showcase">${ic("share")}Showcase</button><button class="btn small" id="rep" aria-label="Weekly report">${ic("trend")}Report</button></div></div>
   <div class="bento"><div class="tile hero s2"><div class="lbl">${ic("sparkle")}Overall progress</div><div class="big">${pct}%</div><div class="sub">${ps.length} productions</div><div class="meter"><i style="width:${pct}%"></i></div></div>
   <div class="tile green"><div class="lbl">${ic("target")}Open goals</div><div class="big">${open}</div><div class="sub">${all.length-open} done</div></div>
   <div class="tile sky"><div class="lbl">${ic("image")}Photos</div><div class="big">${photos}</div><div class="sub">across all</div></div></div>
@@ -1965,7 +1971,7 @@ const actRow=f=>`<li><div class="avatar" style="color:${f.p.color}">${ic(f.p.ico
 const fab=()=>`<div class="fab-wrap"><button class="fab" id="addp" aria-label="New production">${ic("plus")}<span>New production</span></button></div>`;
 function wireHome(){
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{tab="plan";nav("p/"+b.dataset.open)});
-  $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#rep")&&($("#rep").onclick=()=>reportSheet(null));$("#sch-btn")&&($("#sch-btn").onclick=schoolShowcaseSheet);$("#today")&&($("#today").onclick=todaySheet);
+  $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#rep")&&($("#rep").onclick=()=>reportSheet(null));$("#sch-btn")&&($("#sch-btn").onclick=schoolShowcaseSheet);$("#dg-btn")&&($("#dg-btn").onclick=digestSheet);$("#today")&&($("#today").onclick=todaySheet);
 }
 function activityPage(){const f=feedItems().slice(0,60);return `<div class="page-h"><h2>Activity</h2></div><div class="card">${f.length?`<ul class="list">${f.map(actRow).join("")}</ul>`:`<div class="empty">${ic("pulse","xl")}<h3>No activity yet</h3>Comments and log entries from every production show up here.</div>`}</div>`}
 function morePage(){const t=theme();
@@ -1979,9 +1985,10 @@ function morePage(){const t=theme();
   <div class="card"><h2>App lock</h2><p class="muted small" style="margin-top:0">Optional. Add a 3-digit PIN and the app asks for it when you open it on this device.${LOGIN?" You stay signed in either way.":""}</p>${getPin()?`<div class="row wr"><button class="btn" id="pinchg">Change PIN</button><button class="btn danger" id="pinoff">Remove PIN</button></div>`:`<button class="btn primary" id="pinset">${ic("lock")}Set a PIN</button>`}</div>
   <div class="card"><h2>Backup</h2><p class="muted small" style="margin-top:0">Download a backup of your goals, targets, team and logs now and then. Photos and videos are not included.</p><div class="row wr"><button class="btn" id="bk-out">${ic("download")}Download backup</button><button class="btn" id="bk-in">${ic("upload")}Restore</button></div><input type="file" id="bk-f" accept="application/json,.json" class="sr" aria-label="Choose a backup file" tabindex="-1"></div>
   <div class="card"><h2>School showcase</h2><p class="muted small" style="margin-top:0">One public link for families and the community, showing every production or only the ones you choose.</p><button class="btn" id="sch-open">${ic("share")}${S.sch&&S.sch.on?"Manage school showcase":"Set up school showcase"}</button></div>
+  ${binCard()}
   <div class="card"><h2>Start fresh</h2><p class="muted small" style="margin-top:0">Clear all productions, goals, photos and records to begin a new year. A backup copy stays on this device.</p><button class="btn danger" id="fresh">Start fresh…</button></div>
   <div class="card"><h2>This device</h2><p class="muted small" style="margin-top:0">${LOGIN?`Signed in as ${esc(user.email)}. You only need to sign in once on this device.`:LV.on?"Connected with your school code. Everything you add is shared live.":"Not connected. Everything you add is saved on this device only."}</p><div class="row wr">${LOGIN?`<button class="btn" id="out">${ic("logout")}Sign out</button>`:""}${getPin()?`<button class="btn" id="lk">${ic("lock")}Lock now</button>`:""}</div></div>`}
-function wireMore(){wireLive();$("#sch-open").onclick=schoolShowcaseSheet;$("#fresh").onclick=freshSheet;$("#fw-test").onclick=()=>fireworks("Your production");$("#kiosk").onclick=startKiosk;
+function wireMore(){wireLive();$("#bin-open").onclick=binSheet;$("#sch-open").onclick=schoolShowcaseSheet;$("#fresh").onclick=freshSheet;$("#fw-test").onclick=()=>fireworks("Your production");$("#kiosk").onclick=startKiosk;
   $("#fx-s").onclick=e=>{SFX.sound=!SFX.sound;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.sound);if(SFX.sound)fb("tick")};$("#fx-v").onclick=e=>{SFX.vib=!SFX.vib;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.vib);if(SFX.vib)fb("tick")};
   document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#pinset")&&($("#pinset").onclick=setPin);$("#pinchg")&&($("#pinchg").onclick=()=>{removePinThenSet()});$("#pinoff")&&($("#pinoff").onclick=removePin);$("#lk")&&($("#lk").onclick=lockNow);$("#out")&&($("#out").onclick=()=>{if(!confirm("Sign out of this device? You will need to sign in again."))return;if(sb)sb.auth.signOut();else{user=null;try{localStorage.removeItem(USERK)}catch{}render()}});
   $("#bk-out").onclick=()=>{const blob=new Blob([JSON.stringify({app:"ms-productions",v:1,at:new Date().toISOString(),prods:S.prods},null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ms-productions-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")};
@@ -2002,7 +2009,7 @@ function prodSheet(p){
     wireMics(d);
     d.querySelectorAll("[data-e]").forEach(b=>b.onclick=()=>{icn=b.dataset.e;d.querySelectorAll("[data-e]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
     d.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{co=b.dataset.c;d.querySelectorAll("[data-c]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
-    if(!isNew)$("#del").onclick=()=>{p.del=true;save(p);close();nav("home");toast("Production deleted.",()=>{p.del=false;save(p);render()})};
+    if(!isNew)$("#del").onclick=()=>{p.del=true;p.delAt=Date.now();save(p);close();nav("home");toast("Production deleted. Find it under Settings, Recently deleted.",()=>{p.del=false;save(p);render()})};
     $("#ok").onclick=()=>{const n=$("#pn").value.trim();if(!n){$("#pn").focus();return}
       Object.assign(p,{name:n,icon:icn,color:co,desc:$("#pdsc").value.trim()});
       if(isNew){Object.assign(p,{id:uid(),members:[],goals:[],log:[],del:false});S.prods.push(p)}
@@ -2195,11 +2202,132 @@ function scrollHint(el){
 const shortDate=t=>new Date(t).toLocaleDateString(undefined,{day:"numeric",month:"short"});
 const cmpPair=(p,pics)=>{const c=p.cmp||{},a=pics.find(m=>m.id===c.a),b=pics.find(m=>m.id===c.b);return{first:a||pics.at(-1),last:b||pics[0],custom:!!(a&&b)}};
 const beforeNow=(p,pics)=>{const{first,last,custom}=cmpPair(p,pics);return `<div class="card"><div class="row between" style="margin-bottom:10px"><h2 style="margin:0;font-size:1.15rem;white-space:nowrap">Before and now</h2><button class="btn small" data-cmp="${p.id}" aria-label="Choose the before and now photos">${ic("image")}Choose photos</button></div><div class="cmps" id="cmps"><img data-mid="${last.id}" alt="Latest photo"><img class="cmp-b" data-mid="${first.id}" alt="Earliest photo"><span class="cmp-line" aria-hidden="true"></span><span class="cmp-knob" aria-hidden="true">${ic("left","sm")}${ic("chev","sm")}</span><span class="cmp-l l">Before · ${shortDate(first.t)}</span><span class="cmp-l r">Now · ${shortDate(last.t)}</span><input type="range" min="0" max="100" value="50" aria-label="Slide to compare the earliest and latest photo"></div><p class="small muted" style="margin:8px 0 0">Drag the handle, or use the arrow keys, to compare.${custom?" Using the photos you chose.":""}</p></div>`};
+/* ---------- recently deleted: 30 days to change your mind ---------- */
+const BIN_DAYS=30,BIN_KINDS={g:"Goal",tg:"Target",cm:"Comment",lg:"Update",ex:"Expense",in:"Income",wk:"Weekly record",id:"Idea",rs:"Resource",rk:"Risk",rl:"Role",bi:"Budget item",hr:"Handover item"};
+let binPrev=null;
+function binSnap(){const m=new Map();for(const[k,v]of recs())m.set(k,JSON.stringify(v));binPrev=m}
+function binLabel(kd,d){const q=x=>String(x==null?"":x).trim();
+  if(kd==="g")return q(d.title);if(kd==="tg")return q(d.title);if(kd==="cm"||kd==="lg")return q(d.text).slice(0,70);
+  if(kd==="ex")return q(d.item)+(d.amount?" ("+rands(toNum(d.amount))+")":"");if(kd==="in")return q(d.source)+(d.amount?" ("+rands(toNum(d.amount))+")":"");
+  if(kd==="wk")return q(d.label);if(kd==="id")return q(d.idea).slice(0,70);if(kd==="rs")return q(d.item);if(kd==="rk")return q(d.risk).slice(0,70);if(kd==="rl")return q(d.role);if(kd==="bi"||kd==="hr")return q(d.item);return"";}
+function binScan(){
+  if(!binPrev){binSnap();return}
+  const cur=recs(),gone=[],now=Date.now();
+  for(const[k,j]of binPrev)if(!cur.has(k)&&BIN_KINDS[k.split("|")[0]])gone.push([k,j]);
+  S.bin=S.bin||[];
+  /* something that came back (for example through Undo) leaves the bin */
+  if(S.bin.length)S.bin=S.bin.filter(e=>!e.items.some(i=>cur.has(i.k)&&!binPrev.has(i.k)));
+  if(gone.length){
+    const gset=new Set(gone.map(x=>x[0])),ents=new Map();
+    gone.forEach(([k,j])=>{const kd=k.split("|")[0];if(kd==="tg"||kd==="cm"){const pk="g|"+k.split("|")[1]+"|"+k.split("|")[2];if(gset.has(pk)&&ents.has(pk)){ents.get(pk).items.push({k,d:JSON.parse(j)});return}}
+      const d=JSON.parse(j);ents.set(k,{id:uid(),kind:BIN_KINDS[kd],label:binLabel(kd,d)||BIN_KINDS[kd],pid:k.split("|")[1],t:now,items:[{k,d}]})});
+    ents.forEach(e=>{const P0=P(e.pid);e.pname=P0?P0.name:"";S.bin.unshift(e)});
+  }
+  const cut=now-BIN_DAYS*864e5;S.bin=S.bin.filter(e=>e.t>cut).slice(0,150);
+  const next=new Map();for(const[k,v]of cur)next.set(k,JSON.stringify(v));binPrev=next;
+}
+function binItems(){
+  const cut=Date.now()-BIN_DAYS*864e5,out=[];
+  (S.bin||[]).forEach(e=>{if(e.t>cut)out.push({type:"rec",id:e.id,t:e.t,kind:e.kind,label:e.label,where:e.pname,icon:"list"})});
+  S.media.forEach(m=>{if(m.del&&m.delAt&&m.delAt>cut&&!m.purged){const p=P(m.pid);out.push({type:"media",id:m.id,t:m.delAt,kind:m.type==="video"?"Video":"Photo",label:m.cap||(m.type==="video"?"Video":"Photo"),where:p?p.name:"",icon:m.type==="video"?"video":"image"})}});
+  S.prods.forEach(p=>{if(p.del&&p.delAt&&p.delAt>cut)out.push({type:"prod",id:p.id,t:p.delAt,kind:"Production",label:p.name,where:"",icon:p.icon})});
+  return out.sort((a,b)=>b.t-a.t);
+}
+function binRestore(it){
+  if(it.type==="prod"){const p=P(it.id);if(!p)return false;p.del=false;delete p.delAt;save(p);return true}
+  if(it.type==="media"){const m=S.media.find(x=>x.id===it.id);if(!m)return false;m.del=false;delete m.delAt;save(m);return true}
+  const e=(S.bin||[]).find(x=>x.id===it.id);if(!e)return false;
+  const p=P(e.pid);if(!p||p.del){toast("Restore the production first.");return false}
+  e.items.forEach(i=>placeRec(i.k,i.d,false,Date.now()));
+  S.bin=S.bin.filter(x=>x!==e);save(p);return true;
+}
+async function binPurge(){
+  const cut=Date.now()-BIN_DAYS*864e5;let n=0;
+  for(const m of S.media){if(m.del&&m.delAt&&m.delAt<=cut&&!m.purged){
+    if(LV.on&&sb){try{await sb.storage.from("ms-media").remove([mediaPath(m.id)])}catch{continue}}
+    try{await mDel(m.id)}catch{}m.purged=true;n++}}
+  if(n){try{save()}catch{}}
+}
+const binAgo=t=>{const d=Math.floor((Date.now()-t)/864e5);return d<1?"today":d===1?"yesterday":d+" days ago"};
+function binSheet(){
+  const draw=(root)=>{
+    const it=binItems();
+    root.innerHTML=it.length?`<p class="muted small" style="margin:4px 0 10px">Deleted items stay here for ${BIN_DAYS} days on this device, then they are removed for good. Restore puts an item back where it was.</p>${it.map((x,i)=>`<div class="bin-r"><span class="avatar">${ic(x.icon)}</span><span class="grow"><b>${esc(x.label)}</b><span class="small muted" style="display:block">${esc(x.kind)}${x.where?" · "+esc(x.where):""} · deleted ${binAgo(x.t)} · ${Math.max(0,BIN_DAYS-Math.floor((Date.now()-x.t)/864e5))} days left</span></span><button class="btn small" data-i="${i}" type="button">Restore</button></div>`).join("")}`:`<div class="empty">${ic("trash","xl")}<h3>Nothing here</h3>Items you delete show up here for ${BIN_DAYS} days.</div>`;
+    root.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{const x=it[+b.dataset.i];if(binRestore(x)){fb("done");toast(x.kind+" restored.");render();draw(root)}});
+  };
+  sheet("Recently deleted",`<div id="bn"></div>`,(d)=>draw(d.querySelector("#bn")));
+}
+const binCard=()=>{const n=binItems().length;return `<div class="card"><h2>Recently deleted</h2><p class="muted small" style="margin-top:0">Changed your mind? Deleted goals, updates, expenses, photos and productions stay here for ${BIN_DAYS} days on this device.</p><button class="btn" id="bin-open">${ic("trash")}Open recently deleted${n?" ("+n+")":""}</button></div>`};
+/* ---------- QR poster for showcase links ---------- */
+function loadQr(){return new Promise((res,rej)=>{if(window.qrcode)return res();const sc=document.createElement("script");sc.src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js";sc.onload=()=>window.qrcode?res():rej(new Error("qr"));sc.onerror=()=>rej(new Error("qr"));document.head.append(sc)})}
+function printView(title,html){
+  const root=document.createElement("div");
+  root.className="ed bookview";root.setAttribute("role","dialog");root.setAttribute("aria-modal","true");root.setAttribute("aria-label",title);
+  root.innerHTML=`<div class="ed-top"><button class="x" id="pv-x" aria-label="Close">${ic("x")}</button><h2>${esc(title)}</h2><button class="btn primary small" id="pv-p">${ic("printer")}Print or PDF</button></div><iframe id="pv-f" title="${esc(title)}" style="flex:1;border:0;width:100%;background:#fff"></iframe>`;
+  document.body.append(root);document.body.classList.add("noscroll");
+  const fr=root.querySelector("#pv-f");fr.srcdoc=html;
+  const close=fb=>{ovPop("book",fb);root.remove();if(!document.querySelector(".scrim"))document.body.classList.remove("noscroll")};
+  ovPush({k:"book",close:fb=>close(fb)});
+  root.querySelector("#pv-x").onclick=()=>close();
+  root.querySelector("#pv-p").onclick=()=>{try{fr.contentWindow.focus();fr.contentWindow.print()}catch{toast("Use your browser's print option.")}};
+}
+async function posterFor({title,sub,url,color,photoId}){
+  toast("Making your poster…");
+  try{await loadQr()}catch{toast("Couldn't load the QR code maker. Check your internet.");return}
+  let photo="";if(photoId){try{photo=await scImage(photoId)||""}catch{}}
+  const qr=qrcode(0,"M");qr.addData(url);qr.make();
+  const svg=qr.createSvgTag({cellSize:6,margin:0,scalable:true});
+  const col=/^#[0-9a-fA-F]{3,8}$/.test(color||"")?color:"#a65608",e=esc;
+  const html=`<!doctype html><html lang="en-ZA"><head><meta charset="utf-8"><title>${e(title)} poster</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400..700&display=swap"><style>
+@page{size:A4;margin:0}*{box-sizing:border-box}body{margin:0;font-family:"Instrument Sans",system-ui,sans-serif;color:#221c11;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.pg{width:210mm;min-height:297mm;margin:0 auto;display:flex;flex-direction:column;align-items:center;text-align:center;background:#fff}
+.top{width:100%;padding:14mm 12mm 12mm;background:${col};color:#fff;border-radius:0 0 14mm 14mm}.top small{display:block;font-size:12pt;opacity:.92;letter-spacing:.02em}
+h1{font:700 40pt/1.05 "Bricolage Grotesque","Instrument Sans",sans-serif;margin:6mm 0 0}.sub{font-size:16pt;margin:3mm 0 0;opacity:.95}
+.ph{width:150mm;height:78mm;margin:10mm 0 0;border-radius:8mm;overflow:hidden;background:#eee}.ph img{width:100%;height:100%;object-fit:cover;display:block}
+.scan{font:700 24pt "Bricolage Grotesque","Instrument Sans",sans-serif;margin:10mm 0 5mm}
+.qr{width:86mm;height:86mm;padding:5mm;border:2mm solid ${col};border-radius:7mm;background:#fff}.qr svg{width:100%;height:100%;display:block}
+.url{font-size:10pt;color:#6c6250;margin:6mm 14mm 0;word-break:break-all}.foot{margin-top:auto;padding:8mm;font-size:11pt;color:#6c6250}
+</style></head><body><div class="pg"><div class="top"><small>Newberry House Middle School · Production teams</small><h1>${e(title)}</h1>${sub?'<p class="sub">'+e(sub)+"</p>":""}</div>${photo?'<div class="ph"><img src="'+photo+'" alt=""></div>':""}<p class="scan">Scan to see what we are making</p><div class="qr">${svg}</div><p class="url">${e(url)}</p><p class="foot">Learning by doing, together</p></div><script>function fit(){var w=document.documentElement.clientWidth,pw=document.querySelector(".pg").offsetWidth;document.body.style.zoom=Math.min(1,w/pw)}fit();addEventListener("resize",fit);addEventListener("beforeprint",function(){document.body.style.zoom=1});addEventListener("afterprint",fit)<\/script></body></html>`;
+  printView("Poster",html);
+}
+function posterProd(p){const o=p.showcase;if(!o||!o.on)return;const ap=mediaOf(p).filter(m=>m.type!=="video"&&m.consent==="ok")[0];posterFor({title:p.name,sub:p.info&&p.info.term||"",url:scUrl(p),color:p.color,photoId:ap&&ap.id})}
+function posterSchool(){if(!S.sch||!S.sch.on)return;const ap=schList().flatMap(p=>mediaOf(p).filter(m=>m.type!=="video"&&m.consent==="ok"))[0];posterFor({title:"Our production teams",sub:"",url:schUrl(),color:"#a65608",photoId:ap&&ap.id})}
+/* ---------- weekly digest, ready for WhatsApp ---------- */
+function digestText(){
+  const to=Date.now(),from=to-7*864e5,st=repStats(null,from,to),t0=todayStr(),in7=new Date(to+7*864e5).toISOString().slice(0,10);
+  const pl=(n,w)=>n+" "+w+(n===1?"":"s"),fdd=ds=>new Date(ds+"T12:00").toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"});
+  let t="Weekly update, "+dmy2(from)+" to "+dmy2(to)+"\n";
+  t+="All productions: "+st.pct+"% complete on average.\n";
+  t+="This week: "+pl(st.done,"goal")+" finished, "+pl(st.photos,"new photo")+" or video"+(st.photos===1?"":"s")+", "+pl(st.notes,"update")+".\n";
+  if(st.spent||st.income){const pf=st.income-st.spent;t+="Money: spent "+rands(st.spent)+", income "+rands(st.income)+" ("+(pf>=0?"profit":"loss")+" "+rands(Math.abs(pf))+").\n"}
+  const act=st.items.filter(i=>i.done||i.notes||i.photos);
+  if(act.length)t+="\nBy team:\n"+act.map(i=>"• "+i.name+": "+[i.done?pl(i.done,"goal")+" done":"",i.photos?pl(i.photos,"photo"):"",i.notes?pl(i.notes,"update"):""].filter(Boolean).join(", ")).join("\n")+"\n";
+  const up=[];
+  prods().forEach(p=>p.goals.forEach(g=>{if(g.done)return;
+    (g.targets||[]).forEach(x=>{if(!x.done&&x.due&&x.due>=t0&&x.due<=in7)up.push({d:x.due,s:p.name+": "+x.title})});
+    if(g.due&&g.due>=t0&&g.due<=in7)up.push({d:g.due,s:p.name+": "+g.title+" (goal)"})}));
+  up.sort((a,b)=>a.d.localeCompare(b.d));
+  if(up.length)t+="\nComing up next week:\n"+up.slice(0,8).map(x=>"• "+x.s+" (due "+fdd(x.d)+")").join("\n")+"\n";
+  const late=todayData().late.length;if(late)t+="\n"+pl(late,"goal")+" overdue. Please check in with your team.\n";
+  t+="\nWell done, teams! Have a great weekend.";
+  return t;
+}
+function digestSheet(){
+  let text=digestText();
+  sheet("Weekly digest",`<p class="muted small" style="margin:4px 0 8px">A short summary of the last 7 days, ready to send. Edit it first if you like.</p><label class="f" for="dg-t">Message</label><textarea class="t" id="dg-t" rows="12"></textarea><div class="row wr" style="margin-top:14px"><button class="btn primary grow" id="dg-wa" type="button">${ic("chat")}Send on WhatsApp</button><button class="btn" id="dg-sh" type="button">${ic("share")}Share</button><button class="btn" id="dg-cp" type="button">${ic("copy")}Copy</button></div><button class="linkbtn" id="dg-rs" type="button" style="margin-top:6px">Start again from the latest numbers</button>`,(d,close)=>{
+    const ta=d.querySelector("#dg-t");ta.value=text;autosize&&ta.classList.add("ta");try{autosize(ta)}catch{}
+    ta.oninput=()=>{text=ta.value};
+    d.querySelector("#dg-wa").onclick=()=>{window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank","noopener");try{localStorage.setItem(RECAPK,String(weekStart(Date.now())+1))}catch{}};
+    d.querySelector("#dg-sh").onclick=async()=>{try{if(navigator.share)await navigator.share({text});else d.querySelector("#dg-cp").click()}catch{}};
+    d.querySelector("#dg-cp").onclick=()=>navigator.clipboard.writeText(text).then(()=>toast("Copied."),()=>toast("Couldn't copy."));
+    d.querySelector("#dg-rs").onclick=()=>{text=digestText();ta.value=text;try{autosize(ta)}catch{}};
+  });
+}
 /* ---------- start fresh ---------- */
 function freshData(){const now=Date.now();return{prods:DEFAULTS.map(([name,icon,c],i)=>({id:"p"+i,name,icon,color:COLORS[c],desc:"",members:[],goals:[],log:[],del:false,u:now})),media:[]}}
 async function freshLocal(epoch){
   try{localStorage.setItem("ms-prod-prebackup",JSON.stringify(S))}catch{}
-  S=freshData();
+  S=freshData();binSnap();
   try{const d=await mdb();await new Promise(res=>{const t=d.transaction("media","readwrite");t.objectStore("media").clear();t.oncomplete=res;t.onerror=res})}catch{}
   mcache.forEach(u=>{try{URL.revokeObjectURL(u)}catch{}});mcache.clear();
   sm.lv={};sm.since=null;sm.up={};sm.sc={};sm.scAt={};sm.epoch=epoch||0;
@@ -2288,7 +2416,7 @@ function schoolShowcaseSheet(){
     const draw=()=>{
       const all=prods(),n=schList().length,url=o.on?schUrl():"";
       root.innerHTML=`<p class="muted small" style="margin:4px 0 8px">${o.on?"Anyone with this link can see a read-only page about the productions you chose. It updates itself as teams work.":"One link for families and the community. It shows each production's progress, goals done and an approved photo. Each card links to that team's own showcase page if they have turned theirs on."}</p>
-      ${o.on?`<label class="f" for="sh-u">Your link</label><input class="t" id="sh-u" readonly value="${esc(url)}"><div class="row wr" style="margin-top:10px"><button class="btn small" id="sh-cp" type="button">${ic("copy")}Copy link</button><button class="btn small" id="sh-sh" type="button">${ic("share")}Share</button><button class="btn small" id="sh-pv" type="button">${ic("eye")}Preview</button></div><p class="small muted" id="sh-st" style="margin:10px 0 0">${scStatus(o)}</p>`:""}
+      ${o.on?`<label class="f" for="sh-u">Your link</label><input class="t" id="sh-u" readonly value="${esc(url)}"><div class="row wr" style="margin-top:10px"><button class="btn small" id="sh-cp" type="button">${ic("copy")}Copy link</button><button class="btn small" id="sh-sh" type="button">${ic("share")}Share</button><button class="btn small" id="sh-pv" type="button">${ic("eye")}Preview</button><button class="btn small" id="sh-po" type="button">${ic("printer")}Print poster</button></div><p class="small muted" id="sh-st" style="margin:10px 0 0">${scStatus(o)}</p>`:""}
       <h3 class="sub-h">Which productions</h3>
       <div class="chips" role="radiogroup" aria-label="Which productions"><button type="button" class="chip" role="radio" data-m="all" aria-checked="${o.mode!=="selected"}" aria-pressed="${o.mode!=="selected"}">All productions (${all.length})</button><button type="button" class="chip" role="radio" data-m="selected" aria-checked="${o.mode==="selected"}" aria-pressed="${o.mode==="selected"}">Selected only</button></div>
       ${o.mode==="selected"?`<div class="sh-l" role="group" aria-label="Choose productions">${all.map(p=>{const on=(o.ids||[]).includes(p.id);return`<button type="button" class="sh-r" role="checkbox" data-id="${p.id}" aria-checked="${on}"><span class="avatar" style="color:${p.color}">${ic(p.icon)}</span><span class="grow">${esc(p.name)}</span><span class="sh-ck" aria-hidden="true">${on?ic("check","sm"):""}</span></button>`}).join("")}</div><div class="row wr" style="margin-top:8px"><button class="btn small" id="sh-all" type="button">Select all</button><button class="btn small" id="sh-none" type="button">Clear</button></div>`:""}
@@ -2314,6 +2442,7 @@ function schoolShowcaseSheet(){
       const cp=root.querySelector("#sh-cp");if(cp)cp.onclick=()=>navigator.clipboard.writeText(schUrl()).then(()=>toast("Link copied."),()=>{root.querySelector("#sh-u").select();toast("Select the link and copy it.")});
       const sh=root.querySelector("#sh-sh");if(sh)sh.onclick=async()=>{try{if(navigator.share)await navigator.share({title:"Our production teams",text:"See what our production teams have been doing:",url:schUrl()});else cp.click()}catch{}};
       const pv=root.querySelector("#sh-pv");if(pv)pv.onclick=()=>window.open(schUrl(),"_blank","noopener");
+      const po=root.querySelector("#sh-po");if(po)po.onclick=()=>posterSchool();
     };
     draw();
   });
@@ -2392,7 +2521,7 @@ function showcaseSheet(p){
     const draw=()=>{
       const url=o.on?scUrl(p):"",n=nOk();
       root.innerHTML=`<p class="muted small" style="margin:4px 0 6px">${o.on?"Anyone with this link can see a read-only page about "+esc(p.name)+". It updates itself as you work.":"Share a read-only page with families and the community. Only photos marked Approved to share are shown. Updates, comments and student names never appear unless you switch first names on."}</p>
-      ${o.on?`<label class="f" for="sc-u">Your link</label><input class="t" id="sc-u" readonly value="${esc(url)}"><div class="row wr" style="margin-top:10px"><button class="btn small" id="sc-cp" type="button">${ic("copy")}Copy link</button><button class="btn small" id="sc-sh" type="button">${ic("share")}Share</button><button class="btn small" id="sc-pv" type="button">${ic("eye")}Preview</button></div><p class="small muted" id="sc-st" style="margin:10px 0 0">${scStatus(o)}</p>`:""}
+      ${o.on?`<label class="f" for="sc-u">Your link</label><input class="t" id="sc-u" readonly value="${esc(url)}"><div class="row wr" style="margin-top:10px"><button class="btn small" id="sc-cp" type="button">${ic("copy")}Copy link</button><button class="btn small" id="sc-sh" type="button">${ic("share")}Share</button><button class="btn small" id="sc-pv" type="button">${ic("eye")}Preview</button><button class="btn small" id="sc-po" type="button">${ic("printer")}Print poster</button></div><p class="small muted" id="sc-st" style="margin:10px 0 0">${scStatus(o)}</p>`:""}
       <h3 class="sub-h">What to show</h3>${sw("all","All tabs","Plan, Work, Money, Story and Wrap-up in one go")}<div class="sc-sub">${sw("plan","Plan","Proposal, community need, chosen idea, roles and safety")}${sw("work","Work","Goals and their targets")}${sw("money","Money","Income, spending, profit or loss, and where it went")}${sw("story","Story","Recent updates from the team")}${sw("learned","Wrap-up","End of term review and what each member learned")}</div>${sw("names","First names","Show first names in the team, roles and reflections. Off keeps them anonymous.")}<p class="small muted">Updates and reflections are written by people. Use Preview to read everything before you share the link.</p>
       <p class="small muted">${n} photo${n===1?"":"s"} marked Approved to share ${n===1?"will":"will"} appear (up to 14). Set consent in the Gallery.</p><p class="err" id="sc-e" role="alert" hidden></p>
       <div class="row wr" style="margin-top:16px">${o.on?`<button class="btn danger" id="sc-off" type="button">Turn off</button><span class="grow"></span><button class="btn primary" id="sc-up" type="button">Update now</button>`:`<button class="btn primary grow" id="sc-on" type="button">Turn on and create link</button>`}</div>`;
@@ -2411,6 +2540,7 @@ function showcaseSheet(p){
       const cp=root.querySelector("#sc-cp");if(cp)cp.onclick=()=>navigator.clipboard.writeText(scUrl(p)).then(()=>toast("Link copied."),()=>{root.querySelector("#sc-u").select();toast("Select the link and copy it.")});
       const sh=root.querySelector("#sc-sh");if(sh)sh.onclick=async()=>{try{if(navigator.share)await navigator.share({title:p.name+" showcase",text:"See what our production team has been doing:",url:scUrl(p)});else cp.click()}catch{}};
       const pv=root.querySelector("#sc-pv");if(pv)pv.onclick=()=>window.open(scUrl(p),"_blank","noopener");
+      const po=root.querySelector("#sc-po");if(po)po.onclick=()=>posterProd(p);
     };
     draw();
   });
@@ -2467,7 +2597,7 @@ function wireMedia(p){
   if($("#s-wa"))$("#s-wa").onclick=()=>waSheet(p,[...sel]);
   if($("#s-con"))$("#s-con").onclick=()=>consentSheet([...sel]);
   if($("#s-ed"))$("#s-ed").onclick=()=>{const m=S.media.find(x=>x.id===[...sel][0]);m.type==="video"?videoEditSheet(p,m):editSheet(p,m)};
-  if($("#s-del"))$("#s-del").onclick=()=>{const ids=[...sel],ms=ids.map(id=>S.media.find(m=>m.id===id));ms.forEach(m=>{m.del=true;save(m);if(LV.on&&sb)sb.storage.from("ms-media").remove([mediaPath(m.id)]).catch(()=>{});if(sm.up)delete sm.up[m.id]});clearSel();render();
+  if($("#s-del"))$("#s-del").onclick=()=>{const ids=[...sel],ms=ids.map(id=>S.media.find(m=>m.id===id));ms.forEach(m=>{m.del=true;m.delAt=Date.now();save(m);if(sm.up)delete sm.up[m.id]});clearSel();render();
     toast(ms.length+" deleted.",()=>{ms.forEach(m=>{m.del=false;save(m)});render()})};
   document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{
     const m=S.media.find(x=>x.id===b.dataset.m);
