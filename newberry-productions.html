@@ -1147,7 +1147,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.11.1";
+const APP_VER="5.11.2";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1304,7 +1304,7 @@ function planTab(p){
     <h3 class="sub-h">Risks and difficulties</h3><div class="bk-list">${p.risks.map(r=>bkRow("risk:"+r.id,esc(r.risk),"",esc(r.manage||""))).join("")}</div>${addBtn("risk:new","Risk")}
     ${txtCard(p,"perms","Permissions, training or supervision needed before starting","For example: training on how to use a jigsaw")}
     ${txtCard(p,"waste","How we will reduce waste and care for our work space","Tap to write")}`;
-  return setupCard(p)+carryCard(p)+voiceBar(p,"plan")+
+  return setupCard(p)+carryCard(p)+
     acc(p,"team","users","Team and roles",`${p.members.length} member${p.members.length===1?"":"s"} · ${p.roles.length} role${p.roles.length===1?"":"s"}`,stp(p.members.length>0&&p.roles.length>0,p.members.length>0&&p.roles.length>0?"Done":"To do"),team)+
     acc(p,"ideas","sparkle","Ideas and observation",p.txt.chosen?esc(p.txt.chosen).slice(0,50):"What does the community need?",stp(!!(p.ideas.length||p.txt.chosen),p.ideas.length||p.txt.chosen?"Done":"To do"),ideas)+
     acc(p,"prop","book","Project proposal",statusLbl,stp(pr.status==="approved",statusLbl),prop)+
@@ -1421,7 +1421,7 @@ function workTab(p){
   const dots=Array.from({length:9},(_,i)=>`<span class="dot9 ${i<wk.length?"on":""}" aria-hidden="true"></span>`).join("");
   const sess=`<div class="row" style="margin-bottom:10px"><div class="dots9" role="img" aria-label="${wk.length} of 9 weekly records">${dots}</div><span class="small muted grow">${wk.length} of 9 weeks recorded</span></div><div class="bk-list">${wk.map(w=>bkRow("sess:"+w.id,esc(w.label||"Session"),w.spent?rands(toNum(w.spent)):"",`${dShort(w.date)} · ${(w.present||[]).length} present${w.recorder?" · "+esc(w.recorder):""}`)).join("")}</div>${addBtn("sess:new","Record a session")}`;
   const ev=`<p class="small muted" style="margin:0 0 8px">Check the quality of finished tasks and keep evidence: a photo, a sample or feedback.</p>${done.length?`<div class="bk-list">${done.map(({g,t})=>bkRow("evid:"+g.id+"."+t.id,esc(t.title),t.chk?stp(true,"Checked by "+esc(t.chk)):stp(false,"Needs checking"),`${esc(g.title)}${t.doneAt?" · "+dShort(new Date(t.doneAt).toISOString().slice(0,10)):""}`)).join("")}</div>`:`<div class="empty" style="padding:10px 0">Finish a task and it appears here for checking.</div>`}${txtCard(p,"served","Feedback from the people our work served or customers","Tap to write")}`;
-  return voiceBar(p,"work")+readyCard(p)+acc(p,"plan","target","Action plan",`${p.goals.length} milestone${p.goals.length===1?"":"s"}`,stp(nT>0&&dT===nT,nT?`${dT}/${nT} done`:"To do"),plan)+
+  return readyCard(p)+acc(p,"plan","target","Action plan",`${p.goals.length} milestone${p.goals.length===1?"":"s"}`,stp(nT>0&&dT===nT,nT?`${dT}/${nT} done`:"To do"),plan)+
     acc(p,"sess","calendar","Weekly records",`${wk.length} of 9 recorded`,stp(wk.length>0,wk.length?wk.length+" saved":"To do"),sess)+
     acc(p,"evid","check","Completed work and evidence",`${done.filter(x=>x.t.chk).length} of ${dT} checked`,stp(dT>0&&done.every(x=>x.t.chk),dT?`${done.filter(x=>x.t.chk).length}/${dT} checked`:"None yet"),ev);
 }
@@ -1494,7 +1494,7 @@ function moneyTab(p){
   const ic2=[...p.inc].sort((a,b)=>String(b.date||"").localeCompare(String(a.date||"")));
   const inc=`<div class="bk-list">${ic2.map(e=>bkRow("inc:"+e.id,esc(e.source),rands(toNum(e.amount)),`${dShort(e.date)}${toNum(e.qty)?" · "+toNum(e.qty)+" sold":""}${e.by?" · "+esc(e.by):""}`)).join("")}</div>${addBtn("inc:new","Income")}
     <div class="sumbox"><div><span>Total income</span><b>${rands(b.income)}</b></div><div><span>Total spent</span><b>${rands(b.spent)}</b></div><div><span>Actual ${b.surplus>=0?"profit":"loss"}</span><b class="${b.surplus>=0?"pos":"neg"}">${rands(Math.abs(b.surplus))}</b></div></div>${txtCard(p,"tells","What the figures tell us about our project","Tap to write")}${txtCard(p,"surplus","What happened to any surplus stock or remaining funds","Tap to write")}`;
-  return hero+breakdownCard(p)+voiceBar(p,"money")+
+  return hero+breakdownCard(p)+
     acc(p,"bud","list","Planned budget",`${p.bud.items.length} item${p.bud.items.length===1?"":"s"} · ${rands(b.planned)}`,stp(p.bud.items.length>0&&b.approved>0,b.approved?"Approved":"To do"),plan)+
     acc(p,"exp","receipt","Expenditure record",`${p.exp.length} purchase${p.exp.length===1?"":"s"} · ${rands(b.spent)}`,stp(p.exp.length>0,p.exp.length?p.exp.length+" saved":"None yet"),exp)+
     acc(p,"inc","cash","Income and review",`${p.inc.length} entr${p.inc.length===1?"y":"ies"} · ${rands(b.income)}`,stp(p.inc.length>0,p.inc.length?p.inc.length+" saved":"None yet"),inc);
@@ -1508,7 +1508,7 @@ function wrapTab(p){
   const H=p.hand;
   const hand=`${txtCard(p,"hwork",TXT.hwork[0],TXT.hwork[1])}<h3 class="sub-h">Resources, tools, stock and files</h3><div class="bk-list">${H.res.map(r=>bkRow("hres:"+r.id,esc(r.item),"",`${esc(r.loc||"")}${r.cond?" · "+esc(r.cond):""}`)).join("")}</div>${addBtn("hres:new","Item")}${txtCard(p,"hpeople",TXT.hpeople[0],TXT.hpeople[1])}
     <div class="bk-line"><span class="small muted">Funds or stock handed over</span><b>${esc(H.funds||"Not noted")}</b></div><div class="bk-line"><span class="small muted">Handed over by</span><b>${esc(H.by||"-")}${H.byOn?" · "+dLong(H.byOn):""}</b></div><div class="bk-line"><span class="small muted">Received by</span><b>${esc(H.to||"-")}${H.toOn?" · "+dLong(H.toOn):""}</b></div><button class="btn small" data-ba="hand:edit">${ic("pencil")}Hand over sign-off</button>`;
-  return voiceBar(p,"wrap")+acc(p,"rev","flag","End of term review",R.completed||p.txt.achieved?"In progress":"Look back on the term",stp(!!p.txt.achieved&&!!p.txt.compare,p.txt.achieved&&p.txt.compare?"Done":"To do"),rev)+
+  return acc(p,"rev","flag","End of term review",R.completed||p.txt.achieved?"In progress":"Look back on the term",stp(!!p.txt.achieved&&!!p.txt.compare,p.txt.achieved&&p.txt.compare?"Done":"To do"),rev)+
     acc(p,"refl","user","Individual reflections",`${refl.filter(r=>r.done).length} of ${p.members.length} written`,stp(refl.length>0&&refl.every(r=>r.done),refl.length?`${refl.filter(r=>r.done).length}/${refl.length}`:"No members"),rf)+
     acc(p,"hand","users","Handover to the next team",H.to?"Handed over":"Leave it ready to continue",stp(!!H.to,H.to?"Done":"To do"),hand)+
     showcaseCard(p)+`<div class="card"><h2>Project book</h2><p class="muted" style="margin:0 0 12px">Everything you recorded, laid out like the printed Production Team Project Book. Print it or save it as a PDF.</p><button class="btn primary" id="book-x">${ic("printer")}Export project book</button></div>`+nextTermCard(p);
