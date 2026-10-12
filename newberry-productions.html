@@ -626,6 +626,7 @@ kbd{font:600 .85rem var(--body);min-width:34px;text-align:center;padding:4px 8px
 .cp-t[aria-checked=true]::after{content:"";position:absolute;right:6px;top:6px;width:22px;height:22px;border-radius:50%;background:var(--green) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12l5 5 9-10'/%3E%3C/svg%3E") center/14px no-repeat}
 /* v5.7.0: showcase */
 #sc .t[readonly]{font-size:.9rem}
+.sc-sub{margin:0 0 4px 14px;padding-left:12px;border-left:3px solid var(--line)}
 </style>
 </head>
 <body>
@@ -1134,7 +1135,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.8.0";
+const APP_VER="5.9.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -2245,21 +2246,37 @@ const scUrl=p=>location.origin+location.pathname.replace(/[^/]*$/,"")+"showcase.
 const scToken=()=>{const a=new Uint8Array(24);crypto.getRandomValues(a);return[...a].map(x=>"abcdefghijklmnopqrstuvwxyz0123456789"[x%36]).join("")};
 const scStatus=o=>{const t=(sm.scAt||{})[o.token];if(!t)return"Not published yet.";const m=Math.round((Date.now()-t)/60000);return"Last updated "+(m<1?"just now":m<60?m+" min ago":new Date(t).toLocaleString([],{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}))+"."};
 function scBuild(p){
-  ensureBook(p);const o=p.showcase||{},b=bud(p);
-  const apNew=mediaOf(p).filter(m=>m.type!=="video"&&m.consent==="ok"),ap=apNew.slice().sort((a,c)=>a.t-c.t);
+  ensureBook(p);const o=p.showcase||{},b=bud(p),on=k=>k==="work"?o.work!==false:!!o[k],cut=(v,n)=>String(v==null?"":v).trim().slice(0,n);
+  const first=m=>String(m).trim().split(/\s+/)[0];
+  const apNew=mediaOf(p).filter(m=>m.type!=="video"&&m.consent==="ok"),ap=apNew.slice().sort((x,y)=>x.t-y.t);
   let pair=null;if(apNew.length>=2){const c=cmpPair(p,apNew);pair={a:c.first.id,b:c.last.id}}
   const ids=new Set(ap.slice(-12).map(m=>m.id));if(pair){ids.add(pair.a);ids.add(pair.b)}
-  const photos=ap.filter(m=>ids.has(m.id)).map(m=>({id:m.id,cap:String(m.cap||"").slice(0,90),t:m.t}));
-  const doneT=p.goals.flatMap(g=>(g.targets||[]).filter(t=>t.done).map(t=>({t:String(t.title||"").slice(0,100),at:t.doneAt||0}))).sort((a,c)=>c.at-a.at).slice(0,8).map(x=>x.t);
-  const first=m=>String(m).trim().split(/\s+/)[0];
+  const photos=ap.filter(m=>ids.has(m.id)).map(m=>({id:m.id,cap:cut(m.cap,90),t:m.t}));
   const team=o.names&&p.members.length?p.members.slice(0,10).map(first).join(", ")+(p.members.length>10?" and more":""):p.members.length?p.members.length+" student"+(p.members.length===1?"":"s"):"Our team";
-  const d={v:1,name:p.name,icon:ICONS[p.icon]||"",color:p.color,desc:String(p.desc||"").slice(0,240),term:(p.info&&p.info.term)||"",pct:prodPct(p),done:p.goals.filter(g=>g.done).length,open:p.goals.filter(g=>!g.done).length,team,pair,photos,doneTargets:doneT,updated:Date.now(),
-    goals:p.goals.slice(0,15).map(g=>({t:String(g.title||"").slice(0,120),done:!!g.done,pct:goalPct(g)}))};
-  if(o.money){
-    const days=[...new Set([...p.exp,...p.inc].filter(e=>e.date).map(e=>e.date))].sort(),sumTo=(arr,x)=>Math.round(arr.filter(e=>e.date&&e.date<=x).reduce((a,e)=>a+toNum(e.amount),0)*100)/100;
-    d.money={inc:b.income,sp:b.spent,approved:b.approved,rows:days.slice(-60).map(x=>({d:x,inc:sumTo(p.inc,x),sp:sumTo(p.exp,x)}))};
+  const d={v:2,name:p.name,icon:ICONS[p.icon]||"",color:p.color,desc:cut(p.desc,240),term:(p.info&&p.info.term)||"",pct:prodPct(p),done:p.goals.filter(g=>g.done).length,open:p.goals.filter(g=>!g.done).length,team,pair,photos,updated:Date.now()};
+  if(on("work")){
+    d.goals=p.goals.slice(0,15).map(g=>({t:cut(g.title,120),done:!!g.done,pct:goalPct(g),targets:(g.targets||[]).slice(0,10).map(t=>({t:cut(t.title,100),done:!!t.done}))}));
+    d.doneTargets=p.goals.flatMap(g=>(g.targets||[]).filter(t=>t.done).map(t=>({t:cut(t.title,100),at:t.doneAt||0}))).sort((x,y)=>y.at-x.at).slice(0,8).map(x=>x.t);
   }
-  if(o.learned)d.learned={achieved:String(p.txt.achieved||"").slice(0,600),chosen:String(p.txt.chosen||"").slice(0,400)};
+  if(on("plan")){
+    const pr=p.prop||{},T=p.txt||{};
+    d.plan={proposal:{title:cut(pr.title,120),need:cut(pr.need,500),make:cut(pr.make,500),who:cut(pr.who,300),success:cut(pr.success,400),due:pr.due||""},
+      community:cut(T.community,500),noticed:cut(T.noticed,500),chosen:cut(T.chosen,500),successTxt:cut(T.success,500),
+      roles:p.roles.slice(0,10).map(r=>({role:cut(r.role,60),who:o.names&&r.who?first(r.who):""})),
+      risks:p.risks.slice(0,8).map(r=>({risk:cut(r.risk,120),manage:cut(r.manage,200)}))};
+  }
+  if(on("money")){
+    const days=[...new Set([...p.exp,...p.inc].filter(e=>e.date).map(e=>e.date))].sort(),sumTo=(arr,x)=>Math.round(arr.filter(e=>e.date&&e.date<=x).reduce((q,e)=>q+toNum(e.amount),0)*100)/100;
+    d.money={inc:b.income,sp:b.spent,approved:b.approved,rows:days.slice(-60).map(x=>({d:x,inc:sumTo(p.inc,x),sp:sumTo(p.exp,x)})),
+      spend:spendSlices(p).map(x=>({l:cut(x.l,60),v:x.v})),
+      planned:p.bud.items.slice(0,12).map(i=>({item:cut(i.item,60),total:toNum(i.qty)*toNum(i.unit)}))};
+  }
+  if(on("story"))d.updates=p.log.slice().sort((x,y)=>y.t-x.t).slice(0,12).map(l=>({t:l.t,txt:cut(l.text,300)}));
+  if(on("learned")){
+    const T=p.txt||{},R=p.rev||{},rich=o.ver===2;
+    d.learned={achieved:cut(T.achieved,600),chosen:cut(T.chosen,400),compare:rich?cut(T.compare,500):"",shared:rich?cut(T.shared,500):"",change:rich?cut(T.change,500):"",completed:rich?cut(R.completed,60):"",remaining:rich?cut(R.remaining,200):"",
+      refl:!rich?[]:p.members.slice(0,10).map(m=>{const r=p.refl[m]||{};return{who:o.names?first(m):"A team member",contrib:cut(r.contrib,300),skill:cut(r.skill,200),challenge:cut(r.challenge,300)}}).filter(r=>r.contrib||r.skill||r.challenge)};
+  }
   return d;
 }
 async function scImage(id){
@@ -2286,24 +2303,25 @@ async function scOff(p){
   if(sm.sc)delete sm.sc[t];if(sm.scAt)delete sm.scAt[t];persistSync();o.on=false;o.token="";save(p);return true;
 }
 function showcaseSheet(p){
-  const o=p.showcase=p.showcase||{on:false,token:"",money:false,learned:false,names:false};
+  const o=p.showcase=p.showcase||{on:false,token:"",ver:2,plan:false,work:true,money:false,story:false,learned:false,names:false};
   sheet("Showcase page",`<div id="sc"></div>`,(d,close)=>{
     const root=d.querySelector("#sc");let busy=false;
     const nOk=()=>mediaOf(p).filter(m=>m.type!=="video"&&m.consent==="ok").length;
-    const sw=(k,t,sub)=>`<div class="row between" style="margin:12px 0"><div><b>${t}</b><div class="small muted">${sub}</div></div><button type="button" role="switch" class="sw" data-k="${k}" aria-label="${t}" aria-checked="${!!o[k]}"><i></i></button></div>`;
+    const ALL=["plan","work","money","story","learned"],val=k=>k==="all"?ALL.every(x=>val(x)):k==="work"?o.work!==false:!!o[k];
+    const sw=(k,t,sub)=>`<div class="row between" style="margin:12px 0"><div><b>${t}</b><div class="small muted">${sub}</div></div><button type="button" role="switch" class="sw" data-k="${k}" aria-label="${t}" aria-checked="${val(k)}"><i></i></button></div>`;
     const err=m=>{const e=root.querySelector("#sc-e");if(e){e.textContent=m;e.hidden=!m}};
     const draw=()=>{
       const url=o.on?scUrl(p):"",n=nOk();
       root.innerHTML=`<p class="muted small" style="margin:4px 0 6px">${o.on?"Anyone with this link can see a read-only page about "+esc(p.name)+". It updates itself as you work.":"Share a read-only page with families and the community. Only photos marked Approved to share are shown. Updates, comments and student names never appear unless you switch first names on."}</p>
       ${o.on?`<label class="f" for="sc-u">Your link</label><input class="t" id="sc-u" readonly value="${esc(url)}"><div class="row wr" style="margin-top:10px"><button class="btn small" id="sc-cp" type="button">${ic("copy")}Copy link</button><button class="btn small" id="sc-sh" type="button">${ic("share")}Share</button><button class="btn small" id="sc-pv" type="button">${ic("eye")}Preview</button></div><p class="small muted" id="sc-st" style="margin:10px 0 0">${scStatus(o)}</p>`:""}
-      <h3 class="sub-h">What to show</h3>${sw("money","Money","Income, spending and profit or loss")}${sw("learned","What we learned","Your chosen idea and what you achieved, from the Plan and Wrap-up tabs")}${sw("names","First names","Show the team's first names. Off shows only how many students.")}
+      <h3 class="sub-h">What to show</h3>${sw("all","All tabs","Plan, Work, Money, Story and Wrap-up in one go")}<div class="sc-sub">${sw("plan","Plan","Proposal, community need, chosen idea, roles and safety")}${sw("work","Work","Goals and their targets")}${sw("money","Money","Income, spending, profit or loss, and where it went")}${sw("story","Story","Recent updates from the team")}${sw("learned","Wrap-up","End of term review and what each member learned")}</div>${sw("names","First names","Show first names in the team, roles and reflections. Off keeps them anonymous.")}<p class="small muted">Updates and reflections are written by people. Use Preview to read everything before you share the link.</p>
       <p class="small muted">${n} photo${n===1?"":"s"} marked Approved to share ${n===1?"will":"will"} appear (up to 14). Set consent in the Gallery.</p><p class="err" id="sc-e" role="alert" hidden></p>
       <div class="row wr" style="margin-top:16px">${o.on?`<button class="btn danger" id="sc-off" type="button">Turn off</button><span class="grow"></span><button class="btn primary" id="sc-up" type="button">Update now</button>`:`<button class="btn primary grow" id="sc-on" type="button">Turn on and create link</button>`}</div>`;
       wire();
     };
     const run=async(btn,label,fn)=>{if(busy)return;busy=true;const t=btn.innerHTML;btn.disabled=true;btn.textContent=label;try{await fn()}finally{busy=false;if(btn.isConnected){btn.disabled=false;btn.innerHTML=t}}};
     const wire=()=>{
-      root.querySelectorAll(".sw").forEach(b=>b.onclick=async()=>{const k=b.dataset.k;o[k]=!o[k];b.setAttribute("aria-checked",String(!!o[k]));fb("tick");save(p);if(o.on){const ok=await scPublish(p,true);const st=root.querySelector("#sc-st");if(st)st.textContent=ok?scStatus(o):"Could not update yet. It will retry."}});
+      root.querySelectorAll(".sw").forEach(b=>b.onclick=async()=>{const k=b.dataset.k;o.ver=2;if(k==="all"){const to=!val("all");ALL.forEach(x=>o[x]=to)}else o[k]=!val(k);fb("tick");save(p);draw();if(o.on){const ok=await scPublish(p,true);const st=root.querySelector("#sc-st");if(st)st.textContent=ok?scStatus(o):"Could not update yet. It will retry."}});
       const on=root.querySelector("#sc-on");if(on)on.onclick=()=>run(on,"Creating link…",async()=>{
         if(!LV.on){err("Connect this device with the school code first (Settings, then Live sync).");return}
         err("");o.on=true;o.token=scToken();const ok=await scPublish(p,true);

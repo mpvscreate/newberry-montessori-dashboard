@@ -47,6 +47,10 @@ main{max-width:760px;margin:0 auto;padding:0 16px calc(40px + env(safe-area-inse
 .chart{display:block;width:100%;height:150px}.chart path{fill:none;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round;vector-effect:non-scaling-stroke}
 .keys{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.8rem;color:var(--muted);margin-top:8px}.keys i{display:inline-block;width:16px;border-top:3px solid;vertical-align:middle;margin-right:6px;border-radius:2px}
 blockquote{margin:0 0 12px;padding:2px 0 2px 14px;border-left:4px solid var(--pc)}blockquote small{display:block;color:var(--muted);margin-bottom:2px}
+.kv{margin:0 0 12px}.kv span{display:block;font-size:.8rem;color:var(--muted)}.kv p{margin:2px 0 0}.sh{font-size:1rem;margin:14px 0 6px}.pl{padding-left:20px;margin:6px 0 0}.pl li{margin:6px 0}.mu{color:var(--muted);font-size:.9rem}.tg2{font-size:.8rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.tl{list-style:none;margin:0;padding:0}.tl li{padding:10px 0;border-top:1px solid var(--line)}.tl li:first-child{border-top:0}.tl small{display:block;color:var(--muted);margin-bottom:2px}
+.tgt{list-style:none;margin:6px 0 0;padding:0;font-size:.9rem;color:var(--muted)}.tgt li{margin:2px 0}.tgt .ok{color:var(--green)}
+.bars .r{display:grid;grid-template-columns:minmax(80px,34%) 1fr auto;gap:10px;align-items:center;margin:8px 0;font-size:.9rem}.bars .r .n{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.bars .r .t{height:10px;border-radius:99px;background:var(--line);overflow:hidden}.bars .r .t i{display:block;height:100%;border-radius:99px;background:var(--amber)}.bars .r b{font-variant-numeric:tabular-nums}
 footer{text-align:center;color:var(--muted);font-size:.82rem;padding:10px 0}
 .lb{position:fixed;inset:0;z-index:50;background:rgba(0,0,0,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px}.lb[hidden]{display:none}
 .lb img{max-width:100%;max-height:78vh;border-radius:14px}.lb p{color:#fff;margin:12px 0 0;text-align:center}
@@ -105,10 +109,35 @@ function render(d){
   h+='<div class="stats"><div class="stat"><b>'+num(d.done)+"</b><span>goals done</span></div><div class=\"stat\"><b>"+num(d.open)+"</b><span>still to do</span></div><div class=\"stat\"><b class=\"sm\">"+esc(d.team||"")+"</b><span>team</span></div></div>";
   if(pair)h+='<section class="card"><h2>Before and now</h2><div class="cmps" id="cmps"><img data-id="'+esc(pair.b)+'" alt="Now"><img class="b" data-id="'+esc(pair.a)+'" alt="Before"><span class="cl"></span><span class="kn" aria-hidden="true">&lsaquo;&rsaquo;</span><span class="tg l">Before · '+esc(dShort(byId[pair.a].t))+'</span><span class="tg r">Now · '+esc(dShort(byId[pair.b].t))+'</span><input type="range" min="0" max="100" value="50" aria-label="Slide to compare before and now"></div><p class="hint">Drag the handle to compare.</p></section>';
   if(photos.length)h+='<section class="card"><h2>Photos</h2><div class="grid">'+photos.map((p,i)=>'<button data-i="'+i+'" aria-label="Open photo '+(i+1)+(p.cap?": "+esc(p.cap):"")+'"><img data-id="'+esc(p.id)+'" alt="'+esc(p.cap||"Production photo")+'"></button>').join("")+"</div></section>";
+  const kv=(k,v)=>v?'<div class="kv"><span>'+esc(k)+"</span><p>"+esc(v).replace(/\n/g,"<br>")+"</p></div>":"";
+  const fd=t=>{try{return new Date(t).toLocaleDateString("en-ZA",{day:"numeric",month:"long",year:"numeric"})}catch(e){return""}};
+  /* Plan */
+  if(d.plan){const P=d.plan,pr=P.proposal||{};let b="";
+    if(pr.title)b+='<h3 class="sh" style="margin-top:0">'+esc(pr.title)+"</h3>"+kv("The need",pr.need)+kv("What we will make, do or provide",pr.make)+kv("Who benefits",pr.who)+kv("How we will know it worked",pr.success)+(pr.due?'<p class="tg2">Target date: '+esc(fd(pr.due+"T12:00"))+"</p>":"");
+    b+=kv("What our community needs",P.community)+kv("What we noticed",P.noticed)+kv("Our chosen idea",P.chosen)+kv("What success looks like",P.successTxt);
+    if((P.roles||[]).length)b+='<h3 class="sh">Roles</h3><ul class="pl">'+P.roles.map(r=>"<li><b>"+esc(r.role)+"</b>"+(r.who?" · "+esc(r.who):"")+"</li>").join("")+"</ul>";
+    if((P.risks||[]).length)b+='<h3 class="sh">Staying safe</h3><ul class="pl">'+P.risks.map(r=>"<li><b>"+esc(r.risk)+"</b>"+(r.manage?'<br><span class="mu">'+esc(r.manage)+"</span>":"")+"</li>").join("")+"</ul>";
+    if(b)h+='<section class="card"><h2>Our plan</h2>'+b+"</section>";
+  }
+  /* Work */
   const goals=Array.isArray(d.goals)?d.goals:[];
-  if(goals.length||(d.doneTargets||[]).length){h+='<section class="card"><h2>Our goals</h2>'+goals.map(g=>'<div class="goal"><div class="t"><span>'+esc(g.t)+"</span><em>"+(g.done?"Done":Math.round(num(g.pct))+"%")+'</em></div><div class="meter"><i style="width:'+(g.done?100:Math.max(0,Math.min(100,num(g.pct))))+'%"></i></div></div>').join("")+((d.doneTargets||[]).length?'<h3 style="font-size:1rem;margin-top:14px">Recently finished</h3><ul class="done">'+d.doneTargets.map(t=>"<li>"+esc(t)+"</li>").join("")+"</ul>":"")+"</section>"}
-  if(d.money)h+=moneyBlock(d.money);
-  if(d.learned&&(d.learned.achieved||d.learned.chosen)){h+='<section class="card"><h2>What we learned</h2>'+(d.learned.chosen?"<blockquote><small>Our idea and why it matters</small>"+esc(d.learned.chosen)+"</blockquote>":"")+(d.learned.achieved?"<blockquote><small>What we achieved</small>"+esc(d.learned.achieved)+"</blockquote>":"")+"</section>"}
+  if(goals.length||(d.doneTargets||[]).length){h+='<section class="card"><h2>Our goals</h2>'+goals.map(g=>'<div class="goal"><div class="t"><span>'+esc(g.t)+"</span><em>"+(g.done?"Done":Math.round(num(g.pct))+"%")+'</em></div><div class="meter"><i style="width:'+(g.done?100:Math.max(0,Math.min(100,num(g.pct))))+'%"></i></div>'+((g.targets||[]).length?'<ul class="tgt">'+g.targets.map(t=>'<li class="'+(t.done?"ok":"")+'">'+(t.done?"\u2713 ":"\u25cb ")+esc(t.t)+"</li>").join("")+"</ul>":"")+"</div>").join("")+((d.doneTargets||[]).length?'<h3 class="sh">Recently finished</h3><ul class="done">'+d.doneTargets.map(t=>"<li>"+esc(t)+"</li>").join("")+"</ul>":"")+"</section>"}
+  /* Money */
+  if(d.money){h+=moneyBlock(d.money);
+    const sp=(d.money.spend||[]).filter(x=>x&&num(x.v)>0),mx=Math.max(1,...sp.map(x=>num(x.v)));
+    if(sp.length>1)h+='<section class="card"><h2>Where the money went</h2><div class="bars">'+sp.map(x=>'<div class="r"><span class="n">'+esc(x.l)+'</span><span class="t"><i style="width:'+(num(x.v)/mx*100).toFixed(1)+'%"></i></span><b>'+rands(x.v)+"</b></div>").join("")+"</div></section>";
+    const pl=(d.money.planned||[]).filter(x=>x&&x.item);
+    if(pl.length)h+='<section class="card"><h2>Planned costs</h2><div class="bars">'+pl.map(x=>'<div class="r" style="grid-template-columns:1fr auto"><span class="n">'+esc(x.item)+"</span><b>"+rands(x.total)+"</b></div>").join("")+"</div></section>";
+  }
+  /* Story */
+  if((d.updates||[]).length)h+='<section class="card"><h2>Our story</h2><ul class="tl">'+d.updates.map(u=>"<li><small>"+esc(dShort(u.t))+"</small>"+esc(u.txt).replace(/\n/g,"<br>")+"</li>").join("")+"</ul></section>";
+  /* Wrap-up */
+  const L=d.learned;
+  if(L){let b="";
+    b+=(L.chosen?kv("Our idea and why it matters",L.chosen):"")+kv("What we achieved",L.achieved)+kv("How our result compares with what we planned",L.compare)+kv("How we worked together",L.shared)+kv("What we would change next time",L.change)+(L.completed?kv("Project completed",L.completed):"")+(L.remaining?kv("Work still to do",L.remaining):"");
+    if((L.refl||[]).length)b+='<h3 class="sh">What each of us learned</h3>'+L.refl.map(r=>'<blockquote><small>'+esc(r.who)+"</small>"+[r.contrib,r.skill?"Skill: "+r.skill:"",r.challenge?"Challenge: "+r.challenge:""].filter(Boolean).map(x=>esc(x)).join("<br>")+"</blockquote>").join("");
+    if(b)h+='<section class="card"><h2>Wrap-up</h2>'+b+"</section>";
+  }
   h+="<footer>Made by the production team"+(d.updated?" · Updated "+esc(new Date(d.updated).toLocaleDateString("en-ZA",{day:"numeric",month:"long",year:"numeric"})):"")+"<br>Questions about this page? Please contact the school.</footer>";
   app.innerHTML=h;
   const pav=$("#pav");if(pav)pav.append(cleanIcon(d.icon));
