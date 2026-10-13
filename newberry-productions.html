@@ -640,6 +640,10 @@ kbd{font:600 .85rem var(--body);min-width:34px;text-align:center;padding:4px 8px
 /* v5.12.0: lean section 1 */
 button.sync{font-family:inherit;cursor:pointer}.sync[hidden]{display:none}
 .ptile.padd{background:none;border:2px dashed var(--line);box-shadow:none;color:var(--muted)}.ptile.padd .pav{box-shadow:none;background:var(--line);color:var(--muted)}.ptile.padd:hover{border-color:var(--green);color:var(--green)}
+/* v5.12.1: lean section 2 */
+.sh-menu{display:grid;gap:4px;margin-top:6px}
+.st-h{font:700 .8rem var(--body);text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:16px 0 4px}.st-h:first-of-type{margin-top:8px}.st-h.att{color:var(--red)}.st-h.done{color:var(--green)}.st-h .muted{font-weight:600;letter-spacing:0}
+.tile.late .big{color:var(--red)}button.tile{cursor:pointer;border:1px solid var(--line);font:inherit}
 </style>
 </head>
 <body>
@@ -1150,7 +1154,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.12.0";
+const APP_VER="5.12.1";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1957,24 +1961,34 @@ function homePage(){
 /* second tab: the detail */
 let ovMore=false;
 function rankCard(ps){
-  const rows=ps.map(p=>({p,q:prodPct(p),o:p.goals.filter(g=>!g.done).length,d:p.goals.filter(g=>g.done).length})).sort((a,b)=>b.q-a.q||a.p.name.localeCompare(b.p.name));
-  const avg=rows.length?Math.round(rows.reduce((a,r)=>a+r.q,0)/rows.length):0;
-  return `<div class="card rank"><div class="rk-h"><h2>Progress ranking</h2><span class="small muted">Average ${avg}%</span></div><ul class="list rk">${rows.map(r=>`<li><button class="prow" style="--pc:${r.p.color}" data-open="${r.p.id}" aria-label="Open ${esc(r.p.name)}, ${r.q} percent"><span class="avatar" style="color:${r.p.color}">${ic(r.p.icon)}</span><span class="grow"><span class="rk-t"><b>${esc(r.p.name)}</b><b class="amt">${r.q}%</b></span><span class="rk-track"><i style="width:${r.q}%;min-width:${r.q?4:0}px;background:${r.p.color}"></i><u style="left:${avg}%"></u></span><span class="small muted">${r.o?r.o+" open":r.p.goals.length?"All done":"No goals yet"}${r.d?" · "+r.d+" done":""}</span></span></button></li>`).join("")}</ul><p class="small muted rk-note"><u></u>The marker shows the average across all productions.</p></div>`;
+  const td=todayData(),quiet=new Map(td.quiet.map(x=>[x.p.id,x.last]));
+  const info=ps.map(p=>{const q=prodPct(p),o=p.goals.filter(g=>!g.done).length,d=p.goals.filter(g=>g.done).length,lt=lateCount(p);let grp,meta;
+    if(!p.goals.length){grp="new";meta="No goals yet"}
+    else if(lt||quiet.has(p.id)){grp="att";meta=[lt?lt+" overdue":"",quiet.has(p.id)?"no update for "+Math.max(7,Math.floor((Date.now()-quiet.get(p.id))/864e5))+" days":""].filter(Boolean).join(" · ")}
+    else if(o===0){grp="done";meta="All "+d+" goal"+(d===1?"":"s")+" done"}
+    else{grp="ok";meta=o+" open · "+d+" done"}
+    return{p,q,grp,meta}});
+  const avg=info.length?Math.round(info.reduce((x,r)=>x+r.q,0)/info.length):0;
+  const row=r=>`<li><button class="prow" style="--pc:${r.p.color}" data-open="${r.p.id}" aria-label="Open ${esc(r.p.name)}, ${r.q} percent"><span class="avatar" style="color:${r.p.color}">${ic(r.p.icon)}</span><span class="grow"><span class="rk-t"><b>${esc(r.p.name)}</b><b class="amt">${r.q}%</b></span><span class="rk-track"><i style="width:${r.q}%;min-width:${r.q?4:0}px;background:${r.p.color}"></i></span><span class="small muted">${esc(r.meta)}</span></span></button></li>`;
+  const secs=[["att","Needs attention"],["ok","On track"],["done","Finished"]].map(([k,t])=>{const rs=info.filter(r=>r.grp===k).sort((x,y)=>x.q-y.q);return rs.length?`<h3 class="st-h ${k}">${t} <span class="muted">(${rs.length})</span></h3><ul class="list rk">${rs.map(row).join("")}</ul>`:""}).join("");
+  const nw=info.filter(r=>r.grp==="new");
+  return `<div class="card rank"><div class="rk-h"><h2>Where things stand</h2><span class="small muted">Average ${avg}%</span></div>${secs}${nw.length?`<h3 class="st-h new">Not started <span class="muted">(${nw.length})</span></h3><div class="chips">${nw.map(r=>`<button class="chip" data-open="${r.p.id}" type="button">${ic(r.p.icon,"sm")}${esc(r.p.name)}</button>`).join("")}</div>`:""}</div>`;
 }
+const actGroups=arr=>{let day="",h="";arr.forEach(x=>{const l=dayLabel(x.t);if(l!==day){if(day)h+="</ul>";h+=`<h3 class="sday" style="margin-top:12px">${esc(l)}</h3><ul class="list">`;day=l}h+=actRow(x)});return h+(day?"</ul>":"")};
 function overviewPage(){
-  const{ps,all,open,pct,photos}=totals(),allF=feedItems(),f=allF.slice(0,ovMore?60:8);
-  return `<div class="page-h"><h2>Overview</h2><div class="row wr"><button class="btn small" id="dg-btn" aria-label="Weekly digest">${ic("chat")}Digest</button><button class="btn small" id="sch-btn" aria-label="School showcase">${ic("share")}Showcase</button><button class="btn small" id="rep" aria-label="Weekly report">${ic("trend")}Report</button></div></div>
+  const{ps,all,open,pct}=totals(),allF=feedItems(),f=allF.slice(0,ovMore?60:8),td=todayData(),late=td.late.length,soon=td.soon.length;
+  return `<div class="page-h"><h2>Overview</h2><button class="btn small" id="shr-btn" aria-label="Share">${ic("share")}Share</button></div>
   <div class="bento"><div class="tile hero s2"><div class="lbl">${ic("sparkle")}Overall progress</div><div class="big">${pct}%</div><div class="sub">${ps.length} productions</div><div class="meter"><i style="width:${pct}%"></i></div></div>
   <div class="tile green"><div class="lbl">${ic("target")}Open goals</div><div class="big">${open}</div><div class="sub">${all.length-open} done</div></div>
-  <div class="tile sky"><div class="lbl">${ic("image")}Photos</div><div class="big">${photos}</div><div class="sub">across all</div></div></div>
+  <button class="tile ${late?"late":"sky"}" id="ov-late" type="button" aria-label="Overdue: ${late}, due this week: ${soon}. Open the Today list"><div class="lbl">${ic("alert")}Overdue</div><div class="big">${late}</div><div class="sub">${soon} due this week</div></button></div>
   ${rankCard(ps)}
-  <div class="card"><h2>Recent activity</h2>${f.length?`<ul class="list">${f.map(actRow).join("")}</ul>${allF.length>8?`<button class="linkbtn" id="ov-more" type="button" style="margin-top:6px">${ovMore?"Show less":"Show more"}</button>`:""}`:`<div class="empty">${ic("pulse","xl")}<h3>Nothing yet</h3>Open a production and add a goal or a log note.</div>`}</div>`;
+  <div class="card"><h2>Recent activity</h2>${f.length?`${actGroups(f)}${allF.length>8?`<button class="linkbtn" id="ov-more" type="button" style="margin-top:6px">${ovMore?"Show less":"Show more"}</button>`:""}`:`<div class="empty">${ic("pulse","xl")}<h3>Nothing yet</h3>Open a production and add a goal or a log note.</div>`}</div>`;
 }
 const actRow=f=>`<li><div class="avatar" style="color:${f.p.color}">${ic(f.p.icon)}</div><div class="grow"><b>${esc(f.p.name)}</b> <span class="pill type">${f.k}</span><div>${esc(f.txt)}</div><div class="small muted">${fmt(f.t)}</div></div></li>`;
 const fab=()=>`<div class="fab-wrap"><button class="fab" id="addp" aria-label="New production">${ic("plus")}<span>New production</span></button></div>`;
 function wireHome(){
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{tab="plan";nav("p/"+b.dataset.open)});
-  $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#rep")&&($("#rep").onclick=()=>reportSheet(null));$("#sch-btn")&&($("#sch-btn").onclick=schoolShowcaseSheet);$("#dg-btn")&&($("#dg-btn").onclick=digestSheet);$("#ov-more")&&($("#ov-more").onclick=()=>{ovMore=!ovMore;render()});$("#today")&&($("#today").onclick=todaySheet);
+  $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#shr-btn")&&($("#shr-btn").onclick=()=>shareMenu(null));$("#ov-late")&&($("#ov-late").onclick=todaySheet);$("#ov-more")&&($("#ov-more").onclick=()=>{ovMore=!ovMore;render()});$("#today")&&($("#today").onclick=todaySheet);
 }
 function morePage(){const t=theme();
   return `<div class="page-h"><h2>Settings</h2></div><div class="card"><h2>Appearance</h2><div class="segc" role="group" aria-label="Theme">${[["auto","Auto","device"],["light","Light","sun"],["dark","Dark","moon"]].map(([k,l,i])=>`<button data-th="${k}" aria-label="${l}" aria-pressed="${t===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div>
@@ -2323,6 +2337,23 @@ function digestSheet(){
     d.querySelector("#dg-sh").onclick=async()=>{try{if(navigator.share)await navigator.share({text});else d.querySelector("#dg-cp").click()}catch{}};
     d.querySelector("#dg-cp").onclick=()=>navigator.clipboard.writeText(text).then(()=>toast("Copied."),()=>toast("Couldn't copy."));
     d.querySelector("#dg-rs").onclick=()=>{text=digestText();ta.value=text;try{autosize(ta)}catch{}};
+  });
+}
+/* ---------- one Share menu ---------- */
+function shareMenu(p){
+  const rows=[];
+  rows.push(["trend","Weekly report","A picture and a message with the week's numbers"+(p?" for "+p.name:""),()=>reportSheet(p||null)]);
+  if(!p){
+    rows.push(["chat","Weekly digest","A short summary to send on WhatsApp",digestSheet]);
+    rows.push(["share","School showcase","One public page for all productions or chosen ones",schoolShowcaseSheet]);
+    if(S.sch&&S.sch.on)rows.push(["printer","Print school poster","A page with a QR code to the school showcase",posterSchool]);
+  }else{
+    rows.push(["share","Showcase page","A public page for families and the community",()=>showcaseSheet(p)]);
+    if(p.showcase&&p.showcase.on)rows.push(["printer","Print poster","A page with a QR code to this showcase",()=>posterProd(p)]);
+    rows.push(["printer","Project book","Everything recorded, ready to print or save as a PDF",()=>exportBook(p)]);
+  }
+  sheet("Share",`<div class="sh-menu">${rows.map((r,i)=>`<button class="trow" data-i="${i}" type="button"><span class="avatar">${ic(r[0])}</span><span class="grow"><b>${esc(r[1])}</b><span class="small muted" style="display:block">${esc(r[2])}</span></span>${ic("chev","sm")}</button>`).join("")}</div>`,(d,close)=>{
+    d.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{const r=rows[+b.dataset.i];close();setTimeout(r[3],160)});
   });
 }
 /* ---------- start fresh ---------- */
