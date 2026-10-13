@@ -889,7 +889,7 @@ function storyTab(p){
   items.forEach(x=>{const l=dayLabel(x.t);if(l!==day){html+=`<h3 class="sday">${l}</h3>`;day=l}html+=storyCard(x)});
   const first=pics.at(-1),last=pics[0];
   return `<div class="card composer"><div class="row"><textarea class="t ta" rows="1" id="sc-t" enterkeyhint="send" placeholder="Add an update for ${esc(p.name)}" aria-label="Add an update"></textarea>${micBtn()}<button class="btn primary icon" id="sc-post" aria-label="Post update">${ic("send")}</button></div>
-    <div class="row wr" style="margin-top:10px"><button class="btn small" id="sc-ph">${ic("camera")}Photo or video</button><button class="btn small" id="sc-gal">${ic("image")}Gallery</button><button class="btn small" id="sc-rec">${ic("trend")}Share this week</button></div>
+    ${mediaOf(p).length?`<div style="margin-top:8px"><button class="linkbtn" id="sc-gal" type="button">${ic("image","sm")} All photos and videos (${mediaOf(p).length})</button></div>`:""}
     <input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"></div>`+
   (pics.length>1?`${beforeNow(p,pics)}`:"")+
   (items.length?`<div class="story">${html}</div>`:(p.members.length&&p.goals.length&&p.prop&&p.prop.title?`<div class="empty">${ic("pulse","xl")}<h3>Your story starts here</h3><p style="margin:0">Post an update, add a photo, or finish a target. It all shows up here as a diary.</p></div>`:startCard(p)));
@@ -900,9 +900,8 @@ function wireStory(p){
   $("#sc-post").onclick=post;
   document.querySelectorAll("[data-start]").forEach(b=>b.onclick=()=>{const i=b.dataset.start.indexOf(":"),a=b.dataset.start.slice(0,i),id=b.dataset.start.slice(i+1);fb("tap");if(a==="goalnew")goalSheet(p);else if(BA[a])BA[a](p,id)});
   $("#sc-t").onkeydown=e=>{if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();post()}};
-  $("#sc-ph").onclick=()=>$("#pf").click();$("#sc-gal").onclick=()=>{tab="media";render()};
+  {const gl=$("#sc-gal");if(gl)gl.onclick=()=>{tab="media";render()}}
   $("#pf").onchange=async e=>{const n=await addFiles(p.id,e.target.files);if(n){save();fb("add")}render()};
-  $("#sc-rec").onclick=()=>reportSheet(p);
   document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>openMediaSheet(S.media.find(x=>x.id===b.dataset.m)));
   document.querySelectorAll("[data-dl]").forEach(b=>b.onclick=()=>{const i=p.log.findIndex(l=>l.id===b.dataset.dl),[l]=p.log.splice(i,1);save(p);render();toast("Update deleted.",()=>{p.log.splice(i,0,l);save(p);render()})});
 }
@@ -1154,7 +1153,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.12.1";
+const APP_VER="5.12.2";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1518,7 +1517,7 @@ function wrapTab(p){
   return acc(p,"rev","flag","End of term review",R.completed||p.txt.achieved?"In progress":"Look back on the term",stp(!!p.txt.achieved&&!!p.txt.compare,p.txt.achieved&&p.txt.compare?"Done":"To do"),rev)+
     acc(p,"refl","user","Individual reflections",`${refl.filter(r=>r.done).length} of ${p.members.length} written`,stp(refl.length>0&&refl.every(r=>r.done),refl.length?`${refl.filter(r=>r.done).length}/${refl.length}`:"No members"),rf)+
     acc(p,"hand","users","Handover to the next team",H.to?"Handed over":"Leave it ready to continue",stp(!!H.to,H.to?"Done":"To do"),hand)+
-    showcaseCard(p)+`<div class="card"><h2>Project book</h2><p class="muted" style="margin:0 0 12px">Everything you recorded, laid out like the printed Production Team Project Book. Print it or save it as a PDF.</p><button class="btn primary" id="book-x">${ic("printer")}Export project book</button></div>`+nextTermCard(p);
+    nextTermCard(p);
 }
 
 /* ---------- wiring ---------- */
@@ -2084,8 +2083,8 @@ const openG=new Set(),seenP=new Set();
 function prodView(p){
   const q=prodPct(p),open=p.goals.filter(g=>!g.done).length,late=lateCount(p);
   return `<div class="pv"><div class="pv-side"><div class="phero" style="--pc:${p.color}">
-    <div class="ph-top"><button class="x glass" id="back" aria-label="Back to productions">${ic("left")}</button><span class="grow"></span><button class="x glass" id="rep" aria-label="Weekly report">${ic("trend")}</button><button class="x glass" id="edp" aria-label="Edit production">${ic("pencil")}</button></div>
-    <div class="ph-main"><span class="ph-av">${ic(p.icon)}</span><div class="grow"><h2 class="ptitle">${esc(p.name)}</h2><p class="ph-d">${esc(p.desc||"Tap the pencil to add a description.")}</p></div>
+    <div class="ph-top"><button class="x glass" id="back" aria-label="Back to productions">${ic("left")}</button><span class="grow"></span><button class="x glass" id="shr" aria-label="Share">${ic("share")}</button><button class="x glass" id="edp" aria-label="Edit production">${ic("pencil")}</button></div>
+    <div class="ph-main"><span class="ph-av">${ic(p.icon)}</span><div class="grow"><h2 class="ptitle">${esc(p.name)}</h2>${p.desc?`<p class="ph-d">${esc(p.desc)}</p>`:""}</div>
       <div class="ph-ring" style="--p:${q}" role="img" aria-label="${q} percent complete"><b>${q}%</b></div></div>
     <div class="ph-stats"><span><b>${open}</b> open</span><span><b>${p.goals.length-open}</b> done</span>${late?`<span class="lt"><b>${late}</b> overdue</span>`:""}</div>
   </div>
@@ -2136,7 +2135,7 @@ function wireGoals(p){
   });
 }
 function wireProd(p){
-  $("#back").onclick=()=>nav("home");$("#rep").onclick=()=>reportSheet(p);$("#edp").onclick=()=>prodSheet(p);
+  $("#back").onclick=()=>nav("home");$("#shr").onclick=()=>shareMenu(p);$("#edp").onclick=()=>prodSheet(p);
   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;clearSel();render()});
   ({story:wireStory,plan:wireBook,work:q=>{wireBook(q);wireGoals(q)},money:wireBook,wrap:wireBook,goals:wireGoals,media:wireMedia,team:wireTeam,log:wireLog})[tab](p);
 }
@@ -2217,7 +2216,7 @@ function scrollHint(el){
 }
 const shortDate=t=>new Date(t).toLocaleDateString(undefined,{day:"numeric",month:"short"});
 const cmpPair=(p,pics)=>{const c=p.cmp||{},a=pics.find(m=>m.id===c.a),b=pics.find(m=>m.id===c.b);return{first:a||pics.at(-1),last:b||pics[0],custom:!!(a&&b)}};
-const beforeNow=(p,pics)=>{const{first,last,custom}=cmpPair(p,pics);return `<div class="card"><div class="row between" style="margin-bottom:10px"><h2 style="margin:0;font-size:1.15rem;white-space:nowrap">Before and now</h2><button class="btn small" data-cmp="${p.id}" aria-label="Choose the before and now photos">${ic("image")}Choose photos</button></div><div class="cmps" id="cmps"><img data-mid="${last.id}" alt="Latest photo"><img class="cmp-b" data-mid="${first.id}" alt="Earliest photo"><span class="cmp-line" aria-hidden="true"></span><span class="cmp-knob" aria-hidden="true">${ic("left","sm")}${ic("chev","sm")}</span><span class="cmp-l l">Before · ${shortDate(first.t)}</span><span class="cmp-l r">Now · ${shortDate(last.t)}</span><input type="range" min="0" max="100" value="50" aria-label="Slide to compare the earliest and latest photo"></div><p class="small muted" style="margin:8px 0 0">Drag the handle, or use the arrow keys, to compare.${custom?" Using the photos you chose.":""}</p></div>`};
+const beforeNow=(p,pics)=>{const{first,last,custom}=cmpPair(p,pics);return `<div class="card"><div class="row between" style="margin-bottom:10px;flex-wrap:wrap;gap:8px"><h2 style="margin:0;font-size:1.15rem;white-space:nowrap">Before and now</h2><button class="btn small" data-cmp="${p.id}" aria-label="Choose the before and now photos">${ic("image")}Choose photos</button></div><div class="cmps" id="cmps"><img data-mid="${last.id}" alt="Latest photo"><img class="cmp-b" data-mid="${first.id}" alt="Earliest photo"><span class="cmp-line" aria-hidden="true"></span><span class="cmp-knob" aria-hidden="true">${ic("left","sm")}${ic("chev","sm")}</span><span class="cmp-l l">Before · ${shortDate(first.t)}</span><span class="cmp-l r">Now · ${shortDate(last.t)}</span><input type="range" min="0" max="100" value="50" aria-label="Slide to compare the earliest and latest photo"></div><p class="small muted" style="margin:8px 0 0">Drag the handle, or use the arrow keys, to compare.${custom?" Using the photos you chose.":""}</p></div>`};
 /* ---------- recently deleted: 30 days to change your mind ---------- */
 const BIN_DAYS=30,BIN_KINDS={g:"Goal",tg:"Target",cm:"Comment",lg:"Update",ex:"Expense",in:"Income",wk:"Weekly record",id:"Idea",rs:"Resource",rk:"Risk",rl:"Role",bi:"Budget item",hr:"Handover item"};
 let binPrev=null;
@@ -2579,7 +2578,6 @@ function showcaseSheet(p){
   });
 }
 BA.showcase=p=>showcaseSheet(p);
-const showcaseCard=p=>{const on=!!(p.showcase&&p.showcase.on);return `<div class="card"><h2>Showcase page</h2><p class="muted" style="margin:0 0 12px">${on?"Live. Families and the community can open your link any time. It updates as you add photos and finish goals.":"Share a read-only page with families and the community. You choose what appears, and only photos approved to share are shown."}</p><button class="btn ${on?"":"primary"}" data-ba="showcase:go">${ic("share")}${on?"Manage showcase":"Set up showcase"}</button></div>`};
 function cmpSheet(p){
   const pics=mediaOf(p).filter(m=>m.type!=="video").sort((a,b)=>a.t-b.t);
   if(pics.length<2){toast("Add at least two photos first.");return}
