@@ -206,7 +206,7 @@ input[type=range]{width:100%;height:36px;accent-color:var(--green)}
 .hbar .rg b{width:42px;height:42px;border-radius:50%;background:#0e8460;display:grid;place-items:center;font:700 .9rem var(--display)}
 .hbar .st{display:flex;flex-direction:column;line-height:1.05;min-width:0}.hbar .st b{font:700 1.25rem var(--display)}.hbar .st span{font-size:.7rem;opacity:.88}
 .hbar .btn{margin-left:auto;background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.55);color:#fff;min-height:44px;padding:0 12px}
-.ptiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(84px,1fr);gap:10px;min-height:calc(100dvh - 252px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+.ptiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-auto-rows:minmax(84px,1fr);gap:10px;min-height:calc(100dvh - 164px - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
 @media (min-width:640px){.ptiles{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media (min-width:900px){.ptiles{min-height:calc(100dvh - 190px)}}
 .ptile{container-type:size;background:var(--sheet);border:1px solid var(--line);border-radius:22px;padding:0;box-shadow:var(--shadow);cursor:pointer;color:inherit;min-width:0;transition:box-shadow .25s,transform .08s}
@@ -346,7 +346,7 @@ nav.tabs button.cap .i{width:30px;height:30px;stroke-width:2.2}
 .tchip{display:inline-flex;align-items:center;gap:5px;white-space:nowrap;border-radius:99px;padding:5px 11px;font-size:.8rem;font-weight:700;flex:none}
 .tchip.late{background:var(--red-soft);color:var(--red)}.tchip.soon{background:var(--amber-soft);color:var(--amber)}.tchip.quiet{background:var(--sky-soft);color:var(--sky)}.tchip.recap{background:var(--green-soft);color:var(--green)}
 .tgo{margin-left:auto;color:var(--muted);flex:none}
-.ptiles{min-height:calc(100dvh - 252px - var(--st,0px) - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
+.ptiles{min-height:calc(100dvh - 164px - var(--st,0px) - env(safe-area-inset-top) - env(safe-area-inset-bottom))}
 .pn{display:none;font-size:.66rem;color:var(--muted);max-width:92%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 @container (min-height:158px){.pn{display:block}}
 .trow{display:flex;align-items:center;gap:12px;width:100%;border:0;background:none;padding:10px 0;border-top:1px solid var(--line);cursor:pointer;color:inherit;text-align:left}
@@ -637,6 +637,9 @@ kbd{font:600 .85rem var(--body);min-width:34px;text-align:center;padding:4px 8px
 .bin-r{display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line)}.bin-r:first-of-type{border-top:0}
 .bin-r .avatar{flex:none}
 .page-h{flex-wrap:wrap}.page-h .row.wr{gap:8px}
+/* v5.12.0: lean section 1 */
+button.sync{font-family:inherit;cursor:pointer}.sync[hidden]{display:none}
+.ptile.padd{background:none;border:2px dashed var(--line);box-shadow:none;color:var(--muted)}.ptile.padd .pav{box-shadow:none;background:var(--line);color:var(--muted)}.ptile.padd:hover{border-color:var(--green);color:var(--green)}
 </style>
 </head>
 <body>
@@ -1147,7 +1150,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="5.11.2";
+const APP_VER="5.12.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1901,13 +1904,13 @@ function wireLive(){
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&LV.on)syncNow()});
 
 let st;function scheduleSync(){clearTimeout(st);if(LV.on)st=setTimeout(syncNow,1200)}
-function setSyncUi(t){syncState=t;const e=$("#sync");if(e)e.innerHTML=ic(t==="Live"||t==="Syncing…"?"cloud":t==="Saved on this device"?"device":"cloudoff","sm")+`<span class="st">${esc(t)}</span>`;e.title=t;const l=$("#lv-last");if(l)l.textContent=lastTxt()}
+function setSyncUi(t){syncState=t;const e=$("#sync");if(e){e.innerHTML=ic(t==="Live"||t==="Syncing…"?"cloud":t==="Saved on this device"?"device":"cloudoff","sm")+`<span class="st">${esc(t)}</span>`;e.title=t;e.setAttribute("aria-label","Sync: "+t+". Open Settings");e.hidden=t==="Live"}const l=$("#lv-last");if(l)l.textContent=lastTxt()}
 setInterval(()=>{const l=$("#lv-last");if(l)l.textContent=lastTxt()},30000);
 addEventListener("online",()=>{if(LV.on)syncNow()});
 try{const sp=JSON.parse(localStorage.getItem(SPK));if(sp&&sp.space)ensureSb().then(ok=>{if(ok)liveStart(sp.space);else setSyncUi("Offline, saved here")})}catch{}
 
 /* shell */
-const NAV=[["home","Productions","grid"],["overview","Overview","home"],["activity","Activity","pulse"],["more","Settings","sliders"]];
+const NAV=[["home","Productions","grid"],["overview","Overview","home"],["more","Settings","sliders"]];
 function focusKey(){const a=document.activeElement;if(!a||!a.closest||!a.closest("#app")||a===document.body)return null;return{id:a.id,al:a.getAttribute("aria-label"),g:a.closest("[data-g]")?.dataset.g,dn:a.hasAttribute("data-done"),nv:a.dataset.nav,tb:a.dataset.tab,mv:a.dataset.mv,th:a.dataset.th}}
 function restoreFocus(k){if(!k)return;let e=null;if(k.id)e=document.getElementById(k.id);else if(k.nv)e=document.querySelector(`[data-nav="${k.nv}"]`);else if(k.tb)e=document.querySelector(`[data-tab="${k.tb}"]`);else if(k.mv)e=document.querySelector(`[data-mv="${k.mv}"]`);else if(k.th)e=document.querySelector(`[data-th="${k.th}"]`);else if(k.g){const sc=document.querySelector(`[data-g="${k.g}"]`);if(sc)e=k.dn?sc.querySelector("[data-done]"):[...sc.querySelectorAll("[aria-label]")].find(x=>x.getAttribute("aria-label")===k.al)}if(e)e.focus({preventScroll:true})}
 const navBtn=cur=>([k,l,i])=>`<button data-nav="${k}" ${cur===k?'aria-current="page"':""}>${ic(i)}${l}</button>`;
@@ -1922,12 +1925,13 @@ function render(){
   const m=route.match(/^p\/(.+)/),p=m&&P(m[1]);
   const cur=p?"home":route;
   document.documentElement.style.setProperty("--ptint",p?p.color:"transparent");
-  $("#app").innerHTML=`<div class="wrap${!p&&route==="home"?" fit":""}${p?" prodwide":""}${fresh?" enter":""}"><header class="top"><img class="brand" src="icons/productions-96.png" alt="" width="44" height="51"><h1 class="sr">MS Productions</h1><span class="grow"></span><span class="sync" id="sync" aria-live="polite"></span>${!p&&route==="home"?`<button class="x addp" id="addp" aria-label="New production" title="New production">${ic("plus")}</button>`:""}<button class="x" id="srch" aria-label="Search" title="Search (/)">${ic("search")}</button><button class="x" id="thm" aria-label="${isDark()?"Switch to light mode":"Switch to dark mode"}" title="${isDark()?"Light mode":"Dark mode"}">${ic(isDark()?"sun":"moon")}</button></header>
-  <main id="main" tabindex="-1">${p?prodView(p):{home:homePage,overview:overviewPage,activity:activityPage,more:morePage}[route]?.()||homePage()}</main></div>
+  $("#app").innerHTML=`<div class="wrap${!p&&route==="home"?" fit":""}${p?" prodwide":""}${fresh?" enter":""}"><header class="top"><img class="brand" src="icons/productions-96.png" alt="" width="44" height="51"><h1 class="sr">MS Productions</h1><span class="grow"></span><button type="button" class="sync" id="sync" aria-live="polite"></button><button class="x" id="srch" aria-label="Search" title="Search (/)">${ic("search")}</button><button class="x" id="thm" aria-label="${isDark()?"Switch to light mode":"Switch to dark mode"}" title="${isDark()?"Light mode":"Dark mode"}">${ic(isDark()?"sun":"moon")}</button></header>
+  <main id="main" tabindex="-1">${p?prodView(p):{home:homePage,overview:overviewPage,more:morePage}[route]?.()||homePage()}</main></div>
   <nav class="tabs" aria-label="Main">${NAV.slice(0,2).map(navBtn(cur)).join("")}<button class="cap btn primary" id="cap" aria-label="Capture: photo, note, goal, target or voice">${ic("plus")}</button>${NAV.slice(2).map(navBtn(cur)).join("")}</nav>`;
   setSyncUi(syncState||"Sign in to sync");
   document.querySelectorAll("[data-nav]").forEach(b=>b.onclick=()=>{fb("tap");nav(b.dataset.nav)});
   $("#srch").onclick=()=>{fb("tap");searchSheet()};
+  $("#sync").onclick=()=>nav("more");
   $("#thm").onclick=()=>{theme(isDark()?"light":"dark");render()};
   $("#cap").onclick=()=>{fb("tap");captureSheet()};
   hydrate();lastRoute=route+tab;
@@ -1948,33 +1952,30 @@ const totals=()=>{const ps=prods(),all=ps.flatMap(p=>p.goals),open=all.filter(g=
 function homePage(){
   const{ps,open,pct,photos}=totals();
   return `<h2 class="sr">Productions</h2>
-  <div class="hbar"><div class="rg" style="--p:${pct}" role="img" aria-label="Overall progress ${pct} percent"><b>${pct}%</b></div>
-    <div class="st"><b>${open}</b><span>open goals</span></div><div class="st"><b>${photos}</b><span>photos</span></div>
-    <button class="btn small" id="rep" aria-label="Report">${ic("trend")}Report</button></div>
-  ${todayStrip()}<div class="ptiles" style="--st:${todayData().any?56:0}px">${ps.map((p,ix)=>{const q=prodPct(p),lt=lateCount(p),nx=nextTarget(p),as=actState(p);return`<button class="ptile" style="--pc:${p.color};--i:${ix}" data-open="${p.id}" aria-label="${esc(p.name)}, ${q} percent complete${lt?", "+lt+" overdue":""}${as==="active"?", active this week":as==="quiet"?", quiet for a while":""}">${as==="active"||as==="quiet"?`<span class="adot ${as}" aria-hidden="true" title="${as==="active"?"Active this week":"Quiet for a while"}"></span>`:""}${lt?`<span class="pbadge" aria-hidden="true">${lt}</span>`:q===100&&p.goals.length?`<span class="pbadge ok" aria-hidden="true">${ic("check","sm")}</span>`:""}<span class="pi"><span class="pav">${ic(p.icon)}</span><b>${esc(p.name)}</b><span class="pbar" aria-hidden="true"><i style="width:${q}%"></i></span><span class="pq">${q}%</span></span></button>`}).join("")}</div>`;
+  ${todayStrip()}<div class="ptiles" style="--st:${todayData().any?56:0}px">${ps.map((p,ix)=>{const q=prodPct(p),lt=lateCount(p),nx=nextTarget(p),as=actState(p);return`<button class="ptile" style="--pc:${p.color};--i:${ix}" data-open="${p.id}" aria-label="${esc(p.name)}, ${q} percent complete${lt?", "+lt+" overdue":""}">${lt?`<span class="pbadge" aria-hidden="true">${lt}</span>`:q===100&&p.goals.length?`<span class="pbadge ok" aria-hidden="true">${ic("check","sm")}</span>`:""}<span class="pi"><span class="pav">${ic(p.icon)}</span><b>${esc(p.name)}</b><span class="pbar" aria-hidden="true"><i style="width:${q}%"></i></span><span class="pq">${q}%</span></span></button>`}).join("")}<button class="ptile padd" id="addp" aria-label="New production"><span class="pi"><span class="pav">${ic("plus")}</span><b>Add new</b></span></button></div>`;
 }
 /* second tab: the detail */
+let ovMore=false;
 function rankCard(ps){
   const rows=ps.map(p=>({p,q:prodPct(p),o:p.goals.filter(g=>!g.done).length,d:p.goals.filter(g=>g.done).length})).sort((a,b)=>b.q-a.q||a.p.name.localeCompare(b.p.name));
   const avg=rows.length?Math.round(rows.reduce((a,r)=>a+r.q,0)/rows.length):0;
   return `<div class="card rank"><div class="rk-h"><h2>Progress ranking</h2><span class="small muted">Average ${avg}%</span></div><ul class="list rk">${rows.map(r=>`<li><button class="prow" style="--pc:${r.p.color}" data-open="${r.p.id}" aria-label="Open ${esc(r.p.name)}, ${r.q} percent"><span class="avatar" style="color:${r.p.color}">${ic(r.p.icon)}</span><span class="grow"><span class="rk-t"><b>${esc(r.p.name)}</b><b class="amt">${r.q}%</b></span><span class="rk-track"><i style="width:${r.q}%;min-width:${r.q?4:0}px;background:${r.p.color}"></i><u style="left:${avg}%"></u></span><span class="small muted">${r.o?r.o+" open":r.p.goals.length?"All done":"No goals yet"}${r.d?" · "+r.d+" done":""}</span></span></button></li>`).join("")}</ul><p class="small muted rk-note"><u></u>The marker shows the average across all productions.</p></div>`;
 }
 function overviewPage(){
-  const{ps,all,open,pct,photos}=totals(),f=feedItems().slice(0,5);
+  const{ps,all,open,pct,photos}=totals(),allF=feedItems(),f=allF.slice(0,ovMore?60:8);
   return `<div class="page-h"><h2>Overview</h2><div class="row wr"><button class="btn small" id="dg-btn" aria-label="Weekly digest">${ic("chat")}Digest</button><button class="btn small" id="sch-btn" aria-label="School showcase">${ic("share")}Showcase</button><button class="btn small" id="rep" aria-label="Weekly report">${ic("trend")}Report</button></div></div>
   <div class="bento"><div class="tile hero s2"><div class="lbl">${ic("sparkle")}Overall progress</div><div class="big">${pct}%</div><div class="sub">${ps.length} productions</div><div class="meter"><i style="width:${pct}%"></i></div></div>
   <div class="tile green"><div class="lbl">${ic("target")}Open goals</div><div class="big">${open}</div><div class="sub">${all.length-open} done</div></div>
   <div class="tile sky"><div class="lbl">${ic("image")}Photos</div><div class="big">${photos}</div><div class="sub">across all</div></div></div>
   ${rankCard(ps)}
-  <div class="card"><h2>Recent activity</h2>${f.length?`<ul class="list">${f.map(actRow).join("")}</ul>`:`<div class="empty">${ic("pulse","xl")}<h3>Nothing yet</h3>Open a production and add a goal or a log note.</div>`}</div>`;
+  <div class="card"><h2>Recent activity</h2>${f.length?`<ul class="list">${f.map(actRow).join("")}</ul>${allF.length>8?`<button class="linkbtn" id="ov-more" type="button" style="margin-top:6px">${ovMore?"Show less":"Show more"}</button>`:""}`:`<div class="empty">${ic("pulse","xl")}<h3>Nothing yet</h3>Open a production and add a goal or a log note.</div>`}</div>`;
 }
 const actRow=f=>`<li><div class="avatar" style="color:${f.p.color}">${ic(f.p.icon)}</div><div class="grow"><b>${esc(f.p.name)}</b> <span class="pill type">${f.k}</span><div>${esc(f.txt)}</div><div class="small muted">${fmt(f.t)}</div></div></li>`;
 const fab=()=>`<div class="fab-wrap"><button class="fab" id="addp" aria-label="New production">${ic("plus")}<span>New production</span></button></div>`;
 function wireHome(){
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{tab="plan";nav("p/"+b.dataset.open)});
-  $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#rep")&&($("#rep").onclick=()=>reportSheet(null));$("#sch-btn")&&($("#sch-btn").onclick=schoolShowcaseSheet);$("#dg-btn")&&($("#dg-btn").onclick=digestSheet);$("#today")&&($("#today").onclick=todaySheet);
+  $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#rep")&&($("#rep").onclick=()=>reportSheet(null));$("#sch-btn")&&($("#sch-btn").onclick=schoolShowcaseSheet);$("#dg-btn")&&($("#dg-btn").onclick=digestSheet);$("#ov-more")&&($("#ov-more").onclick=()=>{ovMore=!ovMore;render()});$("#today")&&($("#today").onclick=todaySheet);
 }
-function activityPage(){const f=feedItems().slice(0,60);return `<div class="page-h"><h2>Activity</h2></div><div class="card">${f.length?`<ul class="list">${f.map(actRow).join("")}</ul>`:`<div class="empty">${ic("pulse","xl")}<h3>No activity yet</h3>Comments and log entries from every production show up here.</div>`}</div>`}
 function morePage(){const t=theme();
   return `<div class="page-h"><h2>Settings</h2></div><div class="card"><h2>Appearance</h2><div class="segc" role="group" aria-label="Theme">${[["auto","Auto","device"],["light","Light","sun"],["dark","Dark","moon"]].map(([k,l,i])=>`<button data-th="${k}" aria-label="${l}" aria-pressed="${t===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div>
   <div class="card"><h2>Sound and touch</h2><div class="row between" style="margin-bottom:12px"><div><b>Sound effects</b><div class="small muted">Soft tones when you tick, add or finish</div></div><button type="button" role="switch" class="sw" id="fx-s" aria-label="Sound effects" aria-checked="${SFX.sound}"><i></i></button></div><div class="row between"><div><b>Vibration</b><div class="small muted">${navigator.vibrate?"A light buzz on taps and ticks":"Not supported on this device (iPhone does not allow it)"}</div></div><button type="button" role="switch" class="sw" id="fx-v" aria-label="Vibration" aria-checked="${SFX.vib&&!!navigator.vibrate}" ${navigator.vibrate?"":"disabled"}><i></i></button></div></div>
