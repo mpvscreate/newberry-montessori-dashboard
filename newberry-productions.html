@@ -676,6 +676,23 @@ select.sel{width:auto;min-height:44px;padding:0 12px;border-radius:14px}
 .tile.quiet .big{color:var(--amber)}
 .athumb{width:56px;height:56px;border-radius:12px;object-fit:cover;flex:none;background:var(--line)}
 .k-sub{font-size:clamp(.8rem,1.2vw,1rem);opacity:.75;margin-top:4px}
+/* v6.2.0: viewer, cards, video */
+.vw{position:fixed;inset:0;z-index:90;background:#000;color:#fff;display:flex;flex-direction:column}
+.vw-bars{position:absolute;left:12px;right:12px;top:calc(8px + env(safe-area-inset-top));display:flex;gap:4px;z-index:5}
+.vw-bars i{flex:1;height:3px;border-radius:3px;background:rgba(255,255,255,.3);overflow:hidden;display:block}.vw-bars i b{display:block;height:100%;width:0;background:#fff}
+@keyframes vwfill{from{width:0}to{width:100%}}
+.vw-top{position:absolute;left:12px;right:12px;top:calc(20px + env(safe-area-inset-top));display:flex;align-items:center;gap:8px;z-index:5}
+.vw-t{font-weight:600;text-shadow:0 1px 6px rgba(0,0,0,.6);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vw-stage{flex:1;display:grid;place-items:center;overflow:hidden}
+.vw-img{max-width:100%;max-height:100%;width:100%;height:100%;object-fit:contain;display:block}
+.vw-img.kb{animation:kb 6s ease-out forwards}@keyframes kb{from{transform:scale(1)}to{transform:scale(1.07)}}
+.vw-nav{position:absolute;top:84px;bottom:130px;width:32%;border:0;background:transparent;z-index:3;cursor:pointer}.vw-nav.prev{left:0}.vw-nav.next{right:0}
+.vw-cap{position:absolute;left:0;right:0;bottom:0;padding:56px 18px calc(18px + env(safe-area-inset-bottom));background:linear-gradient(transparent,rgba(0,0,0,.8));z-index:4;pointer-events:none}
+.vw-cap p{margin:0 0 6px;font-size:1.05rem;line-height:1.45}.vw-cap span{font-size:.8rem;opacity:.75}
+.vwx{align-items:center;justify-content:center;padding:20px;background:rgba(0,0,0,.88)}
+.vwx-b{background:var(--sheet);color:var(--ink);border-radius:24px;padding:22px;width:100%;max-width:460px;text-align:center}
+.vwx-b h2{margin:0 0 8px}.vwx-bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin:14px 0}.vwx-bar i{display:block;height:100%;width:0;background:var(--green)}
+.cd-prev img{width:100%;border-radius:16px;display:block;box-shadow:var(--shadow)}
 </style>
 </head>
 <body>
@@ -762,6 +779,7 @@ palette:'<path d="M12 3a9 9 0 100 18c1.5 0 2-1 1.500-2-.6-1.200.2-2.500 1.600-2.
 music:'<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
 flask:'<path d="M9 3h6M10 3v6l-5 9a2 2 0 002 3h10a2 2 0 002-3l-5-9V3"/><path d="M7.500 15h9"/>',
 search:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
+pause:'<path d="M8 5v14M16 5v14"/>',
 more:'<circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/>',
 pin:'<path d="M9 4h6l-1 6 3 3H7l3-3z"/><path d="M12 13v7"/>',
 tree:'<path d="M12 21v-6"/><path d="M12 15c-4 0-7-2.500-7-6 0-3 2.500-5 4-5 .5-1.500 2-2 3-2s2.500.5 3 2c1.500 0 4 2 4 5 0 3.500-3 6-7 6z"/>',
@@ -954,12 +972,16 @@ function chapterSheet(p,c){
   });
 }
 function postMenu(p,l){
-  const ms=postMedia(l),rows=[["pencil","Edit post","Change the text, photos, videos or chapter"],["pin",l.pin?"Unpin from the top":"Pin to the top",l.pin?"Move it back into the timeline":"Keep this post at the top of the story"]];
-  const photo=ms.find(m=>m.type!=="video");if(photo)rows.push(["image","Use as cover photo","Show the first photo at the top of "+p.name]);
-  rows.push(["trash","Delete post","You can restore it from Recently deleted"]);
+  const ms=postMedia(l),photo=ms.find(m=>m.type!=="video"),rows=[],acts=[];
+  const add=(icon,t,sub,fn)=>{rows.push([icon,t,sub]);acts.push(fn)};
+  add("pencil","Edit post","Change the text, photos, videos or chapter",c=>{c();setTimeout(()=>postEdit(p,l),160)});
+  add("pin",l.pin?"Unpin from the top":"Pin to the top",l.pin?"Move it back into the timeline":"Keep this post at the top of the story",c=>{l.pin=!l.pin;save(p);fb("tick");c();render()});
+  add("share","Share as a picture","A good-looking card for WhatsApp",c=>{c();setTimeout(()=>cardSheet(p,l),160)});
+  if(ms.length)add("play","Play this post","Full screen, photos and videos one by one",c=>{c();setTimeout(()=>{const list=storyMediaList(p),k=list.findIndex(x=>x.m.id===ms[0].id);openViewer(list,Math.max(0,k),true)},160)});
+  if(photo)add("image","Use as cover photo","Show the first photo at the top of "+p.name,c=>{p.cover=photo.id;save(p);fb("done");c();render();toast("Cover photo set.")});
+  add("trash","Delete post","You can restore it from Recently deleted",c=>{c();delPost(p,l)});
   sheet("Post",`<div class="sh-menu">${rows.map((r,i)=>`<button class="trow" data-i="${i}" type="button"><span class="avatar">${ic(r[0])}</span><span class="grow"><b>${esc(r[1])}</b><span class="small muted" style="display:block">${esc(r[2])}</span></span>${ic("chev","sm")}</button>`).join("")}</div>`,(d,close)=>{
-    const act=[()=>{close();setTimeout(()=>postEdit(p,l),160)},()=>{l.pin=!l.pin;save(p);fb("tick");close();render()},...(photo?[()=>{p.cover=photo.id;save(p);fb("done");close();render();toast("Cover photo set.")}]:[]),()=>{close();delPost(p,l)}];
-    d.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>act[+b.dataset.i]());
+    d.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>acts[+b.dataset.i](close));
   });
 }
 function delPost(p,l){
@@ -1007,8 +1029,8 @@ function wireStory(p){
   {const n=$("#ch-new");if(n)n.onclick=()=>chapterSheet(p)}
   {const e=$("#ch-edit");if(e)e.onclick=()=>chapterSheet(p,(p.chapters||[]).find(c=>c.id===storyF.ch))}
   document.querySelectorAll("[data-po]").forEach(b=>b.onclick=()=>{const l=p.log.find(x=>x.id===b.dataset.po);if(l)postMenu(p,l)});
-  document.querySelectorAll("[data-pm]").forEach(b=>b.onclick=()=>{const[id,i]=b.dataset.pm.split(":"),l=p.log.find(x=>x.id===id);if(!l)return;const m=postMedia(l)[+i];if(m)openMediaSheet(m)});
-  document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>openMediaSheet(S.media.find(x=>x.id===b.dataset.m)));
+  document.querySelectorAll("[data-pm]").forEach(b=>b.onclick=()=>{const[id,i]=b.dataset.pm.split(":"),l=p.log.find(x=>x.id===id);if(!l)return;const m=postMedia(l)[+i];if(m){const list=storyMediaList(p),k=list.findIndex(x=>x.m.id===m.id);openViewer(list,Math.max(0,k),false)}});
+  document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const list=storyMediaList(p),k=list.findIndex(x=>x.m.id===b.dataset.m);if(k>=0)openViewer(list,k,false);else openMediaSheet(S.media.find(x=>x.id===b.dataset.m))});
 }
 
 /* ---------- v3: assign targets to team members ---------- */
@@ -1189,7 +1211,7 @@ function todaySheet(){
   const d=todayData();
   const row=(x,sub)=>`<button class="trow" data-go="${x.p.id}"><span class="avatar" style="color:${x.p.color}">${ic(x.p.icon)}</span><span class="grow"><b>${esc(x.g?x.g.title:x.p.name)}</b><span class="small muted" style="display:block">${esc(x.p.name)}${sub?" · "+sub:""}</span></span>${ic("chev","sm")}</button>`;
   const fd=ds=>new Date(ds+"T12:00").toLocaleDateString(undefined,{day:"numeric",month:"short"});
-  sheet("Today",`${d.recap?`<div class="vprompt" style="margin-top:6px"><p>${ic("trophy")} Your weekly recap is ready to share.</p><div class="row wr"><button class="btn small primary" id="t-recap" type="button">Create recap</button><button class="btn small" id="t-dg" type="button">Draft digest</button></div></div>`:""}
+  sheet("Today",`${d.recap?`<div class="vprompt" style="margin-top:6px"><p>${ic("trophy")} Your weekly digest is ready to draft.</p><div class="row wr"><button class="btn small primary" id="t-dg" type="button">Draft digest</button></div></div>`:""}
     ${d.late.length?`<h3 class="sub-h">Overdue</h3>${d.late.map(x=>row(x,"was due "+fd(x.g.due))).join("")}`:""}
     ${d.soon.length?`<h3 class="sub-h">Due this week</h3>${d.soon.map(x=>row(x,"due "+fd(x.g.due))).join("")}`:""}
     ${d.quiet.length?`<h3 class="sub-h">Gone quiet</h3><p class="small muted" style="margin:0 0 6px">No updates for over a week.</p>${d.quiet.map(x=>row(x,"last update "+dayLabel(x.last).toLowerCase())).join("")}`:""}
@@ -1211,10 +1233,11 @@ function kioskHTML(){
 }
 function kioskPanel(kind){
   if(kind==="week"){
-    const st=repStats(null,Date.now()-7*864e5,Date.now()),rows=st.items.map(i=>({...i,n:i.done+i.notes+i.photos})).sort((a,b)=>b.n-a.n).slice(0,8),mx=Math.max(1,...rows.map(r=>r.n));
-    return `<h3>This week</h3><div class="kp-nums"><div><b>${st.done}</b><span>goals done</span></div><div><b>${st.notes}</b><span>updates</span></div><div><b>${st.photos}</b><span>photos</span></div></div><div class="kp-bars">${rows.map(r=>`<div class="kp-r"><span class="kp-n">${esc(r.name)}</span><span class="kp-t"><i style="width:${Math.max(r.n?4:0,r.n/mx*100)}%;background:${r.color}"></i></span><b>${r.n}</b></div>`).join("")}</div><p class="kp-s">Bars count goals finished, updates and photos in the last 7 days.</p>`;
+    const from=Date.now()-7*864e5,all=prods().map(p=>{const posts=p.log.filter(l=>l.t>=from).length,ph=S.media.filter(m=>m.pid===p.id&&!m.del&&m.t>=from).length;return{name:p.name,color:p.color,posts,ph,n:posts+ph}}).sort((a,b)=>b.n-a.n);
+    const rows=all.slice(0,8),mx=Math.max(1,...rows.map(r=>r.n)),tp=all.reduce((a,r)=>a+r.posts,0),tf=all.reduce((a,r)=>a+r.ph,0),act=all.filter(r=>r.n).length;
+    return `<h3>This week</h3><div class="kp-nums"><div><b>${tp}</b><span>posts</span></div><div><b>${tf}</b><span>photos</span></div><div><b>${act}</b><span>active teams</span></div></div><div class="kp-bars">${rows.map(r=>`<div class="kp-r"><span class="kp-n">${esc(r.name)}</span><span class="kp-t"><i style="width:${Math.max(r.n?4:0,r.n/mx*100)}%;background:${r.color}"></i></span><b>${r.n}</b></div>`).join("")}</div><p class="kp-s">Bars count posts and photos in the last 7 days.</p>`;
   }
-  const rows=prods().map(p=>{const b=bud(p);return{name:p.name,color:p.color,inc:b.income,sp:b.spent}}).filter(r=>r.inc||r.sp).sort((a,b)=>Math.max(b.inc,b.sp)-Math.max(a.inc,a.sp)).slice(0,6),mx=Math.max(1,...rows.map(r=>Math.max(r.inc,r.sp))),ti=rows.reduce((a,r)=>a+r.inc,0),ts=rows.reduce((a,r)=>a+r.sp,0),pf=ti-ts;
+  const rows=prods().filter(p=>p.useMoney).map(p=>{const b=bud(p);return{name:p.name,color:p.color,inc:b.income,sp:b.spent}}).filter(r=>r.inc||r.sp).sort((a,b)=>Math.max(b.inc,b.sp)-Math.max(a.inc,a.sp)).slice(0,6),mx=Math.max(1,...rows.map(r=>Math.max(r.inc,r.sp))),ti=rows.reduce((a,r)=>a+r.inc,0),ts=rows.reduce((a,r)=>a+r.sp,0),pf=ti-ts;
   return `<h3>Money</h3><div class="kp-nums"><div><b>${rands(ti)}</b><span>income</span></div><div><b>${rands(ts)}</b><span>spent</span></div><div><b class="${pf>=0?"pos":"neg"}">${rands(Math.abs(pf))}</b><span>${pf>=0?"profit":"loss"}</span></div></div><div class="kp-bars">${rows.map(r=>`<div class="kp-r two"><span class="kp-n">${esc(r.name)}</span><span class="kp-t"><i style="width:${r.inc/mx*100}%;background:#4aa3d8"></i><i style="width:${r.sp/mx*100}%;background:#e0a020"></i></span></div>`).join("")}</div><p class="kp-s"><span class="kd" style="background:#4aa3d8"></span>Income <span class="kd" style="background:#e0a020"></span>Spent</p>`;
 }
 function wireKiosk(){
@@ -1224,7 +1247,7 @@ function wireKiosk(){
   clock();kioskTimers.push(setInterval(clock,15000));
   const show=async()=>{const m=ph[i%ph.length],img=$("#k-img");if(!img||!m)return;const u=await loadMedia(m.id);if(!u)return;img.style.opacity=0;setTimeout(()=>{const cp=$("#k-cap");if(!cp||!img.isConnected)return;img.src=u;img.style.opacity=1;const p=P(m.pid);cp.innerHTML=`<b>${esc(p?p.name:"")}</b>${m.cap?" · "+esc(m.cap):""}`},350);i++};
   if(ph.length){show();kioskTimers.push(setInterval(show,7000))}
-  const modes=[...(ph.length?["photo"]:[]),"week",...(prods().some(p=>{const b=bud(p);return b.income||b.spent})?["money"]:[])];let mi=0;
+  const modes=[...(ph.length?["photo"]:[]),"week",...(prods().some(p=>p.useMoney&&(bud(p).income||bud(p).spent))?["money"]:[])];let mi=0;
   const setMode=()=>{const pane=$("#k-pane"),pn=$("#k-panel");if(!pane||!pn)return;const k=modes[mi%modes.length];if(k==="photo"){pane.classList.remove("kpanel-on");pn.hidden=true}else{pn.innerHTML=kioskPanel(k);pn.hidden=false;pane.classList.add("kpanel-on")}};
   if(modes.length>1||modes[0]!=="photo"){setMode();if(modes.length>1)kioskTimers.push(setInterval(()=>{mi++;setMode()},12000))}
   kioskTimers.push(setInterval(()=>{if(route==="display"){const y=i;const bars=document.querySelectorAll(".k-card");if(bars.length!==prods().length)render()}},30000));
@@ -1236,7 +1259,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.1.0";
+const APP_VER="6.2.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -2057,11 +2080,10 @@ function morePage(){const t=theme();
   <div class="card"><h2>Voice dictation</h2><p class="muted small" style="margin:0">${SR?"On. Tap the microphone next to any text box and speak.":"Not available in this browser. Try Chrome or Edge, or use your phone keyboard's microphone."}</p></div>
   <div class="card"><h2>App lock</h2><p class="muted small" style="margin-top:0">Optional. Add a 3-digit PIN and the app asks for it when you open it on this device.${LOGIN?" You stay signed in either way.":""}</p>${getPin()?`<div class="row wr"><button class="btn" id="pinchg">Change PIN</button><button class="btn danger" id="pinoff">Remove PIN</button></div>`:`<button class="btn primary" id="pinset">${ic("lock")}Set a PIN</button>`}</div>
   <div class="card"><h2>Backup</h2><p class="muted small" style="margin-top:0">Download a backup of your goals, targets, team and logs now and then. Photos and videos are not included.</p><div class="row wr"><button class="btn" id="bk-out">${ic("download")}Download backup</button><button class="btn" id="bk-in">${ic("upload")}Restore</button></div><input type="file" id="bk-f" accept="application/json,.json" class="sr" aria-label="Choose a backup file" tabindex="-1"></div>
-  <div class="card"><h2>School showcase</h2><p class="muted small" style="margin-top:0">One public link for families and the community, showing every production or only the ones you choose.</p><button class="btn" id="sch-open">${ic("share")}${S.sch&&S.sch.on?"Manage school showcase":"Set up school showcase"}</button></div>
   ${binCard()}
   <div class="card"><h2>Start fresh</h2><p class="muted small" style="margin-top:0">Clear all productions, goals, photos and records to begin a new year. A backup copy stays on this device.</p><button class="btn danger" id="fresh">Start fresh…</button></div>
   <div class="card"><h2>This device</h2><p class="muted small" style="margin-top:0">${LOGIN?`Signed in as ${esc(user.email)}. You only need to sign in once on this device.`:LV.on?"Connected with your school code. Everything you add is shared live.":"Not connected. Everything you add is saved on this device only."}</p><div class="row wr">${LOGIN?`<button class="btn" id="out">${ic("logout")}Sign out</button>`:""}${getPin()?`<button class="btn" id="lk">${ic("lock")}Lock now</button>`:""}</div></div>`}
-function wireMore(){wireLive();$("#bin-open").onclick=binSheet;$("#sch-open").onclick=schoolShowcaseSheet;$("#fresh").onclick=freshSheet;$("#fw-test").onclick=()=>fireworks("Your production");$("#kiosk").onclick=startKiosk;
+function wireMore(){wireLive();$("#bin-open").onclick=binSheet;$("#fresh").onclick=freshSheet;$("#fw-test").onclick=()=>fireworks("Your production");$("#kiosk").onclick=startKiosk;
   $("#fx-s").onclick=e=>{SFX.sound=!SFX.sound;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.sound);if(SFX.sound)fb("tick")};$("#fx-v").onclick=e=>{SFX.vib=!SFX.vib;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.vib);if(SFX.vib)fb("tick")};
   document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#pinset")&&($("#pinset").onclick=setPin);$("#pinchg")&&($("#pinchg").onclick=()=>{removePinThenSet()});$("#pinoff")&&($("#pinoff").onclick=removePin);$("#lk")&&($("#lk").onclick=lockNow);$("#out")&&($("#out").onclick=()=>{if(!confirm("Sign out of this device? You will need to sign in again."))return;if(sb)sb.auth.signOut();else{user=null;try{localStorage.removeItem(USERK)}catch{}render()}});
   $("#bk-out").onclick=()=>{const blob=new Blob([JSON.stringify({app:"ms-productions",v:1,at:new Date().toISOString(),prods:S.prods},null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ms-productions-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")};
@@ -2145,7 +2167,7 @@ function prodView(p){
   const photos=mediaOf(p),cov=(p.cover&&photos.find(m=>m.id===p.cover&&m.type!=="video"))||photos.find(m=>m.type!=="video");
   const last=lastActivity(p);
   return `<div class="pv"><div class="pv-side"><div class="phero${cov?" hascover":""}" style="--pc:${p.color}">${cov?`<img class="ph-cover" data-mid="${cov.id}" alt="">`:""}
-    <div class="ph-top"><button class="x glass" id="back" aria-label="Back to productions">${ic("left")}</button><span class="grow"></span><button class="x glass" id="shr" aria-label="Share">${ic("share")}</button><button class="x glass" id="edp" aria-label="Edit production">${ic("pencil")}</button></div>
+    <div class="ph-top"><button class="x glass" id="back" aria-label="Back to productions">${ic("left")}</button><span class="grow"></span>${photos.length?`<button class="x glass" id="plv" aria-label="Play slideshow">${ic("play")}</button>`:""}<button class="x glass" id="shr" aria-label="Share">${ic("share")}</button><button class="x glass" id="edp" aria-label="Edit production">${ic("pencil")}</button></div>
     <div class="ph-main"><span class="ph-av">${ic(p.icon)}</span><div class="grow"><h2 class="ptitle">${esc(p.name)}</h2>${p.desc?`<p class="ph-d">${esc(p.desc)}</p>`:""}</div></div>
     <div class="ph-stats"><span><b>${p.log.length}</b> post${p.log.length===1?"":"s"}</span><span><b>${photos.length}</b> photo${photos.length===1?"":"s"}</span><span>${agoLabel(last)}</span></div>
   </div>
@@ -2196,7 +2218,7 @@ function wireGoals(p){
   });
 }
 function wireProd(p){
-  $("#back").onclick=()=>nav("home");$("#shr").onclick=()=>shareMenu(p);$("#edp").onclick=()=>prodSheet(p);
+  $("#back").onclick=()=>nav("home");{const pl=$("#plv");if(pl)pl.onclick=()=>openViewer(storyMediaList(p,{ch:storyF.pid===p.id?storyF.ch:""}),0,true)}$("#shr").onclick=()=>shareMenu(p);$("#edp").onclick=()=>prodSheet(p);
   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;clearSel();render()});
   ({story:wireStory,plan:wireBook,money:wireBook,wrap:wireBook,media:wireMedia})[tab](p);
 }
@@ -2370,21 +2392,15 @@ function posterProd(p){const o=p.showcase;if(!o||!o.on)return;const ap=mediaOf(p
 function posterSchool(){if(!S.sch||!S.sch.on)return;const ap=schList().flatMap(p=>mediaOf(p).filter(m=>m.type!=="video"&&m.consent==="ok"))[0];posterFor({title:"Our production teams",sub:"",url:schUrl(),color:"#a65608",photoId:ap&&ap.id})}
 /* ---------- weekly digest, ready for WhatsApp ---------- */
 function digestText(){
-  const to=Date.now(),from=to-7*864e5,st=repStats(null,from,to),t0=todayStr(),in7=new Date(to+7*864e5).toISOString().slice(0,10);
-  const pl=(n,w)=>n+" "+w+(n===1?"":"s"),fdd=ds=>new Date(ds+"T12:00").toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"});
+  const to=Date.now(),from=to-7*864e5,pl=(n,w)=>n+" "+w+(n===1?"":"s");
+  const per=prods().map(p=>({p,posts:p.log.filter(l=>l.t>=from).length,ph:S.media.filter(m=>m.pid===p.id&&!m.del&&m.t>=from).length}));
+  const tp=per.reduce((a,x)=>a+x.posts,0),tf=per.reduce((a,x)=>a+x.ph,0),act=per.filter(x=>x.posts||x.ph);
   let t="Weekly update, "+dmy2(from)+" to "+dmy2(to)+"\n";
-  t+="All productions: "+st.pct+"% complete on average.\n";
-  t+="This week: "+pl(st.done,"goal")+" finished, "+pl(st.photos,"new photo")+" or video"+(st.photos===1?"":"s")+", "+pl(st.notes,"update")+".\n";
-  if(st.spent||st.income){const pf=st.income-st.spent;t+="Money: spent "+rands(st.spent)+", income "+rands(st.income)+" ("+(pf>=0?"profit":"loss")+" "+rands(Math.abs(pf))+").\n"}
-  const act=st.items.filter(i=>i.done||i.notes||i.photos);
-  if(act.length)t+="\nBy team:\n"+act.map(i=>"• "+i.name+": "+[i.done?pl(i.done,"goal")+" done":"",i.photos?pl(i.photos,"photo"):"",i.notes?pl(i.notes,"update"):""].filter(Boolean).join(", ")).join("\n")+"\n";
-  const up=[];
-  prods().forEach(p=>p.goals.forEach(g=>{if(g.done)return;
-    (g.targets||[]).forEach(x=>{if(!x.done&&x.due&&x.due>=t0&&x.due<=in7)up.push({d:x.due,s:p.name+": "+x.title})});
-    if(g.due&&g.due>=t0&&g.due<=in7)up.push({d:g.due,s:p.name+": "+g.title+" (goal)"})}));
-  up.sort((a,b)=>a.d.localeCompare(b.d));
-  if(up.length)t+="\nComing up next week:\n"+up.slice(0,8).map(x=>"• "+x.s+" (due "+fdd(x.d)+")").join("\n")+"\n";
-  const late=todayData().late.length;if(late)t+="\n"+pl(late,"goal")+" overdue. Please check in with your team.\n";
+  t+="This week: "+pl(tp,"post")+" and "+pl(tf,"photo")+" or video"+(tf===1?"":"s")+" from "+act.length+" of "+per.length+" teams.\n";
+  if(act.length)t+="\nBy team:\n"+act.map(x=>"• "+x.p.name+": "+[x.posts?pl(x.posts,"post"):"",x.ph?pl(x.ph,"photo"):""].filter(Boolean).join(", ")).join("\n")+"\n";
+  const hl=per.flatMap(x=>x.p.log.filter(l=>l.t>=from&&l.text).map(l=>({t:l.t,s:x.p.name+": "+l.text.replace(/\s+/g," ").slice(0,110)}))).sort((a,b)=>b.t-a.t).slice(0,4);
+  if(hl.length)t+="\nHighlights:\n"+hl.map(h=>"• "+h.s).join("\n")+"\n";
+  const q=todayData().quiet;if(q.length)t+="\nQuiet this week: "+q.map(x=>x.p.name).join(", ")+".\n";
   t+="\nWell done, teams! Have a great weekend.";
   return t;
 }
@@ -2400,21 +2416,199 @@ function digestSheet(){
   });
 }
 /* ---------- one Share menu ---------- */
+const weekMediaList=()=>prods().flatMap(p=>storyMediaList(p).filter(x=>x.t>=Date.now()-7*864e5)).sort((a,b)=>a.t-b.t);
 function shareMenu(p){
   const rows=[];
-  rows.push(["trend","Weekly report","A picture and a message with the week's numbers"+(p?" for "+p.name:""),()=>reportSheet(p||null)]);
   if(!p){
+    rows.push(["play","This week's slideshow","Photos and videos from every team in the last 7 days",()=>openViewer(weekMediaList(),0,true)]);
     rows.push(["chat","Weekly digest","A short summary to send on WhatsApp",digestSheet]);
-    rows.push(["share","School showcase","One public page for all productions or chosen ones",schoolShowcaseSheet]);
-    if(S.sch&&S.sch.on)rows.push(["printer","Print school poster","A page with a QR code to the school showcase",posterSchool]);
   }else{
+    rows.push(["play","Play slideshow","Photos and videos from "+p.name+", with captions",()=>openViewer(storyMediaList(p,{ch:storyF.pid===p.id?storyF.ch:""}),0,true)]);
+    if(canRecord())rows.push(["download","Save slideshow as a video","A video file to send or play on any screen",()=>slideshowVideo(storyMediaList(p).filter(x=>x.m.type!=="video"))]);
     rows.push(["share","Showcase page","A public page for families and the community",()=>showcaseSheet(p)]);
     if(p.showcase&&p.showcase.on)rows.push(["printer","Print poster","A page with a QR code to this showcase",()=>posterProd(p)]);
-    rows.push(["printer","Project book","Everything recorded, ready to print or save as a PDF",()=>exportBook(p)]);
+    rows.push(["book","Story book (PDF)","Your whole story laid out to print or save",()=>exportStory(p)]);
   }
   sheet("Share",`<div class="sh-menu">${rows.map((r,i)=>`<button class="trow" data-i="${i}" type="button"><span class="avatar">${ic(r[0])}</span><span class="grow"><b>${esc(r[1])}</b><span class="small muted" style="display:block">${esc(r[2])}</span></span>${ic("chev","sm")}</button>`).join("")}</div>`,(d,close)=>{
     d.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{const r=rows[+b.dataset.i];close();setTimeout(r[3],160)});
   });
+}
+/* ---------- viewer and slideshow ---------- */
+function storyMediaList(p,opts){
+  const out=[],ids=new Set(p.log.map(l=>l.id)),ch=opts&&opts.ch;
+  p.log.slice().sort((a,b)=>a.t-b.t).forEach(l=>{if(ch&&l.ch!==ch)return;postMedia(l).forEach(m=>out.push({m,cap:l.text||"",p,t:l.t}))});
+  if(!ch)mediaOf(p).filter(m=>m.tag!=="receipt"&&m.tag!=="evidence"&&(!m.post||!ids.has(m.post))).forEach(m=>out.push({m,cap:m.cap||"",p,t:m.t}));
+  return out.sort((a,b)=>a.t-b.t);
+}
+const canRecord=()=>!!(window.MediaRecorder&&HTMLCanvasElement.prototype.captureStream);
+let VW=null;
+function closeViewer(){if(!VW)return;const v=VW;VW=null;clearTimeout(v.timer);document.removeEventListener("keydown",v.key);document.removeEventListener("visibilitychange",v.vis);try{ovPop("viewer")}catch{}v.root.remove();if(!document.querySelector(".scrim,.ed"))document.body.classList.remove("noscroll")}
+function openViewer(list,start,auto){
+  if(!list.length){toast("No photos or videos yet.");return}
+  closeViewer();
+  let i=Math.max(0,Math.min(start||0,list.length-1)),playing=!!auto;
+  const root=document.createElement("div");root.className="vw";root.setAttribute("role","dialog");root.setAttribute("aria-modal","true");root.setAttribute("aria-label","Photos and videos");
+  const seg=list.length<=20;
+  root.innerHTML=`<div class="vw-bars ${seg?"":"one"}" aria-hidden="true">${seg?list.map(()=>`<i><b></b></i>`).join(""):`<i><b id="vw-one"></b></i>`}</div>
+    <div class="vw-top"><span class="vw-t grow" id="vw-t"></span><button class="x glass" id="vw-pl" type="button"></button>${canRecord()&&list.some(x=>x.m.type!=="video")?`<button class="x glass" id="vw-vid" type="button" aria-label="Save slideshow as a video">${ic("download")}</button>`:""}<button class="x glass" id="vw-ed" type="button" aria-label="Photo details">${ic("pencil")}</button><button class="x glass" id="vw-x" type="button" aria-label="Close">${ic("x")}</button></div>
+    <div class="vw-stage" id="vw-st"></div><button class="vw-nav prev" id="vw-p" type="button" aria-label="Previous"></button><button class="vw-nav next" id="vw-n" type="button" aria-label="Next"></button>
+    <div class="vw-cap" id="vw-c"></div>`;
+  document.body.append(root);document.body.classList.add("noscroll");
+  const v=VW={root,timer:null};
+  const q=s=>root.querySelector(s);
+  const setPl=()=>{const b=q("#vw-pl");b.innerHTML=ic(playing?"pause":"play");b.setAttribute("aria-label",playing?"Pause slideshow":"Play slideshow")};
+  const bars=[...root.querySelectorAll(".vw-bars i b")];
+  const paint=()=>{if(seg)bars.forEach((b,k)=>{b.style.animation="none";b.style.width=k<i?"100%":"0%"});else{const o=q("#vw-one");if(o){o.style.animation="none";o.style.width=((i)/list.length*100)+"%"}}};
+  const next=()=>{if(i>=list.length-1){if(playing){i=0}else return}else i++;show()},prev=()=>{if(i>0){i--;show()}};
+  async function show(){
+    clearTimeout(v.timer);const it=list[i],m=it.m,st=q("#vw-st");paint();
+    const url=await loadMedia(m.id);if(VW!==v)return;
+    const cur=bars[seg?i:0];
+    q("#vw-t").textContent=(it.p?it.p.name:"")+(list.length>1?" · "+(i+1)+" of "+list.length:"");
+    q("#vw-c").innerHTML=`${it.cap?`<p>${nl2br(it.cap.slice(0,260))}${it.cap.length>260?"…":""}</p>`:""}<span>${esc(fmt(it.t))}</span>`;
+    if(m.type==="video"){
+      st.innerHTML=`<video class="vw-img" src="${url||""}" playsinline ${playing?"muted autoplay":"controls"}></video>`;
+      const vd=st.querySelector("video");if(playing){vd.onended=()=>next();vd.play().catch(()=>{});if(cur)cur.style.animation="vwfill 12s linear forwards";v.timer=setTimeout(next,12000)}
+    }else{
+      st.innerHTML=`<img class="vw-img${playing?" kb":""}" src="${url||""}" alt="">`;
+      if(playing){if(cur)cur.style.animation="vwfill 5s linear forwards";v.timer=setTimeout(next,5000)}
+    }
+    const nx=list[i+1];if(nx)loadMedia(nx.m.id);
+  }
+  q("#vw-pl").onclick=()=>{playing=!playing;setPl();show()};setPl();
+  q("#vw-x").onclick=closeViewer;q("#vw-p").onclick=prev;q("#vw-n").onclick=()=>{if(i<list.length-1){i++;show()}};
+  q("#vw-ed").onclick=()=>{const m=list[i].m;closeViewer();openMediaSheet(m)};
+  const vb=q("#vw-vid");if(vb)vb.onclick=()=>{const items=list.filter(x=>x.m.type!=="video");playing=false;clearTimeout(v.timer);closeViewer();slideshowVideo(items)};
+  let sx=0;const stg=q("#vw-st");stg.addEventListener("touchstart",e=>{sx=e.touches[0].clientX},{passive:true});stg.addEventListener("touchend",e=>{const dx=e.changedTouches[0].clientX-sx;if(dx<-50)q("#vw-n").click();else if(dx>50)prev()});
+  v.key=e=>{if(e.key==="Escape")closeViewer();else if(e.key==="ArrowRight")q("#vw-n").click();else if(e.key==="ArrowLeft")prev();else if(e.key===" "){e.preventDefault();q("#vw-pl").click()}};document.addEventListener("keydown",v.key);
+  v.vis=()=>{if(document.hidden&&playing){playing=false;setPl();clearTimeout(v.timer)}};document.addEventListener("visibilitychange",v.vis);
+  ovPush({k:"viewer",close:()=>closeViewer()});
+  show();
+}
+
+/* ---------- a single post as a picture card ---------- */
+function loadImgEl(url){return new Promise(res=>{const im=new Image();im.onload=()=>res(im);im.onerror=()=>res(null);im.src=url})}
+async function renderCard(p,l,all){
+  const W=1080,H=1350,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
+  try{await Promise.all([document.fonts.load('700 80px "Bricolage Grotesque"'),document.fonts.load('500 36px "Instrument Sans"')])}catch{}
+  const D='"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif',B='"Instrument Sans",system-ui,sans-serif';
+  const rr=(x,y,w,h,r)=>{g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath()};
+  g.fillStyle="#fbf6ec";g.fillRect(0,0,W,H);
+  g.fillStyle=p.color||"#a65608";rr(0,0,W,210,0);g.fill();
+  g.fillStyle="#fff";g.font=`700 64px ${D}`;g.fillText(p.name,60,110);g.globalAlpha=.9;g.font=`500 32px ${B}`;g.fillText("Newberry House Middle School",60,162);g.globalAlpha=1;
+  let ms=postMedia(l).filter(m=>m.type!=="video");if(!all)ms=ms.filter(m=>m.consent==="ok");ms=ms.slice(0,4);
+  let y=250;
+  const imgs=[];for(const m of ms){const u=await loadMedia(m.id);const im=u&&await loadImgEl(u);if(im)imgs.push(im)}
+  const cover=(im,x,yy,w,h)=>{const k=Math.max(w/im.width,h/im.height),dw=im.width*k,dh=im.height*k;g.save();rr(x,yy,w,h,28);g.clip();g.drawImage(im,x+(w-dw)/2,yy+(h-dh)/2,dw,dh);g.restore()};
+  if(imgs.length===1){cover(imgs[0],60,y,960,640);y+=670}
+  else if(imgs.length===2){cover(imgs[0],60,y,470,640);cover(imgs[1],550,y,470,640);y+=670}
+  else if(imgs.length>=3){cover(imgs[0],60,y,960,380);const w=imgs.length===3?470:310;imgs.slice(1).forEach((im,k)=>cover(im,60+k*(w+(imgs.length===3?20:15)),y+400,w,250));y+=670}
+  g.fillStyle="#221c11";g.font=`500 44px ${B}`;
+  const words=String(l.text||"").split(/\s+/),maxW=960,lh=62,maxLines=imgs.length?(H-y-190)/lh:(H-y-190)/lh;let line="",n=0,lines=[];
+  for(const w of words){const t=line?line+" "+w:w;if(g.measureText(t).width>maxW&&line){lines.push(line);line=w}else line=t}if(line)lines.push(line);
+  const shown=lines.slice(0,Math.max(2,Math.floor(maxLines)));if(lines.length>shown.length)shown[shown.length-1]=shown[shown.length-1].replace(/\s*\S*$/,"")+"…";
+  shown.forEach((t,k)=>g.fillText(t,60,y+60+k*lh));
+  g.fillStyle="#6c6250";g.font=`500 32px ${B}`;g.fillText(new Date(l.t).toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"}),60,H-110);
+  g.textAlign="right";g.fillText("Learning by doing, together",W-60,H-110);
+  return{blob:await new Promise(r=>c.toBlob(r,"image/png")),photos:imgs.length,totalPhotos:postMedia(l).filter(m=>m.type!=="video").length};
+}
+function cardSheet(p,l){
+  let all=false,cur=null;
+  sheet("Share as a picture",`<div id="cd"></div>`,(d,close)=>{
+    const root=d.querySelector("#cd");let busy=false;
+    const draw=async()=>{
+      root.innerHTML=`<div class="cd-prev"><p class="muted small" style="margin:6px 0">Making your picture…</p></div>`;
+      const r=await renderCard(p,l,all);if(!root.isConnected)return;cur=r;
+      const url=URL.createObjectURL(r.blob);
+      root.innerHTML=`<div class="cd-prev"><img src="${url}" alt="Preview of the picture card"></div>
+        ${r.totalPhotos?`<div class="chips" role="radiogroup" aria-label="Which photos" style="margin-top:12px"><button class="chip" type="button" role="radio" data-all="0" aria-checked="${!all}" aria-pressed="${!all}">Approved photos only</button><button class="chip" type="button" role="radio" data-all="1" aria-checked="${all}" aria-pressed="${all}">All photos</button></div><p class="small muted" style="margin:6px 0 0">${all?"Everyone in these photos agreed to share.":r.photos<r.totalPhotos||!r.photos?"Only photos marked Approved to share are used. Set consent in the gallery.":"All photos here are approved to share."}</p>`:""}
+        <div class="row wr" style="margin-top:14px"><button class="btn primary grow" id="cd-sh" type="button">${ic("share")}Share</button><button class="btn" id="cd-sv" type="button">${ic("download")}Save image</button></div>`;
+      root.querySelectorAll("[data-all]").forEach(b=>b.onclick=()=>{all=b.dataset.all==="1";draw()});
+      const file=()=>new File([r.blob],(p.name+" post.png").replace(/\s+/g,"-"),{type:"image/png"});
+      root.querySelector("#cd-sh").onclick=async()=>{try{if(navigator.canShare&&navigator.canShare({files:[file()]}))await navigator.share({files:[file()],text:(l.text||"").slice(0,200)});else if(navigator.share)await navigator.share({text:l.text||p.name});else toast("Sharing isn't available here. Use Save image.")}catch{}};
+      root.querySelector("#cd-sv").onclick=()=>{const a=document.createElement("a");a.href=url;a.download=file().name;a.click()};
+    };
+    draw();
+  });
+}
+
+/* ---------- slideshow saved as a video ---------- */
+async function slideshowVideo(items){
+  if(!canRecord()){toast("This browser can't save videos. Try Chrome on a laptop or an Android phone.");return}
+  if(!items.length){toast("No photos to put in a video.");return}
+  const root=document.createElement("div");root.className="vw vwx";root.setAttribute("role","dialog");root.setAttribute("aria-modal","true");root.setAttribute("aria-label","Saving the slideshow");
+  root.innerHTML=`<div class="vwx-b"><h2>Making your video</h2><p class="muted" id="vx-s">Getting ready…</p><div class="vwx-bar"><i id="vx-i"></i></div><p class="small muted">Keep this screen open. It plays in real time.</p><button class="btn" id="vx-c" type="button">Cancel</button></div>`;
+  document.body.append(root);document.body.classList.add("noscroll");let cancel=false;
+  const done=()=>{root.remove();if(!document.querySelector(".scrim,.ed,.vw"))document.body.classList.remove("noscroll")};
+  root.querySelector("#vx-c").onclick=()=>{cancel=true};
+  try{
+    const W=1280,H=720,SL=3500,FD=500,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
+    const imgs=[];for(const it of items){const u=await loadMedia(it.m.id);const im=u&&await loadImgEl(u);if(im)imgs.push({im,cap:it.cap||""})}
+    if(!imgs.length)throw new Error("none");
+    const title=items[0].p?items[0].p.name:"Our story";
+    const types=["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm","video/mp4"],mime=types.find(t=>MediaRecorder.isTypeSupported(t))||"";
+    const stream=c.captureStream(30),rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:3500000}:undefined),chunks=[];
+    rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+    const fin=new Promise(res=>rec.onstop=res);
+    const slides=[{title},...imgs,{end:true}],total=slides.length*SL;
+    const fit=(im,sc)=>{const k=Math.max(W/im.width,H/im.height)*sc,dw=im.width*k,dh=im.height*k;g.drawImage(im,(W-dw)/2,(H-dh)/2,dw,dh)};
+    const wrap=(t,x,y,mw,lh)=>{const w=t.split(/\s+/);let line="",yy=y;for(const word of w){const test=line?line+" "+word:word;if(g.measureText(test).width>mw&&line){g.fillText(line,x,yy);yy+=lh;line=word}else line=test}g.fillText(line,x,yy)};
+    const draw=(s,p0,alpha)=>{
+      g.globalAlpha=alpha;
+      if(s.title||s.end){g.fillStyle=s.end?"#0b2a22":"#a65608";g.fillRect(0,0,W,H);g.fillStyle="#fff";g.textAlign="center";g.font='700 84px "Bricolage Grotesque",system-ui,sans-serif';g.fillText(s.title||"Thank you for watching",W/2,H/2);g.font='500 36px "Instrument Sans",system-ui,sans-serif';g.globalAlpha=alpha*.85;g.fillText(s.end?"Newberry House Middle School":"Newberry House Middle School · Production teams",W/2,H/2+70);g.textAlign="left"}
+      else{g.fillStyle="#000";g.fillRect(0,0,W,H);fit(s.im,1+.07*p0);const gr=g.createLinearGradient(0,H-260,0,H);gr.addColorStop(0,"rgba(0,0,0,0)");gr.addColorStop(1,"rgba(0,0,0,.72)");g.fillStyle=gr;g.fillRect(0,H-260,W,260);
+        if(s.cap){g.fillStyle="#fff";g.font='500 40px "Instrument Sans",system-ui,sans-serif';wrap(s.cap.slice(0,160),60,H-120,W-120,52)}}
+      g.globalAlpha=1;
+    };
+    rec.start(250);const t0=performance.now();
+    await new Promise(res=>{const tick=()=>{
+      if(cancel){res();return}
+      const t=performance.now()-t0;if(t>=total){res();return}
+      const idx=Math.min(slides.length-1,Math.floor(t/SL)),loc=t-idx*SL,p0=loc/SL;
+      draw(slides[idx],p0,1);
+      if(idx>0&&loc<FD){/* crossfade from the previous slide */const prevS=slides[idx-1];g.globalAlpha=1-loc/FD;draw(prevS,1,1-loc/FD)}
+      root.querySelector("#vx-i").style.width=Math.round(t/total*100)+"%";root.querySelector("#vx-s").textContent="Slide "+(idx+1)+" of "+slides.length;
+      requestAnimationFrame(tick)};tick()});
+    rec.stop();await fin;stream.getTracks().forEach(t=>t.stop());
+    if(cancel){done();toast("Cancelled.");return}
+    const blob=new Blob(chunks,{type:mime||"video/webm"}),ext=(blob.type.includes("mp4")?"mp4":"webm"),url=URL.createObjectURL(blob),name=(title+" slideshow."+ext).replace(/\s+/g,"-");
+    root.innerHTML=`<div class="vwx-b"><h2>Your video is ready</h2><video src="${url}" controls playsinline style="width:100%;border-radius:16px;margin:10px 0;background:#000"></video><div class="row wr"><button class="btn primary grow" id="vx-sh" type="button">${ic("share")}Share</button><button class="btn" id="vx-sv" type="button">${ic("download")}Save</button><button class="btn" id="vx-x" type="button">Close</button></div></div>`;
+    const file=new File([blob],name,{type:blob.type});
+    root.querySelector("#vx-sv").onclick=()=>{const a=document.createElement("a");a.href=url;a.download=name;a.click()};
+    root.querySelector("#vx-sh").onclick=async()=>{try{if(navigator.canShare&&navigator.canShare({files:[file]}))await navigator.share({files:[file],title});else toast("Sharing isn't available here. Use Save.")}catch{}};
+    root.querySelector("#vx-x").onclick=done;
+  }catch(e){console.warn("video",e);done();toast("Couldn't make the video on this device.")}
+}
+/* ---------- printable story book ---------- */
+function storyBookHTML(p,imgs){
+  const e=esc;ensureBook(p);const pr=p.prop||{},chs=p.chapters||[];
+  const posts=p.log.slice().sort((a,b)=>a.t-b.t);
+  const fl=(k,v)=>v?`<div class="fl"><b>${e(k)}</b>${e(v).replace(/\n/g,"<br>")}</div>`:"";
+  const postHtml=l=>{const ms=postMedia(l).filter(m=>m.type!=="video"&&m.consent!=="no"&&imgs[m.id]).slice(0,6);
+    return `<div class="post"><div class="d">${e(new Date(l.t).toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"}))} · ${e(l.by||"")}</div>${l.text?`<p class="pt">${e(l.text)}</p>`:""}${ms.length?`<div class="ph g${Math.min(ms.length,3)}">${ms.map(m=>`<img src="${imgs[m.id]}" alt="">`).join("")}</div>`:""}</div>`};
+  const byCh=[...chs.map(c=>({name:c.name,list:posts.filter(l=>l.ch===c.id)})),{name:chs.length?"More from the story":"",list:posts.filter(l=>!l.ch||!chs.some(c=>c.id===l.ch))}].filter(g=>g.list.length);
+  const story=byCh.length?byCh.map(g=>`${g.name?`<h2>${e(g.name)}</h2>`:""}${g.list.map(postHtml).join("")}`).join(""):`<p class="muted">No posts yet.</p>`;
+  const cov=coverOf(p),covUrl=cov&&imgs[cov.id];
+  const team=p.members.length?`<h2>Our team</h2><p>${p.members.map(m=>{const r=p.roles.filter(x=>x.who===m).map(x=>x.role).join(", ");return e(m)+(r?" ("+e(r)+")":"")}).join(" · ")}</p>`:"";
+  const prop=pr.title?`<h2>Our project</h2><h3>${e(pr.title)}</h3>${fl("The need",pr.need)}${fl("What we are making, doing or providing",pr.make)}${fl("Who benefits",pr.who)}${fl("How we will know it worked",pr.success)}`:"";
+  const safe=p.risks.length?`<h2>Staying safe</h2><ul>${p.risks.map(r=>`<li><b>${e(r.risk)}</b>${r.manage?" — "+e(r.manage):""}</li>`).join("")}</ul>`:"";
+  const T=p.txt||{},wrap=(T.achieved||T.compare||T.shared||T.change)?`<h2>Looking back</h2>${fl("What we achieved",T.achieved)}${fl("How our result compares with what we planned",T.compare)}${fl("How we worked together",T.shared)}${fl("What we would change next time",T.change)}`:"";
+  const money=p.useMoney?`<h2>Money</h2>${bookCharts(p,bud(p))||'<p class="muted">No money recorded.</p>'}`:"";
+  const css=`@page{size:A4;margin:14mm}*{box-sizing:border-box}body{font:11pt/1.5 "Instrument Sans",system-ui,sans-serif;color:#1d1a12;margin:0}h1{font:700 32pt/1.1 "Bricolage Grotesque",system-ui,sans-serif;margin:0}h2{font:700 17pt "Bricolage Grotesque",system-ui,sans-serif;color:${/^#[0-9a-fA-F]{3,8}$/.test(p.color||"")?p.color:"#0b6a4c"};margin:16pt 0 6pt;page-break-after:avoid}h3{font-size:12.5pt;margin:8pt 0 4pt}.cover{page-break-after:always;text-align:center;padding-top:22mm}.cover .sm{color:#6c6250;margin-top:4pt}.cover .ci{width:100%;height:120mm;object-fit:cover;border-radius:6mm;margin:12mm 0 0}.post{page-break-inside:avoid;margin:0 0 8mm;padding-bottom:5mm;border-bottom:1px solid #e6dfcd}.d{font-size:9pt;color:#6c6250}.pt{white-space:pre-line;margin:3pt 0}.ph{display:grid;gap:2mm;margin-top:3mm}.ph img{width:100%;object-fit:cover;border-radius:3mm;display:block}.g1{grid-template-columns:1fr}.g1 img{max-height:110mm}.g2,.g3{grid-template-columns:1fr 1fr}.g2 img,.g3 img{height:56mm}.g3 img:first-child{grid-column:1/-1;height:78mm}.fl{margin:5pt 0}.fl b{display:block;font-size:9.5pt;color:#6c6250;font-weight:600}.muted{color:#6c6250}.sec{page-break-before:always}.ch{margin:10pt 0;page-break-inside:avoid}.ch svg.mc-spark{display:block;width:100%;height:46mm;border-bottom:1px solid #d8d0bd}.lg{display:flex;flex-wrap:wrap;gap:4pt 14pt;font-size:9pt;margin-top:4pt}.lg i,.bkd-t i{display:inline-block;width:9pt;height:9pt;border-radius:2pt;margin-right:4pt}.bkd{display:flex;gap:14pt;align-items:center}.bkd-d svg{width:38mm;height:38mm}.bkd-t{border-collapse:collapse;font-size:9.5pt}.bkd-t td{border:0;padding:2pt 8pt 2pt 0}`;
+  return `<!doctype html><html lang="en-ZA"><head><meta charset="utf-8"><title>${e(p.name)} story book</title><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400..700&display=swap"><style>${css}</style></head><body>
+  <section class="cover"><div class="sm">Newberry House Middle School · Production teams</div><h1>${e(p.name)}</h1>${p.info&&p.info.term?`<div class="sm">${e(p.info.term)}</div>`:""}${p.desc?`<p style="margin-top:10pt">${e(p.desc)}</p>`:""}${covUrl?`<img class="ci" src="${covUrl}" alt="">`:""}</section>
+  ${team}${prop}${safe}
+  <section class="sec"><h1 style="font-size:24pt">Our story</h1>${story}</section>
+  ${wrap||money?`<section class="sec">${wrap}${money}</section>`:""}
+  </body></html>`;
+}
+async function exportStory(p){
+  toast("Preparing your story book…");
+  const ids=new Set();
+  p.log.forEach(l=>postMedia(l).filter(m=>m.type!=="video"&&m.consent!=="no").slice(0,6).forEach(m=>ids.add(m.id)));
+  const cov=coverOf(p);if(cov)ids.add(cov.id);
+  const imgs={};let n=0;for(const id of ids){if(n++>=60)break;try{imgs[id]=await scImage(id)}catch{}}
+  printView("Story book",storyBookHTML(p,imgs));
 }
 /* ---------- start fresh ---------- */
 function freshData(){const now=Date.now();return{prods:DEFAULTS.map(([name,icon,c],i)=>({id:"p"+i,name,icon,color:COLORS[c],desc:"",members:[],goals:[],log:[],del:false,u:now})),media:[]}}
