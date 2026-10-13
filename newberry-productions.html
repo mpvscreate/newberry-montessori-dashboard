@@ -1259,7 +1259,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.2.0";
+const APP_VER="6.3.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -2741,17 +2741,16 @@ const scUrl=p=>location.origin+location.pathname.replace(/[^/]*$/,"")+"showcase.
 const scToken=()=>{const a=new Uint8Array(24);crypto.getRandomValues(a);return[...a].map(x=>"abcdefghijklmnopqrstuvwxyz0123456789"[x%36]).join("")};
 const scStatus=o=>{const t=(sm.scAt||{})[o.token];if(!t)return"Not published yet.";const m=Math.round((Date.now()-t)/60000);return"Last updated "+(m<1?"just now":m<60?m+" min ago":new Date(t).toLocaleString([],{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}))+"."};
 function scBuild(p){
-  ensureBook(p);const o=p.showcase||{},b=bud(p),on=k=>k==="work"?o.work!==false:!!o[k],cut=(v,n)=>String(v==null?"":v).trim().slice(0,n);
+  ensureBook(p);const o=p.showcase||{},b=bud(p),on=k=>k==="story"?o.story!==false:k==="money"?(!!o.money&&!!p.useMoney):!!o[k],cut=(v,n)=>String(v==null?"":v).trim().slice(0,n);
   const first=m=>String(m).trim().split(/\s+/)[0];
-  const apNew=mediaOf(p).filter(m=>m.type!=="video"&&m.consent==="ok"),ap=apNew.slice().sort((x,y)=>x.t-y.t);
-  let pair=null;if(apNew.length>=2){const c=cmpPair(p,apNew);pair={a:c.first.id,b:c.last.id}}
-  const ids=new Set(ap.slice(-12).map(m=>m.id));if(pair){ids.add(pair.a);ids.add(pair.b)}
-  const photos=ap.filter(m=>ids.has(m.id)).map(m=>({id:m.id,cap:cut(m.cap,90),t:m.t}));
+  const ok=mediaOf(p).filter(m=>m.type!=="video"&&m.consent==="ok"),okId=new Set(ok.map(m=>m.id));
+  const order=ok.slice().sort((x,y)=>(y.id===p.cover)-(x.id===p.cover)||y.t-x.t).slice(0,20),ids=new Set(order.map(m=>m.id));
+  const photos=order.sort((x,y)=>x.t-y.t).map(m=>({id:m.id,cap:cut(m.cap,90),t:m.t}));
   const team=o.names&&p.members.length?p.members.slice(0,10).map(first).join(", ")+(p.members.length>10?" and more":""):p.members.length?p.members.length+" student"+(p.members.length===1?"":"s"):"Our team";
-  const d={v:2,name:p.name,icon:ICONS[p.icon]||"",color:p.color,desc:cut(p.desc,240),term:(p.info&&p.info.term)||"",pct:prodPct(p),done:p.goals.filter(g=>g.done).length,open:p.goals.filter(g=>!g.done).length,team,pair,photos,updated:Date.now()};
-  if(on("work")){
-    d.goals=p.goals.slice(0,15).map(g=>({t:cut(g.title,120),done:!!g.done,pct:goalPct(g),targets:(g.targets||[]).slice(0,10).map(t=>({t:cut(t.title,100),done:!!t.done}))}));
-    d.doneTargets=p.goals.flatMap(g=>(g.targets||[]).filter(t=>t.done).map(t=>({t:cut(t.title,100),at:t.doneAt||0}))).sort((x,y)=>y.at-x.at).slice(0,8).map(x=>x.t);
+  const d={v:3,name:p.name,icon:ICONS[p.icon]||"",color:p.color,desc:cut(p.desc,240),term:(p.info&&p.info.term)||"",team,cover:ids.has(p.cover)?p.cover:"",photos,updated:Date.now()};
+  if(on("story")){
+    const chs=(p.chapters||[]).slice(0,12);d.chapters=chs.map(c=>({id:c.id,name:cut(c.name,40)}));
+    d.posts=p.log.slice().sort((x,y)=>(!!y.pin-!!x.pin)||y.t-x.t).slice(0,40).map(l=>({id:l.id,t:l.t,txt:cut(l.text,600),pin:!!l.pin,ch:chs.some(c=>c.id===l.ch)?l.ch:"",m:(l.m||[]).filter(id=>ids.has(id)).slice(0,6)})).filter(x=>x.txt||x.m.length);
   }
   if(on("plan")){
     const pr=p.prop||{},T=p.txt||{};
@@ -2766,11 +2765,10 @@ function scBuild(p){
       spend:spendSlices(p).map(x=>({l:cut(x.l,60),v:x.v})),
       planned:p.bud.items.slice(0,12).map(i=>({item:cut(i.item,60),total:toNum(i.qty)*toNum(i.unit)}))};
   }
-  if(on("story"))d.updates=p.log.slice().sort((x,y)=>y.t-x.t).slice(0,12).map(l=>({t:l.t,txt:cut(l.text,300)}));
   if(on("learned")){
-    const T=p.txt||{},R=p.rev||{},rich=o.ver===2;
-    d.learned={achieved:cut(T.achieved,600),chosen:cut(T.chosen,400),compare:rich?cut(T.compare,500):"",shared:rich?cut(T.shared,500):"",change:rich?cut(T.change,500):"",completed:rich?cut(R.completed,60):"",remaining:rich?cut(R.remaining,200):"",
-      refl:!rich?[]:p.members.slice(0,10).map(m=>{const r=p.refl[m]||{};return{who:o.names?first(m):"A team member",contrib:cut(r.contrib,300),skill:cut(r.skill,200),challenge:cut(r.challenge,300)}}).filter(r=>r.contrib||r.skill||r.challenge)};
+    const T=p.txt||{},R=p.rev||{};
+    d.learned={achieved:cut(T.achieved,600),chosen:cut(T.chosen,400),compare:cut(T.compare,500),shared:cut(T.shared,500),change:cut(T.change,500),completed:cut(R.completed,60),remaining:cut(R.remaining,200),
+      refl:p.members.slice(0,10).map(m=>{const r=p.refl[m]||{};return{who:o.names?first(m):"A team member",contrib:cut(r.contrib,300),skill:cut(r.skill,200),challenge:cut(r.challenge,300)}}).filter(r=>r.contrib||r.skill||r.challenge)};
   }
   return d;
 }
@@ -2802,15 +2800,15 @@ function showcaseSheet(p){
   sheet("Showcase page",`<div id="sc"></div>`,(d,close)=>{
     const root=d.querySelector("#sc");let busy=false;
     const nOk=()=>mediaOf(p).filter(m=>m.type!=="video"&&m.consent==="ok").length;
-    const ALL=["plan","work","money","story","learned"],val=k=>k==="all"?ALL.every(x=>val(x)):k==="work"?o.work!==false:!!o[k];
+    const ALL=["story","plan",...(p.useMoney?["money"]:[]),"learned"],val=k=>k==="all"?ALL.every(x=>val(x)):k==="story"?o.story!==false:!!o[k];
     const sw=(k,t,sub)=>`<div class="row between" style="margin:12px 0"><div><b>${t}</b><div class="small muted">${sub}</div></div><button type="button" role="switch" class="sw" data-k="${k}" aria-label="${t}" aria-checked="${val(k)}"><i></i></button></div>`;
     const err=m=>{const e=root.querySelector("#sc-e");if(e){e.textContent=m;e.hidden=!m}};
     const draw=()=>{
       const url=o.on?scUrl(p):"",n=nOk();
-      root.innerHTML=`<p class="muted small" style="margin:4px 0 6px">${o.on?"Anyone with this link can see a read-only page about "+esc(p.name)+". It updates itself as you work.":"Share a read-only page with families and the community. Only photos marked Approved to share are shown. Updates, comments and student names never appear unless you switch first names on."}</p>
+      root.innerHTML=`<p class="muted small" style="margin:4px 0 6px">${o.on?"Anyone with this link can see a read-only page about "+esc(p.name)+". It updates itself as you work.":"Share a read-only page with families and the community. Only photos marked Approved to share are shown. Comments and student names never appear unless you switch first names on."}</p>
       ${o.on?`<label class="f" for="sc-u">Your link</label><input class="t" id="sc-u" readonly value="${esc(url)}"><div class="row wr" style="margin-top:10px"><button class="btn small" id="sc-cp" type="button">${ic("copy")}Copy link</button><button class="btn small" id="sc-sh" type="button">${ic("share")}Share</button><button class="btn small" id="sc-pv" type="button">${ic("eye")}Preview</button><button class="btn small" id="sc-po" type="button">${ic("printer")}Print poster</button></div><p class="small muted" id="sc-st" style="margin:10px 0 0">${scStatus(o)}</p>`:""}
-      <h3 class="sub-h">What to show</h3>${sw("all","All tabs","Plan, Work, Money, Story and Wrap-up in one go")}<div class="sc-sub">${sw("plan","Plan","Proposal, community need, chosen idea, roles and safety")}${sw("work","Work","Goals and their targets")}${sw("money","Money","Income, spending, profit or loss, and where it went")}${sw("story","Story","Recent updates from the team")}${sw("learned","Wrap-up","End of term review and what each member learned")}</div>${sw("names","First names","Show first names in the team, roles and reflections. Off keeps them anonymous.")}<p class="small muted">Updates and reflections are written by people. Use Preview to read everything before you share the link.</p>
-      <p class="small muted">${n} photo${n===1?"":"s"} marked Approved to share ${n===1?"will":"will"} appear (up to 14). Set consent in the Gallery.</p><p class="err" id="sc-e" role="alert" hidden></p>
+      <h3 class="sub-h">What to show</h3>${sw("all","Everything","Story, Plan"+(p.useMoney?", Money":"")+" and Wrap-up in one go")}<div class="sc-sub">${sw("story","Story","Posts, chapters and approved photos")}${sw("plan","Plan","Proposal, community need, chosen idea, roles and safety")}${p.useMoney?sw("money","Money","Income, spending, profit or loss, and where it went"):""}${sw("learned","Wrap-up","End of term reflections and what we learned")}</div>
+      <p class="small muted">${n} photo${n===1?"":"s"} marked Approved to share ${n===1?"will":"will"} appear (up to 20). Set consent in the Gallery.</p><p class="err" id="sc-e" role="alert" hidden></p>
       <div class="row wr" style="margin-top:16px">${o.on?`<button class="btn danger" id="sc-off" type="button">Turn off</button><span class="grow"></span><button class="btn primary" id="sc-up" type="button">Update now</button>`:`<button class="btn primary grow" id="sc-on" type="button">Turn on and create link</button>`}</div>`;
       wire();
     };

@@ -57,6 +57,18 @@ footer{text-align:center;color:var(--muted);font-size:.82rem;padding:10px 0}
 .lb img{max-width:100%;max-height:78vh;border-radius:14px}.lb p{color:#fff;margin:12px 0 0;text-align:center}
 .lb button{position:absolute;border:0;background:rgba(255,255,255,.18);color:#fff;width:48px;height:48px;border-radius:50%;font-size:1.4rem;cursor:pointer}.lb .x{top:calc(12px + env(safe-area-inset-top));right:12px}.lb .p{left:10px;top:50%}.lb .n{right:10px;top:50%}
 @media (prefers-reduced-motion:no-preference){.card,.stat{animation:in .4s ease both}@keyframes in{from{opacity:0;transform:translateY(8px)}}}
+.hero.hc{position:relative;overflow:hidden;min-height:260px;display:flex;align-items:flex-end}.hbg{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}.hero.hc::before{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.15),rgba(0,0,0,.72));z-index:1}.hin{position:relative;z-index:2;width:100%}
+.hmeta{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:12px;font-size:.85rem;opacity:.95}
+.play{display:inline-flex;align-items:center;gap:8px;margin-top:16px;border:0;border-radius:99px;padding:11px 20px;font:600 .95rem var(--body);background:#fff;color:#221c11;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.25)}.play svg{width:18px;height:18px;fill:currentColor}
+.story{margin-bottom:16px}.st{font-size:1.3rem;margin:4px 2px 12px}
+.chs{display:flex;gap:8px;overflow-x:auto;padding:2px 2px 12px;margin:0 -2px;scrollbar-width:none}.chs::-webkit-scrollbar{display:none}
+.ch{flex:none;border:1px solid var(--line);background:var(--sheet);color:var(--ink);border-radius:99px;padding:7px 15px;font:600 .88rem var(--body);cursor:pointer}.ch[aria-pressed=true]{background:var(--pc);border-color:var(--pc);color:#fff}
+.post{background:var(--sheet);border-radius:26px;padding:16px;margin-bottom:14px;box-shadow:var(--shadow)}.post[hidden]{display:none}.post.pin{border:2px solid color-mix(in srgb,var(--pc) 45%,transparent)}
+.post p{margin:6px 0 0;font-size:1.02rem;line-height:1.55;overflow-wrap:anywhere}
+.pmeta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.82rem;color:var(--muted)}.pt{background:var(--paper);border-radius:99px;padding:2px 10px;font-weight:600}.pt.c{color:var(--pc)}
+.pm{display:grid;gap:4px;margin-top:12px;border-radius:18px;overflow:hidden}.pm1{grid-template-columns:1fr}.pm2,.pm3,.pm4{grid-template-columns:1fr 1fr}
+.pm button{position:relative;border:0;padding:0;background:var(--line);cursor:pointer;aspect-ratio:4/3;overflow:hidden}.pm1 button{aspect-ratio:16/10}.pm3 button:first-child{grid-row:span 2;aspect-ratio:auto}.pm img{width:100%;height:100%;object-fit:cover;display:block}
+.more{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.5);color:#fff;font:700 1.4rem var(--display)}
 </style>
 </head>
 <body>
@@ -117,15 +129,27 @@ function render(d){
   if(d&&d.kind==="school")return renderSchool(d);
   const col=/^#[0-9a-fA-F]{3,8}$/.test(d.color||"")?d.color:"#a65608";
   document.documentElement.style.setProperty("--pc",col);document.title=(d.name||"Production")+" · Showcase";
-  const pct=Math.max(0,Math.min(100,Math.round(num(d.pct))));
   const photos=Array.isArray(d.photos)?d.photos:[],byId={};photos.forEach(p=>byId[p.id]=p);
-  const pair=d.pair&&byId[d.pair.a]&&byId[d.pair.b]?d.pair:null;
-  let h='<header class="hero"><div class="brand"><img src="icons/productions-96.png" alt="" height="30"><span>Newberry House Middle School · Production teams</span></div><div class="hrow"><div class="pav" id="pav"></div><div><h1>'+esc(d.name)+"</h1>"+(d.term?'<span class="term">'+esc(d.term)+"</span>":"")+'</div><div class="ring" role="img" aria-label="'+pct+' percent complete">'+ringSvg(pct)+"<b>"+pct+"%</b></div></div>"+(d.desc?"<p>"+esc(d.desc)+"</p>":"")+"</header>";
-  h+='<div class="stats"><div class="stat"><b>'+num(d.done)+"</b><span>goals done</span></div><div class=\"stat\"><b>"+num(d.open)+"</b><span>still to do</span></div><div class=\"stat\"><b class=\"sm\">"+esc(d.team||"")+"</b><span>team</span></div></div>";
-  if(pair)h+='<section class="card"><h2>Before and now</h2><div class="cmps" id="cmps"><img data-id="'+esc(pair.b)+'" alt="Now"><img class="b" data-id="'+esc(pair.a)+'" alt="Before"><span class="cl"></span><span class="kn" aria-hidden="true">&lsaquo;&rsaquo;</span><span class="tg l">Before · '+esc(dShort(byId[pair.a].t))+'</span><span class="tg r">Now · '+esc(dShort(byId[pair.b].t))+'</span><input type="range" min="0" max="100" value="50" aria-label="Slide to compare before and now"></div><p class="hint">Drag the handle to compare.</p></section>';
-  if(photos.length)h+='<section class="card"><h2>Photos</h2><div class="grid">'+photos.map((p,i)=>'<button data-i="'+i+'" aria-label="Open photo '+(i+1)+(p.cap?": "+esc(p.cap):"")+'"><img data-id="'+esc(p.id)+'" alt="'+esc(p.cap||"Production photo")+'"></button>').join("")+"</div></section>";
-  const kv=(k,v)=>v?'<div class="kv"><span>'+esc(k)+"</span><p>"+esc(v).replace(/\n/g,"<br>")+"</p></div>":"";
+  const posts=Array.isArray(d.posts)?d.posts:[],chs=Array.isArray(d.chapters)?d.chapters:[];
+  const cover=d.cover&&byId[d.cover]?d.cover:"";
+  /* the viewing order: post photos first (pinned and newest), then any other approved photos */
+  const seq=[],seen=new Set();
+  posts.forEach(po=>(po.m||[]).forEach(id=>{if(byId[id]&&!seen.has(id)){seen.add(id);seq.push({id,cap:po.txt||byId[id].cap||"",t:po.t})}}));
+  photos.slice().reverse().forEach(p=>{if(!seen.has(p.id)){seen.add(p.id);seq.push({id:p.id,cap:p.cap||"",t:p.t})}});
+  const idx={};seq.forEach((x,i)=>idx[x.id]=i);
   const fd=t=>{try{return new Date(t).toLocaleDateString("en-ZA",{day:"numeric",month:"long",year:"numeric"})}catch(e){return""}};
+  let h='<header class="hero'+(cover?" hc":"")+'">'+(cover?'<img class="hbg" data-id="'+esc(cover)+'" alt="">':"")+'<div class="hin"><div class="brand"><img src="icons/productions-96.png" alt="" height="30"><span>Newberry House Middle School · Production teams</span></div><div class="hrow"><div class="pav" id="pav"></div><div><h1>'+esc(d.name)+"</h1>"+(d.term?'<span class="term">'+esc(d.term)+"</span>":"")+"</div></div>"+(d.desc?"<p>"+esc(d.desc)+"</p>":"")+'<div class="hmeta"><span>'+esc(d.team||"")+"</span>"+(posts.length?"<span>"+posts.length+" post"+(posts.length===1?"":"s")+"</span>":"")+(seq.length?"<span>"+seq.length+" photo"+(seq.length===1?"":"s")+"</span>":"")+"</div>"+(seq.length?'<button class="play" id="play" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5l11 7-11 7z"/></svg>Play slideshow</button>':"")+"</div></header>";
+  const kv=(k,v)=>v?'<div class="kv"><span>'+esc(k)+"</span><p>"+esc(v).replace(/\n/g,"<br>")+"</p></div>":"";
+  /* Story */
+  const postHtml=po=>{const ms=(po.m||[]).filter(id=>byId[id]),ch=chs.find(c=>c.id===po.ch);
+    return '<article class="post'+(po.pin?" pin":"")+'" data-ch="'+esc(po.ch||"")+'"><div class="pmeta"><span>'+esc(dShort(po.t))+"</span>"+(po.pin?'<span class="pt">Pinned</span>':"")+(ch?'<span class="pt c">'+esc(ch.name)+"</span>":"")+"</div>"+(po.txt?"<p>"+esc(po.txt).replace(/\n/g,"<br>")+"</p>":"")+(ms.length?'<div class="pm pm'+Math.min(ms.length,4)+'">'+ms.slice(0,4).map((id,i)=>'<button type="button" data-p="'+idx[id]+'" aria-label="Open photo '+(i+1)+' of '+ms.length+'"><img data-id="'+esc(id)+'" alt="'+esc(byId[id].cap||"Production photo")+'">'+(i===3&&ms.length>4?'<span class="more">+'+(ms.length-4)+"</span>":"")+"</button>").join("")+"</div>":"")+"</article>"};
+  if(posts.length){
+    h+='<section class="story" aria-label="Our story"><h2 class="st">Our story</h2>'+(chs.length?'<div class="chs" role="group" aria-label="Chapters"><button type="button" class="ch" data-c="" aria-pressed="true">All</button>'+chs.map(c=>'<button type="button" class="ch" data-c="'+esc(c.id)+'" aria-pressed="false">'+esc(c.name)+"</button>").join("")+"</div>":"")+'<div id="posts">'+posts.map(postHtml).join("")+"</div></section>";
+  }else if(seq.length){
+    h+='<section class="card"><h2>Photos</h2><div class="grid">'+seq.map((p,i)=>'<button data-p="'+i+'" aria-label="Open photo '+(i+1)+'"><img data-id="'+esc(p.id)+'" alt=""></button>').join("")+"</div></section>";
+  }
+  /* pages published before the story update still carry the old updates list */
+  if((d.updates||[]).length&&!posts.length)h+='<section class="card"><h2>Our story</h2><ul class="tl">'+d.updates.map(u=>"<li><small>"+esc(dShort(u.t))+"</small>"+esc(u.txt).replace(/\n/g,"<br>")+"</li>").join("")+"</ul></section>";
   /* Plan */
   if(d.plan){const P=d.plan,pr=P.proposal||{};let b="";
     if(pr.title)b+='<h3 class="sh" style="margin-top:0">'+esc(pr.title)+"</h3>"+kv("The need",pr.need)+kv("What we will make, do or provide",pr.make)+kv("Who benefits",pr.who)+kv("How we will know it worked",pr.success)+(pr.due?'<p class="tg2">Target date: '+esc(fd(pr.due+"T12:00"))+"</p>":"");
@@ -134,9 +158,6 @@ function render(d){
     if((P.risks||[]).length)b+='<h3 class="sh">Staying safe</h3><ul class="pl">'+P.risks.map(r=>"<li><b>"+esc(r.risk)+"</b>"+(r.manage?'<br><span class="mu">'+esc(r.manage)+"</span>":"")+"</li>").join("")+"</ul>";
     if(b)h+='<section class="card"><h2>Our plan</h2>'+b+"</section>";
   }
-  /* Work */
-  const goals=Array.isArray(d.goals)?d.goals:[];
-  if(goals.length||(d.doneTargets||[]).length){h+='<section class="card"><h2>Our goals</h2>'+goals.map(g=>'<div class="goal"><div class="t"><span>'+esc(g.t)+"</span><em>"+(g.done?"Done":Math.round(num(g.pct))+"%")+'</em></div><div class="meter"><i style="width:'+(g.done?100:Math.max(0,Math.min(100,num(g.pct))))+'%"></i></div>'+((g.targets||[]).length?'<ul class="tgt">'+g.targets.map(t=>'<li class="'+(t.done?"ok":"")+'">'+(t.done?"\u2713 ":"\u25cb ")+esc(t.t)+"</li>").join("")+"</ul>":"")+"</div>").join("")+((d.doneTargets||[]).length?'<h3 class="sh">Recently finished</h3><ul class="done">'+d.doneTargets.map(t=>"<li>"+esc(t)+"</li>").join("")+"</ul>":"")+"</section>"}
   /* Money */
   if(d.money){h+=moneyBlock(d.money);
     const sp=(d.money.spend||[]).filter(x=>x&&num(x.v)>0),mx=Math.max(1,...sp.map(x=>num(x.v)));
@@ -144,8 +165,6 @@ function render(d){
     const pl=(d.money.planned||[]).filter(x=>x&&x.item);
     if(pl.length)h+='<section class="card"><h2>Planned costs</h2><div class="bars">'+pl.map(x=>'<div class="r" style="grid-template-columns:1fr auto"><span class="n">'+esc(x.item)+"</span><b>"+rands(x.total)+"</b></div>").join("")+"</div></section>";
   }
-  /* Story */
-  if((d.updates||[]).length)h+='<section class="card"><h2>Our story</h2><ul class="tl">'+d.updates.map(u=>"<li><small>"+esc(dShort(u.t))+"</small>"+esc(u.txt).replace(/\n/g,"<br>")+"</li>").join("")+"</ul></section>";
   /* Wrap-up */
   const L=d.learned;
   if(L){let b="";
@@ -153,16 +172,20 @@ function render(d){
     if((L.refl||[]).length)b+='<h3 class="sh">What each of us learned</h3>'+L.refl.map(r=>'<blockquote><small>'+esc(r.who)+"</small>"+[r.contrib,r.skill?"Skill: "+r.skill:"",r.challenge?"Challenge: "+r.challenge:""].filter(Boolean).map(x=>esc(x)).join("<br>")+"</blockquote>").join("");
     if(b)h+='<section class="card"><h2>Wrap-up</h2>'+b+"</section>";
   }
-  h+="<footer>Made by the production team"+(d.updated?" · Updated "+esc(new Date(d.updated).toLocaleDateString("en-ZA",{day:"numeric",month:"long",year:"numeric"})):"")+"<br>Questions about this page? Please contact the school.</footer>";
+  h+="<footer>Made by the production team"+(d.updated?" · Updated "+esc(fd(d.updated)):"")+"<br>Questions about this page? Please contact the school.</footer>";
   app.innerHTML=h;
   const pav=$("#pav");if(pav)pav.append(cleanIcon(d.icon));
-  const c=$("#cmps");if(c){const r=c.querySelector("input"),set=()=>c.style.setProperty("--x",r.value+"%");r.addEventListener("input",set);set()}
-  /* lightbox */
-  let cur=0;const lb=$("#lb"),show=async i=>{cur=(i+photos.length)%photos.length;const p=photos[cur],u=await loadImg(p.id);$("#lb-i").src=u||"";$("#lb-i").alt=p.cap||"Production photo";$("#lb-c").textContent=p.cap||"";lb.hidden=false;$("#lb-x").focus()};
-  app.querySelectorAll(".grid button").forEach(b=>b.onclick=()=>show(+b.dataset.i));
-  $("#lb-x").onclick=()=>{lb.hidden=true};$("#lb-p").onclick=()=>show(cur-1);$("#lb-n").onclick=()=>show(cur+1);
-  lb.onclick=e=>{if(e.target===lb)lb.hidden=true};
-  document.onkeydown=e=>{if(lb.hidden)return;if(e.key==="Escape")lb.hidden=true;else if(e.key==="ArrowLeft")show(cur-1);else if(e.key==="ArrowRight")show(cur+1)};
+  /* chapters filter the story */
+  app.querySelectorAll(".ch").forEach(b=>b.onclick=()=>{app.querySelectorAll(".ch").forEach(x=>x.setAttribute("aria-pressed",String(x===b)));const c=b.dataset.c;app.querySelectorAll("#posts .post").forEach(a=>{a.hidden=!!c&&a.dataset.ch!==c})});
+  /* lightbox and slideshow */
+  let cur=0,timer=0;const lb=$("#lb"),stop=()=>{if(timer){clearInterval(timer);timer=0}},
+    show=async i=>{if(!seq.length)return;cur=(i+seq.length)%seq.length;const p=seq[cur],u=await loadImg(p.id);$("#lb-i").src=u||"";$("#lb-i").alt=p.cap||"Production photo";$("#lb-c").textContent=p.cap||"";lb.hidden=false},
+    close=()=>{stop();lb.hidden=true};
+  app.querySelectorAll("[data-p]").forEach(b=>b.onclick=()=>{stop();show(+b.dataset.p);$("#lb-x").focus()});
+  const pl=$("#play");if(pl)pl.onclick=()=>{stop();show(0);$("#lb-x").focus();timer=setInterval(()=>show(cur+1),4500)};
+  $("#lb-x").onclick=close;$("#lb-p").onclick=()=>{stop();show(cur-1)};$("#lb-n").onclick=()=>{stop();show(cur+1)};
+  lb.onclick=e=>{if(e.target===lb)close()};
+  document.onkeydown=e=>{if(lb.hidden)return;if(e.key==="Escape")close();else if(e.key==="ArrowLeft"){stop();show(cur-1)}else if(e.key==="ArrowRight"){stop();show(cur+1)}};
   fillImgs(app);
 }
 window.addEventListener("hashchange",()=>location.reload());
