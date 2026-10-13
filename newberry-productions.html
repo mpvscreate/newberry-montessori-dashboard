@@ -666,6 +666,16 @@ select.sel{width:auto;min-height:44px;padding:0 12px;border-radius:14px}
 .phero{position:relative;overflow:hidden}.ph-cover{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .phero.hascover::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,rgba(0,0,0,.28),rgba(0,0,0,.72))}
 .phero>*:not(.ph-cover){position:relative;z-index:2}
+/* v6.1.0: home and overview from the story */
+.ptile{overflow:hidden}
+.tcov{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;border-radius:inherit}
+.ptile.hascov::after{content:"";position:absolute;inset:0;z-index:1;border-radius:inherit;background:linear-gradient(180deg,rgba(0,0,0,.12) 0%,rgba(0,0,0,.76) 100%);pointer-events:none}
+.ptile.hascov .pi{position:relative;z-index:2}
+.ptile.hascov .pi b,.ptile.hascov .pq{color:#fff}.ptile.hascov .pq{opacity:.9}
+.pbadge.q{min-width:0;width:12px;height:12px;padding:0;top:10px;right:10px;background:var(--amber,#e0a020);font-size:0}
+.tile.quiet .big{color:var(--amber)}
+.athumb{width:56px;height:56px;border-radius:12px;object-fit:cover;flex:none;background:var(--line)}
+.k-sub{font-size:clamp(.8rem,1.2vw,1rem);opacity:.75;margin-top:4px}
 </style>
 </head>
 <body>
@@ -1158,17 +1168,13 @@ function lastActivity(p){
   let t=0;
   p.log.forEach(l=>t=Math.max(t,l.t));
   S.media.forEach(m=>{if(m.pid===p.id&&!m.del)t=Math.max(t,m.t)});
-  p.goals.forEach(g=>{t=Math.max(t,idT(g.id),g.doneAt||0);g.comments.forEach(c=>t=Math.max(t,c.t));(g.targets||[]).forEach(x=>t=Math.max(t,x.doneAt||0,idT(x.id)))});
   return t;
 }
 function todayData(){
-  const t0=todayStr(),in7=new Date(Date.now()+7*864e5).toISOString().slice(0,10),late=[],soon=[],quiet=[];
-  prods().forEach(p=>{
-    p.goals.forEach(g=>{if(g.done||!g.due)return;if(g.due<t0)late.push({p,g});else if(g.due<=in7)soon.push({p,g})});
-    if(p.goals.some(g=>!g.done)){const last=lastActivity(p);if(last&&Date.now()-last>7*864e5)quiet.push({p,last})}
-  });
+  const late=[],soon=[],quiet=[];
+  prods().forEach(p=>{const last=lastActivity(p);if(last&&Date.now()-last>7*864e5)quiet.push({p,last})});
   const dow=new Date().getDay(),recap=(dow===5||dow===6||dow===0)&&recapSeen()<weekStart(Date.now());
-  return{late,soon,quiet,recap,any:!!(late.length||soon.length||quiet.length||recap)};
+  return{late,soon,quiet,recap,any:!!(quiet.length||recap)};
 }
 function todayStrip(){
   const d=todayData();if(!d.any)return"";
@@ -1177,7 +1183,7 @@ function todayStrip(){
   if(d.soon.length)chips.push(`<span class="tchip soon">${ic("clock","sm")}${d.soon.length} due this week</span>`);
   if(d.quiet.length)chips.push(`<span class="tchip quiet">${ic("moon","sm")}${d.quiet.length} quiet</span>`);
   if(d.recap)chips.push(`<span class="tchip recap">${ic("trophy","sm")}Recap ready</span>`);
-  return `<button class="tstrip" id="today" aria-label="Today: ${d.late.length} overdue, ${d.soon.length} due this week, ${d.quiet.length} quiet${d.recap?", weekly recap ready":""}. Open">${chips.join("")}<span class="tgo" aria-hidden="true">${ic("chev","sm")}</span></button>`;
+  return `<button class="tstrip" id="today" aria-label="Today: ${d.quiet.length} quiet${d.recap?", weekly recap ready":""}. Open">${chips.join("")}<span class="tgo" aria-hidden="true">${ic("chev","sm")}</span></button>`;
 }
 function todaySheet(){
   const d=todayData();
@@ -1188,7 +1194,7 @@ function todaySheet(){
     ${d.soon.length?`<h3 class="sub-h">Due this week</h3>${d.soon.map(x=>row(x,"due "+fd(x.g.due))).join("")}`:""}
     ${d.quiet.length?`<h3 class="sub-h">Gone quiet</h3><p class="small muted" style="margin:0 0 6px">No updates for over a week.</p>${d.quiet.map(x=>row(x,"last update "+dayLabel(x.last).toLowerCase())).join("")}`:""}
     ${d.any?"":`<div class="empty"><h3>All caught up</h3>Nothing overdue or quiet right now.</div>`}`,(dd,close)=>{
-    dd.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{close();tab="goals";nav("p/"+b.dataset.go)});
+    dd.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{close();tab="story";nav("p/"+b.dataset.go)});
     const dg=dd.querySelector("#t-dg");if(dg)dg.onclick=()=>{close();setTimeout(digestSheet,150)};
     const r=dd.querySelector("#t-recap");if(r)r.onclick=()=>{try{localStorage.setItem(RECAPK,String(weekStart(Date.now())+1))}catch{}close();render();reportSheet(null)};
   });
@@ -1200,7 +1206,7 @@ function stopKiosk(){kioskTimers.forEach(clearInterval);kioskTimers=[];if(wakeLo
 function kioskHTML(){
   const ps=prods(),ph=S.media.filter(m=>!m.del&&m.type!=="video").sort((a,b)=>b.t-a.t).slice(0,14);
   return `<div class="kiosk"><div class="k-top"><img src="icons/productions-96.png" alt="" height="44"><div class="k-clock" id="k-clock"></div><span class="grow"></span><button class="x" id="k-x" aria-label="Exit classroom display">${ic("x")}</button></div>
-  <div class="k-main"><div class="k-grid">${ps.map(p=>{const q=prodPct(p);return`<div class="k-card" style="--pc:${p.color}"><span class="pav">${ic(p.icon)}</span><div class="grow"><b>${esc(p.name)}</b><div class="k-bar"><i style="width:${q}%"></i></div></div><span class="k-pct">${q}%</span></div>`}).join("")}</div>
+  <div class="k-main"><div class="k-grid">${ps.map(p=>{const la=lastActivity(p);return`<div class="k-card" style="--pc:${p.color}"><span class="pav">${ic(p.icon)}</span><div class="grow"><b>${esc(p.name)}</b><div class="k-sub">${p.log.length} post${p.log.length===1?"":"s"} · ${agoShort(la)}</div></div></div>`}).join("")}</div>
   <div class="k-photo" id="k-pane">${ph.length?`<img id="k-img" alt=""><div class="k-cap" id="k-cap"></div>`:`<div class="k-empty">${ic("image","xl")}<p>Photos from your productions will appear here.</p></div>`}<div class="k-panel" id="k-panel" hidden></div></div></div></div>`;
 }
 function kioskPanel(kind){
@@ -1230,7 +1236,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.0.0";
+const APP_VER="6.1.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1729,14 +1735,13 @@ function searchIndex(){
   S.prods.filter(p=>!p.del).forEach(p=>{
     const add=(k,txt,tb,sub)=>{if(txt&&String(txt).trim())r.push({p,k,txt:String(txt).trim(),tb,sub:sub||""})};
     add("Production",p.name,"story");add("About",p.desc,"story");
-    (p.log||[]).forEach(l=>add("Update",l.text,"story",fmt(l.t)));
-    p.goals.forEach(g=>{add("Goal",g.title,"work",g.done?"Done":"Open");(g.targets||[]).forEach(t=>add("Target",t.title,"work",g.title));(g.comments||[]).forEach(c=>add("Comment",c.text,"work",g.title))});
-    (p.members||[]).forEach(m=>add("Member",m,"plan"));(p.ideas||[]).forEach(i=>add("Idea",i.idea,"plan"));(p.risks||[]).forEach(x=>add("Risk",x.risk,"plan"));
-    Object.values(p.txt||{}).forEach(v=>add("Note",v,"plan"));
-    (p.exp||[]).forEach(e=>add("Expense",(e.item||"")+(e.amount?" "+rands(toNum(e.amount)):""),"money",e.date||""));
-    (p.weeks||[]).forEach(w=>add("Weekly record",(w.label||"")+" "+(w.problem||""),"wrap",w.date||""));
+    (p.log||[]).forEach(l=>add("Post",l.text,"story",fmt(l.t)));
+    (p.chapters||[]).forEach(c=>add("Chapter",c.name,"story"));
+    (p.members||[]).forEach(m=>add("Member",m,"plan"));(p.risks||[]).forEach(x=>add("Risk",x.risk,"plan"));
+    add("Proposal",p.prop&&p.prop.title,"plan");
+    if(p.useMoney)(p.exp||[]).forEach(e=>add("Expense",(e.item||"")+(e.amount?" "+rands(toNum(e.amount)):""),"money",e.date||""));
   });
-  S.media.filter(m=>!m.del&&m.cap).forEach(m=>{const p=P(m.pid);if(p)r.push({p,k:m.type==="video"?"Video":"Photo",txt:m.cap,tb:"media",sub:fmt(m.t)})});
+  S.media.filter(m=>!m.del&&m.cap).forEach(m=>{const p=P(m.pid);if(p)r.push({p,k:m.type==="video"?"Video":"Photo",txt:m.cap,tb:"story",sub:fmt(m.t)})});
   return r;
 }
 function searchSheet(){
@@ -2000,7 +2005,6 @@ function render(){
 }
 
 /* overview */
-const feedItems=()=>prods().flatMap(p=>[...p.log.map(l=>({p,t:l.t,txt:l.text,k:"Log"})),...p.goals.flatMap(g=>g.comments.map(c=>({p,t:c.t,txt:g.title+": "+c.text,k:"Comment"})))]).sort((a,b)=>b.t-a.t);
 const card=p=>{const q=prodPct(p),o=p.goals.filter(g=>!g.done).length;
   return `<button class="hcard" style="--pc:${p.color}" data-open="${p.id}"><div class="avatar">${ic(p.icon)}</div><b>${esc(p.name)}</b>
   <div class="meter" role="progressbar" aria-valuenow="${q}" aria-valuemin="0" aria-valuemax="100" aria-label="${esc(p.name)} progress"><i style="width:${q}%"></i></div>
@@ -2008,38 +2012,36 @@ const card=p=>{const q=prodPct(p),o=p.goals.filter(g=>!g.done).length;
 const nextTarget=p=>{for(const g of p.goals){if(g.done)continue;const t=(g.targets||[]).find(x=>!x.done);if(t)return t.title}return""};
 const totals=()=>{const ps=prods(),all=ps.flatMap(p=>p.goals),open=all.filter(g=>!g.done).length;return{ps,all,open,pct:ps.length?Math.round(ps.reduce((a,p)=>a+prodPct(p),0)/ps.length):0,photos:S.media.filter(m=>!m.del).length}};
 /* first tab: every production on one screen */
+const coverOf=p=>{const ms=mediaOf(p).filter(m=>m.type!=="video");return(p.cover&&ms.find(m=>m.id===p.cover))||ms[0]||null};
+const agoShort=t=>{if(!t)return"New";const d=Math.floor((Date.now()-t)/864e5);return d<1?"Today":d===1?"Yesterday":d+"d ago"};
 function homePage(){
-  const{ps,open,pct,photos}=totals();
+  const ps=prods();
   return `<h2 class="sr">Productions</h2>
-  ${todayStrip()}<div class="ptiles" style="--st:${todayData().any?56:0}px">${ps.map((p,ix)=>{const q=prodPct(p),lt=lateCount(p),nx=nextTarget(p),as=actState(p);return`<button class="ptile" style="--pc:${p.color};--i:${ix}" data-open="${p.id}" aria-label="${esc(p.name)}, ${q} percent complete${lt?", "+lt+" overdue":""}">${lt?`<span class="pbadge" aria-hidden="true">${lt}</span>`:q===100&&p.goals.length?`<span class="pbadge ok" aria-hidden="true">${ic("check","sm")}</span>`:""}<span class="pi"><span class="pav">${ic(p.icon)}</span><b>${esc(p.name)}</b><span class="pbar" aria-hidden="true"><i style="width:${q}%"></i></span><span class="pq">${q}%</span></span></button>`}).join("")}<button class="ptile padd" id="addp" aria-label="New production"><span class="pi"><span class="pav">${ic("plus")}</span><b>Add new</b></span></button></div>`;
+  ${todayStrip()}<div class="ptiles" style="--st:${todayData().any?56:0}px">${ps.map((p,ix)=>{const last=lastActivity(p),quiet=!!last&&Date.now()-last>7*864e5,cov=coverOf(p);return`<button class="ptile${cov?" hascov":""}" style="--pc:${p.color};--i:${ix}" data-open="${p.id}" aria-label="${esc(p.name)}, ${agoLabel(last).toLowerCase()}${quiet?", quiet for a while":""}">${cov?`<img class="tcov" data-mid="${cov.id}" alt="" loading="lazy">`:""}${quiet?`<span class="pbadge q" aria-hidden="true"></span>`:""}<span class="pi"><span class="pav">${ic(p.icon)}</span><b>${esc(p.name)}</b><span class="pq">${agoShort(last)}</span></span></button>`}).join("")}<button class="ptile padd" id="addp" aria-label="New production"><span class="pi"><span class="pav">${ic("plus")}</span><b>Add new</b></span></button></div>`;
 }
 /* second tab: the detail */
 let ovMore=false;
 function rankCard(ps){
-  const td=todayData(),quiet=new Map(td.quiet.map(x=>[x.p.id,x.last]));
-  const info=ps.map(p=>{const q=prodPct(p),o=p.goals.filter(g=>!g.done).length,d=p.goals.filter(g=>g.done).length,lt=lateCount(p);let grp,meta;
-    if(!p.goals.length){grp="new";meta="No goals yet"}
-    else if(lt||quiet.has(p.id)){grp="att";meta=[lt?lt+" overdue":"",quiet.has(p.id)?"no update for "+Math.max(7,Math.floor((Date.now()-quiet.get(p.id))/864e5))+" days":""].filter(Boolean).join(" · ")}
-    else if(o===0){grp="done";meta="All "+d+" goal"+(d===1?"":"s")+" done"}
-    else{grp="ok";meta=o+" open · "+d+" done"}
-    return{p,q,grp,meta}});
-  const avg=info.length?Math.round(info.reduce((x,r)=>x+r.q,0)/info.length):0;
-  const row=r=>`<li><button class="prow" style="--pc:${r.p.color}" data-open="${r.p.id}" aria-label="Open ${esc(r.p.name)}, ${r.q} percent"><span class="avatar" style="color:${r.p.color}">${ic(r.p.icon)}</span><span class="grow"><span class="rk-t"><b>${esc(r.p.name)}</b><b class="amt">${r.q}%</b></span><span class="rk-track"><i style="width:${r.q}%;min-width:${r.q?4:0}px;background:${r.p.color}"></i></span><span class="small muted">${esc(r.meta)}</span></span></button></li>`;
-  const secs=[["att","Needs attention"],["ok","On track"],["done","Finished"]].map(([k,t])=>{const rs=info.filter(r=>r.grp===k).sort((x,y)=>x.q-y.q);return rs.length?`<h3 class="st-h ${k}">${t} <span class="muted">(${rs.length})</span></h3><ul class="list rk">${rs.map(row).join("")}</ul>`:""}).join("");
+  const wk=Date.now()-7*864e5;
+  const info=ps.map(p=>{const last=lastActivity(p);return{p,last,n:p.log.length,ph:mediaOf(p).length,grp:!last?"new":last<wk?"att":"ok"}});
+  const row=r=>`<li><button class="prow" style="--pc:${r.p.color}" data-open="${r.p.id}" aria-label="Open ${esc(r.p.name)}, ${esc(agoLabel(r.last).toLowerCase())}"><span class="avatar" style="color:${r.p.color}">${ic(r.p.icon)}</span><span class="grow"><span class="rk-t"><b>${esc(r.p.name)}</b><span class="small muted">${agoShort(r.last)}</span></span><span class="small muted">${r.n} post${r.n===1?"":"s"} · ${r.ph} photo${r.ph===1?"":"s"}</span></span></button></li>`;
+  const secs=[["ok","Active this week"],["att","Quiet for a week or more"]].map(([k,t])=>{const rs=info.filter(r=>r.grp===k).sort((a,b)=>b.last-a.last);return rs.length?`<h3 class="st-h ${k==="att"?"att":""}">${t} <span class="muted">(${rs.length})</span></h3><ul class="list rk">${rs.map(row).join("")}</ul>`:""}).join("");
   const nw=info.filter(r=>r.grp==="new");
-  return `<div class="card rank"><div class="rk-h"><h2>Where things stand</h2><span class="small muted">Average ${avg}%</span></div>${secs}${nw.length?`<h3 class="st-h new">Not started <span class="muted">(${nw.length})</span></h3><div class="chips">${nw.map(r=>`<button class="chip" data-open="${r.p.id}" type="button">${ic(r.p.icon,"sm")}${esc(r.p.name)}</button>`).join("")}</div>`:""}</div>`;
+  return `<div class="card rank"><div class="rk-h"><h2>Teams</h2></div>${secs}${nw.length?`<h3 class="st-h new">No story yet <span class="muted">(${nw.length})</span></h3><div class="chips">${nw.map(r=>`<button class="chip" data-open="${r.p.id}" type="button">${ic(r.p.icon,"sm")}${esc(r.p.name)}</button>`).join("")}</div>`:""}</div>`;
 }
 const actGroups=arr=>{let day="",h="";arr.forEach(x=>{const l=dayLabel(x.t);if(l!==day){if(day)h+="</ul>";h+=`<h3 class="sday" style="margin-top:12px">${esc(l)}</h3><ul class="list">`;day=l}h+=actRow(x)});return h+(day?"</ul>":"")};
 function overviewPage(){
-  const{ps,all,open,pct}=totals(),allF=feedItems(),f=allF.slice(0,ovMore?60:8),td=todayData(),late=td.late.length,soon=td.soon.length;
+  const ps=prods(),wk=Date.now()-7*864e5,allF=feedItems(),f=allF.slice(0,ovMore?60:8);
+  const posts=allF.filter(x=>x.t>=wk).length,photos=S.media.filter(m=>!m.del&&m.t>=wk).length,quiet=todayData().quiet.length,active=ps.filter(p=>lastActivity(p)>=wk).length;
   return `<div class="page-h"><h2>Overview</h2><button class="btn small" id="shr-btn" aria-label="Share">${ic("share")}Share</button></div>
-  <div class="bento"><div class="tile hero s2"><div class="lbl">${ic("sparkle")}Overall progress</div><div class="big">${pct}%</div><div class="sub">${ps.length} productions</div><div class="meter"><i style="width:${pct}%"></i></div></div>
-  <div class="tile green"><div class="lbl">${ic("target")}Open goals</div><div class="big">${open}</div><div class="sub">${all.length-open} done</div></div>
-  <button class="tile ${late?"late":"sky"}" id="ov-late" type="button" aria-label="Overdue: ${late}, due this week: ${soon}. Open the Today list"><div class="lbl">${ic("alert")}Overdue</div><div class="big">${late}</div><div class="sub">${soon} due this week</div></button></div>
+  <div class="bento"><div class="tile hero s2"><div class="lbl">${ic("sparkle")}This week</div><div class="big">${posts}</div><div class="sub">post${posts===1?"":"s"} from ${active} of ${ps.length} teams</div></div>
+  <div class="tile green"><div class="lbl">${ic("image")}Photos and videos</div><div class="big">${photos}</div><div class="sub">added this week</div></div>
+  <button class="tile ${quiet?"quiet":"sky"}" id="ov-late" type="button" aria-label="Quiet teams: ${quiet}. Open the Today list"><div class="lbl">${ic("moon")}Quiet teams</div><div class="big">${quiet}</div><div class="sub">no update for 7 days</div></button></div>
   ${rankCard(ps)}
-  <div class="card"><h2>Recent activity</h2>${f.length?`${actGroups(f)}${allF.length>8?`<button class="linkbtn" id="ov-more" type="button" style="margin-top:6px">${ovMore?"Show less":"Show more"}</button>`:""}`:`<div class="empty">${ic("pulse","xl")}<h3>Nothing yet</h3>Open a production and add a goal or a log note.</div>`}</div>`;
+  <div class="card"><h2>Latest from every team</h2>${f.length?`${actGroups(f)}${allF.length>8?`<button class="linkbtn" id="ov-more" type="button" style="margin-top:6px">${ovMore?"Show less":"Show more"}</button>`:""}`:`<div class="empty">${ic("pulse","xl")}<h3>Nothing yet</h3>Open a production and write the first post.</div>`}</div>`;
 }
-const actRow=f=>`<li><div class="avatar" style="color:${f.p.color}">${ic(f.p.icon)}</div><div class="grow"><b>${esc(f.p.name)}</b> <span class="pill type">${f.k}</span><div>${esc(f.txt)}</div><div class="small muted">${fmt(f.t)}</div></div></li>`;
+const feedItems=()=>prods().flatMap(p=>{const ids=new Set(p.log.map(l=>l.id));return[...p.log.map(l=>({p,t:l.t,txt:l.text||((l.m||[]).length?"Added "+((l.m||[]).length===1?"a photo":(l.m||[]).length+" photos"):""),k:"Post",l})),...mediaOf(p).filter(m=>m.tag!=="receipt"&&m.tag!=="evidence"&&(!m.post||!ids.has(m.post))).map(m=>({p,t:m.t,txt:m.cap||(m.type==="video"?"Added a video":"Added a photo"),k:m.type==="video"?"Video":"Photo",m}))]}).sort((a,b)=>b.t-a.t);
+const actRow=f=>{const m=f.m||(f.l&&postMedia(f.l).find(x=>x.type!=="video"));return `<li><div class="avatar" style="color:${f.p.color}">${ic(f.p.icon)}</div><div class="grow"><b>${esc(f.p.name)}</b> <span class="pill type">${f.k}</span><div>${esc(f.txt)}</div><div class="small muted">${fmt(f.t)}</div></div>${m&&m.type!=="video"?`<img class="athumb" data-mid="${m.id}" alt="">`:""}</li>`};
 const fab=()=>`<div class="fab-wrap"><button class="fab" id="addp" aria-label="New production">${ic("plus")}<span>New production</span></button></div>`;
 function wireHome(){
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{tab="story";nav("p/"+b.dataset.open)});
