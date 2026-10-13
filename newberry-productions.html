@@ -726,6 +726,14 @@ select.sel{width:auto;min-height:44px;padding:0 12px;border-radius:14px}
 .cph.p-tl::after,.cph.p-tr::after,.cph.p-bl::after,.cph.p-br::after{content:"";position:absolute;width:22px;height:22px;border:4px solid #ffd60a}
 .cph.p-tl::after{left:18px;top:18px;border-right:0;border-bottom:0}.cph.p-tr::after{right:18px;top:18px;border-left:0;border-bottom:0}.cph.p-bl::after{left:18px;bottom:18px;border-right:0;border-top:0}.cph.p-br::after{right:18px;bottom:18px;border-left:0;border-top:0}
 .ed-wrap.cropping .ed-play,.ed-wrap.cropping .cmp-btn,.ed-wrap.cropping .ed-time{display:none!important}
+/* v6.6.0: compact composer */
+.composer.mini{display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:10px}
+.cmini{flex:1;min-width:0;display:flex;align-items:center;gap:12px;border:0;background:color-mix(in srgb,var(--ink) 7%,transparent);border-radius:99px;padding:6px 16px 6px 6px;min-height:52px;cursor:pointer;color:var(--muted);font:inherit;text-align:left;box-shadow:none}
+.cmini .pavs{flex:none}.cmt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:1rem}.cmt.dr{color:var(--ink)}
+.composer.mini .cam{flex:none;width:52px;height:52px;color:var(--green)}
+.composer{position:relative}.cmin{position:absolute;top:8px;right:8px;z-index:2}
+/* larger tap areas for small icon buttons */
+.x.sm,.rxb,.attx{position:relative}.x.sm::after,.attx::after{content:"";position:absolute;inset:-6px}
 </style>
 </head>
 <body>
@@ -963,7 +971,7 @@ function storyCard(x){
 const nl2br=t=>esc(t).replace(/\n/g,"<br>");
 const agoLabel=t=>{if(!t)return"No updates yet";const d=Math.floor((Date.now()-t)/864e5);return d<1?"Updated today":d===1?"Updated yesterday":"Updated "+d+" days ago"};
 const postMedia=l=>(l.m||[]).map(id=>S.media.find(x=>x.id===id)).filter(m=>m&&!m.del);
-let storyF={pid:"",ch:""},pendFiles=[];
+let storyF={pid:"",ch:""},pendFiles=[],composeOpen=false;
 const clearPend=()=>{pendFiles.forEach(x=>{try{URL.revokeObjectURL(x.url)}catch{}});pendFiles=[]};
 const PROMPTS=["What was the hardest part today?","Show us something you made.","What did you learn this week?","Who helped you today, and how?","What are you proud of?","What went wrong, and how did you fix it?","What will you do next?","Describe your work in three words.","What surprised you?","What would you tell a new team member?","Show us your workspace.","What did your team decide today?"];
 const todayPrompt=()=>PROMPTS[Math.floor(Date.now()/864e5)%PROMPTS.length];
@@ -990,7 +998,7 @@ async function makePost(p,text,files,chId,share){
 }
 function attHTML(list,rm){return list.map((x,i)=>`<div class="attc">${x.vid?`<video src="${x.url}" muted playsinline></video><span class="vb">${ic("play","sm")}</span>`:`<img src="${x.url}" alt="">`}<button type="button" class="attx" data-rm="${i}" aria-label="Remove ${x.vid?"video":"photo"} ${i+1}">${ic("x","sm")}</button></div>`).join("")}
 function storyTab(p){
-  if(storyF.pid!==p.id){storyF={pid:p.id,ch:""};clearPend()}
+  if(storyF.pid!==p.id){storyF={pid:p.id,ch:""};clearPend();composeOpen=false}
   const chs=p.chapters||[];if(storyF.ch&&!chs.some(c=>c.id===storyF.ch))storyF.ch="";
   const items=storyItems(p),pics=mediaOf(p).filter(m=>m.type!=="video");
   const vis=items.filter(x=>!storyF.ch||(x.k==="post"&&x.l.ch===storyF.ch));
@@ -998,15 +1006,17 @@ function storyTab(p){
   let html="",day="";
   if(pinned.length)html+=`<h3 class="sday" style="margin-top:6px">Pinned</h3>`+pinned.map(x=>postCard(p,x.l)).join("");
   rest.forEach(x=>{const l=dayLabel(x.t);if(l!==day){html+=`<h3 class="sday">${esc(l)}</h3>`;day=l}html+=x.k==="post"?postCard(p,x.l):storyCard(x)});
-  const bar=(chs.length||items.length)?`<div class="chbar" role="group" aria-label="Chapters"><button type="button" class="chip" data-chf="" aria-pressed="${!storyF.ch}">All</button>${chs.map(c=>`<button type="button" class="chip chn" data-chf="${c.id}" title="${esc(c.name)}" aria-pressed="${storyF.ch===c.id}"><span>${esc(c.name)}</span></button>${storyF.ch===c.id?`<button class="chip chedit" id="ch-edit" type="button" aria-label="Rename or delete chapter ${esc(c.name)}">${ic("pencil","sm")}</button>`:""}`).join("")}<button type="button" class="chip add" id="ch-new" aria-label="New chapter">${ic("plus","sm")}Chapter</button></div>`:"";
-  return `<div class="card composer"><div class="row" style="align-items:flex-start"><textarea class="t ta" rows="2" id="sc-t" placeholder="What happened today?" aria-label="Write a post">${esc(draftGet(p.id))}</textarea>${micBtn()}</div>${ideaChip()}
+  const bar=(chs.length||items.length)?`<div class="chbar" role="group" aria-label="Chapters"><button type="button" class="chip" data-chf="" aria-pressed="${!storyF.ch}">All</button>${chs.map(c=>`<button type="button" class="chip chn" data-chf="${c.id}" title="${esc(c.name)}" aria-pressed="${storyF.ch===c.id}"><span>${esc(c.name)}</span></button>${storyF.ch===c.id?`<button class="chip chedit" id="ch-edit" type="button" aria-label="Rename or delete chapter ${esc(c.name)}">${ic("pencil","sm")}</button>`:""}`).join("")}<button type="button" class="chip add" id="ch-new" aria-label="New chapter">${ic("plus","sm")}Chapter</button>${mediaOf(p).length?`<button type="button" class="chip add" id="sc-gal">${ic("image","sm")}All media (${mediaOf(p).length})</button>`:""}</div>`:"";
+  const isOpen2=composeOpen||pendFiles.length>0,dr=draftGet(p.id);
+  const mini=`<div class="card composer mini"><button class="cmini" id="sc-open" type="button" aria-label="${dr?"Continue your draft":"Write a post"}"><span class="pavs" aria-hidden="true">${esc(initials(who()||"me"))}</span><span class="cmt${dr?" dr":""}">${dr?"Draft: "+esc(dr.slice(0,60)):"What happened today?"}</span></button><button class="x cam" id="sc-cam" type="button" aria-label="Add a photo or video">${ic("camera")}</button><input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"></div>`;
+  const full=`<div class="card composer"><div class="row" style="align-items:flex-start"><textarea class="t ta" rows="3" id="sc-t" placeholder="What happened today?" aria-label="Write a post">${esc(draftGet(p.id))}</textarea>${micBtn()}</div>${ideaChip()}
     <div class="att" id="sc-att"></div>${shareSw(p,"sc-pub")}${offLine()}
-    ${chs.length?`<select class="t sel chsel" id="sc-ch" aria-label="Chapter"><option value="">No chapter</option>${chs.map(c=>`<option value="${c.id}"${storyF.ch===c.id?" selected":""}>${esc(c.name)}</option>`).join("")}</select>`:""}<div class="row between" style="margin-top:10px"><button class="btn small" id="sc-add" type="button">${ic("camera")}Photo or video</button><button class="btn primary" id="sc-post" type="button">${ic("send")}Post</button></div>
-    ${mediaOf(p).length?`<div style="margin-top:8px"><button class="linkbtn" id="sc-gal" type="button">${ic("image","sm")} All photos and videos (${mediaOf(p).length})</button></div>`:""}
-    <input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"></div>`+
+    ${chs.length?`<select class="t sel chsel" id="sc-ch" aria-label="Chapter"><option value="">No chapter</option>${chs.map(c=>`<option value="${c.id}"${storyF.ch===c.id?" selected":""}>${esc(c.name)}</option>`).join("")}</select>`:""}<div class="row between" style="margin-top:10px"><button class="btn small" id="sc-add" type="button">${ic("camera")}Photo or video</button><span class="row"><button class="btn small" id="sc-min" type="button">Cancel</button><button class="btn primary" id="sc-post" type="button">${ic("send")}Post</button></span></div>
+    <input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"></div>`;
+  return (isOpen2?full:mini)+
   bar+
-  (pics.length>1&&!storyF.ch?`${beforeNow(p,pics)}`:"")+
-  (vis.length?`<div class="story">${html}</div>`:`<div class="empty">${ic("pulse","xl")}<h3>${storyF.ch?"Nothing in this chapter yet":"Your story starts here"}</h3><p style="margin:0 0 14px">${storyF.ch?"Pick this chapter when you write a post.":"Write what happened and add photos or videos. Every post becomes part of your story, ready to share."}</p>${storyF.ch?"":`<button class="btn primary" id="e-first" type="button">${ic("pencil")}Write your first post</button>`}</div>`);
+  (vis.length?`<div class="story">${html}</div>`:`<div class="empty">${ic("pulse","xl")}<h3>${storyF.ch?"Nothing in this chapter yet":"Your story starts here"}</h3><p style="margin:0 0 14px">${storyF.ch?"Pick this chapter when you write a post.":"Write what happened and add photos or videos. Every post becomes part of your story, ready to share."}</p>${storyF.ch?"":`<button class="btn primary" id="e-first" type="button">${ic("pencil")}Write your first post</button>`}</div>`)+
+  (vis.length&&pics.length>1&&!storyF.ch?beforeNow(p,pics):"");
 }
 function chapterSheet(p,c){
   const isNew=!c;
@@ -1072,20 +1082,25 @@ function postEdit(p,l){
 }
 function wireStory(p){
   wireMics(document);
-  const att=$("#sc-att"),drawAtt=()=>{att.innerHTML=attHTML(pendFiles);att.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{const x=pendFiles.splice(+b.dataset.rm,1)[0];try{URL.revokeObjectURL(x.url)}catch{}drawAtt()})};
+  {const o=$("#sc-open");if(o)o.onclick=()=>{composeOpen=true;render();setTimeout(()=>{const t=$("#sc-t");if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length)}},60)}}
+  {const c=$("#sc-cam");if(c)c.onclick=()=>$("#pf").click()}
+  {const m=$("#sc-min");if(m)m.onclick=()=>{if(pendFiles.length){clearPend()}composeOpen=false;render()}}
+  const att=$("#sc-att"),drawAtt=()=>{if(!att)return;att.innerHTML=attHTML(pendFiles);att.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{const x=pendFiles.splice(+b.dataset.rm,1)[0];try{URL.revokeObjectURL(x.url)}catch{}drawAtt()})};
   drawAtt();
+  if($("#sc-t")){
   $("#sc-add").onclick=()=>$("#pf").click();
   $("#sc-t").addEventListener("input",()=>draftSet(p.id,$("#sc-t").value));
   {const i=document.querySelector("[data-idea]");if(i)i.onclick=()=>{const t=$("#sc-t");if(!t.value.trim())t.value=todayPrompt()+" ";draftSet(p.id,t.value);t.focus();t.setSelectionRange(t.value.length,t.value.length)}}
-  wirePub("sc-pub");{const e=$("#e-first");if(e)e.onclick=()=>$("#sc-t").focus()}
+  wirePub("sc-pub")}
+  {const e=$("#e-first");if(e)e.onclick=()=>{composeOpen=true;render();setTimeout(()=>{const t=$("#sc-t");if(t)t.focus()},60)}}
   document.querySelectorAll("[data-rx]").forEach(b=>b.onclick=()=>{const l=p.log.find(x=>x.id===b.dataset.rx);if(!l)return;const me=who()||"me",a=(l.rx||[]).slice(),k=a.indexOf(me);if(k>=0)a.splice(k,1);else a.push(me);l.rx=a;save(p);fb(k>=0?"tick":"done");render()});
   document.querySelectorAll("[data-nt]").forEach(b=>b.onclick=()=>{const l=p.log.find(x=>x.id===b.dataset.nt);if(l)noteSheet(p,l)});
-  $("#pf").onchange=e=>{[...e.target.files].forEach(f=>{if(pendFiles.length<12)pendFiles.push({file:f,url:URL.createObjectURL(f),vid:f.type.startsWith("video/")})});e.target.value="";drawAtt()};
+  $("#pf").onchange=e=>{[...e.target.files].forEach(f=>{if(pendFiles.length<12)pendFiles.push({file:f,url:URL.createObjectURL(f),vid:f.type.startsWith("video/")})});e.target.value="";if(!att){composeOpen=true;render();return}drawAtt()};
   const post=async()=>{const t=$("#sc-t").value.trim();if(!t&&!pendFiles.length){$("#sc-t").focus();return}if(listening)listening.stop();
     const b=$("#sc-post");b.disabled=true;const files=pendFiles.map(x=>x.file),chv=$("#sc-ch")?$("#sc-ch").value:storyF.ch;
-    const l=await makePost(p,t,files,chv,pubOn("sc-pub"));clearPend();if(l){draftSet(p.id,"");fb("add");toast(postedToast())}render()};
-  $("#sc-post").onclick=post;
-  $("#sc-t").onkeydown=e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();post()}};
+    const l=await makePost(p,t,files,chv,pubOn("sc-pub"));clearPend();composeOpen=false;if(l){draftSet(p.id,"");fb("add");toast(postedToast())}render()};
+  if($("#sc-post")){$("#sc-post").onclick=post;
+  $("#sc-t").onkeydown=e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();post()}}}
   {const gl=$("#sc-gal");if(gl)gl.onclick=()=>{tab="media";render()}}
   document.querySelectorAll("[data-chf]").forEach(b=>b.onclick=()=>{storyF.ch=b.dataset.chf;render()});
   {const n=$("#ch-new");if(n)n.onclick=()=>chapterSheet(p)}
@@ -1326,7 +1341,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.5.0";
+const APP_VER="6.6.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1466,7 +1481,7 @@ function planTab(p){
     ${txtCard(p,"perms","Permissions, training or supervision needed before starting","For example: training on how to use a jigsaw")}`;
   return setupCard(p)+carryCard(p)+
     acc(p,"team","users","Team and roles",`${p.members.length} member${p.members.length===1?"":"s"} · ${p.roles.length} role${p.roles.length===1?"":"s"}`,stp(p.members.length>0&&p.roles.length>0,p.members.length>0&&p.roles.length>0?"Done":"To do"),team)+
-    acc(p,"prop","book","Project proposal",statusLbl,stp(pr.status==="approved",statusLbl),prop)+
+    acc(p,"prop","book","Project proposal",pr.title?esc(pr.title):"Not written yet",stp(pr.status==="approved",statusLbl),prop)+
     acc(p,"safety","shield","Safety",`${p.risks.length} risk${p.risks.length===1?"":"s"} noted`,stp(!!(p.risks.length||p.txt.perms),p.risks.length||p.txt.perms?"Started":"To do"),safety);
 }
 
