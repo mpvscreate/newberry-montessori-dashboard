@@ -1316,7 +1316,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.4.1";
+const APP_VER="6.4.2";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -2493,6 +2493,7 @@ function shareMenu(p){
     rows.push(["chat","Weekly digest","A short summary to send on WhatsApp",digestSheet]);
   }else{
     rows.push(["play","Play slideshow","Photos and videos from "+p.name+", with captions",()=>openViewer(storyMediaList(p,{ch:storyF.pid===p.id?storyF.ch:""}),0,true)]);
+    rows.push(["image","Send photos to WhatsApp","Up to 20 photos from the story, sent as pictures",()=>sharePhotos(storyMediaList(p),p.name)]);
     if(canRecord())rows.push(["download","Save slideshow as a video","A video file to send or play on any screen",()=>slideshowVideo(storyMediaList(p).filter(x=>x.m.type!=="video"))]);
     rows.push(["share","Showcase page","A public page for families and the community",()=>showcaseSheet(p)]);
     if(p.showcase&&p.showcase.on)rows.push(["printer","Print poster","A page with a QR code to this showcase",()=>posterProd(p)]);
@@ -2621,6 +2622,15 @@ function cardSheet(p,l){
 }
 
 /* ---------- slideshow saved as a video ---------- */
+async function sharePhotos(items,title){
+  const list=items.filter(x=>x.m.type!=="video").slice(-20);
+  if(!list.length){toast("No photos to send.");return}
+  toast("Getting the photos ready…");
+  const files=[];
+  for(const it of list){try{const u=await loadMedia(it.m.id);if(!u)continue;const b=await (await fetch(u)).blob();files.push(new File([b],(title+"-"+(files.length+1)+".jpg").replace(/\s+/g,"-"),{type:b.type||"image/jpeg"}))}catch{}}
+  if(!files.length){toast("Couldn't read the photos.");return}
+  try{if(navigator.canShare&&navigator.canShare({files}))await navigator.share({files,title});else toast("Sharing isn't available here. Open the photos and save them instead.")}catch{}
+}
 async function slideshowVideo(items){
   if(!canRecord()){toast("This browser can't save videos. Try Chrome on a laptop or an Android phone.");return}
   if(!items.length){toast("No photos to put in a video.");return}
@@ -2634,7 +2644,7 @@ async function slideshowVideo(items){
     const imgs=[];for(const it of items){const u=await loadMedia(it.m.id);const im=u&&await loadImgEl(u);if(im)imgs.push({im,cap:it.cap||""})}
     if(!imgs.length)throw new Error("none");
     const title=items[0].p?items[0].p.name:"Our story";
-    const types=["video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm","video/mp4"],mime=types.find(t=>MediaRecorder.isTypeSupported(t))||"";
+    const types=["video/mp4;codecs=avc1.42E01E","video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"],mime=types.find(t=>MediaRecorder.isTypeSupported(t))||"";
     const stream=c.captureStream(30),rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:3500000}:undefined),chunks=[];
     rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
     const fin=new Promise(res=>rec.onstop=res);
@@ -2660,8 +2670,10 @@ async function slideshowVideo(items){
     rec.stop();await fin;stream.getTracks().forEach(t=>t.stop());
     if(cancel){done();toast("Cancelled.");return}
     const blob=new Blob(chunks,{type:mime||"video/webm"}),ext=(blob.type.includes("mp4")?"mp4":"webm"),url=URL.createObjectURL(blob),name=(title+" slideshow."+ext).replace(/\s+/g,"-");
-    root.innerHTML=`<div class="vwx-b"><h2>Your video is ready</h2><video src="${url}" controls playsinline style="width:100%;border-radius:16px;margin:10px 0;background:#000"></video><div class="row wr"><button class="btn primary grow" id="vx-sh" type="button">${ic("share")}Share</button><button class="btn" id="vx-sv" type="button">${ic("download")}Save</button><button class="btn" id="vx-x" type="button">Close</button></div></div>`;
+    const mp4=blob.type.includes("mp4");
+    root.innerHTML=`<div class="vwx-b"><h2>Your video is ready</h2><video src="${url}" controls playsinline style="width:100%;border-radius:16px;margin:10px 0;background:#000"></video>${mp4?"":`<p class="small muted" style="margin:0 0 8px">This phone or browser made a WebM video. WhatsApp on iPhone often cannot open it. Use Send as photos instead.</p>`}<div class="row wr"><button class="btn ${mp4?"primary":""} grow" id="vx-sh" type="button">${ic("share")}Share video</button><button class="btn ${mp4?"":"primary"} grow" id="vx-ph" type="button">${ic("image")}Send as photos</button></div><div class="row wr" style="margin-top:8px"><button class="btn" id="vx-sv" type="button">${ic("download")}Save</button><button class="btn" id="vx-x" type="button">Close</button></div></div>`;
     const file=new File([blob],name,{type:blob.type});
+    root.querySelector("#vx-ph").onclick=()=>sharePhotos(items,title);
     root.querySelector("#vx-sv").onclick=()=>{const a=document.createElement("a");a.href=url;a.download=name;a.click()};
     root.querySelector("#vx-sh").onclick=async()=>{try{if(navigator.canShare&&navigator.canShare({files:[file]}))await navigator.share({files:[file],title});else toast("Sharing isn't available here. Use Save.")}catch{}};
     root.querySelector("#vx-x").onclick=done;
