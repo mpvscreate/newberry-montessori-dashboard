@@ -693,6 +693,27 @@ select.sel{width:auto;min-height:44px;padding:0 12px;border-radius:14px}
 .vwx-b{background:var(--sheet);color:var(--ink);border-radius:24px;padding:22px;width:100%;max-width:460px;text-align:center}
 .vwx-b h2{margin:0 0 8px}.vwx-bar{height:10px;border-radius:99px;background:var(--line);overflow:hidden;margin:14px 0}.vwx-bar i{display:block;height:100%;width:0;background:var(--green)}
 .cd-prev img{width:100%;border-radius:16px;display:block;box-shadow:var(--shadow)}
+/* v6.4.0: daily-use polish */
+.qk{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:10px}
+.qkb{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;min-height:76px;border:0;border-radius:20px;background:var(--green-soft);color:var(--green);font:600 .9rem var(--body);cursor:pointer}.qkb svg{width:26px;height:26px}.qkb:active{transform:scale(.97)}
+.idea{display:inline-flex;align-items:center;gap:6px;margin-top:8px;max-width:100%;border:1px dashed var(--line);background:transparent;color:var(--muted);border-radius:99px;padding:6px 12px;font:500 .85rem var(--body);cursor:pointer;text-align:left}.idea span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.idea:hover{color:var(--ink);border-color:var(--green)}
+.pubrow{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px;font-size:.92rem}.pubrow span{display:flex;align-items:center;gap:8px}
+.offb{display:flex;align-items:center;gap:8px;margin:10px 0 0;padding:8px 12px;border-radius:14px;background:var(--amber-soft,#fff3d6);color:var(--ink);font-size:.85rem}
+.pfoot{display:flex;align-items:center;gap:14px;margin-top:10px;padding-top:8px;border-top:1px solid var(--line)}
+.rxb{display:inline-flex;align-items:center;gap:6px;border:0;background:transparent;color:var(--muted);border-radius:99px;padding:6px 10px;margin-left:-10px;font:600 .9rem var(--body);cursor:pointer;min-height:36px}.rxb[aria-pressed=true]{color:#d6336c}.rxb[aria-pressed=true] svg{fill:currentColor}
+.pubtag{margin-left:auto;display:inline-flex;align-items:center;gap:5px;font-size:.78rem;font-weight:600;color:var(--sky)}
+.pnote{margin-top:10px;padding:10px 14px;border-radius:16px;background:var(--green-soft)}.pnote p{margin:2px 0 0}
+.vw-capb{pointer-events:auto;display:inline-flex;align-items:center;gap:6px;margin:8px 0 0 12px;border:0;border-radius:99px;padding:5px 12px;background:rgba(255,255,255,.18);color:#fff;font:600 .8rem var(--body);cursor:pointer}
+.vw-cf{pointer-events:auto;display:flex;gap:8px;align-items:center}.vw-cf .t{flex:1;min-width:0}
+.vw-stage{touch-action:none}.vw-img{transform-origin:center;will-change:transform}.vw.zoomed .vw-nav{pointer-events:none}
+.wkcard{position:relative;display:flex;gap:14px;align-items:center;background:var(--sheet);border-radius:24px;padding:12px;margin-bottom:12px;box-shadow:var(--shadow);min-height:120px}
+.wk-th{display:flex;flex:none}.wk-th img{width:40px;height:58px;object-fit:cover;border-radius:10px;border:2px solid var(--sheet);margin-left:-12px;background:var(--line)}.wk-th img:first-child{margin-left:0}
+.wk-b{display:flex;flex-direction:column;min-width:0;flex:1;padding-right:26px}.wk-b b{font-family:var(--display);font-size:1.05rem}
+.wkcard>.x{position:absolute;top:6px;right:6px}
+.rps{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 8px;scroll-snap-type:x proximity;scrollbar-width:none}.rps::-webkit-scrollbar{display:none}
+.rp{flex:none;width:210px;display:flex;gap:10px;align-items:center;text-align:left;border:0;background:var(--sheet);border-radius:20px;padding:8px;box-shadow:var(--shadow);cursor:pointer;scroll-snap-align:start;color:var(--ink);font:inherit}
+.rp img,.rp-i{width:52px;height:52px;border-radius:14px;object-fit:cover;flex:none;background:var(--line)}.rp-i{display:grid;place-items:center;color:var(--pc)}
+.rp-b{display:flex;flex-direction:column;min-width:0;line-height:1.3}.rp-b b{font-size:.85rem;color:var(--pc)}.rp-t{font-size:.85rem;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 </style>
 </head>
 <body>
@@ -779,6 +800,9 @@ palette:'<path d="M12 3a9 9 0 100 18c1.5 0 2-1 1.500-2-.6-1.200.2-2.500 1.600-2.
 music:'<path d="M9 18V5l11-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="17" cy="16" r="3"/>',
 flask:'<path d="M9 3h6M10 3v6l-5 9a2 2 0 002 3h10a2 2 0 002-3l-5-9V3"/><path d="M7.500 15h9"/>',
 search:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',
+heart:'<path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/>',
+bulb:'<path d="M9 18h6M10 21h4M12 3a6 6 0 00-3.5 10.9c.6.5 1 1.2 1 2.1h5c0-.9.4-1.6 1-2.1A6 6 0 0012 3z"/>',
+globe:'<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3.3 3 14.7 0 18M12 3c-3 3.3-3 14.7 0 18"/>',
 pause:'<path d="M8 5v14M16 5v14"/>',
 more:'<circle cx="5" cy="12" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="19" cy="12" r="1.7"/>',
 pin:'<path d="M9 4h6l-1 6 3 3H7l3-3z"/><path d="M12 13v7"/>',
@@ -929,14 +953,26 @@ const agoLabel=t=>{if(!t)return"No updates yet";const d=Math.floor((Date.now()-t
 const postMedia=l=>(l.m||[]).map(id=>S.media.find(x=>x.id===id)).filter(m=>m&&!m.del);
 let storyF={pid:"",ch:""},pendFiles=[];
 const clearPend=()=>{pendFiles.forEach(x=>{try{URL.revokeObjectURL(x.url)}catch{}});pendFiles=[]};
+const PROMPTS=["What was the hardest part today?","Show us something you made.","What did you learn this week?","Who helped you today, and how?","What are you proud of?","What went wrong, and how did you fix it?","What will you do next?","Describe your work in three words.","What surprised you?","What would you tell a new team member?","Show us your workspace.","What did your team decide today?"];
+const todayPrompt=()=>PROMPTS[Math.floor(Date.now()/864e5)%PROMPTS.length];
+const DRAFTK="ms-prod-draft";
+const draftGet=pid=>{try{return(JSON.parse(localStorage.getItem(DRAFTK)||"{}")[pid])||""}catch{return""}};
+const draftSet=(pid,t)=>{try{const o=JSON.parse(localStorage.getItem(DRAFTK)||"{}");if(t)o[pid]=t;else delete o[pid];localStorage.setItem(DRAFTK,JSON.stringify(o))}catch{}};
+const ideaChip=()=>`<button type="button" class="idea" data-idea="1">${ic("bulb","sm")}<span>${esc(todayPrompt())}</span></button>`;
+const offLine=()=>navigator.onLine===false?`<p class="offb" role="status">${ic("cloudoff","sm")}You are offline. Posts are saved on this device and send when you are back online.</p>`:"";
+let pubPref=false;
+const shareSw=(p,id)=>p&&p.showcase&&p.showcase.on?`<div class="pubrow"><span>${ic("globe","sm")}Show photos on the public page</span><button type="button" role="switch" class="sw" id="${id}" aria-checked="${pubPref}" aria-label="Show photos on the public page"><i></i></button></div>`:"";
+const pubOn=id=>{const b=document.getElementById(id);return !!b&&b.getAttribute("aria-checked")==="true"};
+const wirePub=id=>{const b=document.getElementById(id);if(b)b.onclick=()=>{pubPref=b.getAttribute("aria-checked")!=="true";b.setAttribute("aria-checked",String(pubPref));fb("tick")}};
+const postedToast=name=>navigator.onLine===false?"Saved on this device. It sends when you are online.":name?"Posted to "+name:"Posted.";
 function postCard(p,l){
   const ms=postMedia(l),ch=(p.chapters||[]).find(c=>c.id===l.ch);
   const grid=ms.length?`<div class="pm pm${Math.min(ms.length,4)}">${ms.slice(0,4).map((m,i)=>`<button type="button" class="pmi" data-pm="${l.id}:${i}" aria-label="Open ${m.type==="video"?"video":"photo"} ${i+1} of ${ms.length}">${m.type==="video"?`<video data-mid="${m.id}" muted playsinline preload="metadata"></video><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${m.id}" alt="" loading="lazy">`}${i===3&&ms.length>4?`<span class="pmore">+${ms.length-4}</span>`:""}</button>`).join("")}</div>`:"";
-  return `<article class="post${l.pin?" pinned":""}" data-post="${l.id}"><header class="phd"><span class="pavs" aria-hidden="true">${esc(initials(l.by||"me"))}</span><div class="grow"><b>${esc(l.by||"")}</b><span class="small muted" style="display:block">${tmOf(l.t)}${l.ed?" · edited":""}</span></div>${l.pin?`<span class="pinic" title="Pinned" aria-label="Pinned">${ic("pin","sm")}</span>`:""}<button class="x sm" data-po="${l.id}" aria-label="Post options">${ic("more")}</button></header>${ch?`<span class="chtag">${esc(ch.name)}</span>`:""}${l.text?`<p class="ptext">${nl2br(l.text)}</p>`:""}${grid}</article>`;
+  return `<article class="post${l.pin?" pinned":""}" data-post="${l.id}"><header class="phd"><span class="pavs" aria-hidden="true">${esc(initials(l.by||"me"))}</span><div class="grow"><b>${esc(l.by||"")}</b><span class="small muted" style="display:block">${tmOf(l.t)}${l.ed?" · edited":""}</span></div>${l.pin?`<span class="pinic" title="Pinned" aria-label="Pinned">${ic("pin","sm")}</span>`:""}<button class="x sm" data-po="${l.id}" aria-label="Post options">${ic("more")}</button></header>${ch?`<span class="chtag">${esc(ch.name)}</span>`:""}${l.text?`<p class="ptext">${nl2br(l.text)}</p>`:""}${grid}${l.note&&l.note.text?`<div class="pnote"><span class="small muted">${esc(l.note.by||"Teacher")} left a note</span><p>${nl2br(l.note.text)}</p></div>`:""}<footer class="pfoot"><button type="button" class="rxb" data-rx="${l.id}" aria-pressed="${(l.rx||[]).includes(who()||"me")}" aria-label="${(l.rx||[]).includes(who()||"me")?"Remove your heart":"Send a heart"}${(l.rx||[]).length?", "+(l.rx||[]).length+" so far":""}">${ic("heart","sm")}<span>${(l.rx||[]).length||""}</span></button><button type="button" class="linkbtn" data-nt="${l.id}">${ic("chat","sm")}${l.note&&l.note.text?"Edit note":"Add a note"}</button>${ms.some(m=>m.consent==="ok")?`<span class="pubtag">${ic("globe","sm")}Public</span>`:""}</footer></article>`;
 }
-async function makePost(p,text,files,chId){
+async function makePost(p,text,files,chId,share){
   const id=uid(),ids=files.length?await addFilesIds(p.id,files,""):[];
-  ids.forEach(mid=>{const m=S.media.find(x=>x.id===mid);if(m)m.post=id});
+  ids.forEach(mid=>{const m=S.media.find(x=>x.id===mid);if(m){m.post=id;if(share&&m.type!=="video")m.consent="ok"}});
   if(!text&&!ids.length)return null;
   const l={id,text,by:who(),t:Date.now(),m:ids,ch:chId||"",pin:false};p.log.push(l);save(p);return l;
 }
@@ -951,14 +987,14 @@ function storyTab(p){
   if(pinned.length)html+=`<h3 class="sday" style="margin-top:6px">Pinned</h3>`+pinned.map(x=>postCard(p,x.l)).join("");
   rest.forEach(x=>{const l=dayLabel(x.t);if(l!==day){html+=`<h3 class="sday">${esc(l)}</h3>`;day=l}html+=x.k==="post"?postCard(p,x.l):storyCard(x)});
   const bar=(chs.length||items.length)?`<div class="chbar" role="group" aria-label="Chapters"><button type="button" class="chip" data-chf="" aria-pressed="${!storyF.ch}">All</button>${chs.map(c=>`<button type="button" class="chip" data-chf="${c.id}" aria-pressed="${storyF.ch===c.id}">${esc(c.name)}</button>`).join("")}<button type="button" class="chip add" id="ch-new">${ic("plus","sm")}Chapter</button></div>${storyF.ch?`<button class="linkbtn" id="ch-edit" type="button" style="margin:-4px 0 6px">Rename or delete this chapter</button>`:""}`:"";
-  return `<div class="card composer"><div class="row" style="align-items:flex-start"><textarea class="t ta" rows="2" id="sc-t" placeholder="What happened today?" aria-label="Write a post"></textarea>${micBtn()}</div>
-    <div class="att" id="sc-att"></div>
+  return `<div class="card composer"><div class="row" style="align-items:flex-start"><textarea class="t ta" rows="2" id="sc-t" placeholder="What happened today?" aria-label="Write a post">${esc(draftGet(p.id))}</textarea>${micBtn()}</div>${ideaChip()}
+    <div class="att" id="sc-att"></div>${shareSw(p,"sc-pub")}${offLine()}
     <div class="row between wr" style="margin-top:10px"><div class="row wr"><button class="btn small" id="sc-add" type="button">${ic("camera")}Photo or video</button>${chs.length?`<select class="t sel" id="sc-ch" aria-label="Chapter"><option value="">No chapter</option>${chs.map(c=>`<option value="${c.id}"${storyF.ch===c.id?" selected":""}>${esc(c.name)}</option>`).join("")}</select>`:""}</div><button class="btn primary" id="sc-post" type="button">${ic("send")}Post</button></div>
     ${mediaOf(p).length?`<div style="margin-top:8px"><button class="linkbtn" id="sc-gal" type="button">${ic("image","sm")} All photos and videos (${mediaOf(p).length})</button></div>`:""}
     <input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"></div>`+
   bar+
   (pics.length>1&&!storyF.ch?`${beforeNow(p,pics)}`:"")+
-  (vis.length?`<div class="story">${html}</div>`:`<div class="empty">${ic("pulse","xl")}<h3>${storyF.ch?"Nothing in this chapter yet":"Your story starts here"}</h3><p style="margin:0">${storyF.ch?"Pick this chapter when you write a post.":"Write what happened and add photos or videos. Every post becomes part of your story, ready to share."}</p></div>`);
+  (vis.length?`<div class="story">${html}</div>`:`<div class="empty">${ic("pulse","xl")}<h3>${storyF.ch?"Nothing in this chapter yet":"Your story starts here"}</h3><p style="margin:0 0 14px">${storyF.ch?"Pick this chapter when you write a post.":"Write what happened and add photos or videos. Every post becomes part of your story, ready to share."}</p>${storyF.ch?"":`<button class="btn primary" id="e-first" type="button">${ic("pencil")}Write your first post</button>`}</div>`);
 }
 function chapterSheet(p,c){
   const isNew=!c;
@@ -976,12 +1012,21 @@ function postMenu(p,l){
   const add=(icon,t,sub,fn)=>{rows.push([icon,t,sub]);acts.push(fn)};
   add("pencil","Edit post","Change the text, photos, videos or chapter",c=>{c();setTimeout(()=>postEdit(p,l),160)});
   add("pin",l.pin?"Unpin from the top":"Pin to the top",l.pin?"Move it back into the timeline":"Keep this post at the top of the story",c=>{l.pin=!l.pin;save(p);fb("tick");c();render()});
+  if(p.showcase&&p.showcase.on&&ms.some(m=>m.type!=="video")){const pub=ms.some(m=>m.consent==="ok");add("globe",pub?"Make photos private":"Show photos on the public page",pub?"Remove them from the showcase":"Approve this post's photos for the showcase",c=>{ms.forEach(m=>{if(m.type!=="video"){m.consent=pub?"":"ok";save(m)}});fb("done");c();render();toast(pub?"Photos are private again.":"Photos will show on the public page.")})}
   add("share","Share as a picture","A good-looking card for WhatsApp",c=>{c();setTimeout(()=>cardSheet(p,l),160)});
   if(ms.length)add("play","Play this post","Full screen, photos and videos one by one",c=>{c();setTimeout(()=>{const list=storyMediaList(p),k=list.findIndex(x=>x.m.id===ms[0].id);openViewer(list,Math.max(0,k),true)},160)});
   if(photo)add("image","Use as cover photo","Show the first photo at the top of "+p.name,c=>{p.cover=photo.id;save(p);fb("done");c();render();toast("Cover photo set.")});
   add("trash","Delete post","You can restore it from Recently deleted",c=>{c();delPost(p,l)});
   sheet("Post",`<div class="sh-menu">${rows.map((r,i)=>`<button class="trow" data-i="${i}" type="button"><span class="avatar">${ic(r[0])}</span><span class="grow"><b>${esc(r[1])}</b><span class="small muted" style="display:block">${esc(r[2])}</span></span>${ic("chev","sm")}</button>`).join("")}</div>`,(d,close)=>{
     d.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>acts[+b.dataset.i](close));
+  });
+}
+function noteSheet(p,l){
+  const n=l.note||{};
+  sheet("Note on this post",`<p class="muted small" style="margin:4px 0 8px">A short word of praise or advice. It shows under the post for the whole team.</p><label class="f" for="nt-t">Note</label><div class="row" style="align-items:flex-start"><textarea class="t ta" id="nt-t" rows="3" maxlength="300">${esc(n.text||"")}</textarea>${micBtn()}</div><div class="row" style="margin-top:16px">${n.text?`<button class="btn danger" id="nt-d" type="button">Remove</button>`:""}<span class="grow"></span><button class="btn primary" id="nt-ok" type="button">Save note</button></div>`,(d,close)=>{
+    wireMics(d);d.querySelectorAll(".ta").forEach(autosize);setTimeout(()=>d.querySelector("#nt-t").focus(),80);
+    d.querySelector("#nt-ok").onclick=()=>{const t=d.querySelector("#nt-t").value.trim();if(t)l.note={text:t,by:who()||"Teacher",t:Date.now()};else delete l.note;save(p);fb("done");close();render()};
+    const dl=d.querySelector("#nt-d");if(dl)dl.onclick=()=>{delete l.note;save(p);close();render()};
   });
 }
 function delPost(p,l){
@@ -1018,10 +1063,15 @@ function wireStory(p){
   const att=$("#sc-att"),drawAtt=()=>{att.innerHTML=attHTML(pendFiles);att.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{const x=pendFiles.splice(+b.dataset.rm,1)[0];try{URL.revokeObjectURL(x.url)}catch{}drawAtt()})};
   drawAtt();
   $("#sc-add").onclick=()=>$("#pf").click();
+  $("#sc-t").addEventListener("input",()=>draftSet(p.id,$("#sc-t").value));
+  {const i=document.querySelector("[data-idea]");if(i)i.onclick=()=>{const t=$("#sc-t");if(!t.value.trim())t.value=todayPrompt()+" ";draftSet(p.id,t.value);t.focus();t.setSelectionRange(t.value.length,t.value.length)}}
+  wirePub("sc-pub");{const e=$("#e-first");if(e)e.onclick=()=>$("#sc-t").focus()}
+  document.querySelectorAll("[data-rx]").forEach(b=>b.onclick=()=>{const l=p.log.find(x=>x.id===b.dataset.rx);if(!l)return;const me=who()||"me",a=(l.rx||[]).slice(),k=a.indexOf(me);if(k>=0)a.splice(k,1);else a.push(me);l.rx=a;save(p);fb(k>=0?"tick":"done");render()});
+  document.querySelectorAll("[data-nt]").forEach(b=>b.onclick=()=>{const l=p.log.find(x=>x.id===b.dataset.nt);if(l)noteSheet(p,l)});
   $("#pf").onchange=e=>{[...e.target.files].forEach(f=>{if(pendFiles.length<12)pendFiles.push({file:f,url:URL.createObjectURL(f),vid:f.type.startsWith("video/")})});e.target.value="";drawAtt()};
   const post=async()=>{const t=$("#sc-t").value.trim();if(!t&&!pendFiles.length){$("#sc-t").focus();return}if(listening)listening.stop();
     const b=$("#sc-post");b.disabled=true;const files=pendFiles.map(x=>x.file),chv=$("#sc-ch")?$("#sc-ch").value:storyF.ch;
-    const l=await makePost(p,t,files,chv);clearPend();if(l){fb("add");toast("Posted.")}render()};
+    const l=await makePost(p,t,files,chv,pubOn("sc-pub"));clearPend();if(l){draftSet(p.id,"");fb("add");toast(postedToast())}render()};
   $("#sc-post").onclick=post;
   $("#sc-t").onkeydown=e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();post()}};
   {const gl=$("#sc-gal");if(gl)gl.onclick=()=>{tab="media";render()}}
@@ -1163,26 +1213,31 @@ function captureSheet(){
     const draw=()=>{
       const p=P0(),chs=(p&&p.chapters)||[];
       root.innerHTML=`${prods().length>1?`<div class="sub-l">Which production?</div><div class="chips cp-chips" role="group" aria-label="Production">${prods().map(q=>`<button class="chip" data-pp="${q.id}" aria-pressed="${q.id===pid}">${esc(q.name)}</button>`).join("")}</div>`:""}
-      <div class="row" style="align-items:flex-start;margin-top:10px"><textarea class="t ta" rows="3" id="cp-t" placeholder="What happened today?" aria-label="Write a post"></textarea>${micBtn()}</div>
+      <div class="qk" role="group" aria-label="Add a photo or video"><button class="qkb" data-a="img" type="button">${ic("camera")}<span>Photo</span></button><button class="qkb" data-a="vid" type="button">${ic("film")}<span>Video</span></button><button class="qkb" data-a="lib" type="button">${ic("image")}<span>Choose</span></button></div>
+      <div class="row" style="align-items:flex-start;margin-top:10px"><textarea class="t ta" rows="3" id="cp-t" placeholder="What happened today?" aria-label="Write a post">${esc(draftGet(pid))}</textarea>${micBtn()}</div>${ideaChip()}
       <div class="att" id="cp-att"></div>
-      <div class="row wr" style="margin-top:10px"><button class="btn small" data-a="img" type="button">${ic("camera")}Take photo</button><button class="btn small" data-a="vid" type="button">${ic("film")}Record video</button><button class="btn small" data-a="lib" type="button">${ic("image")}Choose</button></div>
+      ${shareSw(p,"cp-pub")}${offLine()}
       ${chs.length?`<label class="f" for="cp-ch">Chapter</label><select class="t" id="cp-ch"><option value="">No chapter</option>${chs.map(c=>`<option value="${c.id}">${esc(c.name)}</option>`).join("")}</select>`:""}
       <button class="btn primary block" id="cp-go" type="button" style="margin-top:14px">${ic("send")}Post to ${esc(p?p.name:"")}</button>`;
       wireMics(root);root.querySelectorAll(".ta").forEach(autosize);
-      root.querySelectorAll("[data-pp]").forEach(b=>b.onclick=()=>{const t=$("#cp-t").value;pid=b.dataset.pp;remember();draw();$("#cp-t").value=t});
+      root.querySelectorAll("[data-pp]").forEach(b=>b.onclick=()=>{const t=$("#cp-t").value;draftSet(pid,"");pid=b.dataset.pp;remember();draftSet(pid,t);draw();$("#cp-t").value=t});
       const att=root.querySelector("#cp-att"),drawAtt=()=>{att.innerHTML=attHTML(files);att.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{const x=files.splice(+b.dataset.rm,1)[0];try{URL.revokeObjectURL(x.url)}catch{}drawAtt()})};
       drawAtt();
+      $("#cp-t").addEventListener("input",()=>draftSet(pid,$("#cp-t").value));
+      {const i=root.querySelector("[data-idea]");if(i)i.onclick=()=>{const t=$("#cp-t");if(!t.value.trim())t.value=todayPrompt()+" ";draftSet(pid,t.value);t.focus();t.setSelectionRange(t.value.length,t.value.length)}}
+      wirePub("cp-pub");
       root.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>$("#cp-"+b.dataset.a).click());
       ["cp-lib","cp-img","cp-vid"].forEach(id=>{$("#"+id).onchange=e=>{[...e.target.files].forEach(f=>{if(files.length<12)files.push({file:f,url:URL.createObjectURL(f),vid:f.type.startsWith("video/")})});e.target.value="";drawAtt()}});
       $("#cp-go").onclick=async()=>{const t=$("#cp-t").value.trim();if(!t&&!files.length){$("#cp-t").focus();return}if(listening)listening.stop();
         const b=$("#cp-go");b.disabled=true;const chv=$("#cp-ch")?$("#cp-ch").value:"";
-        const l=await makePost(P0(),t,files.map(x=>x.file),chv);files.forEach(x=>{try{URL.revokeObjectURL(x.url)}catch{}});files=[];
-        if(l){fb("add");remember();close();render();toast("Posted to "+P0().name)}else{b.disabled=false}};
+        const l=await makePost(P0(),t,files.map(x=>x.file),chv,pubOn("cp-pub"));files.forEach(x=>{try{URL.revokeObjectURL(x.url)}catch{}});files=[];
+        if(l){draftSet(pid,"");fb("add");remember();close();render();toast(postedToast(P0().name))}else{b.disabled=false}};
     };
     draw();
   });
 }
 
+window.addEventListener("online",()=>{if(!isOpen())render()});window.addEventListener("offline",()=>{if(!isOpen())render()});
 /* ---------- v3: today strip and gentle nudges ---------- */
 const RECAPK="ms-prod-recap";
 const recapSeen=()=>{try{return +localStorage.getItem(RECAPK)||0}catch{return 0}};
@@ -1195,7 +1250,7 @@ function lastActivity(p){
 function todayData(){
   const late=[],soon=[],quiet=[];
   prods().forEach(p=>{const last=lastActivity(p);if(last&&Date.now()-last>7*864e5)quiet.push({p,last})});
-  const dow=new Date().getDay(),recap=(dow===5||dow===6||dow===0)&&recapSeen()<weekStart(Date.now());
+  const dow=new Date().getDay(),recap=false;
   return{late,soon,quiet,recap,any:!!(quiet.length||recap)};
 }
 function todayStrip(){
@@ -1259,7 +1314,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.3.0";
+const APP_VER="6.4.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -2037,10 +2092,21 @@ const totals=()=>{const ps=prods(),all=ps.flatMap(p=>p.goals),open=all.filter(g=
 /* first tab: every production on one screen */
 const coverOf=p=>{const ms=mediaOf(p).filter(m=>m.type!=="video");return(p.cover&&ms.find(m=>m.id===p.cover))||ms[0]||null};
 const agoShort=t=>{if(!t)return"New";const d=Math.floor((Date.now()-t)/864e5);return d<1?"Today":d===1?"Yesterday":d+"d ago"};
+function weekCard(){
+  const dow=new Date().getDay();if(!(dow===5||dow===6||dow===0||dow===1))return"";
+  if(Date.now()-recapSeen()<3*864e5)return"";
+  const l=weekMediaList().filter(x=>x.m.type!=="video");if(l.length<2)return"";
+  const teams=new Set(l.map(x=>x.p.id)).size,th=l.slice(-3);
+  return `<section class="wkcard" aria-label="Week in review"><div class="wk-th">${th.map(x=>`<img data-mid="${x.m.id}" alt="" loading="lazy">`).join("")}</div><div class="wk-b"><b>Your week in review</b><span class="small muted">${l.length} photo${l.length===1?"":"s"} from ${teams} team${teams===1?"":"s"}</span><div class="row wr" style="margin-top:8px"><button class="btn small primary" id="wk-play" type="button">${ic("play","sm")}Play</button><button class="btn small" id="wk-sh" type="button">${ic("share","sm")}Share</button></div></div><button class="x sm" id="wk-x" type="button" aria-label="Hide for now">${ic("x","sm")}</button></section>`;
+}
+function recentStrip(){
+  const it=prods().flatMap(p=>p.log.map(l=>({p,l}))).sort((a,b)=>b.l.t-a.l.t).slice(0,6);if(!it.length)return"";
+  return `<h3 class="st-h" style="margin:18px 2px 8px">Recently posted</h3><div class="rps">${it.map(({p,l})=>{const m=postMedia(l).find(x=>x.type!=="video");return `<button class="rp" style="--pc:${p.color}" data-open="${p.id}" type="button" aria-label="${esc(p.name)}: ${esc((l.text||"Photo post").slice(0,80))}">${m?`<img data-mid="${m.id}" alt="" loading="lazy">`:`<span class="rp-i">${ic(p.icon)}</span>`}<span class="rp-b"><b>${esc(p.name)}</b><span class="rp-t">${esc(l.text||"Added a photo")}</span><span class="small muted">${agoShort(l.t)}</span></span></button>`}).join("")}</div>`;
+}
 function homePage(){
-  const ps=prods();
+  const ps=prods(),wk=weekCard();
   return `<h2 class="sr">Productions</h2>
-  ${todayStrip()}<div class="ptiles" style="--st:${todayData().any?56:0}px">${ps.map((p,ix)=>{const last=lastActivity(p),quiet=!!last&&Date.now()-last>7*864e5,cov=coverOf(p);return`<button class="ptile${cov?" hascov":""}" style="--pc:${p.color};--i:${ix}" data-open="${p.id}" aria-label="${esc(p.name)}, ${agoLabel(last).toLowerCase()}${quiet?", quiet for a while":""}">${cov?`<img class="tcov" data-mid="${cov.id}" alt="" loading="lazy">`:""}${quiet?`<span class="pbadge q" aria-hidden="true"></span>`:""}<span class="pi"><span class="pav">${ic(p.icon)}</span><b>${esc(p.name)}</b><span class="pq">${agoShort(last)}</span></span></button>`}).join("")}<button class="ptile padd" id="addp" aria-label="New production"><span class="pi"><span class="pav">${ic("plus")}</span><b>Add new</b></span></button></div>`;
+  ${wk}${todayStrip()}<div class="ptiles" style="--st:${(todayData().any?56:0)+(wk?132:0)}px">${ps.map((p,ix)=>{const last=lastActivity(p),quiet=!!last&&Date.now()-last>7*864e5,cov=coverOf(p);return`<button class="ptile${cov?" hascov":""}" style="--pc:${p.color};--i:${ix}" data-open="${p.id}" aria-label="${esc(p.name)}, ${agoLabel(last).toLowerCase()}${quiet?", quiet for a while":""}">${cov?`<img class="tcov" data-mid="${cov.id}" alt="" loading="lazy">`:""}${quiet?`<span class="pbadge q" aria-hidden="true"></span>`:""}<span class="pi"><span class="pav">${ic(p.icon)}</span><b>${esc(p.name)}</b><span class="pq">${agoShort(last)}</span></span></button>`}).join("")}<button class="ptile padd" id="addp" aria-label="New production"><span class="pi"><span class="pav">${ic("plus")}</span><b>Add new</b></span></button></div>${recentStrip()}`;
 }
 /* second tab: the detail */
 let ovMore=false;
@@ -2067,6 +2133,7 @@ const feedItems=()=>prods().flatMap(p=>{const ids=new Set(p.log.map(l=>l.id));re
 const actRow=f=>{const m=f.m||(f.l&&postMedia(f.l).find(x=>x.type!=="video"));return `<li><div class="avatar" style="color:${f.p.color}">${ic(f.p.icon)}</div><div class="grow"><b>${esc(f.p.name)}</b> <span class="pill type">${f.k}</span><div>${esc(f.txt)}</div><div class="small muted">${fmt(f.t)}</div></div>${m&&m.type!=="video"?`<img class="athumb" data-mid="${m.id}" alt="">`:""}</li>`};
 const fab=()=>`<div class="fab-wrap"><button class="fab" id="addp" aria-label="New production">${ic("plus")}<span>New production</span></button></div>`;
 function wireHome(){
+  {const a=$("#wk-play");if(a)a.onclick=()=>openViewer(weekMediaList(),0,true);const b=$("#wk-sh");if(b)b.onclick=()=>shareMenu(null);const x=$("#wk-x");if(x)x.onclick=()=>{try{localStorage.setItem(RECAPK,String(Date.now()))}catch{}render()}}
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{tab="story";nav("p/"+b.dataset.open)});
   $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#shr-btn")&&($("#shr-btn").onclick=()=>shareMenu(null));$("#ov-late")&&($("#ov-late").onclick=todaySheet);$("#ov-more")&&($("#ov-more").onclick=()=>{ovMore=!ovMore;render()});$("#today")&&($("#today").onclick=todaySheet);
 }
@@ -2436,8 +2503,8 @@ function shareMenu(p){
 /* ---------- viewer and slideshow ---------- */
 function storyMediaList(p,opts){
   const out=[],ids=new Set(p.log.map(l=>l.id)),ch=opts&&opts.ch;
-  p.log.slice().sort((a,b)=>a.t-b.t).forEach(l=>{if(ch&&l.ch!==ch)return;postMedia(l).forEach(m=>out.push({m,cap:l.text||"",p,t:l.t}))});
-  if(!ch)mediaOf(p).filter(m=>m.tag!=="receipt"&&m.tag!=="evidence"&&(!m.post||!ids.has(m.post))).forEach(m=>out.push({m,cap:m.cap||"",p,t:m.t}));
+  p.log.slice().sort((a,b)=>a.t-b.t).forEach(l=>{if(ch&&l.ch!==ch)return;postMedia(l).forEach(m=>out.push({m,cap:m.cap||l.text||"",pt:l.text||"",p,t:l.t}))});
+  if(!ch)mediaOf(p).filter(m=>m.tag!=="receipt"&&m.tag!=="evidence"&&(!m.post||!ids.has(m.post))).forEach(m=>out.push({m,cap:m.cap||"",pt:"",p,t:m.t}));
   return out.sort((a,b)=>a.t-b.t);
 }
 const canRecord=()=>!!(window.MediaRecorder&&HTMLCanvasElement.prototype.captureStream);
@@ -2457,15 +2524,17 @@ function openViewer(list,start,auto){
   const v=VW={root,timer:null};
   const q=s=>root.querySelector(s);
   const setPl=()=>{const b=q("#vw-pl");b.innerHTML=ic(playing?"pause":"play");b.setAttribute("aria-label",playing?"Pause slideshow":"Play slideshow")};
+  let z={s:1,x:0,y:0};
   const bars=[...root.querySelectorAll(".vw-bars i b")];
   const paint=()=>{if(seg)bars.forEach((b,k)=>{b.style.animation="none";b.style.width=k<i?"100%":"0%"});else{const o=q("#vw-one");if(o){o.style.animation="none";o.style.width=((i)/list.length*100)+"%"}}};
   const next=()=>{if(i>=list.length-1){if(playing){i=0}else return}else i++;show()},prev=()=>{if(i>0){i--;show()}};
   async function show(){
-    clearTimeout(v.timer);const it=list[i],m=it.m,st=q("#vw-st");paint();
+    clearTimeout(v.timer);z={s:1,x:0,y:0};root.classList.remove("zoomed");const it=list[i],m=it.m,st=q("#vw-st");paint();
     const url=await loadMedia(m.id);if(VW!==v)return;
     const cur=bars[seg?i:0];
     q("#vw-t").textContent=(it.p?it.p.name:"")+(list.length>1?" · "+(i+1)+" of "+list.length:"");
-    q("#vw-c").innerHTML=`${it.cap?`<p>${nl2br(it.cap.slice(0,260))}${it.cap.length>260?"…":""}</p>`:""}<span>${esc(fmt(it.t))}</span>`;
+    q("#vw-c").innerHTML=`${it.cap?`<p>${nl2br(it.cap.slice(0,260))}${it.cap.length>260?"…":""}</p>`:""}<span>${esc(fmt(it.t))}</span>${m.type!=="video"?`<button type="button" class="vw-capb" id="vw-cap">${ic("pencil","sm")}${m.cap?"Edit caption":"Add caption"}</button>`:""}`;
+    {const cb=q("#vw-cap");if(cb)cb.onclick=()=>capEdit()}
     if(m.type==="video"){
       st.innerHTML=`<video class="vw-img" src="${url||""}" playsinline ${playing?"muted autoplay":"controls"}></video>`;
       const vd=st.querySelector("video");if(playing){vd.onended=()=>next();vd.play().catch(()=>{});if(cur)cur.style.animation="vwfill 12s linear forwards";v.timer=setTimeout(next,12000)}
@@ -2475,12 +2544,29 @@ function openViewer(list,start,auto){
     }
     const nx=list[i+1];if(nx)loadMedia(nx.m.id);
   }
+  const capEdit=()=>{
+    if(playing){playing=false;setPl();clearTimeout(v.timer)}
+    const it=list[i],m=it.m,c=q("#vw-c");
+    c.innerHTML=`<form class="vw-cf"><input class="t" id="vw-ci" type="text" maxlength="90" placeholder="Write a caption for this photo" aria-label="Caption" value="${esc(m.cap||"")}"><button class="btn small primary" type="submit">Save</button><button class="btn small" id="vw-cc" type="button">Cancel</button></form>`;
+    const inp=c.querySelector("#vw-ci");inp.focus();
+    c.querySelector("#vw-cc").onclick=()=>show();
+    c.querySelector("form").onsubmit=e=>{e.preventDefault();m.cap=inp.value.trim();save(m);it.cap=m.cap||it.pt||"";fb("done");show()};
+  };
   q("#vw-pl").onclick=()=>{playing=!playing;setPl();show()};setPl();
   q("#vw-x").onclick=closeViewer;q("#vw-p").onclick=prev;q("#vw-n").onclick=()=>{if(i<list.length-1){i++;show()}};
   q("#vw-ed").onclick=()=>{const m=list[i].m;closeViewer();openMediaSheet(m)};
   const vb=q("#vw-vid");if(vb)vb.onclick=()=>{const items=list.filter(x=>x.m.type!=="video");playing=false;clearTimeout(v.timer);closeViewer();slideshowVideo(items)};
-  let sx=0;const stg=q("#vw-st");stg.addEventListener("touchstart",e=>{sx=e.touches[0].clientX},{passive:true});stg.addEventListener("touchend",e=>{const dx=e.changedTouches[0].clientX-sx;if(dx<-50)q("#vw-n").click();else if(dx>50)prev()});
-  v.key=e=>{if(e.key==="Escape")closeViewer();else if(e.key==="ArrowRight")q("#vw-n").click();else if(e.key==="ArrowLeft")prev();else if(e.key===" "){e.preventDefault();q("#vw-pl").click()}};document.addEventListener("keydown",v.key);
+  let sx=0,pd=0,ps=1,pan=null,moved=false,lastTap=0;const stg=q("#vw-st");
+  const imgEl=()=>{const e=q("#vw-st .vw-img");return e&&e.tagName==="IMG"?e:null},applyZ=()=>{const e=imgEl();if(e){e.style.transform=z.s>1?`translate(${z.x}px,${z.y}px) scale(${z.s})`:"";root.classList.toggle("zoomed",z.s>1)}};
+  const pausePl=()=>{if(playing){playing=false;setPl();clearTimeout(v.timer)}};
+  const gd=t=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);
+  root.addEventListener("touchstart",e=>{if(e.target.closest(".vw-top,.vw-cap"))return;moved=false;if(e.touches.length===2){pd=gd(e.touches);ps=z.s;pausePl()}else{sx=e.touches[0].clientX;pan={x:e.touches[0].clientX-z.x,y:e.touches[0].clientY-z.y}}},{passive:true});
+  root.addEventListener("touchmove",e=>{if(e.target.closest(".vw-top,.vw-cap")||!imgEl())return;if(e.touches.length===2&&pd){moved=true;z.s=Math.max(1,Math.min(4,ps*gd(e.touches)/pd));if(z.s===1){z.x=0;z.y=0}applyZ()}else if(e.touches.length===1&&z.s>1&&pan){moved=true;z.x=e.touches[0].clientX-pan.x;z.y=e.touches[0].clientY-pan.y;applyZ()}},{passive:true});
+  root.addEventListener("touchend",e=>{if(e.target.closest(".vw-top,.vw-cap")||e.touches.length)return;pd=0;const dx=e.changedTouches[0].clientX-sx,tap=Math.abs(dx)<10&&!moved;
+    if(tap){if(e.target.classList.contains("vw-nav"))return;const n=Date.now();if(n-lastTap<300){if(z.s>1){z={s:1,x:0,y:0}}else{z={s:2,x:0,y:0};pausePl()}applyZ();lastTap=0}else lastTap=n;return}
+    if(z.s>1||moved)return;if(dx<-50)q("#vw-n").click();else if(dx>50)prev()});
+  stg.addEventListener("dblclick",()=>{if(!imgEl())return;if(z.s>1)z={s:1,x:0,y:0};else{z={s:2,x:0,y:0};pausePl()}applyZ()});
+  v.key=e=>{if(e.target&&/^(INPUT|TEXTAREA)$/.test(e.target.tagName)&&e.key!=="Escape")return;if(e.key==="Escape")closeViewer();else if(e.key==="ArrowRight")q("#vw-n").click();else if(e.key==="ArrowLeft")prev();else if(e.key===" "){e.preventDefault();q("#vw-pl").click()}};document.addEventListener("keydown",v.key);
   v.vis=()=>{if(document.hidden&&playing){playing=false;setPl();clearTimeout(v.timer)}};document.addEventListener("visibilitychange",v.vis);
   ovPush({k:"viewer",close:()=>closeViewer()});
   show();

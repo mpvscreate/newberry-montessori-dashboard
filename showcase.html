@@ -134,7 +134,7 @@ function render(d){
   const cover=d.cover&&byId[d.cover]?d.cover:"";
   /* the viewing order: post photos first (pinned and newest), then any other approved photos */
   const seq=[],seen=new Set();
-  posts.forEach(po=>(po.m||[]).forEach(id=>{if(byId[id]&&!seen.has(id)){seen.add(id);seq.push({id,cap:po.txt||byId[id].cap||"",t:po.t})}}));
+  posts.forEach(po=>(po.m||[]).forEach(id=>{if(byId[id]&&!seen.has(id)){seen.add(id);seq.push({id,cap:byId[id].cap||po.txt||"",t:po.t})}}));
   photos.slice().reverse().forEach(p=>{if(!seen.has(p.id)){seen.add(p.id);seq.push({id:p.id,cap:p.cap||"",t:p.t})}});
   const idx={};seq.forEach((x,i)=>idx[x.id]=i);
   const fd=t=>{try{return new Date(t).toLocaleDateString("en-ZA",{day:"numeric",month:"long",year:"numeric"})}catch(e){return""}};
