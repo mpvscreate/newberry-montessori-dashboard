@@ -1027,7 +1027,7 @@ function storyTab(p){
   let html="",day="";
   if(pinned.length)html+=`<h3 class="sday" style="margin-top:6px">Pinned</h3>`+pinned.map(x=>postCard(p,x.l)).join("");
   rest.forEach(x=>{const l=dayLabel(x.t);if(l!==day){html+=`<h3 class="sday">${esc(l)}</h3>`;day=l}html+=x.k==="post"?postCard(p,x.l):storyCard(x)});
-  const bar=(hasTW||items.length||filt)?`<div class="twbar" role="group" aria-label="Filter the story"><select class="t sel" id="tf-t" aria-label="Show term"><option value="0">All terms</option>${TERMS.map(n=>`<option value="${n}"${storyF.term===n?" selected":""}>Term ${n}</option>`).join("")}</select><select class="t sel" id="tf-w" aria-label="Show week"><option value="0">All weeks</option>${WEEKS.map(n=>`<option value="${n}"${storyF.wk===n?" selected":""}>Week ${n}</option>`).join("")}</select>${mediaOf(p).length?`<button type="button" class="chip add" id="sc-gal">${ic("image","sm")}All media (${mediaOf(p).length})</button>`:""}</div>`:"";
+  const bar=(hasTW||items.length||filt)?`<div class="twbar" role="group" aria-label="Filter the story"><select class="t sel" id="tf-t" aria-label="Show term"><option value="0">Term</option>${TERMS.map(n=>`<option value="${n}"${storyF.term===n?" selected":""}>Term ${n}</option>`).join("")}</select><select class="t sel" id="tf-w" aria-label="Show week"><option value="0">Week</option>${WEEKS.map(n=>`<option value="${n}"${storyF.wk===n?" selected":""}>Week ${n}</option>`).join("")}</select></div>`:"";
     const isOpen2=composeOpen||pendFiles.length>0,dr=draftGet(p.id);
   const mini=`<div class="card composer mini"><button class="cmini" id="sc-open" type="button" aria-label="${dr?"Continue your draft":"Write a post"}"><span class="pavs" aria-hidden="true">${esc(initials(who()||"me"))}</span><span class="cmt${dr?" dr":""}">${dr?"Draft: "+esc(dr.slice(0,60)):"What happened today?"}</span></button><button class="x cam" id="sc-cam" type="button" aria-label="Add a photo or video">${ic("camera")}</button><input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"></div>`;
   const full=`<div class="card composer"><div class="row" style="align-items:flex-start"><textarea class="t ta" rows="3" id="sc-t" placeholder="What happened today?" aria-label="Write a post">${esc(draftGet(p.id))}</textarea>${micBtn()}</div>${ideaChip()}
@@ -1352,7 +1352,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.9.0";
+const APP_VER="6.9.1";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
