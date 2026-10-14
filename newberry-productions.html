@@ -1367,7 +1367,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.10.2";
+const APP_VER="6.11.1";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -3181,7 +3181,7 @@ const tfont=(s,w)=>`700 ${s*.009*w}px "Instrument Sans",system-ui,sans-serif`;
 function drawAnn(g,w,h,ann){
   for(const a of ann){
     if(a.k==="s"){g.strokeStyle=a.c;g.lineWidth=a.s*.0025*w;g.lineCap="round";g.lineJoin="round";g.beginPath();a.p.forEach(([x,y],i)=>i?g.lineTo(x*w,y*h):g.moveTo(x*w,y*h));if(a.p.length===1)g.lineTo(a.p[0][0]*w+.01,a.p[0][1]*h);g.stroke()}
-    else{const fs=a.s*.009*w;g.font=tfont(a.s,w);g.textAlign="center";g.textBaseline="middle";g.lineJoin="round";g.lineWidth=fs*.2;g.strokeStyle=lum(a.c)>.5?"#000":"#fff";g.strokeText(a.t,a.x*w,a.y*h);g.fillStyle=a.c;g.fillText(a.t,a.x*w,a.y*h)}
+    else{const fs=a.s*.009*w;g.save();g.font=tfont(a.s,w);g.textAlign="center";g.textBaseline="middle";g.shadowColor=lum(a.c)>.5?"rgba(0,0,0,.55)":"rgba(255,255,255,.6)";g.shadowBlur=fs*.2;g.shadowOffsetX=0;g.shadowOffsetY=fs*.07;g.fillStyle=a.c;g.fillText(a.t,a.x*w,a.y*h);g.restore()}
   }
 }
 const sliderRow=(id,l,min,max,val=0)=>`<label class="f" for="${id}">${l}</label><input type="range" id="${id}" min="${min}" max="${max}" step="1" value="${val}">`;
@@ -3245,20 +3245,20 @@ async function editSheet(p,m){
   const img=new Image();img.src=u;try{await img.decode()}catch{toast("Couldn't open this photo.");return}
   const st={rot:0,flip:false,ratio:0,ang:0,crop:null,preset:0,...ZERO};let curTool="",cropu=null,ratI=0;
   const arNow=()=>{const o=st.rot%2===1;return o?img.naturalHeight/img.naturalWidth:img.naturalWidth/img.naturalHeight};
-  const ann=[];let col=ANNC[2],size=10,drag=null,compare=false;
+  const ann=[];let col=ANNC[0],size=8,drag=null,compare=false,selT=null;
   const glc=document.createElement("canvas"),glh=makeGL(glc),thumbSrc=(()=>{const nw=img.naturalWidth,nh=img.naturalHeight,w=Math.min(1,nh/nw),h=Math.min(1,nw/nh);return drawEdit(img,{rot:0,flip:false,ang:0,crop:{x:(1-w)/2,y:(1-h)/2,w,h}},96)})();
   let cv,ov;
-  const paintOv=()=>{ov.width=cv.width;ov.height=cv.height;const g=ov.getContext("2d");g.clearRect(0,0,ov.width,ov.height);if(!compare&&curTool!=="crop")drawAnn(g,ov.width,ov.height,ann)};
+  const paintOv=()=>{ov.width=cv.width;ov.height=cv.height;const g=ov.getContext("2d");g.clearRect(0,0,ov.width,ov.height);if(!compare&&curTool!=="crop")drawAnn(g,ov.width,ov.height,ann);if(!compare&&curTool==="text"&&selT&&ann.includes(selT)){g.save();g.font=tfont(selT.s,ov.width);const tw=g.measureText(selT.t).width,th=selT.s*.009*ov.width*1.3;g.strokeStyle="rgba(255,255,255,.9)";g.setLineDash([6,5]);g.lineWidth=2;g.strokeRect(selT.x*ov.width-tw/2-10,selT.y*ov.height-th/2-6,tw+20,th+12);g.restore()}};
   const paint=()=>{const o=drawEdit(img,curTool==="crop"?{...st,crop:null}:st,900),f=filterPass(glh,glc,o,compare?ZERO:st);cv.width=o.width;cv.height=o.height;cv.getContext("2d").drawImage(f,0,0);paintOv();if(cropu)cropu.show(curTool==="crop");ed.dots()};
   const geo=()=>{if(ann.length){ann.length=0;toast("Drawings cleared because the shape changed.")}paint()};
-  const swatches=el=>{el.insertAdjacentHTML("beforeend",`<div class="swatches" id="sw" style="margin-top:12px">${ANNC.map(c=>`<button type="button" data-c="${c}" style="background:${c}" aria-pressed="${c===col}" aria-label="Colour ${c}"></button>`).join("")}</div><div class="row" style="margin-top:6px"><span class="small muted">Size</span><input class="sl-i grow" id="a-size" type="range" min="1" max="40" value="${size}" aria-label="Size" style="--a:0%;--b:${(size-1)/39*100}%"><button class="btn small" id="a-undo" aria-label="Undo">${ic("undo")}</button><button class="btn small danger" id="a-clear">Clear</button></div>`);
-    el.querySelectorAll("#sw [data-c]").forEach(b=>b.onclick=()=>{col=b.dataset.c;el.querySelectorAll("#sw [data-c]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
-    const sz=$("#a-size");sz.oninput=()=>{size=+sz.value;sz.style.setProperty("--b",(size-1)/39*100+"%")};
+  const swatches=el=>{el.insertAdjacentHTML("beforeend",`<div class="swatches" id="sw" style="margin-top:12px">${ANNC.map(c=>`<button type="button" data-c="${c}" style="background:${c}" aria-pressed="${c===col}" aria-label="Colour ${c}"></button>`).join("")}</div><div class="row" style="margin-top:6px"><span class="small muted">Size</span><input class="sl-i grow" id="a-size" type="range" min="1" max="30" value="${size}" aria-label="Size" style="--a:0%;--b:${(size-1)/29*100}%"><button class="btn small" id="a-undo" aria-label="Undo">${ic("undo")}</button><button class="btn small danger" id="a-clear">Clear</button></div>`);
+    el.querySelectorAll("#sw [data-c]").forEach(b=>b.onclick=()=>{col=b.dataset.c;el.querySelectorAll("#sw [data-c]").forEach(x=>x.setAttribute("aria-pressed",x===b));if(selT&&ann.includes(selT)&&ov.dataset.mode==="text"){selT.c=col;paintOv()}});
+    const sz=$("#a-size");sz.oninput=()=>{size=+sz.value;sz.style.setProperty("--b",(size-1)/29*100+"%");if(selT&&ann.includes(selT)&&ov.dataset.mode==="text"){selT.s=size;paintOv()}};
     $("#a-undo").onclick=()=>{ann.pop();paintOv();ed.dots()};$("#a-clear").onclick=()=>{if(ann.length){const keep=ann.splice(0);paintOv();ed.dots();toast("Cleared.",()=>{ann.push(...keep);paintOv();ed.dots()})}}};
   const tools=[
     {id:"text",label:"Text",icon:"type",mod:()=>ann.some(a=>a.k==="t"),panel:el=>{
       el.innerHTML=`<div class="row"><input class="t" id="tx-in" type="text" maxlength="60" placeholder="Type or speak your text" aria-label="Your text">${micBtn()}<button class="btn primary icon" id="tx-add" aria-label="Add text">${ic("plus")}</button></div><p class="small muted" style="margin:6px 0 0">Drag the text on the photo to move it.</p>`;wireMics(el);swatches(el);
-      const add=()=>{const t=$("#tx-in").value.trim();if(!t){$("#tx-in").focus();return}if(listening)listening.stop();ann.push({k:"t",t,c:col,s:size,x:.5,y:.5});$("#tx-in").value="";paintOv();ed.dots()};
+      const add=()=>{const t=$("#tx-in").value.trim();if(!t){$("#tx-in").focus();return}if(listening)listening.stop();{const a={k:"t",t,c:col,s:size,x:.5,y:.5};ann.push(a);selT=a}$("#tx-in").value="";paintOv();ed.dots()};
       $("#tx-add").onclick=add;$("#tx-in").onkeydown=e=>{if(e.key==="Enter")add()}},onSelect:()=>{if(ov){ov.style.pointerEvents="auto";ov.dataset.mode="text"}}},
     {id:"look",label:"Looks",icon:"wand",mod:()=>st.preset>0,panel:el=>presetsPanel(el,thumbSrc,st,paint)},
     {id:"crop",label:"Crop",icon:"crop",mod:()=>!!(st.rot||st.flip||st.crop||st.ang),panel:el=>{
@@ -3285,7 +3285,7 @@ async function editSheet(p,m){
   const pt=e=>{const r=ov.getBoundingClientRect();return[(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height]};
   const hit=([x,y])=>{const g=ov.getContext("2d");for(let i=ann.length-1;i>=0;i--){const a=ann[i];if(a.k!=="t")continue;g.font=tfont(a.s,ov.width);const tw=g.measureText(a.t).width/ov.width,th=a.s*.009*1.2;if(Math.abs(x-a.x)<=tw/2+.03&&Math.abs(y-a.y)<=th/2+.03*ov.width/ov.height)return a}return null};
   ov.onpointerdown=e=>{const mode=ov.dataset.mode;if(!mode)return;e.preventDefault();try{ov.setPointerCapture(e.pointerId)}catch{}const q=pt(e);
-    if(mode==="draw"){const a={k:"s",c:col,s:size,p:[q]};ann.push(a);drag={a,t:"s"}}else{const a=hit(q);if(a)drag={a,t:"t",dx:a.x-q[0],dy:a.y-q[1]}}paintOv()};
+    if(mode==="draw"){const a={k:"s",c:col,s:size,p:[q]};ann.push(a);drag={a,t:"s"}}else{const a=hit(q);if(a){selT=a;col=a.c;size=a.s;const z=document.getElementById("a-size");if(z){z.value=a.s;z.style.setProperty("--b",(a.s-1)/29*100+"%")}document.querySelectorAll("#sw [data-c]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.c===col));drag={a,t:"t",dx:a.x-q[0],dy:a.y-q[1]}}}paintOv()};
   ov.onpointermove=e=>{if(!drag)return;const q=pt(e);if(drag.t==="s")drag.a.p.push(q);else{drag.a.x=Math.min(1,Math.max(0,q[0]+drag.dx));drag.a.y=Math.min(1,Math.max(0,q[1]+drag.dy))}paintOv()};
   ov.onpointerup=ov.onpointercancel=()=>{drag=null;ed.dots()};
   ed.onClose=()=>{glh&&glh.destroy()};
