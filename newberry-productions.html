@@ -1006,7 +1006,7 @@ let pubPref=false;
 const shareSw=(p,id)=>p&&p.showcase&&p.showcase.on?`<div class="pubrow"><span>${ic("globe","sm")}Show photos on the public page</span><button type="button" role="switch" class="sw" id="${id}" aria-checked="${pubPref}" aria-label="Show photos on the public page"><i></i></button></div>`:"";
 const pubOn=id=>{const b=document.getElementById(id);return !!b&&b.getAttribute("aria-checked")==="true"};
 const wirePub=id=>{const b=document.getElementById(id);if(b)b.onclick=()=>{pubPref=b.getAttribute("aria-checked")!=="true";b.setAttribute("aria-checked",String(pubPref));fb("tick")}};
-const postedToast=name=>navigator.onLine===false?"Saved on this device. It sends when you are online.":name?"Posted to "+name:"Posted.";
+const postedToast=name=>navigator.onLine===false?"Saved on this device. It sends when you are online.":name?"Saved to "+name:"Saved.";
 function postCard(p,l){
   const ms=postMedia(l),tw=twLabel(l);
   const grid=ms.length?`<div class="pm pm${Math.min(ms.length,4)}">${ms.slice(0,4).map((m,i)=>`<button type="button" class="pmi" data-pm="${l.id}:${i}" aria-label="Open ${m.type==="video"?"video":"photo"} ${i+1} of ${ms.length}">${m.type==="video"?`<video data-mid="${m.id}" muted playsinline preload="metadata"></video><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${m.id}" alt="" loading="lazy">`}${i===3&&ms.length>4?`<span class="pmore">+${ms.length-4}</span>`:""}</button>`).join("")}</div>`:"";
@@ -1033,7 +1033,7 @@ function storyTab(p){
   const mini=`<div class="card composer mini"><button class="cmini" id="sc-open" type="button" aria-label="${dr?"Continue your draft":"Write a post"}"><span class="pavs" aria-hidden="true">${esc(initials(who()||"me"))}</span><span class="cmt${dr?" dr":""}">${dr?"Draft: "+esc(dr.slice(0,60)):"What happened today?"}</span></button><button class="x cam" id="sc-cam" type="button" aria-label="Add a photo or video">${ic("camera")}</button><input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"></div>`;
   const full=`<div class="card composer"><div class="row" style="align-items:flex-start"><textarea class="t ta" rows="3" id="sc-t" placeholder="What happened today?" aria-label="Write a post">${esc(draftGet(p.id))}</textarea>${micBtn()}</div>${ideaChip()}
     <div class="att" id="sc-att"></div>${shareSw(p,"sc-pub")}${offLine()}
-    ${twSelects("sc-tm","sc-wk",tp)}<div class="row between wr" style="margin-top:10px"><button class="btn small" id="sc-add" type="button">${ic("camera")}Photo or video</button><span class="row"><button class="btn small" id="sc-min" type="button">Cancel</button><button class="btn primary" id="sc-post" type="button">${ic("send")}Post</button></span></div>
+    ${twSelects("sc-tm","sc-wk",tp)}<div class="row between wr" style="margin-top:10px"><button class="btn small" id="sc-add" type="button">${ic("camera")}Photo or video</button><span class="row"><button class="btn small" id="sc-min" type="button">Cancel</button><button class="btn primary" id="sc-post" type="button">${ic("send")}Save</button></span></div>
     <input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"></div>`;
   return (isOpen2?full:mini)+
   bar+
@@ -1265,7 +1265,7 @@ function captureSheet(){
       <div class="att" id="cp-att"></div>
       ${shareSw(p,"cp-pub")}${offLine()}
       ${twSelects("cp-tm","cp-wk",twLast(pid))}
-      <button class="btn primary block" id="cp-go" type="button" style="margin-top:14px">${ic("send")}Post to ${esc(p?p.name:"")}</button>`;
+      <button class="btn primary block" id="cp-go" type="button" style="margin-top:14px">${ic("send")}Save to ${esc(p?p.name:"")}</button>`;
       wireMics(root);root.querySelectorAll(".ta").forEach(autosize);
       root.querySelectorAll("[data-pp]").forEach(b=>b.onclick=()=>{const t=$("#cp-t").value;draftSet(pid,"");pid=b.dataset.pp;remember();draftSet(pid,t);draw();$("#cp-t").value=t});
       const att=root.querySelector("#cp-att"),drawAtt=()=>{att.innerHTML=attHTML(files);att.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{const x=files.splice(+b.dataset.rm,1)[0];try{URL.revokeObjectURL(x.url)}catch{}drawAtt()})};
@@ -1361,7 +1361,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.9.4";
+const APP_VER="6.9.5";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
