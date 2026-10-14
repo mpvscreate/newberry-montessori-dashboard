@@ -876,7 +876,9 @@ const goalPct=g=>g.targets&&g.targets.length?Math.round(g.targets.filter(t=>t.do
 const lastAct=p=>{let t=0;const u=x=>{if(x&&x.t>t)t=x.t};(p.log||[]).forEach(u);p.goals.forEach(g=>{(g.comments||[]).forEach(u);if(g.doneAt>t)t=g.doneAt;(g.targets||[]).forEach(x=>{if(x.doneAt>t)t=x.doneAt})});S.media.forEach(m=>{if(m.pid===p.id&&!m.del)u(m)});(p.weeks||[]).forEach(w=>{const d=w.date?new Date(w.date+"T12:00").getTime():0;if(d>t)t=d});return t};
 const actState=p=>{const t=lastAct(p),d=(Date.now()-t)/864e5,open=p.goals.some(g=>!g.done);if(!t)return open?"quiet":"new";return d<=7?"active":d>=21&&open?"quiet":"ok"};
 const prodPct=p=>p.goals.length?Math.round(p.goals.reduce((a,g)=>a+goalPct(g),0)/p.goals.length):0;
-const who=()=>user?.email?.split("@")[0]||"me";
+const NAMEK="ms-prod-name";
+const myName=()=>{try{return(localStorage.getItem(NAMEK)||"").trim()}catch{return""}};
+const who=()=>myName()||user?.email?.split("@")[0]||"me";
 const fmt=t=>new Date(t).toLocaleDateString(undefined,{day:"numeric",month:"short"})+" "+new Date(t).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"});
 
 function theme(m){if(m){try{m==="auto"?localStorage.removeItem(THEME):localStorage.setItem(THEME,m)}catch{}if(m==="auto")document.documentElement.removeAttribute("data-theme");else document.documentElement.setAttribute("data-theme",m)}let t="auto";try{t=localStorage.getItem(THEME)||"auto"}catch{}return t}
@@ -1066,7 +1068,8 @@ function delPost(p,l){
 }
 function postEdit(p,l){
   let keep=postMedia(l).map(m=>m.id),add=[];
-  sheet("Edit post",`<label class="f" for="pe-t">Text</label><div class="row" style="align-items:flex-start"><textarea class="t ta" id="pe-t" rows="4">${esc(l.text)}</textarea>${micBtn()}</div>
+  sheet("Edit post",`<label class="f" for="pe-by">Posted by</label><input class="t" id="pe-by" type="text" maxlength="30" list="pe-bl" value="${esc(l.by||"")}" placeholder="Name"><datalist id="pe-bl">${p.members.map(m=>`<option value="${esc(m)}">`).join("")}</datalist>
+    <label class="f" for="pe-t">Text</label><div class="row" style="align-items:flex-start"><textarea class="t ta" id="pe-t" rows="4">${esc(l.text)}</textarea>${micBtn()}</div>
     <label class="f">Term and week</label>${twSelects("pe-tm","pe-wk",{term:l.term||0,wk:l.wk||0})}
     <label class="f">Photos and videos</label><div class="att" id="pe-m"></div><button class="btn small" id="pe-add" type="button">${ic("camera")}Add photos or videos</button><input type="file" id="pe-f" accept="image/*,video/*" multiple class="sr" tabindex="-1" aria-label="Add photos or videos">
     <div class="row" style="margin-top:18px"><button class="btn danger" id="pe-del" type="button">${ic("trash")}Delete</button><span class="grow"></span><button class="btn primary" id="pe-ok" type="button">Save</button></div>`,(d,close)=>{
@@ -1084,7 +1087,7 @@ function postEdit(p,l){
       (l.m||[]).filter(id=>!keep.includes(id)).forEach(id=>{const m=S.media.find(x=>x.id===id);if(m){m.del=true;m.delAt=Date.now();if(sm.up)delete sm.up[m.id]}});
       const ids=add.length?await addFilesIds(p.id,add.map(x=>x.file),""):[];ids.forEach(mid=>{const m=S.media.find(x=>x.id===mid);if(m)m.post=l.id});
       add.forEach(x=>{try{URL.revokeObjectURL(x.url)}catch{}});
-      Object.assign(l,{text,term:ch.term,wk:ch.wk,m:[...keep,...ids],ed:Date.now()});save(p);fb("done");close();render();
+      Object.assign(l,{text,by:(d.querySelector("#pe-by").value.trim()||l.by),term:ch.term,wk:ch.wk,m:[...keep,...ids],ed:Date.now()});save(p);fb("done");close();render();
     };
   });
 }
@@ -1349,7 +1352,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.8.1";
+const APP_VER="6.9.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -2193,6 +2196,7 @@ function wireHome(){
 const foldOpen=new Set();
 function morePage(){const t=theme();
   return `<div class="page-h"><h2>Settings</h2></div><div class="card"><h2>Appearance</h2><div class="segc" role="group" aria-label="Theme">${[["auto","Auto","device"],["light","Light","sun"],["dark","Dark","moon"]].map(([k,l,i])=>`<button data-th="${k}" aria-label="${l}" aria-pressed="${t===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div>
+  <div class="card"><h2>Your name</h2><p class="muted small" style="margin-top:0">Shown on the posts and notes you write on this device.</p><div class="row"><input class="t" id="my-name" type="text" maxlength="30" autocomplete="name" placeholder="For example: Mrs Smith" value="${esc(myName())}" aria-label="Your name"><button class="btn primary" id="my-name-ok" type="button">Save</button></div></div>
   <div class="card"><h2>Sound and touch</h2><div class="row between" style="margin-bottom:12px"><div><b>Sound effects</b><div class="small muted">Soft tones when you tick, add or finish</div></div><button type="button" role="switch" class="sw" id="fx-s" aria-label="Sound effects" aria-checked="${SFX.sound}"><i></i></button></div><div class="row between"><div><b>Vibration</b><div class="small muted">${navigator.vibrate?"A light buzz on taps and ticks":"Not supported on this device (iPhone does not allow it)"}</div></div><button type="button" role="switch" class="sw" id="fx-v" aria-label="Vibration" aria-checked="${SFX.vib&&!!navigator.vibrate}" ${navigator.vibrate?"":"disabled"}><i></i></button></div></div>
   ${liveCard()}
   <details class="fold" data-f="tools"${foldOpen.has("tools")?" open":""}><summary class="foldh"><span>Display and tools</span>${ic("chev")}</summary>
@@ -2207,7 +2211,7 @@ function morePage(){const t=theme();
   ${binCard()}
   <div class="card"><h2>Start fresh</h2><p class="muted small" style="margin-top:0">Clear all productions, goals, photos and records to begin a new year. A backup copy stays on this device.</p><button class="btn danger" id="fresh">Start fresh…</button></div>
   <div class="card"><h2>This device</h2><p class="muted small" style="margin-top:0">${LOGIN?`Signed in as ${esc(user.email)}. You only need to sign in once on this device.`:LV.on?"Connected with your school code. Everything you add is shared live.":"Not connected. Everything you add is saved on this device only."}</p><div class="row wr">${LOGIN?`<button class="btn" id="out">${ic("logout")}Sign out</button>`:""}${getPin()?`<button class="btn" id="lk">${ic("lock")}Lock now</button>`:""}</div></div></details>`}
-function wireMore(){wireLive();$("#tour-again").onclick=()=>tourSheet();document.querySelectorAll(".fold").forEach(d=>d.ontoggle=()=>{d.open?foldOpen.add(d.dataset.f):foldOpen.delete(d.dataset.f)});$("#bin-open").onclick=binSheet;$("#fresh").onclick=freshSheet;$("#fw-test").onclick=()=>fireworks("Your production");$("#kiosk").onclick=startKiosk;
+function wireMore(){wireLive();{const save2=()=>{const v=$("#my-name").value.trim();try{if(v)localStorage.setItem(NAMEK,v);else localStorage.removeItem(NAMEK)}catch{}fb("done");toast(v?"Saved. New posts will show "+v+".":"Name cleared.");render()};$("#my-name-ok").onclick=save2;$("#my-name").onkeydown=e=>{if(e.key==="Enter")save2()}}$("#tour-again").onclick=()=>tourSheet();document.querySelectorAll(".fold").forEach(d=>d.ontoggle=()=>{d.open?foldOpen.add(d.dataset.f):foldOpen.delete(d.dataset.f)});$("#bin-open").onclick=binSheet;$("#fresh").onclick=freshSheet;$("#fw-test").onclick=()=>fireworks("Your production");$("#kiosk").onclick=startKiosk;
   $("#fx-s").onclick=e=>{SFX.sound=!SFX.sound;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.sound);if(SFX.sound)fb("tick")};$("#fx-v").onclick=e=>{SFX.vib=!SFX.vib;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.vib);if(SFX.vib)fb("tick")};
   document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#pinset")&&($("#pinset").onclick=setPin);$("#pinchg")&&($("#pinchg").onclick=()=>{removePinThenSet()});$("#pinoff")&&($("#pinoff").onclick=removePin);$("#lk")&&($("#lk").onclick=lockNow);$("#out")&&($("#out").onclick=()=>{if(!confirm("Sign out of this device? You will need to sign in again."))return;if(sb)sb.auth.signOut();else{user=null;try{localStorage.removeItem(USERK)}catch{}render()}});
   $("#bk-out").onclick=()=>{const blob=new Blob([JSON.stringify({app:"ms-productions",v:1,at:new Date().toISOString(),prods:S.prods},null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ms-productions-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")};
