@@ -1369,7 +1369,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.12.0";
+const APP_VER="6.12.1";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1887,7 +1887,7 @@ function rollTerm(p,label){
   (p.terms=p.terms||[]).push(snap);
   p.carry={from:snap.label,work:p.txt.hwork||"",people:p.txt.hpeople||"",funds:p.hand.funds||""};
   const carried=p.hand.res.map(r=>({id:uid(),item:r.item,src:"Have",who:""}));
-  p.txt={};p.roles=[];p.ideas=[];p.risks=[];p.prop={};p.bud={items:[]};p.exp=[];p.inc=[];p.weeks=[];p.refl={};p.rev={};p.hand={res:[]};p.res=carried;p.ready=null;
+  p.txt={};p.roles=[];p.ideas=[];p.risks=[];p.prop={};p.bud={items:[]};p.exp=[];p.inc=[];p.weeks=[];p.refl={};p.srev={};p.rev={};p.hand={res:[]};p.res=carried;p.ready=null;
   p.info={term:label,mentor:p.info.mentor||"",gate:p.info.gate};
   p.goals=p.goals.filter(g=>!g.done);p.goals.forEach(g=>{if(g.targets&&g.targets.length){g.targets=g.targets.filter(t=>!t.done);syncGoal(g)}});
 }
