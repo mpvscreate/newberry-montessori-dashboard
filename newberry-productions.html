@@ -959,8 +959,8 @@ async function addFiles(pid,files){
 function openMediaSheet(m){
   sheet(m.type==="video"?"Video":"Photo",`${m.type==="video"?`<video data-mid="${m.id}" controls playsinline style="width:100%;border-radius:16px;margin-top:8px;background:#000"></video>`:`<img data-mid="${m.id}" alt="" style="width:100%;border-radius:16px;margin-top:8px">`}<label class="f" for="mc">Caption</label><div class="row"><textarea class="t ta" rows="1" id="mc">${esc(m.cap)}</textarea>${micBtn()}</div>
   <label class="f">Consent to share</label><div class="chips" id="mcon" role="group" aria-label="Consent to share">${CONSENT.map(([k,l])=>`<button type="button" class="chip" data-c="${k}" aria-pressed="${m.consent===k}">${l}</button>`).join("")}</div>
-  <p class="muted small">${esc(m.by)} · ${fmt(m.t)}</p><div class="row wr"><button class="btn danger" id="del">${ic("trash")}Delete</button><span class="grow"></span><button class="btn" id="med" type="button">${ic("wand")}Edit</button>${m.type!=="video"?`<button class="btn" id="mcov" type="button">${ic("image")}${P(m.pid)&&P(m.pid).cover===m.id?"Cover photo":"Set as cover"}</button>`:""}<button class="btn primary" id="ok">Done</button></div>`,(d,close)=>{
-    hydrate(d);wireMics(d);{const eb=d.querySelector("#med");if(eb)eb.onclick=()=>{close();setTimeout(()=>{const pp=P(m.pid);m.type==="video"?videoEditSheet(pp,m):editSheet(pp,m)},200)}}{const cv=d.querySelector("#mcov");if(cv)cv.onclick=()=>{const pp=P(m.pid);if(pp){pp.cover=m.id;save(pp);fb("done");close();render();toast("Cover photo set.")}}}d.querySelectorAll("#mcon .chip").forEach(b=>b.onclick=()=>{const was=b.getAttribute("aria-pressed")==="true";d.querySelectorAll("#mcon .chip").forEach(x=>x.setAttribute("aria-pressed","false"));b.setAttribute("aria-pressed",String(!was))});
+  <p class="muted small">${esc(m.by)} · ${fmt(m.t)}</p><div class="row wr"><button class="btn danger" id="del">${ic("trash")}Delete</button><span class="grow"></span><button class="btn" id="med" type="button">${ic("wand")}Edit</button><button class="btn" id="mdr" type="button">${ic("cloud")}Drive</button>${m.type!=="video"?`<button class="btn" id="mcov" type="button">${ic("image")}${P(m.pid)&&P(m.pid).cover===m.id?"Cover photo":"Set as cover"}</button>`:""}<button class="btn primary" id="ok">Done</button></div>`,(d,close)=>{
+    hydrate(d);wireMics(d);{const db=d.querySelector("#mdr");if(db)db.onclick=()=>{const pp=P(m.pid);close();saveToDrive([m.id],pp)}}{const eb=d.querySelector("#med");if(eb)eb.onclick=()=>{close();setTimeout(()=>{const pp=P(m.pid);m.type==="video"?videoEditSheet(pp,m):editSheet(pp,m)},200)}}{const cv=d.querySelector("#mcov");if(cv)cv.onclick=()=>{const pp=P(m.pid);if(pp){pp.cover=m.id;save(pp);fb("done");close();render();toast("Cover photo set.")}}}d.querySelectorAll("#mcon .chip").forEach(b=>b.onclick=()=>{const was=b.getAttribute("aria-pressed")==="true";d.querySelectorAll("#mcon .chip").forEach(x=>x.setAttribute("aria-pressed","false"));b.setAttribute("aria-pressed",String(!was))});
     $("#ok").onclick=()=>{m.cap=$("#mc").value.trim();const cc=d.querySelector("#mcon [aria-pressed=true]");m.consent=cc?cc.dataset.c:"";save(m);close();render()};
     $("#del").onclick=()=>{m.del=true;m.delAt=Date.now();save(m);close();render();if(sm.up)delete sm.up[m.id];
       toast("Deleted.",()=>{m.del=false;save(m);render()})}});
@@ -1361,7 +1361,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.9.5";
+const APP_VER="6.10.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -2561,6 +2561,7 @@ function shareMenu(p){
     rows.push(["chat","Weekly digest","A short summary to send on WhatsApp",digestSheet]);
   }else{
     rows.push(["play","Play slideshow","Photos and videos from "+p.name+", with captions",()=>openViewer(storyMediaList(p,storyF.pid===p.id?{term:storyF.term,wk:storyF.wk}:{}),0,true)]);
+    rows.push(["cloud","Save to Google Drive","All photos and videos from "+p.name+", up to 30 files",()=>saveToDrive(mediaOf(p).slice().reverse().map(m=>m.id),p)]);
     rows.push(["image","Send photos to WhatsApp","Up to 20 photos from the story, sent as pictures",()=>sharePhotos(storyMediaList(p),p.name)]);
     if(canRecord())rows.push(["download","Save slideshow as a video","A video file to send or play on any screen",()=>slideshowVideo(storyMediaList(p).filter(x=>x.m.type!=="video"))]);
     rows.push(["share","Showcase page","A public page for families and the community",()=>showcaseSheet(p)]);
@@ -3040,7 +3041,7 @@ function mediaTab(p){
   ${ms.length?`<button class="btn small" id="seltog" aria-pressed="${selecting}">${ic(selecting?"x":"check")}${selecting?"Done":"Select"}</button>`:""}</div>`+body+
   `<input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1">`+
   (selecting?(n?`<div style="height:130px" aria-hidden="true"></div><div class="selbar" role="toolbar" aria-label="Actions for selected media"><div class="selrow"><span class="selcount" aria-live="polite">${n} selected</span><button class="btn small danger" id="s-del" aria-label="Delete selected">${ic("trash")}</button></div>
-    <div class="selacts"><button class="btn primary small" id="s-wa">${ic("chat")}WhatsApp</button>${n===1?`<button class="btn small" id="s-ed">${ic("sliders")}Edit photo</button>`:""}<button class="btn small" id="s-con">${ic("shield")}Consent</button></div></div>`:`<p class="hint" style="text-align:center">Tap photos or videos to select them.</p>`):fabBtn("addm","Add photo or video"));
+    <div class="selacts"><button class="btn primary small" id="s-wa">${ic("chat")}WhatsApp</button>${n===1?`<button class="btn small" id="s-ed">${ic("sliders")}Edit photo</button>`:""}<button class="btn small" id="s-dr">${ic("cloud")}Drive</button><button class="btn small" id="s-con">${ic("shield")}Consent</button></div></div>`:`<p class="hint" style="text-align:center">Tap photos or videos to select them.</p>`):fabBtn("addm","Add photo or video"));
 }
 function wireMedia(p){
   document.querySelectorAll("[data-back]").forEach(b=>b.onclick=()=>{tab=b.dataset.back;render()});
@@ -3049,6 +3050,7 @@ function wireMedia(p){
   $("#addm")&&($("#addm").onclick=()=>$("#pf").click());$("#e-pf")&&($("#e-pf").onclick=()=>$("#pf").click());
   $("#pf").onchange=async e=>{const n=await addFiles(p.id,e.target.files);if(n){save();fb("add")}render()};
   if($("#s-wa"))$("#s-wa").onclick=()=>waSheet(p,[...sel]);
+  if($("#s-dr"))$("#s-dr").onclick=()=>saveToDrive([...sel],p);
   if($("#s-con"))$("#s-con").onclick=()=>consentSheet([...sel]);
   if($("#s-ed"))$("#s-ed").onclick=()=>{const m=S.media.find(x=>x.id===[...sel][0]);m.type==="video"?videoEditSheet(p,m):editSheet(p,m)};
   if($("#s-del"))$("#s-del").onclick=()=>{const ids=[...sel],ms=ids.map(id=>S.media.find(m=>m.id===id));ms.forEach(m=>{m.del=true;m.delAt=Date.now();save(m);if(sm.up)delete sm.up[m.id]});clearSel();render();
@@ -3060,6 +3062,19 @@ function wireMedia(p){
 }
 
 /* share selected media with a WhatsApp message */
+/* Google Drive: the share menu lists the Drive app; on a computer the files download and Drive opens */
+async function saveToDrive(ids,p){
+  if(!ids.length){toast("No photos or videos to save yet.");return}
+  toast("Getting the files ready…");
+  const files=await mediaFiles(ids.slice(0,30),p);
+  if(!files.length){toast("Couldn't read the files on this device.");return}
+  try{
+    if(navigator.canShare&&navigator.canShare({files})){await navigator.share({files,title:p.name});return}
+  }catch(e){if(e&&e.name==="AbortError")return}
+  files.forEach((fl,i)=>setTimeout(()=>{const a=document.createElement("a");a.href=URL.createObjectURL(fl);a.download=fl.name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),5000)},i*350));
+  toast(files.length+" file"+(files.length===1?"":"s")+" downloaded. Upload them in Google Drive.");
+  setTimeout(()=>{try{window.open("https://drive.google.com/drive/my-drive","_blank","noopener")}catch{}},files.length*350+300);
+}
 async function mediaFiles(ids,p){
   const out=[];
   for(const id of ids){
