@@ -852,7 +852,7 @@ const DEFAULTS=[["Maintenance","wrench",0],["Media","film",2],["Gardening","spro
 /* sign-in is switched off for now: the app opens with a PIN and keeps data on this device. Set LOGIN=true to bring staff sign-in and cloud sync back. */
 /* sign-in is switched off for now: the app opens straight in and keeps data on this device. Set LOGIN=true to bring staff sign-in and cloud sync back. An optional PIN can still lock a device. */
 const LOGIN=false,PINLEN=3;
-let S=load(),sm=loadSync(),user=null,sb=null,route="home",tab="story",syncState=LOGIN?"":"Saved on this device",authReady=false,listening=null;
+let S=load(),sm=loadSync(),user=null,sb=null,route="home",tab="plan",syncState=LOGIN?"":"Saved on this device",authReady=false,listening=null;
 function upgrade(d){
   const now=Date.now();let ch=false;
   const c=d.prods.find(p=>p.id==="p6"&&p.name==="Cooking");if(c){c.name="Baking";c.icon="bake";c.u=now;ch=true}
@@ -1308,7 +1308,7 @@ function todaySheet(){
     ${d.soon.length?`<h3 class="sub-h">Due this week</h3>${d.soon.map(x=>row(x,"due "+fd(x.g.due))).join("")}`:""}
     ${d.quiet.length?`<h3 class="sub-h">Gone quiet</h3><p class="small muted" style="margin:0 0 6px">No updates for over a week.</p>${d.quiet.map(x=>row(x,"last update "+dayLabel(x.last).toLowerCase())).join("")}`:""}
     ${d.any?"":`<div class="empty"><h3>All caught up</h3>Nothing overdue or quiet right now.</div>`}`,(dd,close)=>{
-    dd.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{close();tab="story";nav("p/"+b.dataset.go)});
+    dd.querySelectorAll("[data-go]").forEach(b=>b.onclick=()=>{close();tab="plan";nav("p/"+b.dataset.go)});
     const dg=dd.querySelector("#t-dg");if(dg)dg.onclick=()=>{close();setTimeout(digestSheet,150)};
     const r=dd.querySelector("#t-recap");if(r)r.onclick=()=>{try{localStorage.setItem(RECAPK,String(weekStart(Date.now())+1))}catch{}close();render();reportSheet(null)};
   });
@@ -1351,7 +1351,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.7.0";
+const APP_VER="6.7.1";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -2190,7 +2190,7 @@ const actRow=f=>{const m=f.m||(f.l&&postMedia(f.l).find(x=>x.type!=="video"));re
 const fab=()=>`<div class="fab-wrap"><button class="fab" id="addp" aria-label="New production">${ic("plus")}<span>New production</span></button></div>`;
 function wireHome(){
   {const a=$("#wk-play");if(a)a.onclick=()=>openViewer(weekMediaList(),0,true);const b=$("#wk-sh");if(b)b.onclick=()=>shareMenu(null);const x=$("#wk-x");if(x)x.onclick=()=>{try{localStorage.setItem(RECAPK,String(Date.now()))}catch{}render()}}
-  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{tab="story";nav("p/"+b.dataset.open)});
+  document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{tab="plan";nav("p/"+b.dataset.open)});
   $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#shr-btn")&&($("#shr-btn").onclick=()=>shareMenu(null));$("#ov-late")&&($("#ov-late").onclick=todaySheet);$("#ov-more")&&($("#ov-more").onclick=()=>{ovMore=!ovMore;render()});$("#today")&&($("#today").onclick=todaySheet);
 }
 const foldOpen=new Set();
@@ -2242,7 +2242,7 @@ function prodSheet(p){
 }
 
 /* production view */
-const tabsFor=p=>[["story","Story","pulse"],["plan","Plan","compass"],...(p.useMoney?[["money","Money","cash"]]:[]),["wrap","Wrap-up","flag"]];
+const tabsFor=p=>[["plan","Plan","compass"],["story","Story","pulse"],...(p.useMoney?[["money","Money","cash"]]:[]),["wrap","Wrap-up","flag"]];
 const lateCount=p=>{const t=todayStr();return p.goals.filter(g=>!g.done&&g.due&&g.due<t).length};
 /* sound + haptic feedback (sounds are synthesised, no files) */
 const FXK="ms-prod-fx";
@@ -2290,7 +2290,7 @@ function fb(k){if(SFX.vib){try{navigator.vibrate&&navigator.vibrate(HAP[k])}catc
 
 const openG=new Set(),seenP=new Set();
 function prodView(p){
-  const TB=tabsFor(p);if(!TB.some(t=>t[0]===tab)&&tab!=="media")tab="story";
+  const TB=tabsFor(p);if(!TB.some(t=>t[0]===tab)&&tab!=="media")tab="plan";
   const photos=mediaOf(p),cov=(p.cover&&photos.find(m=>m.id===p.cover&&m.type!=="video"))||photos.find(m=>m.type!=="video");
   const last=lastActivity(p);
   return `<div class="pv"><div class="pv-side"><div class="phero${cov?" hascover":""}" style="--pc:${p.color}">${cov?`<img class="ph-cover" data-mid="${cov.id}" alt="">`:""}
