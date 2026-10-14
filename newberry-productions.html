@@ -1351,7 +1351,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.7.1";
+const APP_VER="6.7.2";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -3224,6 +3224,10 @@ async function editSheet(p,m){
     const sz=$("#a-size");sz.oninput=()=>{size=+sz.value;sz.style.setProperty("--b",(size-1)/39*100+"%")};
     $("#a-undo").onclick=()=>{ann.pop();paintOv();ed.dots()};$("#a-clear").onclick=()=>{if(ann.length){const keep=ann.splice(0);paintOv();ed.dots();toast("Cleared.",()=>{ann.push(...keep);paintOv();ed.dots()})}}};
   const tools=[
+    {id:"text",label:"Text",icon:"type",mod:()=>ann.some(a=>a.k==="t"),panel:el=>{
+      el.innerHTML=`<div class="row"><input class="t" id="tx-in" type="text" maxlength="60" placeholder="Type or speak your text" aria-label="Your text">${micBtn()}<button class="btn primary icon" id="tx-add" aria-label="Add text">${ic("plus")}</button></div><p class="small muted" style="margin:6px 0 0">Drag the text on the photo to move it.</p>`;wireMics(el);swatches(el);
+      const add=()=>{const t=$("#tx-in").value.trim();if(!t){$("#tx-in").focus();return}if(listening)listening.stop();ann.push({k:"t",t,c:col,s:size,x:.5,y:.5});$("#tx-in").value="";paintOv();ed.dots()};
+      $("#tx-add").onclick=add;$("#tx-in").onkeydown=e=>{if(e.key==="Enter")add()}},onSelect:()=>{if(ov){ov.style.pointerEvents="auto";ov.dataset.mode="text"}}},
     {id:"look",label:"Looks",icon:"wand",mod:()=>st.preset>0,panel:el=>presetsPanel(el,thumbSrc,st,paint)},
     {id:"crop",label:"Crop",icon:"crop",mod:()=>!!(st.rot||st.flip||st.crop||st.ang),panel:el=>{
       const RT=[["Free",0],["Original","o"],["Square",1],["4:3",4/3],["3:4",3/4],["16:9",16/9],["9:16",9/16]];
@@ -3237,16 +3241,13 @@ async function editSheet(p,m){
       $("#e-rs").onclick=()=>{st.rot=0;st.flip=false;st.ang=0;ratI=0;cropu.reset();geo();ed.select("crop")}}},
     ...adjTools(st,paint),
     {id:"draw",label:"Draw",icon:"pencil",mod:()=>ann.some(a=>a.k==="s"),panel:el=>{el.innerHTML=`<p class="small muted" style="margin:0">Draw with your finger on the photo.</p>`;swatches(el)},onSelect:()=>{ov.style.pointerEvents="auto";ov.dataset.mode="draw"}},
-    {id:"text",label:"Text",icon:"type",mod:()=>ann.some(a=>a.k==="t"),panel:el=>{
-      el.innerHTML=`<div class="row"><input class="t" id="tx-in" type="text" maxlength="60" placeholder="Type or speak your text" aria-label="Your text">${micBtn()}<button class="btn primary icon" id="tx-add" aria-label="Add text">${ic("plus")}</button></div><p class="small muted" style="margin:6px 0 0">Drag the text on the photo to move it.</p>`;wireMics(el);swatches(el);
-      const add=()=>{const t=$("#tx-in").value.trim();if(!t){$("#tx-in").focus();return}if(listening)listening.stop();ann.push({k:"t",t,c:col,s:size,x:.5,y:.5});$("#tx-in").value="";paintOv();ed.dots()};
-      $("#tx-add").onclick=add;$("#tx-in").onkeydown=e=>{if(e.key==="Enter")add()}},onSelect:()=>{ov.style.pointerEvents="auto";ov.dataset.mode="text"}}
+
   ];
   tools.forEach(t=>{const f=t.onSelect,dt=t.id==="draw"||t.id==="text";t.onSelect=()=>{curTool=t.id;if(ov&&!dt){ov.style.pointerEvents="none";ov.dataset.mode=""}f&&f();if(cv)paint()}});
   const dirty=()=>st.rot||st.flip||st.crop||st.ang||st.b||st.c||st.s||st.w||st.sh||st.hi||st.sd||st.vg||ann.length;
-  const ed=editorShell({title:"Edit photo",tools,dirty,start:"look"});
+  const ed=editorShell({title:"Edit photo",tools,dirty,start:"text"});
   ed.stage.innerHTML=`<div class="ed-wrap"><canvas id="ec" aria-label="Photo preview"></canvas><canvas id="ov" aria-hidden="true"></canvas><button class="cmp-btn" id="cmp" aria-label="Hold to see the original">${ic("eye")}</button></div>`;
-  cv=$("#ec");ov=$("#ov");cropu=cropUI(document.querySelector(".ed-wrap"),st,{ar:arNow,onCommit:()=>{if(ann.length){ann.length=0;toast("Drawings cleared because the shape changed.")}ed.dots()}});paint();
+  cv=$("#ec");ov=$("#ov");if(curTool==="text"){ov.style.pointerEvents="auto";ov.dataset.mode="text"}cropu=cropUI(document.querySelector(".ed-wrap"),st,{ar:arNow,onCommit:()=>{if(ann.length){ann.length=0;toast("Drawings cleared because the shape changed.")}ed.dots()}});paint();
   const hold=v=>{compare=v;paint()};const cb=$("#cmp");cb.onpointerdown=e=>{e.preventDefault();hold(true)};cb.onpointerup=cb.onpointerleave=cb.onpointercancel=()=>compare&&hold(false);
   cb.onkeydown=e=>{if(e.key===" "||e.key==="Enter"){e.preventDefault();hold(true)}};cb.onkeyup=()=>hold(false);
   const pt=e=>{const r=ov.getBoundingClientRect();return[(e.clientX-r.left)/r.width,(e.clientY-r.top)/r.height]};
