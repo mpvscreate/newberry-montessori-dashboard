@@ -1376,7 +1376,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.13.0";
+const APP_VER="6.14.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1738,12 +1738,13 @@ function studentsCard(p){
   if(!svUnlocked)return `<section class="card acc sv" id="sv-card"><button class="acc-h" id="sv-open" type="button"><span class="acc-ic">${ic("lock")}</span><span class="grow"><b>Students</b><span class="small muted" style="display:block">Private reviews · PIN needed</span></span><span class="stp">Locked</span><span class="gchev" aria-hidden="true">${ic("chev")}</span></button></section>`;
   const rows=p.members.map((m,i)=>{const r=(p.srate||{})[m]||{},n=SV_CRIT.filter(([k])=>r[k]!==undefined).length;
     return `<details class="sv-d" data-svd="${esc(m)}"${svOpen.has(m)?" open":""}><summary class="sv-s"><span class="pavs" aria-hidden="true">${esc(initials(m))}</span><b>${esc(m)}</b><span class="sv-dots" id="svd-${i}" aria-label="${n} of ${SV_CRIT.length} rated">${svDots(r)}</span><span class="gchev" aria-hidden="true">${ic("chev","sm")}</span></summary><div class="sv-body">${SV_CRIT.map(([k,l,o])=>`<div class="svr" role="radiogroup" aria-label="${esc(l)}"><span class="svr-l">${esc(l)}</span><div class="svr-o">${(o||SV_YPN).map((t,v)=>`<button type="button" class="svo o${v}" role="radio" aria-checked="${r[k]===v}" data-sr="${i}:${k}:${v}">${esc(t)}</button>`).join("")}</div></div>`).join("")}<label class="f" for="sv-t${i}">Review</label><div class="row" style="align-items:flex-start"><textarea class="t ta sv-t" id="sv-t${i}" rows="3" data-sv="${i}" placeholder="Write a review for ${esc(m)}">${esc((p.srev||{})[m]||"")}</textarea>${micBtn()}</div></div></details>`}).join("");
-  return `<section class="card sv" id="sv-card"><div class="row between wr"><h2 style="margin:0;display:flex;align-items:center;gap:8px">${ic("lock","sm")}Students</h2><div class="row"><button class="btn small" id="sv-chg" type="button">Change PIN</button><button class="btn small" id="sv-lock" type="button">Lock</button></div></div><p class="small muted" style="margin:8px 0 4px">A rating and a review for each student. These are not shown on the public page or in the story book. Saved as you type.</p>${p.members.length?rows:`<div class="empty" style="padding:14px 0"><p style="margin:0 0 12px">Add the team members in Plan first.</p><button class="btn primary" id="sv-plan" type="button">${ic("users")}Go to Plan</button></div>`}</section>`;
+  return `<section class="card sv" id="sv-card"><div class="row between wr"><h2 style="margin:0;display:flex;align-items:center;gap:8px">${ic("lock","sm")}Students</h2><div class="row"><button class="btn small" id="sv-exp" type="button">${ic("download")}Export</button><button class="btn small" id="sv-chg" type="button">Change PIN</button><button class="btn small" id="sv-lock" type="button">Lock</button></div></div><p class="small muted" style="margin:8px 0 4px">A rating and a review for each student. These are not shown on the public page or in the story book. Saved as you type.</p>${p.members.length?rows:`<div class="empty" style="padding:14px 0"><p style="margin:0 0 12px">Add the team members in Plan first.</p><button class="btn primary" id="sv-plan" type="button">${ic("users")}Go to Plan</button></div>`}</section>`;
 }
 function wireStudents(p){
   const o=$("#sv-open");if(o)o.onclick=()=>svPinSheet();
   const lk=$("#sv-lock");if(lk)lk.onclick=()=>{svUnlocked=false;fb("tick");render()};
   const ch=$("#sv-chg");if(ch)ch.onclick=()=>svChangeSheet();
+  const ex=$("#sv-exp");if(ex)ex.onclick=()=>svExportSheet(p);
   const pl=$("#sv-plan");if(pl)pl.onclick=()=>{tab="plan";render()};
   document.querySelectorAll(".sv-d").forEach(d=>d.addEventListener("toggle",()=>{d.open?svOpen.add(d.dataset.svd):svOpen.delete(d.dataset.svd)}));
   document.querySelectorAll("[data-sr]").forEach(b=>b.onclick=()=>{
@@ -1783,6 +1784,32 @@ function svPinSheet(){
       root.querySelector("#sv-rs").onclick=go;inp.onkeydown=e=>{if(e.key==="Enter")go()};root.querySelector("#sv-bk").onclick=enter;
     };
     enter();
+  });
+}
+/* ---------- export of the student section ---------- */
+const svLabel=(k,v)=>{const c=SV_CRIT.find(x=>x[0]===k);return v===undefined?"":(c[2]||SV_YPN)[v]};
+function svCSV(p){
+  const q=v=>{let t=String(v==null?"":v);if(/^[=+\-@\t\r]/.test(t))t="'"+t;return '"'+t.replace(/"/g,'""')+'"'};
+  const head=["Production","Term","Student",...SV_CRIT.map(c=>c[1]),"Review"];
+  const rows=p.members.map(m=>{const r=(p.srate||{})[m]||{};return[p.name,(p.info&&p.info.term)||"",m,...SV_CRIT.map(([k])=>svLabel(k,r[k])),(p.srev||{})[m]||""]});
+  return "\ufeff"+[head,...rows].map(r=>r.map(q).join(",")).join("\r\n");
+}
+async function svSaveCSV(p){
+  const name=(p.name+"-students-"+new Date().toISOString().slice(0,10)).replace(/[^\w-]+/g,"-")+".csv",file=new File([svCSV(p)],name,{type:"text/csv"});
+  try{if(navigator.canShare&&navigator.canShare({files:[file]})&&matchMedia("(pointer:coarse)").matches){await navigator.share({files:[file],title:name});return}}catch(e){if(e&&e.name==="AbortError")return}
+  const a=document.createElement("a");a.href=URL.createObjectURL(file);a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Spreadsheet downloaded.");
+}
+function svReportHTML(p){
+  const e=esc,date=new Date().toLocaleDateString("en-ZA",{day:"numeric",month:"long",year:"numeric"}),col=["#2fa36b","#e0a020","#d4483b"],ink=["#fff","#1d1203","#fff"];
+  const pages=p.members.map(m=>{const r=(p.srate||{})[m]||{},rv=(p.srev||{})[m]||"";
+    return `<section class="pg"><div class="hd"><div><div class="k">${e(p.name)}${p.info&&p.info.term?" · "+e(p.info.term):""}</div><h1>${e(m)}</h1></div><div class="dt">${e(date)}</div></div><table>${SV_CRIT.map(([k,l,o])=>{const v=r[k];return `<tr><td>${e(l)}</td><td>${v===undefined?'<span class="nr">Not rated</span>':`<span class="ch" style="background:${col[v]};color:${ink[v]}">${e((o||SV_YPN)[v])}</span>`}</td></tr>`}).join("")}</table><h2>Review</h2><div class="rv">${rv?e(rv).replace(/\n/g,"<br>"):'<span class="nr">No review written.</span>'}</div><div class="ft">Newberry House Middle School · Production teams · Private</div></section>`}).join("");
+  const css="@page{size:A4;margin:16mm}*{box-sizing:border-box;-webkit-print-color-adjust:exact;print-color-adjust:exact}body{font:11pt/1.5 'Instrument Sans',system-ui,sans-serif;color:#1d1a12;margin:0}.pg{page-break-after:always;min-height:240mm;position:relative}.pg:last-child{page-break-after:auto}.hd{display:flex;justify-content:space-between;align-items:flex-end;border-bottom:3px solid #a65608;padding-bottom:8px;margin-bottom:14px}.k{color:#6c6250;font-size:10pt}h1{font:700 24pt 'Bricolage Grotesque',system-ui,sans-serif;margin:2px 0 0}.dt{color:#6c6250;font-size:10pt}table{width:100%;border-collapse:collapse;margin-bottom:14px}td{padding:6px 4px;border-bottom:1px solid #e6dcc6;vertical-align:middle}td:first-child{width:56%}.ch{display:inline-block;border-radius:99px;padding:2px 12px;font-weight:600;font-size:10pt}.nr{color:#9a8f78;font-style:italic}h2{font:700 13pt 'Bricolage Grotesque',system-ui,sans-serif;margin:8px 0 6px}.rv{border:1px solid #e6dcc6;border-radius:8px;padding:10px 12px;min-height:60mm}.ft{position:absolute;bottom:0;left:0;right:0;text-align:center;color:#9a8f78;font-size:9pt}";
+  return '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>Student reports</title><style>'+css+'</style></head><body>'+(pages||"<p>No students yet.</p>")+'</body></html>';
+}
+function svExportSheet(p){
+  const rows=[["download","Spreadsheet (CSV)","One row per student. Opens in Excel or Google Sheets.",()=>svSaveCSV(p)],["printer","Printable report (PDF)","One page for each student, with ratings and review.",()=>printView("Student reports",svReportHTML(p))]];
+  sheet("Export students",`<p class="muted small" style="margin:4px 0 12px">These files contain private reviews. Keep them somewhere safe.</p><div class="sh-menu">${rows.map((r,i)=>`<button class="trow" data-i="${i}" type="button"><span class="avatar">${ic(r[0])}</span><span class="grow"><b>${esc(r[1])}</b><span class="small muted" style="display:block">${esc(r[2])}</span></span>${ic("chev","sm")}</button>`).join("")}</div>`,(d,close)=>{
+    d.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{const r=rows[+b.dataset.i];close();setTimeout(r[3],160)});
   });
 }
 function svChangeSheet(){
