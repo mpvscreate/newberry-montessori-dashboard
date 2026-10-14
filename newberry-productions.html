@@ -746,6 +746,7 @@ select.sel{width:auto;min-height:44px;padding:0 12px;border-radius:14px}
 /* v6.8.0: term and week */
 .twsel{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.twsel .sel{width:100%;min-width:0}
 .twbar{display:flex;gap:8px;align-items:center;overflow-x:auto;padding:2px 2px 10px;margin:0 -2px;scrollbar-width:none}.twbar::-webkit-scrollbar{display:none}.twbar .sel{flex:1 1 0;min-width:0;width:auto}.twbar .chip{flex:none}
+.story [hidden],#tw-empty[hidden],#bn-wrap[hidden]{display:none!important}
 </style>
 </head>
 <body>
@@ -1009,7 +1010,7 @@ const postedToast=name=>navigator.onLine===false?"Saved on this device. It sends
 function postCard(p,l){
   const ms=postMedia(l),tw=twLabel(l);
   const grid=ms.length?`<div class="pm pm${Math.min(ms.length,4)}">${ms.slice(0,4).map((m,i)=>`<button type="button" class="pmi" data-pm="${l.id}:${i}" aria-label="Open ${m.type==="video"?"video":"photo"} ${i+1} of ${ms.length}">${m.type==="video"?`<video data-mid="${m.id}" muted playsinline preload="metadata"></video><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${m.id}" alt="" loading="lazy">`}${i===3&&ms.length>4?`<span class="pmore">+${ms.length-4}</span>`:""}</button>`).join("")}</div>`:"";
-  return `<article class="post${l.pin?" pinned":""}" data-post="${l.id}"><header class="phd"><span class="pavs" aria-hidden="true">${esc(initials(l.by||"me"))}</span><div class="grow"><b>${esc(l.by||"")}</b><span class="small muted" style="display:block">${tmOf(l.t)}${l.ed?" · edited":""}</span></div>${l.pin?`<span class="pinic" title="Pinned" aria-label="Pinned">${ic("pin","sm")}</span>`:""}<button class="x sm" data-po="${l.id}" aria-label="Post options">${ic("more")}</button></header>${tw?`<span class="chtag">${esc(tw)}</span>`:""}${l.text?`<p class="ptext">${nl2br(l.text)}</p>`:""}${grid}${l.note&&l.note.text?`<div class="pnote"><span class="small muted">${esc(l.note.by||"Teacher")} left a note</span><p>${nl2br(l.note.text)}</p></div>`:""}<footer class="pfoot"><button type="button" class="rxb" data-rx="${l.id}" aria-pressed="${(l.rx||[]).includes(who()||"me")}" aria-label="${(l.rx||[]).includes(who()||"me")?"Remove your heart":"Send a heart"}${(l.rx||[]).length?", "+(l.rx||[]).length+" so far":""}">${ic("heart","sm")}<span>${(l.rx||[]).length||""}</span></button><button type="button" class="linkbtn" data-nt="${l.id}">${ic("chat","sm")}${l.note&&l.note.text?"Edit note":"Add a note"}</button>${ms.some(m=>m.consent==="ok")?`<span class="pubtag">${ic("globe","sm")}Public</span>`:""}</footer></article>`;
+  return `<article class="post${l.pin?" pinned":""}" data-post="${l.id}" data-tm="${l.term||0}" data-wk="${l.wk||0}"><header class="phd"><span class="pavs" aria-hidden="true">${esc(initials(l.by||"me"))}</span><div class="grow"><b>${esc(l.by||"")}</b><span class="small muted" style="display:block">${tmOf(l.t)}${l.ed?" · edited":""}</span></div>${l.pin?`<span class="pinic" title="Pinned" aria-label="Pinned">${ic("pin","sm")}</span>`:""}<button class="x sm" data-po="${l.id}" aria-label="Post options">${ic("more")}</button></header>${tw?`<span class="chtag">${esc(tw)}</span>`:""}${l.text?`<p class="ptext">${nl2br(l.text)}</p>`:""}${grid}${l.note&&l.note.text?`<div class="pnote"><span class="small muted">${esc(l.note.by||"Teacher")} left a note</span><p>${nl2br(l.note.text)}</p></div>`:""}<footer class="pfoot"><button type="button" class="rxb" data-rx="${l.id}" aria-pressed="${(l.rx||[]).includes(who()||"me")}" aria-label="${(l.rx||[]).includes(who()||"me")?"Remove your heart":"Send a heart"}${(l.rx||[]).length?", "+(l.rx||[]).length+" so far":""}">${ic("heart","sm")}<span>${(l.rx||[]).length||""}</span></button><button type="button" class="linkbtn" data-nt="${l.id}">${ic("chat","sm")}${l.note&&l.note.text?"Edit note":"Add a note"}</button>${ms.some(m=>m.consent==="ok")?`<span class="pubtag">${ic("globe","sm")}Public</span>`:""}</footer></article>`;
 }
 async function makePost(p,text,files,tw,share){
   const id=uid(),ids=files.length?await addFilesIds(p.id,files,""):[];
@@ -1022,7 +1023,7 @@ function storyTab(p){
   if(storyF.pid!==p.id){storyF={pid:p.id,term:0,wk:0};clearPend();composeOpen=false}
   const hasTW=p.log.some(l=>l.term||l.wk),filt=!!(storyF.term||storyF.wk),tp=filt?{term:storyF.term,wk:storyF.wk}:twLast(p.id);
   const items=storyItems(p),pics=mediaOf(p).filter(m=>m.type!=="video");
-  const vis=items.filter(x=>x.k==="post"?((!storyF.term||x.l.term===storyF.term)&&(!storyF.wk||x.l.wk===storyF.wk)):!filt);
+  const vis=items;
   const pinned=vis.filter(x=>x.k==="post"&&x.l.pin),rest=vis.filter(x=>!(x.k==="post"&&x.l.pin));
   let html="",day="";
   if(pinned.length)html+=`<h3 class="sday" style="margin-top:6px">Pinned</h3>`+pinned.map(x=>postCard(p,x.l)).join("");
@@ -1036,8 +1037,8 @@ function storyTab(p){
     <input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"></div>`;
   return (isOpen2?full:mini)+
   bar+
-  (vis.length?`<div class="story">${html}</div>`:`<div class="empty">${ic("pulse","xl")}<h3>${filt?"Nothing for this term or week yet":"Your story starts here"}</h3><p style="margin:0 0 14px">${filt?"Choose this term and week when you write a post.":"Write what happened and add photos or videos. Every post becomes part of your story, ready to share."}</p>${filt?"":`<button class="btn primary" id="e-first" type="button">${ic("pencil")}Write your first post</button>`}</div>`)+
-  (vis.length&&pics.length>1&&!filt?beforeNow(p,pics):"");
+  (vis.length?`<div class="story">${html}</div><div class="empty" id="tw-empty" hidden>${ic("pulse","xl")}<h3>Nothing for this term or week yet</h3><p style="margin:0">Choose this term and week when you write a post.</p></div>`:`<div class="empty">${ic("pulse","xl")}<h3>${filt?"Nothing for this term or week yet":"Your story starts here"}</h3><p style="margin:0 0 14px">${filt?"Choose this term and week when you write a post.":"Write what happened and add photos or videos. Every post becomes part of your story, ready to share."}</p>${filt?"":`<button class="btn primary" id="e-first" type="button">${ic("pencil")}Write your first post</button>`}</div>`)+
+  (vis.length&&pics.length>1?`<div id="bn-wrap">${beforeNow(p,pics)}</div>`:"");
 }
 function postMenu(p,l){
   const ms=postMedia(l),photo=ms.find(m=>m.type!=="video"),rows=[],acts=[];
@@ -1114,8 +1115,16 @@ function wireStory(p){
   if($("#sc-post")){$("#sc-post").onclick=post;
   $("#sc-t").onkeydown=e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();post()}}}
   {const gl=$("#sc-gal");if(gl)gl.onclick=()=>{tab="media";render()}}
-  {const a=$("#tf-t");if(a)a.onchange=()=>{storyF.term=+a.value;render()}}
-  {const b=$("#tf-w");if(b)b.onchange=()=>{storyF.wk=+b.value;render()}}
+  const applyTW=()=>{
+    const t=storyF.term,w=storyF.wk,filt=!!(t||w),st=document.querySelector(".story");let any=0;
+    if(st){const kids=[...st.children];if(!st.dataset.h&&!filt)st.dataset.h=st.offsetHeight;st.style.minHeight=filt&&st.dataset.h?Math.min(+st.dataset.h,Math.round(innerHeight*.9))+"px":"";
+      kids.forEach(el=>{if(el.matches("article.post")){const ok=(!t||+el.dataset.tm===t)&&(!w||+el.dataset.wk===w);el.hidden=!ok;if(ok)any++}else if(!el.matches("h3.sday"))el.hidden=filt});
+      kids.forEach((el,i)=>{if(el.matches("h3.sday")){let vis=false;for(let j=i+1;j<kids.length&&!kids[j].matches("h3.sday");j++){if(!kids[j].hidden){vis=true;break}}el.hidden=!vis}})}
+    const em=$("#tw-empty");if(em)em.hidden=!(filt&&!any);const bn=$("#bn-wrap");if(bn)bn.hidden=filt;
+  };
+  {const a=$("#tf-t");if(a)a.onchange=()=>{storyF.term=+a.value;fb("tick");applyTW()}}
+  {const b=$("#tf-w");if(b)b.onchange=()=>{storyF.wk=+b.value;fb("tick");applyTW()}}
+  applyTW();
   document.querySelectorAll("[data-po]").forEach(b=>b.onclick=()=>{const l=p.log.find(x=>x.id===b.dataset.po);if(l)postMenu(p,l)});
   document.querySelectorAll("[data-pm]").forEach(b=>b.onclick=()=>{const[id,i]=b.dataset.pm.split(":"),l=p.log.find(x=>x.id===id);if(!l)return;const m=postMedia(l)[+i];if(m){const list=storyMediaList(p),k=list.findIndex(x=>x.m.id===m.id);openViewer(list,Math.max(0,k),false)}});
   document.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{const list=storyMediaList(p),k=list.findIndex(x=>x.m.id===b.dataset.m);if(k>=0)openViewer(list,k,false);else openMediaSheet(S.media.find(x=>x.id===b.dataset.m))});
@@ -1352,7 +1361,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.9.2";
+const APP_VER="6.9.4";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
