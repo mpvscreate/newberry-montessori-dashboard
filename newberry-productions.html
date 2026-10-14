@@ -753,6 +753,8 @@ select.sel{width:auto;min-height:44px;padding:0 12px;border-radius:14px}
 .ed-tools{-webkit-mask-image:linear-gradient(to right,#000 88%,transparent);mask-image:linear-gradient(to right,#000 88%,transparent)}
 .ed-tools button{min-width:76px}
 .ed-panel .sl{margin-top:8px}
+/* v6.12.0: students */
+.sv .sv-row{margin-top:16px}.sv-h{display:flex;align-items:center;gap:10px;margin-bottom:8px}.sv-t{min-height:88px}
 </style>
 </head>
 <body>
@@ -1367,7 +1369,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.11.1";
+const APP_VER="6.12.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1395,7 +1397,7 @@ const teamIdeas=p=>{const r=TEAM_IDEAS.find(x=>x[0].test(p.name));return r?{name
 function ensureBook(p){
   p.txt=p.txt||{};p.roles=p.roles||[];p.ideas=p.ideas||[];p.res=p.res||[];p.risks=p.risks||[];p.prop=p.prop||{};
   p.bud=p.bud||{};p.bud.items=p.bud.items||[];p.exp=p.exp||[];p.inc=p.inc||[];p.weeks=p.weeks||[];
-  p.refl=p.refl||{};p.hand=p.hand||{};p.hand.res=p.hand.res||[];p.rev=p.rev||{};p.info=p.info||{};p.minfo=p.minfo||{};
+  p.refl=p.refl||{};p.srev=p.srev||{};p.hand=p.hand||{};p.hand.res=p.hand.res||[];p.rev=p.rev||{};p.info=p.info||{};p.minfo=p.minfo||{};
   p.chapters=p.chapters||[];if(p.useMoney===undefined)p.useMoney=!!(p.exp.length||p.inc.length||p.bud.items.length||toNum(p.bud.approved)>0);
 }
 const bud=p=>{const planned=p.bud.items.reduce((a,i)=>a+toNum(i.qty)*toNum(i.unit),0),approved=toNum(p.bud.approved),spent=p.exp.reduce((a,e)=>a+toNum(e.amount),0),income=p.inc.reduce((a,e)=>a+toNum(e.amount),0);return{planned,approved,expInc:toNum(p.bud.income),spent,income,left:approved-spent,surplus:income-spent}};
@@ -1717,6 +1719,59 @@ function moneyTab(p){
     acc(p,"inc","cash","Income and review",`${p.inc.length} entr${p.inc.length===1?"y":"ies"} · ${rands(b.income)}`,stp(p.inc.length>0,p.inc.length?p.inc.length+" saved":"None yet"),inc);
 }
 
+/* ---------- Students: private reviews behind a PIN ---------- */
+const SVPK="ms-prod-sv-pin",SV_DEFAULT="007",SV_RESET="1975";
+const svPin=()=>{try{return localStorage.getItem(SVPK)||SV_DEFAULT}catch{return SV_DEFAULT}};
+const svSetPin=v=>{try{if(v===SV_DEFAULT)localStorage.removeItem(SVPK);else localStorage.setItem(SVPK,v)}catch{}};
+let svUnlocked=false;const svTry={n:0,until:0};
+function studentsCard(p){
+  if(!svUnlocked)return `<section class="card acc sv" id="sv-card"><button class="acc-h" id="sv-open" type="button"><span class="acc-ic">${ic("lock")}</span><span class="grow"><b>Students</b><span class="small muted" style="display:block">Private reviews · PIN needed</span></span><span class="stp">Locked</span><span class="gchev" aria-hidden="true">${ic("chev")}</span></button></section>`;
+  const rows=p.members.map((m,i)=>`<div class="sv-row"><div class="sv-h"><span class="pavs" aria-hidden="true">${esc(initials(m))}</span><b>${esc(m)}</b></div><div class="row" style="align-items:flex-start"><textarea class="t ta sv-t" rows="3" data-sv="${i}" aria-label="Review for ${esc(m)}" placeholder="Write a review for ${esc(m)}">${esc((p.srev||{})[m]||"")}</textarea>${micBtn()}</div></div>`).join("");
+  return `<section class="card sv" id="sv-card"><div class="row between wr"><h2 style="margin:0;display:flex;align-items:center;gap:8px">${ic("lock","sm")}Students</h2><div class="row"><button class="btn small" id="sv-chg" type="button">Change PIN</button><button class="btn small" id="sv-lock" type="button">Lock</button></div></div><p class="small muted" style="margin:8px 0 4px">One review for each student. These are not shown on the public page or in the story book. Saved as you type.</p>${p.members.length?rows:`<div class="empty" style="padding:14px 0"><p style="margin:0 0 12px">Add the team members in Plan first.</p><button class="btn primary" id="sv-plan" type="button">${ic("users")}Go to Plan</button></div>`}</section>`;
+}
+function wireStudents(p){
+  const o=$("#sv-open");if(o)o.onclick=()=>svPinSheet();
+  const lk=$("#sv-lock");if(lk)lk.onclick=()=>{svUnlocked=false;fb("tick");render()};
+  const ch=$("#sv-chg");if(ch)ch.onclick=()=>svChangeSheet();
+  const pl=$("#sv-plan");if(pl)pl.onclick=()=>{tab="plan";render()};
+  const ts=document.querySelectorAll("[data-sv]");if(!ts.length)return;
+  wireMics(document);
+  ts.forEach(t=>{const m=p.members[+t.dataset.sv];let tm=0;
+    const commit=()=>{clearTimeout(tm);const v=t.value;p.srev=p.srev||{};if(v.trim()){if(p.srev[m]!==v){p.srev[m]=v;save(p)}}else if(m in p.srev){delete p.srev[m];save(p)}};
+    t.addEventListener("input",()=>{clearTimeout(tm);tm=setTimeout(commit,500)});t.addEventListener("blur",commit)});
+}
+function svPinSheet(){
+  sheet("Students",`<div id="sv-b"></div>`,(d,close)=>{
+    const root=d.querySelector("#sv-b");
+    const err=m=>{const e=root.querySelector("#sv-e");e.textContent=m;e.hidden=!m};
+    const enter=()=>{
+      root.innerHTML=`<p class="muted small" style="margin:4px 0 10px">These reviews are private. Enter the PIN to open them.</p><label class="f" for="sv-in">PIN</label><input class="t" id="sv-in" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" aria-label="PIN"><p class="err" id="sv-e" role="alert" hidden></p><div class="row" style="margin-top:14px"><button class="linkbtn" id="sv-fg" type="button">Forgot the PIN?</button><span class="grow"></span><button class="btn primary" id="sv-go" type="button">Open</button></div>`;
+      const inp=root.querySelector("#sv-in");setTimeout(()=>inp.focus(),80);
+      const go=()=>{
+        if(Date.now()<svTry.until){err("Too many tries. Please wait a minute.");return}
+        if(inp.value===svPin()){svTry.n=0;svUnlocked=true;fb("done");close();render();return}
+        svTry.n++;inp.value="";fb("del");
+        if(svTry.n>=5){svTry.n=0;svTry.until=Date.now()+60000;err("Too many tries. Please wait a minute.")}else err("That PIN isn't right.");
+      };
+      root.querySelector("#sv-go").onclick=go;inp.onkeydown=e=>{if(e.key==="Enter")go()};
+      root.querySelector("#sv-fg").onclick=reset;
+    };
+    const reset=()=>{
+      root.innerHTML=`<p class="muted small" style="margin:4px 0 10px">Enter the reset code. The PIN goes back to the standard one, and you can then change it.</p><label class="f" for="sv-rc">Reset code</label><input class="t" id="sv-rc" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off" aria-label="Reset code"><p class="err" id="sv-e" role="alert" hidden></p><div class="row" style="margin-top:14px"><button class="btn" id="sv-bk" type="button">Back</button><span class="grow"></span><button class="btn primary" id="sv-rs" type="button">Reset PIN</button></div>`;
+      const inp=root.querySelector("#sv-rc");setTimeout(()=>inp.focus(),80);
+      const go=()=>{if(inp.value===SV_RESET){svSetPin(SV_DEFAULT);svTry.n=0;svTry.until=0;fb("done");toast("PIN reset to the standard one.");enter()}else{inp.value="";fb("del");err("That reset code isn't right.")}};
+      root.querySelector("#sv-rs").onclick=go;inp.onkeydown=e=>{if(e.key==="Enter")go()};root.querySelector("#sv-bk").onclick=enter;
+    };
+    enter();
+  });
+}
+function svChangeSheet(){
+  sheet("Change PIN",`<p class="muted small" style="margin:4px 0 10px">Choose a PIN of 3 to 8 digits. It applies to this device.</p><label class="f" for="sv-n1">New PIN</label><input class="t" id="sv-n1" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off"><label class="f" for="sv-n2">Type it again</label><input class="t" id="sv-n2" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" autocomplete="off"><p class="err" id="sv-e" role="alert" hidden></p><div class="row" style="margin-top:14px"><span class="grow"></span><button class="btn primary" id="sv-sv" type="button">Save PIN</button></div>`,(d,close)=>{
+    const a=d.querySelector("#sv-n1"),b=d.querySelector("#sv-n2"),e=d.querySelector("#sv-e");setTimeout(()=>a.focus(),80);
+    const go=()=>{const x=a.value;if(!/^\d{3,8}$/.test(x)){e.textContent="Use 3 to 8 digits, numbers only.";e.hidden=false;return}if(x!==b.value){e.textContent="The two PINs don't match.";e.hidden=false;return}svSetPin(x);fb("done");close();toast("PIN changed.")};
+    d.querySelector("#sv-sv").onclick=go;b.onkeydown=ev=>{if(ev.key==="Enter")go()};
+  });
+}
 /* ---------- Wrap-up tab ---------- */
 function wrapTab(p){
   const R=p.rev,refl=p.members.map((m,i)=>({m,i,done:!!(p.refl[m]&&(p.refl[m].contrib||p.refl[m].skill))}));
@@ -1728,6 +1783,7 @@ function wrapTab(p){
   return acc(p,"rev","flag","End of term review",R.completed||p.txt.achieved?"In progress":"Look back on the term",stp(!!p.txt.achieved&&!!p.txt.compare,p.txt.achieved&&p.txt.compare?"Done":"To do"),rev)+
     acc(p,"refl","user","Individual reflections",`${refl.filter(r=>r.done).length} of ${p.members.length} written`,stp(refl.length>0&&refl.every(r=>r.done),refl.length?`${refl.filter(r=>r.done).length}/${refl.length}`:"No members"),rf)+
     acc(p,"hand","users","Handover to the next team",H.to?"Handed over":"Leave it ready to continue",stp(!!H.to,H.to?"Done":"To do"),hand)+
+    studentsCard(p)+
     nextTermCard(p);
 }
 
@@ -1960,9 +2016,10 @@ function recs(){
   const m=new Map();
   S.prods.forEach(p=>{
     ensureBook(p);const P=p.id;
-    m.set("p|"+P,{...strip(p,["goals","log","exp","inc","weeks","ideas","res","risks","roles","terms","txt","refl","bud","hand","chapters"]),bud:strip(p.bud,["items"]),hand:strip(p.hand,["res"])});
+    m.set("p|"+P,{...strip(p,["goals","log","exp","inc","weeks","ideas","res","risks","roles","terms","txt","refl","bud","hand","chapters","srev"]),bud:strip(p.bud,["items"]),hand:strip(p.hand,["res"])});
     Object.keys(p.txt).forEach(k=>m.set("t|"+P+"|"+k,{v:p.txt[k]}));
     Object.keys(p.refl).forEach(k=>m.set("r|"+P+"|"+k,{v:p.refl[k]}));
+    Object.keys(p.srev||{}).forEach(k=>m.set("sv|"+P+"|"+k,{v:p.srev[k]}));
     LISTS.forEach(([f,kd])=>(p[f]||[]).forEach(it=>{
       if(!it||!it.id)return;
       if(kd==="g"){m.set("g|"+P+"|"+it.id,strip(it,["targets","comments"]));(it.targets||[]).forEach(t=>m.set("tg|"+P+"|"+it.id+"|"+t.id,strip(t,[])));(it.comments||[]).forEach(c=>m.set("cm|"+P+"|"+it.id+"|"+c.id,strip(c,[])))}
@@ -1989,6 +2046,7 @@ function placeRec(key,data,del,u){
   if(!p)return;ensureBook(p);
   if(kd==="t"){if(del)delete p.txt[seg[2]];else p.txt[seg[2]]=data.v;return}
   if(kd==="r"){if(del)delete p.refl[seg[2]];else p.refl[seg[2]]=data.v;return}
+  if(kd==="sv"){p.srev=p.srev||{};if(del)delete p.srev[seg[2]];else p.srev[seg[2]]=data.v;return}
   let arr;
   if(kd==="bi")arr=p.bud.items;else if(kd==="hr")arr=p.hand.res;
   else if(kd==="tg"||kd==="cm"){const g=p.goals.find(x=>x.id===seg[2]);if(!g)return;arr=kd==="tg"?(g.targets=g.targets||[]):(g.comments=g.comments||[])}
@@ -2132,6 +2190,7 @@ function render(){
   if(!user){authReady?authScreen():splash();return}
   if(route==="prods")route="home";
   if(route!=="display")stopKiosk();
+  svUnlocked=svUnlocked&&route.startsWith("p/")&&tab==="wrap";
   if(route==="display"){$("#app").innerHTML=kioskHTML();hydrate();wireKiosk();document.documentElement.style.setProperty("--ptint","transparent");lastRoute="display";return}
   prods().forEach(q=>{ensureBook(q);if(pctSeen[q.id]===undefined)pctSeen[q.id]=prodPct(q)});
   const fk=focusKey(),sy=lastRoute===route+tab?scrollY:0,fresh=lastRoute!==route+tab;
@@ -2364,6 +2423,7 @@ function wireProd(p){
   $("#back").onclick=()=>nav("home");{const pl=$("#plv");if(pl)pl.onclick=()=>openViewer(storyMediaList(p,storyF.pid===p.id?{term:storyF.term,wk:storyF.wk}:{}),0,true)}$("#shr").onclick=()=>shareMenu(p);$("#edp").onclick=()=>prodSheet(p);
   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;clearSel();render()});
   ({story:wireStory,plan:wireBook,money:wireBook,wrap:wireBook,media:wireMedia})[tab](p);
+  wireStudents(p);
 }
 const fabBtn=(id,label)=>`<div class="fab-wrap"><button class="fab" id="${id}" aria-label="${label}">${ic("plus")}<span>${label}</span></button></div>`;
 
