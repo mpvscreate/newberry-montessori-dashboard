@@ -755,6 +755,13 @@ select.sel{width:auto;min-height:44px;padding:0 12px;border-radius:14px}
 .ed-panel .sl{margin-top:8px}
 /* v6.12.0: students */
 .sv .sv-row{margin-top:16px}.sv-h{display:flex;align-items:center;gap:10px;margin-bottom:8px}.sv-t{min-height:88px}
+/* v6.13.0: student ratings */
+.sv-d{border-top:1px solid var(--line);margin-top:6px}.sv-s{display:flex;align-items:center;gap:10px;padding:10px 0;cursor:pointer;list-style:none;min-height:56px}.sv-s::-webkit-details-marker{display:none}.sv-s b{flex:none}
+.sv-dots{display:flex;flex:1;flex-wrap:wrap;gap:3px;justify-content:flex-end;min-width:0}.sv-dots .d{width:9px;height:9px;border-radius:50%;background:var(--line)}.sv-dots .d.o0{background:#2fa36b}.sv-dots .d.o1{background:#e0a020}.sv-dots .d.o2{background:#d4483b}
+.sv-s .gchev{transition:transform .2s}.sv-d[open] .sv-s .gchev{transform:rotate(90deg)}.sv-body{padding:0 0 14px}
+.svr{margin:12px 0 0}.svr-l{display:block;font-weight:600;font-size:.9rem;margin-bottom:6px}.svr-o{display:flex;flex-wrap:wrap;gap:6px}
+.svo{flex:1 1 0;min-width:84px;min-height:42px;border:1.5px solid var(--line);background:transparent;color:var(--ink);border-radius:12px;padding:8px 6px;font:600 .85rem/1.2 var(--body);cursor:pointer}
+.svo[aria-checked=true].o0{background:#2fa36b;border-color:#2fa36b;color:#fff}.svo[aria-checked=true].o1{background:#e0a020;border-color:#e0a020;color:#1d1203}.svo[aria-checked=true].o2{background:#d4483b;border-color:#d4483b;color:#fff}
 </style>
 </head>
 <body>
@@ -1369,7 +1376,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.12.1";
+const APP_VER="6.13.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -1397,7 +1404,7 @@ const teamIdeas=p=>{const r=TEAM_IDEAS.find(x=>x[0].test(p.name));return r?{name
 function ensureBook(p){
   p.txt=p.txt||{};p.roles=p.roles||[];p.ideas=p.ideas||[];p.res=p.res||[];p.risks=p.risks||[];p.prop=p.prop||{};
   p.bud=p.bud||{};p.bud.items=p.bud.items||[];p.exp=p.exp||[];p.inc=p.inc||[];p.weeks=p.weeks||[];
-  p.refl=p.refl||{};p.srev=p.srev||{};p.hand=p.hand||{};p.hand.res=p.hand.res||[];p.rev=p.rev||{};p.info=p.info||{};p.minfo=p.minfo||{};
+  p.refl=p.refl||{};p.srev=p.srev||{};p.srate=p.srate||{};p.hand=p.hand||{};p.hand.res=p.hand.res||[];p.rev=p.rev||{};p.info=p.info||{};p.minfo=p.minfo||{};
   p.chapters=p.chapters||[];if(p.useMoney===undefined)p.useMoney=!!(p.exp.length||p.inc.length||p.bud.items.length||toNum(p.bud.approved)>0);
 }
 const bud=p=>{const planned=p.bud.items.reduce((a,i)=>a+toNum(i.qty)*toNum(i.unit),0),approved=toNum(p.bud.approved),spent=p.exp.reduce((a,e)=>a+toNum(e.amount),0),income=p.inc.reduce((a,e)=>a+toNum(e.amount),0);return{planned,approved,expInc:toNum(p.bud.income),spent,income,left:approved-spent,surplus:income-spent}};
@@ -1723,17 +1730,30 @@ function moneyTab(p){
 const SVPK="ms-prod-sv-pin",SV_DEFAULT="007",SV_RESET="1975";
 const svPin=()=>{try{return localStorage.getItem(SVPK)||SV_DEFAULT}catch{return SV_DEFAULT}};
 const svSetPin=v=>{try{if(v===SV_DEFAULT)localStorage.removeItem(SVPK);else localStorage.setItem(SVPK,v)}catch{}};
+const SV_CRIT=[["effort","Effort",["Positive and engaged","Participating","Disengaged"]],["planning","Planning"],["groups","Participates in group activities"],["task","Task completion"],["economic","Economic understanding"],["customer","Customer engagement"],["expert","Expert engagement"],["responsible","Works responsibly"],["pride","Takes pride in their efforts"],["curiosity","Shows curiosity"]];
+const SV_YPN=["Yes","Partly","No"],svOpen=new Set();
+const svDots=r=>SV_CRIT.map(([k])=>`<i class="d${r&&r[k]!==undefined?" o"+r[k]:""}"></i>`).join("");
 let svUnlocked=false;const svTry={n:0,until:0};
 function studentsCard(p){
   if(!svUnlocked)return `<section class="card acc sv" id="sv-card"><button class="acc-h" id="sv-open" type="button"><span class="acc-ic">${ic("lock")}</span><span class="grow"><b>Students</b><span class="small muted" style="display:block">Private reviews · PIN needed</span></span><span class="stp">Locked</span><span class="gchev" aria-hidden="true">${ic("chev")}</span></button></section>`;
-  const rows=p.members.map((m,i)=>`<div class="sv-row"><div class="sv-h"><span class="pavs" aria-hidden="true">${esc(initials(m))}</span><b>${esc(m)}</b></div><div class="row" style="align-items:flex-start"><textarea class="t ta sv-t" rows="3" data-sv="${i}" aria-label="Review for ${esc(m)}" placeholder="Write a review for ${esc(m)}">${esc((p.srev||{})[m]||"")}</textarea>${micBtn()}</div></div>`).join("");
-  return `<section class="card sv" id="sv-card"><div class="row between wr"><h2 style="margin:0;display:flex;align-items:center;gap:8px">${ic("lock","sm")}Students</h2><div class="row"><button class="btn small" id="sv-chg" type="button">Change PIN</button><button class="btn small" id="sv-lock" type="button">Lock</button></div></div><p class="small muted" style="margin:8px 0 4px">One review for each student. These are not shown on the public page or in the story book. Saved as you type.</p>${p.members.length?rows:`<div class="empty" style="padding:14px 0"><p style="margin:0 0 12px">Add the team members in Plan first.</p><button class="btn primary" id="sv-plan" type="button">${ic("users")}Go to Plan</button></div>`}</section>`;
+  const rows=p.members.map((m,i)=>{const r=(p.srate||{})[m]||{},n=SV_CRIT.filter(([k])=>r[k]!==undefined).length;
+    return `<details class="sv-d" data-svd="${esc(m)}"${svOpen.has(m)?" open":""}><summary class="sv-s"><span class="pavs" aria-hidden="true">${esc(initials(m))}</span><b>${esc(m)}</b><span class="sv-dots" id="svd-${i}" aria-label="${n} of ${SV_CRIT.length} rated">${svDots(r)}</span><span class="gchev" aria-hidden="true">${ic("chev","sm")}</span></summary><div class="sv-body">${SV_CRIT.map(([k,l,o])=>`<div class="svr" role="radiogroup" aria-label="${esc(l)}"><span class="svr-l">${esc(l)}</span><div class="svr-o">${(o||SV_YPN).map((t,v)=>`<button type="button" class="svo o${v}" role="radio" aria-checked="${r[k]===v}" data-sr="${i}:${k}:${v}">${esc(t)}</button>`).join("")}</div></div>`).join("")}<label class="f" for="sv-t${i}">Review</label><div class="row" style="align-items:flex-start"><textarea class="t ta sv-t" id="sv-t${i}" rows="3" data-sv="${i}" placeholder="Write a review for ${esc(m)}">${esc((p.srev||{})[m]||"")}</textarea>${micBtn()}</div></div></details>`}).join("");
+  return `<section class="card sv" id="sv-card"><div class="row between wr"><h2 style="margin:0;display:flex;align-items:center;gap:8px">${ic("lock","sm")}Students</h2><div class="row"><button class="btn small" id="sv-chg" type="button">Change PIN</button><button class="btn small" id="sv-lock" type="button">Lock</button></div></div><p class="small muted" style="margin:8px 0 4px">A rating and a review for each student. These are not shown on the public page or in the story book. Saved as you type.</p>${p.members.length?rows:`<div class="empty" style="padding:14px 0"><p style="margin:0 0 12px">Add the team members in Plan first.</p><button class="btn primary" id="sv-plan" type="button">${ic("users")}Go to Plan</button></div>`}</section>`;
 }
 function wireStudents(p){
   const o=$("#sv-open");if(o)o.onclick=()=>svPinSheet();
   const lk=$("#sv-lock");if(lk)lk.onclick=()=>{svUnlocked=false;fb("tick");render()};
   const ch=$("#sv-chg");if(ch)ch.onclick=()=>svChangeSheet();
   const pl=$("#sv-plan");if(pl)pl.onclick=()=>{tab="plan";render()};
+  document.querySelectorAll(".sv-d").forEach(d=>d.addEventListener("toggle",()=>{d.open?svOpen.add(d.dataset.svd):svOpen.delete(d.dataset.svd)}));
+  document.querySelectorAll("[data-sr]").forEach(b=>b.onclick=()=>{
+    const[i,k,v]=b.dataset.sr.split(":"),m=p.members[+i],val=+v;p.srate=p.srate||{};const r=p.srate[m]=p.srate[m]||{};
+    if(r[k]===val)delete r[k];else r[k]=val;
+    if(!Object.keys(r).length)delete p.srate[m];
+    b.closest(".svr-o").querySelectorAll(".svo").forEach(x=>x.setAttribute("aria-checked",String(!!p.srate[m]&&p.srate[m][k]===+x.dataset.sr.split(":")[2])));
+    const dots=$("#svd-"+i);if(dots){dots.innerHTML=svDots(p.srate[m]);const n=SV_CRIT.filter(([c])=>p.srate[m]&&p.srate[m][c]!==undefined).length;dots.setAttribute("aria-label",n+" of "+SV_CRIT.length+" rated")}
+    fb("tick");save(p);
+  });
   const ts=document.querySelectorAll("[data-sv]");if(!ts.length)return;
   wireMics(document);
   ts.forEach(t=>{const m=p.members[+t.dataset.sv];let tm=0;
@@ -1887,7 +1907,7 @@ function rollTerm(p,label){
   (p.terms=p.terms||[]).push(snap);
   p.carry={from:snap.label,work:p.txt.hwork||"",people:p.txt.hpeople||"",funds:p.hand.funds||""};
   const carried=p.hand.res.map(r=>({id:uid(),item:r.item,src:"Have",who:""}));
-  p.txt={};p.roles=[];p.ideas=[];p.risks=[];p.prop={};p.bud={items:[]};p.exp=[];p.inc=[];p.weeks=[];p.refl={};p.srev={};p.rev={};p.hand={res:[]};p.res=carried;p.ready=null;
+  p.txt={};p.roles=[];p.ideas=[];p.risks=[];p.prop={};p.bud={items:[]};p.exp=[];p.inc=[];p.weeks=[];p.refl={};p.srev={};p.srate={};p.rev={};p.hand={res:[]};p.res=carried;p.ready=null;
   p.info={term:label,mentor:p.info.mentor||"",gate:p.info.gate};
   p.goals=p.goals.filter(g=>!g.done);p.goals.forEach(g=>{if(g.targets&&g.targets.length){g.targets=g.targets.filter(t=>!t.done);syncGoal(g)}});
 }
@@ -2016,10 +2036,11 @@ function recs(){
   const m=new Map();
   S.prods.forEach(p=>{
     ensureBook(p);const P=p.id;
-    m.set("p|"+P,{...strip(p,["goals","log","exp","inc","weeks","ideas","res","risks","roles","terms","txt","refl","bud","hand","chapters","srev"]),bud:strip(p.bud,["items"]),hand:strip(p.hand,["res"])});
+    m.set("p|"+P,{...strip(p,["goals","log","exp","inc","weeks","ideas","res","risks","roles","terms","txt","refl","bud","hand","chapters","srev","srate"]),bud:strip(p.bud,["items"]),hand:strip(p.hand,["res"])});
     Object.keys(p.txt).forEach(k=>m.set("t|"+P+"|"+k,{v:p.txt[k]}));
     Object.keys(p.refl).forEach(k=>m.set("r|"+P+"|"+k,{v:p.refl[k]}));
     Object.keys(p.srev||{}).forEach(k=>m.set("sv|"+P+"|"+k,{v:p.srev[k]}));
+    Object.keys(p.srate||{}).forEach(k=>m.set("sr|"+P+"|"+k,{v:p.srate[k]}));
     LISTS.forEach(([f,kd])=>(p[f]||[]).forEach(it=>{
       if(!it||!it.id)return;
       if(kd==="g"){m.set("g|"+P+"|"+it.id,strip(it,["targets","comments"]));(it.targets||[]).forEach(t=>m.set("tg|"+P+"|"+it.id+"|"+t.id,strip(t,[])));(it.comments||[]).forEach(c=>m.set("cm|"+P+"|"+it.id+"|"+c.id,strip(c,[])))}
@@ -2046,6 +2067,7 @@ function placeRec(key,data,del,u){
   if(!p)return;ensureBook(p);
   if(kd==="t"){if(del)delete p.txt[seg[2]];else p.txt[seg[2]]=data.v;return}
   if(kd==="r"){if(del)delete p.refl[seg[2]];else p.refl[seg[2]]=data.v;return}
+  if(kd==="sr"){p.srate=p.srate||{};if(del)delete p.srate[seg[2]];else p.srate[seg[2]]=data.v;return}
   if(kd==="sv"){p.srev=p.srev||{};if(del)delete p.srev[seg[2]];else p.srev[seg[2]]=data.v;return}
   let arr;
   if(kd==="bi")arr=p.bud.items;else if(kd==="hr")arr=p.hand.res;
