@@ -164,10 +164,10 @@ input[type=range]{width:100%;height:36px;accent-color:var(--green)}
 .confetti i{position:absolute;top:-20px;width:10px;height:14px;border-radius:3px;animation:fall 1.6s ease-in forwards}
 @keyframes fall{to{transform:translateY(110vh) rotate(540deg)}}
 .ed{position:fixed;inset:0;z-index:35;display:flex;flex-direction:column;background:#0e0c09;color:#f4ecdc;--paper:#0e0c09;--sheet:#1a1712;--ink:#f4ecdc;--muted:#b1a68e;--line:#2f2a20;--field:#7d7258;--accent:#f2a54f;--accent-ink:#1d1203;--accent-soft:#3b2a12;--green:#4fd1a1;--green-soft:#14342a;--glow:rgba(242,165,79,.4);--glow-soft:rgba(242,165,79,.2);--glow-green:rgba(79,209,161,.3);--red:#f4a99d;--shadow:none;padding-top:env(safe-area-inset-top);animation:up .2s ease-out}
-.ed-top{display:flex;align-items:center;gap:10px;padding:8px 12px}.ed-top h2{flex:1;font-size:1.1rem;text-align:center}
+.ed-top{display:flex;align-items:center;gap:10px;padding:8px 12px;padding-top:calc(8px + env(safe-area-inset-top))}.ed-top h2{flex:1;font-size:1.1rem;text-align:center}
 .ed-stage{flex:1;min-height:0;display:grid;place-items:center;padding:4px 12px;overflow:hidden}
 .ed-wrap{position:relative;display:inline-block;max-width:100%}
-.ed-wrap canvas{display:block;max-width:100%;max-height:calc(100dvh - 340px - env(safe-area-inset-top) - env(safe-area-inset-bottom));border-radius:14px;background:#000}
+.ed-wrap canvas{display:block;max-width:100%;max-height:calc(100dvh - 430px - env(safe-area-inset-top) - env(safe-area-inset-bottom));border-radius:14px;background:#000}
 .ed-wrap #ov{position:absolute;left:0;top:0;width:100%;height:100%;background:none;touch-action:none;pointer-events:none}
 .cmp-btn{position:absolute;right:8px;top:8px;width:44px;height:44px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;display:grid;place-items:center;backdrop-filter:blur(6px);touch-action:none;-webkit-user-select:none;user-select:none;cursor:pointer}
 .ed-play{position:absolute;inset:0;margin:auto;width:76px;height:76px;border-radius:50%;border:0;background:rgba(0,0,0,.5);color:#fff;display:none;place-items:center;backdrop-filter:blur(6px);cursor:pointer;pointer-events:none}.ed-play.on{display:grid}.ed-play .i{width:34px;height:34px}
@@ -747,6 +747,12 @@ select.sel{width:auto;min-height:44px;padding:0 12px;border-radius:14px}
 .twsel{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}.twsel .sel{width:100%;min-width:0}
 .twbar{display:flex;gap:8px;align-items:center;overflow-x:auto;padding:2px 2px 10px;margin:0 -2px;scrollbar-width:none}.twbar::-webkit-scrollbar{display:none}.twbar .sel{flex:1 1 0;min-width:0;width:auto}.twbar .chip{flex:none}
 .story [hidden],#tw-empty[hidden],#bn-wrap[hidden]{display:none!important}
+/* v6.10.1: editor fixes */
+.ed-wrap{overflow:visible;clip-path:inset(-30px round 14px)}
+.rtchips{margin-top:10px;flex-wrap:wrap;gap:8px}.rtchips .chip{padding:6px 14px;min-height:38px;font-size:.92rem}
+.ed-tools{-webkit-mask-image:linear-gradient(to right,#000 88%,transparent);mask-image:linear-gradient(to right,#000 88%,transparent)}
+.ed-tools button{min-width:76px}
+.ed-panel .sl{margin-top:8px}
 </style>
 </head>
 <body>
@@ -1361,7 +1367,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.10.0";
+const APP_VER="6.10.2";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -3257,7 +3263,7 @@ async function editSheet(p,m){
     {id:"look",label:"Looks",icon:"wand",mod:()=>st.preset>0,panel:el=>presetsPanel(el,thumbSrc,st,paint)},
     {id:"crop",label:"Crop",icon:"crop",mod:()=>!!(st.rot||st.flip||st.crop||st.ang),panel:el=>{
       const RT=[["Free",0],["Original","o"],["Square",1],["4:3",4/3],["3:4",3/4],["16:9",16/9],["9:16",9/16]];
-      el.innerHTML=`<div class="row wr"><button class="btn small" id="e-l" aria-label="Rotate left">${ic("rotl")}</button><button class="btn small" id="e-r" aria-label="Rotate right">${ic("rotr")}</button><button class="btn small" id="e-f" aria-label="Flip">${ic("flip")}</button><span class="grow"></span><button class="linkbtn" id="e-rs" type="button">Reset</button></div><div class="chips" role="group" aria-label="Crop shape" style="margin-top:10px;flex-wrap:nowrap;overflow-x:auto">${RT.map(([l],i)=>`<button class="chip" data-r="${i}" aria-pressed="${i===ratI}">${l}</button>`).join("")}</div><div class="sl" style="margin-top:4px"><div class="sl-h"><span>Straighten</span><output id="an-v"></output></div><input class="sl-i" id="e-ang" type="range" min="-45" max="45" step="1" value="${st.ang}" aria-label="Straighten"></div><p class="small muted" style="margin:2px 0 0">Drag the corners or edges of the frame to resize it. Drag inside to move it.</p>`;
+      el.innerHTML=`<div class="row wr"><button class="btn small" id="e-l" aria-label="Rotate left">${ic("rotl")}</button><button class="btn small" id="e-r" aria-label="Rotate right">${ic("rotr")}</button><button class="btn small" id="e-f" aria-label="Flip">${ic("flip")}</button><span class="grow"></span><button class="linkbtn" id="e-rs" type="button">Reset</button></div><div class="chips rtchips" role="group" aria-label="Crop shape">${RT.map(([l],i)=>`<button class="chip" data-r="${i}" aria-pressed="${i===ratI}">${l}</button>`).join("")}</div><div class="sl" style="margin-top:4px"><div class="sl-h"><span>Straighten</span><output id="an-v"></output></div><input class="sl-i" id="e-ang" type="range" min="-45" max="45" step="1" value="${st.ang}" aria-label="Straighten"></div>`;
       const ang=$("#e-ang"),fill=()=>{const pc=(+ang.value+45)/90*100;ang.style.setProperty("--a",Math.min(50,pc)+"%");ang.style.setProperty("--b",Math.max(50,pc)+"%");$("#an-v").textContent=(ang.value>0?"+":"")+ang.value+"°"};fill();
       const turn=d=>{st.rot=(st.rot+d+4)%4;st.crop=null;if(st.ratio){if(ratI===1)st.ratio=arNow();cropu.fit()}geo()};
       $("#e-l").onclick=()=>turn(-1);$("#e-r").onclick=()=>turn(1);
@@ -3339,7 +3345,7 @@ async function videoEditSheet(p,m){
       if(!thumbsDone){thumbsDone=true;buildStrip()}else{fillStrip()}}},
     {id:"crop",label:"Crop",icon:"crop",mod:()=>!!(cs.crop||cs.rot),panel:el=>{
       const RT=[["Free",0],["Original","o"],["Square",1],["4:3",4/3],["3:4",3/4],["16:9",16/9],["9:16",9/16]],arV=()=>{const[rw,rh]=vdim();return rw/rh};
-      el.innerHTML=`<div class="row wr"><button class="btn small" id="e-l" aria-label="Rotate left">${ic("rotl")}</button><button class="btn small" id="e-r" aria-label="Rotate right">${ic("rotr")}</button><span class="grow"></span><button class="linkbtn" id="e-rs" type="button">Reset</button></div><div class="chips" role="group" aria-label="Crop shape" style="margin-top:10px;flex-wrap:nowrap;overflow-x:auto">${RT.map(([l],i)=>`<button class="chip" data-r="${i}" aria-pressed="${i===vri}">${l}</button>`).join("")}</div><p class="small muted" style="margin:8px 0 0">Drag the corners or edges of the frame to resize it. Drag inside to move it.</p>`;
+      el.innerHTML=`<div class="row wr"><button class="btn small" id="e-l" aria-label="Rotate left">${ic("rotl")}</button><button class="btn small" id="e-r" aria-label="Rotate right">${ic("rotr")}</button><span class="grow"></span><button class="linkbtn" id="e-rs" type="button">Reset</button></div><div class="chips rtchips" role="group" aria-label="Crop shape">${RT.map(([l],i)=>`<button class="chip" data-r="${i}" aria-pressed="${i===vri}">${l}</button>`).join("")}</div>`;
       const turn=d=>{cs.rot=(cs.rot+d+4)%4;cs.crop=null;if(cs.ratio){if(vri===1)cs.ratio=arV();cropu.fit()}layout();frame();ed.dots()};
       $("#e-l").onclick=()=>turn(-1);$("#e-r").onclick=()=>turn(1);
       el.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{vri=+b.dataset.r;const x=RT[vri][1];cs.ratio=x==="o"?arV():x;el.querySelectorAll("[data-r]").forEach(y=>y.setAttribute("aria-pressed",y===b));cropu.fit();ed.dots()});
