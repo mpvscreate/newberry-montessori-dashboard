@@ -1066,6 +1066,30 @@ const twSave=(pid,t)=>{try{const o=JSON.parse(localStorage.getItem(TWK)||"{}");o
 const TFK="ms-prod-tf";
 const tfLoad=pid=>{try{const o=(JSON.parse(localStorage.getItem(TFK)||"{}")[pid])||{};return{term:+o.term||0,wk:+o.wk||0}}catch{return{term:0,wk:0}}};
 const tfSave=(pid,t)=>{try{const o=JSON.parse(localStorage.getItem(TFK)||"{}");if(t.term||t.wk)o[pid]={term:t.term||0,wk:t.wk||0};else delete o[pid];localStorage.setItem(TFK,JSON.stringify(o))}catch{}};
+/* put existing posts under a term and week; photos and videos outside a post become posts */
+function bulkTag(term,wk,all){
+  let tagged=0,made=0;
+  prods().forEach(p=>{
+    const inPost=new Set(),ids=new Set();
+    p.log.forEach(l=>{ids.add(l.id);(l.m||[]).forEach(id=>inPost.add(id));if((all||(!l.term&&!l.wk))&&(l.term!==term||l.wk!==wk)){l.term=term;l.wk=wk;tagged++}});
+    S.media.forEach(m=>{
+      if(m.pid!==p.id||m.del||m.tag==="receipt"||m.tag==="evidence"||inPost.has(m.id)||(m.post&&ids.has(m.post)))return;
+      const id=uid();p.log.push({id,text:m.cap||"",by:m.by||who(),t:m.t||Date.now(),m:[m.id],term,wk,pin:false});m.post=id;save(m);made++;
+    });
+    save(p);
+  });
+  return{tagged,made};
+}
+function bulkTagSheet(){
+  sheet("Term and week for existing posts",`<p class="muted small" style="margin:4px 0 10px">Choose a term and week. Photos and videos that are not inside a post become posts, so they are included too. This covers every production on this device.</p>${twSelects("bt-tm","bt-wk",{term:4,wk:2})}<label class="f" for="bt-sc">Which posts</label><select class="t sel" id="bt-sc" aria-label="Which posts"><option value="all">Every post, replacing its term and week</option><option value="none">Only posts with no term or week</option></select><p class="err" id="bt-e" role="alert" hidden></p><div class="row" style="margin-top:16px"><span class="grow"></span><button class="btn primary" id="bt-go" type="button">Apply</button></div>`,(d,close)=>{
+    d.querySelector("#bt-go").onclick=()=>{
+      const t=twRead("bt-tm","bt-wk");if(!t.term||!t.wk){const e=d.querySelector("#bt-e");e.textContent="Choose a term and a week.";e.hidden=false;return}
+      const snap=JSON.stringify({prods:S.prods,media:S.media}),r=bulkTag(t.term,t.wk,d.querySelector("#bt-sc").value==="all");
+      fb("done");close();render();
+      toast("Term "+t.term+", Week "+t.wk+": "+r.tagged+" post"+(r.tagged===1?"":"s")+" tagged, "+r.made+" photo or video"+(r.made===1?"":"s")+" added as posts.",()=>{const o=JSON.parse(snap);S.prods=o.prods;S.media=o.media;save();render();toast("Undone.")});
+    };
+  });
+}
 const twSelects=(idT,idW,v)=>`<div class="twsel"><label class="sr" for="${idT}">Term</label><select class="t sel" id="${idT}" aria-label="Term"><option value="0">Term</option>${TERMS.map(n=>`<option value="${n}"${v.term===n?" selected":""}>Term ${n}</option>`).join("")}</select><label class="sr" for="${idW}">Week</label><select class="t sel" id="${idW}" aria-label="Week"><option value="0">Week</option>${WEEKS.map(n=>`<option value="${n}"${v.wk===n?" selected":""}>Week ${n}</option>`).join("")}</select></div>`;
 const twRead=(idT,idW)=>({term:+(document.getElementById(idT)||{}).value||0,wk:+(document.getElementById(idW)||{}).value||0});
 const PROMPTS=["What was the hardest part today?","Show us something you made.","What did you learn this week?","Who helped you today, and how?","What are you proud of?","What went wrong, and how did you fix it?","What will you do next?","Describe your work in three words.","What surprised you?","What would you tell a new team member?","Show us your workspace.","What did your team decide today?"];
@@ -1438,7 +1462,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.18.2";
+const APP_VER="6.19.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -2388,6 +2412,7 @@ function morePage(){const t=theme();
   <div class="card"><h2>Classroom display</h2><p class="muted small" style="margin-top:0">Show progress and the latest photos full screen on a classroom TV or tablet. It stays awake and updates itself.</p><button class="btn" id="kiosk">${ic("device")}Start classroom display</button></div>
   <div class="card"><h2>Celebration</h2><p class="muted small" style="margin-top:0">Fireworks and sound play when every goal in a production is finished.</p><button class="btn" id="fw-test">${ic("sparkle")}Preview the fireworks</button></div>
   <div class="card"><h2>Voice dictation</h2><p class="muted small" style="margin:0">${SR?"On. Tap the microphone next to any text box and speak.":"Not available in this browser. Try Chrome or Edge, or use your phone keyboard's microphone."}</p></div>
+  <div class="card"><h2>Term and week</h2><p class="muted small" style="margin-top:0">Put the posts you already have under a term and week.</p><button class="btn" id="bt-open" type="button">Set term and week for existing posts</button></div>
   <div class="card"><h2>Welcome tour</h2><p class="muted small" style="margin-top:0">A quick look at posting, term and week, and sharing.</p><button class="btn" id="tour-again" type="button">Show the tour</button></div></details>
   <details class="fold" data-f="data"${foldOpen.has("data")?" open":""}><summary class="foldh"><span>Data and security</span>${ic("chev")}</summary>
   <div class="card"><h2>App lock</h2><p class="muted small" style="margin-top:0">Optional. Add a 3-digit PIN and the app asks for it when you open it on this device.${LOGIN?" You stay signed in either way.":""}</p>${getPin()?`<div class="row wr"><button class="btn" id="pinchg">Change PIN</button><button class="btn danger" id="pinoff">Remove PIN</button></div>`:`<button class="btn primary" id="pinset">${ic("lock")}Set a PIN</button>`}</div>
@@ -2395,7 +2420,7 @@ function morePage(){const t=theme();
   ${binCard()}
   <div class="card"><h2>Start fresh</h2><p class="muted small" style="margin-top:0">Clear all productions, goals, photos and records to begin a new year. A backup copy stays on this device.</p><button class="btn danger" id="fresh">Start fresh…</button></div>
   <div class="card"><h2>This device</h2><p class="muted small" style="margin-top:0">${LOGIN?`Signed in as ${esc(user.email)}. You only need to sign in once on this device.`:LV.on?"Connected with your school code. Everything you add is shared live.":"Not connected. Everything you add is saved on this device only."}</p><div class="row wr">${LOGIN?`<button class="btn" id="out">${ic("logout")}Sign out</button>`:""}${getPin()?`<button class="btn" id="lk">${ic("lock")}Lock now</button>`:""}</div></div></details>`}
-function wireMore(){wireLive();{const save2=()=>{const v=$("#my-name").value.trim();try{if(v)localStorage.setItem(NAMEK,v);else localStorage.removeItem(NAMEK)}catch{}fb("done");toast(v?"Saved. New posts will show "+v+".":"Name cleared.");render()};$("#my-name-ok").onclick=save2;$("#my-name").onkeydown=e=>{if(e.key==="Enter")save2()}}$("#tour-again").onclick=()=>tourSheet();document.querySelectorAll(".fold").forEach(d=>d.ontoggle=()=>{d.open?foldOpen.add(d.dataset.f):foldOpen.delete(d.dataset.f)});$("#bin-open").onclick=binSheet;$("#fresh").onclick=freshSheet;$("#fw-test").onclick=()=>fireworks("Your production");$("#kiosk").onclick=startKiosk;
+function wireMore(){wireLive();{const b=$("#bt-open");if(b)b.onclick=bulkTagSheet}{const save2=()=>{const v=$("#my-name").value.trim();try{if(v)localStorage.setItem(NAMEK,v);else localStorage.removeItem(NAMEK)}catch{}fb("done");toast(v?"Saved. New posts will show "+v+".":"Name cleared.");render()};$("#my-name-ok").onclick=save2;$("#my-name").onkeydown=e=>{if(e.key==="Enter")save2()}}$("#tour-again").onclick=()=>tourSheet();document.querySelectorAll(".fold").forEach(d=>d.ontoggle=()=>{d.open?foldOpen.add(d.dataset.f):foldOpen.delete(d.dataset.f)});$("#bin-open").onclick=binSheet;$("#fresh").onclick=freshSheet;$("#fw-test").onclick=()=>fireworks("Your production");$("#kiosk").onclick=startKiosk;
   $("#fx-s").onclick=e=>{SFX.sound=!SFX.sound;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.sound);if(SFX.sound)fb("tick")};$("#fx-v").onclick=e=>{SFX.vib=!SFX.vib;saveFx();e.currentTarget.setAttribute("aria-checked",SFX.vib);if(SFX.vib)fb("tick")};
   document.querySelectorAll("[data-th]").forEach(b=>b.onclick=()=>{theme(b.dataset.th);render()});$("#pinset")&&($("#pinset").onclick=setPin);$("#pinchg")&&($("#pinchg").onclick=()=>{removePinThenSet()});$("#pinoff")&&($("#pinoff").onclick=removePin);$("#lk")&&($("#lk").onclick=lockNow);$("#out")&&($("#out").onclick=()=>{if(!confirm("Sign out of this device? You will need to sign in again."))return;if(sb)sb.auth.signOut();else{user=null;try{localStorage.removeItem(USERK)}catch{}render()}});
   $("#bk-out").onclick=()=>{const blob=new Blob([JSON.stringify({app:"ms-productions",v:1,at:new Date().toISOString(),prods:S.prods},null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="ms-productions-backup-"+new Date().toISOString().slice(0,10)+".json";a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")};
