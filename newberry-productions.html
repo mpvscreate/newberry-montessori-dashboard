@@ -1015,7 +1015,7 @@ function storyItems(p){
 function storyCard(x){
   const ex=storyCardExtra(x);if(ex)return ex;
   if(x.k==="log")return `<div class="sitem"><span class="sic">${ic("note")}</span><div class="sbody"><div>${esc(x.l.text)}</div><div class="small muted">${esc(x.l.by)} · ${tmOf(x.t)}</div></div><button class="x sm" data-dl="${x.l.id}" aria-label="Delete update">${ic("trash")}</button></div>`;
-  if(x.k==="media")return `<div class="sitem media"><button class="smedia" data-m="${x.m.id}" aria-label="Open ${x.m.type==="video"?"video":"photo"} ${esc(x.m.cap||"")}">${x.m.type==="video"?`<video data-mid="${x.m.id}" muted playsinline preload="metadata"></video><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${x.m.id}" alt="${esc(x.m.cap||"Photo")}" loading="lazy">`}${consBadge(x.m)}</button>${x.m.cap?`<div class="scap">${esc(x.m.cap)}</div>`:""}<div class="small muted">${esc(x.m.by)} · ${tmOf(x.t)}</div></div>`;
+  if(x.k==="media")return `<div class="sitem media"><button class="smedia" data-m="${x.m.id}" aria-label="Open ${x.m.type==="video"?"video":"photo"} ${esc(x.m.cap||"")}">${x.m.type==="video"?`<img data-mid="${x.m.id}" alt="" loading="lazy"><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${x.m.id}" alt="${esc(x.m.cap||"Photo")}" loading="lazy">`}${consBadge(x.m)}</button>${x.m.cap?`<div class="scap">${esc(x.m.cap)}</div>`:""}<div class="small muted">${esc(x.m.by)} · ${tmOf(x.t)}</div></div>`;
   if(x.k==="goal")return `<div class="sitem win"><span class="sic ok">${ic("trophy")}</span><div class="sbody"><b>Goal finished</b><div>${esc(x.g.title)}</div><div class="small muted">${tmOf(x.t)}</div></div></div>`;
   if(x.k==="target")return `<div class="sitem"><span class="sic ok">${ic("check")}</span><div class="sbody">Target done: ${esc(x.tg.title)}${x.tg.who?` <span class="small muted">· ${esc(x.tg.who)}</span>`:""}<div class="small muted">${esc(x.g.title)} · ${tmOf(x.t)}</div></div></div>`;
   return `<div class="sitem"><span class="sic">${ic("chat")}</span><div class="sbody">${esc(x.c.text)}<div class="small muted">${esc(x.g.title)} · ${esc(x.c.by)} · ${tmOf(x.t)}</div></div></div>`;
@@ -1047,7 +1047,7 @@ const wirePub=id=>{const b=document.getElementById(id);if(b)b.onclick=()=>{pubPr
 const postedToast=name=>navigator.onLine===false?"Saved on this device. It sends when you are online.":name?"Saved to "+name:"Saved.";
 function postCard(p,l){
   const ms=postMedia(l),tw=twLabel(l);
-  const grid=ms.length?`<div class="pm pm${Math.min(ms.length,4)}">${ms.slice(0,4).map((m,i)=>`<button type="button" class="pmi" data-pm="${l.id}:${i}" aria-label="Open ${m.type==="video"?"video":"photo"} ${i+1} of ${ms.length}">${m.type==="video"?`<video data-mid="${m.id}" muted playsinline preload="metadata"></video><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${m.id}" alt="" loading="lazy">`}${i===3&&ms.length>4?`<span class="pmore">+${ms.length-4}</span>`:""}</button>`).join("")}</div>`:"";
+  const grid=ms.length?`<div class="pm pm${Math.min(ms.length,4)}">${ms.slice(0,4).map((m,i)=>`<button type="button" class="pmi" data-pm="${l.id}:${i}" aria-label="Open ${m.type==="video"?"video":"photo"} ${i+1} of ${ms.length}">${m.type==="video"?`<img data-mid="${m.id}" alt="" loading="lazy"><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${m.id}" alt="" loading="lazy">`}${i===3&&ms.length>4?`<span class="pmore">+${ms.length-4}</span>`:""}</button>`).join("")}</div>`:"";
   return `<article class="post${l.pin?" pinned":""}${postOpen.has(l.id)?" open":""}${ms.length?"":" nophoto"}" tabindex="0" data-post="${l.id}" data-tm="${l.term||0}" data-wk="${l.wk||0}">${ms.length>1?`<span class="pcnt" aria-hidden="true">${ic("image","sm")}${ms.length}</span>`:""}<header class="phd"><span class="pavs" aria-hidden="true">${esc(initials(l.by||"me"))}</span><div class="grow"><b>${esc(l.by||"")}</b><span class="small muted" style="display:block">${tmOf(l.t)}${l.ed?" · edited":""}</span></div>${l.pin?`<span class="pinic" title="Pinned" aria-label="Pinned">${ic("pin","sm")}</span>`:""}<button class="x sm ptog" data-pt="${l.id}" aria-expanded="${postOpen.has(l.id)}" aria-label="${postOpen.has(l.id)?"Show less":"Show more"}">${ic("chev","sm")}</button><button class="x sm" data-po="${l.id}" aria-label="Post options">${ic("more")}</button></header>${tw?`<span class="chtag">${esc(tw)}</span>`:""}${l.text?`<p class="ptext">${nl2br(l.text)}</p>`:""}${grid}${l.note&&l.note.text?`<div class="pnote"><span class="small muted">${esc(l.note.by||"Teacher")} left a note</span><p>${nl2br(l.note.text)}</p></div>`:""}<footer class="pfoot"><button type="button" class="rxb" data-rx="${l.id}" aria-pressed="${(l.rx||[]).includes(who()||"me")}" aria-label="${(l.rx||[]).includes(who()||"me")?"Remove your heart":"Send a heart"}${(l.rx||[]).length?", "+(l.rx||[]).length+" so far":""}">${ic("heart","sm")}<span>${(l.rx||[]).length||""}</span></button><button type="button" class="linkbtn" data-nt="${l.id}">${ic("chat","sm")}${l.note&&l.note.text?"Edit note":"Add a note"}</button>${ms.some(m=>m.consent==="ok")?`<span class="pubtag">${ic("globe","sm")}Public</span>`:""}</footer></article>`;
 }
 async function makePost(p,text,files,tw,share){
@@ -1079,11 +1079,11 @@ function storyTab(p){
   (vis.length&&pics.length>1?`<div id="bn-wrap">${beforeNow(p,pics)}</div>`:"");
 }
 function postMenu(p,l){
-  const ms=postMedia(l),photo=ms.find(m=>m.type!=="video"),rows=[],acts=[];
+  const ms=postMedia(l),photo=ms[0],rows=[],acts=[];
   const add=(icon,t,sub,fn)=>{rows.push([icon,t,sub]);acts.push(fn)};
   add("pencil","Edit post","Change the text, photos, videos or chapter",c=>{c();setTimeout(()=>postEdit(p,l),160)});
   add("pin",l.pin?"Unpin from the top":"Pin to the top",l.pin?"Move it back into the timeline":"Keep this post at the top of the story",c=>{l.pin=!l.pin;save(p);fb("tick");c();render()});
-  if(p.showcase&&p.showcase.on&&ms.some(m=>m.type!=="video")){const pub=ms.some(m=>m.consent==="ok");add("globe",pub?"Make photos private":"Show photos on the public page",pub?"Remove them from the showcase":"Approve this post's photos for the showcase",c=>{ms.forEach(m=>{if(m.type!=="video"){m.consent=pub?"":"ok";save(m)}});fb("done");c();render();toast(pub?"Photos are private again.":"Photos will show on the public page.")})}
+  if(p.showcase&&p.showcase.on&&ms.length){const pub=ms.some(m=>m.consent==="ok");add("globe",pub?"Make photos private":"Show photos on the public page",pub?"Remove them from the showcase":"Approve this post's photos for the showcase",c=>{ms.forEach(m=>{m.consent=pub?"":"ok";save(m)});fb("done");c();render();toast(pub?"Photos are private again.":"Photos will show on the public page.")})}
   add("share","Share as a picture","A good-looking card for WhatsApp",c=>{c();setTimeout(()=>cardSheet(p,l),160)});
   if(ms.length)add("play","Play this post","Full screen, photos and videos one by one",c=>{c();setTimeout(()=>{const list=storyMediaList(p),k=list.findIndex(x=>x.m.id===ms[0].id);openViewer(list,Math.max(0,k),true)},160)});
   if(photo)add("image","Use as cover photo","Show the first photo at the top of "+p.name,c=>{p.cover=photo.id;save(p);fb("done");c();render();toast("Cover photo set.")});
@@ -1114,7 +1114,7 @@ function postEdit(p,l){
     <div class="row" style="margin-top:18px"><button class="btn danger" id="pe-del" type="button">${ic("trash")}Delete</button><span class="grow"></span><button class="btn primary" id="pe-ok" type="button">Save</button></div>`,(d,close)=>{
     wireMics(d);d.querySelectorAll(".ta").forEach(autosize);
     const box=d.querySelector("#pe-m"),draw=()=>{
-      box.innerHTML=keep.map((id,i)=>{const m=S.media.find(x=>x.id===id);return `<div class="attc">${m.type==="video"?`<video data-mid="${id}" muted playsinline></video><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${id}" alt="">`}<button type="button" class="attx" data-k="${i}" aria-label="Remove">${ic("x","sm")}</button></div>`}).join("")+attHTML(add,true).replace(/data-rm=/g,"data-a=");
+      box.innerHTML=keep.map((id,i)=>{const m=S.media.find(x=>x.id===id);return `<div class="attc">${m.type==="video"?`<img data-mid="${id}" alt=""><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${id}" alt="">`}<button type="button" class="attx" data-k="${i}" aria-label="Remove">${ic("x","sm")}</button></div>`}).join("")+attHTML(add,true).replace(/data-rm=/g,"data-a=");
       hydrate(box);box.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{keep.splice(+b.dataset.k,1);draw()});box.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const x=add.splice(+b.dataset.a,1)[0];try{URL.revokeObjectURL(x.url)}catch{}draw()})};
     draw();
     d.querySelector("#pe-add").onclick=()=>d.querySelector("#pe-f").click();
@@ -1368,7 +1368,7 @@ function todaySheet(){
 let kioskTimers=[],wakeLock=null;
 function stopKiosk(){kioskTimers.forEach(clearInterval);kioskTimers=[];if(wakeLock){try{wakeLock.release()}catch{}wakeLock=null}}
 function kioskHTML(){
-  const ps=prods(),ph=S.media.filter(m=>!m.del&&m.type!=="video").sort((a,b)=>b.t-a.t).slice(0,14);
+  const ps=prods(),ph=S.media.filter(m=>!m.del).sort((a,b)=>b.t-a.t).slice(0,14);
   return `<div class="kiosk"><div class="k-top"><img src="icons/productions-96.png" alt="" height="44"><div class="k-clock" id="k-clock"></div><span class="grow"></span><button class="x" id="k-x" aria-label="Exit classroom display">${ic("x")}</button></div>
   <div class="k-main"><div class="k-grid">${ps.map(p=>{const la=lastActivity(p);return`<div class="k-card" style="--pc:${p.color}"><span class="pav">${ic(p.icon)}</span><div class="grow"><b>${esc(p.name)}</b><div class="k-sub">${p.log.length} post${p.log.length===1?"":"s"} · ${agoShort(la)}</div></div></div>`}).join("")}</div>
   <div class="k-photo" id="k-pane">${ph.length?`<img id="k-img" alt=""><div class="k-cap" id="k-cap"></div>`:`<div class="k-empty">${ic("image","xl")}<p>Photos from your productions will appear here.</p></div>`}<div class="k-panel" id="k-panel" hidden></div></div></div></div>`;
@@ -1384,7 +1384,7 @@ function kioskPanel(kind){
 }
 function wireKiosk(){
   stopKiosk();
-  const ph=S.media.filter(m=>!m.del&&m.type!=="video").sort((a,b)=>b.t-a.t).slice(0,14);let i=0;
+  const ph=S.media.filter(m=>!m.del).sort((a,b)=>b.t-a.t).slice(0,14);let i=0;
   const clock=()=>{const e=$("#k-clock");if(e)e.textContent=new Date().toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long"})+" · "+tmOf(Date.now())};
   clock();kioskTimers.push(setInterval(clock,15000));
   const show=async()=>{const m=ph[i%ph.length],img=$("#k-img");if(!img||!m)return;const u=await loadMedia(m.id);if(!u)return;img.style.opacity=0;setTimeout(()=>{const cp=$("#k-cap");if(!cp||!img.isConnected)return;img.src=u;img.style.opacity=1;const p=P(m.pid);cp.innerHTML=`<b>${esc(p?p.name:"")}</b>${m.cap?" · "+esc(m.cap):""}`},350);i++};
@@ -1401,7 +1401,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.16.1";
+const APP_VER="6.17.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -2292,18 +2292,18 @@ const card=p=>{const q=prodPct(p),o=p.goals.filter(g=>!g.done).length;
 const nextTarget=p=>{for(const g of p.goals){if(g.done)continue;const t=(g.targets||[]).find(x=>!x.done);if(t)return t.title}return""};
 const totals=()=>{const ps=prods(),all=ps.flatMap(p=>p.goals),open=all.filter(g=>!g.done).length;return{ps,all,open,pct:ps.length?Math.round(ps.reduce((a,p)=>a+prodPct(p),0)/ps.length):0,photos:S.media.filter(m=>!m.del).length}};
 /* first tab: every production on one screen */
-const coverOf=p=>{const ms=mediaOf(p).filter(m=>m.type!=="video");return(p.cover&&ms.find(m=>m.id===p.cover))||ms[0]||null};
+const coverOf=p=>{const ms=mediaOf(p).filter(m=>m.tag!=="receipt"&&m.tag!=="evidence");return(p.cover&&ms.find(m=>m.id===p.cover))||ms[0]||null};
 const agoShort=t=>{if(!t)return"New";const d=Math.floor((Date.now()-t)/864e5);return d<1?"Today":d===1?"Yesterday":d+"d ago"};
 function weekCard(){
   const dow=new Date().getDay();if(!(dow===5||dow===6||dow===0||dow===1))return"";
   if(Date.now()-recapSeen()<3*864e5)return"";
-  const l=weekMediaList().filter(x=>x.m.type!=="video");if(l.length<2)return"";
+  const l=weekMediaList();if(l.length<2)return"";
   const teams=new Set(l.map(x=>x.p.id)).size,th=l.slice(-3);
-  return `<section class="wkcard" aria-label="Week in review"><div class="wk-th">${th.map(x=>`<img data-mid="${x.m.id}" alt="" loading="lazy">`).join("")}</div><div class="wk-b"><b>Your week in review</b><span class="small muted">${l.length} photo${l.length===1?"":"s"} from ${teams} team${teams===1?"":"s"}</span><div class="row wr" style="margin-top:8px"><button class="btn small primary" id="wk-play" type="button">${ic("play","sm")}Play</button><button class="btn small" id="wk-sh" type="button">${ic("share","sm")}Share</button></div></div><button class="x sm" id="wk-x" type="button" aria-label="Hide for now">${ic("x","sm")}</button></section>`;
+  return `<section class="wkcard" aria-label="Week in review"><div class="wk-th">${th.map(x=>`<img data-mid="${x.m.id}" alt="" loading="lazy">`).join("")}</div><div class="wk-b"><b>Your week in review</b><span class="small muted">${l.length} photo${l.length===1?"":"s"} and video${l.length===1?"":"s"} from ${teams} team${teams===1?"":"s"}</span><div class="row wr" style="margin-top:8px"><button class="btn small primary" id="wk-play" type="button">${ic("play","sm")}Play</button><button class="btn small" id="wk-sh" type="button">${ic("share","sm")}Share</button></div></div><button class="x sm" id="wk-x" type="button" aria-label="Hide for now">${ic("x","sm")}</button></section>`;
 }
 function recentStrip(){
   const it=prods().flatMap(p=>p.log.map(l=>({p,l}))).sort((a,b)=>b.l.t-a.l.t).slice(0,6);if(!it.length)return"";
-  return `<h3 class="st-h" style="margin:18px 2px 8px">Recently posted</h3><div class="rps">${it.map(({p,l})=>{const m=postMedia(l).find(x=>x.type!=="video");return `<button class="rp" style="--pc:${p.color}" data-open="${p.id}" type="button" aria-label="${esc(p.name)}: ${esc((l.text||"Photo post").slice(0,80))}">${m?`<img data-mid="${m.id}" alt="" loading="lazy">`:`<span class="rp-i">${ic(p.icon)}</span>`}<span class="rp-b"><b>${esc(p.name)}</b><span class="rp-t">${esc(l.text||"Added a photo")}</span><span class="small muted">${agoShort(l.t)}</span></span></button>`}).join("")}</div>`;
+  return `<h3 class="st-h" style="margin:18px 2px 8px">Recently posted</h3><div class="rps">${it.map(({p,l})=>{const m=postMedia(l)[0];return `<button class="rp" style="--pc:${p.color}" data-open="${p.id}" type="button" aria-label="${esc(p.name)}: ${esc((l.text||"Photo post").slice(0,80))}">${m?`<img data-mid="${m.id}" alt="" loading="lazy">`:`<span class="rp-i">${ic(p.icon)}</span>`}<span class="rp-b"><b>${esc(p.name)}</b><span class="rp-t">${esc(l.text||"Added a photo")}</span><span class="small muted">${agoShort(l.t)}</span></span></button>`}).join("")}</div>`;
 }
 function homePage(){
   const ps=prods(),wk=weekCard();
@@ -2332,7 +2332,7 @@ function overviewPage(){
   <div class="card"><h2>Latest from every team</h2>${f.length?`${actGroups(f)}${allF.length>8?`<button class="linkbtn" id="ov-more" type="button" style="margin-top:6px">${ovMore?"Show less":"Show more"}</button>`:""}`:`<div class="empty">${ic("pulse","xl")}<h3>Nothing yet</h3>Open a production and write the first post.</div>`}</div>`;
 }
 const feedItems=()=>prods().flatMap(p=>{const ids=new Set(p.log.map(l=>l.id));return[...p.log.map(l=>({p,t:l.t,txt:l.text||((l.m||[]).length?"Added "+((l.m||[]).length===1?"a photo":(l.m||[]).length+" photos"):""),k:"Post",l})),...mediaOf(p).filter(m=>m.tag!=="receipt"&&m.tag!=="evidence"&&(!m.post||!ids.has(m.post))).map(m=>({p,t:m.t,txt:m.cap||(m.type==="video"?"Added a video":"Added a photo"),k:m.type==="video"?"Video":"Photo",m}))]}).sort((a,b)=>b.t-a.t);
-const actRow=f=>{const m=f.m||(f.l&&postMedia(f.l).find(x=>x.type!=="video"));return `<li><div class="avatar" style="color:${f.p.color}">${ic(f.p.icon)}</div><div class="grow"><b>${esc(f.p.name)}</b> <span class="pill type">${f.k}</span><div>${esc(f.txt)}</div><div class="small muted">${fmt(f.t)}</div></div>${m&&m.type!=="video"?`<img class="athumb" data-mid="${m.id}" alt="">`:""}</li>`};
+const actRow=f=>{const m=f.m||(f.l&&postMedia(f.l)[0]);return `<li><div class="avatar" style="color:${f.p.color}">${ic(f.p.icon)}</div><div class="grow"><b>${esc(f.p.name)}</b> <span class="pill type">${f.k}</span><div>${esc(f.txt)}</div><div class="small muted">${fmt(f.t)}</div></div>${m?`<img class="athumb" data-mid="${m.id}" alt="">`:""}</li>`};
 const fab=()=>`<div class="fab-wrap"><button class="fab" id="addp" aria-label="New production">${ic("plus")}<span>New production</span></button></div>`;
 function wireHome(){
   {const a=$("#wk-play");if(a)a.onclick=()=>openViewer(weekMediaList(),0,true);const b=$("#wk-sh");if(b)b.onclick=()=>shareMenu(null);const x=$("#wk-x");if(x)x.onclick=()=>{try{localStorage.setItem(RECAPK,String(Date.now()))}catch{}render()}}
@@ -2438,7 +2438,7 @@ function fb(k){if(SFX.vib){try{navigator.vibrate&&navigator.vibrate(HAP[k])}catc
 const openG=new Set(),seenP=new Set();
 function prodView(p){
   const TB=tabsFor(p);if(!TB.some(t=>t[0]===tab)&&tab!=="media")tab="plan";
-  const photos=mediaOf(p),cov=(p.cover&&photos.find(m=>m.id===p.cover&&m.type!=="video"))||photos.find(m=>m.type!=="video");
+  const photos=mediaOf(p),cov=(p.cover&&photos.find(m=>m.id===p.cover))||photos[0];
   const last=lastActivity(p);
   return `<div class="pv"><div class="pv-side"><div class="phero${cov?" hascover":""}" style="--pc:${p.color}">${cov?`<img class="ph-cover" data-mid="${cov.id}" alt="">`:""}
     <div class="ph-top"><button class="x glass" id="back" aria-label="Back to productions">${ic("left")}</button><span class="grow"></span>${photos.length?`<button class="x glass" id="plv" aria-label="Play slideshow">${ic("play")}</button>`:""}<button class="x glass" id="shr" aria-label="Share">${ic("share")}</button><button class="x glass" id="edp" aria-label="Edit production">${ic("pencil")}</button></div>
@@ -2560,6 +2560,34 @@ async function loadMedia(id){
   if(!b&&LV.on&&sb){const{data}=await sb.storage.from("ms-media").download(mediaPath(id)).catch(()=>({}));if(data){b=data;mPut(id,b).catch(()=>{})}}
   if(!b)return null;const u=URL.createObjectURL(b);mcache.set(id,u);return u;
 }
+/* a still frame for every video, made once and kept on this device */
+const thumbCache=new Map();let thumbQ=Promise.resolve();
+function videoThumb(id){
+  if(thumbCache.has(id))return thumbCache.get(id);
+  const pr=thumbQ=thumbQ.then(()=>makeThumb(id)).catch(()=>null);
+  const out=pr.then(u=>{if(!u)thumbCache.delete(id);return u});thumbCache.set(id,out);return out;
+}
+async function makeThumb(id){
+  const key=id+":th";const had=await mGet(key).catch(()=>null);if(had)return URL.createObjectURL(had);
+  const u=await loadMedia(id);if(!u)return null;
+  const v=document.createElement("video");v.muted=true;v.playsInline=true;v.preload="auto";v.src=u;
+  const wait=(ev,ms)=>new Promise(res=>{let d=false;const g=()=>{if(!d){d=true;res()}};v.addEventListener(ev,g,{once:true});setTimeout(g,ms)});
+  await wait("loadeddata",7000);if(!v.videoWidth){v.removeAttribute("src");return null}
+  let dur=v.duration;if(!isFinite(dur)||dur<=0){v.currentTime=1e7;await wait("seeked",2500);dur=isFinite(v.duration)&&v.duration>0?v.duration:2}
+  const c=document.createElement("canvas"),k=Math.min(1,640/Math.max(v.videoWidth,v.videoHeight));c.width=Math.max(2,Math.round(v.videoWidth*k));c.height=Math.max(2,Math.round(v.videoHeight*k));const g=c.getContext("2d");
+  let best=null,bestL=-1;
+  for(const t of [Math.min(1,dur/3),dur/2,Math.min(.1,dur/2)]){
+    v.currentTime=t;await wait("seeked",2500);
+    try{g.drawImage(v,0,0,c.width,c.height)}catch{continue}
+    const px=g.getImageData(0,0,c.width,c.height).data;let sum=0,n=0;for(let i=0;i<px.length;i+=388){sum+=px[i]*.3+px[i+1]*.59+px[i+2]*.11;n++}
+    const L=n?sum/n:0;if(L>bestL){bestL=L;best=await new Promise(r=>c.toBlob(r,"image/jpeg",.8))}
+    if(L>25)break;
+  }
+  v.removeAttribute("src");try{v.load()}catch{}
+  if(!best)return null;mPut(key,best).catch(()=>{});return URL.createObjectURL(best);
+}
+/* the picture to use for a photo, or a video's thumbnail */
+async function stillUrl(id){const m=S.media.find(x=>x.id===id);return m&&m.type==="video"?await videoThumb(id):await loadMedia(id)}
 async function pushMedia(){
   sm.up=sm.up||{};
   for(const m of S.media){
@@ -2663,8 +2691,8 @@ h1{font:700 40pt/1.05 "Bricolage Grotesque","Instrument Sans",sans-serif;margin:
 </style></head><body><div class="pg"><div class="top"><small>Newberry House Middle School · Production teams</small><h1>${e(title)}</h1>${sub?'<p class="sub">'+e(sub)+"</p>":""}</div>${photo?'<div class="ph"><img src="'+photo+'" alt=""></div>':""}<p class="scan">Scan to see what we are making</p><div class="qr">${svg}</div><p class="url">${e(url)}</p><p class="foot">Learning by doing, together</p></div><script>function fit(){var w=document.documentElement.clientWidth,pw=document.querySelector(".pg").offsetWidth;document.body.style.zoom=Math.min(1,w/pw)}fit();addEventListener("resize",fit);addEventListener("beforeprint",function(){document.body.style.zoom=1});addEventListener("afterprint",fit)<\/script></body></html>`;
   printView("Poster",html);
 }
-function posterProd(p){const o=p.showcase;if(!o||!o.on)return;const ap=mediaOf(p).filter(m=>m.type!=="video"&&m.consent==="ok")[0];posterFor({title:p.name,sub:p.info&&p.info.term||"",url:scUrl(p),color:p.color,photoId:ap&&ap.id})}
-function posterSchool(){if(!S.sch||!S.sch.on)return;const ap=schList().flatMap(p=>mediaOf(p).filter(m=>m.type!=="video"&&m.consent==="ok"))[0];posterFor({title:"Our production teams",sub:"",url:schUrl(),color:"#a65608",photoId:ap&&ap.id})}
+function posterProd(p){const o=p.showcase;if(!o||!o.on)return;const ap=mediaOf(p).filter(m=>m.consent==="ok")[0];posterFor({title:p.name,sub:p.info&&p.info.term||"",url:scUrl(p),color:p.color,photoId:ap&&ap.id})}
+function posterSchool(){if(!S.sch||!S.sch.on)return;const ap=schList().flatMap(p=>mediaOf(p).filter(m=>m.consent==="ok"))[0];posterFor({title:"Our production teams",sub:"",url:schUrl(),color:"#a65608",photoId:ap&&ap.id})}
 /* ---------- weekly digest, ready for WhatsApp ---------- */
 function digestText(){
   const to=Date.now(),from=to-7*864e5,pl=(n,w)=>n+" "+w+(n===1?"":"s");
@@ -2701,7 +2729,7 @@ function shareMenu(p){
     rows.push(["play","Play slideshow","Photos and videos from "+p.name+", with captions",()=>openViewer(storyMediaList(p,storyF.pid===p.id?{term:storyF.term,wk:storyF.wk}:{}),0,true)]);
     rows.push(["cloud","Save to Google Drive","All photos and videos from "+p.name+", up to 30 files",()=>saveToDrive(mediaOf(p).slice().reverse().map(m=>m.id),p)]);
     rows.push(["image","Send photos to WhatsApp","Up to 20 photos from the story, sent as pictures",()=>sharePhotos(storyMediaList(p),p.name)]);
-    if(canRecord())rows.push(["download","Save slideshow as a video","A video file to send or play on any screen",()=>slideshowVideo(storyMediaList(p).filter(x=>x.m.type!=="video"))]);
+    if(canRecord())rows.push(["download","Save slideshow as a video","A video file to send or play on any screen",()=>slideshowVideo(storyMediaList(p))]);
     rows.push(["share","Showcase page","A public page for families and the community",()=>showcaseSheet(p)]);
     if(p.showcase&&p.showcase.on)rows.push(["printer","Print poster","A page with a QR code to this showcase",()=>posterProd(p)]);
     rows.push(["book","Story book (PDF)","Your whole story laid out to print or save",()=>exportStory(p)]);
@@ -2727,7 +2755,7 @@ function openViewer(list,start,auto){
   const root=document.createElement("div");root.className="vw";root.setAttribute("role","dialog");root.setAttribute("aria-modal","true");root.setAttribute("aria-label","Photos and videos");
   const seg=list.length<=20;
   root.innerHTML=`<div class="vw-bars ${seg?"":"one"}" aria-hidden="true">${seg?list.map(()=>`<i><b></b></i>`).join(""):`<i><b id="vw-one"></b></i>`}</div>
-    <div class="vw-top"><span class="vw-t grow" id="vw-t"></span><button class="x glass" id="vw-pl" type="button"></button>${canRecord()&&list.some(x=>x.m.type!=="video")?`<button class="x glass" id="vw-vid" type="button" aria-label="Save slideshow as a video">${ic("download")}</button>`:""}<button class="x glass" id="vw-edit" type="button" aria-label="Edit">${ic("wand")}</button><button class="x glass" id="vw-ed" type="button" aria-label="Details and sharing consent">${ic("pencil")}</button><button class="x glass" id="vw-x" type="button" aria-label="Close">${ic("x")}</button></div>
+    <div class="vw-top"><span class="vw-t grow" id="vw-t"></span><button class="x glass" id="vw-pl" type="button"></button>${canRecord()?`<button class="x glass" id="vw-vid" type="button" aria-label="Save slideshow as a video">${ic("download")}</button>`:""}<button class="x glass" id="vw-edit" type="button" aria-label="Edit">${ic("wand")}</button><button class="x glass" id="vw-ed" type="button" aria-label="Details and sharing consent">${ic("pencil")}</button><button class="x glass" id="vw-x" type="button" aria-label="Close">${ic("x")}</button></div>
     <div class="vw-stage" id="vw-st"></div><button class="vw-nav prev" id="vw-p" type="button" aria-label="Previous"></button><button class="vw-nav next" id="vw-n" type="button" aria-label="Next"></button>
     <div class="vw-cap" id="vw-c"></div>`;
   document.body.append(root);document.body.classList.add("noscroll");
@@ -2766,7 +2794,7 @@ function openViewer(list,start,auto){
   q("#vw-x").onclick=closeViewer;q("#vw-p").onclick=prev;q("#vw-n").onclick=()=>{if(i<list.length-1){i++;show()}};
   q("#vw-ed").onclick=()=>{const m=list[i].m;closeViewer();openMediaSheet(m)};
   q("#vw-edit").onclick=()=>{const m=list[i].m,pp=P(m.pid);closeViewer();setTimeout(()=>m.type==="video"?videoEditSheet(pp,m):editSheet(pp,m),200)};
-  const vb=q("#vw-vid");if(vb)vb.onclick=()=>{const items=list.filter(x=>x.m.type!=="video");playing=false;clearTimeout(v.timer);closeViewer();slideshowVideo(items)};
+  const vb=q("#vw-vid");if(vb)vb.onclick=()=>{const items=list;playing=false;clearTimeout(v.timer);closeViewer();slideshowVideo(items)};
   let sx=0,pd=0,ps=1,pan=null,moved=false,lastTap=0;const stg=q("#vw-st");
   const imgEl=()=>{const e=q("#vw-st .vw-img");return e&&e.tagName==="IMG"?e:null},applyZ=()=>{const e=imgEl();if(e){e.style.transform=z.s>1?`translate(${z.x}px,${z.y}px) scale(${z.s})`:"";root.classList.toggle("zoomed",z.s>1)}};
   const pausePl=()=>{if(playing){playing=false;setPl();clearTimeout(v.timer)}};
@@ -2793,9 +2821,9 @@ async function renderCard(p,l,all){
   g.fillStyle="#fbf6ec";g.fillRect(0,0,W,H);
   g.fillStyle=p.color||"#a65608";rr(0,0,W,210,0);g.fill();
   g.fillStyle="#fff";g.font=`700 64px ${D}`;g.fillText(p.name,60,110);g.globalAlpha=.9;g.font=`500 32px ${B}`;g.fillText("Newberry House Middle School",60,162);g.globalAlpha=1;
-  let ms=postMedia(l).filter(m=>m.type!=="video");if(!all)ms=ms.filter(m=>m.consent==="ok");ms=ms.slice(0,4);
+  let ms=postMedia(l);if(!all)ms=ms.filter(m=>m.consent==="ok");ms=ms.slice(0,4);
   let y=250;
-  const imgs=[];for(const m of ms){const u=await loadMedia(m.id);const im=u&&await loadImgEl(u);if(im)imgs.push(im)}
+  const imgs=[];for(const m of ms){const u=await stillUrl(m.id);const im=u&&await loadImgEl(u);if(im)imgs.push(im)}
   const cover=(im,x,yy,w,h)=>{const k=Math.max(w/im.width,h/im.height),dw=im.width*k,dh=im.height*k;g.save();rr(x,yy,w,h,28);g.clip();g.drawImage(im,x+(w-dw)/2,yy+(h-dh)/2,dw,dh);g.restore()};
   if(imgs.length===1){cover(imgs[0],60,y,960,640);y+=670}
   else if(imgs.length===2){cover(imgs[0],60,y,470,640);cover(imgs[1],550,y,470,640);y+=670}
@@ -2807,7 +2835,7 @@ async function renderCard(p,l,all){
   shown.forEach((t,k)=>g.fillText(t,60,y+60+k*lh));
   g.fillStyle="#6c6250";g.font=`500 32px ${B}`;g.fillText(new Date(l.t).toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"}),60,H-110);
   g.textAlign="right";g.fillText("Learning by doing, together",W-60,H-110);
-  return{blob:await new Promise(r=>c.toBlob(r,"image/png")),photos:imgs.length,totalPhotos:postMedia(l).filter(m=>m.type!=="video").length};
+  return{blob:await new Promise(r=>c.toBlob(r,"image/png")),photos:imgs.length,totalPhotos:postMedia(l).length};
 }
 function cardSheet(p,l){
   let all=false,cur=null;
@@ -2849,7 +2877,7 @@ async function slideshowVideo(items){
   root.querySelector("#vx-c").onclick=()=>{cancel=true};
   try{
     const W=1280,H=720,SL=3500,FD=500,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
-    const imgs=[];for(const it of items){const u=await loadMedia(it.m.id);const im=u&&await loadImgEl(u);if(im)imgs.push({im,cap:it.cap||""})}
+    const imgs=[];for(const it of items){const u=await stillUrl(it.m.id);const im=u&&await loadImgEl(u);if(im)imgs.push({im,cap:it.cap||""})}
     if(!imgs.length)throw new Error("none");
     const title=items[0].p?items[0].p.name:"Our story";
     const types=["video/mp4;codecs=avc1.42E01E","video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"],mime=types.find(t=>MediaRecorder.isTypeSupported(t))||"";
@@ -2892,7 +2920,7 @@ function storyBookHTML(p,imgs){
   const e=esc;ensureBook(p);const pr=p.prop||{};
   const posts=p.log.slice().sort((a,b)=>a.t-b.t);
   const fl=(k,v)=>v?`<div class="fl"><b>${e(k)}</b>${e(v).replace(/\n/g,"<br>")}</div>`:"";
-  const postHtml=l=>{const ms=postMedia(l).filter(m=>m.type!=="video"&&m.consent!=="no"&&imgs[m.id]).slice(0,6);
+  const postHtml=l=>{const ms=postMedia(l).filter(m=>m.consent!=="no"&&imgs[m.id]).slice(0,6);
     return `<div class="post"><div class="d">${e(new Date(l.t).toLocaleDateString(undefined,{weekday:"long",day:"numeric",month:"long",year:"numeric"}))} · ${e(l.by||"")}</div>${l.text?`<p class="pt">${e(l.text)}</p>`:""}${ms.length?`<div class="ph g${Math.min(ms.length,3)}">${ms.map(m=>`<img src="${imgs[m.id]}" alt="">`).join("")}</div>`:""}</div>`};
   const gk=new Map();posts.forEach(l=>{const k=twLabel(l);if(!gk.has(k))gk.set(k,{name:k,o:k?(l.term||0)*100+(l.wk||0):99999,list:[]});gk.get(k).list.push(l)});
   const byCh=[...gk.values()].sort((a,b)=>a.o-b.o).map(g=>g.name?g:{...g,name:gk.size>1?"More from the story":""}).filter(g=>g.list.length);
@@ -2914,7 +2942,7 @@ function storyBookHTML(p,imgs){
 async function exportStory(p){
   toast("Preparing your story book…");
   const ids=new Set();
-  p.log.forEach(l=>postMedia(l).filter(m=>m.type!=="video"&&m.consent!=="no").slice(0,6).forEach(m=>ids.add(m.id)));
+  p.log.forEach(l=>postMedia(l).filter(m=>m.consent!=="no").slice(0,6).forEach(m=>ids.add(m.id)));
   const cov=coverOf(p);if(cov)ids.add(cov.id);
   const imgs={};let n=0;for(const id of ids){if(n++>=60)break;try{imgs[id]=await scImage(id)}catch{}}
   printView("Story book",storyBookHTML(p,imgs));
@@ -2981,7 +3009,7 @@ const schList=()=>{const o=S.sch||{};return prods().filter(p=>o.mode!=="selected
 function schBuild(){
   const cut=(v,n)=>String(v==null?"":v).trim().slice(0,n);
   const items=schList().map(p=>{ensureBook(p);
-    const ap=mediaOf(p).filter(m=>m.type!=="video"&&m.consent==="ok"),cover=ap[0]||null;
+    const ap=mediaOf(p).filter(m=>m.consent==="ok"),cover=ap[0]||null;
     return{id:p.id,name:p.name,icon:ICONS[p.icon]||"",color:p.color,desc:cut(p.desc,120),pct:prodPct(p),done:p.goals.filter(g=>g.done).length,open:p.goals.filter(g=>!g.done).length,students:p.members.length,
       cover:cover?{id:cover.id,cap:cut(cover.cap,80)}:null,link:(p.showcase&&p.showcase.on&&p.showcase.token)||""}});
   return{v:2,kind:"school",title:"Our production teams",updated:Date.now(),count:items.length,pct:items.length?Math.round(items.reduce((a,i)=>a+i.pct,0)/items.length):0,done:items.reduce((a,i)=>a+i.done,0),open:items.reduce((a,i)=>a+i.open,0),students:items.reduce((a,i)=>a+i.students,0),items};
@@ -3052,9 +3080,9 @@ const scStatus=o=>{const t=(sm.scAt||{})[o.token];if(!t)return"Not published yet
 function scBuild(p){
   ensureBook(p);const o=p.showcase||{},b=bud(p),on=k=>k==="story"?o.story!==false:k==="money"?(!!o.money&&!!p.useMoney):!!o[k],cut=(v,n)=>String(v==null?"":v).trim().slice(0,n);
   const first=m=>String(m).trim().split(/\s+/)[0];
-  const ok=mediaOf(p).filter(m=>m.type!=="video"&&m.consent==="ok"),okId=new Set(ok.map(m=>m.id));
+  const ok=mediaOf(p).filter(m=>m.consent==="ok"),okId=new Set(ok.map(m=>m.id));
   const order=ok.slice().sort((x,y)=>(y.id===p.cover)-(x.id===p.cover)||y.t-x.t).slice(0,20),ids=new Set(order.map(m=>m.id));
-  const photos=order.sort((x,y)=>x.t-y.t).map(m=>({id:m.id,cap:cut(m.cap,90),t:m.t}));
+  const photos=order.sort((x,y)=>x.t-y.t).map(m=>({id:m.id,cap:cut(m.cap,90),t:m.t,v:m.type==="video"?1:0}));
   const team=o.names&&p.members.length?p.members.slice(0,10).map(first).join(", ")+(p.members.length>10?" and more":""):p.members.length?p.members.length+" student"+(p.members.length===1?"":"s"):"Our team";
   const d={v:3,name:p.name,icon:ICONS[p.icon]||"",color:p.color,desc:cut(p.desc,240),term:(p.info&&p.info.term)||"",team,cover:ids.has(p.cover)?p.cover:"",photos,updated:Date.now()};
   if(on("story")){
@@ -3082,7 +3110,7 @@ function scBuild(p){
   return d;
 }
 async function scImage(id){
-  const u=await loadMedia(id);if(!u)return null;
+  const u=await stillUrl(id);if(!u)return null;
   const bl=await (await fetch(u)).blob(),bmp=await createImageBitmap(bl).catch(()=>null);if(!bmp)return null;
   for(const[mx,q]of[[1000,.72],[800,.65],[640,.55]]){const k=Math.min(1,mx/Math.max(bmp.width,bmp.height)),c=document.createElement("canvas");c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);c.getContext("2d").drawImage(bmp,0,0,c.width,c.height);const url=c.toDataURL("image/jpeg",q);if(url.length<380000)return url}
   return null;
@@ -3108,7 +3136,7 @@ function showcaseSheet(p){
   const o=p.showcase=p.showcase||{on:false,token:"",ver:2,plan:false,work:true,money:false,story:false,learned:false,names:false};
   sheet("Showcase page",`<div id="sc"></div>`,(d,close)=>{
     const root=d.querySelector("#sc");let busy=false;
-    const nOk=()=>mediaOf(p).filter(m=>m.type!=="video"&&m.consent==="ok").length;
+    const nOk=()=>mediaOf(p).filter(m=>m.consent==="ok").length;
     const ALL=["story","plan",...(p.useMoney?["money"]:[]),"learned"],val=k=>k==="all"?ALL.every(x=>val(x)):k==="story"?o.story!==false:!!o[k];
     const sw=(k,t,sub)=>`<div class="row between" style="margin:12px 0"><div><b>${t}</b><div class="small muted">${sub}</div></div><button type="button" role="switch" class="sw" data-k="${k}" aria-label="${t}" aria-checked="${val(k)}"><i></i></button></div>`;
     const err=m=>{const e=root.querySelector("#sc-e");if(e){e.textContent=m;e.hidden=!m}};
@@ -3153,13 +3181,13 @@ function cmpSheet(p){
   });
 }
 function wireCmp(c){const r=c.querySelector("input");if(!r||c.dataset.w)return;c.dataset.w="1";const set=()=>c.style.setProperty("--x",r.value+"%");r.addEventListener("input",set);set()}
-function hydrate(root=document){root.querySelectorAll(".cmps").forEach(wireCmp);root.querySelectorAll("[data-cmp]").forEach(b=>{if(b.dataset.w)return;b.dataset.w="1";b.onclick=()=>{const q=P(b.dataset.cmp);if(q)cmpSheet(q)}});root.querySelectorAll("[data-mid]").forEach(async el=>{const u=await loadMedia(el.dataset.mid);if(u)el.src=el.tagName==="VIDEO"&&!el.controls?u+"#t=0.1":u})}
+function hydrate(root=document){root.querySelectorAll(".cmps").forEach(wireCmp);root.querySelectorAll("[data-cmp]").forEach(b=>{if(b.dataset.w)return;b.dataset.w="1";b.onclick=()=>{const q=P(b.dataset.cmp);if(q)cmpSheet(q)}});root.querySelectorAll("[data-mid]").forEach(async el=>{const id=el.dataset.mid,vm=S.media.find(x=>x.id===id);if(vm&&vm.type==="video"&&el.tagName!=="VIDEO"){const t=await videoThumb(id);if(t)el.src=t;return}if(vm&&vm.type==="video"&&!el.controls){const t=await videoThumb(id);if(t)el.poster=t}const u=await loadMedia(id);if(u)el.src=el.tagName==="VIDEO"&&!el.controls?u+"#t=0.1":u})}
 async function migrateMedia(){let n=0;for(const m of S.media){if(!m.data)continue;try{const b=await (await fetch(m.data)).blob();await mPut(m.id,b);delete m.data;m.type=m.type||"photo";n++}catch{}}if(n){save();if(!isOpen())render()}}
 function toBlob(file){return new Promise(res=>{const im=new Image(),u=URL.createObjectURL(file);im.onload=()=>{const s=Math.min(1,1600/Math.max(im.width,im.height)),c=document.createElement("canvas");c.width=im.width*s;c.height=im.height*s;c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(res,"image/jpeg",.75)};im.onerror=()=>res(null);im.src=u})}
 
 let mview="grid",selecting=false,selScope="";const sel=new Set();
 const mediaOf=p=>S.media.filter(m=>m.pid===p.id&&!m.del).sort((a,b)=>b.t-a.t);
-const mthumb=m=>`<button data-m="${m.id}" ${selecting?`aria-pressed="${sel.has(m.id)}"`:""} class="${sel.has(m.id)?"sel":""}" aria-label="${selecting?"Select ":"Open "}${m.type==="video"?"video":"photo"} ${esc(m.cap||"")}">${m.type==="video"?`<video data-mid="${m.id}" muted playsinline preload="metadata"></video><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${m.id}" alt="${esc(m.cap||"Photo")}" loading="lazy">`}${consBadge(m)}${selecting?`<span class="ck">${ic("check","sm")}</span>`:""}</button>`;
+const mthumb=m=>`<button data-m="${m.id}" ${selecting?`aria-pressed="${sel.has(m.id)}"`:""} class="${sel.has(m.id)?"sel":""}" aria-label="${selecting?"Select ":"Open "}${m.type==="video"?"video":"photo"} ${esc(m.cap||"")}">${m.type==="video"?`<img data-mid="${m.id}" alt="" loading="lazy"><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${m.id}" alt="${esc(m.cap||"Photo")}" loading="lazy">`}${consBadge(m)}${selecting?`<span class="ck">${ic("check","sm")}</span>`:""}</button>`;
 function weekStart(t){const d=new Date(t);d.setHours(0,0,0,0);d.setDate(d.getDate()-((d.getDay()+6)%7));return d.getTime()}
 function clearSel(){selecting=false;sel.clear()}
 function mediaTab(p){
@@ -3227,7 +3255,7 @@ function waSheet(p,ids){
   const caps=ms.map(m=>m.cap).filter(Boolean);
   let text=`${p.name} update`+(caps.length?"\n"+caps.map(c=>"- "+c).join("\n"):"")+"\n\nNewberry Middle School Project";
   const cNo=ms.filter(m=>m.consent==="no").length,cUn=ms.filter(m=>!m.consent).length;
-  sheet("Send on WhatsApp",`<div class="chips" style="gap:6px;margin:10px 0">${ms.slice(0,8).map(m=>`<span style="width:56px;height:56px;border-radius:12px;overflow:hidden;display:block;background:var(--line)">${m.type==="video"?`<video data-mid="${m.id}" muted playsinline preload="metadata" style="width:100%;height:100%;object-fit:cover"></video>`:`<img data-mid="${m.id}" alt="" style="width:100%;height:100%;object-fit:cover">`}</span>`).join("")}${ms.length>8?`<span class="muted small">+${ms.length-8} more</span>`:""}</div>
+  sheet("Send on WhatsApp",`<div class="chips" style="gap:6px;margin:10px 0">${ms.slice(0,8).map(m=>`<span style="width:56px;height:56px;border-radius:12px;overflow:hidden;display:block;background:var(--line)">${m.type==="video"?`<img data-mid="${m.id}" alt="" style="width:100%;height:100%;object-fit:cover">`:`<img data-mid="${m.id}" alt="" style="width:100%;height:100%;object-fit:cover">`}</span>`).join("")}${ms.length>8?`<span class="muted small">+${ms.length-8} more</span>`:""}</div>
   <p class="muted small" style="margin:0">${ms.length} item${ms.length>1?"s":""} selected</p>
   <label class="f" for="wm">Your message</label><div class="row" style="align-items:flex-start"><textarea class="t" id="wm" rows="6">${esc(text)}</textarea>${micBtn()}</div>
   ${cNo?`<div class="warncard" style="margin-top:12px">${ic("alert")}<span>${cNo} selected item${cNo>1?"s are":" is"} marked Do not share. Remove ${cNo>1?"them":"it"} before sharing photos.</span></div>`:cUn?`<div class="hintcard" style="background:var(--amber-soft)"><p>${cUn} item${cUn>1?"s haven't":" hasn't"} had a consent check. Make sure everyone shown agreed.</p></div>`:""}<button class="btn primary block" id="wsend" ${cNo?"disabled":""} style="margin-top:16px">${ic("share")}Share with photos</button><div class="row" style="margin-top:10px"><button class="btn grow" id="wtxt">${ic("chat")}Message only</button><button class="btn grow" id="wcp">${ic("copy")}Copy</button></div>

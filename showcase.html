@@ -68,6 +68,7 @@ footer{text-align:center;color:var(--muted);font-size:.82rem;padding:10px 0}
 .pmeta{display:flex;flex-wrap:wrap;align-items:center;gap:6px;font-size:.82rem;color:var(--muted)}.pt{background:var(--paper);border-radius:99px;padding:2px 10px;font-weight:600}.pt.c{color:var(--pc)}
 .pm{display:grid;gap:4px;margin-top:12px;border-radius:18px;overflow:hidden}.pm1{grid-template-columns:1fr}.pm2,.pm3,.pm4{grid-template-columns:1fr 1fr}
 .pm button{position:relative;border:0;padding:0;background:var(--line);cursor:pointer;aspect-ratio:4/3;overflow:hidden}.pm1 button{aspect-ratio:16/10}.pm3 button:first-child{grid-row:span 2;aspect-ratio:auto}.pm img{width:100%;height:100%;object-fit:cover;display:block}
+.pb{position:absolute;right:6px;bottom:6px;background:rgba(0,0,0,.62);color:#fff;border-radius:99px;padding:1px 8px;font-size:.72rem;line-height:1.5}
 .more{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.5);color:#fff;font:700 1.4rem var(--display)}
 </style>
 </head>
@@ -142,11 +143,11 @@ function render(d){
   const kv=(k,v)=>v?'<div class="kv"><span>'+esc(k)+"</span><p>"+esc(v).replace(/\n/g,"<br>")+"</p></div>":"";
   /* Story */
   const postHtml=po=>{const ms=(po.m||[]).filter(id=>byId[id]),ch=chs.find(c=>c.id===po.ch);
-    return '<article class="post'+(po.pin?" pin":"")+'" data-ch="'+esc(po.ch||"")+'"><div class="pmeta"><span>'+esc(dShort(po.t))+"</span>"+(po.pin?'<span class="pt">Pinned</span>':"")+(ch?'<span class="pt c">'+esc(ch.name)+"</span>":"")+"</div>"+(po.txt?"<p>"+esc(po.txt).replace(/\n/g,"<br>")+"</p>":"")+(ms.length?'<div class="pm pm'+Math.min(ms.length,4)+'">'+ms.slice(0,4).map((id,i)=>'<button type="button" data-p="'+idx[id]+'" aria-label="Open photo '+(i+1)+' of '+ms.length+'"><img data-id="'+esc(id)+'" alt="'+esc(byId[id].cap||"Production photo")+'">'+(i===3&&ms.length>4?'<span class="more">+'+(ms.length-4)+"</span>":"")+"</button>").join("")+"</div>":"")+"</article>"};
+    return '<article class="post'+(po.pin?" pin":"")+'" data-ch="'+esc(po.ch||"")+'"><div class="pmeta"><span>'+esc(dShort(po.t))+"</span>"+(po.pin?'<span class="pt">Pinned</span>':"")+(ch?'<span class="pt c">'+esc(ch.name)+"</span>":"")+"</div>"+(po.txt?"<p>"+esc(po.txt).replace(/\n/g,"<br>")+"</p>":"")+(ms.length?'<div class="pm pm'+Math.min(ms.length,4)+'">'+ms.slice(0,4).map((id,i)=>'<button type="button" data-p="'+idx[id]+'" aria-label="Open photo '+(i+1)+' of '+ms.length+'"><img data-id="'+esc(id)+'" alt="'+esc(byId[id].cap||"Production photo")+'">'+(byId[id].v?'<span class="pb" aria-hidden="true">&#9654;</span>':"")+(i===3&&ms.length>4?'<span class="more">+'+(ms.length-4)+"</span>":"")+"</button>").join("")+"</div>":"")+"</article>"};
   if(posts.length){
     h+='<section class="story" aria-label="Our story"><h2 class="st">Our story</h2>'+(chs.length?'<div class="chs" role="group" aria-label="Chapters"><button type="button" class="ch" data-c="" aria-pressed="true">All</button>'+chs.map(c=>'<button type="button" class="ch" data-c="'+esc(c.id)+'" aria-pressed="false">'+esc(c.name)+"</button>").join("")+"</div>":"")+'<div id="posts">'+posts.map(postHtml).join("")+"</div></section>";
   }else if(seq.length){
-    h+='<section class="card"><h2>Photos</h2><div class="grid">'+seq.map((p,i)=>'<button data-p="'+i+'" aria-label="Open photo '+(i+1)+'"><img data-id="'+esc(p.id)+'" alt=""></button>').join("")+"</div></section>";
+    h+='<section class="card"><h2>Photos</h2><div class="grid">'+seq.map((p,i)=>'<button data-p="'+i+'" aria-label="Open photo '+(i+1)+'"><img data-id="'+esc(p.id)+'" alt="">'+(byId[p.id]&&byId[p.id].v?'<span class="pb" aria-hidden="true">&#9654;</span>':"")+"</button>").join("")+"</div></section>";
   }
   /* pages published before the story update still carry the old updates list */
   if((d.updates||[]).length&&!posts.length)h+='<section class="card"><h2>Our story</h2><ul class="tl">'+d.updates.map(u=>"<li><small>"+esc(dShort(u.t))+"</small>"+esc(u.txt).replace(/\n/g,"<br>")+"</li>").join("")+"</ul></section>";
