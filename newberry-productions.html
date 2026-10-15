@@ -785,6 +785,12 @@ select.sel{width:auto;min-height:44px;padding:0 12px;border-radius:14px}
 .story .post:not(.open) .pcnt~.ptext{right:46px}
 .story .post:focus-visible{outline:3px solid var(--green);outline-offset:2px}
 .ptog svg{transition:transform .2s}.post.open .ptog svg{transform:rotate(90deg)}
+/* v6.18.0: reposition cover */
+.ph-cover,.tcov{object-position:var(--cx,50%) var(--cy,50%);transform:scale(var(--cz,1));transform-origin:var(--cx,50%) var(--cy,50%)}
+.ptile.hascov{overflow:hidden}
+.rp-main{position:relative;aspect-ratio:4/3;border-radius:18px;overflow:hidden;background:var(--line);touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}.rp-main:active{cursor:grabbing}
+.rp-main img,.rp-tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:var(--cx,50%) var(--cy,50%);transform:scale(var(--cz,1));transform-origin:var(--cx,50%) var(--cy,50%);pointer-events:none}
+.rp-small{display:flex;align-items:center;gap:12px;margin:12px 0 4px}.rp-tile{position:relative;width:84px;height:84px;border-radius:16px;overflow:hidden;flex:none;background:var(--line)}
 </style>
 </head>
 <body>
@@ -994,11 +1000,30 @@ async function addFiles(pid,files){
   }
   return n;
 }
+async function coverSheet(p){
+  const cov=coverOf(p);if(!cov)return;
+  const url=await stillUrl(cov.id);if(!url){toast("This photo isn't on this device yet.");return}
+  const cp={x:50,y:50,z:1,...(p.coverPos||{})};
+  sheet("Reposition photo",`<p class="muted small" style="margin:4px 0 10px">Drag the photo to choose what shows. Use the slider to zoom in.</p><div class="rp-main" id="rp-f"><img id="rp-i" src="${url}" alt="Cover photo preview" draggable="false"></div><div class="rp-small"><div class="rp-tile" id="rp-t"><img src="${url}" alt="" draggable="false"></div><span class="small muted">How it looks on the Home screen</span></div><label class="f" for="rp-z">Zoom</label><input class="sl-i" id="rp-z" type="range" min="100" max="250" step="5" aria-label="Zoom"><div class="row" style="margin-top:14px"><button class="btn" id="rp-r" type="button">Reset</button><span class="grow"></span><button class="btn primary" id="rp-s" type="button">Save</button></div>`,(d,close)=>{
+    const imgs=[...d.querySelectorAll("#rp-f img,#rp-t img")],fr=d.querySelector("#rp-f"),zs=d.querySelector("#rp-z"),cl=(v,a,b)=>Math.min(b,Math.max(a,v));
+    const ap=()=>{imgs.forEach(im=>{im.style.setProperty("--cx",cp.x+"%");im.style.setProperty("--cy",cp.y+"%");im.style.setProperty("--cz",cp.z)});zs.value=Math.round(cp.z*100);zs.style.setProperty("--a","0%");zs.style.setProperty("--b",((cp.z-1)/1.5*100)+"%")};
+    ap();
+    let drag=null;
+    fr.onpointerdown=e=>{e.preventDefault();try{fr.setPointerCapture(e.pointerId)}catch{}const r=fr.getBoundingClientRect();drag={x:e.clientX,y:e.clientY,x0:cp.x,y0:cp.y,w:r.width,h:r.height}};
+    fr.onpointermove=e=>{if(!drag)return;cp.x=cl(drag.x0-(e.clientX-drag.x)/drag.w*100,0,100);cp.y=cl(drag.y0-(e.clientY-drag.y)/drag.h*100,0,100);ap()};
+    fr.onpointerup=fr.onpointercancel=()=>{drag=null};
+    fr.onkeydown=e=>{const st=e.shiftKey?10:3;if(e.key==="ArrowLeft")cp.x=cl(cp.x+st,0,100);else if(e.key==="ArrowRight")cp.x=cl(cp.x-st,0,100);else if(e.key==="ArrowUp")cp.y=cl(cp.y+st,0,100);else if(e.key==="ArrowDown")cp.y=cl(cp.y-st,0,100);else return;e.preventDefault();ap()};
+    fr.tabIndex=0;fr.setAttribute("aria-label","Photo preview. Drag, or use the arrow keys, to move the photo.");
+    zs.oninput=()=>{cp.z=+zs.value/100;ap()};
+    d.querySelector("#rp-r").onclick=()=>{cp.x=50;cp.y=50;cp.z=1;ap();fb("tick")};
+    d.querySelector("#rp-s").onclick=()=>{if(cp.x===50&&cp.y===50&&cp.z===1)delete p.coverPos;else p.coverPos={x:Math.round(cp.x*10)/10,y:Math.round(cp.y*10)/10,z:Math.round(cp.z*100)/100};save(p);fb("done");close();render();toast("Photo position saved.")};
+  });
+}
 function openMediaSheet(m){
   sheet(m.type==="video"?"Video":"Photo",`${m.type==="video"?`<video data-mid="${m.id}" controls playsinline style="width:100%;border-radius:16px;margin-top:8px;background:#000"></video>`:`<img data-mid="${m.id}" alt="" style="width:100%;border-radius:16px;margin-top:8px">`}<label class="f" for="mc">Caption</label><div class="row"><textarea class="t ta" rows="1" id="mc">${esc(m.cap)}</textarea>${micBtn()}</div>
   <label class="f">Consent to share</label><div class="chips" id="mcon" role="group" aria-label="Consent to share">${CONSENT.map(([k,l])=>`<button type="button" class="chip" data-c="${k}" aria-pressed="${m.consent===k}">${l}</button>`).join("")}</div>
   <p class="muted small">${esc(m.by)} · ${fmt(m.t)}</p><div class="row wr"><button class="btn danger" id="del">${ic("trash")}Delete</button><span class="grow"></span><button class="btn" id="med" type="button">${ic("wand")}Edit</button><button class="btn" id="mdr" type="button">${ic("cloud")}Drive</button>${m.type!=="video"?`<button class="btn" id="mcov" type="button">${ic("image")}${P(m.pid)&&P(m.pid).cover===m.id?"Cover photo":"Set as cover"}</button>`:""}<button class="btn primary" id="ok">Done</button></div>`,(d,close)=>{
-    hydrate(d);wireMics(d);{const db=d.querySelector("#mdr");if(db)db.onclick=()=>{const pp=P(m.pid);close();saveToDrive([m.id],pp)}}{const eb=d.querySelector("#med");if(eb)eb.onclick=()=>{close();setTimeout(()=>{const pp=P(m.pid);m.type==="video"?videoEditSheet(pp,m):editSheet(pp,m)},200)}}{const cv=d.querySelector("#mcov");if(cv)cv.onclick=()=>{const pp=P(m.pid);if(pp){pp.cover=m.id;save(pp);fb("done");close();render();toast("Cover photo set.")}}}d.querySelectorAll("#mcon .chip").forEach(b=>b.onclick=()=>{const was=b.getAttribute("aria-pressed")==="true";d.querySelectorAll("#mcon .chip").forEach(x=>x.setAttribute("aria-pressed","false"));b.setAttribute("aria-pressed",String(!was))});
+    hydrate(d);wireMics(d);{const db=d.querySelector("#mdr");if(db)db.onclick=()=>{const pp=P(m.pid);close();saveToDrive([m.id],pp)}}{const eb=d.querySelector("#med");if(eb)eb.onclick=()=>{close();setTimeout(()=>{const pp=P(m.pid);m.type==="video"?videoEditSheet(pp,m):editSheet(pp,m)},200)}}{const cv=d.querySelector("#mcov");if(cv)cv.onclick=()=>{const pp=P(m.pid);if(pp){pp.cover=m.id;delete pp.coverPos;save(pp);fb("done");close();render();toast("Cover photo set.")}}}d.querySelectorAll("#mcon .chip").forEach(b=>b.onclick=()=>{const was=b.getAttribute("aria-pressed")==="true";d.querySelectorAll("#mcon .chip").forEach(x=>x.setAttribute("aria-pressed","false"));b.setAttribute("aria-pressed",String(!was))});
     $("#ok").onclick=()=>{m.cap=$("#mc").value.trim();const cc=d.querySelector("#mcon [aria-pressed=true]");m.consent=cc?cc.dataset.c:"";save(m);close();render()};
     $("#del").onclick=()=>{m.del=true;m.delAt=Date.now();save(m);close();render();if(sm.up)delete sm.up[m.id];
       toast("Deleted.",()=>{m.del=false;save(m);render()})}});
@@ -1086,7 +1111,7 @@ function postMenu(p,l){
   if(p.showcase&&p.showcase.on&&ms.length){const pub=ms.some(m=>m.consent==="ok");add("globe",pub?"Make photos private":"Show photos on the public page",pub?"Remove them from the showcase":"Approve this post's photos for the showcase",c=>{ms.forEach(m=>{m.consent=pub?"":"ok";save(m)});fb("done");c();render();toast(pub?"Photos are private again.":"Photos will show on the public page.")})}
   add("share","Share as a picture","A good-looking card for WhatsApp",c=>{c();setTimeout(()=>cardSheet(p,l),160)});
   if(ms.length)add("play","Play this post","Full screen, photos and videos one by one",c=>{c();setTimeout(()=>{const list=storyMediaList(p),k=list.findIndex(x=>x.m.id===ms[0].id);openViewer(list,Math.max(0,k),true)},160)});
-  if(photo)add("image","Use as cover photo","Show the first photo at the top of "+p.name,c=>{p.cover=photo.id;save(p);fb("done");c();render();toast("Cover photo set.")});
+  if(photo)add("image","Use as cover photo","Show the first photo at the top of "+p.name,c=>{p.cover=photo.id;delete p.coverPos;save(p);fb("done");c();render();toast("Cover photo set.")});
   add("trash","Delete post","You can restore it from Recently deleted",c=>{c();delPost(p,l)});
   sheet("Post",`<div class="sh-menu">${rows.map((r,i)=>`<button class="trow" data-i="${i}" type="button"><span class="avatar">${ic(r[0])}</span><span class="grow"><b>${esc(r[1])}</b><span class="small muted" style="display:block">${esc(r[2])}</span></span>${ic("chev","sm")}</button>`).join("")}</div>`,(d,close)=>{
     d.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>acts[+b.dataset.i](close));
@@ -1401,7 +1426,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.17.0";
+const APP_VER="6.18.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -2292,6 +2317,7 @@ const card=p=>{const q=prodPct(p),o=p.goals.filter(g=>!g.done).length;
 const nextTarget=p=>{for(const g of p.goals){if(g.done)continue;const t=(g.targets||[]).find(x=>!x.done);if(t)return t.title}return""};
 const totals=()=>{const ps=prods(),all=ps.flatMap(p=>p.goals),open=all.filter(g=>!g.done).length;return{ps,all,open,pct:ps.length?Math.round(ps.reduce((a,p)=>a+prodPct(p),0)/ps.length):0,photos:S.media.filter(m=>!m.del).length}};
 /* first tab: every production on one screen */
+const covVars=p=>{const c=p&&p.coverPos;if(!c)return"";const n=(v,a,b,d)=>Number.isFinite(+v)?Math.min(b,Math.max(a,+v)):d;return` style="--cx:${n(c.x,0,100,50)}%;--cy:${n(c.y,0,100,50)}%;--cz:${n(c.z,1,3,1)}"`};
 const coverOf=p=>{const ms=mediaOf(p).filter(m=>m.tag!=="receipt"&&m.tag!=="evidence");return(p.cover&&ms.find(m=>m.id===p.cover))||ms[0]||null};
 const agoShort=t=>{if(!t)return"New";const d=Math.floor((Date.now()-t)/864e5);return d<1?"Today":d===1?"Yesterday":d+"d ago"};
 function weekCard(){
@@ -2308,7 +2334,7 @@ function recentStrip(){
 function homePage(){
   const ps=prods(),wk=weekCard();
   return `<h2 class="sr">Productions</h2>
-  ${wk}${todayStrip()}<div class="ptiles" style="--st:${(todayData().any?56:0)+(wk?132:0)}px">${ps.map((p,ix)=>{const last=lastActivity(p),quiet=!!last&&Date.now()-last>7*864e5,cov=coverOf(p);return`<button class="ptile${cov?" hascov":""}" style="--pc:${p.color};--i:${ix}" data-open="${p.id}" aria-label="${esc(p.name)}, ${agoLabel(last).toLowerCase()}${quiet?", quiet for a while":""}">${cov?`<img class="tcov" data-mid="${cov.id}" alt="" loading="lazy">`:""}${quiet?`<span class="pbadge q" aria-hidden="true"></span>`:""}<span class="pi"><span class="pav">${ic(p.icon)}</span><b>${esc(p.name)}</b><span class="pq">${agoShort(last)}</span></span></button>`}).join("")}<button class="ptile padd" id="addp" aria-label="New production"><span class="pi"><span class="pav">${ic("plus")}</span><b>Add new</b></span></button></div>${recentStrip()}`;
+  ${wk}${todayStrip()}<div class="ptiles" style="--st:${(todayData().any?56:0)+(wk?132:0)}px">${ps.map((p,ix)=>{const last=lastActivity(p),quiet=!!last&&Date.now()-last>7*864e5,cov=coverOf(p);return`<button class="ptile${cov?" hascov":""}" style="--pc:${p.color};--i:${ix}" data-open="${p.id}" aria-label="${esc(p.name)}, ${agoLabel(last).toLowerCase()}${quiet?", quiet for a while":""}">${cov?`<img class="tcov" data-mid="${cov.id}" alt="" loading="lazy"${covVars(p)}>`:""}${quiet?`<span class="pbadge q" aria-hidden="true"></span>`:""}<span class="pi"><span class="pav">${ic(p.icon)}</span><b>${esc(p.name)}</b><span class="pq">${agoShort(last)}</span></span></button>`}).join("")}<button class="ptile padd" id="addp" aria-label="New production"><span class="pi"><span class="pav">${ic("plus")}</span><b>Add new</b></span></button></div>${recentStrip()}`;
 }
 /* second tab: the detail */
 let ovMore=false;
@@ -2440,8 +2466,8 @@ function prodView(p){
   const TB=tabsFor(p);if(!TB.some(t=>t[0]===tab)&&tab!=="media")tab="plan";
   const photos=mediaOf(p),cov=(p.cover&&photos.find(m=>m.id===p.cover))||photos[0];
   const last=lastActivity(p);
-  return `<div class="pv"><div class="pv-side"><div class="phero${cov?" hascover":""}" style="--pc:${p.color}">${cov?`<img class="ph-cover" data-mid="${cov.id}" alt="">`:""}
-    <div class="ph-top"><button class="x glass" id="back" aria-label="Back to productions">${ic("left")}</button><span class="grow"></span>${photos.length?`<button class="x glass" id="plv" aria-label="Play slideshow">${ic("play")}</button>`:""}<button class="x glass" id="shr" aria-label="Share">${ic("share")}</button><button class="x glass" id="edp" aria-label="Edit production">${ic("pencil")}</button></div>
+  return `<div class="pv"><div class="pv-side"><div class="phero${cov?" hascover":""}" style="--pc:${p.color}">${cov?`<img class="ph-cover" data-mid="${cov.id}" alt=""${covVars(p)}>`:""}
+    <div class="ph-top"><button class="x glass" id="back" aria-label="Back to productions">${ic("left")}</button><span class="grow"></span>${cov?`<button class="x glass" id="rpc" aria-label="Reposition the cover photo">${ic("crop")}</button>`:""}${photos.length?`<button class="x glass" id="plv" aria-label="Play slideshow">${ic("play")}</button>`:""}<button class="x glass" id="shr" aria-label="Share">${ic("share")}</button><button class="x glass" id="edp" aria-label="Edit production">${ic("pencil")}</button></div>
     <div class="ph-main"><span class="ph-av">${ic(p.icon)}</span><div class="grow"><h2 class="ptitle">${esc(p.name)}</h2>${p.desc?`<p class="ph-d">${esc(p.desc)}</p>`:""}</div></div>
     <div class="ph-stats"><span><b>${p.log.length}</b> post${p.log.length===1?"":"s"}</span><span><b>${photos.length}</b> photo${photos.length===1?"":"s"}</span><span>${agoLabel(last)}</span></div>
   </div>
@@ -2492,7 +2518,7 @@ function wireGoals(p){
   });
 }
 function wireProd(p){
-  $("#back").onclick=()=>nav("home");{const pl=$("#plv");if(pl)pl.onclick=()=>openViewer(storyMediaList(p,storyF.pid===p.id?{term:storyF.term,wk:storyF.wk}:{}),0,true)}$("#shr").onclick=()=>shareMenu(p);$("#edp").onclick=()=>prodSheet(p);
+  $("#back").onclick=()=>nav("home");{const rp=$("#rpc");if(rp)rp.onclick=()=>coverSheet(p)}{const pl=$("#plv");if(pl)pl.onclick=()=>openViewer(storyMediaList(p,storyF.pid===p.id?{term:storyF.term,wk:storyF.wk}:{}),0,true)}$("#shr").onclick=()=>shareMenu(p);$("#edp").onclick=()=>prodSheet(p);
   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;clearSel();render()});
   ({story:wireStory,plan:wireBook,money:wireBook,wrap:wireBook,media:wireMedia})[tab](p);
   wireStudents(p);
@@ -3084,7 +3110,7 @@ function scBuild(p){
   const order=ok.slice().sort((x,y)=>(y.id===p.cover)-(x.id===p.cover)||y.t-x.t).slice(0,20),ids=new Set(order.map(m=>m.id));
   const photos=order.sort((x,y)=>x.t-y.t).map(m=>({id:m.id,cap:cut(m.cap,90),t:m.t,v:m.type==="video"?1:0}));
   const team=o.names&&p.members.length?p.members.slice(0,10).map(first).join(", ")+(p.members.length>10?" and more":""):p.members.length?p.members.length+" student"+(p.members.length===1?"":"s"):"Our team";
-  const d={v:3,name:p.name,icon:ICONS[p.icon]||"",color:p.color,desc:cut(p.desc,240),term:(p.info&&p.info.term)||"",team,cover:ids.has(p.cover)?p.cover:"",photos,updated:Date.now()};
+  const d={v:3,name:p.name,icon:ICONS[p.icon]||"",color:p.color,desc:cut(p.desc,240),term:(p.info&&p.info.term)||"",team,cover:ids.has(p.cover)?p.cover:"",coverPos:p.coverPos?{x:+p.coverPos.x||50,y:+p.coverPos.y||50,z:+p.coverPos.z||1}:null,photos,updated:Date.now()};
   if(on("story")){
     const ord=n=>{const l=p.log.find(x=>twLabel(x)===n);return(l.term||0)*100+(l.wk||0)},chs=[...new Set(p.log.map(twLabel).filter(Boolean))].sort((a,b)=>ord(a)-ord(b)).slice(0,12);d.chapters=chs.map(n=>({id:n,name:n}));
     d.posts=p.log.slice().sort((x,y)=>(!!y.pin-!!x.pin)||y.t-x.t).slice(0,40).map(l=>({id:l.id,t:l.t,txt:cut(l.text,600),pin:!!l.pin,ch:chs.includes(twLabel(l))?twLabel(l):"",m:(l.m||[]).filter(id=>ids.has(id)).slice(0,6)})).filter(x=>x.txt||x.m.length);
