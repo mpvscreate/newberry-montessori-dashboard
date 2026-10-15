@@ -1056,6 +1056,9 @@ const twLabel=l=>l&&(l.term||l.wk)?(l.term?"Term "+l.term:"")+(l.term&&l.wk?" ·
 const TWK="ms-prod-tw";
 const twLast=pid=>{try{return(JSON.parse(localStorage.getItem(TWK)||"{}")[pid])||{term:0,wk:0}}catch{return{term:0,wk:0}}};
 const twSave=(pid,t)=>{try{const o=JSON.parse(localStorage.getItem(TWK)||"{}");o[pid]={term:t.term||0,wk:t.wk||0};localStorage.setItem(TWK,JSON.stringify(o))}catch{}};
+const TFK="ms-prod-tf";
+const tfLoad=pid=>{try{const o=(JSON.parse(localStorage.getItem(TFK)||"{}")[pid])||{};return{term:+o.term||0,wk:+o.wk||0}}catch{return{term:0,wk:0}}};
+const tfSave=(pid,t)=>{try{const o=JSON.parse(localStorage.getItem(TFK)||"{}");if(t.term||t.wk)o[pid]={term:t.term||0,wk:t.wk||0};else delete o[pid];localStorage.setItem(TFK,JSON.stringify(o))}catch{}};
 const twSelects=(idT,idW,v)=>`<div class="twsel"><label class="sr" for="${idT}">Term</label><select class="t sel" id="${idT}" aria-label="Term"><option value="0">Term</option>${TERMS.map(n=>`<option value="${n}"${v.term===n?" selected":""}>Term ${n}</option>`).join("")}</select><label class="sr" for="${idW}">Week</label><select class="t sel" id="${idW}" aria-label="Week"><option value="0">Week</option>${WEEKS.map(n=>`<option value="${n}"${v.wk===n?" selected":""}>Week ${n}</option>`).join("")}</select></div>`;
 const twRead=(idT,idW)=>({term:+(document.getElementById(idT)||{}).value||0,wk:+(document.getElementById(idW)||{}).value||0});
 const PROMPTS=["What was the hardest part today?","Show us something you made.","What did you learn this week?","Who helped you today, and how?","What are you proud of?","What went wrong, and how did you fix it?","What will you do next?","Describe your work in three words.","What surprised you?","What would you tell a new team member?","Show us your workspace.","What did your team decide today?"];
@@ -1083,7 +1086,7 @@ async function makePost(p,text,files,tw,share){
 }
 function attHTML(list,rm){return list.map((x,i)=>`<div class="attc">${x.vid?`<video src="${x.url}" muted playsinline></video><span class="vb">${ic("play","sm")}</span>`:`<img src="${x.url}" alt="">`}<button type="button" class="attx" data-rm="${i}" aria-label="Remove ${x.vid?"video":"photo"} ${i+1}">${ic("x","sm")}</button></div>`).join("")}
 function storyTab(p){
-  if(storyF.pid!==p.id){storyF={pid:p.id,term:0,wk:0};clearPend();composeOpen=false}
+  if(storyF.pid!==p.id){storyF={pid:p.id,...tfLoad(p.id)};clearPend();composeOpen=false}
   const hasTW=p.log.some(l=>l.term||l.wk),filt=!!(storyF.term||storyF.wk),tp=filt?{term:storyF.term,wk:storyF.wk}:twLast(p.id);
   const items=storyItems(p),pics=mediaOf(p).filter(m=>m.type!=="video");
   const vis=items;
@@ -1167,6 +1170,7 @@ function wireStory(p){
   $("#sc-add").onclick=()=>$("#pf").click();
   $("#sc-t").addEventListener("input",()=>draftSet(p.id,$("#sc-t").value));
   {const i=document.querySelector("[data-idea]");if(i)i.onclick=()=>{const t=$("#sc-t");if(!t.value.trim())t.value=todayPrompt()+" ";draftSet(p.id,t.value);t.focus();t.setSelectionRange(t.value.length,t.value.length)}}
+  {const sv=()=>twSave(p.id,twRead("sc-tm","sc-wk"));["sc-tm","sc-wk"].forEach(i=>{const e=document.getElementById(i);if(e)e.onchange=sv})}
   wirePub("sc-pub")}
   {const e=$("#e-first");if(e)e.onclick=()=>{composeOpen=true;render();setTimeout(()=>{const t=$("#sc-t");if(t)t.focus()},60)}}
   document.querySelectorAll("[data-rx]").forEach(b=>b.onclick=()=>{const l=p.log.find(x=>x.id===b.dataset.rx);if(!l)return;const me=who()||"me",a=(l.rx||[]).slice(),k=a.indexOf(me);if(k>=0)a.splice(k,1);else a.push(me);l.rx=a;save(p);fb(k>=0?"tick":"done");render()});
@@ -1185,8 +1189,8 @@ function wireStory(p){
       kids.forEach((el,i)=>{if(el.matches("h3.sday")){let vis=false;for(let j=i+1;j<kids.length&&!kids[j].matches("h3.sday");j++){if(!kids[j].hidden){vis=true;break}}el.hidden=!vis}})}
     const em=$("#tw-empty");if(em)em.hidden=!(filt&&!any);const bn=$("#bn-wrap");if(bn)bn.hidden=filt;
   };
-  {const a=$("#tf-t");if(a)a.onchange=()=>{storyF.term=+a.value;fb("tick");applyTW()}}
-  {const b=$("#tf-w");if(b)b.onchange=()=>{storyF.wk=+b.value;fb("tick");applyTW()}}
+  {const a=$("#tf-t");if(a)a.onchange=()=>{storyF.term=+a.value;tfSave(p.id,storyF);fb("tick");applyTW()}}
+  {const b=$("#tf-w");if(b)b.onchange=()=>{storyF.wk=+b.value;tfSave(p.id,storyF);fb("tick");applyTW()}}
   applyTW();
   {const tg=a=>{const id=a.dataset.post,o=!a.classList.contains("open");a.classList.toggle("open",o);o?postOpen.add(id):postOpen.delete(id);const b=a.querySelector("[data-pt]");if(b){b.setAttribute("aria-expanded",String(o));b.setAttribute("aria-label",o?"Show less":"Show more")}};
    document.querySelectorAll("article.post").forEach(a=>{a.addEventListener("click",e=>{if(e.target.closest("button,a,input,textarea,select")&&!(e.target.closest(".pmi")&&!a.classList.contains("open")))return;tg(a);if(a.classList.contains("open"))setTimeout(()=>a.scrollIntoView({block:"nearest",behavior:"smooth"}),30)});a.addEventListener("keydown",e=>{if(e.target===a&&(e.key==="Enter"||e.key===" ")){e.preventDefault();tg(a)}});const b=a.querySelector("[data-pt]");if(b)b.onclick=()=>tg(a)})}
@@ -1337,6 +1341,7 @@ function captureSheet(){
       drawAtt();
       $("#cp-t").addEventListener("input",()=>draftSet(pid,$("#cp-t").value));
       {const i=root.querySelector("[data-idea]");if(i)i.onclick=()=>{const t=$("#cp-t");if(!t.value.trim())t.value=todayPrompt()+" ";draftSet(pid,t.value);t.focus();t.setSelectionRange(t.value.length,t.value.length)}}
+      {const sv=()=>twSave(pid,twRead("cp-tm","cp-wk"));["cp-tm","cp-wk"].forEach(i=>{const e=document.getElementById(i);if(e)e.onchange=sv})}
       wirePub("cp-pub");
       root.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>$("#cp-"+b.dataset.a).click());
       ["cp-lib","cp-img","cp-vid"].forEach(id=>{$("#"+id).onchange=e=>{[...e.target.files].forEach(f=>{if(files.length<12)files.push({file:f,url:URL.createObjectURL(f),vid:f.type.startsWith("video/")})});e.target.value="";drawAtt()}});
@@ -1426,7 +1431,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.18.0";
+const APP_VER="6.18.1";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
