@@ -791,6 +791,15 @@ select.sel{width:auto;min-height:44px;padding:0 12px;border-radius:14px}
 .rp-main{position:relative;aspect-ratio:4/3;border-radius:18px;overflow:hidden;background:var(--line);touch-action:none;cursor:grab;user-select:none;-webkit-user-select:none}.rp-main:active{cursor:grabbing}
 .rp-main img,.rp-tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:var(--cx,50%) var(--cy,50%);transform:scale(var(--cz,1));transform-origin:var(--cx,50%) var(--cy,50%);pointer-events:none}
 .rp-small{display:flex;align-items:center;gap:12px;margin:12px 0 4px}.rp-tile{position:relative;width:84px;height:84px;border-radius:16px;overflow:hidden;flex:none;background:var(--line)}
+/* v6.20.0: calmer production banner */
+.phero{border-radius:26px;padding:12px 14px 14px}
+.phero.hascover{min-height:178px;display:flex;flex-direction:column;justify-content:space-between}
+.phero.hascover::before{background:linear-gradient(180deg,rgba(0,0,0,.34) 0%,rgba(0,0,0,.04) 38%,rgba(0,0,0,.8) 100%)}
+.ph-main{margin-top:16px}
+.phero .ph-main .ptitle{display:flex;align-items:center;gap:9px;font-size:clamp(1.4rem,6.6vw,1.85rem);line-height:1.15;text-shadow:0 1px 8px rgba(0,0,0,.35)}
+.ph-ic{flex:none;width:30px;height:30px;border-radius:10px;background:rgba(255,255,255,.22);display:inline-grid;place-items:center}.ph-ic .i{width:18px;height:18px}
+.ph-meta{margin:4px 0 0;font-size:.82rem;opacity:.92;text-shadow:0 1px 6px rgba(0,0,0,.4)}
+.phero .ph-d{margin-top:2px;-webkit-line-clamp:1}
 </style>
 </head>
 <body>
@@ -1020,6 +1029,14 @@ async function coverSheet(p){
   });
 }
 /* play the story; the Term and Week filter only counts while the Story screen is showing it */
+/* the quieter actions live behind the three dots */
+function prodMenu(p){
+  const rows=[["pencil","Edit production","Name, colour, icon, term and team details",()=>prodSheet(p)]];
+  if(coverOf(p))rows.push(["crop","Reposition cover photo","Choose what shows at the top and on Home",()=>coverSheet(p)]);
+  sheet(p.name,`<div class="sh-menu">${rows.map((r,i)=>`<button class="trow" data-i="${i}" type="button"><span class="avatar">${ic(r[0])}</span><span class="grow"><b>${esc(r[1])}</b><span class="small muted" style="display:block">${esc(r[2])}</span></span>${ic("chev","sm")}</button>`).join("")}</div>`,(d,close)=>{
+    d.querySelectorAll("[data-i]").forEach(b=>b.onclick=()=>{const r=rows[+b.dataset.i];close();setTimeout(r[3],160)});
+  });
+}
 function playStory(p){
   const on=tab==="story"&&storyF.pid===p.id&&(storyF.term||storyF.wk),f=on?{term:storyF.term,wk:storyF.wk}:{};
   const list=storyMediaList(p,f);
@@ -1462,7 +1479,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.19.0";
+const APP_VER="6.20.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -2503,10 +2520,10 @@ function prodView(p){
   const TB=tabsFor(p);if(!TB.some(t=>t[0]===tab)&&tab!=="media")tab="plan";
   const photos=mediaOf(p),cov=(p.cover&&photos.find(m=>m.id===p.cover))||photos[0];
   const last=lastActivity(p);
+  const pl=n=>n===1?"":"s";
   return `<div class="pv"><div class="pv-side"><div class="phero${cov?" hascover":""}" style="--pc:${p.color}">${cov?`<img class="ph-cover" data-mid="${cov.id}" alt=""${covVars(p)}>`:""}
-    <div class="ph-top"><button class="x glass" id="back" aria-label="Back to productions">${ic("left")}</button><span class="grow"></span>${cov?`<button class="x glass" id="rpc" aria-label="Reposition the cover photo">${ic("crop")}</button>`:""}${photos.length?`<button class="x glass" id="plv" aria-label="Play slideshow">${ic("play")}</button>`:""}<button class="x glass" id="shr" aria-label="Share">${ic("share")}</button><button class="x glass" id="edp" aria-label="Edit production">${ic("pencil")}</button></div>
-    <div class="ph-main"><span class="ph-av">${ic(p.icon)}</span><div class="grow"><h2 class="ptitle">${esc(p.name)}</h2>${p.desc?`<p class="ph-d">${esc(p.desc)}</p>`:""}</div></div>
-    <div class="ph-stats"><span><b>${p.log.length}</b> post${p.log.length===1?"":"s"}</span><span><b>${photos.length}</b> photo${photos.length===1?"":"s"}</span><span>${agoLabel(last)}</span></div>
+    <div class="ph-top"><button class="x glass" id="back" aria-label="Back to productions">${ic("left")}</button><span class="grow"></span>${photos.length?`<button class="x glass" id="plv" aria-label="Play slideshow">${ic("play")}</button>`:""}<button class="x glass" id="shr" aria-label="Share">${ic("share")}</button><button class="x glass" id="pmore" aria-label="More options">${ic("more")}</button></div>
+    <div class="ph-main"><div class="grow"><h2 class="ptitle"><span class="ph-ic" aria-hidden="true">${ic(p.icon)}</span><span>${esc(p.name)}</span></h2>${p.desc?`<p class="ph-d">${esc(p.desc)}</p>`:""}<p class="ph-meta">${p.log.length} post${pl(p.log.length)} · ${photos.length} photo${pl(photos.length)} · ${agoLabel(last)}</p></div></div>
   </div>
   <div class="segwrap"><div class="segc" role="group" aria-label="Sections">${TB.map(([k,l,i])=>`<button data-tab="${k}" aria-label="${l}" aria-pressed="${tab===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div></div>
   <div class="tabbody">${{story:storyTab,plan:planTab,money:moneyTab,wrap:wrapTab,media:mediaTab}[tab](p)}</div></div>`;
@@ -2555,7 +2572,7 @@ function wireGoals(p){
   });
 }
 function wireProd(p){
-  $("#back").onclick=()=>nav("home");{const rp=$("#rpc");if(rp)rp.onclick=()=>coverSheet(p)}{const pl=$("#plv");if(pl)pl.onclick=()=>playStory(p)}$("#shr").onclick=()=>shareMenu(p);$("#edp").onclick=()=>prodSheet(p);
+  $("#back").onclick=()=>nav("home");{const pl=$("#plv");if(pl)pl.onclick=()=>playStory(p)}$("#shr").onclick=()=>shareMenu(p);$("#pmore").onclick=()=>prodMenu(p);
   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;clearSel();render()});
   ({story:wireStory,plan:wireBook,money:wireBook,wrap:wireBook,media:wireMedia})[tab](p);
   wireStudents(p);
