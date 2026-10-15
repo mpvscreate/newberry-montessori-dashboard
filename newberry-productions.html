@@ -1019,6 +1019,13 @@ async function coverSheet(p){
     d.querySelector("#rp-s").onclick=()=>{if(cp.x===50&&cp.y===50&&cp.z===1)delete p.coverPos;else p.coverPos={x:Math.round(cp.x*10)/10,y:Math.round(cp.y*10)/10,z:Math.round(cp.z*100)/100};save(p);fb("done");close();render();toast("Photo position saved.")};
   });
 }
+/* play the story; the Term and Week filter only counts while the Story screen is showing it */
+function playStory(p){
+  const on=tab==="story"&&storyF.pid===p.id&&(storyF.term||storyF.wk),f=on?{term:storyF.term,wk:storyF.wk}:{};
+  const list=storyMediaList(p,f);
+  if(!list.length){toast(on?"No photos or videos for this term and week.":"No photos or videos yet.");return}
+  openViewer(list,0,true);
+}
 function openMediaSheet(m){
   sheet(m.type==="video"?"Video":"Photo",`${m.type==="video"?`<video data-mid="${m.id}" controls playsinline style="width:100%;border-radius:16px;margin-top:8px;background:#000"></video>`:`<img data-mid="${m.id}" alt="" style="width:100%;border-radius:16px;margin-top:8px">`}<label class="f" for="mc">Caption</label><div class="row"><textarea class="t ta" rows="1" id="mc">${esc(m.cap)}</textarea>${micBtn()}</div>
   <label class="f">Consent to share</label><div class="chips" id="mcon" role="group" aria-label="Consent to share">${CONSENT.map(([k,l])=>`<button type="button" class="chip" data-c="${k}" aria-pressed="${m.consent===k}">${l}</button>`).join("")}</div>
@@ -1431,7 +1438,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.18.1";
+const APP_VER="6.18.2";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
@@ -2523,7 +2530,7 @@ function wireGoals(p){
   });
 }
 function wireProd(p){
-  $("#back").onclick=()=>nav("home");{const rp=$("#rpc");if(rp)rp.onclick=()=>coverSheet(p)}{const pl=$("#plv");if(pl)pl.onclick=()=>openViewer(storyMediaList(p,storyF.pid===p.id?{term:storyF.term,wk:storyF.wk}:{}),0,true)}$("#shr").onclick=()=>shareMenu(p);$("#edp").onclick=()=>prodSheet(p);
+  $("#back").onclick=()=>nav("home");{const rp=$("#rpc");if(rp)rp.onclick=()=>coverSheet(p)}{const pl=$("#plv");if(pl)pl.onclick=()=>playStory(p)}$("#shr").onclick=()=>shareMenu(p);$("#edp").onclick=()=>prodSheet(p);
   document.querySelectorAll("[data-tab]").forEach(b=>b.onclick=()=>{tab=b.dataset.tab;clearSel();render()});
   ({story:wireStory,plan:wireBook,money:wireBook,wrap:wireBook,media:wireMedia})[tab](p);
   wireStudents(p);
@@ -2757,7 +2764,7 @@ function shareMenu(p){
     rows.push(["play","This week's slideshow","Photos and videos from every team in the last 7 days",()=>openViewer(weekMediaList(),0,true)]);
     rows.push(["chat","Weekly digest","A short summary to send on WhatsApp",digestSheet]);
   }else{
-    rows.push(["play","Play slideshow","Photos and videos from "+p.name+", with captions",()=>openViewer(storyMediaList(p,storyF.pid===p.id?{term:storyF.term,wk:storyF.wk}:{}),0,true)]);
+    rows.push(["play","Play slideshow","Photos and videos from "+p.name+", with captions",()=>playStory(p)]);
     rows.push(["cloud","Save to Google Drive","All photos and videos from "+p.name+", up to 30 files",()=>saveToDrive(mediaOf(p).slice().reverse().map(m=>m.id),p)]);
     rows.push(["image","Send photos to WhatsApp","Up to 20 photos from the story, sent as pictures",()=>sharePhotos(storyMediaList(p),p.name)]);
     if(canRecord())rows.push(["download","Save slideshow as a video","A video file to send or play on any screen",()=>slideshowVideo(storyMediaList(p))]);
