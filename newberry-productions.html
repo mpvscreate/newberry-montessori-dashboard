@@ -730,7 +730,7 @@ select.sel{width:auto;min-height:44px;padding:0 12px;border-radius:14px}
 .composer.mini{display:flex;align-items:center;gap:8px;padding:8px 10px;margin-bottom:10px}
 .cmini{flex:1;min-width:0;display:flex;align-items:center;gap:12px;border:0;background:color-mix(in srgb,var(--ink) 7%,transparent);border-radius:99px;padding:6px 16px 6px 6px;min-height:52px;cursor:pointer;color:var(--muted);font:inherit;text-align:left;box-shadow:none}
 .cmini .pavs{flex:none}.cmt{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:1rem}.cmt.dr{color:var(--ink)}
-.composer.mini .cam{flex:none;width:52px;height:52px;color:var(--green)}
+.composer.mini .cam{flex:none;width:46px;height:46px;color:var(--green)}
 .composer{position:relative}.cmin{position:absolute;top:8px;right:8px;z-index:2}
 /* larger tap areas for small icon buttons */
 .x.sm,.rxb,.attx{position:relative}.x.sm::after,.attx::after{content:"";position:absolute;inset:-6px}
@@ -1081,8 +1081,16 @@ const TWK="ms-prod-tw";
 const twLast=pid=>{try{return(JSON.parse(localStorage.getItem(TWK)||"{}")[pid])||{term:0,wk:0}}catch{return{term:0,wk:0}}};
 const twSave=(pid,t)=>{try{const o=JSON.parse(localStorage.getItem(TWK)||"{}");o[pid]={term:t.term||0,wk:t.wk||0};localStorage.setItem(TWK,JSON.stringify(o))}catch{}};
 const TFK="ms-prod-tf";
-const tfLoad=pid=>{try{const o=(JSON.parse(localStorage.getItem(TFK)||"{}")[pid])||{};return{term:+o.term||0,wk:+o.wk||0}}catch{return{term:0,wk:0}}};
-const tfSave=(pid,t)=>{try{const o=JSON.parse(localStorage.getItem(TFK)||"{}");if(t.term||t.wk)o[pid]={term:t.term||0,wk:t.wk||0};else delete o[pid];localStorage.setItem(TFK,JSON.stringify(o))}catch{}};
+const tfMem=new Map();
+const tfLoad=pid=>{
+  const norm=o=>o?{term:+o.term||0,wk:+o.wk||0}:null;
+  let r=tfMem.get(pid)||null;
+  if(!r){try{r=norm(S.tf&&S.tf[pid])}catch{}}
+  if(!r||(!r.term&&!r.wk)){try{const o=JSON.parse(localStorage.getItem(TFK)||"{}")[pid];if(o)r=norm(o)}catch{}}
+  if(!r||(!r.term&&!r.wk)){try{const o=JSON.parse(sessionStorage.getItem(TFK)||"{}")[pid];if(o)r=norm(o)}catch{}}
+  return r||{term:0,wk:0};
+};
+const tfSave=(pid,t)=>{const v={term:t.term||0,wk:t.wk||0};tfMem.set(pid,v);try{S.tf=S.tf||{};if(v.term||v.wk)S.tf[pid]=v;else delete S.tf[pid];save()}catch{}try{const o=JSON.parse(sessionStorage.getItem(TFK)||"{}");if(v.term||v.wk)o[pid]=v;else delete o[pid];sessionStorage.setItem(TFK,JSON.stringify(o))}catch{}try{const o=JSON.parse(localStorage.getItem(TFK)||"{}");if(t.term||t.wk)o[pid]={term:t.term||0,wk:t.wk||0};else delete o[pid];localStorage.setItem(TFK,JSON.stringify(o))}catch{}};
 /* put existing posts under a term and week; photos and videos outside a post become posts */
 function bulkTag(term,wk,all){
   let tagged=0,made=0;
@@ -1144,11 +1152,11 @@ function storyTab(p){
   rest.forEach(x=>{const l=dayLabel(x.t);if(l!==day){html+=`<h3 class="sday">${esc(l)}</h3>`;day=l}html+=x.k==="post"?postCard(p,x.l):storyCard(x)});
   const bar=(hasTW||items.length||filt)?`<div class="twbar" role="group" aria-label="Filter the story"><select class="t sel" id="tf-t" aria-label="Show term"><option value="0">Term</option>${TERMS.map(n=>`<option value="${n}"${storyF.term===n?" selected":""}>Term ${n}</option>`).join("")}</select><select class="t sel" id="tf-w" aria-label="Show week"><option value="0">Week</option>${WEEKS.map(n=>`<option value="${n}"${storyF.wk===n?" selected":""}>Week ${n}</option>`).join("")}</select>${mediaOf(p).length?`<button type="button" class="chip add" id="sc-gal" aria-label="Photos and videos, ${mediaOf(p).length}">${ic("image","sm")}Media (${mediaOf(p).length})</button>`:""}</div>`:"";
     const isOpen2=composeOpen||pendFiles.length>0,dr=draftGet(p.id);
-  const mini=`<div class="card composer mini"><button class="cmini" id="sc-open" type="button" aria-label="${dr?"Continue your draft":"Write a post"}"><span class="pavs" aria-hidden="true">${esc(initials(who()||"me"))}</span><span class="cmt${dr?" dr":""}">${dr?"Draft: "+esc(dr.slice(0,60)):"What happened today?"}</span></button><button class="x cam" id="sc-cam" type="button" aria-label="Add a photo or video">${ic("camera")}</button><input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"></div>`;
+  const mini=`<div class="card composer mini"><button class="cmini" id="sc-open" type="button" aria-label="${dr?"Continue your draft":"Write a post"}"><span class="pavs" aria-hidden="true">${esc(initials(who()||"me"))}</span><span class="cmt${dr?" dr":""}">${dr?"Draft: "+esc(dr.slice(0,60)):"What happened today?"}</span></button><button class="x cam" id="sc-cam" type="button" aria-label="Take a photo">${ic("camera")}</button><button class="x cam" id="sc-lib" type="button" aria-label="Choose photos or videos from the library">${ic("image")}</button><input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"><input type="file" id="pc" accept="image/*" capture="environment" class="sr" aria-label="Take a photo" tabindex="-1"></div>`;
   const full=`<div class="card composer"><div class="row" style="align-items:flex-start"><textarea class="t ta" rows="3" id="sc-t" placeholder="What happened today?" aria-label="Write a post">${esc(draftGet(p.id))}</textarea>${micBtn()}</div>${ideaChip()}
     <div class="att" id="sc-att"></div>${shareSw(p,"sc-pub")}${offLine()}
-    ${twSelects("sc-tm","sc-wk",tp)}<div class="row between wr" style="margin-top:10px"><button class="btn small" id="sc-add" type="button">${ic("camera")}Photo or video</button><span class="row"><button class="btn small" id="sc-min" type="button">Cancel</button><button class="btn primary" id="sc-post" type="button">${ic("send")}Save</button></span></div>
-    <input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"></div>`;
+    ${twSelects("sc-tm","sc-wk",tp)}<div class="row between wr" style="margin-top:10px"><span class="row"><button class="btn small" id="sc-cam2" type="button">${ic("camera")}Camera</button><button class="btn small" id="sc-add" type="button">${ic("image")}Library</button></span><span class="row"><button class="btn small" id="sc-min" type="button">Cancel</button><button class="btn primary" id="sc-post" type="button">${ic("send")}Save</button></span></div>
+    <input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"><input type="file" id="pc" accept="image/*" capture="environment" class="sr" aria-label="Take a photo" tabindex="-1"></div>`;
   return (isOpen2?full:mini)+
   bar+
   (vis.length?`<div class="story">${html}</div><div class="empty" id="tw-empty" hidden>${ic("pulse","xl")}<h3>Nothing for this term or week yet</h3><p style="margin:0">Choose this term and week when you write a post.</p></div>`:`<div class="empty">${ic("pulse","xl")}<h3>${filt?"Nothing for this term or week yet":"Your story starts here"}</h3><p style="margin:0 0 14px">${filt?"Choose this term and week when you write a post.":"Write what happened and add photos or videos. Every post becomes part of your story, ready to share."}</p>${filt?"":`<button class="btn primary" id="e-first" type="button">${ic("pencil")}Write your first post</button>`}</div>`)+
@@ -1210,7 +1218,9 @@ function wireStory(p){
   wireMics(document);
   if(!tourShown&&!tourSeen()&&!isOpen()){tourShown=true;setTimeout(()=>{if(!isOpen())tourSheet()},700)}
   {const o=$("#sc-open");if(o)o.onclick=()=>{composeOpen=true;render();setTimeout(()=>{const t=$("#sc-t");if(t){t.focus();t.setSelectionRange(t.value.length,t.value.length)}},60)}}
-  {const c=$("#sc-cam");if(c)c.onclick=()=>$("#pf").click()}
+  {const c=$("#sc-cam");if(c)c.onclick=()=>$("#pc").click()}
+  {const c=$("#sc-lib");if(c)c.onclick=()=>$("#pf").click()}
+  {const c=$("#sc-cam2");if(c)c.onclick=()=>$("#pc").click()}
   {const m=$("#sc-min");if(m)m.onclick=()=>{if(pendFiles.length){clearPend()}composeOpen=false;render()}}
   const att=$("#sc-att"),drawAtt=()=>{if(!att)return;att.innerHTML=attHTML(pendFiles);att.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{const x=pendFiles.splice(+b.dataset.rm,1)[0];try{URL.revokeObjectURL(x.url)}catch{}drawAtt()})};
   drawAtt();
@@ -1223,7 +1233,8 @@ function wireStory(p){
   {const e=$("#e-first");if(e)e.onclick=()=>{composeOpen=true;render();setTimeout(()=>{const t=$("#sc-t");if(t)t.focus()},60)}}
   document.querySelectorAll("[data-rx]").forEach(b=>b.onclick=()=>{const l=p.log.find(x=>x.id===b.dataset.rx);if(!l)return;const me=who()||"me",a=(l.rx||[]).slice(),k=a.indexOf(me);if(k>=0)a.splice(k,1);else a.push(me);l.rx=a;save(p);fb(k>=0?"tick":"done");render()});
   document.querySelectorAll("[data-nt]").forEach(b=>b.onclick=()=>{const l=p.log.find(x=>x.id===b.dataset.nt);if(l)noteSheet(p,l)});
-  $("#pf").onchange=e=>{[...e.target.files].forEach(f=>{if(pendFiles.length<12)pendFiles.push({file:f,url:URL.createObjectURL(f),vid:f.type.startsWith("video/")})});e.target.value="";if(!att){composeOpen=true;render();return}drawAtt()};
+  const onPick=e=>{[...e.target.files].forEach(f=>{if(pendFiles.length<12)pendFiles.push({file:f,url:URL.createObjectURL(f),vid:f.type.startsWith("video/")})});e.target.value="";if(!att){composeOpen=true;render();return}drawAtt()};
+  $("#pf").onchange=onPick;{const pc=$("#pc");if(pc)pc.onchange=onPick}
   const post=async()=>{const t=$("#sc-t").value.trim();if(!t&&!pendFiles.length){$("#sc-t").focus();return}if(listening)listening.stop();
     const b=$("#sc-post");b.disabled=true;const files=pendFiles.map(x=>x.file),chv=twRead("sc-tm","sc-wk");
     const l=await makePost(p,t,files,chv,pubOn("sc-pub"));clearPend();composeOpen=false;if(l){draftSet(p.id,"");fb("add");toast(postedToast())}render()};
@@ -1237,8 +1248,8 @@ function wireStory(p){
       kids.forEach((el,i)=>{if(el.matches("h3.sday")){let vis=false;for(let j=i+1;j<kids.length&&!kids[j].matches("h3.sday");j++){if(!kids[j].hidden){vis=true;break}}el.hidden=!vis}})}
     const em=$("#tw-empty");if(em)em.hidden=!(filt&&!any);const bn=$("#bn-wrap");if(bn)bn.hidden=filt;
   };
-  {const a=$("#tf-t");if(a)a.onchange=()=>{storyF.term=+a.value;tfSave(p.id,storyF);fb("tick");applyTW()}}
-  {const b=$("#tf-w");if(b)b.onchange=()=>{storyF.wk=+b.value;tfSave(p.id,storyF);fb("tick");applyTW()}}
+  {const ha=a=>()=>{if(storyF.term===+a.value)return;storyF.term=+a.value;tfSave(p.id,storyF);fb("tick");applyTW()},hb=b=>()=>{if(storyF.wk===+b.value)return;storyF.wk=+b.value;tfSave(p.id,storyF);fb("tick");applyTW()};
+   const a=$("#tf-t"),b=$("#tf-w");if(a){a.addEventListener("change",ha(a));a.addEventListener("input",ha(a))}if(b){b.addEventListener("change",hb(b));b.addEventListener("input",hb(b))}}
   applyTW();
   {const tg=a=>{const id=a.dataset.post,o=!a.classList.contains("open");a.classList.toggle("open",o);o?postOpen.add(id):postOpen.delete(id);const b=a.querySelector("[data-pt]");if(b){b.setAttribute("aria-expanded",String(o));b.setAttribute("aria-label",o?"Show less":"Show more")}};
    document.querySelectorAll("article.post").forEach(a=>{a.addEventListener("click",e=>{if(e.target.closest("button,a,input,textarea,select")&&!(e.target.closest(".pmi")&&!a.classList.contains("open")))return;tg(a);if(a.classList.contains("open"))setTimeout(()=>a.scrollIntoView({block:"nearest",behavior:"smooth"}),30)});a.addEventListener("keydown",e=>{if(e.target===a&&(e.key==="Enter"||e.key===" ")){e.preventDefault();tg(a)}});const b=a.querySelector("[data-pt]");if(b)b.onclick=()=>tg(a)})}
@@ -1479,7 +1490,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: if a newer version is on the server, offer a one-tap refresh (clears old cached copies) */
-const APP_VER="6.20.1";
+const APP_VER="6.21.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function checkUpdate(){try{const r=await fetch(location.pathname+"?v="+Date.now(),{cache:"no-store"});if(!r.ok)return;const t=await r.text(),m=t.match(/const APP_VER="([^"]+)"/);if(!m||m[1]!==APP_VER)showUpdate()}catch{}}
