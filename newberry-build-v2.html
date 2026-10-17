@@ -371,6 +371,49 @@ html.outdoor[data-theme="dark"]{--muted:#e3d9c3;--line:#5c5442;--field:#b7aa86}
 .ba{position:relative;aspect-ratio:4/3;border-radius:20px;overflow:hidden;background:#000;margin-top:8px}.ba img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
 .ba .bl,.ba .al{position:absolute;bottom:10px;padding:4px 10px;border-radius:99px;background:rgba(0,0,0,.6);color:#fff;font:600 .78rem var(--body)}.ba .bl{left:10px}.ba .al{right:10px}
 #mic[aria-pressed=true]{background:var(--red-soft);color:var(--red);border-color:var(--red)}
+/* ---------- v2c: rings, timeline, curves, photo headers, radial plus ---------- */
+.pring{position:relative;width:68px;height:68px;display:grid;place-items:center;flex:none}
+.pring .pr{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.pr .rt{fill:none;stroke:var(--line);stroke-width:5}.pr .rp{fill:none;stroke:var(--pc);stroke-width:5;stroke-linecap:round}
+.pr.w .rt{stroke:rgba(255,255,255,.28)}.pr.w .rp{stroke:#fff}
+.ptile.has .pr .rt{stroke:rgba(255,255,255,.3)}.ptile.has .pr .rp{stroke:#fff}
+.pring.full .pr .rp{stroke:var(--green)}.ptile.has .pring.full .pr .rp{stroke:#8ff0c5}
+.pring .pav{width:46px;height:46px;border-radius:50%}
+.enter .pr .rp{animation:ringIn .9s cubic-bezier(.2,.8,.2,1) both}
+@keyframes ringIn{from{stroke-dasharray:0 100}}
+.ptile{grid-auto-rows:auto}
+.tbg{opacity:0;filter:blur(12px);transform:scale(1.06);transition:opacity .5s,filter .5s,transform .6s}.tbg.on{opacity:1;filter:none;transform:none}
+[data-m]:empty{background:linear-gradient(100deg,var(--line) 30%,color-mix(in srgb,var(--line) 35%,var(--sheet)) 50%,var(--line) 70%);background-size:200% 100%;animation:shim 1.3s linear infinite}
+@keyframes shim{to{background-position:-200% 0}}
+svg.chart{max-width:640px;margin:0 auto}
+.gantt{position:relative;--gl:106px;padding-top:20px;margin-top:6px}
+.gr{display:flex;align-items:center;width:100%;min-height:40px;border:0;background:none;padding:0;color:var(--ink);cursor:pointer;text-align:left;border-radius:10px}
+.gl{width:var(--gl);flex:none;padding-right:8px;font:600 .78rem var(--body);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.gt{position:relative;flex:1;height:16px;border-radius:99px;background:color-mix(in srgb,var(--line) 55%,transparent)}
+.gp{position:absolute;top:0;bottom:0;border-radius:99px;overflow:hidden;background:color-mix(in srgb,var(--pc) 24%,var(--sheet));border:1px solid color-mix(in srgb,var(--pc) 55%,transparent);min-width:6px}
+.gf{display:block;height:100%;border-radius:99px;background:var(--pc);transition:width .7s cubic-bezier(.2,.8,.2,1)}.gf.late{background:var(--amber)}.gf.ok{background:var(--green)}
+.gtoday{position:absolute;top:12px;bottom:0;width:2px;margin-left:-1px;background:var(--accent);border-radius:2px;z-index:2;pointer-events:none}
+.gtoday b{position:absolute;top:-16px;left:50%;transform:translateX(-50%);font:700 .65rem var(--body);color:var(--accent);letter-spacing:.04em;text-transform:uppercase}
+.card .segc{margin-bottom:8px}
+.phero{position:relative;overflow:hidden;min-height:176px;display:flex;align-items:flex-end}
+.phero .tbg{position:absolute;inset:0;background:var(--sheet) center/cover no-repeat}
+.phero.has::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(10,8,5,.1) 0%,rgba(10,8,5,.78) 100%)}
+.phero .phi{position:relative;z-index:1;width:100%}
+.pbig{position:relative;width:72px;height:72px;display:grid;place-items:center;flex:none}
+.pbig .pr{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.pbig .i.lg{color:#fff;width:30px;height:30px}.pbig .pc{font:700 .95rem var(--display);color:#fff;font-variant-numeric:tabular-nums}
+.pnav{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:0 0 12px}
+.pdots{display:flex;gap:5px}.pdots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:all .2s}.pdots i.on{width:18px;border-radius:99px;background:var(--em)}
+.done-card{display:flex;align-items:center;gap:14px;background:linear-gradient(160deg,var(--green-soft),var(--sheet) 75%);border-color:transparent}
+.done-card h3{font-size:1.15rem}.dc-i{width:56px;height:56px;border-radius:50%;background:var(--green);color:var(--paper);display:grid;place-items:center;flex:none;animation:pop .45s cubic-bezier(.2,1.3,.3,1)}.dc-i .i{width:30px;height:30px}
+body #fab-wrap{left:0;top:0;right:0;bottom:0;transform:none;width:auto;max-width:none;pointer-events:none}
+body #fab-wrap .fab-menu{position:absolute;inset:0;display:block}
+body #fab-wrap .fab-item{position:absolute;left:0;top:0;width:78px;min-width:0;min-height:0;padding:0;background:none;box-shadow:none;border-radius:0;display:flex;flex-direction:column;align-items:center;gap:5px;color:#fff;pointer-events:auto;animation:none;
+  transform:translate(calc(var(--tx,0px) - 39px),calc(var(--ty,0px) - 32px)) scale(.25);opacity:0;transition:transform .28s cubic-bezier(.2,1.25,.3,1),opacity .18s}
+body #fab-wrap.open .fab-item{transform:translate(calc(var(--tx,0px) - 39px),calc(var(--ty,0px) - 32px)) scale(1);opacity:1}
+.fab-scrim{background:rgba(10,8,5,.66);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.fab-item .fi{width:56px;height:56px;border-radius:50%;background:var(--sheet);color:var(--accent);display:grid;place-items:center;box-shadow:0 6px 20px rgba(0,0,0,.4)}
+.fab-item .fi .i{width:26px;height:26px}.fab-item .fl{font:700 .72rem/1.15 var(--body);text-align:center;text-shadow:0 1px 8px rgba(0,0,0,.9)}
 /* ---------- Newberry Build: page rules ---------- */
 .st{width:44px;height:44px;border-radius:50%;border:2px solid var(--field);background:var(--sheet);color:var(--muted);display:grid;place-items:center;cursor:pointer;flex:none;transition:box-shadow .25s,transform .08s}
 .st:active{transform:scale(.94)}
@@ -621,7 +664,7 @@ const TABS=[["build","Build","grid"],["home","Overview","home"],["add","Add","pl
 const navTab=t=>({phase:"build",mats:"build",site:"build"})[t]||t;
 $("nav.tabs").innerHTML=TABS.map(([k,l,i])=>k==="add"?`<button type="button" class="cap" id="fab" aria-label="Add something" aria-expanded="false" aria-controls="fab-menu">${ic(i)}</button>`:`<button data-tab="${k}">${ic(i)}<span>${l}</span>${k==="build"?'<i class="dot" id="tdot" hidden></i>':""}</button>`).join("");
 $("#today").textContent=new Date().toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long"});
-$("#fab-menu").innerHTML=[["photo","camera","Add photo"],["cost","cash","Add expense"],["pay","users","Record payment"],["task","clip","Add task"],["mat","truck","Add material"],["issue","alert","Report issue"]].map(([k,i,l])=>`<button class="fab-item" data-fab="${k}">${ic(i)}${l}</button>`).join("");
+$("#fab-menu").innerHTML=[["photo","camera","Add photo"],["cost","cash","Add expense"],["pay","users","Record payment"],["task","clip","Add task"],["mat","truck","Add material"],["issue","alert","Report issue"]].map(([k,i,l])=>`<button class="fab-item" data-fab="${k}"><span class="fi">${ic(i)}</span><span class="fl">${l}</span></button>`).join("");
 
 let toastT;
 function toast(msg,undo){
@@ -674,7 +717,7 @@ function compactRows(root){
 }
 const rowBtns=(e,d,id)=>`<button class="btn small" data-act="edit${e}" data-id="${esc(id)}" aria-label="Edit ${esc(d)}">Edit</button><button class="btn small danger" data-act="del${e}" data-id="${esc(id)}" aria-label="Delete ${esc(d)}">Delete</button>`;
 function confirmSheet(title,msg,ok,fn){sheet(title,`<p class="muted" style="margin:6px 0 18px">${esc(msg)}</p><div class="row"><button class="btn grow" id="no" type="button">Cancel</button><button class="btn grow" id="yes" type="button" style="background:var(--red);border-color:var(--red);color:#fff">${esc(ok)}</button></div>`,(sh,close)=>{sh.querySelector("#no").onclick=close;sh.querySelector("#yes").onclick=()=>{close();fn()};sh.querySelector("#no").focus()})}
-function setFab(o){$("#fab").setAttribute("aria-expanded",o);$("#fab-menu").hidden=!o;document.querySelector(".fab-scrim")?.remove();if(o){const s=document.createElement("div");s.className="fab-scrim";s.onclick=()=>setFab(false);document.body.append(s)}}
+function setFab(o){$("#fab").setAttribute("aria-expanded",o);$("#fab-menu").hidden=!o;$("#fab-wrap").classList.toggle("open",false);document.querySelector(".fab-scrim")?.remove();if(o){layoutFab(false);void $("#fab-menu").offsetWidth;requestAnimationFrame(()=>{$("#fab-wrap").classList.add("open");layoutFab(true)})}if(o){const s=document.createElement("div");s.className="fab-scrim";s.onclick=()=>setFab(false);document.body.append(s)}}
 $("#fab").onclick=()=>setFab($("#fab").getAttribute("aria-expanded")!=="true");
 document.querySelectorAll("[data-fab]").forEach(b=>b.onclick=()=>{setFab(false);({photo:()=>quickPhoto(tab==="phase"?curPh:undefined),cost:()=>costSheet(),pay:()=>recPaySheet(),task:()=>addTaskSheet(tab==="phase"?curPh:undefined),mat:()=>matSheet(),issue:()=>logSheet(null,"issue")})[b.dataset.fab]()});
 addEventListener("keydown",e=>{if(e.key==="Escape"){if(closeSheet)closeSheet();else if($("#fab").getAttribute("aria-expanded")==="true"){setFab(false);$("#fab").focus()}}});
@@ -753,9 +796,10 @@ function render(){
   v.querySelectorAll("[data-go]").forEach(el=>el.addEventListener("click",()=>{if(el._lp){el._lp=false;return}const[t,f]=el.dataset.go.split(":");if(t==="phase"&&f)curPh=f;if(t==="site"&&f)logSub=f;if(t==="mats"&&f)matF=f;go(t)}));
   v.querySelectorAll("[data-rf]").forEach(el=>el.addEventListener("click",()=>{roomF=el.dataset.rf;render()}));
   v.querySelectorAll("details.gd").forEach(d=>d.addEventListener("toggle",()=>{if(openPh===null)openPh=new Set(curPhases());d.open?openPh.add(d.dataset.ph):openPh.delete(d.dataset.ph)}));
-  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;render()}));
+  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;render()}));
   v.querySelectorAll("li.tap").forEach(el=>{el.setAttribute("role","button");el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click()}})});
   hydrate(v);hydrateBg(v);countUp(v);
+  v.querySelectorAll("svg.chart").forEach(wireChart);v.querySelectorAll(".phero").forEach(h=>swipeHoriz(h,phaseStep));
   if(role!=="funder"){v.querySelectorAll(".ptile").forEach(tl=>longPress(tl,()=>tileMenu(tl)));v.querySelectorAll(".list li").forEach(li=>{const bs=[...li.querySelectorAll('[data-act="cyc"]')];if(bs.length)swipeRow(li,()=>cycMany(bs.map(b=>b.dataset.id)))})}
   setSync(syncState);
 }
@@ -928,7 +972,7 @@ function home(){
    <button class="tile ${issues?"alert":""}" data-go="site:issues"><div class="lbl">${ic("alert")}Open issues</div><div class="big">${issues}</div><div class="sub">${issues?"Tap to see them":"Nothing to fix"}</div></button>
    <button class="tile sky" data-go="mats:all"><div class="lbl">${ic("truck")}To order</div><div class="big">${toOrder}</div><div class="sub">${toOrder?"materials waiting":"All ordered"}</div></button>
    <section class="tile s4 next"><div class="lbl">${ic("flag")}Next up</div>${nu.length?`<ul class="list">${nu.map(x=>{const rs=x.ts.map(t=>t.room),stuck=x.ts.some(t=>t.status==="stuck"),od=x.ts.some(t=>t.due&&t.due<today());return `<li class="tap" tabindex="0" data-act="opentask" data-id="${x.key}|${x.ts[0].room}"><span class="row-ic ${stuck?"red":x.ts.some(t=>t.status==="doing")?"sky":""}">${ic(stuck?"alert":x.ts.some(t=>t.status==="doing")?"clock":phase(x.phase)?.[2]||"clip")}</span><div class="grow"><div class="lt">${esc(x.title)}</div><div class="ls ${stuck||od?"bad":""}">${stuck?"Stuck · ":od?"Overdue · ":""}${esc(phaseName(x.phase))} · ${rs.length===R.length?"Both":rs.map(roomName).join(", ")}</div></div>${ic("chev")}</li>`}).join("")}</ul>`:`<p class="muted">Every task is done. Well done!</p>`}</section>
-  </div>${actCard()}`;
+  </div>${timelineCard()}${curveCard()}${actCard()}`;
 }
 function taskRow(key,single){
   const ts=S.tasks.filter(t=>t.key===key&&(single?t.room===single||t.room==="shared":true)).sort((a,b)=>roomNo(a.room)-roomNo(b.room));
@@ -955,7 +999,7 @@ function buildV(){
   const left=S.settings.target?Math.ceil((new Date(S.settings.target+"T12:00")-new Date(today()+"T12:00"))/864e5):null;
   const tiles=PH.map(([id,name,icon],i)=>{
     const ts=S.tasks.filter(t=>t.phase===id),dn=doneN(ts),st=ts.filter(t=>t.status==="stuck").length,ph=phasePhoto(id),full=ts.length>0&&dn===ts.length;
-    return `<button type="button" class="ptile ${ph?"has":""} ${id===cur?"cur":""}" data-go="phase:${id}" style="--pc:${PCOL[id]};--i:${i}" aria-label="${esc(name)}: ${dn} of ${ts.length} tasks done${st?", "+st+" stuck":""}">${ph?`<span class="tbg" data-bg="${ph}"></span>`:""}${st?`<span class="pbadge">${st}</span>`:full?`<span class="pbadge ok">${ic("check","sm")}</span>`:""}<span class="pi"><span class="pav">${ic(icon)}</span><b>${esc(PSHORT[id])}</b><span class="pq">${dn}/${ts.length}</span><span class="pbar"><i style="width:${pct(dn,ts.length)}%"></i></span></span></button>`}).join("");
+    return `<button type="button" class="ptile ${ph?"has":""} ${id===cur?"cur":""}" data-go="phase:${id}" style="--pc:${PCOL[id]};--i:${i}" aria-label="${esc(name)}: ${dn} of ${ts.length} tasks done${st?", "+st+" stuck":""}">${ph?`<span class="tbg" data-bg="${ph}"></span>`:""}${st?`<span class="pbadge">${st}</span>`:full?`<span class="pbadge ok">${ic("check","sm")}</span>`:""}<span class="pi"><span class="pring ${full?"full":""}">${ringSvg(pct(dn,ts.length))}<span class="pav">${ic(icon)}</span></span><b>${esc(PSHORT[id])}</b><span class="pq">${dn}/${ts.length}</span></span></button>`}).join("");
   const rec=logsNewest().slice(0,6);
   const toOrder=S.mats.filter(m=>needsOrder(m)&&(m.qty>0||secOf(m)!=="stock")).length,issues=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length;
   return `<section class="bhero"><div class="row between" style="align-items:flex-start"><div><div class="eyebrow">Whole build</div><div class="big" data-count="${p}">${p}%</div><div class="sub">${d} of ${all.length} tasks done</div></div><button class="btn ghost" data-act="report">${ic("share")}Share</button></div>
@@ -971,16 +1015,17 @@ function phaseV(){
   const keys=[...new Map(S.tasks.filter(t=>t.phase===id&&(f==="all"||t.room===f||t.room==="shared")).sort((a,b)=>(a.order??0)-(b.order??0)).map(t=>[t.key,1])).keys()];
   const ph=phasePhotoIds(id);
   return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2 style="overflow-wrap:anywhere">${esc(PSHORT[id])}</h2></div><button class="btn primary" data-act="addtask" data-id="${id}">${ic("plus")}Add task</button></div>
-  <section class="phero" style="--pc:${PCOL[id]}"><div class="row" style="gap:12px"><span class="ph-av">${ic(p[2])}</span><div class="grow"><h3 style="color:#fff;font-size:1.2rem">${esc(p[1])}</h3><div class="ph-d">${d} of ${ts.length} tasks done${st?` · ${st} stuck`:""}</div></div><div class="ph-ring" style="--p:${pc}"><b>${pc}%</b></div></div></section>
+  ${phaseHero(id,p,ts,d,st,pc)}
+  ${phaseNav(id)}
+  ${ts.length&&d===ts.length?completeCard(ts):""}
   ${ts.some(t=>t.room!=="shared")?`<div class="segc" role="group" aria-label="Show classroom">${[["all","Both"],...R.map(r=>[r.id,r.name])].map(([k,l])=>`<button type="button" data-rf="${k}" aria-pressed="${f===k}">${esc(l)}</button>`).join("")}</div>`:""}
   ${f==="all"&&!hintSeen()&&ts.some(t=>t.room!=="shared")?`<div class="note-card">${ic("eye")}<span>Each task shows one button per classroom (${R.map((r,i)=>`<b>${i+1}</b> = ${esc(r.name)}`).join(", ")}). Tap a button, or swipe a task to the right, to move it on: not started, in progress, done.</span></div>`:""}
   <div class="card">${keys.length?`<ul class="list">${keys.map(k=>taskRow(k,f==="all"?null:f)).join("")}</ul>`:`<div class="empty">${ic("clip","xl")}<h3>No tasks here</h3><p>Add the first task for this phase.</p><button class="btn primary" data-act="addtask" data-id="${id}">${ic("plus")}Add task</button></div>`}</div>
   <div class="card"><div class="row between"><h2 style="margin:0">Photos</h2><div class="row" style="gap:8px">${ph.length>=2?`<button class="btn small" data-act="phba" data-id="${id}">Before and after</button>`:""}<button class="btn small" data-act="phphoto" data-id="${id}">${ic("camera")}Add photo</button></div></div>${ph.length?`<div class="pthumbs">${ph.slice(0,9).map((m,i)=>`<button type="button" class="etile" style="border:0;padding:0" data-act="phlb" data-id="${id}|${i}" aria-label="Open photo ${i+1}"><span data-m="${m}" style="position:absolute;inset:0"></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:10px 0 0">No photos for this phase yet.</p>`}</div>`;
 }
 async function hydrateBg(root=document){
-  for(const el of root.querySelectorAll("[data-bg]")){const u=await mUrl(el.dataset.bg);if(u)el.style.backgroundImage=`url("${u}")`}
+  for(const el of root.querySelectorAll("[data-bg]")){const u=await mUrl(el.dataset.bg);if(!u)continue;const im=new Image();im.onload=()=>{el.style.backgroundImage='url("'+u+'")';el.classList.add("on")};im.src=u}
 }
-
 function builderCard(){
   const ct=contractAmt(),paid=paidTotal(),sched=sum(S.pays,x=>x.amount),left=Math.max(0,ct-paid),pp=ct?Math.min(100,paid/ct*100):0;
   const planned=S.pays.filter(x=>!x.paid).sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999")||a.title.localeCompare(b.title)),made=S.pays.filter(x=>x.paid).sort((a,b)=>(b.paidOn||"").localeCompare(a.paidOn||""));
@@ -1101,7 +1146,7 @@ function act(a,id,el){
    addphoto:()=>quickPhoto(id&&phase(id)?id:undefined),addissue:()=>logSheet(null,"issue"),editlog:()=>logSheet(id),dellog:()=>delRecs(S.logs,l=>l.id===id,"Entry"),
    fix:()=>{const l=S.logs.find(x=>x.id===id),u=undoEdit(l,{fixed:true});logAct("Marked an issue as fixed");save();render();toast("Issue marked fixed.",u)},
    lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
-   refresh:()=>refreshApp(),report:()=>reportSheet(),acts:()=>actsSheet(),phba:()=>baSheet(id),outdoor:()=>{outdoor=!outdoor;try{localStorage.setItem("build2-outdoor",outdoor?"1":"0")}catch{}applyOutdoor();render()},share:()=>shareSheet(),project:()=>projectSheet(),whoami:()=>whoSheet(),
+   refresh:()=>refreshApp(),phstep:()=>phaseStep(+id),report:()=>reportSheet(),acts:()=>actsSheet(),phba:()=>baSheet(id),outdoor:()=>{outdoor=!outdoor;try{localStorage.setItem("build2-outdoor",outdoor?"1":"0")}catch{}applyOutdoor();render()},share:()=>shareSheet(),project:()=>projectSheet(),whoami:()=>whoSheet(),
    theme:()=>{if(id==="auto"){document.documentElement.removeAttribute("data-theme");try{localStorage.setItem("build2-theme","auto")}catch{}}else{document.documentElement.setAttribute("data-theme",id);try{localStorage.setItem("build2-theme",id)}catch{}}paintTheme();render()},
    export:()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`newberry-build-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")},
    import:()=>{const f=$("#impf");f.onchange=async()=>{try{const d=JSON.parse(await f.files[0].text());if(!Array.isArray(d.tasks))throw 0;confirmSheet("Restore this backup?","This replaces the project on this phone with the backup.","Restore",()=>{S={...DEF(),...d};save();render();toast("Backup restored.")})}catch{toast("That file is not a Newberry Build backup.")}f.value=""};f.click()},
@@ -1118,12 +1163,12 @@ function cycTask(id,quiet){try{localStorage.setItem("build-hint","1")}catch{}
 }
 function addTaskSheet(ph){
   const st={room:"both",phase:ph&&phase(ph)?ph:curPhases()[0]||"site"};
-  sheet("Add a task",`<form id="f" novalidate><label class="f" for="ti">What needs doing?</label><input id="ti" data-autofocus class="t" maxlength="120" placeholder="For example: Order roof sheets">
+  sheet("Add a task",`<form id="f" novalidate><label class="f" for="ti">What needs doing?</label><input id="ti" data-autofocus class="t" maxlength="120" placeholder="For example: Order roof sheets">${micBtn("ti","Speak the task")}
   <label class="f">Phase</label>${chipRow("phase",PH.map(p=>[p[0],p[1]]),st.phase,"scroll")}
   <label class="f">Which classroom?</label>${chipRow("room",[...roomOpts(),["shared","Shared (done once)"]],st.room)}
   ${dateField("du","","Due date (optional)").replace('<div class="chips" style="margin-bottom:8px"><button type="button" class="chip" data-dc="'+today()+'"','<div class="chips" style="margin-bottom:8px"><button type="button" class="chip" data-dc="'+today()+'"')}
   <div class="foot"><button class="btn primary block">Add task</button></div></form>`,(sh,close)=>{
-    wireDc(sh);wireChips(sh,st,"room");wireChips(sh,st,"phase");
+    wireDc(sh);wireMics(sh);wireChips(sh,st,"room");wireChips(sh,st,"phase");
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const ti=sh.querySelector("#ti"),title=ti.value.trim();if(!title)return showErr(sh,ti,"Write what needs doing.");
       const key=uid(),rs=st.room==="both"?rooms().map(r=>r.id):[st.room],base=Math.max(-1,...S.tasks.map(t=>t.order??0))+1;
       const mk=rs.map((r,i)=>({id:r+"_"+key,key,room:r,phase:st.phase,title,status:"todo",due:sh.querySelector("#du").value||"",who:"",note:"",order:base+i}));
@@ -1138,12 +1183,12 @@ function taskSheet(key,roomId){
   const body=()=>{const d=draft[cur];return `<label class="f">Status</label>${chipRow("status",ST,d.status)}
    ${dateField("du",d.due,"Due date").replace(/<div class="chips"[\s\S]*?<\/div>/,futureChips("du"))}
    <label class="f" for="wh">Who is doing it?</label>${names.length?`<div class="chips" style="margin-bottom:8px">${names.map(n=>`<button type="button" class="chip" data-nm="${esc(n)}">${esc(n)}</button>`).join("")}</div>`:""}<input id="wh" class="t" maxlength="60" value="${esc(d.who)}" placeholder="Name or company">
-   <label class="f" for="nt">Note</label><textarea id="nt" class="t" maxlength="400" placeholder="Anything the team should know">${esc(d.note)}</textarea>`};
-  sheet("Task",`<form id="f" novalidate><label class="f" for="ti">Task</label><input id="ti" class="t" maxlength="120" value="${esc(title)}">
+   <label class="f" for="nt">Note</label><textarea id="nt" class="t" maxlength="400" placeholder="Anything the team should know">${esc(d.note)}</textarea>${micBtn("nt","Speak a note")}`};
+  sheet("Task",`<form id="f" novalidate><label class="f" for="ti">Task</label><input id="ti" class="t" maxlength="120" value="${esc(title)}">${micBtn("ti","Speak the task name")}
    ${ts.length>1?`<label class="f">Edit for</label><div class="segc" role="group" id="rm">${ts.sort((a,b)=>roomNo(a.room)-roomNo(b.room)).map(t=>`<button type="button" data-r="${t.room}" aria-pressed="${t.room===cur}">${esc(roomName(t.room))}</button>`).join("")}</div>`:`<p class="muted small" style="margin:6px 0 0">${esc(roomName(cur))}</p>`}
    <div id="body">${body()}</div><div class="foot"><button class="btn primary block">Save task</button></div></form>`,(sh,close)=>{
     const read=()=>{const d=draft[cur];d.due=sh.querySelector("#du")?.value||"";d.who=sh.querySelector("#wh")?.value.trim()||"";d.note=sh.querySelector("#nt")?.value.trim()||"";title=sh.querySelector("#ti").value};
-    const wire=()=>{wireDc(sh);sh.querySelectorAll('[data-ch="status"]').forEach(b=>b.onclick=()=>{draft[cur].status=b.dataset.v;sh.querySelectorAll('[data-ch="status"]').forEach(x=>x.setAttribute("aria-pressed",x===b))});
+    const wire=()=>{wireDc(sh);wireMics(sh);sh.querySelectorAll('[data-ch="status"]').forEach(b=>b.onclick=()=>{draft[cur].status=b.dataset.v;sh.querySelectorAll('[data-ch="status"]').forEach(x=>x.setAttribute("aria-pressed",x===b))});
       sh.querySelectorAll("[data-nm]").forEach(b=>b.onclick=()=>{sh.querySelector("#wh").value=b.dataset.nm})};
     wire();
     sh.querySelectorAll("#rm [data-r]").forEach(b=>b.onclick=()=>{read();cur=b.dataset.r;sh.querySelectorAll("#rm [data-r]").forEach(x=>x.setAttribute("aria-pressed",x===b));sh.querySelector("#body").innerHTML=body();wire()});
@@ -1561,6 +1606,124 @@ async function refreshApp(){
 })();
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&Date.now()-lastVerCheck>10*6e4)newVersion().then(n=>{if(n)updateNotice()})});
 
+/* ---------- voice dictation for task fields ---------- */
+const SPEECH=window.SpeechRecognition||window.webkitSpeechRecognition;
+function micBtn(target,label){return SPEECH?'<button type="button" class="btn small" data-mic="'+target+'" aria-pressed="false" style="margin-top:8px">'+ic("mic")+'<span>'+(label||"Speak")+'</span></button>':""}
+function wireMics(sh){
+  sh.querySelectorAll("[data-mic]").forEach(b=>{
+    if(b._w)return;b._w=true;let rec=null;const lab=b.querySelector("span"),idle=lab.textContent;
+    b.onclick=()=>{
+      if(rec){rec.stop();return}
+      const f=sh.querySelector("#"+b.dataset.mic);if(!f)return;
+      try{
+        rec=new SPEECH();rec.lang="en-ZA";rec.continuous=true;rec.interimResults=false;
+        rec.onresult=ev=>{const said=Array.from(ev.results).slice(ev.resultIndex).map(r=>r[0].transcript).join(" ").trim();if(said){const cur=f.value.trim();f.value=(cur?cur+" ":"")+(cur?said:said.charAt(0).toUpperCase()+said.slice(1));f.dispatchEvent(new Event("input",{bubbles:true}))}};
+        rec.onend=()=>{rec=null;b.setAttribute("aria-pressed","false");lab.textContent=idle};
+        rec.onerror=e=>{if(e&&(e.error==="not-allowed"||e.error==="service-not-allowed"))toast("Allow the microphone to use voice.")};
+        rec.start();b.setAttribute("aria-pressed","true");lab.textContent="Listening… tap to stop";
+      }catch{rec=null}
+    };
+  });
+}
+/* ---------- timeline, progress curves, phase header, radial plus ---------- */
+let curveSub="progress";
+const DMS=x=>new Date(x+"T12:00").getTime();
+function timelineCard(){
+  const st=S.settings.start,en=S.settings.target;
+  if(!st||!en)return `<div class="card"><h2>Timeline</h2><p class="muted small">Set a start and finish date in More, Project details, to see the timeline.</p></div>`;
+  const a=DMS(st),b=DMS(en),span=Math.max(1,b-a),tot=S.tasks.length||1,td=DMS(today());let acc=0;
+  const rows=PH.map(([id])=>{
+    const ts=S.tasks.filter(t=>t.phase===id),w=ts.length/tot,s0=acc;acc+=w;
+    const dn=doneN(ts),f=ts.length?dn/ts.length:0,endT=a+acc*span,late=td>endT&&f<1;
+    return `<button type="button" class="gr" data-go="phase:${id}" style="--pc:${PCOL[id]}" aria-label="${esc(PSHORT[id])}: ${dn} of ${ts.length} tasks done${late?", behind plan":""}"><span class="gl">${esc(PSHORT[id])}</span><span class="gt"><span class="gp" style="left:${(s0*100).toFixed(2)}%;width:${(w*100).toFixed(2)}%"><i class="gf ${late?"late":f===1?"ok":""}" style="width:${(f*100).toFixed(1)}%"></i></span></span></button>`;
+  }).join("");
+  const tp=Math.max(0,Math.min(1,(td-a)/span));
+  return `<div class="card"><div class="row between wr"><h2 style="margin:0">Timeline</h2><span class="small muted">${dshort(st)} to ${dshort(en)}</span></div>
+  <div class="gantt"><div class="gtoday" style="left:calc(var(--gl) + (100% - var(--gl)) * ${tp.toFixed(4)})"><b>Today</b></div>${rows}</div>
+  <p class="hint">Each phase gets a share of the project dates by how many tasks it has. The bar fills as tasks are done. Amber means the planned end has passed.</p></div>`;
+}
+function curveData(kind){
+  const st=S.settings.start,en=S.settings.target;if(!st||!en)return null;
+  const a=DMS(st),days=Math.round((DMS(en)-a)/864e5);if(days<7)return null;
+  const todayI=Math.max(0,Math.min(days,Math.round((DMS(today())-a)/864e5)));
+  const idx=d=>Math.round((DMS(d)-a)/864e5),fmt=i=>dshort(addDays(st,i));
+  if(kind==="budget"){
+    const bud=+S.settings.budget||0;if(!bud)return{msg:"Set a budget in More to see the budget curve."};
+    const cs=S.costs.filter(c=>c.date).map(c=>[idx(c.date),c.amount]);
+    return{days,todayI,fmt,unit:"R",max:Math.max(bud,sum(S.costs,c=>c.amount))*1.05,planned:i=>bud*i/days,actual:i=>sum(cs.filter(([d])=>d<=i),c=>c[1]),label:["Planned spending","Actual spending"],money:true};
+  }
+  const n=S.tasks.length||1,dd=S.tasks.filter(t=>t.status==="done"&&t.doneOn).map(t=>idx(t.doneOn)),und=S.tasks.filter(t=>t.status==="done"&&!t.doneOn).length;
+  return{days,todayI,fmt,unit:"%",max:105,planned:i=>100*i/days,actual:i=>(und+dd.filter(d=>d<=i).length)/n*100,label:["Planned progress","Actual progress"]};
+}
+const CHARTS={};
+function curveCard(){
+  const d=curveData(curveSub);
+  const head=`<div class="row between wr"><h2 style="margin:0">Progress curve</h2></div><div class="segc" style="margin:12px 0 8px" role="group" aria-label="Chart">${[["progress","Work done"],["budget","Money spent"]].map(([k,l])=>`<button type="button" data-sub="curve:${k}" aria-pressed="${curveSub===k}">${l}</button>`).join("")}</div>`;
+  if(!d)return `<div class="card">${head}<p class="muted small">Set a start and finish date in More, Project details, to see this chart.</p></div>`;
+  if(d.msg)return `<div class="card">${head}<p class="muted small">${d.msg}</p></div>`;
+  CHARTS.curve=d;d.pl=38;d.pr=12;
+  const W=360,H=210,pl=38,pr=12,pt=14,pb=28,iw=W-pl-pr,ih=H-pt-pb,X=i=>pl+i/d.days*iw,Y=v=>pt+ih-Math.max(0,Math.min(d.max,v))/d.max*ih;
+  const f=v=>d.money?(v>=1e6?(v/1e6).toFixed(1).replace(".",",")+"m":Math.round(v/1000)+"k"):Math.round(v)+"%";
+  const grid=[.25,.5,.75,1].map(q=>{const v=d.max/1.05*q,y=Y(v);return `<line class="grid" x1="${pl}" x2="${W-pr}" y1="${y}" y2="${y}"/><text x="${pl-8}" y="${y+4}" text-anchor="end">${f(v)}</text>`}).join("");
+  const xs=[0,Math.round(d.days/2),d.days].map((i,k)=>`<text x="${X(i)}" y="${H-8}" text-anchor="${k===0?"start":k===2?"end":"middle"}">${d.fmt(i)}</text>`).join("");
+  const plan=`M${X(0)} ${Y(d.planned(0))} L${X(d.days)} ${Y(d.planned(d.days))}`;
+  let act="";for(let i=0;i<=d.todayI;i++)act+=(i?"L":"M")+X(i).toFixed(1)+" "+Y(d.actual(i)).toFixed(1)+" ";
+  const nowx=X(d.todayI),nowv=d.actual(d.todayI);
+  const rows=[];for(let i=0;i<=d.days;i+=7)rows.push(i);if(rows[rows.length-1]!==d.days)rows.push(d.days);
+  const val=v=>d.money?money0(v):Math.round(v)+"%";
+  return `<div class="card">${head}
+  <div class="lg"><span><i class="ln" style="background:var(--c1)"></i>${d.label[0]}</span><span><i class="ln" style="background:var(--c2)"></i>${d.label[1]}</span></div>
+  <svg class="chart" viewBox="0 0 ${W} ${H}" role="img" aria-label="${d.label[1]} compared with the plan" data-chart="curve">${grid}<line class="base" x1="${pl}" x2="${W-pr}" y1="${Y(0)}" y2="${Y(0)}"/>${xs}
+   <path d="${plan}" fill="none" style="stroke:var(--c1)" stroke-width="2.5" stroke-dasharray="7 6" stroke-linecap="round"/>
+   <path d="${act}" fill="none" style="stroke:var(--c2)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+   <line x1="${nowx}" x2="${nowx}" y1="${pt}" y2="${Y(0)}" style="stroke:var(--accent)" stroke-width="1.5" stroke-dasharray="3 4"/>
+   <circle cx="${nowx}" cy="${Y(nowv)}" r="5.5" style="fill:var(--c2);stroke:var(--sheet)" stroke-width="2.5"/>
+   <line class="cur" x1="0" x2="0" y1="${pt}" y2="${Y(0)}" style="stroke:var(--ink)" stroke-width="1" opacity="0"/>
+   <rect class="hit" x="${pl}" y="${pt}" width="${iw}" height="${ih}" fill="transparent"/></svg>
+  <p class="chart-read" aria-live="polite">Today, ${d.fmt(d.todayI)}: <b>${val(nowv)}</b> against a plan of <b>${val(d.planned(d.todayI))}</b>. Touch the chart to read other days.</p>
+  <details class="tv"><summary>View as table</summary><table class="dt"><thead><tr><th>Date</th><th>Plan</th><th>Actual</th></tr></thead><tbody>${rows.map(i=>`<tr><td>${d.fmt(i)}</td><td>${val(d.planned(i))}</td><td>${i<=d.todayI?val(d.actual(i)):"–"}</td></tr>`).join("")}</tbody></table></details></div>`;
+}
+function wireChart(svg){
+  const d=CHARTS[svg.dataset.chart];if(!d)return;const hit=svg.querySelector(".hit"),cur=svg.querySelector(".cur"),read=svg.parentElement.querySelector(".chart-read");
+  const vb=svg.viewBox.baseVal,pl=d.pl,iw=vb.width-pl-d.pr;
+  const val=v=>d.money?money0(v):Math.round(v)+"%";
+  const at=e=>{const r=svg.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*vb.width,i=Math.max(0,Math.min(d.days,Math.round((x-pl)/iw*d.days))),px=pl+i/d.days*iw;
+    cur.setAttribute("x1",px);cur.setAttribute("x2",px);cur.setAttribute("opacity",".5");
+    read.innerHTML=`<b>${d.fmt(i)}</b>: plan ${val(d.planned(i))}${i<=d.todayI?`, actual ${val(d.actual(i))}`:", not reached yet"}`};
+  ["pointerdown","pointermove"].forEach(ev=>hit.addEventListener(ev,at));
+}
+function swipeHoriz(el,fn){
+  let x0=null,y0=0;
+  el.addEventListener("touchstart",e=>{if(e.touches.length!==1){x0=null;return}x0=e.touches[0].clientX;y0=e.touches[0].clientY},{passive:true});
+  el.addEventListener("touchend",e=>{if(x0===null)return;const t=e.changedTouches[0],dx=t.clientX-x0,dy=t.clientY-y0;x0=null;if(Math.abs(dx)>70&&Math.abs(dy)<Math.abs(dx)*.6)fn(dx<0?1:-1)},{passive:true});
+}
+function phaseStep(dir){
+  const i=PH.findIndex(p=>p[0]===curPh),n=PH[i+dir];if(!n)return;buzz(10);curPh=n[0];go("phase");
+}
+const ringSvg=(pct,cls="")=>`<svg class="pr ${cls}" viewBox="0 0 64 64" aria-hidden="true"><circle class="rt" cx="32" cy="32" r="28" pathLength="100"/>${pct>0?`<circle class="rp" cx="32" cy="32" r="28" pathLength="100" stroke-dasharray="${Math.min(100,pct)} 100"/>`:""}</svg>`;
+function phaseHero(id,p,ts,d,st,pc){
+  const ph=phasePhoto(id),full=ts.length>0&&d===ts.length;
+  return `<section class="phero ${ph?"has":""}" style="--pc:${PCOL[id]}">${ph?`<span class="tbg" data-bg="${ph}"></span>`:""}<div class="phi"><div class="row" style="gap:12px"><div class="grow" style="min-width:0"><div class="eyebrow" style="color:rgba(255,255,255,.88)">Phase ${PH.findIndex(x=>x[0]===id)+1} of ${PH.length}</div><h3 style="color:#fff;font-size:1.3rem;margin-top:6px">${esc(p[1])}</h3><div class="ph-d">${d} of ${ts.length} tasks done${st?` · ${st} stuck`:""}</div></div><div class="pbig">${ringSvg(pc,"w")}<span class="pc">${full?ic("check","lg"):pc+"%"}</span></div></div></div></section>`;
+}
+function phaseNav(id){
+  const i=PH.findIndex(x=>x[0]===id),pv=PH[i-1],nx=PH[i+1];
+  return `<div class="pnav">${pv?`<button type="button" class="btn small" data-act="phstep" data-id="-1" aria-label="Previous phase: ${esc(PSHORT[pv[0]])}">${ic("left","sm")}${esc(PSHORT[pv[0]])}</button>`:"<span></span>"}<span class="pdots" aria-hidden="true">${PH.map((x,k)=>`<i class="${k===i?"on":""}"></i>`).join("")}</span>${nx?`<button type="button" class="btn small" data-act="phstep" data-id="1" aria-label="Next phase: ${esc(PSHORT[nx[0]])}">${esc(PSHORT[nx[0]])}${ic("chev","sm")}</button>`:"<span></span>"}</div>`;
+}
+function completeCard(ts){
+  const last=ts.map(t=>t.doneOn).filter(Boolean).sort().pop();
+  return `<div class="card done-card"><span class="dc-i">${ic("check","xl")}</span><div><h3>Phase complete</h3><p class="muted small" style="margin:2px 0 0">${last?"Finished "+dlong(last)+". ":""}Every task in this phase is done.</p></div></div>`;
+}
+function layoutFab(open){
+  const items=[...document.querySelectorAll("#fab-menu .fab-item")].filter(b=>getComputedStyle(b).display!=="none");
+  const cap=$("#fab").getBoundingClientRect(),cx=cap.left+cap.width/2,cy=cap.top+cap.height/2,desk=innerWidth>=900,n=items.length,R=desk?160:150;
+  let shift=0;if(desk){const top=cy+R*Math.sin(-72*Math.PI/180)-34;if(top<16)shift=16-top}
+  items.forEach((b,i)=>{
+    const q=n>1?i/(n-1):.5;let x,y;
+    if(desk){const a=(-72+144*q)*Math.PI/180;x=cap.right-6+R*Math.cos(a);y=cy+R*Math.sin(a)+shift}
+    else{const a=(196+148*q)*Math.PI/180;x=cx+R*Math.cos(a);y=cy-26+R*Math.sin(a)}
+    b.style.setProperty("--tx",(open?x:cx)+"px");b.style.setProperty("--ty",(open?y:cy)+"px");b.style.transitionDelay=(open?i*30:0)+"ms";
+  });
+}
 /* ---------- start ---------- */
 render();
 if(sm.code){setSync("syncing");syncNow()}else setSync("off");

@@ -389,6 +389,7 @@ addEventListener("error",e=>{const v=document.getElementById("view");if(v&&!v.ch
 const ICONS={
 home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
 down:'<path d="M12 5v14M6 13l6 6 6-6"/>',
+mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/>',
 dots:'<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>',
 plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>',check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
 cash:'<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>',
@@ -886,12 +887,12 @@ function cycTask(id){try{localStorage.setItem("build-hint","1")}catch{}
 }
 function addTaskSheet(){
   const st={room:"both",phase:curPhases()[0]||"site"};
-  sheet("Add a task",`<form id="f" novalidate><label class="f" for="ti">What needs doing?</label><input id="ti" data-autofocus class="t" maxlength="120" placeholder="For example: Order roof sheets">
+  sheet("Add a task",`<form id="f" novalidate><label class="f" for="ti">What needs doing?</label><input id="ti" data-autofocus class="t" maxlength="120" placeholder="For example: Order roof sheets">${micBtn("ti","Speak the task")}
   <label class="f">Phase</label>${chipRow("phase",PH.map(p=>[p[0],p[1]]),st.phase,"scroll")}
   <label class="f">Which classroom?</label>${chipRow("room",[...roomOpts(),["shared","Shared (done once)"]],st.room)}
   ${dateField("du","","Due date (optional)").replace('<div class="chips" style="margin-bottom:8px"><button type="button" class="chip" data-dc="'+today()+'"','<div class="chips" style="margin-bottom:8px"><button type="button" class="chip" data-dc="'+today()+'"')}
   <div class="foot"><button class="btn primary block">Add task</button></div></form>`,(sh,close)=>{
-    wireDc(sh);wireChips(sh,st,"room");wireChips(sh,st,"phase");
+    wireDc(sh);wireMics(sh);wireChips(sh,st,"room");wireChips(sh,st,"phase");
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const ti=sh.querySelector("#ti"),title=ti.value.trim();if(!title)return showErr(sh,ti,"Write what needs doing.");
       const key=uid(),rs=st.room==="both"?rooms().map(r=>r.id):[st.room],base=Math.max(-1,...S.tasks.map(t=>t.order??0))+1;
       const mk=rs.map((r,i)=>({id:r+"_"+key,key,room:r,phase:st.phase,title,status:"todo",due:sh.querySelector("#du").value||"",who:"",note:"",order:base+i}));
@@ -906,12 +907,12 @@ function taskSheet(key,roomId){
   const body=()=>{const d=draft[cur];return `<label class="f">Status</label>${chipRow("status",ST,d.status)}
    ${dateField("du",d.due,"Due date").replace(/<div class="chips"[\s\S]*?<\/div>/,futureChips("du"))}
    <label class="f" for="wh">Who is doing it?</label>${names.length?`<div class="chips" style="margin-bottom:8px">${names.map(n=>`<button type="button" class="chip" data-nm="${esc(n)}">${esc(n)}</button>`).join("")}</div>`:""}<input id="wh" class="t" maxlength="60" value="${esc(d.who)}" placeholder="Name or company">
-   <label class="f" for="nt">Note</label><textarea id="nt" class="t" maxlength="400" placeholder="Anything the team should know">${esc(d.note)}</textarea>`};
-  sheet("Task",`<form id="f" novalidate><label class="f" for="ti">Task</label><input id="ti" class="t" maxlength="120" value="${esc(title)}">
+   <label class="f" for="nt">Note</label><textarea id="nt" class="t" maxlength="400" placeholder="Anything the team should know">${esc(d.note)}</textarea>${micBtn("nt","Speak a note")}`};
+  sheet("Task",`<form id="f" novalidate><label class="f" for="ti">Task</label><input id="ti" class="t" maxlength="120" value="${esc(title)}">${micBtn("ti","Speak the task name")}
    ${ts.length>1?`<label class="f">Edit for</label><div class="segc" role="group" id="rm">${ts.sort((a,b)=>roomNo(a.room)-roomNo(b.room)).map(t=>`<button type="button" data-r="${t.room}" aria-pressed="${t.room===cur}">${esc(roomName(t.room))}</button>`).join("")}</div>`:`<p class="muted small" style="margin:6px 0 0">${esc(roomName(cur))}</p>`}
    <div id="body">${body()}</div><div class="foot"><button class="btn primary block">Save task</button></div></form>`,(sh,close)=>{
     const read=()=>{const d=draft[cur];d.due=sh.querySelector("#du")?.value||"";d.who=sh.querySelector("#wh")?.value.trim()||"";d.note=sh.querySelector("#nt")?.value.trim()||"";title=sh.querySelector("#ti").value};
-    const wire=()=>{wireDc(sh);sh.querySelectorAll('[data-ch="status"]').forEach(b=>b.onclick=()=>{draft[cur].status=b.dataset.v;sh.querySelectorAll('[data-ch="status"]').forEach(x=>x.setAttribute("aria-pressed",x===b))});
+    const wire=()=>{wireDc(sh);wireMics(sh);sh.querySelectorAll('[data-ch="status"]').forEach(b=>b.onclick=()=>{draft[cur].status=b.dataset.v;sh.querySelectorAll('[data-ch="status"]').forEach(x=>x.setAttribute("aria-pressed",x===b))});
       sh.querySelectorAll("[data-nm]").forEach(b=>b.onclick=()=>{sh.querySelector("#wh").value=b.dataset.nm})};
     wire();
     sh.querySelectorAll("#rm [data-r]").forEach(b=>b.onclick=()=>{read();cur=b.dataset.r;sh.querySelectorAll("#rm [data-r]").forEach(x=>x.setAttribute("aria-pressed",x===b));sh.querySelector("#body").innerHTML=body();wire()});
@@ -1307,6 +1308,25 @@ async function refreshApp(){
 })();
 document.addEventListener("visibilitychange",()=>{if(!document.hidden&&Date.now()-lastVerCheck>10*6e4)newVersion().then(n=>{if(n)updateNotice()})});
 
+/* ---------- voice dictation for task fields ---------- */
+const SPEECH=window.SpeechRecognition||window.webkitSpeechRecognition;
+function micBtn(target,label){return SPEECH?'<button type="button" class="btn small" data-mic="'+target+'" aria-pressed="false" style="margin-top:8px">'+ic("mic")+'<span>'+(label||"Speak")+'</span></button>':""}
+function wireMics(sh){
+  sh.querySelectorAll("[data-mic]").forEach(b=>{
+    if(b._w)return;b._w=true;let rec=null;const lab=b.querySelector("span"),idle=lab.textContent;
+    b.onclick=()=>{
+      if(rec){rec.stop();return}
+      const f=sh.querySelector("#"+b.dataset.mic);if(!f)return;
+      try{
+        rec=new SPEECH();rec.lang="en-ZA";rec.continuous=true;rec.interimResults=false;
+        rec.onresult=ev=>{const said=Array.from(ev.results).slice(ev.resultIndex).map(r=>r[0].transcript).join(" ").trim();if(said){const cur=f.value.trim();f.value=(cur?cur+" ":"")+(cur?said:said.charAt(0).toUpperCase()+said.slice(1));f.dispatchEvent(new Event("input",{bubbles:true}))}};
+        rec.onend=()=>{rec=null;b.setAttribute("aria-pressed","false");lab.textContent=idle};
+        rec.onerror=e=>{if(e&&(e.error==="not-allowed"||e.error==="service-not-allowed"))toast("Allow the microphone to use voice.")};
+        rec.start();b.setAttribute("aria-pressed","true");lab.textContent="Listening… tap to stop";
+      }catch{rec=null}
+    };
+  });
+}
 /* ---------- start ---------- */
 render();
 if(sm.code){setSync("syncing");syncNow()}else setSync("off");
