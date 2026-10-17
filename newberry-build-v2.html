@@ -495,6 +495,8 @@ home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"
 grid:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
 mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/>',
 down:'<path d="M12 5v14M6 13l6 6 6-6"/>',
+lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>',
+backspace:'<path d="M21 5H9l-6 7 6 7h12z"/><path d="M13 9l4 6M17 9l-4 6"/>',
 dots:'<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>',
 plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>',check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
 cash:'<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>',
@@ -723,7 +725,7 @@ document.querySelectorAll("[data-fab]").forEach(b=>b.onclick=()=>{setFab(false);
 addEventListener("keydown",e=>{if(e.key==="Escape"){if(closeSheet)closeSheet();else if($("#fab").getAttribute("aria-expanded")==="true"){setFab(false);$("#fab").focus()}}});
 const reduced=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
 const buzz=n=>{try{navigator.vibrate?.(n)}catch{}};
-function go(t){closePop();if(role==="builder"&&t==="money")t="build";const doIt=()=>{tab=t;countAnim=true;const v=$("#view");v.classList.add("enter");setTimeout(()=>v.classList.remove("enter"),700);render();scrollTo(0,0);$("#view").focus({preventScroll:true})};if(document.startViewTransition&&!reduced())document.startViewTransition(doIt);else doIt()}
+function go(t){closePop();if(role==="builder"&&t==="money")t="build";if(t==="money"&&!moneyOK){moneyGate(()=>go("money"));return}const doIt=()=>{tab=t;countAnim=true;const v=$("#view");v.classList.add("enter");setTimeout(()=>v.classList.remove("enter"),700);render();scrollTo(0,0);$("#view").focus({preventScroll:true})};if(document.startViewTransition&&!reduced())document.startViewTransition(doIt);else doIt()}
 addEventListener("scroll",()=>$("header.top")?.classList.toggle("scrolled",scrollY>8),{passive:true});
 let countAnim=false;
 function countUp(root){if(reduced()||!countAnim)return;countAnim=false;root.querySelectorAll("[data-count]").forEach(el=>{const to=+el.dataset.count;if(!to)return;const t0=performance.now();const f=now=>{const k=Math.min(1,(now-t0)/700),e=1-Math.pow(1-k,3);el.textContent=Math.round(to*e)+"%";if(k<1)requestAnimationFrame(f)};requestAnimationFrame(f)})}
@@ -786,6 +788,7 @@ function delRecs(arr,pred,label){
 
 /* ---------- views ---------- */
 function render(){
+  if(tab==="money"&&!moneyOK)tab="build";
   document.querySelectorAll("nav.tabs button").forEach(b=>b.dataset.tab===navTab(tab)?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
   $("#pname").textContent=S.settings.name||"Newberry Build";
   document.title=`${({build:"Build",home:"Overview",money:"Money",more:"More",phase:"Phase",mats:"Materials",site:"Site log"})[tab]} · Newberry Build 2`;
@@ -839,12 +842,13 @@ function pvb(ct,paid){
   ${proj>0?`<p class="hint">At this pace the builder's payments would reach about ${money0(proj)} (contract ${money0(ct)}).</p>`:""}
   <p class="hint">Work done counts finished tasks out of all ${S.tasks.length}. Every task counts the same.</p></div>`;
 }
-function logAct(text){
-  S.acts.push({id:uid(),t:Date.now(),who:me||"Someone",text});
+function logAct(text,money){
+  S.acts.push({id:uid(),t:Date.now(),who:me||"Someone",text,...(money?{m:1}:{})});
   if(S.acts.length>160){S.acts.sort((a,b)=>a.t-b.t);S.acts.splice(0,S.acts.length-150)}
 }
 const rel=t=>{const m=Math.round((Date.now()-t)/6e4);if(m<1)return"Just now";if(m<60)return m+" min ago";const d=new Date(t),td=today(),dd=iso(d),hh=d.toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"});return dd===td?"Today "+hh:dd===addDays(td,-1)?"Yesterday "+hh:dshort(dd)+" "+hh};
-const actList=n=>[...S.acts].sort((a,b)=>b.t-a.t).slice(0,n);
+const isMoneyAct=a=>a.m||/\bR ?\d/.test(a.text);
+const actList=n=>[...S.acts].filter(a=>moneyOK||!isMoneyAct(a)).sort((a,b)=>b.t-a.t).slice(0,n);
 const actRow=a=>`<li><span class="avatar">${esc((a.who||"?")[0].toUpperCase())}</span><div class="grow"><div class="lt" style="font-weight:500">${esc(a.text)}</div><div class="ls">${esc(a.who)} · ${rel(a.t)}</div></div></li>`;
 function actCard(){
   const l=actList(5);
@@ -909,7 +913,7 @@ async function progressCard(){
   x.strokeStyle="#fff";x.beginPath();x.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*Math.max(.001,p));x.stroke();
   x.textAlign="center";x.font=F(700,78);x.fillText(Math.round(p*100)+"%",cx,cy-44);x.textAlign="left";
   const issues=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length;
-  const lines=[`${d} of ${all.length} tasks done`,...rooms().map(rm=>{const t=tasksOf(rm.id);return`${rm.name}: ${pct(doneN(t),t.length)}%`}),role==="owner"&&paidTotal()?`Paid ${money0(paidTotal())} · work ${Math.round(p*100)}%`:null,`Open issues: ${issues}`].filter(Boolean);
+  const lines=[`${d} of ${all.length} tasks done`,...rooms().map(rm=>{const t=tasksOf(rm.id);return`${rm.name}: ${pct(doneN(t),t.length)}%`}),role==="owner"&&moneyOK&&paidTotal()?`Paid ${money0(paidTotal())} · work ${Math.round(p*100)}%`:null,`Open issues: ${issues}`].filter(Boolean);
   lines.forEach((t,i)=>{x.font=F(i?500:700,i?36:46);x.fillText(fit(t,W-420),380,285+i*64)});
   const ids=logsNewest().flatMap(l=>l.media||[]).slice(0,4),pw=484,ph=300;
   for(let i=0;i<4;i++){
@@ -964,15 +968,14 @@ function home(){
   const nu=nextUp();
   const sched=schedule();
   return `<div class="page-h"><h2>Overview</h2><button class="btn primary" data-act="report">${ic("chat")}Share</button></div>
-  <div class="qa"><button class="main" data-act="addphoto">${ic("camera","lg")}Photo</button><button data-act="addcost">${ic("cash","lg")}Expense</button><button data-act="addissue">${ic("alert","lg")}Issue</button></div>
+  <div class="qa"><button class="main" data-act="addphoto">${ic("camera","lg")}Photo</button><button data-act="addtask">${ic("clip","lg")}Task</button><button data-act="addissue">${ic("alert","lg")}Issue</button></div>
   <div class="bento">
    <section class="tile hero s2"><div class="lbl">${ic("calendar")}Schedule</div><div class="big">${left===null?"–":left>=0?left:-left}<small> ${left===null?"":left>=0?"days to go":"days past target"}</small></div><div class="sub">${S.settings.start?dshort(S.settings.start):"?"} to ${S.settings.target?dshort(S.settings.target):"?"}</div><div class="row wr" style="gap:8px">${sched.chip}</div>${fcLine()}</section>
    ${R.map(r=>{const t=tasksOf(r.id),x=pct(doneN(t),t.length);return `<button class="tile green" data-go="build"><div class="lbl">${ic("home")}${esc(r.name)}</div><div class="big">${x}%</div><div class="sub">${doneN(t)} of ${t.length} done</div><div class="meter"><i style="width:${x}%"></i></div></button>`}).join("")}
-   <button class="tile warm s2" data-go="money"><div class="lbl">${ic("cash")}Money spent</div><div class="big">${money0(sp)}</div><div class="sub">${bud?`of ${money0(bud)} · ${bp>1?money0(sp-bud)+" over budget":money0(bud-sp)+" left"}`:"Set a budget in More to track what is left"}</div>${bud?`<div class="meter ${bp>1?"low":bp>.85?"mid":""}"><i style="width:${Math.min(100,bp*100)}%"></i></div>`:""}</button>
    <button class="tile ${issues?"alert":""}" data-go="site:issues"><div class="lbl">${ic("alert")}Open issues</div><div class="big">${issues}</div><div class="sub">${issues?"Tap to see them":"Nothing to fix"}</div></button>
    <button class="tile sky" data-go="mats:all"><div class="lbl">${ic("truck")}To order</div><div class="big">${toOrder}</div><div class="sub">${toOrder?"materials waiting":"All ordered"}</div></button>
    <section class="tile s4 next"><div class="lbl">${ic("flag")}Next up</div>${nu.length?`<ul class="list">${nu.map(x=>{const rs=x.ts.map(t=>t.room),stuck=x.ts.some(t=>t.status==="stuck"),od=x.ts.some(t=>t.due&&t.due<today());return `<li class="tap" tabindex="0" data-act="opentask" data-id="${x.key}|${x.ts[0].room}"><span class="row-ic ${stuck?"red":x.ts.some(t=>t.status==="doing")?"sky":""}">${ic(stuck?"alert":x.ts.some(t=>t.status==="doing")?"clock":phase(x.phase)?.[2]||"clip")}</span><div class="grow"><div class="lt">${esc(x.title)}</div><div class="ls ${stuck||od?"bad":""}">${stuck?"Stuck · ":od?"Overdue · ":""}${esc(phaseName(x.phase))} · ${rs.length===R.length?"Both":rs.map(roomName).join(", ")}</div></div>${ic("chev")}</li>`}).join("")}</ul>`:`<p class="muted">Every task is done. Well done!</p>`}</section>
-  </div>${timelineCard()}${curveCard()}${actCard()}`;
+  </div>${timelineCard()}${curveCard("progress")}${actCard()}`;
 }
 function taskRow(key,single){
   const ts=S.tasks.filter(t=>t.key===key&&(single?t.room===single||t.room==="shared":true)).sort((a,b)=>roomNo(a.room)-roomNo(b.room));
@@ -1046,7 +1049,7 @@ function moneyV(){
   const byCat=CATS.map(([k,l,i])=>[k,l,i,sum(S.costs.filter(c=>c.cat===k),c=>c.amount)]).filter(x=>x[3]>0);
   const list=S.costs.filter(c=>costF==="all"||c.room===costF).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||0);
   const maxC=Math.max(1,...byCat.map(x=>x[3]));
-  return `<div class="page-h"><h2>Money</h2><button class="btn primary" data-act="addcost">${ic("plus")}Add expense</button></div>
+  return `<div class="page-h"><h2>Money</h2><div class="row" style="gap:8px"><button class="iconbtn" data-act="lockmoney" aria-label="Lock money now">${ic("lock")}</button><button class="btn primary" data-act="addcost">${ic("plus")}Add expense</button></div></div>
   <div class="bento">
    <section class="tile hero s2"><div class="lbl">${ic("cash")}Spent so far</div><div class="big">${money0(sp)}</div><div class="sub">${bud?`${pct(sp,bud)}% of ${money0(bud)} budget`:"No budget set yet"}</div></section>
    <section class="tile green"><div class="lbl">${ic("trend")}${bud&&sp>bud?"Over budget":"Left"}</div><div class="big">${bud?money0(Math.abs(bud-sp)):"–"}</div>${bud?`<div class="meter ${sp>bud?"low":sp>bud*.85?"mid":""}"><i style="width:${Math.min(100,sp/bud*100)}%"></i></div>`:`<div class="sub"><button class="linkbtn" data-act="budget" style="padding:0;min-height:32px">Set budget</button></div>`}</section>
@@ -1054,6 +1057,7 @@ function moneyV(){
    ${R.map(r=>`<section class="tile"><div class="lbl">${ic("home")}${esc(r.name)}</div><div class="big">${money0(spentRoom(r.id))}</div><div class="sub">incl. half of shared costs</div></section>`).join("")}
   </div>
   ${builderCard()}
+  ${curveCard("budget")}
   ${byCat.length?`<div class="card"><h2>Where the money went</h2><div class="cbars">${byCat.map(([k,l,i,v])=>`<div class="cbar"><span class="catrow">${ic(i)}${esc(l)}</span><b>${money0(v)}</b><div class="tr"><i style="width:${v/maxC*100}%"></i></div></div>`).join("")}</div></div>`:""}
   <div class="card"><div class="row between wr"><h2 style="margin:0">Expenses</h2></div>
    <div class="chips scroll" style="margin-top:10px" role="group" aria-label="Filter expenses">${[["all","All"],["both","Shared"],...R.map(r=>[r.id,r.name])].map(([k,l])=>`<button type="button" class="chip" data-sub="cost:${k}" aria-pressed="${costF===k}">${esc(l)}</button>`).join("")}</div>
@@ -1118,7 +1122,8 @@ function more(){
   </ul></div>
   <div class="card"><ul class="list">
    ${row("home","Project details",esc([s.name,s.site].filter(Boolean).join(" · ")||"Name, site and dates"),"project")}
-   ${row("cash","Budget",s.budget?money0(s.budget)+" in total":"Not set","budget")}
+   ${row("cash","Budget",moneyOK?(s.budget?money0(s.budget)+" in total":"Not set"):"Locked","budget")}
+   ${moneyOK?row("lock","Lock money now","Asks for the password again","lockmoney"):""}
    ${row("user","Your name",esc(me||"Shown on photos and notes you add"),"whoami")}
   </ul></div>
   <div class="card"><h2>Look</h2><div class="themes">${[["auto","Auto","device"],["light","Light","sun"],["dark","Dark","moon"]].map(([k,l,i])=>`<button type="button" class="themeopt" data-act="theme" data-id="${k}" aria-pressed="${(document.documentElement.getAttribute("data-theme")||"auto")===k}">${ic(i,"lg")}<b>${l}</b></button>`).join("")}</div></div>
@@ -1130,16 +1135,16 @@ function more(){
 /* ---------- actions ---------- */
 function act(a,id,el){
   closePop();
-  if(role==="funder"&&!["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba"].includes(a)){toast("This is a view-only copy.");return}
+  if(role==="funder"&&!["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney"].includes(a)){toast("This is a view-only copy.");return}
   if(role==="builder"&&["addcost","editcost","delcost","budget","addpay","editpay","delpay","recpay","paypay","paycost","contract","typicalpay","weekly","resetpays","payall","report"].includes(a)){toast("Money is hidden for builders.");return}
   ({
    cyc:()=>cycTask(id),opentask:()=>taskSheet(...id.split("|")),edittask:()=>taskSheet(...id.split("|")),
    deltask:()=>{const[k]=id.split("|");const f=roomF;delRecs(S.tasks,t=>t.key===k&&(f==="all"||t.room===f||t.room==="shared"),"Task")},
    addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>quickPhoto(id),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),addcost:()=>costSheet(),editcost:()=>costSheet(id),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
    payall:()=>{payAll=!payAll;render()},resetpays:()=>{const ps=[...S.pays],cs=S.costs.filter(c=>c.pay);S.pays.length=0;cs.forEach(c=>S.costs.splice(S.costs.indexOf(c),1));payAll=false;save();render();toast("All builder payments reset to R 0.",()=>{ps.forEach(x=>S.pays.push(x));cs.forEach(c=>S.costs.push(c))})},recpay:()=>recPaySheet(),weekly:()=>weeklySheet(),addpay:()=>paySheet(),editpay:()=>paySheet(id),contract:()=>contractSheet(),typicalpay:()=>typicalPays(),
-   paypay:()=>{const x=S.pays.find(q=>q.id===id),u=undoEdit(x,{paid:true,paidOn:today()});payCost(x);logAct(`Builder payment of ${money(x.amount)} recorded`);save();render();toast(`${money(x.amount)} paid to the builder.`,()=>{u();payCost(x)})},
+   paypay:()=>{const x=S.pays.find(q=>q.id===id),u=undoEdit(x,{paid:true,paidOn:today()});payCost(x);logAct(`Builder payment of ${money(x.amount)} recorded`,1);save();render();toast(`${money(x.amount)} paid to the builder.`,()=>{u();payCost(x)})},
    delpay:()=>{const x=S.pays.find(q=>q.id===id),lc=S.costs.find(c=>c.id==="pay_"+id);S.pays.splice(S.pays.indexOf(x),1);if(lc)S.costs.splice(S.costs.indexOf(lc),1);save();render();toast("Stage deleted.",()=>{S.pays.push(x);if(lc)S.costs.push(lc)})},
-   paycost:()=>{const c=S.costs.find(x=>x.id===id),u=undoEdit(c,{paid:true});save();render();toast(`${money(c.amount)} marked as paid.`,u)},budget:()=>budgetSheet(),addmat:()=>matSheet(),editmat:()=>matSheet(id),delmat:()=>delRecs(S.mats,m=>m.id===id,"Material"),
+   paycost:()=>{const c=S.costs.find(x=>x.id===id),u=undoEdit(c,{paid:true});save();render();toast(`${money(c.amount)} marked as paid.`,u)},budget:()=>moneyOK?budgetSheet():moneyGate(budgetSheet),lockmoney:()=>{lockMoney();toast("Money is locked.")},addmat:()=>matSheet(),editmat:()=>matSheet(id),delmat:()=>delRecs(S.mats,m=>m.id===id,"Material"),
    cycmat:()=>{const m=S.mats.find(x=>x.id===id),L=mst(m),order=L.map(x=>x[0]),nx=order[(order.indexOf(m.status)+1)%order.length];const u=undoEdit(m,{status:nx});save();render();toast(`${m.name}: ${L.find(x=>x[0]===nx)[1].toLowerCase()}.`,u)},
    movein:()=>moveSheet(id,"in"),moveout:()=>moveSheet(id,"out"),editelec:()=>elecSheet(),
    shareorder:()=>shareOrder(),addsup:()=>supSheet(),editsup:()=>supSheet(id),delsup:()=>delRecs(S.sups,s=>s.id===id,"Contact"),
@@ -1211,7 +1216,7 @@ function costSheet(id){
     wireDc(sh);["cat","room"].forEach(n=>wireChips(sh,st,n));sh.querySelectorAll('[data-ch="paid"]').forEach(b=>b.onclick=()=>{st.paid=b.dataset.v==="1";sh.querySelectorAll('[data-ch="paid"]').forEach(x=>x.setAttribute("aria-pressed",x===b))});
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const am=sh.querySelector("#am"),v=parseAmt(am.value);if(!(v>0))return showErr(sh,am.closest(".amtin"),"Enter an amount above zero.");
       const vals={amount:Math.round(v*100)/100,title:sh.querySelector("#ti").value.trim(),cat:st.cat,room:st.room,date:sh.querySelector("#dt").value||today(),paid:st.paid,sup:sh.querySelector("#su")?.value||""};
-      if(c){const u=undoEdit(c,vals);save();close();render();toast("Expense saved.",u)}else{const n={id:uid(),...vals};S.costs.push(n);logAct(`Expense of ${money(n.amount)}${n.title?": "+n.title:""}`);save();close();render();toast(`Added ${money(n.amount)}.`,()=>S.costs.splice(S.costs.indexOf(n),1))}};
+      if(c){const u=undoEdit(c,vals);save();close();render();toast("Expense saved.",u)}else{const n={id:uid(),...vals};S.costs.push(n);logAct(`Expense of ${money(n.amount)}${n.title?": "+n.title:""}`,1);save();close();render();toast(`Added ${money(n.amount)}.`,()=>S.costs.splice(S.costs.indexOf(n),1))}};
   });
 }
 function typicalPays(){
@@ -1229,7 +1234,7 @@ function recPaySheet(){
     wireDc(sh);
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const am=sh.querySelector("#am"),v=parseAmt(am.value);if(!(v>0))return showErr(sh,am.closest(".amtin"),"Enter the amount you paid.");
       const date=sh.querySelector("#po").value||today(),n={id:uid(),title:"Payment "+dshort(date),amount:Math.round(v*100)/100,phase:"",due:date,paid:true,paidOn:date,note:sh.querySelector("#nt").value.trim()};
-      S.pays.push(n);payCost(n);logAct(`Builder payment of ${money(n.amount)} recorded`);save();close();render();toast(`${money(n.amount)} recorded.`,()=>{n.paid=false;payCost(n);S.pays.splice(S.pays.indexOf(n),1)})};
+      S.pays.push(n);payCost(n);logAct(`Builder payment of ${money(n.amount)} recorded`,1);save();close();render();toast(`${money(n.amount)} recorded.`,()=>{n.paid=false;payCost(n);S.pays.splice(S.pays.indexOf(n),1)})};
   });
 }
 function weeklySheet(){
@@ -1432,7 +1437,8 @@ function whoSheet(){
   sheet("Your name",`<form id="f" novalidate><p class="muted" style="margin:6px 0 0">Shown on the photos, notes and tasks you add, so the team knows who did what. Stays on this phone.</p><label class="f" for="nm">Name</label><input id="nm" data-autofocus class="t" maxlength="40" value="${esc(me)}" autocomplete="name"><div class="foot"><button class="btn primary block">Save</button></div></form>`,(sh,close)=>{
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();me=sh.querySelector("#nm").value.trim();try{localStorage.setItem("build-who",me)}catch{}close();render();toast("Saved.")}});
 }
-function reportText(){
+function reportText(){const t=reportTextFull();return moneyOK?t:t.split("\n").filter(l=>!/^(Spent|Still to pay|Builder paid)/.test(l)).join("\n")}
+function reportTextFull(){
   const all=S.tasks,R=rooms(),bud=+S.settings.budget||0,issues=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length,nu=nextUp().slice(0,3);
   let t=`*${S.settings.name||"Classroom build"}*: update ${dlong(today())}\n\n`;
   R.forEach(r=>{const x=tasksOf(r.id);t+=`${r.name}: ${doneN(x)} of ${x.length} tasks done (${pct(doneN(x),x.length)}%)\n`});
@@ -1656,9 +1662,9 @@ function curveData(kind){
   return{days,todayI,fmt,unit:"%",max:105,planned:i=>100*i/days,actual:i=>(und+dd.filter(d=>d<=i).length)/n*100,label:["Planned progress","Actual progress"]};
 }
 const CHARTS={};
-function curveCard(){
-  const d=curveData(curveSub);
-  const head=`<div class="row between wr"><h2 style="margin:0">Progress curve</h2></div><div class="segc" style="margin:12px 0 8px" role="group" aria-label="Chart">${[["progress","Work done"],["budget","Money spent"]].map(([k,l])=>`<button type="button" data-sub="curve:${k}" aria-pressed="${curveSub===k}">${l}</button>`).join("")}</div>`;
+function curveCard(kind){kind=kind||"progress";
+  const d=curveData(kind);
+  const head=`<div class="row between wr"><h2 style="margin:0">${kind==="budget"?"Money spent":"Progress curve"}</h2></div>`;
   if(!d)return `<div class="card">${head}<p class="muted small">Set a start and finish date in More, Project details, to see this chart.</p></div>`;
   if(d.msg)return `<div class="card">${head}<p class="muted small">${d.msg}</p></div>`;
   CHARTS.curve=d;d.pl=38;d.pr=12;
@@ -1722,6 +1728,30 @@ function layoutFab(open){
     if(desk){const a=(-72+144*q)*Math.PI/180;x=cap.right-6+R*Math.cos(a);y=cy+R*Math.sin(a)+shift}
     else{const a=(196+148*q)*Math.PI/180;x=cx+R*Math.cos(a);y=cy-26+R*Math.sin(a)}
     b.style.setProperty("--tx",(open?x:cx)+"px");b.style.setProperty("--ty",(open?y:cy)+"px");b.style.transitionDelay=(open?i*30:0)+"ms";
+  });
+}
+/* ---------- money password ---------- */
+let moneyOK=false,hiddenAt=0;const MONEY_PW="007";
+function lockMoney(){moneyOK=false;if(tab==="money")tab="build";render()}
+document.addEventListener("visibilitychange",()=>{if(document.hidden)hiddenAt=Date.now();else if(moneyOK&&hiddenAt&&Date.now()-hiddenAt>12e4)lockMoney()});
+function moneyGate(then){
+  let d="";
+  sheet("Money is locked",`<p class="muted" style="margin:6px 0 0">Enter the password to see money.</p><div class="lk-dots" id="md" role="img"></div><p class="lk-s" id="ms" role="status" style="text-align:center"></p>
+  <div class="lk-pad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button type="button" data-k="${n}" aria-label="${n}">${n}</button>`).join("")}<button type="button" class="ghost" tabindex="-1" aria-hidden="true"></button><button type="button" data-k="0" aria-label="0">0</button><button type="button" data-k="b" aria-label="Delete the last digit">${ic("backspace")}</button></div>
+  <div class="foot"><button type="button" class="btn block" id="mc">Cancel</button></div>`,(sh,close)=>{
+    const dots=sh.querySelector("#md"),msg=sh.querySelector("#ms");
+    const draw=()=>{dots.innerHTML=Array.from({length:MONEY_PW.length},(_,i)=>'<i class="'+(i<d.length?"on":"")+'"></i>').join("");dots.setAttribute("aria-label",d.length+" of "+MONEY_PW.length+" digits entered")};
+    const press=k=>{
+      if(k==="b"){d=d.slice(0,-1);draw();return}
+      if(d.length>=MONEY_PW.length)return;d+=k;draw();msg.textContent="";msg.className="lk-s";
+      if(d.length===MONEY_PW.length){
+        if(d===MONEY_PW){moneyOK=true;close();then&&then()}
+        else{d="";dots.classList.remove("shake");void dots.offsetWidth;dots.classList.add("shake");navigator.vibrate&&navigator.vibrate(60);msg.textContent="That password is not right.";msg.className="lk-s bad";setTimeout(draw,250)}
+      }
+    };
+    sh.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>press(b.dataset.k));
+    sh.addEventListener("keydown",e=>{if(/^\d$/.test(e.key)){press(e.key);e.preventDefault()}else if(e.key==="Backspace"){press("b");e.preventDefault()}});
+    sh.querySelector("#mc").onclick=close;draw();
   });
 }
 /* ---------- start ---------- */
