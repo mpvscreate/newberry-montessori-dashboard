@@ -6,8 +6,9 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <title>Newberry Build 2</title>
-<link rel="icon" type="image/svg+xml" href="icons/build-icon.svg">
-<link rel="apple-touch-icon" href="icons/build-icon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/build-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="icons/build-192.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/build-apple-180.png">
 <link rel="manifest" href="manifest-build2.webmanifest">
 <meta name="theme-color" content="#fbf6ec" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#14110c" media="(prefers-color-scheme: dark)">
@@ -450,6 +451,7 @@ const ICONS={
 home:'<path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/><path d="M10 20v-6h4v6"/>',
 grid:'<rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/>',
 mic:'<rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/>',
+down:'<path d="M12 5v14M6 13l6 6 6-6"/>',
 dots:'<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>',
 plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>',check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
 cash:'<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>',
@@ -1065,6 +1067,7 @@ function more(){
    ${row("truck","Materials and stock","Stock, fittings, electrical, sundries and suppliers","gomats")}
    ${row("camera","Site log and issues","Photos, notes and things to fix","gosite")}
    ${row("clock","Activity","Who did what, and when","acts")}
+   ${row("cloud","Refresh and check for updates","Pulling down on any screen does the same","refresh")}
    ${row("share","Share with your team",sm.code?"On. Everyone with the link sees the same project.":"Give your builder the link so you all see the same project","share")}
    ${row("chat","Send a progress update","WhatsApp summary of tasks, money and issues","report")}
   </ul></div>
@@ -1098,7 +1101,7 @@ function act(a,id,el){
    addphoto:()=>quickPhoto(id&&phase(id)?id:undefined),addissue:()=>logSheet(null,"issue"),editlog:()=>logSheet(id),dellog:()=>delRecs(S.logs,l=>l.id===id,"Entry"),
    fix:()=>{const l=S.logs.find(x=>x.id===id),u=undoEdit(l,{fixed:true});logAct("Marked an issue as fixed");save();render();toast("Issue marked fixed.",u)},
    lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
-   report:()=>reportSheet(),acts:()=>actsSheet(),phba:()=>baSheet(id),outdoor:()=>{outdoor=!outdoor;try{localStorage.setItem("build2-outdoor",outdoor?"1":"0")}catch{}applyOutdoor();render()},share:()=>shareSheet(),project:()=>projectSheet(),whoami:()=>whoSheet(),
+   refresh:()=>refreshApp(),report:()=>reportSheet(),acts:()=>actsSheet(),phba:()=>baSheet(id),outdoor:()=>{outdoor=!outdoor;try{localStorage.setItem("build2-outdoor",outdoor?"1":"0")}catch{}applyOutdoor();render()},share:()=>shareSheet(),project:()=>projectSheet(),whoami:()=>whoSheet(),
    theme:()=>{if(id==="auto"){document.documentElement.removeAttribute("data-theme");try{localStorage.setItem("build2-theme","auto")}catch{}}else{document.documentElement.setAttribute("data-theme",id);try{localStorage.setItem("build2-theme",id)}catch{}}paintTheme();render()},
    export:()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`newberry-build-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")},
    import:()=>{const f=$("#impf");f.onchange=async()=>{try{const d=JSON.parse(await f.files[0].text());if(!Array.isArray(d.tasks))throw 0;confirmSheet("Restore this backup?","This replaces the project on this phone with the backup.","Restore",()=>{S={...DEF(),...d};save();render();toast("Backup restored.")})}catch{toast("That file is not a Newberry Build backup.")}f.value=""};f.click()},
@@ -1528,6 +1531,35 @@ function joinFromHash(){
       S=DEF();sm={meta:{},lastPull:null,pendingMedia:[],code,joinedAt:Date.now(),role:newRole};role=newRole;applyRole();try{await mClear()}catch{}urls.clear();persistSync();
       await pull();if(!S.tasks.length){S.tasks=seedTasks()}save();scan();await push();render();toast("You are in. Welcome!")}});
 }
+
+/* ---------- pull down to refresh, and a notice when a new version is out ---------- */
+const verSig=async()=>{try{const r=await fetch(location.pathname,{method:"HEAD",cache:"no-store"});return r.headers.get("etag")||r.headers.get("last-modified")||r.headers.get("content-length")||""}catch{return""}};
+let baseSig="",lastVerCheck=0;verSig().then(v=>baseSig=v);
+async function newVersion(){lastVerCheck=Date.now();const v=await verSig();return!!(baseSig&&v&&v!==baseSig)}
+function updateNotice(){clearTimeout(toastT);const t=document.createElement("div");t.className="toast";t.innerHTML='<span>A new version of the app is ready.</span><button type="button">Update</button>';t.querySelector("button").onclick=()=>location.reload();$("#toasts").replaceChildren(t)}
+let refreshing=false;
+async function refreshApp(){
+  if(refreshing)return;refreshing=true;const el=$("#ptr");el.classList.add("spin");el.style.transform="translate(-50%,56px)";
+  const t0=Date.now();
+  try{await syncNow()}catch{}
+  render();
+  const nv=await newVersion();
+  await new Promise(r=>setTimeout(r,Math.max(0,700-(Date.now()-t0))));
+  el.classList.remove("spin");el.style.transform="";el.style.opacity="";refreshing=false;
+  if(nv)updateNotice();else toast(sm.code?"Synced. Everything is up to date.":"Refreshed. You have the latest version.");
+}
+(()=>{const el=document.createElement("div");el.id="ptr";el.setAttribute("aria-hidden","true");el.innerHTML=ic("down");document.body.append(el);
+  let y0=null,pull=0;const T=70,blocked=()=>document.body.classList.contains("lock")||refreshing;
+  addEventListener("touchstart",e=>{y0=(scrollY<=0&&!blocked()&&e.touches.length===1&&!e.target.closest("input,textarea,select,.chips.scroll,.rps"))?e.touches[0].clientY:null;pull=0},{passive:true});
+  addEventListener("touchmove",e=>{if(y0===null)return;const dy=e.touches[0].clientY-y0;
+    if(dy<=0||scrollY>0){if(pull>0){pull=0;el.style.transform="";el.style.opacity=""}return}
+    if(dy>8&&e.cancelable)e.preventDefault();
+    pull=Math.min(dy*.5,96);el.style.opacity=Math.min(1,pull/40);el.style.transform="translate(-50%,"+(pull-8)+"px) rotate("+(pull>=T/1.4?180:0)+"deg)";
+    el.classList.toggle("ready",pull>=T/1.4)},{passive:false});
+  const end=()=>{if(y0===null)return;const go=pull>=T/1.4;y0=null;el.classList.remove("ready");if(go)refreshApp();else{el.style.transform="";el.style.opacity=""}pull=0};
+  addEventListener("touchend",end);addEventListener("touchcancel",end);
+})();
+document.addEventListener("visibilitychange",()=>{if(!document.hidden&&Date.now()-lastVerCheck>10*6e4)newVersion().then(n=>{if(n)updateNotice()})});
 
 /* ---------- start ---------- */
 render();
