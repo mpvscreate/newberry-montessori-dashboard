@@ -416,6 +416,21 @@ body #fab-wrap.open .fab-item{transform:translate(calc(var(--tx,0px) - 39px),cal
 .fab-item .fi .i{width:26px;height:26px}.fab-item .fl{font:700 .72rem/1.15 var(--body);text-align:center;text-shadow:0 1px 8px rgba(0,0,0,.9)}
 /* quick repeated taps (keypad, steppers) must never trigger double-tap zoom on phones */
 html,body,button,a,input,select,textarea,.chip,.st,.stp,.lk-pad button,[role=button]{touch-action:manipulation}
+/* ---------- v2e: plans with pins ---------- */
+.plv{position:relative;height:min(64dvh,560px);overflow:hidden;border-radius:22px;background:var(--sheet);border:1px solid var(--line);touch-action:none;-webkit-user-select:none;user-select:none;cursor:grab}
+.plv.pm{cursor:crosshair;box-shadow:0 0 0 3px var(--glow)}
+.plc{position:absolute;left:0;top:0;transform-origin:0 0;will-change:transform}
+.plc img{display:block;max-width:none;pointer-events:none;-webkit-user-drag:none;background:#fff}
+.pin{--pc:#2a7bd0;position:absolute;width:30px;height:30px;padding:0;border:2px solid #fff;border-radius:50%;background:var(--pc);color:#fff;font:700 .78rem var(--body);display:grid;place-items:center;box-shadow:0 2px 8px rgba(0,0,0,.45);cursor:pointer;transform:translate(-50%,-100%) scale(calc(1 / var(--z,1)));transform-origin:50% 100%;margin-top:-7px}
+.pin::after{content:"";position:absolute;left:50%;bottom:-7px;width:10px;height:10px;background:var(--pc);transform:translateX(-50%) rotate(45deg);border-right:2px solid #fff;border-bottom:2px solid #fff;z-index:-1}
+.pin::before{content:"";position:absolute;inset:-9px}
+.pin.red{--pc:#d33a2f}.pin.green{--pc:#1f9d6c}.pin.blue{--pc:#2a7bd0}.pin.ghost{--pc:var(--accent);pointer-events:none;animation:pop .3s ease-out}
+.pinb{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;flex:none;background:#2a7bd0;color:#fff;font:700 .8rem var(--body)}.pinb.red{background:#d33a2f}.pinb.green{background:#1f9d6c}
+.pltools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0 14px}
+.pltools [aria-pressed=true]{box-shadow:0 0 0 4px var(--glow-soft),0 6px 22px var(--glow)}
+.ro [data-act="addplan"],.ro [data-act="pinmode"],.ro [data-act="plopts"]{display:none!important}
+.plw.full{position:fixed;inset:0;z-index:35;background:var(--paper);display:flex;flex-direction:column;padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(10px + env(safe-area-inset-bottom,0px))}
+.plw.full .plv{flex:1;height:auto;border-radius:16px}.plw.full .pltools{margin:10px 0 0}.plw.full .note-card{margin-bottom:8px}
 /* ---------- Newberry Build: page rules ---------- */
 .st{width:44px;height:44px;border-radius:50%;border:2px solid var(--field);background:var(--sheet);color:var(--muted);display:grid;place-items:center;cursor:pointer;flex:none;transition:box-shadow .25s,transform .08s}
 .st:active{transform:scale(.94)}
@@ -500,6 +515,9 @@ down:'<path d="M12 5v14M6 13l6 6 6-6"/>',
 lock:'<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V8a4 4 0 018 0v3"/>',
 backspace:'<path d="M21 5H9l-6 7 6 7h12z"/><path d="M13 9l4 6M17 9l-4 6"/>',
 up:'<path d="M12 19V5M6 11l6-6 6 6"/>',
+pin:'<path d="M12 21s-6-5.6-6-10a6 6 0 0112 0c0 4.4-6 10-6 10z"/><circle cx="12" cy="11" r="2.2"/>',
+map:'<path d="M9 4l6 2 6-2v14l-6 2-6-2-6 2V6z"/><path d="M9 4v14M15 6v14"/>',
+expand:'<path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5"/>',
 dots:'<circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/>',
 plus:'<path d="M12 5v14M5 12h14"/>',minus:'<path d="M5 12h14"/>',x:'<path d="M6 6l12 12M18 6L6 18"/>',check:'<path d="M5 12.5l4.5 4.5L19 7.5"/>',
 cash:'<rect x="2.5" y="6" width="19" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/>',
@@ -602,7 +620,7 @@ const seedMats=()=>{
 };
 
 const KEY="newberry-build-v2";
-const DEF=()=>({settings:{name:"MS 2 Project",site:"",start:"2026-10-22",target:"2027-01-10",budget:958896,contract:928896,rooms:[{id:"r1",name:"Classroom 1"},{id:"r2",name:"Classroom 2"}]},tasks:[],costs:[],mats:[],sups:[],logs:[],pays:[],acts:[]});
+const DEF=()=>({settings:{name:"MS 2 Project",site:"",start:"2026-10-22",target:"2027-01-10",budget:958896,contract:928896,rooms:[{id:"r1",name:"Classroom 1"},{id:"r2",name:"Classroom 2"}]},tasks:[],costs:[],mats:[],sups:[],logs:[],pays:[],acts:[],plans:[]});
 let S;
 function seedTasks(){
   let n=0;const out=[],R=S.settings.rooms;
@@ -666,7 +684,7 @@ const unpaid=()=>sum(S.costs.filter(c=>!c.paid),c=>c.amount);
 /* ---------- ui chrome ---------- */
 let matSec="stock",payAll=false,tab="build",roomF="all",logSub="log",matF="all",costF="all",openPh=null;
 const TABS=[["build","Build","grid"],["home","Overview","home"],["add","Add","plus"],["money","Money","cash"],["more","More","dots"]];
-const navTab=t=>({phase:"build",mats:"build",site:"build"})[t]||t;
+const navTab=t=>({phase:"build",mats:"build",site:"build",plans:"build"})[t]||t;
 $("nav.tabs").innerHTML=TABS.map(([k,l,i])=>k==="add"?`<button type="button" class="cap" id="fab" aria-label="Add something" aria-expanded="false" aria-controls="fab-menu">${ic(i)}</button>`:`<button data-tab="${k}">${ic(i)}<span>${l}</span>${k==="build"?'<i class="dot" id="tdot" hidden></i>':""}</button>`).join("");
 $("#today").textContent=new Date().toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long"});
 $("#fab-menu").innerHTML=[["photo","camera","Add photo"],["cost","cash","Add expense"],["pay","users","Record payment"],["task","clip","Add task"],["mat","truck","Add material"],["issue","alert","Report issue"]].map(([k,i,l])=>`<button class="fab-item" data-fab="${k}"><span class="fi">${ic(i)}</span><span class="fl">${l}</span></button>`).join("");
@@ -728,7 +746,7 @@ document.querySelectorAll("[data-fab]").forEach(b=>b.onclick=()=>{setFab(false);
 addEventListener("keydown",e=>{if(e.key==="Escape"){if(closeSheet)closeSheet();else if($("#fab").getAttribute("aria-expanded")==="true"){setFab(false);$("#fab").focus()}}});
 const reduced=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
 const buzz=n=>{try{navigator.vibrate?.(n)}catch{}};
-function go(t){closePop();reorderMode=false;if(role==="builder"&&t==="money")t="build";if(t==="money"&&!moneyOK){moneyGate(()=>go("money"));return}const doIt=()=>{tab=t;countAnim=true;const v=$("#view");v.classList.add("enter");setTimeout(()=>v.classList.remove("enter"),700);render();scrollTo(0,0);$("#view").focus({preventScroll:true})};if(document.startViewTransition&&!reduced())document.startViewTransition(doIt);else doIt()}
+function go(t){closePop();if(fullPlan){fullPlan=false;document.body.classList.remove("lock")}reorderMode=false;if(role==="builder"&&t==="money")t="build";if(t==="money"&&!moneyOK){moneyGate(()=>go("money"));return}const doIt=()=>{tab=t;countAnim=true;const v=$("#view");v.classList.add("enter");setTimeout(()=>v.classList.remove("enter"),700);render();scrollTo(0,0);$("#view").focus({preventScroll:true})};if(document.startViewTransition&&!reduced())document.startViewTransition(doIt);else doIt()}
 addEventListener("scroll",()=>$("header.top")?.classList.toggle("scrolled",scrollY>8),{passive:true});
 let countAnim=false;
 function countUp(root){if(reduced()||!countAnim)return;countAnim=false;root.querySelectorAll("[data-count]").forEach(el=>{const to=+el.dataset.count;if(!to)return;const t0=performance.now();const f=now=>{const k=Math.min(1,(now-t0)/700),e=1-Math.pow(1-k,3);el.textContent=Math.round(to*e)+"%";if(k<1)requestAnimationFrame(f)};requestAnimationFrame(f)})}
@@ -794,17 +812,17 @@ function render(){
   if(tab==="money"&&!moneyOK)tab="build";
   document.querySelectorAll("nav.tabs button").forEach(b=>b.dataset.tab===navTab(tab)?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
   $("#pname").textContent=S.settings.name||"Newberry Build";
-  document.title=`${({build:"Build",home:"Overview",money:"Money",more:"More",phase:"Phase",mats:"Materials",site:"Site log"})[tab]} · Newberry Build 2`;
+  document.title=`${({build:"Build",home:"Overview",money:"Money",more:"More",phase:"Phase",plans:"Plans",mats:"Materials",site:"Site log"})[tab]} · Newberry Build 2`;
   $("#tdot").hidden=!S.tasks.some(t=>t.status==="stuck");
-  const v=$("#view");v.innerHTML=({build:buildV,home,phase:phaseV,money:moneyV,mats:matsV,site:siteV,more})[tab]();
+  const v=$("#view");v.innerHTML=({build:buildV,home,phase:phaseV,plans:plansV,money:moneyV,mats:matsV,site:siteV,more})[tab]();
   compactRows(v);
   v.querySelectorAll("[data-act]").forEach(el=>el.addEventListener("click",()=>act(el.dataset.act,el.dataset.id,el)));
   v.querySelectorAll("[data-go]").forEach(el=>el.addEventListener("click",()=>{if(el._lp){el._lp=false;return}const[t,f]=el.dataset.go.split(":");if(t==="phase"&&f)curPh=f;if(t==="site"&&f)logSub=f;if(t==="mats"&&f)matF=f;go(t)}));
   v.querySelectorAll("[data-rf]").forEach(el=>el.addEventListener("click",()=>{roomF=el.dataset.rf;render()}));
   v.querySelectorAll("details.gd").forEach(d=>d.addEventListener("toggle",()=>{if(openPh===null)openPh=new Set(curPhases());d.open?openPh.add(d.dataset.ph):openPh.delete(d.dataset.ph)}));
-  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;render()}));
+  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;if(k==="plan"){planSel=val;PV.plan=""}render()}));
   v.querySelectorAll("li.tap").forEach(el=>{el.setAttribute("role","button");el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click()}})});
-  hydrate(v);hydrateBg(v);countUp(v);
+  hydrate(v);hydrateBg(v);countUp(v);if(tab==="plans")initPlanView();
   v.querySelectorAll("svg.chart").forEach(wireChart);v.querySelectorAll(".phero").forEach(h=>swipeHoriz(h,phaseStep));
   if(role!=="funder"){v.querySelectorAll(".ptile").forEach(tl=>longPress(tl,()=>tileMenu(tl)));v.querySelectorAll(".list li").forEach(li=>{const bs=[...li.querySelectorAll('[data-act="cyc"]')];if(bs.length)swipeRow(li,()=>cycMany(bs.map(b=>b.dataset.id)))})}
   setSync(syncState);
@@ -861,9 +879,9 @@ function actsSheet(){sheet("Activity",`<ul class="list">${actList(50).map(actRow
 
 /* ---------- site-day speed ---------- */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
-function quickPhoto(ph,kind){
+function quickPhoto(ph,kind,pin){
   const i=document.createElement("input");i.type="file";i.accept="image/*";i.multiple=true;i.setAttribute("capture","environment");i.style.display="none";document.body.append(i);
-  i.addEventListener("change",()=>{const f=[...i.files];i.remove();if(f.length)logSheet(null,kind||"update",ph,f)});
+  i.addEventListener("change",()=>{const f=[...i.files];i.remove();if(f.length)logSheet(null,kind||"update",ph,f,pin)});
   i.addEventListener("cancel",()=>i.remove());i.click();
 }
 function cycMany(ids){
@@ -1013,7 +1031,7 @@ function buildV(){
   <div class="ptiles" role="list">${tiles}</div>
   <div class="eyebrow" style="margin:20px 2px 10px">Recently posted</div>
   ${rec.length?`<div class="rps">${rec.map(l=>`<button type="button" class="rp" data-go="site"><span class="rpi">${l.media?.length?`<span data-m="${l.media[0]}" style="position:absolute;inset:0"></span>`:ic(l.kind==="issue"?"alert":"note","lg")}</span><span class="rpt"><b style="color:${PCOL[l.phase]||"var(--accent)"}">${esc(l.phase&&PSHORT[l.phase]?PSHORT[l.phase]:"Site")}</b><span>${esc(l.text?l.text.slice(0,48):l.kind==="issue"?"Issue reported":"Added a photo")}</span><small>${dlabel(l.date)}</small></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:0 2px">Photos and notes you add will show up here.</p>`}
-  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials and stock</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button></div>`;
+  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials and stock</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="plans" style="grid-column:1/-1">${ic("map")}<span>Plans and pins</span>${S.plans.length?`<small class="muted">${S.plans.length} plan${S.plans.length===1?"":"s"}</small>`:""}</button></div>`;
 }
 function phaseV(){
   const id=curPh,p=phase(id);if(!p){tab="build";return buildV()}
@@ -1104,7 +1122,7 @@ function matsV(){
 }
 function siteV(){
   const logs=S.logs.filter(l=>logSub==="issues"?l.kind==="issue"&&!l.fixed:true).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||b.id.localeCompare(a.id));
-  const card=l=>`<li><div class="tl-card ${l.kind==="issue"?"issue":""} ${l.fixed?"fixed":""}"><div class="meta"><b>${dlabel(l.date)}</b>${l.kind==="issue"?`<span class="pill ${l.fixed?"":"unwell"}">${l.fixed?ic("check","sm")+"Fixed":ic("alert","sm")+"Issue"}</span>`:""}<span class="pill sky">${esc(roomName(l.room))}</span>${l.phase&&phase(l.phase)?`<span class="pill type">${esc(phaseName(l.phase))}</span>`:""}</div>
+  const card=l=>`<li><div class="tl-card ${l.kind==="issue"?"issue":""} ${l.fixed?"fixed":""}"><div class="meta"><b>${dlabel(l.date)}</b>${l.kind==="issue"?`<span class="pill ${l.fixed?"":"unwell"}">${l.fixed?ic("check","sm")+"Fixed":ic("alert","sm")+"Issue"}</span>`:""}<span class="pill sky">${esc(roomName(l.room))}</span>${l.pin?`<span class="pill gone">${ic("pin","sm")}On plan</span>`:""}${l.phase&&phase(l.phase)?`<span class="pill type">${esc(phaseName(l.phase))}</span>`:""}</div>
    ${l.text?`<p>${esc(l.text)}</p>`:""}
    ${l.media?.length?`<div class="mg n${Math.min(l.media.length,4)}">${l.media.slice(0,4).map((m,i)=>`<button type="button" class="mtile" data-act="lb" data-id="${l.id}|${i}" aria-label="Open photo ${i+1}"><span data-m="${m}" style="position:absolute;inset:0"></span>${i===3&&l.media.length>4?`<span class="more">+${l.media.length-4}</span>`:""}</button>`).join("")}</div>`:""}
    <div class="row wr" style="gap:8px">${l.kind==="issue"&&!l.fixed?`<button class="btn small good" data-act="fix" data-id="${l.id}">${ic("check")}Mark fixed</button>`:""}${l.who?`<span class="small muted grow">${esc(l.who)}</span>`:`<span class="grow"></span>`}${rowBtns("log","entry",l.id).replace(/class="btn small"/,'class="btn small"')}</div></div></li>`;
@@ -1116,6 +1134,7 @@ function more(){
   const s=S.settings,row=(i,t,sub,act)=>`<li class="tap" tabindex="0" data-act="${act}"><span class="row-ic">${ic(i)}</span><div class="grow"><div class="lt">${t}</div><div class="ls">${sub}</div></div>${ic("chev")}</li>`;
   return `<div class="page-h"><h2>More</h2></div>
   <div class="card"><ul class="list">
+   ${row("map","Plans and pins","Drop pins for issues and photos on the floor plan","goplans")}
    ${row("truck","Materials and stock","Stock, fittings, electrical, sundries and suppliers","gomats")}
    ${row("camera","Site log and issues","Photos, notes and things to fix","gosite")}
    ${row("clock","Activity","Who did what, and when","acts")}
@@ -1138,7 +1157,7 @@ function more(){
 /* ---------- actions ---------- */
 function act(a,id,el){
   closePop();
-  if(role==="funder"&&!["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney"].includes(a)){toast("This is a view-only copy.");return}
+  if(role==="funder"&&!["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","pinopen","plzin","plzout","plfit","plfull"].includes(a)){toast("This is a view-only copy.");return}
   if(role==="builder"&&["addcost","editcost","delcost","budget","addpay","editpay","delpay","recpay","paypay","paycost","contract","typicalpay","weekly","resetpays","payall","report"].includes(a)){toast("Money is hidden for builders.");return}
   ({
    cyc:()=>cycTask(id),opentask:()=>taskSheet(...id.split("|")),edittask:()=>taskSheet(...id.split("|")),
@@ -1154,7 +1173,7 @@ function act(a,id,el){
    addphoto:()=>quickPhoto(id&&phase(id)?id:undefined),addissue:()=>logSheet(null,"issue"),editlog:()=>logSheet(id),dellog:()=>delRecs(S.logs,l=>l.id===id,"Entry"),
    fix:()=>{const l=S.logs.find(x=>x.id===id),u=undoEdit(l,{fixed:true});logAct("Marked an issue as fixed");save();render();toast("Issue marked fixed.",u)},
    lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
-   refresh:()=>refreshApp(),reorder:()=>{reorderMode=!reorderMode;render()},mvup:()=>moveKey(curPh,id,-1),mvdn:()=>moveKey(curPh,id,1),phstep:()=>phaseStep(+id),report:()=>reportSheet(),acts:()=>actsSheet(),phba:()=>baSheet(id),outdoor:()=>{outdoor=!outdoor;try{localStorage.setItem("build2-outdoor",outdoor?"1":"0")}catch{}applyOutdoor();render()},share:()=>shareSheet(),project:()=>projectSheet(),whoami:()=>whoSheet(),
+   refresh:()=>refreshApp(),addplan:()=>planAddSheet(),plopts:()=>planOptsSheet(),plzin:()=>zoomCenter(1.4),plzout:()=>zoomCenter(1/1.4),plfit:()=>fitView(),plfull:()=>{fullPlan=!fullPlan;PV.plan="";document.body.classList.toggle("lock",fullPlan);render()},pinmode:()=>{if(movingPin)movingPin="";else pinMode=!pinMode;render()},pinopen:()=>pinSheet(id),goplans:()=>go("plans"),reorder:()=>{reorderMode=!reorderMode;render()},mvup:()=>moveKey(curPh,id,-1),mvdn:()=>moveKey(curPh,id,1),phstep:()=>phaseStep(+id),report:()=>reportSheet(),acts:()=>actsSheet(),phba:()=>baSheet(id),outdoor:()=>{outdoor=!outdoor;try{localStorage.setItem("build2-outdoor",outdoor?"1":"0")}catch{}applyOutdoor();render()},share:()=>shareSheet(),project:()=>projectSheet(),whoami:()=>whoSheet(),
    theme:()=>{if(id==="auto"){document.documentElement.removeAttribute("data-theme");try{localStorage.setItem("build2-theme","auto")}catch{}}else{document.documentElement.setAttribute("data-theme",id);try{localStorage.setItem("build2-theme",id)}catch{}}paintTheme();render()},
    export:()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`newberry-build-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")},
    import:()=>{const f=$("#impf");f.onchange=async()=>{try{const d=JSON.parse(await f.files[0].text());if(!Array.isArray(d.tasks))throw 0;confirmSheet("Restore this backup?","This replaces the project on this phone with the backup.","Restore",()=>{S={...DEF(),...d};save();render();toast("Backup restored.")})}catch{toast("That file is not a Newberry Build backup.")}f.value=""};f.click()},
@@ -1376,7 +1395,7 @@ function supSheet(id){
       if(s){const u=undoEdit(s,vals);save();close();render();toast("Contact saved.",u)}else{const n={id:uid(),...vals};S.sups.push(n);save();close();render();toast("Contact added.",()=>S.sups.splice(S.sups.indexOf(n),1))}};
   });
 }
-function logSheet(id,kind,ph,files){
+function logSheet(id,kind,ph,files,pin){
   const l=id?S.logs.find(x=>x.id===id):null,st={kind:l?.kind||kind||"update",room:l?.room||"both",phase:l?.phase||ph||""};
   let keep=[...(l?.media||[])],add=(files||[]).map(f=>({file:f,url:URL.createObjectURL(f)}));
   sheet(l?"Edit entry":st.kind==="issue"?"Report an issue":"Add to site log",`<form id="f" novalidate>
@@ -1412,7 +1431,7 @@ function logSheet(id,kind,ph,files){
       for(const a of add){const blob=await prepPhoto(a.file,PSIZES[psize][1]),mid=uid();await mPut(mid,blob);queueMedia(mid);ids.push(mid)}
       add.forEach(a=>URL.revokeObjectURL(a.url));
       const vals={kind:st.kind,room:st.room,phase:sh.querySelector("#ph").value,text:tx,date:sh.querySelector("#dt").value||today(),media:ids,who:l?.who||me,fixed:st.kind==="issue"?!!l?.fixed:false};
-      if(l){const u=undoEdit(l,vals);save();close();render();toast("Entry saved.",u)}else{const n={id:uid(),...vals};S.logs.push(n);logAct(st.kind==="issue"?"Reported an issue"+(n.phase&&PSHORT[n.phase]?" in "+PSHORT[n.phase]:""):`Added ${ids.length?(ids.length===1?"a photo":ids.length+" photos"):"a note"}${n.phase&&PSHORT[n.phase]?" to "+PSHORT[n.phase]:""}`);save();close();render();toast(st.kind==="issue"?"Issue reported.":"Added to the site log.",()=>S.logs.splice(S.logs.indexOf(n),1))}};
+      if(l){const u=undoEdit(l,vals);save();close();render();toast("Entry saved.",u)}else{const n={id:uid(),...vals,...(pin?{pin}:{})};S.logs.push(n);logAct(st.kind==="issue"?"Reported an issue"+(n.phase&&PSHORT[n.phase]?" in "+PSHORT[n.phase]:""):`Added ${ids.length?(ids.length===1?"a photo":ids.length+" photos"):"a note"}${n.phase&&PSHORT[n.phase]?" to "+PSHORT[n.phase]:""}`);save();close();render();toast(st.kind==="issue"?"Issue reported.":"Added to the site log.",()=>S.logs.splice(S.logs.indexOf(n),1))}};
   });
 }
 function lightbox(ids,start){
@@ -1456,7 +1475,7 @@ function reportTextFull(){
 /* ---------- sharing and sync (Supabase, one secret project code, newest change wins) ---------- */
 const SB_URL="https://oikwudpqmbnssttatlhc.supabase.co",SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pa3d1ZHBxbWJuc3N0dGF0bGhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTMzODEsImV4cCI6MjA5NTY4OTM4MX0.p6I9qlvre5TjF3qOVjAIBus3_PNrbvCF2cMXHe3uiXw";
 let sb=null,syncState="off",syncedAt=null,pulling=false,pushing=false,lastErr="";
-const COLS=["tasks","costs","mats","sups","logs","pays","acts"];
+const COLS=["tasks","costs","mats","sups","logs","pays","acts","plans"];
 const canon=v=>Array.isArray(v)?"["+v.map(canon).join(",")+"]":v&&typeof v==="object"?"{"+Object.keys(v).filter(k=>v[k]!==undefined).sort().map(k=>JSON.stringify(k)+":"+canon(v[k])).join(",")+"}":JSON.stringify(v);
 const hashOf=r=>{const s=canon(r);let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return h+":"+s.length};
 function recMap(){const m=new Map();COLS.forEach(k=>S[k].forEach(r=>m.set(k+"|"+r.id,{r})));m.set("settings|main",{r:S.settings});return m}
@@ -1778,6 +1797,135 @@ function reorderToolbar(id,keys){
   if(keys.length<2)return"";
   return '<div class="row between" style="margin-bottom:6px;min-height:44px"><span class="eyebrow">'+(reorderMode?"Use the arrows to move tasks":"Tasks")+'</span><button type="button" class="btn small '+(reorderMode?"primary":"")+'" data-act="reorder">'+(reorderMode?"Done":ic("sliders","sm")+"Reorder")+'</button></div>';
 }
+/* ---------- plans with pins ---------- */
+let planSel="",pinMode=false,movingPin="",fullPlan=false;
+const PV={plan:"",z:1,tx:0,ty:0,nw:0,nh:0,fit:1};
+const planOf=id=>S.plans.find(p=>p.id===id);
+const pinsOf=pid=>S.logs.filter(l=>l.pin&&l.pin.p===pid).sort((a,b)=>((a.pin.t||0)-(b.pin.t||0))||(a.date||"").localeCompare(b.date||"")||a.id.localeCompare(b.id));
+const pinCls=l=>l.kind==="issue"?(l.fixed?"green":"red"):"blue";
+const pinWord=l=>l.kind==="issue"?(l.fixed?"Fixed":"Issue"):"Update";
+function plansV(){
+  const head=`<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Plans</h2></div><button class="btn primary" data-act="addplan">${ic("plus")}Add plan</button></div>`;
+  if(!S.plans.length)return head+empty("map","No plans yet","Add the floor plan as a picture or a PDF. Then you can drop pins on it where an issue or a photo belongs.",`<button class="btn primary" data-act="addplan">${ic("plus")}Add the floor plan</button>`);
+  const p=planOf(planSel)||S.plans[0];planSel=p.id;
+  const pins=pinsOf(p.id);
+  return head+`${S.plans.length>1?`<div class="chips scroll" role="group" aria-label="Choose a plan" style="margin-bottom:10px">${S.plans.map(x=>`<button type="button" class="chip" data-sub="plan:${x.id}" aria-pressed="${x.id===p.id}">${esc(x.name)}</button>`).join("")}</div>`:""}
+  <div class="plw ${fullPlan?"full":""}">${pinMode||movingPin?`<div class="note-card">${ic("pin")}<span><b>${movingPin?"Tap the new spot for this pin.":"Tap the plan where it belongs."}</b> <button type="button" class="linkbtn" data-act="pinmode" style="padding:0;min-height:32px">Cancel</button></span></div>`:""}
+  <div class="plv ${pinMode||movingPin?"pm":""}" id="plv" role="group" aria-label="${esc(p.name)}. Drag to move, pinch or use the buttons to zoom."><div class="plc" id="plc"><img id="plimg" alt="${esc(p.name)}">${pins.map((l,i)=>`<button type="button" class="pin ${pinCls(l)}" data-act="pinopen" data-id="${l.id}" data-x="${l.pin.x}" data-y="${l.pin.y}" aria-label="Pin ${i+1}: ${pinWord(l)}${l.text?", "+esc(l.text.slice(0,40)):""}">${i+1}</button>`).join("")}</div></div>
+  <div class="pltools"><button type="button" class="btn small icon" data-act="plzout" aria-label="Zoom out">${ic("minus")}</button><button type="button" class="btn small icon" data-act="plzin" aria-label="Zoom in">${ic("plus")}</button><button type="button" class="btn small" data-act="plfit">Fit</button><button type="button" class="btn small icon" data-act="plfull" aria-label="${fullPlan?"Exit full screen":"Full screen"}">${ic(fullPlan?"x":"expand","sm")}</button><button type="button" class="btn small icon" data-act="plopts" aria-label="Plan options: rename or delete">${ic("sliders","sm")}</button><button type="button" class="btn primary" data-act="pinmode" aria-pressed="${pinMode}" style="flex:1 1 100%">${ic("pin","sm")}Add pin</button></div></div>
+  <div class="card"><div class="row between"><h2 style="margin:0">Pins</h2><span class="small muted">${pins.filter(l=>l.kind==="issue"&&!l.fixed).length} open issue${pins.filter(l=>l.kind==="issue"&&!l.fixed).length===1?"":"s"}</span></div>
+  ${pins.length?`<ul class="list">${pins.map((l,i)=>`<li class="tap" tabindex="0" data-act="pinopen" data-id="${l.id}"><span class="pinb ${pinCls(l)}">${i+1}</span><div class="grow"><div class="lt">${esc(l.text?l.text.slice(0,70):l.kind==="issue"?"Issue":"Photo")}</div><div class="ls">${pinWord(l)} · ${dlabel(l.date)}${l.phase&&PSHORT[l.phase]?" · "+esc(PSHORT[l.phase]):""}</div></div>${ic("chev")}</li>`).join("")}</ul>`:`<p class="muted small" style="margin:10px 0 0">No pins yet. Tap <b>Add pin</b>, then tap the plan.</p>`}</div>`;
+}
+function applyView(){const c=$("#plc");if(!c)return;c.style.transform=`translate(${PV.tx}px,${PV.ty}px) scale(${PV.z})`;c.style.setProperty("--z",PV.z)}
+function fitView(){const v=$("#plv");if(!v||!PV.nw)return;const z=Math.min(v.clientWidth/PV.nw,v.clientHeight/PV.nh);PV.fit=z;PV.z=z;PV.tx=(v.clientWidth-PV.nw*z)/2;PV.ty=(v.clientHeight-PV.nh*z)/2;applyView()}
+function clampView(){const v=$("#plv");if(!v)return;const m=80;PV.tx=Math.min(v.clientWidth-m,Math.max(m-PV.nw*PV.z,PV.tx));PV.ty=Math.min(v.clientHeight-m,Math.max(m-PV.nh*PV.z,PV.ty))}
+function zoomAt(cx,cy,f){const z2=Math.max(PV.fit*.9,Math.min(PV.fit*10,PV.z*f)),k=z2/PV.z;PV.tx=cx-(cx-PV.tx)*k;PV.ty=cy-(cy-PV.ty)*k;PV.z=z2;clampView();applyView()}
+function zoomCenter(f){const v=$("#plv");if(v)zoomAt(v.clientWidth/2,v.clientHeight/2,f)}
+async function initPlanView(){
+  const plv=$("#plv");if(!plv)return;const p=planOf(planSel);if(!p)return;
+  const img=$("#plimg"),plc=$("#plc"),u=await mUrl(p.media);
+  if(!u){plv.insertAdjacentHTML("beforeend",'<div class="mmiss" style="position:absolute;inset:0">'+ic("cloud","xl")+'<span>The plan is still loading from your team.</span></div>');return}
+  await new Promise(r=>{img.onload=r;img.onerror=r;img.src=u});
+  if(!plv.isConnected)return;
+  PV.nw=img.naturalWidth||p.w||1000;PV.nh=img.naturalHeight||p.h||700;
+  plv.style.height=fullPlan?"":Math.min(innerHeight*.64,Math.max(260,plv.clientWidth*PV.nh/PV.nw+28))+"px";
+  img.style.width=PV.nw+"px";img.style.height=PV.nh+"px";plc.style.width=PV.nw+"px";plc.style.height=PV.nh+"px";
+  plc.querySelectorAll(".pin").forEach(b=>{b.style.left=(+b.dataset.x*PV.nw)+"px";b.style.top=(+b.dataset.y*PV.nh)+"px"});
+  const keep=PV.plan===p.id&&PV.fit>0&&PV.z>0&&PV.nw>0&&PV.had;
+  if(!keep){PV.plan=p.id;PV.had=true;fitView()}else{PV.fit=Math.min(plv.clientWidth/PV.nw,plv.clientHeight/PV.nh);applyView()}
+  const ptrs=new Map();let st=null,moved=false,t0=0;
+  const mid=()=>{const a=[...ptrs.values()],r=plv.getBoundingClientRect();return{x:(a[0].x+a[1].x)/2-r.left,y:(a[0].y+a[1].y)/2-r.top,d:Math.hypot(a[0].x-a[1].x,a[0].y-a[1].y)}};
+  plv.addEventListener("pointerdown",e=>{
+    if(e.target.closest(".pin"))return;
+    plc.querySelector(".pin.ghost")?.remove();
+    try{plv.setPointerCapture(e.pointerId)}catch{}
+    ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});moved=false;t0=Date.now();
+    if(ptrs.size===1)st={tx:PV.tx,ty:PV.ty,x:e.clientX,y:e.clientY};
+    else if(ptrs.size===2){const m=mid();st={z:PV.z,tx:PV.tx,ty:PV.ty,d:m.d||1,mx:m.x,my:m.y};moved=true}
+  });
+  plv.addEventListener("pointermove",e=>{
+    if(!ptrs.has(e.pointerId))return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
+    if(ptrs.size===1&&st){const dx=e.clientX-st.x,dy=e.clientY-st.y;if(Math.abs(dx)+Math.abs(dy)>7)moved=true;if(moved){PV.tx=st.tx+dx;PV.ty=st.ty+dy;clampView();applyView()}}
+    else if(ptrs.size===2&&st){const m=mid(),z2=Math.max(PV.fit*.9,Math.min(PV.fit*10,st.z*m.d/st.d)),px=(st.mx-st.tx)/st.z,py=(st.my-st.ty)/st.z;PV.z=z2;PV.tx=m.x-px*z2;PV.ty=m.y-py*z2;clampView();applyView()}
+  });
+  const up=e=>{
+    if(!ptrs.has(e.pointerId))return;const was=ptrs.size;ptrs.delete(e.pointerId);
+    if(was===1&&!moved&&Date.now()-t0<600&&(pinMode||movingPin))placePoint(e.clientX,e.clientY);
+    if(ptrs.size===1){const r=[...ptrs.values()][0];st={tx:PV.tx,ty:PV.ty,x:r.x,y:r.y};moved=true}else if(!ptrs.size)st=null;
+  };
+  plv.addEventListener("pointerup",up);plv.addEventListener("pointercancel",up);
+  plv.addEventListener("wheel",e=>{e.preventDefault();const r=plv.getBoundingClientRect();zoomAt(e.clientX-r.left,e.clientY-r.top,e.deltaY<0?1.18:1/1.18)},{passive:false});
+}
+function placePoint(cx,cy){
+  const v=$("#plv"),r=v.getBoundingClientRect(),x=((cx-r.left)-PV.tx)/PV.z/PV.nw,y=((cy-r.top)-PV.ty)/PV.z/PV.nh;
+  if(x<0||x>1||y<0||y>1){toast("Tap inside the plan.");return}
+  const pin={p:planSel,x:Math.round(x*1e4)/1e4,y:Math.round(y*1e4)/1e4,t:Date.now()};
+  if(movingPin){const l=S.logs.find(q=>q.id===movingPin);movingPin="";if(l){const old=l.pin;pin.t=old.t||pin.t;l.pin=pin;save();render();toast("Pin moved.",()=>{l.pin=old})}return}
+  const g=document.createElement("span");g.className="pin ghost";g.style.left=(pin.x*PV.nw)+"px";g.style.top=(pin.y*PV.nh)+"px";g.textContent="+";$("#plc").append(g);
+  closePop();
+  const pop=document.createElement("div");pop.className="pop";pop.setAttribute("role","menu");
+  pop.innerHTML=`<button type="button" role="menuitem" data-m="issue">${ic("alert")}Report an issue here</button><button type="button" role="menuitem" data-m="photo">${ic("camera")}Add a photo here</button><button type="button" role="menuitem" data-m="note">${ic("note")}Add a note here</button><button type="button" role="menuitem" data-m="x">${ic("x")}Cancel</button>`;
+  document.body.append(pop);const w=pop.offsetWidth,h=pop.offsetHeight;
+  pop.style.left=Math.max(8,Math.min(innerWidth-w-8,cx-w/2))+"px";pop.style.top=(cy+14+h>innerHeight-8?Math.max(8,cy-14-h):cy+14)+"px";
+  pop.querySelectorAll("button").forEach(b=>b.onclick=()=>{closePop();pinMode=false;g.remove();
+    ({issue:()=>logSheet(null,"issue",undefined,null,pin),photo:()=>quickPhoto(undefined,"update",pin),note:()=>logSheet(null,"update",undefined,null,pin),x:()=>render()})[b.dataset.m]()});
+  document.addEventListener("pointerdown",popOutside,true);document.addEventListener("keydown",popKey,true);pop.querySelector("button").focus();
+}
+function pinSheet(id){
+  const l=S.logs.find(x=>x.id===id);if(!l||!l.pin)return;
+  const n=pinsOf(l.pin.p).findIndex(x=>x.id===id)+1;
+  sheet(`Pin ${n}`,`<div class="row wr" style="gap:8px;margin:8px 0 12px"><span class="pill ${l.kind==="issue"?(l.fixed?"":"unwell"):"sky"}">${l.kind==="issue"&&!l.fixed?ic("alert","sm"):""}${pinWord(l)}</span>${l.phase&&PSHORT[l.phase]?`<span class="pill type">${esc(PSHORT[l.phase])}</span>`:""}<span class="pill gone">${dlabel(l.date)}</span>${l.who?`<span class="small muted">${esc(l.who)}</span>`:""}</div>
+  ${l.text?`<p style="white-space:pre-line;margin:0 0 12px">${esc(l.text)}</p>`:""}
+  ${l.media?.length?`<div class="mg n${Math.min(l.media.length,4)}">${l.media.slice(0,4).map((m,i)=>`<button type="button" class="mtile" data-pm="${i}" aria-label="Open photo ${i+1}"><span data-m="${m}" style="position:absolute;inset:0"></span>${i===3&&l.media.length>4?`<span class="more">+${l.media.length-4}</span>`:""}</button>`).join("")}</div>`:""}
+  <div class="tasks">${l.kind==="issue"&&!l.fixed?`<button type="button" class="btn good block" id="pf">${ic("check")}Mark as fixed</button>`:""}<button type="button" class="btn block" id="pe">${ic("pencil")}Edit</button><button type="button" class="btn block" id="pm">${ic("pin")}Move this pin</button><button type="button" class="btn block danger" id="pd">${ic("trash")}Delete</button></div>`,(sh,close)=>{
+    hydrate(sh);
+    sh.querySelectorAll("[data-pm]").forEach(b=>b.onclick=()=>lightbox(l.media,+b.dataset.pm));
+    const ro=role==="funder";["pf","pe","pm","pd"].forEach(k=>{const e=sh.querySelector("#"+k);if(e&&ro)e.hidden=true});
+    sh.querySelector("#pf")&&(sh.querySelector("#pf").onclick=()=>{close();act("fix",id)});
+    sh.querySelector("#pe").onclick=()=>{close();logSheet(id)};
+    sh.querySelector("#pm").onclick=()=>{close();movingPin=id;pinMode=false;render();toast("Tap the new spot on the plan.")};
+    sh.querySelector("#pd").onclick=()=>{close();delRecs(S.logs,x=>x.id===id,"Pin")};
+  });
+}
+function wirePdf(){return new Promise((res,rej)=>{if(window.pdfjsLib)return res(window.pdfjsLib);const s=document.createElement("script");s.src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js";s.onload=()=>{try{window.pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js";res(window.pdfjsLib)}catch(e){rej(e)}};s.onerror=()=>rej(new Error("offline"));document.head.append(s)})}
+async function pdfPage(pdf,n,maxW){const pg=await pdf.getPage(n),v1=pg.getViewport({scale:1}),sc=maxW/v1.width,vp=pg.getViewport({scale:sc}),c=document.createElement("canvas");c.width=Math.round(vp.width);c.height=Math.round(vp.height);const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);await pg.render({canvasContext:x,viewport:vp}).promise;return new Promise(r=>c.toBlob(r,"image/jpeg",.88))}
+function planAddSheet(){
+  let file=null,pdf=null,page=1,pages=1,busy=false;
+  sheet("Add a plan",`<form id="f" novalidate><p class="muted" style="margin:6px 0 0">Add a floor plan, roof plan or site drawing as a picture or a PDF. You can then drop pins on it.</p>
+  <label class="f" for="pn">Name</label><input id="pn" class="t" maxlength="40" value="${S.plans.length?"":"Floor plan"}" placeholder="For example: Floor plan">
+  <div class="photo-add"><button type="button" class="btn" id="pf2">${ic("upload")}Choose file</button><button type="button" class="btn" id="pc2">${ic("camera")}Take photo</button></div>
+  <input type="file" id="fi" accept="image/*,application/pdf" hidden><input type="file" id="fc" accept="image/*" capture="environment" hidden>
+  <div id="pgbox" hidden style="margin-top:12px"><label class="f" style="margin-top:0">PDF page</label><div class="stepper"><button type="button" data-st="-1" aria-label="Previous page">${ic("minus")}</button><input id="pg" inputmode="numeric" value="1" aria-label="Page number"><button type="button" data-st="1" aria-label="Next page">${ic("plus")}</button></div><p class="hint" id="pgn"></p></div>
+  <div class="cardprev" id="pvw" hidden style="margin-top:12px"></div><p class="hint" id="pst"></p>
+  <div class="foot"><button class="btn primary block" id="go" disabled>Add plan</button></div></form>`,(sh,close)=>{
+    const st=t=>sh.querySelector("#pst").textContent=t,go=sh.querySelector("#go"),pv=sh.querySelector("#pvw");
+    const showPrev=async()=>{if(!file)return;busy=true;go.disabled=true;st("Preparing preview…");try{let b;if(pdf)b=await pdfPage(pdf,page,700);else b=file;const u=URL.createObjectURL(b);pv.hidden=false;pv.innerHTML=`<img src="${u}" alt="Preview">`;st("");go.disabled=false}catch(e){st("Could not read that file. Try a picture of the plan instead.")}busy=false};
+    const take=async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;file=f;pdf=null;sh.querySelector("#pgbox").hidden=true;
+      if(f.type==="application/pdf"||/\.pdf$/i.test(f.name)){st("Opening the PDF…");try{const lib=await wirePdf();pdf=await lib.getDocument({data:await f.arrayBuffer()}).promise;pages=pdf.numPages;page=1;sh.querySelector("#pg").value=1;sh.querySelector("#pgn").textContent=pages+" page"+(pages===1?"":"s")+" in this PDF. Pick the page with the plan.";sh.querySelector("#pgbox").hidden=pages<2}catch{file=null;st("The PDF needs an internet connection to open the first time. Connect, or add a picture of the plan.");return}}
+      if(!sh.querySelector("#pn").value.trim())sh.querySelector("#pn").value=f.name.replace(/\.[^.]+$/,"").slice(0,40);
+      showPrev()};
+    sh.querySelector("#fi").onchange=take;sh.querySelector("#fc").onchange=take;
+    sh.querySelector("#pf2").onclick=()=>sh.querySelector("#fi").click();sh.querySelector("#pc2").onclick=()=>sh.querySelector("#fc").click();
+    const setPage=n=>{page=Math.max(1,Math.min(pages,n));sh.querySelector("#pg").value=page;showPrev()};
+    sh.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>setPage(page+ +b.dataset.st));sh.querySelector("#pg").onchange=e=>setPage(parseInt(e.target.value)||1);
+    sh.querySelector("#f").onsubmit=async e=>{e.preventDefault();if(!file||busy)return;const nm=sh.querySelector("#pn");if(!nm.value.trim())return showErr(sh,nm,"Give the plan a name.");
+      go.disabled=true;go.textContent="Saving…";
+      try{const blob=pdf?await pdfPage(pdf,page,2000):await prepPhoto(file,2400),bm=await createImageBitmap(blob),id=uid(),mid="pl"+uid();
+        await mPut(mid,blob);queueMedia(mid);const plan={id,name:nm.value.trim(),media:mid,w:bm.width,h:bm.height};bm.close?.();
+        S.plans.push(plan);planSel=id;PV.plan="";logAct("Added the plan: "+plan.name);save();close();tab="plans";render();toast("Plan added. Tap Add pin to drop a pin on it.")}
+      catch(err){go.disabled=false;go.textContent="Add plan";st("Could not save that file. Try a smaller picture.")}};
+  });
+}
+function planOptsSheet(){
+  const p=planOf(planSel);if(!p)return;
+  sheet("Plan options",`<form id="f" novalidate><label class="f" for="pn">Name</label><input id="pn" data-autofocus class="t" maxlength="40" value="${esc(p.name)}">
+  <button type="button" class="btn block danger" id="pdl" style="margin-top:16px">${ic("trash")}Delete this plan</button><p class="hint">Deleting a plan keeps its issues and photos in the site log. They just lose their pin.</p>
+  <div class="foot"><button class="btn primary block">Save name</button></div></form>`,(sh,close)=>{
+    sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const nm=sh.querySelector("#pn");if(!nm.value.trim())return showErr(sh,nm,"Give the plan a name.");const u=undoEdit(p,{name:nm.value.trim()});save();close();render();toast("Plan renamed.",u)};
+    sh.querySelector("#pdl").onclick=()=>{close();const idx=S.plans.indexOf(p),pins=S.logs.filter(l=>l.pin&&l.pin.p===p.id).map(l=>[l,l.pin]);S.plans.splice(idx,1);pins.forEach(([l])=>{delete l.pin});planSel="";save();render();toast("Plan deleted.",()=>{S.plans.splice(idx,0,p);pins.forEach(([l,pn])=>{l.pin=pn});planSel=p.id})};
+  });
+}
+addEventListener("keydown",e=>{if(e.key==="Escape"&&fullPlan&&!closeSheet&&!document.querySelector(".pop")&&!document.getElementById("lbx")){fullPlan=false;document.body.classList.remove("lock");render()}});
 /* ---------- start ---------- */
 render();
 if(sm.code){setSync("syncing");syncNow()}else setSync("off");
