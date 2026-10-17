@@ -1,0 +1,19 @@
+{
+  "name": "Newberry Build 2",
+  "short_name": "⠀",
+  "description": "Track the building of two classrooms: phases, money, materials and site photos, shared with your team.",
+  "start_url": "./newberry-build-v2.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#14110c",
+  "theme_color": "#0b7a55",
+  "icons": [
+    {
+      "src": "icons/build-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}
