@@ -133,7 +133,7 @@ begin
   w:=public.b3_who(p_code,p_key); mg:=coalesce((w.perm->>'manage')::boolean,false);
   return coalesce((select jsonb_agg(
       case when mg then jsonb_build_object('pid',p.pid,'name',p.name,'role',p.role,'active',p.active,'phone',p.phone,'perm',p.perm,'key',p.key,'seen',p.last_seen)
-      else jsonb_build_object('pid',p.pid,'name',p.name,'role',p.role,'active',p.active,'phone',p.phone) end
+      else jsonb_build_object('pid',p.pid,'name',p.name,'role',p.role,'active',p.active) end
       order by p.created_at, p.pid)
     from public.build3_people p where p.code=p_code),'[]'::jsonb);
 end $$;

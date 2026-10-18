@@ -716,7 +716,7 @@ let matSec="stock",payAll=false,tab="build",roomF="all",logSub="log",matF="all",
 const TABS=[["build","Build","grid"],["home","Overview","home"],["add","Add","plus"],["money","Money","cash"],["more","More","dots"]];
 const navTab=t=>({phase:"build",mats:"build",site:"build",plans:"build",docs:"build",inbox:"more",people:"more"})[t]||t;
 $("nav.tabs").innerHTML=TABS.map(([k,l,i])=>k==="add"?`<button type="button" class="cap" id="fab" aria-label="Add something" aria-expanded="false" aria-controls="fab-menu">${ic(i)}</button>`:`<button data-tab="${k}">${ic(i)}<span>${l}</span>${k==="build"?'<i class="dot" id="tdot" hidden></i>':""}</button>`).join("");
-$("#today").textContent=new Date().toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long"});
+$("#today").textContent=new Date().toLocaleDateString("en-ZA",sm.code?{weekday:"short",day:"numeric",month:"short"}:{weekday:"long",day:"numeric",month:"long"});
 $("#fab-menu").innerHTML=[["photo","camera","Add photo"],["cost","cash","Add expense"],["pay","users","Record payment"],["task","clip","Add task"],["mat","truck","Add material"],["issue","alert","Report issue"]].map(([k,i,l])=>`<button class="fab-item" data-fab="${k}"><span class="fi">${ic(i)}</span><span class="fl">${l}</span></button>`).join("");
 
 let toastT;
@@ -1044,7 +1044,7 @@ function home(){
   const toOrder=S.mats.filter(m=>needsOrder(m)&&(m.qty>0||secOf(m)!=="stock")).length;
   const nu=nextUp();
   const sched=schedule();
-  return `<div class="page-h"><h2>Overview</h2><button class="btn primary" data-act="report">${ic("chat")}Share</button></div>
+  return `<div class="page-h"><h2>Overview</h2><button class="btn primary" data-act="report">${ic("share")}Report</button></div>
   <div class="qa two"><button class="main" data-act="addphoto">${ic("camera","lg")}Photo</button><button data-act="gostock">${ic("truck","lg")}Material</button></div>
   <div class="bento">
    <section class="tile hero s2"><div class="lbl">${ic("calendar")}Schedule</div><div class="big">${left===null?"–":left>=0?left:-left}<small> ${left===null?"":left>=0?"days to go":"days past target"}</small></div><div class="sub">${S.settings.start?dshort(S.settings.start):"?"} to ${S.settings.target?dshort(S.settings.target):"?"}</div><div class="row wr" style="gap:8px">${sched.chip}</div>${fcLine()}</section>
@@ -1090,12 +1090,12 @@ function buildV(){
     return `<button type="button" class="ptile ${ph?"has":""} ${id===cur?"cur":""}" data-go="phase:${id}" style="--pc:${PCOL[id]};--i:${i}" aria-label="${esc(name)}: ${dn} of ${ts.length} tasks done${st?", "+st+" stuck":""}">${ph?`<span class="tbg" data-bg="${ph}"></span>`:""}${st?`<span class="pbadge">${st}</span>`:full?`<span class="pbadge ok">${ic("check","sm")}</span>`:""}<span class="pi"><span class="pring ${full?"full":""}">${ringSvg(pct(dn,ts.length))}<span class="pav">${ic(icon)}</span></span><b>${esc(PSHORT[id])}</b><span class="pq">${dn}/${ts.length}</span></span></button>`}).join("");
   const rec=logsNewest().slice(0,6);
   const toOrder=S.mats.filter(m=>needsOrder(m)&&(m.qty>0||secOf(m)!=="stock")).length,issues=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length;
-  return `<section class="bhero"><div class="row between" style="align-items:flex-start"><div><div class="eyebrow">Whole build</div><div class="big" data-count="${p}">${p}%</div><div class="sub">${d} of ${all.length} tasks done</div></div><button class="btn ghost" data-act="report">${ic("share")}Share</button></div>
+  return `<section class="bhero"><div class="row between" style="align-items:flex-start"><div><div class="eyebrow">Whole build</div><div class="big" data-count="${p}">${p}%</div><div class="sub">${d} of ${all.length} tasks done</div></div></div>
    <div class="row wr" style="gap:8px;margin-top:10px">${sched.chip}${left===null?"":left>=0?`<span class="chip-d">${ic("calendar","sm")}${left} day${left===1?"":"s"} to go</span>`:`<span class="chip-d">${ic("alert","sm")}${-left} day${left===-1?"":"s"} past target</span>`}</div><div class="meter hm"><i style="width:${p}%"></i></div>${fcLine()}</section>
   ${whoLine()}${backupDue()}<div class="ptiles" role="list">${tiles}</div>
   <div class="eyebrow" style="margin:20px 2px 10px">Recently posted</div>
   ${rec.length?`<div class="rps">${rec.map(l=>`<button type="button" class="rp" data-go="site"><span class="rpi">${l.media?.length?`<span data-m="${l.media[0]}" style="position:absolute;inset:0"></span>`:ic(l.kind==="issue"?"alert":"note","lg")}</span><span class="rpt"><b style="color:${PCOL[l.phase]||"var(--accent)"}">${esc(l.phase&&PSHORT[l.phase]?PSHORT[l.phase]:"Site")}</b><span>${esc(l.text?l.text.slice(0,48):l.kind==="issue"?"Issue reported":"Added a photo")}</span><small>${dlabel(l.date)}</small></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:0 2px">Photos and notes you add will show up here.</p>`}
-  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials and stock</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="docs" style="grid-column:1/-1">${ic("note")}<span>Documents</span>${S.docs.filter(docVisible).length?`<small class="muted">${S.docs.filter(docVisible).length}</small>`:""}</button></div>`;
+  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="docs" style="grid-column:1/-1">${ic("note")}<span>Documents</span>${S.docs.filter(docVisible).length?`<small class="muted">${S.docs.filter(docVisible).length}</small>`:""}</button></div>`;
 }
 function phaseV(){
   const id=curPh,p=phase(id);if(!p){tab="build";return buildV()}
@@ -1197,22 +1197,20 @@ function more(){
   const s=S.settings,row=(i,t,sub,act)=>`<li class="tap" tabindex="0" data-act="${act}"><span class="row-ic">${ic(i)}</span><div class="grow"><div class="lt">${t}</div><div class="ls">${sub}</div></div>${ic("chev")}</li>`;
   return `<div class="page-h"><h2>More</h2></div>
   <div class="card"><ul class="list">
-   ${row("chat","Updates","Messages for you and the team"+(unreadMsgs().length?" · "+unreadMsgs().length+" new":""),"goinbox")}
-   ${row("users","People and access","Who is on the project and what they can do","gopeople")}
+   ${row("bell","Updates","Messages sent between people"+(unreadMsgs().length?" · "+unreadMsgs().length+" new":""),"goinbox")}
+   ${row("users","People and access",sm.code?"Who is on the project and what they can do":"Share the project and add your team","gopeople")}
    ${row("note","Documents","Quotes, contract, invoices, certificates, drawings and delivery notes","godocs")}
-   ${perm.manage?row("cloud","Back up to Google Drive","Save all documents, photos and project data at once","gbackup"):""}
-   ${row("truck","Materials and stock","Stock, fittings, electrical, sundries and suppliers","gomats")}
+   ${row("truck","Materials","Stock, fittings, electrical, sundries and suppliers","gomats")}
    ${row("camera","Site log and issues","Photos, notes and things to fix","gosite")}
-   ${row("clock","Activity","Who did what, and when","acts")}
-   ${row("cloud","Refresh and check for updates","Pulling down on any screen does the same","refresh")}
-   ${row("share","Share with your team",sm.code?"On. Everyone with the link sees the same project.":"Give your builder the link so you all see the same project","share")}
-   ${row("chat","Send a progress update","WhatsApp summary of tasks, money and issues","report")}
+   ${row("clock","Activity log","Automatic history of what changed","acts")}
   </ul></div>
-  <div class="card"><ul class="list">
+    <div class="card"><ul class="list">
    ${row("home","Project details",esc([s.name,s.site].filter(Boolean).join(" · ")||"Name, site and dates"),"project")}
    ${row("cash","Budget",moneyOK?(s.budget?money0(s.budget)+" in total":"Not set"):"Locked","budget")}
    ${moneyOK?row("lock","Lock money now","Asks for the password again","lockmoney"):""}
-   ${row("user","Your name",esc(me||"Shown on photos and notes you add"),"whoami")}
+   ${row("user","Your name",esc(me||"Shown on photos and notes you add")+(sm.code&&!perm.manage?" · set by the Project Lead":""),"whoami")}
+   ${perm.manage?row("cloud","Back up to Google Drive","Save all documents, photos and project data at once","gbackup"):""}
+   ${row("cloud","Refresh the app","Pulling down on any screen does the same","refresh")}
   </ul></div>
   <div class="card"><h2>Look</h2><div class="themes">${[["auto","Auto","device"],["light","Light","sun"],["dark","Dark","moon"]].map(([k,l,i])=>`<button type="button" class="themeopt" data-act="theme" data-id="${k}" aria-pressed="${(document.documentElement.getAttribute("data-theme")||"auto")===k}">${ic(i,"lg")}<b>${l}</b></button>`).join("")}</div></div>
   <div class="card"><button type="button" class="themeopt" data-act="outdoor" aria-pressed="${outdoor}" style="width:100%;flex-direction:row;justify-content:flex-start;text-align:left;gap:12px;padding:14px 16px">${ic("sun","lg")}<span><b>Outdoor mode</b><br><span class="small muted">Bigger text and stronger contrast for bright sun</span></span></button></div>
@@ -1642,8 +1640,9 @@ function projectSheet(){
   });
 }
 function whoSheet(){
+  if(sm.code&&!perm.manage){toast("Your name is set by the Project Lead.");return}
   sheet("Your name",`<form id="f" novalidate><p class="muted" style="margin:6px 0 0">Shown on the photos, notes and tasks you add, so the team knows who did what. Stays on this phone.</p><label class="f" for="nm">Name</label><input id="nm" data-autofocus class="t" maxlength="40" value="${esc(me)}" autocomplete="name"><div class="foot"><button class="btn primary block">Save</button></div></form>`,(sh,close)=>{
-    sh.querySelector("#f").onsubmit=e=>{e.preventDefault();me=sh.querySelector("#nm").value.trim();try{localStorage.setItem("build-who",me)}catch{}close();render();toast("Saved.")}});
+    sh.querySelector("#f").onsubmit=e=>{e.preventDefault();me=sh.querySelector("#nm").value.trim();try{localStorage.setItem("build-who",me)}catch{}if(sm.code&&perm.manage&&me){sm.pname=me;persistSync();peopleSet({pid:sm.pid,name:me}).catch(()=>{})}close();render();toast("Saved.")}});
 }
 function reportText(){const t=reportTextFull();return moneyOK?t:t.split("\n").filter(l=>!/^(Spent|Still to pay|Builder paid)/.test(l)).join("\n")}
 function reportTextFull(){
@@ -2243,7 +2242,7 @@ function fabOK(k){
   if(perm.edit==="notes"&&(k==="photo"||k==="issue"))return true;
   toast(perm.edit==="notes"?"You can add photos and notes.":"Your access is view only here.");return false;
 }
-const whoLine=()=>sm.code?`<p class="muted small" style="margin:0 2px 12px">You are <b>${esc(sm.pname||me||"signed in")}</b>, ${esc(roleLabel(sm.prole))}. ${esc(accessText(perm))}</p>`:"";
+const whoLine=()=>sm.code&&!perm.manage?`<p class="muted small" style="margin:0 2px 12px">You are <b>${esc(sm.pname||me||"signed in")}</b>, ${esc(roleLabel(sm.prole))}. ${esc(accessText(perm))}</p>`:"";
 
 async function loadMe(){
   const{data,error}=await sb.rpc("build3_me",{p_code:sm.code,p_key:sm.key});if(error)throw error;
@@ -2326,6 +2325,8 @@ function newMsgSheet(){
       const m={id:uid(),from:sm.pid,t:Date.now(),to:to.has("all")?["all"]:target,text:tx,media:ids};
       S.msgs.push(m);save();close();render();toast("Update sent"+(names?" to "+names:" to everyone")+".",()=>{const i=S.msgs.indexOf(m);if(i>=0)S.msgs.splice(i,1)});syncNow();
     };
+    const ready=()=>{const ok=to.size&&(sh.querySelector("#mt").value.trim()||files.length);["#ms","#mw"].forEach(i=>sh.querySelector(i).disabled=!ok)};
+    sh.querySelector("#mt").addEventListener("input",ready);sh.querySelectorAll("[data-r]").forEach(b=>b.addEventListener("click",ready));sh.querySelector("#mf").addEventListener("change",ready);ready();
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();send(false)};
     sh.querySelector("#mw").onclick=()=>send(true);
   });
@@ -2345,16 +2346,16 @@ function personSheet(pid){
   const p=pid?personOf(pid):null,isMe=!!p&&p.pid===sm.pid;
   const st={role:p?.role||"other",edit:p?.perm?.edit||ROLES.other.perm.edit,money:p?.perm?.money||ROLES.other.perm.money,send:(p?p.perm?.send:ROLES.other.perm.send)?"yes":"no"};
   sheet(p?p.name:"Add a person",`<form id="f" novalidate>
+  ${p&&!isMe?`<div class="tasks" style="margin:8px 0 16px"><button type="button" class="btn block" id="wl">${ic("chat")}Send their link on WhatsApp</button><button type="button" class="btn block" id="cl">${ic("copy")}Copy their link</button><button type="button" class="btn block" id="nl">${ic("key")}Make a new link</button><button type="button" class="btn block ${p.active?"danger":""}" id="tg">${p.active?"Switch access off":"Switch access back on"}</button></div><p class="hint">Each link is personal. A new link stops the old one working.</p>`:""}
   <label class="f" for="pn">Name</label><input id="pn" class="t" maxlength="40" ${p?"":"data-autofocus"} value="${esc(p?.name||"")}">
   <label class="f" for="pp">WhatsApp number (optional)</label><input id="pp" class="t" type="tel" inputmode="tel" value="${esc(p?.phone||"")}" placeholder="For example 082 123 4567">
   ${isMe?`<p class="muted" style="margin:12px 0 0">You are the Project Lead. You always have full control.</p>`:`
-  <label class="f">Role</label>${chipRow("role",ROLE_PICK.map(r=>[r,roleLabel(r)]),st.role,"scroll")}
+  <label class="f">Role</label>${chipRow("role",ROLE_PICK.map(r=>[r,roleLabel(r)]),st.role)}
   <label class="f">What can they update?</label>${chipRow("edit",[["all","Everything"],["notes","Photos and notes"],["none","View only"]],st.edit)}
   <label class="f">Money</label>${chipRow("money",[["none","Hidden"],["view","View"],["edit","View and record"]],st.money)}
   <label class="f">Can send updates?</label>${chipRow("send",[["yes","Yes"],["no","No, receives only"]],st.send)}
   <p class="hint" id="ah"></p>`}
-  <div class="foot"><button class="btn primary block" id="sv">${p?"Save":"Add person"}</button></div>
-  ${p&&!isMe?`<div class="tasks" style="margin-top:12px"><button type="button" class="btn block" id="wl">${ic("chat")}Send their link on WhatsApp</button><button type="button" class="btn block" id="cl">${ic("copy")}Copy their link</button><button type="button" class="btn block" id="nl">${ic("key")}Make a new link</button><button type="button" class="btn block ${p.active?"danger":""}" id="tg">${p.active?"Switch access off":"Switch access back on"}</button></div><p class="hint">Each link is personal. A new link stops the old one working.</p>`:""}</form>`,(sh,close)=>{
+  <div class="foot"><button class="btn primary block" id="sv">${p?"Save":"Add person"}</button></div></form>`,(sh,close)=>{
     const ah=sh.querySelector("#ah"),paint=n=>sh.querySelectorAll(`[data-ch="${n}"]`).forEach(x=>x.setAttribute("aria-pressed",x.dataset.v===st[n]));
     const hint=()=>{if(ah)ah.textContent=accessText({edit:st.edit,money:st.money,send:st.send==="yes",manage:false})};
     if(!isMe){
