@@ -266,7 +266,7 @@ html{overscroll-behavior-y:contain}
 #lbx{position:fixed;inset:0;z-index:95;background:rgba(8,6,3,.96);display:grid;place-items:center}
 #lbx .lb-body{display:grid;place-items:center;width:100%;max-height:78vh}#lbx img,#lbx video{max-width:100vw;max-height:78vh;object-fit:contain;display:block}
 #lbx .lb-b{position:absolute;width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;display:grid;place-items:center;cursor:pointer}
-#lbx .lb-x{top:calc(env(safe-area-inset-top,0px) + 12px);right:12px}#lbx .lb-n{top:50%;margin-top:-24px}#lbx .prev{left:8px}#lbx .next{right:8px}
+#lbx .lb-x{top:calc(env(safe-area-inset-top,0px) + 12px);right:12px}#lbx .lb-g{top:calc(env(safe-area-inset-top,0px) + 12px);right:72px}#lbx .lb-n{top:50%;margin-top:-24px}#lbx .prev{left:8px}#lbx .next{right:8px}
 #lbx .lb-cap{position:absolute;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);color:#fff;text-align:center;font-size:.95rem}
 .mthumb{aspect-ratio:4/3;border-radius:20px;overflow:hidden;background:var(--accent-soft)}
 .mthumb img,.mthumb video{display:block;width:100%;height:100%;object-fit:cover;background:#000}
@@ -1047,7 +1047,7 @@ function taskRow(key,single){
   const sub=single?[t0.status==="done"&&t0.doneOn?`Done ${dshort(t0.doneOn)}`:t0.due?`${od?"Overdue · ":"Due "}${dshort(t0.due)}`:"",t0.who].filter(Boolean).join(" · "):[stuck?"Stuck":"",od?"Overdue":""].filter(Boolean).join(" · ");
   const lab=t=>`${esc(t.title)}, ${esc(roomName(t.room))}: ${stLabel(t.status)}. Tap to tick done or undo. Hold for more options.`;
   const btn=t=>`<button class="st ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${lab(t)}">${stIcon(t.status)||ic("check")}</button>`;
-  const pill=t=>`<button class="stp ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${lab(t)}">${stIcon(t.status)||ic("minus","sm")}<span><b>${t.room==="shared"?"All":roomNo(t.room)}</b>${{todo:"To do",doing:"Doing",done:"Done",stuck:"Stuck"}[t.status]}</span></button>`;
+  const pill=t=>`<button class="stp ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${lab(t)}">${stIcon(t.status)||ic("minus","sm")}<span><b>${t.room==="shared"?"All":roomNo(t.room)}</b>${{todo:"To do",doing:"In progress",done:"Done",stuck:"Stuck"}[t.status]}</span></button>`;
   const head=`<div class="lt ${allDone?"dn":""}">${esc(t0.title)}</div>${sub?`<div class="ls ${stuck||od?"bad":""}">${esc(sub)}</div>`:""}`;
   return single?`<li data-mv="${key}">${btn(t0)}<div class="grow">${head}${t0.note?`<div class="ls">${esc(t0.note)}</div>`:""}</div>${rowBtns("task",t0.title,t0.key+"|"+t0.room)}</li>`
    :`<li data-mv="${key}"><div class="grow">${head}<div class="duo">${ts.map(pill).join("")}</div></div>${rowBtns("task",t0.title,t0.key+"|"+t0.room)}</li>`;
@@ -1086,7 +1086,7 @@ function phaseV(){
   ${ts.some(t=>t.room!=="shared")?`<div class="segc" role="group" aria-label="Show classroom">${[["all","Both"],...R.map(r=>[r.id,r.name])].map(([k,l])=>`<button type="button" data-rf="${k}" aria-pressed="${f===k}">${esc(l)}</button>`).join("")}</div>`:""}
   ${f==="all"&&!hintSeen()&&ts.some(t=>t.room!=="shared")?`<div class="note-card">${ic("eye")}<span>Each task shows one button per classroom (${R.map((r,i)=>`<b>${i+1}</b> = ${esc(r.name)}`).join(", ")}). Tap a button, or swipe a task to the right, to move it on: not started, in progress, done. Hold a task, then drag it up or down to change the order.</span></div>`:""}
   <div class="card">${keys.length?`<ul class="list reord">${keys.map(k=>taskRow(k,f==="all"?null:f)).join("")}</ul>`:`<div class="empty">${ic("clip","xl")}<h3>No tasks here</h3><p>Add the first task for this phase.</p><button class="btn primary" data-act="addtask" data-id="${id}">${ic("plus")}Add task</button></div>`}</div>
-  <div class="card"><div class="row between"><h2 style="margin:0">Photos</h2><div class="row" style="gap:8px">${ph.length>=2?`<button class="btn small" data-act="phba" data-id="${id}">Before and after</button>`:""}<button class="btn small" data-act="phphoto" data-id="${id}">${ic("camera")}Add photo</button></div></div>${ph.length?`<div class="pthumbs">${ph.slice(0,9).map((m,i)=>`<button type="button" class="etile" style="border:0;padding:0" data-act="phlb" data-id="${id}|${i}" aria-label="Open photo ${i+1}"><span data-m="${m}" style="position:absolute;inset:0"></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:10px 0 0">No photos for this phase yet.</p>`}</div>`;
+  <div class="card"><div class="row between"><h2 style="margin:0">Photos</h2><div class="row" style="gap:8px">${ph.length>=2?`<button class="btn small" data-act="phba" data-id="${id}">Before and after</button>`:""}${ph.length?`<button class="btn small icon" data-act="phdrive" data-id="${id}" aria-label="Save all photos of this phase to Google Drive">${ic("cloud")}</button>`:""}<button class="btn small" data-act="phphoto" data-id="${id}">${ic("camera")}Add photo</button></div></div>${ph.length?`<div class="pthumbs">${ph.slice(0,9).map((m,i)=>`<button type="button" class="etile" style="border:0;padding:0" data-act="phlb" data-id="${id}|${i}" aria-label="Open photo ${i+1}"><span data-m="${m}" style="position:absolute;inset:0"></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:10px 0 0">No photos for this phase yet.</p>`}</div>`;
 }
 async function hydrateBg(root=document){
   for(const el of root.querySelectorAll("[data-bg]")){const u=await mUrl(el.dataset.bg);if(!u)continue;const im=new Image();im.onload=()=>{el.style.backgroundImage='url("'+u+'")';el.classList.add("on")};im.src=u}
@@ -1198,12 +1198,12 @@ function more(){
 /* ---------- actions ---------- */
 function act(a,id,el){
   closePop();
-  if(role==="funder"&&!["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock","plprev","plnext"].includes(a)){toast("This is a view-only copy.");return}
+  if(role==="funder"&&!["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock","plprev","plnext","phdrive"].includes(a)){toast("This is a view-only copy.");return}
   if(role==="builder"&&["addcost","editcost","delcost","budget","addpay","editpay","delpay","recpay","paypay","paycost","contract","typicalpay","weekly","resetpays","payall","report"].includes(a)){toast("Money is hidden for builders.");return}
   ({
    cyc:()=>cycTask(id),opentask:()=>taskSheet(...id.split("|")),edittask:()=>taskSheet(...id.split("|")),
    deltask:()=>{const[k]=id.split("|");const f=roomF;delRecs(S.tasks,t=>t.key===k&&(f==="all"||t.room===f||t.room==="shared"),"Task")},
-   addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>quickPhoto(id),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),addcost:()=>costSheet(),editcost:()=>costSheet(id),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
+   addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>quickPhoto(id),phdrive:()=>driveSave(phasePhotoIds(id).map((m,i)=>({media:m,name:(PSHORT[id]||"Phase")+" photo "+(i+1)+".jpg"}))),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),addcost:()=>costSheet(),editcost:()=>costSheet(id),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
    payall:()=>{payAll=!payAll;render()},resetpays:()=>{const ps=[...S.pays],cs=S.costs.filter(c=>c.pay);S.pays.length=0;cs.forEach(c=>S.costs.splice(S.costs.indexOf(c),1));payAll=false;save();render();toast("All builder payments reset to R 0.",()=>{ps.forEach(x=>S.pays.push(x));cs.forEach(c=>S.costs.push(c))})},recpay:()=>recPaySheet(),weekly:()=>weeklySheet(),addpay:()=>paySheet(),editpay:()=>paySheet(id),contract:()=>contractSheet(),typicalpay:()=>typicalPays(),
    paypay:()=>{const x=S.pays.find(q=>q.id===id),u=undoEdit(x,{paid:true,paidOn:today()});payCost(x);logAct(`Builder payment of ${money(x.amount)} recorded`,1);save();render();toast(`${money(x.amount)} paid to the builder.`,()=>{u();payCost(x)})},
    delpay:()=>{const x=S.pays.find(q=>q.id===id),lc=S.costs.find(c=>c.id==="pay_"+id);S.pays.splice(S.pays.indexOf(x),1);if(lc)S.costs.splice(S.costs.indexOf(lc),1);save();render();toast("Stage deleted.",()=>{S.pays.push(x);if(lc)S.costs.push(lc)})},
@@ -1497,10 +1497,57 @@ function logSheet(id,kind,ph,files){
       if(l){const u=undoEdit(l,vals);save();close();render();toast("Entry saved.",u)}else{const n={id:uid(),...vals};S.logs.push(n);logAct(st.kind==="issue"?"Reported an issue"+(n.phase&&PSHORT[n.phase]?" in "+PSHORT[n.phase]:""):`Added ${ids.length?(ids.length===1?"a photo":ids.length+" photos"):"a note"}${n.phase&&PSHORT[n.phase]?" to "+PSHORT[n.phase]:""}`);save();close();render();toast(st.kind==="issue"?"Issue reported.":"Added to the site log.",()=>S.logs.splice(S.logs.indexOf(n),1))}};
   });
 }
+/* ---------- save to Google Drive (drive.file scope: the app only sees files it creates) ---------- */
+const GCID="765708879735-q6ni3h43avg6rqs783l8a7ftn49e40c7.apps.googleusercontent.com";
+let gTok=null,gLoad=null,gClient=null;
+const gisLoad=()=>gLoad||(gLoad=new Promise((res,rej)=>{if(window.google?.accounts?.oauth2)return res();const s=document.createElement("script");s.src="https://accounts.google.com/gsi/client";s.async=true;s.onload=()=>res();s.onerror=()=>{gLoad=null;rej(new Error("offline"))};document.head.append(s)}));
+function gToken(){return new Promise((res,rej)=>{
+  if(gTok&&gTok.exp>Date.now()+60000)return res(gTok.t);
+  if(!window.google?.accounts?.oauth2)return rej(new Error("load"));
+  gClient=gClient||google.accounts.oauth2.initTokenClient({client_id:GCID,scope:"https://www.googleapis.com/auth/drive.file",
+    callback:r=>{if(r.error)return gClient._rej(new Error(r.error));gTok={t:r.access_token,exp:Date.now()+(r.expires_in||3600)*1000};gClient._res(gTok.t)},
+    error_callback:e=>gClient._rej(new Error(e&&e.type||"closed"))});
+  gClient._res=res;gClient._rej=rej;gClient.requestAccessToken();
+})}
+const gFolderName=()=>(S.settings.name||"MS 2 Project").replace(/['\\]/g,"").slice(0,60)||"MS 2 Project";
+async function gFolder(t){
+  const H={Authorization:"Bearer "+t},fid=(()=>{try{return localStorage.getItem("build-gfolder")}catch{return null}})();
+  if(fid){try{const r=await fetch(`https://www.googleapis.com/drive/v3/files/${fid}?fields=id,trashed`,{headers:H});if(r.ok&&!(await r.json()).trashed)return fid}catch{}}
+  const q=encodeURIComponent(`mimeType='application/vnd.google-apps.folder' and name='${gFolderName()}' and trashed=false`);
+  const l=await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id)&pageSize=1`,{headers:H});
+  if(!l.ok)throw new Error("drive "+l.status);
+  let id=(await l.json()).files?.[0]?.id;
+  if(!id){const c=await fetch("https://www.googleapis.com/drive/v3/files?fields=id",{method:"POST",headers:{...H,"Content-Type":"application/json"},body:JSON.stringify({name:gFolderName(),mimeType:"application/vnd.google-apps.folder"})});
+    if(!c.ok)throw new Error("drive "+c.status);id=(await c.json()).id}
+  try{localStorage.setItem("build-gfolder",id)}catch{}
+  return id;
+}
+async function gUpload(t,folder,blob,name){
+  const fd=new FormData();fd.append("metadata",new Blob([JSON.stringify({name,parents:[folder]})],{type:"application/json"}));fd.append("file",blob);
+  const r=await fetch("https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id",{method:"POST",headers:{Authorization:"Bearer "+t},body:fd});
+  if(!r.ok)throw new Error("drive "+r.status);
+}
+let gBusy=false;
+async function driveSave(items,say){
+  say=say||(m=>toast(m));if(gBusy)return;
+  let t;
+  try{t=await gToken()}catch(e){
+    if(e.message==="load"){gisLoad().then(()=>say("Google is ready. Tap Save to Google Drive again."),()=>say("You need to be online to use Google Drive."))}
+    else say(/access_denied|popup|closed|cancel/i.test(e.message)?"Google sign-in was cancelled.":"Could not connect to Google Drive.");
+    return;
+  }
+  gBusy=true;say("Saving to Google Drive…");
+  try{const f=await gFolder(t);let n=0;
+    for(const it of items){const b=await mGet(it.media).catch(()=>null);if(!b)continue;await gUpload(t,f,b,it.name);n++;if(items.length>1)say(`Saving to Google Drive… ${n} of ${items.length}`)}
+    say(n?`Saved ${n} file${n===1?"":"s"} to "${gFolderName()}" in Google Drive.`:"Nothing saved yet. The file is still loading from your team.");
+  }catch(e){if(/401/.test(e.message))gTok=null;say(/403/.test(e.message)?"Google would not allow that. Check that the Drive API is turned on.":"Could not save to Google Drive. Check your connection and try again.")}
+  gBusy=false;
+}
+setTimeout(()=>{if(navigator.onLine)gisLoad().catch(()=>{})},4000);
 function lightbox(ids,start){
   let i=start;const el=document.createElement("div");el.id="lbx";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","Photo viewer");
-  const draw=async()=>{const u=await mUrl(ids[i]);el.innerHTML=`<div class="lb-body">${u?`<img src="${u}" alt="Site photo ${i+1} of ${ids.length}">`:`<div class="mmiss" style="color:#fff">${ic("cloud","xl")}<span>Photo is still loading</span></div>`}</div><button class="lb-b lb-x" aria-label="Close photo">${ic("x")}</button>${ids.length>1?`<button class="lb-b lb-n prev" aria-label="Previous photo">${ic("left")}</button><button class="lb-b lb-n next" aria-label="Next photo">${ic("chev")}</button><div class="lb-cap">${i+1} of ${ids.length}</div>`:""}`;
-    el.querySelector(".lb-x").onclick=close;el.querySelector(".prev")?.addEventListener("click",()=>{i=(i-1+ids.length)%ids.length;draw()});el.querySelector(".next")?.addEventListener("click",()=>{i=(i+1)%ids.length;draw()});el.querySelector(".lb-x").focus()};
+  const draw=async()=>{const u=await mUrl(ids[i]);el.innerHTML=`<div class="lb-body">${u?`<img src="${u}" alt="Site photo ${i+1} of ${ids.length}">`:`<div class="mmiss" style="color:#fff">${ic("cloud","xl")}<span>Photo is still loading</span></div>`}</div><button class="lb-b lb-x" aria-label="Close photo">${ic("x")}</button><button class="lb-b lb-g" aria-label="Save this photo to Google Drive">${ic("cloud")}</button>${ids.length>1?`<button class="lb-b lb-n prev" aria-label="Previous photo">${ic("left")}</button><button class="lb-b lb-n next" aria-label="Next photo">${ic("chev")}</button><div class="lb-cap">${i+1} of ${ids.length}</div>`:""}`;
+    el.querySelector(".lb-x").onclick=close;el.querySelector(".lb-g").onclick=()=>driveSave([{media:ids[i],name:"Site photo "+ids[i].slice(-6)+".jpg"}]);el.querySelector(".prev")?.addEventListener("click",()=>{i=(i-1+ids.length)%ids.length;draw()});el.querySelector(".next")?.addEventListener("click",()=>{i=(i+1)%ids.length;draw()});el.querySelector(".lb-x").focus()};
   const key=e=>{if(e.key==="Escape"){e.stopPropagation();close()}else if(e.key==="ArrowLeft")el.querySelector(".prev")?.click();else if(e.key==="ArrowRight")el.querySelector(".next")?.click()};
   function close(){document.removeEventListener("keydown",key,true);el.remove();if(!closeSheet){document.body.classList.remove("lock");[$("#app"),$("nav.tabs")].forEach(x=>x.inert=false)}}
   document.addEventListener("keydown",key,true);document.body.append(el);document.body.classList.add("lock");[$("#app"),$("nav.tabs")].forEach(x=>x.inert=true);draw();
@@ -2064,7 +2111,7 @@ function docView(id){
   sheet(d.name,`<div class="row wr" style="gap:8px;margin:8px 0 12px"><span class="pill ${docMoney(d)?"type":"sky"}">${esc(dtype(d.type)[1])}</span><span class="pill gone">${dlabel(d.date)}</span>${d.size?`<span class="pill gone">${fmtMB(d.size)}</span>`:""}</div>
   ${d.sup?`<p class="muted small" style="margin:0 0 6px">${ic("user","sm")} ${esc(supName(d.sup))}</p>`:""}${d.phase&&PSHORT[d.phase]?`<p class="muted small" style="margin:0 0 6px">${esc(PSHORT[d.phase])}</p>`:""}${d.note?`<p style="margin:0 0 12px">${esc(d.note)}</p>`:""}
   <p class="hint" id="dst"></p>
-  <div class="tasks"><button type="button" class="btn primary block" id="do">${ic("eye")}Open</button><button type="button" class="btn block" id="ds">${ic("share")}Share</button><button type="button" class="btn block" id="dd">${ic("download")}Save to this phone</button>${ro?"":`<button type="button" class="btn block" id="de">${ic("pencil")}Edit details</button><button type="button" class="btn block danger" id="dx">${ic("trash")}Delete</button>`}</div>`,(sh,close)=>{
+  <div class="tasks"><button type="button" class="btn primary block" id="do">${ic("eye")}Open</button><button type="button" class="btn block" id="ds">${ic("share")}Share</button><button type="button" class="btn block" id="dg">${ic("cloud")}Save to Google Drive</button><button type="button" class="btn block" id="dd">${ic("download")}Save to this phone</button>${ro?"":`<button type="button" class="btn block" id="de">${ic("pencil")}Edit details</button><button type="button" class="btn block danger" id="dx">${ic("trash")}Delete</button>`}</div>`,(sh,close)=>{
     const st=t=>sh.querySelector("#dst").textContent=t;
     const get=async()=>{const b=await mGet(d.media).catch(()=>null);if(!b){st("This file is still loading from your team. Try again in a moment.");return null}return b};
     const typed=b=>new Blob([b],{type:d.mime||b.type||"application/octet-stream"});
@@ -2073,7 +2120,7 @@ function docView(id){
     sh.querySelector("#ds").onclick=async()=>{const b=await get();if(!b)return;const f=new File([b],docFileName(d),{type:d.mime||b.type||"application/octet-stream"});
       if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:d.name})}catch{}}
       else{const a=document.createElement("a");a.href=URL.createObjectURL(f);a.download=f.name;document.body.append(a);a.click();a.remove();st("Sharing files is not available here, so the file was saved to this phone. Attach it in WhatsApp.")}};
-    sh.querySelector("#dd").onclick=async()=>{const b=await get();if(!b)return;const a=document.createElement("a");a.href=URL.createObjectURL(typed(b));a.download=docFileName(d);document.body.append(a);a.click();a.remove();toast("Saved to this phone.")};
+    sh.querySelector("#dg").onclick=()=>driveSave([{media:d.media,name:docFileName(d)}],st);sh.querySelector("#dd").onclick=async()=>{const b=await get();if(!b)return;const a=document.createElement("a");a.href=URL.createObjectURL(typed(b));a.download=docFileName(d);document.body.append(a);a.click();a.remove();toast("Saved to this phone.")};
     if(!ro){sh.querySelector("#de").onclick=()=>{close();docSheet(id)};sh.querySelector("#dx").onclick=()=>{close();delRecs(S.docs,x=>x.id===id,"Document")}}
   });
 }
