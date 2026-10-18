@@ -434,7 +434,8 @@ html,body,button,a,input,select,textarea,.chip,.st,.stp,.lk-pad button,[role=but
 .pltools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0 6px}
 .plw.full{position:fixed;inset:0;z-index:35;background:var(--paper);display:flex;flex-direction:column;padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(10px + env(safe-area-inset-bottom,0px))}
 .plw.full .plv{flex:1;height:auto;border-radius:16px}.plw.full .pltools{margin:10px 0 0}
-.ro [data-act="addplan"],.ro [data-act="plopts"],.ro [data-act="adddoc"]{display:none!important}
+.ro [data-act="addplan"],.ro [data-act="adddoc"]{display:none!important}
+.plpg{display:inline-flex;align-items:center;gap:6px;margin-left:auto}
 .sheet .hd{position:sticky;top:-18px;z-index:3;background:var(--sheet);margin:-18px -18px 6px;padding:24px 18px 8px;border-radius:28px 28px 0 0;touch-action:none}
 .sheet .grab{position:absolute;left:50%;top:8px;transform:translateX(-50%);width:44px;height:5px;border-radius:99px;background:var(--field);opacity:.5;cursor:grab}
 .sheet .grab::before{content:"";position:absolute;left:-30px;right:-30px;top:-10px;bottom:-14px}
@@ -611,7 +612,7 @@ const ST=[["todo","Not started"],["doing","In progress"],["done","Done"],["stuck
 const stLabel=s=>ST.find(x=>x[0]===s)?.[1]||"";
 const stIcon=s=>s==="done"?ic("check"):s==="doing"?ic("clock"):s==="stuck"?ic("alert"):"";
 const MSTAT=[["need","To order"],["ordered","Ordered"],["got","Delivered"]];
-const MSTAT4=[...MSTAT,["inst","Installed"]];
+const MSTAT4=MSTAT;
 const SECS=[["stock","Stock","layers"],["fit","Fittings","home"],["elec","Electrical","bolt"],["sund","Sundries","paint"]];
 const secOf=m=>m.sec||"stock";
 const mst=m=>secOf(m)==="fit"||secOf(m)==="elec"?MSTAT4:MSTAT;
@@ -655,8 +656,8 @@ if(fresh&&!location.hash.includes("join=")){S.tasks=seedTasks();S.sups=[{id:"jon
   S.mats=seedMats()}
 const demoCost=()=>({id:"c_demo",amount:30000,title:"Demolition (price agreed)",cat:"labour",room:"both",date:S.settings.start||today(),paid:false,sup:""});
 function migrate(){
-  if(fresh){S.tplv=5;S.costs.push(demoCost());return}
-  if((S.tplv||0)>=5||!S.tasks.length)return;
+  if(fresh){S.tplv=6;S.costs.push(demoCost());return}
+  if((S.tplv||0)>=6||!S.tasks.length)return;
   if((S.tplv||0)<2){
     const have=new Set(S.tasks.map(t=>t.id));let n=-200;
     seedTasks().filter(t=>t.phase==="demo"&&!have.has(t.id)).forEach(t=>{t.order=n++;S.tasks.push(t)});
@@ -666,7 +667,11 @@ function migrate(){
   if(+S.settings.budget===928896)S.settings.budget=958896;
   if((S.tplv||0)<4){const old={m_tiles:"f_tiles",m_mesh:"s_mesh",m_iso:"f_iso",m_gyp:"f_gyp"};S.mats=S.mats.filter(m=>!old[m.id]);S.mats.forEach(m=>{m.sec=m.sec||"stock";m.moves=m.moves||[]});const have=new Set(S.mats.map(m=>m.id));seedMats().filter(m=>!have.has(m.id)).forEach(m=>S.mats.push(m))}
   S.tasks=S.tasks.filter(t=>t.id!=="shared_xmas");
-  S.tplv=5;
+  (S.plans||[]).forEach(p=>{if(!S.docs.some(d=>d.id===p.id))S.docs.push({id:p.id,name:p.name,type:"drawing",date:iso(),phase:"",sup:"",note:"",media:p.media,fn:p.name+(p.kind==="pdf"?".pdf":".jpg"),mime:p.kind==="pdf"?"application/pdf":"image/jpeg",size:p.size||0,who:""})});
+  S.plans=[];
+  S.mats.forEach(m=>{if(m.status==="inst")m.status="got"});
+  {const e=S.settings.elec;if(e&&e.name&&!e.sup){if(!S.sups.some(x=>x.id==="electrician"))S.sups.push({id:"electrician",name:e.name,trade:"Electrician",phone:e.phone||""});S.settings.elec={sup:"electrician",coc:e.coc||"todo",cocDate:e.cocDate||""}}}
+  S.tplv=6;
 }
 migrate();
 let me="";try{me=localStorage.getItem("build-who")||""}catch{}
@@ -1050,7 +1055,7 @@ function taskRow(key,single){
 const PSHORT={demo:"Demolition",site:"Site prep",found:"Foundations",walls:"Walls and Windows",roof:"Roof",svc:"Services",fin:"Finishes",ext:"Stoep and deck",hand:"Handover"};
 const PCOL={demo:"#e0852f",site:"#3b93de",found:"#a77bd6",walls:"#e0603c",roof:"#2fb88a",svc:"#e3b43a",fin:"#d35d9c",ext:"#3fb0b0",hand:"#8c9be0"};
 let curPh="found";
-const backBtn=()=>`<button class="iconbtn" data-go="build" aria-label="Back to Build">${ic("left")}</button>`;
+const backBtn=(to)=>`<button class="iconbtn" data-go="${to||"build"}" aria-label="Back to ${to==="docs"?"Documents":"Build"}">${ic("left")}</button>`;
 const logsNewest=()=>[...S.logs].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||b.id.localeCompare(a.id));
 const phasePhotoIds=id=>logsNewest().filter(l=>l.phase===id).flatMap(l=>l.media||[]);
 const phasePhoto=id=>phasePhotoIds(id)[0]||"";
@@ -1067,7 +1072,7 @@ function buildV(){
   <div class="ptiles" role="list">${tiles}</div>
   <div class="eyebrow" style="margin:20px 2px 10px">Recently posted</div>
   ${rec.length?`<div class="rps">${rec.map(l=>`<button type="button" class="rp" data-go="site"><span class="rpi">${l.media?.length?`<span data-m="${l.media[0]}" style="position:absolute;inset:0"></span>`:ic(l.kind==="issue"?"alert":"note","lg")}</span><span class="rpt"><b style="color:${PCOL[l.phase]||"var(--accent)"}">${esc(l.phase&&PSHORT[l.phase]?PSHORT[l.phase]:"Site")}</b><span>${esc(l.text?l.text.slice(0,48):l.kind==="issue"?"Issue reported":"Added a photo")}</span><small>${dlabel(l.date)}</small></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:0 2px">Photos and notes you add will show up here.</p>`}
-  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials and stock</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="plans">${ic("map")}<span>Plans</span>${S.plans.length?`<small class="muted">${S.plans.length}</small>`:""}</button><button type="button" class="sc" data-go="docs">${ic("note")}<span>Documents</span>${S.docs.filter(docVisible).length?`<small class="muted">${S.docs.filter(docVisible).length}</small>`:""}</button></div>`;
+  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials and stock</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="docs" style="grid-column:1/-1">${ic("note")}<span>Documents</span>${S.docs.filter(docVisible).length?`<small class="muted">${S.docs.filter(docVisible).length}</small>`:""}</button></div>`;
 }
 function phaseV(){
   const id=curPh,p=phase(id);if(!p){tab="build";return buildV()}
@@ -1135,10 +1140,10 @@ function itemRow(m){
   return `<li><button class="st ${cls}" data-act="cycmat" data-id="${m.id}" aria-label="${esc(m.name)}: ${L[i][1]}. Tap to change.">${m.status==="inst"||done?ic("check"):m.status==="got"?ic("check"):m.status==="ordered"?ic("truck"):""}</button><div class="grow"><div class="lt ${done?"dn":""}">${esc(m.name)}</div><div class="ls ${m.due&&m.due<today()&&!done&&m.status!=="got"?"bad":""}">${m.qty>0?num(m.qty,2)+" "+esc(m.unit):"Set how many"} · ${L[i][1]}${m.room!=="both"?" · "+esc(roomName(m.room)):""}${m.sup?" · "+esc(supName(m.sup)):""}${m.due?" · need by "+dshort(m.due):""}</div></div>${rowBtns("mat",m.name,m.id)}</li>`;
 }
 function elecCard(){
-  const e=S.settings.elec||{},c=e.coc||"todo",lab={todo:["Certificate not booked","watch"],booked:["Certificate booked","sky"],issued:["Certificate issued",""]}[c];
-  return `<div class="card"><div class="row"><span class="row-ic">${ic("bolt")}</span><div class="grow"><div class="lt">${esc(e.name||"Add your electrician")}</div><div class="ls">${esc(e.phone||"Name and phone number")}</div></div>${e.phone?`<a class="btn small icon" href="tel:${esc(e.phone.replace(/[^\d+]/g,""))}" aria-label="Call the electrician">${ic("phone")}</a>`:""}<button class="btn small icon" data-act="editelec" aria-label="Edit electrician details">${ic("pencil")}</button></div>
+  const e=S.settings.elec||{},c=e.coc||"todo",sp=S.sups.find(x=>x.id===e.sup),lab={todo:["Certificate not booked","watch"],booked:["Certificate booked","sky"],issued:["Certificate issued",""]}[c];
+  return `<div class="card"><div class="row"><span class="row-ic">${ic("bolt")}</span><div class="grow"><div class="lt">${esc(sp?.name||"Choose your electrician")}</div><div class="ls">${esc(sp?.phone||"Pick a contact or add a new one")}</div></div>${sp?.phone?`<a class="btn small icon" href="tel:${esc(sp.phone.replace(/[^\\d+]/g,""))}" aria-label="Call the electrician">${ic("phone")}</a>`:""}<button class="btn small icon" data-act="editelec" aria-label="Choose the electrician and certificate status">${ic("pencil")}</button></div>
   <div class="row wr" style="margin-top:12px;gap:8px"><span class="pill ${lab[1]}">${c==="issued"?ic("check","sm"):""}${lab[0]}${e.cocDate?" · "+dshort(e.cocDate):""}</span></div>
-  <p class="hint">The Electrical Certificate of Compliance is needed before the school can use the rooms.</p></div>`;
+  <p class="hint">The Electrical Certificate of Compliance is needed before the school can use the rooms. Add the certificate itself under Documents.</p></div>`;
 }
 function matsV(){
   const sec=matSec,inSec=S.mats.filter(m=>secOf(m)===sec),L=sec==="fit"||sec==="elec"?MSTAT4:MSTAT;
@@ -1169,8 +1174,7 @@ function more(){
   const s=S.settings,row=(i,t,sub,act)=>`<li class="tap" tabindex="0" data-act="${act}"><span class="row-ic">${ic(i)}</span><div class="grow"><div class="lt">${t}</div><div class="ls">${sub}</div></div>${ic("chev")}</li>`;
   return `<div class="page-h"><h2>More</h2></div>
   <div class="card"><ul class="list">
-   ${row("map","Plans","View the floor plan and drawings, with zoom","goplans")}
-   ${row("note","Documents","Quotes, contract, invoices, certificates and delivery notes","godocs")}
+   ${row("note","Documents","Quotes, contract, invoices, certificates, drawings and delivery notes","godocs")}
    ${row("truck","Materials and stock","Stock, fittings, electrical, sundries and suppliers","gomats")}
    ${row("camera","Site log and issues","Photos, notes and things to fix","gosite")}
    ${row("clock","Activity","Who did what, and when","acts")}
@@ -1193,7 +1197,7 @@ function more(){
 /* ---------- actions ---------- */
 function act(a,id,el){
   closePop();
-  if(role==="funder"&&!["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock"].includes(a)){toast("This is a view-only copy.");return}
+  if(role==="funder"&&!["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock","plprev","plnext"].includes(a)){toast("This is a view-only copy.");return}
   if(role==="builder"&&["addcost","editcost","delcost","budget","addpay","editpay","delpay","recpay","paypay","paycost","contract","typicalpay","weekly","resetpays","payall","report"].includes(a)){toast("Money is hidden for builders.");return}
   ({
    cyc:()=>cycTask(id),opentask:()=>taskSheet(...id.split("|")),edittask:()=>taskSheet(...id.split("|")),
@@ -1209,7 +1213,7 @@ function act(a,id,el){
    addphoto:()=>quickPhoto(id&&phase(id)?id:undefined),addissue:()=>logSheet(null,"issue"),editlog:()=>logSheet(id),dellog:()=>delRecs(S.logs,l=>l.id===id,"Entry"),
    fix:()=>{const l=S.logs.find(x=>x.id===id),u=undoEdit(l,{fixed:true});logAct("Marked an issue as fixed");save();render();toast("Issue marked fixed.",u)},
    lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
-   refresh:()=>refreshApp(),adddoc:()=>docSheet(),opendoc:()=>docView(id),docunlock:()=>moneyGate(()=>render()),godocs:()=>go("docs"),addplan:()=>planAddSheet(),plopts:()=>planOptsSheet(),plzin:()=>zoomCenter(1.5),plzout:()=>zoomCenter(1/1.5),plfit:()=>fitView(),plfull:()=>{fullPlan=!fullPlan;PV.had=false;document.body.classList.toggle("lock",fullPlan);render()},goplans:()=>go("plans"),gostock:()=>{matSec="stock";matF="all";go("mats")},mvup:()=>moveKey(curPh,id,-1),mvdn:()=>moveKey(curPh,id,1),phstep:()=>phaseStep(+id),report:()=>reportSheet(),acts:()=>actsSheet(),phba:()=>baSheet(id),outdoor:()=>{outdoor=!outdoor;try{localStorage.setItem("build2-outdoor",outdoor?"1":"0")}catch{}applyOutdoor();render()},share:()=>shareSheet(),project:()=>projectSheet(),whoami:()=>whoSheet(),
+   refresh:()=>refreshApp(),adddoc:()=>docSheet(),opendoc:()=>docView(id),docunlock:()=>moneyGate(()=>render()),godocs:()=>go("docs"),addplan:()=>docSheet(undefined,"drawing"),plprev:()=>turnPage(-1),plnext:()=>turnPage(1),plzin:()=>zoomCenter(1.5),plzout:()=>zoomCenter(1/1.5),plfit:()=>fitView(),plfull:()=>{fullPlan=!fullPlan;PV.had=false;document.body.classList.toggle("lock",fullPlan);render()},goplans:()=>go("plans"),gostock:()=>{matSec="stock";matF="all";go("mats")},mvup:()=>moveKey(curPh,id,-1),mvdn:()=>moveKey(curPh,id,1),phstep:()=>phaseStep(+id),report:()=>reportSheet(),acts:()=>actsSheet(),phba:()=>baSheet(id),outdoor:()=>{outdoor=!outdoor;try{localStorage.setItem("build2-outdoor",outdoor?"1":"0")}catch{}applyOutdoor();render()},share:()=>shareSheet(),project:()=>projectSheet(),whoami:()=>whoSheet(),
    theme:()=>{if(id==="auto"){document.documentElement.removeAttribute("data-theme");try{localStorage.setItem("build2-theme","auto")}catch{}}else{document.documentElement.setAttribute("data-theme",id);try{localStorage.setItem("build2-theme",id)}catch{}}paintTheme();render()},
    export:()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`newberry-build-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")},
    import:()=>{const f=$("#impf");f.onchange=async()=>{try{const d=JSON.parse(await f.files[0].text());if(!Array.isArray(d.tasks))throw 0;confirmSheet("Restore this backup?","This replaces the project on this phone with the backup.","Restore",()=>{S={...DEF(),...d};save();render();toast("Backup restored.")})}catch{toast("That file is not a Newberry Build backup.")}f.value=""};f.click()},
@@ -1270,8 +1274,9 @@ function costSheet(id){
   ${dateField("dt",c?.date||today())}
   <label class="f">Payment</label>${chipRow("paid",[["1","Paid"],["0","Not paid yet"]],st.paid?"1":"0")}
   ${S.sups.length?`<label class="f" for="su">Paid to</label><select id="su" class="t sel"><option value="">Not listed</option>${S.sups.map(s=>`<option value="${s.id}" ${s.id===st.sup?"selected":""}>${esc(s.name)}</option>`).join("")}</select>`:""}
+  ${S.sups.some(x=>x.id==="jonathan")?`<p class="warn" id="sw" hidden>${ic("alert")}<span>Payments to ${esc(supName("jonathan"))} are recorded under Builder payments in the Money tab. Adding them here as well would count them twice.</span></p>`:""}
   <div class="foot"><button class="btn primary block">${c?"Save changes":"Add expense"}</button></div></form>`,(sh,close)=>{
-    wireDc(sh);["cat","room"].forEach(n=>wireChips(sh,st,n));sh.querySelectorAll('[data-ch="paid"]').forEach(b=>b.onclick=()=>{st.paid=b.dataset.v==="1";sh.querySelectorAll('[data-ch="paid"]').forEach(x=>x.setAttribute("aria-pressed",x===b))});
+    wireDc(sh);{const sw=sh.querySelector("#sw"),su=sh.querySelector("#su");const chk=()=>{if(sw&&su)sw.hidden=su.value!=="jonathan"};if(su)su.addEventListener("change",chk);chk()}["cat","room"].forEach(n=>wireChips(sh,st,n));sh.querySelectorAll('[data-ch="paid"]').forEach(b=>b.onclick=()=>{st.paid=b.dataset.v==="1";sh.querySelectorAll('[data-ch="paid"]').forEach(x=>x.setAttribute("aria-pressed",x===b))});
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const am=sh.querySelector("#am"),v=parseAmt(am.value);if(!(v>0))return showErr(sh,am.closest(".amtin"),"Enter an amount above zero.");
       const vals={amount:Math.round(v*100)/100,title:sh.querySelector("#ti").value.trim(),cat:st.cat,room:st.room,date:sh.querySelector("#dt").value||today(),paid:st.paid,sup:sh.querySelector("#su")?.value||""};
       if(c){const u=undoEdit(c,vals);save();close();render();toast("Expense saved.",u)}else{const n={id:uid(),...vals};S.costs.push(n);logAct(`Expense of ${money(n.amount)}${n.title?": "+n.title:""}`,1);save();close();render();toast(`Added ${money(n.amount)}.`,()=>S.costs.splice(S.costs.indexOf(n),1))}};
@@ -1358,7 +1363,7 @@ function matSheet(id){
    <label class="f">${st.sec==="stock"?"Order status (before the first delivery)":"Status"}</label>${chipRow("status",L,st.status)}
    ${S.sups.length?`<label class="f" for="su">Supplier</label><select id="su" class="t sel"><option value="">Not chosen</option>${S.sups.map(s=>`<option value="${s.id}" ${s.id===m?.sup?"selected":""}>${esc(s.name)}</option>`).join("")}</select>`:""}
    ${dateField("du",m?.due||"","Needed by").replace(/<div class="chips"[\s\S]*?<\/div>/,futureChips("du"))}
-   ${st.sec==="stock"&&moves.length?`<label class="f">Deliveries and use</label><ul class="list" id="mv">${moves.slice().reverse().map(x=>`<li><div class="grow"><div class="lt">${x.t==="in"?"Delivered":"Used"} ${num(x.qty,2)}</div><div class="ls">${dshort(x.date)}${x.note?" · "+esc(x.note):""}</div></div>${x.photo?`<button type="button" class="btn small" data-note="${x.photo}" aria-label="View delivery note photo">${ic("image","sm")}Note</button>`:""}<button type="button" class="btn small danger" data-rm="${x.id}" aria-label="Remove this entry">${ic("trash","sm")}Remove</button></li>`).join("")}</ul>`:""}`};
+   ${st.sec==="stock"&&moves.length?`<label class="f">Deliveries and use</label><ul class="list" id="mv">${moves.slice().reverse().map(x=>`<li><div class="grow"><div class="lt">${x.t==="in"?"Delivered":"Used"} ${num(x.qty,2)}</div><div class="ls">${dshort(x.date)}${x.note?" · "+esc(x.note):""}</div></div>${x.doc&&S.docs.some(d=>d.id===x.doc)?`<button type="button" class="btn small" data-docv="${x.doc}" aria-label="View delivery note photo">${ic("image","sm")}Note</button>`:x.photo?`<button type="button" class="btn small" data-note="${x.photo}" aria-label="View delivery note photo">${ic("image","sm")}Note</button>`:""}<button type="button" class="btn small danger" data-rm="${x.id}" aria-label="Remove this entry">${ic("trash","sm")}Remove</button></li>`).join("")}</ul>`:""}`};
   sheet(m?"Edit item":"Add item",`<form id="f" novalidate><label class="f" for="nm">Item</label><input id="nm" data-autofocus class="t" maxlength="100" value="${esc(m?.name||"")}" placeholder="For example: Cement, door, paint">
   <label class="f">Section</label>${chipRow("sec",SECS.map(x=>[x[0],x[1]]),st.sec)}
   <div id="bd">${body()}</div>
@@ -1366,7 +1371,7 @@ function matSheet(id){
     const wire=()=>{wireDc(sh);["unit","room","status"].forEach(n=>wireChips(sh,st,n));const q=sh.querySelector("#q");
       sh.querySelectorAll("[data-step]").forEach(b=>b.onclick=()=>{q.value=Math.max(0,(parseAmt(q.value)||0)+ +b.dataset.step)});
       sh.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{q.value=(parseAmt(q.value)||0)+ +b.dataset.add});
-      sh.querySelectorAll("[data-note]").forEach(b=>b.onclick=()=>lightbox([b.dataset.note],0));sh.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{moves=moves.filter(x=>x.id!==b.dataset.rm);keepq();sh.querySelector("#bd").innerHTML=body();wire()})};
+      sh.querySelectorAll("[data-note]").forEach(b=>b.onclick=()=>lightbox([b.dataset.note],0));sh.querySelectorAll("[data-docv]").forEach(b=>b.onclick=()=>{const dd=S.docs.find(x=>x.id===b.dataset.docv);if(dd)lightbox([dd.media],0)});sh.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{moves=moves.filter(x=>x.id!==b.dataset.rm);keepq();sh.querySelector("#bd").innerHTML=body();wire()})};
     const keepq=()=>{};
     wireChips(sh,st,"sec",()=>{const nm=sh.querySelector("#nm").value,keep=["#q","#mn","#du","#su"].map(k=>[k,sh.querySelector(k)?.value]);sh.querySelector("#bd").innerHTML=body();wire();sh.querySelector("#nm").value=nm;keep.forEach(([k,v])=>{const e=sh.querySelector(k);if(e&&v!==undefined)e.value=v})});
     wire();
@@ -1392,22 +1397,27 @@ function moveSheet(id,t){
     if(inn){const got=e=>{dn=e.target.files[0]||null;sh.querySelector("#dn-s").textContent=dn?"Photo added: "+dn.name:""};sh.querySelector("#dn-c").onchange=got;sh.querySelector("#dn-p").onchange=got;sh.querySelector("#dn-cam").onclick=()=>sh.querySelector("#dn-c").click();sh.querySelector("#dn-pick").onclick=()=>sh.querySelector("#dn-p").click()}
     sh.querySelector("#f").onsubmit=async e=>{e.preventDefault();const v=parseAmt(q.value);if(!(v>0))return showErr(sh,q,"Enter a number above zero.");
       const entry={id:uid(),t,qty:v,date:sh.querySelector("#dt").value||today(),note:sh.querySelector("#nt").value.trim(),who:me};
-      if(dn){const mid="dn"+uid();await mPut(mid,await prepPhoto(dn,PSIZES[psize][1]));queueMedia(mid);entry.photo=mid}
-      const u=undoEdit(m,{moves:[...(m.moves||[]),entry]});logAct(inn?`Delivery: ${num(v,2)} ${m.unit} of ${m.name}`:`Used ${num(v,2)} ${m.unit} of ${m.name}`);save();close();render();
+      if(dn){const mid="dc"+uid(),blob=await prepPhoto(dn,PSIZES[psize][1]),did=uid();await mPut(mid,blob);queueMedia(mid);
+        S.docs.push({id:did,name:"Delivery note: "+m.name+" "+num(v,2)+" "+m.unit,type:"delivery",date:entry.date,phase:"",sup:m.sup||"",note:entry.note,media:mid,fn:"delivery-note.jpg",mime:"image/jpeg",size:blob.size,who:me});entry.doc=did}
+      const u0=undoEdit(m,{moves:[...(m.moves||[]),entry]}),u=()=>{u0();if(entry.doc){const i=S.docs.findIndex(x=>x.id===entry.doc);if(i>=0)S.docs.splice(i,1)}};logAct(inn?`Delivery: ${num(v,2)} ${m.unit} of ${m.name}`:`Used ${num(v,2)} ${m.unit} of ${m.name}`);save();close();render();
       toast(inn?`Delivery of ${num(v,2)} ${m.unit} recorded.`:`${num(v,2)} ${m.unit} used.`,u)};
   });
 }
 function elecSheet(){
   const e=S.settings.elec||{},st={coc:e.coc||"todo"};
-  sheet("Electrician and certificate",`<form id="f" novalidate><label class="f" for="nm">Electrician or company</label><input id="nm" data-autofocus class="t" maxlength="80" value="${esc(e.name||"")}">
-  <label class="f" for="ph">Phone number</label><input id="ph" class="t" type="tel" inputmode="tel" value="${esc(e.phone||"")}">
+  sheet("Electrician and certificate",`<form id="f" novalidate><label class="f" for="es">Electrician or company</label><select id="es" data-autofocus class="t sel"><option value="">Not chosen</option>${S.sups.map(x=>`<option value="${x.id}" ${x.id===e.sup?"selected":""}>${esc(x.name)}${x.trade?" · "+esc(x.trade):""}</option>`).join("")}<option value="__new">Add a new contact…</option></select>
+  <div id="nw" hidden><label class="f" for="nm">Name</label><input id="nm" class="t" maxlength="80"><label class="f" for="ph">Phone number</label><input id="ph" class="t" type="tel" inputmode="tel"></div>
+  <p class="hint">Contacts are kept once, under Suppliers and contractors.</p>
   <label class="f">Certificate of Compliance</label>${chipRow("coc",[["todo","Not yet"],["booked","Booked"],["issued","Issued"]],st.coc)}
   <div id="cd" ${st.coc==="todo"?"hidden":""}><label class="f" for="cdt">Date</label><input id="cdt" class="t" type="date" value="${esc(e.cocDate||today())}"></div>
   <div class="foot"><button class="btn primary block">Save</button></div></form>`,(sh,close)=>{
+    const es=sh.querySelector("#es");es.onchange=()=>{sh.querySelector("#nw").hidden=es.value!=="__new"};
     wireChips(sh,st,"coc",()=>{sh.querySelector("#cd").hidden=st.coc==="todo"});
-    sh.querySelector("#f").onsubmit=ev=>{ev.preventDefault();
-      const val={name:sh.querySelector("#nm").value.trim(),phone:sh.querySelector("#ph").value.trim(),coc:st.coc,cocDate:st.coc==="todo"?"":(sh.querySelector("#cdt").value||today())};
+    sh.querySelector("#f").onsubmit=ev=>{ev.preventDefault();let supId=es.value,made=null;
+      if(supId==="__new"){const nm=sh.querySelector("#nm");if(!nm.value.trim())return showErr(sh,nm,"Write a name.");made={id:uid(),name:nm.value.trim(),trade:"Electrician",phone:sh.querySelector("#ph").value.trim()};S.sups.push(made);supId=made.id}
+      const val={sup:supId,coc:st.coc,cocDate:st.coc==="todo"?"":(sh.querySelector("#cdt").value||today())};
       const ups=[undoEdit(S.settings,{elec:val})];
+      if(made)ups.push(()=>{const i=S.sups.indexOf(made);if(i>=0)S.sups.splice(i,1)});
       if(st.coc==="issued"){const t=S.tasks.find(x=>x.id==="shared_coc");if(t&&t.status!=="done")ups.push(undoEdit(t,{status:"done",doneOn:today()}))}
       save();close();render();toast("Electrician details saved.",()=>ups.forEach(u=>u()))};
   });
@@ -1871,11 +1881,12 @@ function holdDrag(ul,phId){
     li.addEventListener("click",e=>{if(li._dragged){e.stopPropagation();e.preventDefault();li._dragged=false}},true);
   });
 }
-/* ---------- plans: view a PDF or a picture at full detail, with zoom ---------- */
+/* ---------- drawings: any PDF or picture from Documents, viewed at full detail with zoom ---------- */
 let planSel="",fullPlan=false;
-const PV={plan:"",mode:"img",z:1,tx:0,ty:0,nw:0,nh:0,fit:1,max:10,rz:1,rtx:0,rty:0,rid:0,page:null,task:null,timer:0,had:false};
-const PDFS={};
-const planOf=id=>S.plans.find(p=>p.id===id);
+const PV={plan:"",mode:"img",z:1,tx:0,ty:0,nw:0,nh:0,fit:1,max:10,rz:1,rtx:0,rty:0,rid:0,page:null,task:null,timer:0,had:false,pages:1};
+const PDFS={},PAGEMEM={};
+const planOf=id=>S.docs.find(d=>d.id===id);
+const isPdfDoc=d=>/pdf/i.test(d.mime||"")||/\.pdf$/i.test(d.fn||"");
 const fmtMB=b=>b>=1048576?(b/1048576).toFixed(1).replace(".",",")+" MB":Math.round(b/1024)+" KB";
 async function getPdfLib(){
   if(window.pdfjsLib)return window.pdfjsLib;
@@ -1892,15 +1903,18 @@ async function getPdfLib(){
   window.pdfjsLib.GlobalWorkerOptions.workerSrc=URL.createObjectURL(new Blob([work],{type:"text/javascript"}));
   return window.pdfjsLib;
 }
-async function pdfPreview(pdf,n,maxW){const pg=await pdf.getPage(n),v1=pg.getViewport({scale:1}),vp=pg.getViewport({scale:maxW/v1.width}),c=document.createElement("canvas");c.width=Math.round(vp.width);c.height=Math.round(vp.height);const x=c.getContext("2d");x.fillStyle="#fff";x.fillRect(0,0,c.width,c.height);await pg.render({canvasContext:x,viewport:vp}).promise;return new Promise(r=>c.toBlob(r,"image/jpeg",.85))}
 function plansV(){
-  const head=`<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Plans</h2></div><button class="btn primary" data-act="addplan">${ic("plus")}Add plan</button></div>`;
-  if(!S.plans.length)return head+empty("map","No plans yet","Add the floor plan as a PDF or a picture. A PDF stays sharp however far you zoom in.",`<button class="btn primary" data-act="addplan">${ic("plus")}Add the floor plan</button>`);
-  const p=planOf(planSel)||S.plans[0];planSel=p.id;
-  return head+`${S.plans.length>1?`<div class="chips scroll" role="group" aria-label="Choose a plan" style="margin-bottom:10px">${S.plans.map(x=>`<button type="button" class="chip" data-sub="plan:${x.id}" aria-pressed="${x.id===p.id}">${esc(x.name)}</button>`).join("")}</div>`:""}
+  const drawings=S.docs.filter(d=>d.type==="drawing"&&docVisible(d));
+  let p=planOf(planSel);if(!p||!docVisible(p))p=drawings[0];
+  const head=`<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn("docs")}<h2>Drawings</h2></div><button class="btn primary" data-act="addplan">${ic("plus")}Add</button></div>`;
+  if(!p)return head+empty("map","No drawings yet","Add the floor plan or any drawing as a PDF or a picture. A PDF stays sharp however far you zoom in.",`<button class="btn primary" data-act="addplan">${ic("plus")}Add a drawing</button>`);
+  planSel=p.id;
+  const list=[...drawings];if(!list.some(x=>x.id===p.id))list.push(p);
+  return head+`${list.length>1?`<div class="chips scroll" role="group" aria-label="Choose a drawing" style="margin-bottom:10px">${list.map(x=>`<button type="button" class="chip" data-sub="plan:${x.id}" aria-pressed="${x.id===p.id}">${esc(x.name)}</button>`).join("")}</div>`:""}
   <div class="plw ${fullPlan?"full":""}"><div class="plv" id="plv" role="group" aria-label="${esc(p.name)}. Drag to move around. Pinch or use the buttons to zoom."><div class="plc" id="plc"><img id="plimg" alt="${esc(p.name)}" hidden></div><canvas id="plcv" hidden></canvas></div>
-  <div class="pltools"><button type="button" class="btn small icon" data-act="plzout" aria-label="Zoom out">${ic("minus")}</button><button type="button" class="btn small icon" data-act="plzin" aria-label="Zoom in">${ic("plus")}</button><button type="button" class="btn small" data-act="plfit">Fit</button><button type="button" class="btn small icon" data-act="plfull" aria-label="${fullPlan?"Exit full screen":"Full screen"}">${ic(fullPlan?"x":"expand","sm")}</button><button type="button" class="btn small icon" data-act="plopts" aria-label="Plan options: rename or delete">${ic("sliders","sm")}</button></div></div>
-  <p class="hint">${esc(p.name)} · ${p.kind==="pdf"?"PDF, sharp at any zoom":"Picture"}${p.size?" · "+fmtMB(p.size):""}. Pinch or use + and − to zoom, drag to move around.</p>`;
+  <div class="pltools"><button type="button" class="btn small icon" data-act="plzout" aria-label="Zoom out">${ic("minus")}</button><button type="button" class="btn small icon" data-act="plzin" aria-label="Zoom in">${ic("plus")}</button><button type="button" class="btn small" data-act="plfit">Fit</button><button type="button" class="btn small icon" data-act="plfull" aria-label="${fullPlan?"Exit full screen":"Full screen"}">${ic(fullPlan?"x":"expand","sm")}</button><button type="button" class="btn small icon" data-act="opendoc" data-id="${p.id}" aria-label="Document details: share, save, edit or delete">${ic("sliders","sm")}</button>
+  <span class="plpg" id="plpg" hidden><button type="button" class="btn small icon" data-act="plprev" aria-label="Previous page">${ic("left","sm")}</button><b class="small" id="plpn"></b><button type="button" class="btn small icon" data-act="plnext" aria-label="Next page">${ic("chev","sm")}</button></span></div></div>
+  <p class="hint">${esc(p.name)} · ${isPdfDoc(p)?"PDF, sharp at any zoom":"Picture"}${p.size?" · "+fmtMB(p.size):""}. Pinch or use + and − to zoom, drag to move around.</p>`;
 }
 function applyView(){
   if(PV.mode==="img"){const c=$("#plc");if(c)c.style.transform=`translate(${PV.tx}px,${PV.ty}px) scale(${PV.z})`;return}
@@ -1931,24 +1945,27 @@ function fitView(){
 function clampView(){const v=$("#plv");if(!v)return;const m=80;PV.tx=Math.min(v.clientWidth-m,Math.max(m-PV.nw*PV.z,PV.tx));PV.ty=Math.min(v.clientHeight-m,Math.max(m-PV.nh*PV.z,PV.ty))}
 function zoomAt(cx,cy,f){const z2=Math.max(PV.fit*.9,Math.min(PV.max,PV.z*f)),k=z2/PV.z;PV.tx=cx-(cx-PV.tx)*k;PV.ty=cy-(cy-PV.ty)*k;PV.z=z2;clampView();applyView()}
 function zoomCenter(f){const v=$("#plv");if(v)zoomAt(v.clientWidth/2,v.clientHeight/2,f)}
+function turnPage(d){const n=Math.max(1,Math.min(PV.pages,(PAGEMEM[planSel]||1)+d));if(n===(PAGEMEM[planSel]||1))return;PAGEMEM[planSel]=n;PV.plan="";PV.had=false;render()}
 async function initPlanView(){
   const plv=$("#plv");if(!plv)return;const p=planOf(planSel);if(!p)return;
   const blob=await mGet(p.media).catch(()=>null);
-  if(!blob){plv.insertAdjacentHTML("beforeend",'<div class="mmiss" style="position:absolute;inset:0">'+ic("cloud","xl")+'<span>'+(p.shared===false?"This plan is large and stays on the phone that added it.":"The plan is still loading from your team.")+'</span></div>');return}
-  const img=$("#plimg"),plc=$("#plc"),cv=$("#plcv");
-  PV.mode=p.kind==="pdf"?"pdf":"img";
+  if(!blob){plv.insertAdjacentHTML("beforeend",'<div class="mmiss" style="position:absolute;inset:0">'+ic("cloud","xl")+'<span>The file is still loading from your team.</span></div>');return}
+  const img=$("#plimg"),plc=$("#plc"),cv=$("#plcv"),pdfMode=isPdfDoc(p);
+  PV.mode=pdfMode?"pdf":"img";
   try{
-    if(PV.mode==="pdf"){
+    if(pdfMode){
       const lib=await getPdfLib();
       if(!PDFS[p.id]){PDFS[p.id]=await lib.getDocument({data:await blob.arrayBuffer()}).promise}
-      PV.page=await PDFS[p.id].getPage(p.page||1);const v1=PV.page.getViewport({scale:1});PV.nw=v1.width;PV.nh=v1.height;
+      PV.pages=PDFS[p.id].numPages;const pg=Math.min(PAGEMEM[p.id]||1,PV.pages);PAGEMEM[p.id]=pg;
+      PV.page=await PDFS[p.id].getPage(pg);const v1=PV.page.getViewport({scale:1});PV.nw=v1.width;PV.nh=v1.height;
       cv.hidden=false;plc.hidden=true;
+      const box=$("#plpg");if(box&&PV.pages>1){box.hidden=false;$("#plpn").textContent="Page "+pg+" of "+PV.pages}
     }else{
       const u=await mUrl(p.media);await new Promise(r=>{img.onload=r;img.onerror=r;img.src=u});
-      PV.nw=img.naturalWidth||p.w||1000;PV.nh=img.naturalHeight||p.h||700;
-      img.hidden=false;img.style.width=PV.nw+"px";img.style.height=PV.nh+"px";plc.style.width=PV.nw+"px";plc.style.height=PV.nh+"px";cv.hidden=true;
+      PV.nw=img.naturalWidth||1000;PV.nh=img.naturalHeight||700;
+      img.hidden=false;img.style.width=PV.nw+"px";img.style.height=PV.nh+"px";plc.style.width=PV.nw+"px";plc.style.height=PV.nh+"px";cv.hidden=true;PV.pages=1;
     }
-  }catch(e){plv.insertAdjacentHTML("beforeend",'<div class="mmiss" style="position:absolute;inset:0">'+ic("cloud","xl")+'<span>This plan needs an internet connection to open the first time.</span></div>');return}
+  }catch(e){plv.insertAdjacentHTML("beforeend",'<div class="mmiss" style="position:absolute;inset:0">'+ic("cloud","xl")+'<span>This PDF needs an internet connection to open the first time.</span></div>');return}
   if(!plv.isConnected)return;
   plv.style.height=fullPlan?"":Math.min(innerHeight*.66,Math.max(280,plv.clientWidth*PV.nh/PV.nw+28))+"px";
   const keep=PV.plan===p.id&&PV.had;
@@ -1973,52 +1990,6 @@ async function initPlanView(){
   plv.addEventListener("wheel",e=>{e.preventDefault();const r=plv.getBoundingClientRect();zoomAt(e.clientX-r.left,e.clientY-r.top,e.deltaY<0?1.2:1/1.2)},{passive:false});
   plv.addEventListener("dblclick",e=>{const r=plv.getBoundingClientRect();zoomAt(e.clientX-r.left,e.clientY-r.top,2)});
 }
-function planAddSheet(){
-  let file=null,pdf=null,page=1,pages=1,busy=false;
-  sheet("Add a plan",`<form id="f" novalidate><p class="muted" style="margin:6px 0 0">Add a floor plan or drawing as a PDF or a picture. A PDF keeps its full sharpness when you zoom in.</p>
-  <label class="f" for="pn">Name</label><input id="pn" class="t" maxlength="40" value="${S.plans.length?"":"Floor plan"}" placeholder="For example: Floor plan">
-  <div class="photo-add"><button type="button" class="btn" id="pf2">${ic("upload")}Choose file</button><button type="button" class="btn" id="pc2">${ic("camera")}Take photo</button></div>
-  <input type="file" id="fi" accept="application/pdf,image/*" hidden><input type="file" id="fc" accept="image/*" capture="environment" hidden>
-  <div id="pgbox" hidden style="margin-top:12px"><label class="f" style="margin-top:0">PDF page</label><div class="stepper"><button type="button" data-st="-1" aria-label="Previous page">${ic("minus")}</button><input id="pg" inputmode="numeric" value="1" aria-label="Page number"><button type="button" data-st="1" aria-label="Next page">${ic("plus")}</button></div><p class="hint" id="pgn"></p></div>
-  <div class="cardprev" id="pvw" hidden style="margin-top:12px"></div><p class="hint" id="pst"></p>
-  <div class="foot"><button class="btn primary block" id="go" disabled>Add plan</button></div></form>`,(sh,close)=>{
-    const st=t=>sh.querySelector("#pst").textContent=t,go=sh.querySelector("#go"),pv=sh.querySelector("#pvw");
-    const showPrev=async()=>{if(!file)return;busy=true;go.disabled=true;st("Preparing preview…");try{const b=pdf?await pdfPreview(pdf,page,900):file;pv.hidden=false;pv.innerHTML='<img src="'+URL.createObjectURL(b)+'" alt="Preview">';st(fmtMB(file.size)+(pdf?" · "+pages+" page"+(pages===1?"":"s"):""));go.disabled=false}catch(e){st("Could not read that file. Try a different one.")}busy=false};
-    const take=async e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
-      if(f.size>40*1048576){st("That file is over 40 MB. Choose a smaller one.");return}
-      const isPdf=f.type==="application/pdf"||/\.pdf$/i.test(f.name);
-      if(!isPdf&&!/^image\//.test(f.type)){st("Choose a PDF or a picture.");return}
-      file=f;pdf=null;sh.querySelector("#pgbox").hidden=true;
-      if(isPdf){st("Opening the PDF…");try{const lib=await getPdfLib();pdf=await lib.getDocument({data:await f.arrayBuffer()}).promise;pages=pdf.numPages;page=1;sh.querySelector("#pg").value=1;sh.querySelector("#pgn").textContent=pages+" page"+(pages===1?"":"s")+" in this PDF. Pick the page with the plan.";sh.querySelector("#pgbox").hidden=pages<2}catch{file=null;st("The PDF reader needs an internet connection the first time. Connect, or add a picture of the plan.");return}}
-      if(!sh.querySelector("#pn").value.trim())sh.querySelector("#pn").value=f.name.replace(/\.[^.]+$/,"").slice(0,40);
-      showPrev()};
-    sh.querySelector("#fi").onchange=take;sh.querySelector("#fc").onchange=take;
-    sh.querySelector("#pf2").onclick=()=>sh.querySelector("#fi").click();sh.querySelector("#pc2").onclick=()=>sh.querySelector("#fc").click();
-    const setPage=n=>{page=Math.max(1,Math.min(pages,n));sh.querySelector("#pg").value=page;showPrev()};
-    sh.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>setPage(page+ +b.dataset.st));sh.querySelector("#pg").onchange=e=>setPage(parseInt(e.target.value)||1);
-    sh.querySelector("#f").onsubmit=async e=>{e.preventDefault();if(!file||busy)return;const nm=sh.querySelector("#pn");if(!nm.value.trim())return showErr(sh,nm,"Give the plan a name.");
-      go.disabled=true;go.textContent="Saving…";
-      try{
-        let w,h;
-        if(pdf){const pg=await pdf.getPage(page),v=pg.getViewport({scale:1});w=v.width;h=v.height}
-        else{const bm=await createImageBitmap(file);w=bm.width;h=bm.height;bm.close&&bm.close()}
-        const id=uid(),mid="pl"+uid(),big=file.size>8*1048576;
-        await mPut(mid,file);if(!big)queueMedia(mid);
-        const plan={id,name:nm.value.trim(),media:mid,kind:pdf?"pdf":"img",page:pdf?page:1,w:Math.round(w),h:Math.round(h),size:file.size,...(big?{shared:false}:{})};
-        S.plans.push(plan);planSel=id;PV.plan="";PV.had=false;logAct("Added the plan: "+plan.name);save();close();tab="plans";render();
-        toast(big?"Plan added. It is large, so it stays on this phone.":"Plan added.")}
-      catch(err){go.disabled=false;go.textContent="Add plan";st("Could not save that file. Try a smaller one.")}};
-  });
-}
-function planOptsSheet(){
-  const p=planOf(planSel);if(!p)return;
-  sheet("Plan options",`<form id="f" novalidate><label class="f" for="pn">Name</label><input id="pn" data-autofocus class="t" maxlength="40" value="${esc(p.name)}">
-  <button type="button" class="btn block danger" id="pdl" style="margin-top:16px">${ic("trash")}Delete this plan</button>
-  <div class="foot"><button class="btn primary block">Save name</button></div></form>`,(sh,close)=>{
-    sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const nm=sh.querySelector("#pn");if(!nm.value.trim())return showErr(sh,nm,"Give the plan a name.");const u=undoEdit(p,{name:nm.value.trim()});save();close();render();toast("Plan renamed.",u)};
-    sh.querySelector("#pdl").onclick=()=>{close();const idx=S.plans.indexOf(p);S.plans.splice(idx,1);planSel="";save();render();toast("Plan deleted.",()=>{S.plans.splice(idx,0,p);planSel=p.id})};
-  });
-}
 addEventListener("keydown",e=>{if(e.key==="Escape"&&fullPlan&&!closeSheet&&!document.querySelector(".pop")&&!document.getElementById("lbx")){fullPlan=false;document.body.classList.remove("lock");render()}});
 /* ---------- documents: quotes, contract, invoices, certificates, drawings, delivery notes ---------- */
 const DTYPES=[["contract","Contract","clip",1],["quote","Quote","cash",1],["invoice","Invoice","cash",1],["cert","Certificate","check",0],["drawing","Drawing","map",0],["delivery","Delivery note","truck",0],["other","Other","note",0]];
@@ -2039,11 +2010,11 @@ function docsV(){
   ${locked?`<div class="note-card">${ic("lock")}<span><b>${locked} money document${locked===1?" is":"s are"} locked.</b> Contract, quotes and invoices need the money password.<br><button type="button" class="linkbtn" data-act="docunlock" style="padding:0;min-height:32px">Enter password</button></span></div>`:""}
   <div class="card">${list.length?`<ul class="list">${list.map(d=>`<li class="tap" tabindex="0" data-act="opendoc" data-id="${d.id}"><span class="row-ic ${docMoney(d)?"":"sky"}">${ic(docIcon(d))}</span><div class="grow"><div class="lt">${esc(d.name)}</div><div class="ls">${esc(dtype(d.type)[1])} · ${dshort(d.date)}${d.size?" · "+fmtMB(d.size):""}${d.sup?" · "+esc(supName(d.sup)):""}</div></div>${ic("chev")}</li>`).join("")}</ul>`:`<p class="muted" style="margin:6px 0 0">No documents in this list.</p>`}</div>`;
 }
-function docSheet(id){
+function docSheet(id,presetType){
   const d=id?S.docs.find(x=>x.id===id):null;
-  const types=DTYPES.filter(t=>role!=="builder"||!t[3]),st={type:d?.type||"other"};
+  const types=DTYPES.filter(t=>role!=="builder"||!t[3]),st={type:d?.type||presetType||"other"};
   let file=null;
-  sheet(d?"Edit document":"Add a document",`<form id="f" novalidate>
+  sheet(d?"Edit document":presetType==="drawing"?"Add a drawing":"Add a document",`<form id="f" novalidate>
   ${d?"":`<p class="muted" style="margin:6px 0 0">PDF, picture, Word or Excel file, up to 10 MB.</p><div class="photo-add"><button type="button" class="btn" id="df">${ic("upload")}Choose file</button><button type="button" class="btn" id="dc">${ic("camera")}Take photo</button></div><input type="file" id="fi" hidden><input type="file" id="fc" accept="image/*" capture="environment" hidden><p class="hint" id="fs"></p>`}
   <label class="f" for="dn">Name</label><input id="dn" ${d?"data-autofocus":""} class="t" maxlength="80" value="${esc(d?.name||"")}" placeholder="For example: Roof sheeting quote">
   <label class="f">Type</label>${chipRow("type",types.map(t=>[t[0],t[1]]),st.type,"scroll")}
@@ -2080,7 +2051,7 @@ function docView(id){
     const st=t=>sh.querySelector("#dst").textContent=t;
     const get=async()=>{const b=await mGet(d.media).catch(()=>null);if(!b){st("This file is still loading from your team. Try again in a moment.");return null}return b};
     const typed=b=>new Blob([b],{type:d.mime||b.type||"application/octet-stream"});
-    sh.querySelector("#do").onclick=async()=>{const b=await get();if(!b)return;if(/^image\//.test(d.mime||b.type)){close();const u=await mUrl(d.media);if(u)lightbox([d.media],0);return}
+    sh.querySelector("#do").onclick=async()=>{const b=await get();if(!b)return;if(isPdfDoc(d)||d.type==="drawing"){close();planSel=d.id;PV.plan="";PV.had=false;go("plans");return}if(/^image\//.test(d.mime||b.type)){close();const u=await mUrl(d.media);if(u)lightbox([d.media],0);return}
       const a=document.createElement("a");a.href=URL.createObjectURL(typed(b));a.target="_blank";a.rel="noopener";document.body.append(a);a.click();a.remove()};
     sh.querySelector("#ds").onclick=async()=>{const b=await get();if(!b)return;const f=new File([b],docFileName(d),{type:d.mime||b.type||"application/octet-stream"});
       if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:d.name})}catch{}}
