@@ -1098,7 +1098,7 @@ function buildV(){
   ${whoLine()}${attentionV()}${pushPrompt()}${backupDue()}<div class="ptiles" role="list">${tiles}</div>
   <div class="eyebrow" style="margin:20px 2px 10px">Recently posted</div>
   ${rec.length?`<div class="rps">${rec.map(l=>`<button type="button" class="rp" data-go="site"><span class="rpi">${l.media?.length?`<span data-m="${l.media[0]}" style="position:absolute;inset:0"></span>`:ic(l.kind==="issue"?"alert":"note","lg")}</span><span class="rpt"><b style="color:${PCOL[l.phase]||"var(--accent)"}">${esc(l.phase&&PSHORT[l.phase]?PSHORT[l.phase]:"Site")}</b><span>${esc(l.text?l.text.slice(0,48):l.kind==="issue"?"Issue reported":"Added a photo")}</span><small>${dlabel(l.date)}</small></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:0 2px">Photos and notes you add will show up here.</p>`}
-  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="tasks">${ic("check")}<span>Tasks</span>${sm.code&&S.tasks.some(t=>t.assignee===sm.pid&&t.status!=="done")?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${S.tasks.filter(t=>t.assignee===sm.pid&&t.status!=="done").length}</i>`:""}</button><button type="button" class="sc" data-go="docs">${ic("note")}<span>Documents</span>${S.docs.filter(docVisible).length?`<small class="muted">${S.docs.filter(docVisible).length}</small>`:""}</button></div>`;
+  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="tasks">${ic("check")}<span>Tasks</span>${sm.code&&S.tasks.some(t=>t.assignee===sm.pid&&t.status!=="done")?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${S.tasks.filter(t=>t.assignee===sm.pid&&t.status!=="done").length}</i>`:""}</button><button type="button" class="sc" data-go="docs">${ic("note")}<span>Documents</span>${S.docs.filter(docListed).length?`<small class="muted">${S.docs.filter(docListed).length}</small>`:""}</button></div>`;
 }
 function phaseV(){
   const id=curPh,p=phase(id);if(!p){tab="build";return buildV()}
@@ -1243,7 +1243,7 @@ function act(a,id,el){
    addphoto:()=>quickPhoto(id&&phase(id)?id:undefined),addissue:()=>logSheet(null,"issue"),editlog:()=>logSheet(id),dellog:()=>delRecs(S.logs,l=>l.id===id,"Entry"),
    fix:()=>{const l=S.logs.find(x=>x.id===id),u=undoEdit(l,{fixed:true});logAct("Marked an issue as fixed");save();render();toast("Issue marked fixed.",u)},
    lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
-   refresh:()=>refreshApp(),adddoc:()=>docSheet(),opendoc:()=>docView(id),docunlock:()=>moneyGate(()=>render()),godocs:()=>go("docs"),addplan:()=>docSheet(undefined,"drawing"),plprev:()=>turnPage(-1),plnext:()=>turnPage(1),plzin:()=>zoomCenter(1.5),plzout:()=>zoomCenter(1/1.5),plfit:()=>fitView(),plfull:()=>{fullPlan=!fullPlan;PV.had=false;document.body.classList.toggle("lock",fullPlan);render()},goplans:()=>go("plans"),gostock:()=>{matSec="stock";matF="all";go("mats")},mvup:()=>moveKey(curPh,id,-1),mvdn:()=>moveKey(curPh,id,1),phstep:()=>phaseStep(+id),report:()=>reportSheet(),acts:()=>actsSheet(),phba:()=>baSheet(id),outdoor:()=>{outdoor=!outdoor;try{localStorage.setItem("build2-outdoor",outdoor?"1":"0")}catch{}applyOutdoor();render()},share:()=>shareSheet(),project:()=>projectSheet(),whoami:()=>whoSheet(),
+   refresh:()=>refreshApp(),adddoc:()=>docSheet(),opendoc:()=>{const d=S.docs.find(x=>x.id===id);if(d&&docListed(d)&&!docVisible(d))moneyGate(()=>docView(id),"document");else docView(id)},docunlock:()=>moneyGate(()=>render()),godocs:()=>go("docs"),addplan:()=>docSheet(undefined,"drawing"),plprev:()=>turnPage(-1),plnext:()=>turnPage(1),plzin:()=>zoomCenter(1.5),plzout:()=>zoomCenter(1/1.5),plfit:()=>fitView(),plfull:()=>{fullPlan=!fullPlan;PV.had=false;document.body.classList.toggle("lock",fullPlan);render()},goplans:()=>go("plans"),gostock:()=>{matSec="stock";matF="all";go("mats")},mvup:()=>moveKey(curPh,id,-1),mvdn:()=>moveKey(curPh,id,1),phstep:()=>phaseStep(+id),report:()=>reportSheet(),acts:()=>actsSheet(),phba:()=>baSheet(id),outdoor:()=>{outdoor=!outdoor;try{localStorage.setItem("build2-outdoor",outdoor?"1":"0")}catch{}applyOutdoor();render()},share:()=>shareSheet(),project:()=>projectSheet(),whoami:()=>whoSheet(),
    theme:()=>{if(id==="auto"){document.documentElement.removeAttribute("data-theme");try{localStorage.setItem("build2-theme","auto")}catch{}}else{document.documentElement.setAttribute("data-theme",id);try{localStorage.setItem("build2-theme",id)}catch{}}paintTheme();render()},
    export:()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`newberry-build-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")},
    import:()=>{const f=$("#impf");f.onchange=async()=>{try{const d=JSON.parse(await f.files[0].text());if(!Array.isArray(d.tasks))throw 0;confirmSheet("Restore this backup?","This replaces the project on this phone with the backup.","Restore",()=>{S={...DEF(),...d};save();render();toast("Backup restored.")})}catch{toast("That file is not a Newberry Build backup.")}f.value=""};f.click()},
@@ -1954,12 +1954,12 @@ function layoutFab(open){
   });
 }
 /* ---------- money password ---------- */
-let moneyOK=false,hiddenAt=0;const MONEY_PW="007";
+let moneyOK=false,hiddenAt=0;const MONEY_PW="0027";
 function lockMoney(){moneyOK=false;if(tab==="money")tab="build";render()}
 document.addEventListener("visibilitychange",()=>{if(document.hidden)hiddenAt=Date.now();else if(moneyOK&&hiddenAt&&Date.now()-hiddenAt>12e4)lockMoney()});
-function moneyGate(then){
+function moneyGate(then,what){
   let d="";
-  sheet("Money is locked",`<p class="muted" style="margin:6px 0 0">Enter the password to see money.</p><div class="lk-dots" id="md" role="img"></div><p class="lk-s" id="ms" role="status" style="text-align:center"></p>
+  sheet(what?"Locked":"Money is locked",`<p class="muted" style="margin:6px 0 0">Enter the password to ${what?"open this "+what:"see money"}.</p><div class="lk-dots" id="md" role="img"></div><p class="lk-s" id="ms" role="status" style="text-align:center"></p>
   <div class="lk-pad">${[1,2,3,4,5,6,7,8,9].map(n=>`<button type="button" data-k="${n}" aria-label="${n}">${n}</button>`).join("")}<button type="button" class="ghost" tabindex="-1" aria-hidden="true"></button><button type="button" data-k="0" aria-label="0">0</button><button type="button" data-k="b" aria-label="Delete the last digit">${ic("backspace")}</button></div>
   <div class="foot"><button type="button" class="btn block" id="mc">Cancel</button></div>`,(sh,close)=>{
     const dots=sh.querySelector("#md"),msg=sh.querySelector("#ms");
@@ -2151,6 +2151,7 @@ const DTYPES=[["contract","Contract","clip",1],["quote","Quote","cash",1],["invo
 const dtype=k=>DTYPES.find(t=>t[0]===k)||DTYPES[6];
 const docMoney=d=>!!dtype(d.type)[3];
 const docVisible=d=>docMoney(d)?(moneyOK&&canMoney()):(d.locked?moneyOK:true);
+const docListed=d=>docMoney(d)?canMoney():true;
 const docLockedHidden=d=>!docVisible(d)&&(docMoney(d)?canMoney():true);
 const DOC_MAX=10*1048576;
 let docF="all";
@@ -2158,13 +2159,12 @@ const docIcon=d=>/^image\//.test(d.mime||"")?"image":dtype(d.type)[2];
 const guessType=n=>{n=(n||"").toLowerCase();return /quot|estimate/.test(n)?"quote":/invoice|\binv\b|statement/.test(n)?"invoice":/contract|agreement/.test(n)?"contract":/coc|certificate|compliance|approval/.test(n)?"cert":/plan|drawing|elevation|section|layout/.test(n)?"drawing":/delivery|dn\b|waybill/.test(n)?"delivery":"other"};
 function docsV(){
   const head=`<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Documents</h2></div><div class="row" style="gap:8px">${moneyOK?`<button class="iconbtn" data-act="lockmoney" aria-label="Lock documents now">${ic("lock")}</button>`:""}<button class="btn primary" data-act="adddoc">${ic("plus")}Add</button></div></div>`;
-  const vis=S.docs.filter(docVisible),locked=S.docs.filter(docLockedHidden).length;
+  const vis=S.docs.filter(docListed);
   const types=DTYPES.filter(t=>canMoney()||!t[3]),cnt=k=>vis.filter(d=>d.type===k).length;
   const list=vis.filter(d=>docF==="all"||d.type===docF).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||b.id.localeCompare(a.id));
   if(!S.docs.length)return head+empty("note","No documents yet","Keep quotes, the contract, invoices, delivery notes and certificates in one place, and send any of them on WhatsApp.",`<button class="btn primary" data-act="adddoc">${ic("plus")}Add the first document</button>`);
   return head+`<div class="chips scroll" role="group" aria-label="Filter documents" style="margin-bottom:12px">${[["all","All · "+vis.length],...types.filter(t=>cnt(t[0])).map(t=>[t[0],t[1]+" · "+cnt(t[0])])].map(([k,l])=>`<button type="button" class="chip" data-sub="doc:${k}" aria-pressed="${docF===k}">${esc(l)}</button>`).join("")}</div>
-  ${locked?`<div class="note-card">${ic("lock")}<span><b>${locked} document${locked===1?" is":"s are"} locked.</b> Contracts, quotes, invoices and any document you lock need the money password.<br><button type="button" class="linkbtn" data-act="docunlock" style="padding:0;min-height:32px">Enter password</button></span></div>`:""}
-  <div class="card">${list.length?`<ul class="list">${list.map(d=>`<li class="tap" tabindex="0" data-act="opendoc" data-id="${d.id}"><span class="row-ic ${docMoney(d)?"":"sky"}">${ic(docIcon(d))}</span><div class="grow"><div class="lt">${esc(d.name)}${d.locked&&!docMoney(d)?` <span class="muted" style="display:inline-flex;vertical-align:middle" aria-label="Locked">${ic("lock","sm")}</span>`:""}</div><div class="ls">${esc(dtype(d.type)[1])} · ${dshort(d.date)}${d.size?" · "+fmtMB(d.size):""}${d.sup?" · "+esc(supName(d.sup)):""}</div></div>${ic("chev")}</li>`).join("")}</ul>`:`<p class="muted" style="margin:6px 0 0">No documents in this list.</p>`}</div>`;
+  <div class="card">${list.length?`<ul class="list">${list.map(d=>`<li class="tap" tabindex="0" data-act="opendoc" data-id="${d.id}"><span class="row-ic ${docMoney(d)?"":"sky"}">${ic(docIcon(d))}</span><div class="grow"><div class="lt">${esc(d.name)}${docMoney(d)||d.locked?` <span class="muted" style="display:inline-flex;vertical-align:middle" aria-label="Locked">${ic("lock","sm")}</span>`:""}</div><div class="ls">${esc(dtype(d.type)[1])} · ${dshort(d.date)}${d.size?" · "+fmtMB(d.size):""}${d.sup?" · "+esc(supName(d.sup)):""}</div></div>${ic("chev")}</li>`).join("")}</ul>`:`<p class="muted" style="margin:6px 0 0">No documents in this list.</p>`}</div>`;
 }
 function docSheet(id,presetType){
   const d=id?S.docs.find(x=>x.id===id):null;
