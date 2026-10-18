@@ -45,7 +45,7 @@ begin
   if k in ('tasks','mats','sups','plans') then return e='all'; end if;
   if k='settings' then return e='all' or m='edit'; end if;
   if k='logs' then return e in ('all','notes'); end if;
-  if k in ('costs','pays') then return m='edit'; end if;
+  if k in ('costs','pays','trades') then return m='edit'; end if;
   if k='docs' then if mon then return m='edit'; else return e in ('all','notes') or m='edit'; end if; end if;
   if k in ('acts','media') then if coalesce(d->>'m','0')='1' then return m='edit'; else return e in ('all','notes') or m='edit'; end if; end if;
   if k='msgs' then return coalesce((w.perm->>'send')::boolean,false) and d->>'from'=w.pid; end if;
@@ -97,6 +97,7 @@ begin
         else (mg or case b.kind
           when 'costs' then mv<>'none'
           when 'pays' then mv<>'none'
+          when 'trades' then mv<>'none'
           when 'docs' then mv<>'none' or coalesce(b.data->>'type','') not in ('contract','quote','invoice')
           when 'acts' then mv<>'none' or coalesce(b.data->>'m','0')<>'1'
           when 'media' then mv<>'none' or coalesce(b.data->>'m','0')<>'1'
