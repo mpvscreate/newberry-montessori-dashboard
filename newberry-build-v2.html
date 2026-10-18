@@ -435,6 +435,9 @@ html,body,button,a,input,select,textarea,.chip,.st,.stp,.lk-pad button,[role=but
 .plw.full{position:fixed;inset:0;z-index:35;background:var(--paper);display:flex;flex-direction:column;padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(10px + env(safe-area-inset-bottom,0px))}
 .plw.full .plv{flex:1;height:auto;border-radius:16px}.plw.full .pltools{margin:10px 0 0}
 .ro [data-act="addplan"],.ro [data-act="plopts"]{display:none!important}
+.sheet .grab{position:relative;width:44px;height:5px;border-radius:99px;background:var(--field);opacity:.5;margin:-6px auto 10px;cursor:grab;touch-action:none}
+.sheet .grab::before{content:"";position:absolute;left:-30px;right:-30px;top:-14px;bottom:-14px}
+.sheet .hd{touch-action:none}
 /* ---------- Newberry Build: page rules ---------- */
 .st{width:44px;height:44px;border-radius:50%;border:2px solid var(--field);background:var(--sheet);color:var(--muted);display:grid;place-items:center;cursor:pointer;flex:none;transition:box-shadow .25s,transform .08s}
 .st:active{transform:scale(.94)}
@@ -704,14 +707,14 @@ let closeSheet=null,lastFocus=null;
 function sheet(title,html,onMount){
   $("#toasts").replaceChildren();clearTimeout(toastT);
   lastFocus=document.activeElement;const l=$("#layer");
-  l.innerHTML=`<div class="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t" tabindex="-1"><div class="hd"><h2 id="sh-t">${esc(title)}</h2><button class="x" aria-label="Close dialog" type="button">${ic("x")}</button></div>${html}</div></div>`;
+  l.innerHTML=`<div class="scrim"><div class="sheet" role="dialog" aria-modal="true" aria-labelledby="sh-t" tabindex="-1"><div class="grab" aria-hidden="true"></div><div class="hd"><h2 id="sh-t">${esc(title)}</h2><button class="x" aria-label="Close dialog" type="button">${ic("x")}</button></div>${html}</div></div>`;
   document.body.classList.add("lock");[$("#app"),$("nav.tabs")].forEach(e=>e.inert=true);$("#fab-wrap").hidden=true;setFab(false);
   const sh=l.querySelector(".sheet"),scrim=l.querySelector(".scrim"),vv=window.visualViewport;
   const fit=()=>{if(!vv)return;scrim.style.height=vv.height+"px";scrim.style.top=vv.offsetTop+"px";sh.style.maxHeight=(vv.height-12)+"px"};
   vv?.addEventListener("resize",fit);vv?.addEventListener("scroll",fit);fit();
   sh.addEventListener("focusin",e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))setTimeout(()=>e.target.scrollIntoView({block:"center",behavior:"smooth"}),300)});
   const close=()=>{closePop();vv?.removeEventListener("resize",fit);vv?.removeEventListener("scroll",fit);l.innerHTML="";document.body.classList.remove("lock");[$("#app"),$("nav.tabs")].forEach(e=>e.inert=false);$("#fab-wrap").hidden=false;closeSheet=null;lastFocus?.isConnected&&lastFocus.focus()};
-  closeSheet=close;l.querySelector(".x").onclick=close;
+  closeSheet=close;l.querySelector(".x").onclick=close;sheetDrag(sh,scrim,close);
   l.querySelector(".scrim").onclick=e=>{if(e.target.classList.contains("scrim"))close()};
   sh.addEventListener("keydown",e=>{if(e.key!=="Tab")return;const f=[...sh.querySelectorAll('button:not([disabled]),[href],input:not([disabled]):not([type=hidden]),select,textarea')].filter(x=>x.offsetParent);if(!f.length)return;const a=f[0],z=f[f.length-1];
     if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}});
@@ -725,6 +728,18 @@ function growWire(sh){
   sh.addEventListener("input",e=>{if(e.target.matches&&e.target.matches("textarea.grow-ta"))f()});
   sh.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.matches&&e.target.matches("textarea.grow-ta")){e.preventDefault();e.target.blur()}});
   f();setTimeout(f,80);
+}
+/* pull a dialog down by its handle or title to close it; a short pull springs back */
+function sheetDrag(sh,scrim,close){
+  const grab=sh.querySelector(".grab"),hd=sh.querySelector(".hd");let y0=null,dy=0,t0=0,id=null;
+  const down=e=>{if(e.target.closest(".x"))return;y0=e.clientY;dy=0;t0=Date.now();id=e.pointerId;sh.style.transition="none";try{e.currentTarget.setPointerCapture(e.pointerId)}catch{}};
+  const move=e=>{if(y0===null||e.pointerId!==id)return;dy=Math.max(0,e.clientY-y0);sh.style.transform="translateY("+dy+"px)";scrim.style.background="rgba(25,15,0,"+(.55*Math.max(0,1-dy/(sh.offsetHeight||600))).toFixed(3)+")"};
+  const up=e=>{
+    if(y0===null||e.pointerId!==id)return;const v=dy/Math.max(1,Date.now()-t0);y0=null;
+    if(dy>Math.min(150,(sh.offsetHeight||600)*.33)||(v>.6&&dy>40)){sh.style.transition="transform .2s ease-in";sh.style.transform="translateY(100%)";scrim.style.transition="background .2s";scrim.style.background="rgba(25,15,0,0)";setTimeout(close,190)}
+    else{sh.style.transition="transform .2s ease-out";sh.style.transform="";scrim.style.background="";setTimeout(()=>{sh.style.transition=""},220)}
+  };
+  [grab,hd].forEach(el=>{if(!el)return;el.addEventListener("pointerdown",down);el.addEventListener("pointermove",move);el.addEventListener("pointerup",up);el.addEventListener("pointercancel",up)});
 }
 function closePop(){document.querySelector(".pop")?.remove();document.removeEventListener("pointerdown",popOutside,true);document.removeEventListener("keydown",popKey,true)}
 const popOutside=e=>{if(!e.target.closest(".pop"))closePop()};
