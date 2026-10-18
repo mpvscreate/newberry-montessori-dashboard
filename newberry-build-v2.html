@@ -1060,6 +1060,15 @@ const backBtn=(to)=>`<button class="iconbtn" data-go="${to||"build"}" aria-label
 const logsNewest=()=>[...S.logs].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||b.id.localeCompare(a.id));
 const phasePhotoIds=id=>logsNewest().filter(l=>l.phase===id).flatMap(l=>l.media||[]);
 const phasePhoto=id=>phasePhotoIds(id)[0]||"";
+const lsGet=k=>{try{return localStorage.getItem(k)||""}catch{return ""}},lsSet=(k,v)=>{try{localStorage.setItem(k,v)}catch{}};
+function backupDue(){
+  if(role!=="owner")return "";
+  const dow=new Date().getDay();if(!(dow===5||dow===6||dow===0))return "";
+  if(lsGet("build-bkdis")===today())return "";
+  const last=lsGet("build-lastbk");if(last&&(new Date(today()+"T12:00")-new Date(last+"T12:00"))/864e5<5)return "";
+  if(!S.docs.length&&!S.logs.some(l=>(l.media||[]).length))return "";
+  return `<div class="note-card" style="margin:0 0 14px">${ic("cloud")}<span><b>Friday backup.</b> Save this week's photos and documents to Google Drive.<br><button type="button" class="linkbtn" data-act="gbackup" style="padding:0;min-height:36px;margin-right:16px">Back up now</button><button type="button" class="linkbtn" data-act="bkdismiss" style="padding:0;min-height:36px">Not today</button></span></div>`;
+}
 function buildV(){
   const all=S.tasks,d=doneN(all),p=pct(d,all.length),cur=curPhases()[0],sched=schedule();
   const left=S.settings.target?Math.ceil((new Date(S.settings.target+"T12:00")-new Date(today()+"T12:00"))/864e5):null;
@@ -1070,7 +1079,7 @@ function buildV(){
   const toOrder=S.mats.filter(m=>needsOrder(m)&&(m.qty>0||secOf(m)!=="stock")).length,issues=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length;
   return `<section class="bhero"><div class="row between" style="align-items:flex-start"><div><div class="eyebrow">Whole build</div><div class="big" data-count="${p}">${p}%</div><div class="sub">${d} of ${all.length} tasks done</div></div><button class="btn ghost" data-act="report">${ic("share")}Share</button></div>
    <div class="row wr" style="gap:8px;margin-top:10px">${sched.chip}${left===null?"":left>=0?`<span class="chip-d">${ic("calendar","sm")}${left} day${left===1?"":"s"} to go</span>`:`<span class="chip-d">${ic("alert","sm")}${-left} day${left===-1?"":"s"} past target</span>`}</div><div class="meter hm"><i style="width:${p}%"></i></div>${fcLine()}</section>
-  <div class="ptiles" role="list">${tiles}</div>
+  ${backupDue()}<div class="ptiles" role="list">${tiles}</div>
   <div class="eyebrow" style="margin:20px 2px 10px">Recently posted</div>
   ${rec.length?`<div class="rps">${rec.map(l=>`<button type="button" class="rp" data-go="site"><span class="rpi">${l.media?.length?`<span data-m="${l.media[0]}" style="position:absolute;inset:0"></span>`:ic(l.kind==="issue"?"alert":"note","lg")}</span><span class="rpt"><b style="color:${PCOL[l.phase]||"var(--accent)"}">${esc(l.phase&&PSHORT[l.phase]?PSHORT[l.phase]:"Site")}</b><span>${esc(l.text?l.text.slice(0,48):l.kind==="issue"?"Issue reported":"Added a photo")}</span><small>${dlabel(l.date)}</small></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:0 2px">Photos and notes you add will show up here.</p>`}
   <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials and stock</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="docs" style="grid-column:1/-1">${ic("note")}<span>Documents</span>${S.docs.filter(docVisible).length?`<small class="muted">${S.docs.filter(docVisible).length}</small>`:""}</button></div>`;
@@ -1204,7 +1213,7 @@ function act(a,id,el){
   ({
    cyc:()=>cycTask(id),opentask:()=>taskSheet(...id.split("|")),edittask:()=>taskSheet(...id.split("|")),
    deltask:()=>{const[k]=id.split("|");const f=roomF;delRecs(S.tasks,t=>t.key===k&&(f==="all"||t.room===f||t.room==="shared"),"Task")},
-   addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>quickPhoto(id),gbackup:()=>backupSheet(),phdrive:()=>driveSave(phasePhotoIds(id).map((m,i)=>({media:m,name:(PSHORT[id]||"Phase")+" photo "+(i+1)+".jpg"}))),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),addcost:()=>costSheet(),editcost:()=>costSheet(id),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
+   addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>quickPhoto(id),gbackup:()=>backupSheet(),bkdismiss:()=>{lsSet("build-bkdis",today());render()},phdrive:()=>driveSave(phasePhotoIds(id).map((m,i)=>({media:m,name:(PSHORT[id]||"Phase")+" photo "+(i+1)+".jpg"}))),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),addcost:()=>costSheet(),editcost:()=>costSheet(id),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
    payall:()=>{payAll=!payAll;render()},resetpays:()=>{const ps=[...S.pays],cs=S.costs.filter(c=>c.pay);S.pays.length=0;cs.forEach(c=>S.costs.splice(S.costs.indexOf(c),1));payAll=false;save();render();toast("All builder payments reset to R 0.",()=>{ps.forEach(x=>S.pays.push(x));cs.forEach(c=>S.costs.push(c))})},recpay:()=>recPaySheet(),weekly:()=>weeklySheet(),addpay:()=>paySheet(),editpay:()=>paySheet(id),contract:()=>contractSheet(),typicalpay:()=>typicalPays(),
    paypay:()=>{const x=S.pays.find(q=>q.id===id),u=undoEdit(x,{paid:true,paidOn:today()});payCost(x);logAct(`Builder payment of ${money(x.amount)} recorded`,1);save();render();toast(`${money(x.amount)} paid to the builder.`,()=>{u();payCost(x)})},
    delpay:()=>{const x=S.pays.find(q=>q.id===id),lc=S.costs.find(c=>c.id==="pay_"+id);S.pays.splice(S.pays.indexOf(x),1);if(lc)S.costs.splice(S.costs.indexOf(lc),1);save();render();toast("Stage deleted.",()=>{S.pays.push(x);if(lc)S.costs.push(lc)})},
@@ -1586,7 +1595,7 @@ function backupSheet(){
           n++;bar.style.width=Math.round(n/total*100)+"%";t1.textContent=`Saving… ${n} of ${total}`}
         const data=JSON.parse(JSON.stringify(S));if(!plan.money){delete data.costs;delete data.pays;data.docs=(data.docs||[]).filter(docVisible)}
         await gUpload(t,root,new Blob([JSON.stringify(data,null,1)],{type:"application/json"}),"project-data "+today()+".json");
-        bar.style.width="100%";t1.textContent=fail?`Done. ${fail} file${fail===1?"":"s"} could not be read yet and will be saved next time.`:`Done. Everything is saved in "${gFolderName()}" in your Google Drive.`;
+        lsSet("build-lastbk",today());bar.style.width="100%";t1.textContent=fail?`Done. ${fail} file${fail===1?"":"s"} could not be read yet and will be saved next time.`:`Done. Everything is saved in "${gFolderName()}" in your Google Drive.`;
         stx.textContent="You can run this again any time. Only new files are saved.";go.textContent="Close";go.disabled=false;go.onclick=close;
       }catch(e){if(/401/.test(e.message))gTok=null;t1.textContent=/403/.test(e.message)?"Google would not allow that. Check that the Drive API is turned on.":"Stopped early. Check your connection and tap Back up now to continue.";go.disabled=false}
       gBusy=false;
@@ -1658,8 +1667,13 @@ async function push(){
     for(const[key,m]of Object.entries(sm.meta)){if(!isDirty(key,m,cur))continue;const i=key.indexOf("|"),kind=key.slice(0,i),id=key.slice(i+1);rows.push(m.del?{kind,id,data:null,deleted:true,u:m.u}:{kind,id,data:cur.get(key).r,deleted:false,u:m.u})}
     for(let i=0;i<rows.length;i+=200){const part=rows.slice(i,i+200),{error}=await sb.rpc("build_upsert",{p_code:sm.code,p_rows:part});if(error)throw error;
       part.forEach(r=>{const m=sm.meta[r.kind+"|"+r.id];if(m){if(r.deleted)m.s="x";else m.s=m.h}})}
-    for(const mid of[...sm.pendingMedia]){const b=await mGet(mid).catch(()=>null);if(!b){sm.pendingMedia=sm.pendingMedia.filter(x=>x!==mid);continue}
-      const{error}=await sb.rpc("build_upsert",{p_code:sm.code,p_rows:[{kind:"media",id:mid,data:{d:await blobToData(b)},deleted:false,u:Date.now()}]});if(error)throw error;sm.pendingMedia=sm.pendingMedia.filter(x=>x!==mid)}
+    if(!sm.mig){try{const ks=((await mTx("readonly",st=>st.getAllKeys()))||[]).filter(k=>typeof k==="string"&&!k.startsWith("lib-")&&/^[A-Za-z0-9_-]{1,60}$/.test(k));ks.forEach(k=>{if(!sm.pendingMedia.includes(k))sm.pendingMedia.push(k)});sm.mig=1}catch{}}
+    for(const mid of[...sm.pendingMedia]){const b=await mGet(mid).catch(()=>null);if(!b||!/^[A-Za-z0-9_-]{1,60}$/.test(mid)){sm.pendingMedia=sm.pendingMedia.filter(x=>x!==mid);continue}
+      const path=sm.code+"/"+mid,up=await sb.storage.from("build-media").upload(path,b,{contentType:b.type||"application/octet-stream",upsert:false});
+      if(up.error&&!/exist|duplicate|409/i.test((up.error.message||"")+(up.error.statusCode||""))){
+        if(/size|exceed|413|too large|mime|not supported/i.test((up.error.message||"")+(up.error.statusCode||""))){console.warn("media skipped",mid,up.error);sm.pendingMedia=sm.pendingMedia.filter(x=>x!==mid);continue}
+        throw up.error}
+      const{error}=await sb.rpc("build_upsert",{p_code:sm.code,p_rows:[{kind:"media",id:mid,data:{p:path,t:b.type||"",n:b.size},deleted:false,u:Date.now()}]});if(error)throw error;sm.pendingMedia=sm.pendingMedia.filter(x=>x!==mid)}
     persistSync();setSync("ok");
   }catch(e){lastErr=e?.message||String(e);console.warn("sync push",e);setSync(navigator.onLine?"error":"offline")}
   finally{pushing=false;persistSync()}
@@ -1693,7 +1707,9 @@ async function pull(){
       const{data,error}=await sb.rpc("build_pull",{p_code:sm.code,p_since:from||null,p_lim:40});if(error)throw error;
       if(!data.length)break;
       if(applyRemote(data))changed=true;
-      for(const r of data)if(r.kind==="media"&&!r.deleted&&r.data?.d){const have=await mGet(r.id).catch(()=>null);if(!have){await mPut(r.id,await (await fetch(r.data.d)).blob());gotMedia=true}}
+      for(const r of data)if(r.kind==="media"&&!r.deleted&&(r.data?.d||r.data?.p)){const have=await mGet(r.id).catch(()=>null);if(!have){
+        if(r.data.p){const res=await fetch(SB_URL+"/storage/v1/object/public/build-media/"+r.data.p).catch(()=>null);if(res&&res.ok){await mPut(r.id,await res.blob());gotMedia=true}}
+        else{await mPut(r.id,await (await fetch(r.data.d)).blob());gotMedia=true}}}
       const last=data.at(-1).updated_at;max=last;if(data.length<40||last===from)break;from=last;
     }
     if(max)sm.lastPull=max;persistSync();
