@@ -435,11 +435,11 @@ html,body,button,a,input,select,textarea,.chip,.st,.stp,.lk-pad button,[role=but
 .plw.full{position:fixed;inset:0;z-index:35;background:var(--paper);display:flex;flex-direction:column;padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(10px + env(safe-area-inset-bottom,0px))}
 .plw.full .plv{flex:1;height:auto;border-radius:16px}.plw.full .pltools{margin:10px 0 0}
 .ro [data-act="addplan"],.ro [data-act="plopts"]{display:none!important}
-.sheet .hd{position:sticky;top:0;z-index:3;background:var(--sheet);margin:-18px -18px 6px;padding:24px 18px 8px;border-radius:28px 28px 0 0;touch-action:none}
+.sheet .hd{position:sticky;top:-18px;z-index:3;background:var(--sheet);margin:-18px -18px 6px;padding:24px 18px 8px;border-radius:28px 28px 0 0;touch-action:none}
 .sheet .grab{position:absolute;left:50%;top:8px;transform:translateX(-50%);width:44px;height:5px;border-radius:99px;background:var(--field);opacity:.5;cursor:grab}
 .sheet .grab::before{content:"";position:absolute;left:-30px;right:-30px;top:-10px;bottom:-14px}
 .sheet input,.sheet textarea,.sheet select{scroll-margin-top:84px;scroll-margin-bottom:120px}
-.sheet.sc .hd{box-shadow:0 1px 0 var(--line),0 10px 16px -12px rgba(0,0,0,.4)}
+.sheet.scrolled .hd{box-shadow:0 1px 0 var(--line),0 10px 16px -12px rgba(0,0,0,.4)}
 /* ---------- Newberry Build: page rules ---------- */
 .st{width:44px;height:44px;border-radius:50%;border:2px solid var(--field);background:var(--sheet);color:var(--muted);display:grid;place-items:center;cursor:pointer;flex:none;transition:box-shadow .25s,transform .08s}
 .st:active{transform:scale(.94)}
@@ -719,7 +719,7 @@ function sheet(title,html,onMount){
   sh.addEventListener("focusin",e=>{if(/INPUT|TEXTAREA|SELECT/.test(e.target.tagName))setTimeout(()=>e.target.scrollIntoView({block:"nearest",behavior:"smooth"}),320)});
   if(!navPushed){try{history.pushState({nb:1},"");navPushed=true}catch{}}
   const close=()=>{if(!popClosing)setTimeout(()=>{if(!closeSheet&&navPushed){navPushed=false;backIgnore++;history.back()}},90);closePop();vv?.removeEventListener("resize",fit);vv?.removeEventListener("scroll",fit);l.innerHTML="";document.body.classList.remove("lock");[$("#app"),$("nav.tabs")].forEach(e=>e.inert=false);$("#fab-wrap").hidden=false;closeSheet=null;lastFocus?.isConnected&&lastFocus.focus()};
-  closeSheet=close;l.querySelector(".x").onclick=close;sheetDrag(sh,scrim,close);sh.addEventListener("scroll",()=>sh.classList.toggle("sc",sh.scrollTop>4),{passive:true});
+  closeSheet=close;l.querySelector(".x").onclick=close;sheetDrag(sh,scrim,close);sh.addEventListener("scroll",()=>sh.classList.toggle("scrolled",sh.scrollTop>4),{passive:true});
   l.querySelector(".scrim").onclick=e=>{if(e.target.classList.contains("scrim"))close()};
   sh.addEventListener("keydown",e=>{if(e.key!=="Tab")return;const f=[...sh.querySelectorAll('button:not([disabled]),[href],input:not([disabled]):not([type=hidden]),select,textarea')].filter(x=>x.offsetParent);if(!f.length)return;const a=f[0],z=f[f.length-1];
     if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}});
