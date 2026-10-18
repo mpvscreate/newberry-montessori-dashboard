@@ -434,7 +434,7 @@ html,body,button,a,input,select,textarea,.chip,.st,.stp,.lk-pad button,[role=but
 .pltools{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:10px 0 6px}
 .plw.full{position:fixed;inset:0;z-index:35;background:var(--paper);display:flex;flex-direction:column;padding:calc(10px + env(safe-area-inset-top,0px)) 12px calc(10px + env(safe-area-inset-bottom,0px))}
 .plw.full .plv{flex:1;height:auto;border-radius:16px}.plw.full .pltools{margin:10px 0 0}
-.ro [data-act="addplan"],.ro [data-act="plopts"]{display:none!important}
+.ro [data-act="addplan"],.ro [data-act="plopts"],.ro [data-act="adddoc"]{display:none!important}
 .sheet .hd{position:sticky;top:-18px;z-index:3;background:var(--sheet);margin:-18px -18px 6px;padding:24px 18px 8px;border-radius:28px 28px 0 0;touch-action:none}
 .sheet .grab{position:absolute;left:50%;top:8px;transform:translateX(-50%);width:44px;height:5px;border-radius:99px;background:var(--field);opacity:.5;cursor:grab}
 .sheet .grab::before{content:"";position:absolute;left:-30px;right:-30px;top:-10px;bottom:-14px}
@@ -631,7 +631,7 @@ const seedMats=()=>{
 };
 
 const KEY="newberry-build-v2";
-const DEF=()=>({settings:{name:"MS 2 Project",site:"",start:"2026-10-22",target:"2027-01-10",budget:958896,contract:928896,rooms:[{id:"r1",name:"Classroom 1"},{id:"r2",name:"Classroom 2"}]},tasks:[],costs:[],mats:[],sups:[],logs:[],pays:[],acts:[],plans:[]});
+const DEF=()=>({settings:{name:"MS 2 Project",site:"",start:"2026-10-22",target:"2027-01-10",budget:958896,contract:928896,rooms:[{id:"r1",name:"Classroom 1"},{id:"r2",name:"Classroom 2"}]},tasks:[],costs:[],mats:[],sups:[],logs:[],pays:[],acts:[],plans:[],docs:[]});
 let S;
 function seedTasks(){
   let n=0;const out=[],R=S.settings.rooms;
@@ -695,7 +695,7 @@ const unpaid=()=>sum(S.costs.filter(c=>!c.paid),c=>c.amount);
 /* ---------- ui chrome ---------- */
 let matSec="stock",payAll=false,tab="build",roomF="all",logSub="log",matF="all",costF="all",openPh=null;
 const TABS=[["build","Build","grid"],["home","Overview","home"],["add","Add","plus"],["money","Money","cash"],["more","More","dots"]];
-const navTab=t=>({phase:"build",mats:"build",site:"build",plans:"build"})[t]||t;
+const navTab=t=>({phase:"build",mats:"build",site:"build",plans:"build",docs:"build"})[t]||t;
 $("nav.tabs").innerHTML=TABS.map(([k,l,i])=>k==="add"?`<button type="button" class="cap" id="fab" aria-label="Add something" aria-expanded="false" aria-controls="fab-menu">${ic(i)}</button>`:`<button data-tab="${k}">${ic(i)}<span>${l}</span>${k==="build"?'<i class="dot" id="tdot" hidden></i>':""}</button>`).join("");
 $("#today").textContent=new Date().toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long"});
 $("#fab-menu").innerHTML=[["photo","camera","Add photo"],["cost","cash","Add expense"],["pay","users","Record payment"],["task","clip","Add task"],["mat","truck","Add material"],["issue","alert","Report issue"]].map(([k,i,l])=>`<button class="fab-item" data-fab="${k}"><span class="fi">${ic(i)}</span><span class="fl">${l}</span></button>`).join("");
@@ -846,15 +846,15 @@ function render(){
   if(tab==="money"&&!moneyOK)tab="build";
   document.querySelectorAll("nav.tabs button").forEach(b=>b.dataset.tab===navTab(tab)?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
   $("#pname").textContent=S.settings.name||"Newberry Build";
-  document.title=`${({build:"Build",home:"Overview",money:"Money",more:"More",phase:"Phase",plans:"Plans",mats:"Materials",site:"Site log"})[tab]} · Newberry Build 2`;
+  document.title=`${({build:"Build",home:"Overview",money:"Money",more:"More",phase:"Phase",plans:"Plans",docs:"Documents",mats:"Materials",site:"Site log"})[tab]} · Newberry Build 2`;
   $("#tdot").hidden=!S.tasks.some(t=>t.status==="stuck");
-  const v=$("#view");v.innerHTML=({build:buildV,home,phase:phaseV,plans:plansV,money:moneyV,mats:matsV,site:siteV,more})[tab]();
+  const v=$("#view");v.innerHTML=({build:buildV,home,phase:phaseV,plans:plansV,docs:docsV,money:moneyV,mats:matsV,site:siteV,more})[tab]();
   compactRows(v);
   v.querySelectorAll("[data-act]").forEach(el=>el.addEventListener("click",()=>act(el.dataset.act,el.dataset.id,el)));
   v.querySelectorAll("[data-go]").forEach(el=>el.addEventListener("click",()=>{if(el._lp){el._lp=false;return}const[t,f]=el.dataset.go.split(":");if(t==="phase"&&f)curPh=f;if(t==="site"&&f)logSub=f;if(t==="mats"&&f)matF=f;go(t)}));
   v.querySelectorAll("[data-rf]").forEach(el=>el.addEventListener("click",()=>{roomF=el.dataset.rf;render()}));
   v.querySelectorAll("details.gd").forEach(d=>d.addEventListener("toggle",()=>{if(openPh===null)openPh=new Set(curPhases());d.open?openPh.add(d.dataset.ph):openPh.delete(d.dataset.ph)}));
-  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;if(k==="plan"){planSel=val;PV.plan="";PV.had=false}render()}));
+  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;if(k==="plan"){planSel=val;PV.plan="";PV.had=false}if(k==="doc")docF=val;render()}));
   v.querySelectorAll("li.tap").forEach(el=>{el.setAttribute("role","button");el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click()}})});
   hydrate(v);hydrateBg(v);countUp(v);if(tab==="plans")initPlanView();
   v.querySelectorAll("svg.chart").forEach(wireChart);if(role!=="funder")v.querySelectorAll("ul.reord").forEach(ul=>holdDrag(ul,curPh));
@@ -1067,7 +1067,7 @@ function buildV(){
   <div class="ptiles" role="list">${tiles}</div>
   <div class="eyebrow" style="margin:20px 2px 10px">Recently posted</div>
   ${rec.length?`<div class="rps">${rec.map(l=>`<button type="button" class="rp" data-go="site"><span class="rpi">${l.media?.length?`<span data-m="${l.media[0]}" style="position:absolute;inset:0"></span>`:ic(l.kind==="issue"?"alert":"note","lg")}</span><span class="rpt"><b style="color:${PCOL[l.phase]||"var(--accent)"}">${esc(l.phase&&PSHORT[l.phase]?PSHORT[l.phase]:"Site")}</b><span>${esc(l.text?l.text.slice(0,48):l.kind==="issue"?"Issue reported":"Added a photo")}</span><small>${dlabel(l.date)}</small></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:0 2px">Photos and notes you add will show up here.</p>`}
-  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials and stock</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="plans" style="grid-column:1/-1">${ic("map")}<span>Plans</span>${S.plans.length?`<small class="muted">${S.plans.length} plan${S.plans.length===1?"":"s"}</small>`:""}</button></div>`;
+  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials and stock</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="plans">${ic("map")}<span>Plans</span>${S.plans.length?`<small class="muted">${S.plans.length}</small>`:""}</button><button type="button" class="sc" data-go="docs">${ic("note")}<span>Documents</span>${S.docs.filter(docVisible).length?`<small class="muted">${S.docs.filter(docVisible).length}</small>`:""}</button></div>`;
 }
 function phaseV(){
   const id=curPh,p=phase(id);if(!p){tab="build";return buildV()}
@@ -1170,6 +1170,7 @@ function more(){
   return `<div class="page-h"><h2>More</h2></div>
   <div class="card"><ul class="list">
    ${row("map","Plans","View the floor plan and drawings, with zoom","goplans")}
+   ${row("note","Documents","Quotes, contract, invoices, certificates and delivery notes","godocs")}
    ${row("truck","Materials and stock","Stock, fittings, electrical, sundries and suppliers","gomats")}
    ${row("camera","Site log and issues","Photos, notes and things to fix","gosite")}
    ${row("clock","Activity","Who did what, and when","acts")}
@@ -1192,7 +1193,7 @@ function more(){
 /* ---------- actions ---------- */
 function act(a,id,el){
   closePop();
-  if(role==="funder"&&!["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull"].includes(a)){toast("This is a view-only copy.");return}
+  if(role==="funder"&&!["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock"].includes(a)){toast("This is a view-only copy.");return}
   if(role==="builder"&&["addcost","editcost","delcost","budget","addpay","editpay","delpay","recpay","paypay","paycost","contract","typicalpay","weekly","resetpays","payall","report"].includes(a)){toast("Money is hidden for builders.");return}
   ({
    cyc:()=>cycTask(id),opentask:()=>taskSheet(...id.split("|")),edittask:()=>taskSheet(...id.split("|")),
@@ -1208,7 +1209,7 @@ function act(a,id,el){
    addphoto:()=>quickPhoto(id&&phase(id)?id:undefined),addissue:()=>logSheet(null,"issue"),editlog:()=>logSheet(id),dellog:()=>delRecs(S.logs,l=>l.id===id,"Entry"),
    fix:()=>{const l=S.logs.find(x=>x.id===id),u=undoEdit(l,{fixed:true});logAct("Marked an issue as fixed");save();render();toast("Issue marked fixed.",u)},
    lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
-   refresh:()=>refreshApp(),addplan:()=>planAddSheet(),plopts:()=>planOptsSheet(),plzin:()=>zoomCenter(1.5),plzout:()=>zoomCenter(1/1.5),plfit:()=>fitView(),plfull:()=>{fullPlan=!fullPlan;PV.had=false;document.body.classList.toggle("lock",fullPlan);render()},goplans:()=>go("plans"),gostock:()=>{matSec="stock";matF="all";go("mats")},mvup:()=>moveKey(curPh,id,-1),mvdn:()=>moveKey(curPh,id,1),phstep:()=>phaseStep(+id),report:()=>reportSheet(),acts:()=>actsSheet(),phba:()=>baSheet(id),outdoor:()=>{outdoor=!outdoor;try{localStorage.setItem("build2-outdoor",outdoor?"1":"0")}catch{}applyOutdoor();render()},share:()=>shareSheet(),project:()=>projectSheet(),whoami:()=>whoSheet(),
+   refresh:()=>refreshApp(),adddoc:()=>docSheet(),opendoc:()=>docView(id),docunlock:()=>moneyGate(()=>render()),godocs:()=>go("docs"),addplan:()=>planAddSheet(),plopts:()=>planOptsSheet(),plzin:()=>zoomCenter(1.5),plzout:()=>zoomCenter(1/1.5),plfit:()=>fitView(),plfull:()=>{fullPlan=!fullPlan;PV.had=false;document.body.classList.toggle("lock",fullPlan);render()},goplans:()=>go("plans"),gostock:()=>{matSec="stock";matF="all";go("mats")},mvup:()=>moveKey(curPh,id,-1),mvdn:()=>moveKey(curPh,id,1),phstep:()=>phaseStep(+id),report:()=>reportSheet(),acts:()=>actsSheet(),phba:()=>baSheet(id),outdoor:()=>{outdoor=!outdoor;try{localStorage.setItem("build2-outdoor",outdoor?"1":"0")}catch{}applyOutdoor();render()},share:()=>shareSheet(),project:()=>projectSheet(),whoami:()=>whoSheet(),
    theme:()=>{if(id==="auto"){document.documentElement.removeAttribute("data-theme");try{localStorage.setItem("build2-theme","auto")}catch{}}else{document.documentElement.setAttribute("data-theme",id);try{localStorage.setItem("build2-theme",id)}catch{}}paintTheme();render()},
    export:()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`newberry-build-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")},
    import:()=>{const f=$("#impf");f.onchange=async()=>{try{const d=JSON.parse(await f.files[0].text());if(!Array.isArray(d.tasks))throw 0;confirmSheet("Restore this backup?","This replaces the project on this phone with the backup.","Restore",()=>{S={...DEF(),...d};save();render();toast("Backup restored.")})}catch{toast("That file is not a Newberry Build backup.")}f.value=""};f.click()},
@@ -1510,7 +1511,7 @@ function reportTextFull(){
 /* ---------- sharing and sync (Supabase, one secret project code, newest change wins) ---------- */
 const SB_URL="https://oikwudpqmbnssttatlhc.supabase.co",SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pa3d1ZHBxbWJuc3N0dGF0bGhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTMzODEsImV4cCI6MjA5NTY4OTM4MX0.p6I9qlvre5TjF3qOVjAIBus3_PNrbvCF2cMXHe3uiXw";
 let sb=null,syncState="off",syncedAt=null,pulling=false,pushing=false,lastErr="";
-const COLS=["tasks","costs","mats","sups","logs","pays","acts","plans"];
+const COLS=["tasks","costs","mats","sups","logs","pays","acts","plans","docs"];
 const canon=v=>Array.isArray(v)?"["+v.map(canon).join(",")+"]":v&&typeof v==="object"?"{"+Object.keys(v).filter(k=>v[k]!==undefined).sort().map(k=>JSON.stringify(k)+":"+canon(v[k])).join(",")+"}":JSON.stringify(v);
 const hashOf=r=>{const s=canon(r);let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return h+":"+s.length};
 function recMap(){const m=new Map();COLS.forEach(k=>S[k].forEach(r=>m.set(k+"|"+r.id,{r})));m.set("settings|main",{r:S.settings});return m}
@@ -2019,6 +2020,75 @@ function planOptsSheet(){
   });
 }
 addEventListener("keydown",e=>{if(e.key==="Escape"&&fullPlan&&!closeSheet&&!document.querySelector(".pop")&&!document.getElementById("lbx")){fullPlan=false;document.body.classList.remove("lock");render()}});
+/* ---------- documents: quotes, contract, invoices, certificates, drawings, delivery notes ---------- */
+const DTYPES=[["contract","Contract","clip",1],["quote","Quote","cash",1],["invoice","Invoice","cash",1],["cert","Certificate","check",0],["drawing","Drawing","map",0],["delivery","Delivery note","truck",0],["other","Other","note",0]];
+const dtype=k=>DTYPES.find(t=>t[0]===k)||DTYPES[6];
+const docMoney=d=>!!dtype(d.type)[3];
+const docVisible=d=>!docMoney(d)||(moneyOK&&role!=="builder");
+const DOC_MAX=10*1048576;
+let docF="all";
+const docIcon=d=>/^image\//.test(d.mime||"")?"image":dtype(d.type)[2];
+const guessType=n=>{n=(n||"").toLowerCase();return /quot|estimate/.test(n)?"quote":/invoice|\binv\b|statement/.test(n)?"invoice":/contract|agreement/.test(n)?"contract":/coc|certificate|compliance|approval/.test(n)?"cert":/plan|drawing|elevation|section|layout/.test(n)?"drawing":/delivery|dn\b|waybill/.test(n)?"delivery":"other"};
+function docsV(){
+  const head=`<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Documents</h2></div><button class="btn primary" data-act="adddoc">${ic("plus")}Add</button></div>`;
+  const vis=S.docs.filter(docVisible),locked=role==="builder"?0:S.docs.length-vis.length;
+  const types=DTYPES.filter(t=>role!=="builder"||!t[3]),cnt=k=>vis.filter(d=>d.type===k).length;
+  const list=vis.filter(d=>docF==="all"||d.type===docF).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||b.id.localeCompare(a.id));
+  if(!S.docs.length)return head+empty("note","No documents yet","Keep quotes, the contract, invoices, delivery notes and certificates in one place, and send any of them on WhatsApp.",`<button class="btn primary" data-act="adddoc">${ic("plus")}Add the first document</button>`);
+  return head+`<div class="chips scroll" role="group" aria-label="Filter documents" style="margin-bottom:12px">${[["all","All · "+vis.length],...types.filter(t=>cnt(t[0])).map(t=>[t[0],t[1]+" · "+cnt(t[0])])].map(([k,l])=>`<button type="button" class="chip" data-sub="doc:${k}" aria-pressed="${docF===k}">${esc(l)}</button>`).join("")}</div>
+  ${locked?`<div class="note-card">${ic("lock")}<span><b>${locked} money document${locked===1?" is":"s are"} locked.</b> Contract, quotes and invoices need the money password.<br><button type="button" class="linkbtn" data-act="docunlock" style="padding:0;min-height:32px">Enter password</button></span></div>`:""}
+  <div class="card">${list.length?`<ul class="list">${list.map(d=>`<li class="tap" tabindex="0" data-act="opendoc" data-id="${d.id}"><span class="row-ic ${docMoney(d)?"":"sky"}">${ic(docIcon(d))}</span><div class="grow"><div class="lt">${esc(d.name)}</div><div class="ls">${esc(dtype(d.type)[1])} · ${dshort(d.date)}${d.size?" · "+fmtMB(d.size):""}${d.sup?" · "+esc(supName(d.sup)):""}</div></div>${ic("chev")}</li>`).join("")}</ul>`:`<p class="muted" style="margin:6px 0 0">No documents in this list.</p>`}</div>`;
+}
+function docSheet(id){
+  const d=id?S.docs.find(x=>x.id===id):null;
+  const types=DTYPES.filter(t=>role!=="builder"||!t[3]),st={type:d?.type||"other"};
+  let file=null;
+  sheet(d?"Edit document":"Add a document",`<form id="f" novalidate>
+  ${d?"":`<p class="muted" style="margin:6px 0 0">PDF, picture, Word or Excel file, up to 10 MB.</p><div class="photo-add"><button type="button" class="btn" id="df">${ic("upload")}Choose file</button><button type="button" class="btn" id="dc">${ic("camera")}Take photo</button></div><input type="file" id="fi" hidden><input type="file" id="fc" accept="image/*" capture="environment" hidden><p class="hint" id="fs"></p>`}
+  <label class="f" for="dn">Name</label><input id="dn" ${d?"data-autofocus":""} class="t" maxlength="80" value="${esc(d?.name||"")}" placeholder="For example: Roof sheeting quote">
+  <label class="f">Type</label>${chipRow("type",types.map(t=>[t[0],t[1]]),st.type,"scroll")}
+  ${dateField("dt",d?.date||today())}
+  <label class="f" for="ph">Phase (optional)</label><select id="ph" class="t sel"><option value="">None</option>${PH.map(p=>`<option value="${p[0]}" ${p[0]===d?.phase?"selected":""}>${esc(p[1])}</option>`).join("")}</select>
+  ${S.sups.length?`<label class="f" for="su">Supplier or contractor (optional)</label><select id="su" class="t sel"><option value="">None</option>${S.sups.map(s=>`<option value="${s.id}" ${s.id===d?.sup?"selected":""}>${esc(s.name)}</option>`).join("")}</select>`:""}
+  <label class="f" for="nt">Note (optional)</label><input id="nt" class="t" maxlength="160" value="${esc(d?.note||"")}">
+  <div class="foot"><button class="btn primary block" id="go" ${d?"":"disabled"}>${d?"Save changes":"Add document"}</button></div></form>`,(sh,close)=>{
+    wireDc(sh);wireChips(sh,st,"type");
+    const take=e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
+      if(f.size>DOC_MAX){sh.querySelector("#fs").textContent="That file is "+fmtMB(f.size)+". The limit is 10 MB.";return}
+      file=f;sh.querySelector("#fs").textContent=f.name+" · "+fmtMB(f.size);sh.querySelector("#go").disabled=false;
+      const nm=sh.querySelector("#dn");if(!nm.value.trim())nm.value=f.name.replace(/\.[^.]+$/,"").slice(0,80);
+      const g=guessType(f.name);if(types.some(t=>t[0]===g)){st.type=g;sh.querySelectorAll('[data-ch="type"]').forEach(x=>x.setAttribute("aria-pressed",x.dataset.v===g))}};
+    if(!d){sh.querySelector("#fi").onchange=take;sh.querySelector("#fc").onchange=take;sh.querySelector("#df").onclick=()=>sh.querySelector("#fi").click();sh.querySelector("#dc").onclick=()=>sh.querySelector("#fc").click()}
+    sh.querySelector("#f").onsubmit=async e=>{e.preventDefault();const nm=sh.querySelector("#dn");if(!d&&!file)return;if(!nm.value.trim())return showErr(sh,nm,"Give the document a name.");
+      const vals={name:nm.value.trim(),type:st.type,date:sh.querySelector("#dt").value||today(),phase:sh.querySelector("#ph").value,sup:sh.querySelector("#su")?.value||"",note:sh.querySelector("#nt").value.trim()};
+      if(d){const u=undoEdit(d,vals);save();close();render();toast("Document saved.",u);return}
+      const b=sh.querySelector("#go");b.disabled=true;b.textContent="Saving…";
+      try{const mid="dc"+uid();await mPut(mid,file);queueMedia(mid);
+        const n={id:uid(),...vals,media:mid,fn:file.name,mime:file.type||"",size:file.size,who:me};
+        S.docs.push(n);logAct("Added a document: "+n.name,docMoney(n)?1:0);save();close();render();toast("Document added.",()=>S.docs.splice(S.docs.indexOf(n),1))}
+      catch(err){b.disabled=false;b.textContent="Add document";sh.querySelector("#fs").textContent="Could not save that file. Try a smaller one."}};
+  });
+}
+const docFileName=d=>{const ext=((d.fn||"").match(/\.[A-Za-z0-9]+$/)||[""])[0];return (d.name||"document").replace(/[\\/:*?"<>|]+/g," ").trim()+ext};
+function docView(id){
+  const d=S.docs.find(x=>x.id===id);if(!d||!docVisible(d))return;
+  const ro=role==="funder";
+  sheet(d.name,`<div class="row wr" style="gap:8px;margin:8px 0 12px"><span class="pill ${docMoney(d)?"type":"sky"}">${esc(dtype(d.type)[1])}</span><span class="pill gone">${dlabel(d.date)}</span>${d.size?`<span class="pill gone">${fmtMB(d.size)}</span>`:""}</div>
+  ${d.sup?`<p class="muted small" style="margin:0 0 6px">${ic("user","sm")} ${esc(supName(d.sup))}</p>`:""}${d.phase&&PSHORT[d.phase]?`<p class="muted small" style="margin:0 0 6px">${esc(PSHORT[d.phase])}</p>`:""}${d.note?`<p style="margin:0 0 12px">${esc(d.note)}</p>`:""}
+  <p class="hint" id="dst"></p>
+  <div class="tasks"><button type="button" class="btn primary block" id="do">${ic("eye")}Open</button><button type="button" class="btn block" id="ds">${ic("share")}Share</button><button type="button" class="btn block" id="dd">${ic("download")}Save to this phone</button>${ro?"":`<button type="button" class="btn block" id="de">${ic("pencil")}Edit details</button><button type="button" class="btn block danger" id="dx">${ic("trash")}Delete</button>`}</div>`,(sh,close)=>{
+    const st=t=>sh.querySelector("#dst").textContent=t;
+    const get=async()=>{const b=await mGet(d.media).catch(()=>null);if(!b){st("This file is still loading from your team. Try again in a moment.");return null}return b};
+    const typed=b=>new Blob([b],{type:d.mime||b.type||"application/octet-stream"});
+    sh.querySelector("#do").onclick=async()=>{const b=await get();if(!b)return;if(/^image\//.test(d.mime||b.type)){close();const u=await mUrl(d.media);if(u)lightbox([d.media],0);return}
+      const a=document.createElement("a");a.href=URL.createObjectURL(typed(b));a.target="_blank";a.rel="noopener";document.body.append(a);a.click();a.remove()};
+    sh.querySelector("#ds").onclick=async()=>{const b=await get();if(!b)return;const f=new File([b],docFileName(d),{type:d.mime||b.type||"application/octet-stream"});
+      if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:d.name})}catch{}}
+      else{const a=document.createElement("a");a.href=URL.createObjectURL(f);a.download=f.name;document.body.append(a);a.click();a.remove();st("Sharing files is not available here, so the file was saved to this phone. Attach it in WhatsApp.")}};
+    sh.querySelector("#dd").onclick=async()=>{const b=await get();if(!b)return;const a=document.createElement("a");a.href=URL.createObjectURL(typed(b));a.download=docFileName(d);document.body.append(a);a.click();a.remove();toast("Saved to this phone.")};
+    if(!ro){sh.querySelector("#de").onclick=()=>{close();docSheet(id)};sh.querySelector("#dx").onclick=()=>{close();delRecs(S.docs,x=>x.id===id,"Document")}}
+  });
+}
 /* ---------- start ---------- */
 render();
 if(sm.code){setSync("syncing");syncNow()}else setSync("off");
