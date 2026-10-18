@@ -440,6 +440,9 @@ html,body,button,a,input,select,textarea,.chip,.st,.stp,.lk-pad button,[role=but
 .sheet .grab::before{content:"";position:absolute;left:-30px;right:-30px;top:-10px;bottom:-14px}
 .sheet input,.sheet textarea,.sheet select{scroll-margin-top:84px;scroll-margin-bottom:120px}
 .sheet.scrolled .hd{box-shadow:0 1px 0 var(--line),0 10px 16px -12px rgba(0,0,0,.4)}
+.qa.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.qa.two button{min-height:72px;flex-direction:row;gap:10px;font-size:1rem}
+.bento .tile:not(.hero){min-height:112px}
 /* ---------- Newberry Build: page rules ---------- */
 .st{width:44px;height:44px;border-radius:50%;border:2px solid var(--field);background:var(--sheet);color:var(--muted);display:grid;place-items:center;cursor:pointer;flex:none;transition:box-shadow .25s,transform .08s}
 .st:active{transform:scale(.94)}
@@ -881,7 +884,7 @@ function forecast(){
 }
 function fcLine(){
   const f=forecast();if(!f)return"";
-  if(f.none)return `<div class="sub fc" style="margin-top:8px">${esc(f.why)}</div>`;
+  if(f.none)return"";
   const txt=f.late>3?`At this pace the build finishes about ${dlong(f.date)}, ${f.late} days late.`:f.late<-3?`At this pace the build finishes about ${dlong(f.date)}, ${-f.late} days early.`:`At this pace the build finishes around ${dlong(f.date)}, on time.`;
   return `<div class="sub fc" style="margin-top:8px">${ic("trend","sm")} ${txt}</div>`;
 }
@@ -903,8 +906,8 @@ const isMoneyAct=a=>a.m||/\bR ?\d/.test(a.text);
 const actList=n=>[...S.acts].filter(a=>moneyOK||!isMoneyAct(a)).sort((a,b)=>b.t-a.t).slice(0,n);
 const actRow=a=>`<li><span class="avatar">${esc((a.who||"?")[0].toUpperCase())}</span><div class="grow"><div class="lt" style="font-weight:500">${esc(a.text)}</div><div class="ls">${esc(a.who)} · ${rel(a.t)}</div></div></li>`;
 function actCard(){
-  const l=actList(5);
-  return `<div class="card" style="margin-top:16px"><div class="row between"><h2 style="margin:0">Activity</h2>${l.length?`<button class="linkbtn" data-act="acts" style="padding:0">See all</button>`:""}</div>${l.length?`<ul class="list">${l.map(actRow).join("")}</ul>`:`<p class="muted small" style="margin:10px 0 0">When you or your team update a task, add a photo or record a payment, it shows up here.</p>`}</div>`;
+  const l=actList(5);if(!l.length)return"";
+  return `<div class="card"><div class="row between"><h2 style="margin:0">Activity</h2>${l.length?`<button class="linkbtn" data-act="acts" style="padding:0">See all</button>`:""}</div>${l.length?`<ul class="list">${l.map(actRow).join("")}</ul>`:`<p class="muted small" style="margin:10px 0 0">When you or your team update a task, add a photo or record a payment, it shows up here.</p>`}</div>`;
 }
 function actsSheet(){sheet("Activity",`<ul class="list">${actList(50).map(actRow).join("")||'<li class="muted">Nothing yet.</li>'}</ul>`)}
 
@@ -1011,6 +1014,9 @@ function schedule(){
   const plan=Math.min(1,(t-a)/Math.max(1,b-a)),act=doneN(all)/all.length,gap=Math.round((plan-act)*100);
   return{chip:gap<=5?`<span class="chip-d">${ic("check","sm")}On track</span>`:`<span class="chip-d">${ic("alert","sm")}${gap}% behind plan</span>`};
 }
+function nextCard(nu,R){
+  return `<div class="card"><h2 style="margin:0">Next up</h2>${nu.length?`<ul class="list">${nu.map(x=>{const rs=x.ts.map(t=>t.room),stuck=x.ts.some(t=>t.status==="stuck"),od=x.ts.some(t=>t.due&&t.due<today()),doing=x.ts.some(t=>t.status==="doing");return `<li class="tap" tabindex="0" data-act="opentask" data-id="${x.key}|${x.ts[0].room}"><span class="row-ic ${stuck?"red":doing?"sky":""}">${ic(stuck?"alert":doing?"clock":phase(x.phase)?.[2]||"clip")}</span><div class="grow"><div class="lt">${esc(x.title)}</div><div class="ls ${stuck||od?"bad":""}">${stuck?"Stuck · ":od?"Overdue · ":""}${esc(phaseName(x.phase))} · ${rs.length===R.length?"Both classrooms":rs.map(roomName).join(", ")}</div></div>${ic("chev")}</li>`}).join("")}</ul>`:`<p class="muted" style="margin:10px 0 0">Every task is done. Well done!</p>`}</div>`;
+}
 function home(){
   const all=S.tasks,d=doneN(all),p=pct(d,all.length),R=rooms();
   const left=S.settings.target?Math.ceil((new Date(S.settings.target+"T12:00")-new Date(today()+"T12:00"))/864e5):null;
@@ -1020,14 +1026,13 @@ function home(){
   const nu=nextUp();
   const sched=schedule();
   return `<div class="page-h"><h2>Overview</h2><button class="btn primary" data-act="report">${ic("chat")}Share</button></div>
-  <div class="qa"><button class="main" data-act="addphoto">${ic("camera","lg")}Photo</button><button data-act="gostock">${ic("truck","lg")}Material and Stock</button><button data-act="addissue">${ic("alert","lg")}Issue</button></div>
+  <div class="qa two"><button class="main" data-act="addphoto">${ic("camera","lg")}Photo</button><button data-act="gostock">${ic("truck","lg")}Material</button></div>
   <div class="bento">
    <section class="tile hero s2"><div class="lbl">${ic("calendar")}Schedule</div><div class="big">${left===null?"–":left>=0?left:-left}<small> ${left===null?"":left>=0?"days to go":"days past target"}</small></div><div class="sub">${S.settings.start?dshort(S.settings.start):"?"} to ${S.settings.target?dshort(S.settings.target):"?"}</div><div class="row wr" style="gap:8px">${sched.chip}</div>${fcLine()}</section>
    ${R.map(r=>{const t=tasksOf(r.id),x=pct(doneN(t),t.length);return `<button class="tile green" data-go="build"><div class="lbl">${ic("home")}${esc(r.name)}</div><div class="big">${x}%</div><div class="sub">${doneN(t)} of ${t.length} done</div><div class="meter"><i style="width:${x}%"></i></div></button>`}).join("")}
    <button class="tile ${issues?"alert":""}" data-go="site:issues"><div class="lbl">${ic("alert")}Open issues</div><div class="big">${issues}</div><div class="sub">${issues?"Tap to see them":"Nothing to fix"}</div></button>
    <button class="tile sky" data-go="mats:all"><div class="lbl">${ic("truck")}To order</div><div class="big">${toOrder}</div><div class="sub">${toOrder?"materials waiting":"All ordered"}</div></button>
-   <section class="tile s4 next"><div class="lbl">${ic("flag")}Next up</div>${nu.length?`<ul class="list">${nu.map(x=>{const rs=x.ts.map(t=>t.room),stuck=x.ts.some(t=>t.status==="stuck"),od=x.ts.some(t=>t.due&&t.due<today());return `<li class="tap" tabindex="0" data-act="opentask" data-id="${x.key}|${x.ts[0].room}"><span class="row-ic ${stuck?"red":x.ts.some(t=>t.status==="doing")?"sky":""}">${ic(stuck?"alert":x.ts.some(t=>t.status==="doing")?"clock":phase(x.phase)?.[2]||"clip")}</span><div class="grow"><div class="lt">${esc(x.title)}</div><div class="ls ${stuck||od?"bad":""}">${stuck?"Stuck · ":od?"Overdue · ":""}${esc(phaseName(x.phase))} · ${rs.length===R.length?"Both":rs.map(roomName).join(", ")}</div></div>${ic("chev")}</li>`}).join("")}</ul>`:`<p class="muted">Every task is done. Well done!</p>`}</section>
-  </div>${timelineCard()}${curveCard("progress")}${actCard()}`;
+  </div>${nextCard(nu,R)}${timelineCard()}${curveCard("progress")}${actCard()}`;
 }
 function taskRow(key,single){
   const ts=S.tasks.filter(t=>t.key===key&&(single?t.room===single||t.room==="shared":true)).sort((a,b)=>roomNo(a.room)-roomNo(b.room));
