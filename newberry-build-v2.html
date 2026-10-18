@@ -447,6 +447,7 @@ html,body,button,a,input,select,textarea,.chip,.st,.stp,.lk-pad button,[role=but
 /* ---------- Newberry Build: page rules ---------- */
 .st{width:44px;height:44px;border-radius:50%;border:2px solid var(--field);background:var(--sheet);color:var(--muted);display:grid;place-items:center;cursor:pointer;flex:none;transition:box-shadow .25s,transform .08s}
 .st:active{transform:scale(.94)}
+.st.todo svg{opacity:.28}
 .st.doing{border-color:var(--sky);color:var(--sky);background:var(--sky-soft)}
 .st.done{border-color:var(--green);background:var(--green);color:#fff;box-shadow:0 0 0 4px var(--glow-green)}
 .st.stuck{border-color:var(--red);color:var(--red);background:var(--red-soft)}
@@ -1044,8 +1045,8 @@ function taskRow(key,single){
   if(!ts.length)return "";
   const t0=ts[0],allDone=ts.every(t=>t.status==="done"),stuck=ts.some(t=>t.status==="stuck"),od=ts.some(t=>t.status!=="done"&&t.due&&t.due<today());
   const sub=single?[t0.status==="done"&&t0.doneOn?`Done ${dshort(t0.doneOn)}`:t0.due?`${od?"Overdue · ":"Due "}${dshort(t0.due)}`:"",t0.who].filter(Boolean).join(" · "):[stuck?"Stuck":"",od?"Overdue":""].filter(Boolean).join(" · ");
-  const lab=t=>`${esc(t.title)}, ${esc(roomName(t.room))}: ${stLabel(t.status)}. Tap to change.`;
-  const btn=t=>`<button class="st ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${lab(t)}">${stIcon(t.status)}</button>`;
+  const lab=t=>`${esc(t.title)}, ${esc(roomName(t.room))}: ${stLabel(t.status)}. Tap to tick done or undo. Hold for more options.`;
+  const btn=t=>`<button class="st ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${lab(t)}">${stIcon(t.status)||ic("check")}</button>`;
   const pill=t=>`<button class="stp ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${lab(t)}">${stIcon(t.status)||ic("minus","sm")}<span><b>${t.room==="shared"?"All":roomNo(t.room)}</b>${{todo:"To do",doing:"Doing",done:"Done",stuck:"Stuck"}[t.status]}</span></button>`;
   const head=`<div class="lt ${allDone?"dn":""}">${esc(t0.title)}</div>${sub?`<div class="ls ${stuck||od?"bad":""}">${esc(sub)}</div>`:""}`;
   return single?`<li data-mv="${key}">${btn(t0)}<div class="grow">${head}${t0.note?`<div class="ls">${esc(t0.note)}</div>`:""}</div>${rowBtns("task",t0.title,t0.key+"|"+t0.room)}</li>`
@@ -1221,9 +1222,25 @@ function act(a,id,el){
   })[a]?.();
 }
 const hintSeen=()=>{try{return!!localStorage.getItem("build-hint")}catch{return true}};
-function cycTask(id,quiet){try{localStorage.setItem("build-hint","1")}catch{}
+function stateSheet(id){
+  const t=S.tasks.find(x=>x.id===id);if(!t)return;
+  sheet(t.title,`<p class="muted" style="margin:6px 0 12px">${esc(roomName(t.room))}. Tap the circle to tick it done. Choose another state here.</p><div class="tasks">${ST.map(([k,l])=>`<button type="button" class="btn block ${k===t.status?"primary":""}" data-s="${k}">${stIcon(k)||ic("minus")}${esc(l)}</button>`).join("")}<button type="button" class="btn block" data-o="1">${ic("pencil")}Open task</button></div>`,(sh,close)=>{
+    sh.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{close();if(b.dataset.s!==t.status)cycTask(id,false,b.dataset.s)});
+    sh.querySelector("[data-o]").onclick=()=>{close();taskSheet(t.key,t.room)};
+  });
+}
+let holdFired=false;
+(()=>{let tm=0,sx=0,sy=0;const clr=()=>{clearTimeout(tm);tm=0};
+  document.addEventListener("pointerdown",e=>{const b=e.target.closest&&e.target.closest('[data-act="cyc"]');if(!b||document.body.classList.contains("ro"))return;holdFired=false;sx=e.clientX;sy=e.clientY;clr();
+    tm=setTimeout(()=>{holdFired=true;buzz(20);stateSheet(b.dataset.id)},480)},true);
+  document.addEventListener("pointermove",e=>{if(tm&&Math.hypot(e.clientX-sx,e.clientY-sy)>8)clr()},true);
+  ["pointerup","pointercancel","scroll"].forEach(n=>document.addEventListener(n,clr,true));
+  document.addEventListener("click",e=>{if(holdFired&&e.target.closest&&e.target.closest('[data-act="cyc"]')){e.stopPropagation();e.preventDefault();holdFired=false}},true);
+  document.addEventListener("contextmenu",e=>{if(e.target.closest&&e.target.closest('[data-act="cyc"]'))e.preventDefault()},true);
+})();
+function cycTask(id,quiet,forced){try{localStorage.setItem("build-hint","1")}catch{}
   const t=S.tasks.find(x=>x.id===id);if(!t)return null;
-  const nx={todo:"doing",doing:"done",done:"todo",stuck:"doing"}[t.status];
+  const nx=forced||(t.status==="done"?"todo":"done");
   const u=undoEdit(t,{status:nx,doneOn:nx==="done"?today():"",...(nx==="done"&&me?{who:t.who||me}:{})});
   if(quiet)return{u,t,nx};
   buzz(nx==="done"?[18,40,18]:12);logAct(`Marked "${t.title}" ${stLabel(nx).toLowerCase()}${rooms().length>1&&t.room!=="shared"?` (${roomName(t.room)})`:""}`);save();render();document.querySelectorAll(`[data-id="${id}"]`).forEach(b=>b.classList.add("popit"));toast(`${t.title}: ${stLabel(nx).toLowerCase()}${rooms().length>1&&t.room!=="shared"?` (${roomName(t.room)})`:""}.`,u);
