@@ -309,6 +309,12 @@ html.privacy #app{filter:blur(22px)}
 
 /* quick repeated taps (keypad, steppers) must never trigger double-tap zoom on phones */
 html,body,button,a,input,select,textarea,.chip,.st,.stp,.lk-pad button,[role=button]{touch-action:manipulation}
+.sheet textarea.t.grow-ta{min-height:52px;resize:none;overflow:hidden;line-height:1.35;display:block}
+/* notices sit low, just above the bottom bar, stay short, and Undo is only offered for 3 seconds */
+#toasts{bottom:calc(100px + env(safe-area-inset-bottom))}
+@media (min-width:900px){#toasts{bottom:24px}}
+.toast{padding:6px 4px 6px 14px;gap:6px;font-size:.92rem;line-height:1.3;max-width:min(94vw,440px)}
+.toast span{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 /* ---------- Newberry Build: page rules ---------- */
 .st{width:44px;height:44px;border-radius:50%;border:2px solid var(--field);background:var(--sheet);color:var(--muted);display:grid;place-items:center;cursor:pointer;flex:none;transition:box-shadow .25s,transform .08s}
 .st:active{transform:scale(.94)}
@@ -564,7 +570,7 @@ function toast(msg,undo){
   clearTimeout(toastT);const t=document.createElement("div");t.className="toast";
   t.innerHTML=`<span>${esc(msg)}</span>${undo?"<button>Undo</button>":""}`;
   if(undo)t.querySelector("button").onclick=()=>{undo();t.remove();save();render()};
-  $("#toasts").replaceChildren(t);toastT=setTimeout(()=>t.remove(),undo?9000:6000);
+  $("#toasts").replaceChildren(t);toastT=setTimeout(()=>t.remove(),undo?3000:4500);
 }
 const undoEdit=(rec,vals)=>{const old={...rec};Object.assign(rec,vals);return()=>{Object.keys(rec).forEach(k=>delete rec[k]);Object.assign(rec,old)}};
 let closeSheet=null,lastFocus=null;
@@ -582,9 +588,16 @@ function sheet(title,html,onMount){
   l.querySelector(".scrim").onclick=e=>{if(e.target.classList.contains("scrim"))close()};
   sh.addEventListener("keydown",e=>{if(e.key!=="Tab")return;const f=[...sh.querySelectorAll('button:not([disabled]),[href],input:not([disabled]):not([type=hidden]),select,textarea')].filter(x=>x.offsetParent);if(!f.length)return;const a=f[0],z=f[f.length-1];
     if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}});
-  onMount?.(sh,close);compactRows(sh);
+  onMount?.(sh,close);compactRows(sh);growWire(sh);
   if(!sh.querySelector(".foot,form,#yes,#re")){const d=document.createElement("div");d.className="foot";d.innerHTML='<button type="button" class="btn primary block" data-done>Done</button>';sh.append(d);d.firstChild.onclick=close}
   (sh.querySelector("[data-autofocus]")||sh).focus({preventScroll:true});return close;
+}
+/* task names can be long: the field grows with the text, and Enter just closes the keyboard */
+function growWire(sh){
+  const f=()=>sh.querySelectorAll("textarea.grow-ta").forEach(t=>{t.style.height="auto";t.style.height=Math.min(t.scrollHeight+2,240)+"px"});
+  sh.addEventListener("input",e=>{if(e.target.matches&&e.target.matches("textarea.grow-ta"))f()});
+  sh.addEventListener("keydown",e=>{if(e.key==="Enter"&&e.target.matches&&e.target.matches("textarea.grow-ta")){e.preventDefault();e.target.blur()}});
+  f();setTimeout(f,80);
 }
 function closePop(){document.querySelector(".pop")?.remove();document.removeEventListener("pointerdown",popOutside,true);document.removeEventListener("keydown",popKey,true)}
 const popOutside=e=>{if(!e.target.closest(".pop"))closePop()};
@@ -889,7 +902,7 @@ function cycTask(id){try{localStorage.setItem("build-hint","1")}catch{}
 }
 function addTaskSheet(){
   const st={room:"both",phase:curPhases()[0]||"site"};
-  sheet("Add a task",`<form id="f" novalidate><label class="f" for="ti">What needs doing?</label><input id="ti" data-autofocus class="t" maxlength="120" placeholder="For example: Order roof sheets">${micBtn("ti","Speak the task")}
+  sheet("Add a task",`<form id="f" novalidate><label class="f" for="ti">What needs doing?</label><textarea id="ti" data-autofocus class="t grow-ta" rows="1" maxlength="160" placeholder="For example: Order roof sheets"></textarea>${micBtn("ti","Speak the task")}
   <label class="f">Phase</label>${chipRow("phase",PH.map(p=>[p[0],p[1]]),st.phase,"scroll")}
   <label class="f">Which classroom?</label>${chipRow("room",[...roomOpts(),["shared","Shared (done once)"]],st.room)}
   ${dateField("du","","Due date (optional)").replace('<div class="chips" style="margin-bottom:8px"><button type="button" class="chip" data-dc="'+today()+'"','<div class="chips" style="margin-bottom:8px"><button type="button" class="chip" data-dc="'+today()+'"')}
@@ -910,7 +923,7 @@ function taskSheet(key,roomId){
    ${dateField("du",d.due,"Due date").replace(/<div class="chips"[\s\S]*?<\/div>/,futureChips("du"))}
    <label class="f" for="wh">Who is doing it?</label>${names.length?`<div class="chips" style="margin-bottom:8px">${names.map(n=>`<button type="button" class="chip" data-nm="${esc(n)}">${esc(n)}</button>`).join("")}</div>`:""}<input id="wh" class="t" maxlength="60" value="${esc(d.who)}" placeholder="Name or company">
    <label class="f" for="nt">Note</label><textarea id="nt" class="t" maxlength="400" placeholder="Anything the team should know">${esc(d.note)}</textarea>${micBtn("nt","Speak a note")}`};
-  sheet("Task",`<form id="f" novalidate><label class="f" for="ti">Task</label><input id="ti" class="t" maxlength="120" value="${esc(title)}">${micBtn("ti","Speak the task name")}
+  sheet("Task",`<form id="f" novalidate><label class="f" for="ti">Task</label><textarea id="ti" class="t grow-ta" rows="1" maxlength="160">${esc(title)}</textarea>${micBtn("ti","Speak the task name")}
    ${ts.length>1?`<label class="f">Edit for</label><div class="segc" role="group" id="rm">${ts.sort((a,b)=>roomNo(a.room)-roomNo(b.room)).map(t=>`<button type="button" data-r="${t.room}" aria-pressed="${t.room===cur}">${esc(roomName(t.room))}</button>`).join("")}</div>`:`<p class="muted small" style="margin:6px 0 0">${esc(roomName(cur))}</p>`}
    <div id="body">${body()}</div><div class="foot"><button class="btn primary block">Save task</button></div></form>`,(sh,close)=>{
     const read=()=>{const d=draft[cur];d.due=sh.querySelector("#du")?.value||"";d.who=sh.querySelector("#wh")?.value.trim()||"";d.note=sh.querySelector("#nt")?.value.trim()||"";title=sh.querySelector("#ti").value};
