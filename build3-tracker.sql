@@ -173,3 +173,34 @@ grant execute on function
   public.build3_start(text,text,text), public.build3_me(text,text),
   public.build3_people_list(text,text), public.build3_people_set(text,text,jsonb)
 to anon, authenticated;
+
+-- Phone notifications (applied later). The edge function build3-notify (supabase/functions/build3-notify) sends them.
+create table if not exists public.build3_push(
+  endpoint text primary key, code text not null, pid text not null, p256dh text not null, auth text not null,
+  created_at timestamptz not null default now());
+alter table public.build3_push enable row level security;
+revoke all on public.build3_push from anon, authenticated;
+create index if not exists build3_push_pid on public.build3_push(code,pid);
+create table if not exists public.build3_secrets(k text primary key, v text not null);
+alter table public.build3_secrets enable row level security;
+revoke all on public.build3_secrets from anon, authenticated;
+
+create or replace function public.build3_push_save(p_code text, p_key text, p_sub jsonb) returns void
+language plpgsql security definer set search_path=public as $$
+declare w public.build3_people; ep text; a text; d text;
+begin
+  w:=public.b3_who(p_code,p_key);
+  ep:=p_sub->>'endpoint'; d:=p_sub->'keys'->>'p256dh'; a:=p_sub->'keys'->>'auth';
+  if ep is null or d is null or a is null or length(ep)>1000 then raise exception 'bad subscription'; end if;
+  insert into public.build3_push(endpoint,code,pid,p256dh,auth) values(ep,p_code,w.pid,d,a)
+  on conflict(endpoint) do update set code=excluded.code,pid=excluded.pid,p256dh=excluded.p256dh,auth=excluded.auth,created_at=now();
+end $$;
+
+create or replace function public.build3_push_drop(p_code text, p_key text, p_endpoint text) returns void
+language plpgsql security definer set search_path=public as $$
+declare w public.build3_people;
+begin
+  w:=public.b3_who(p_code,p_key);
+  delete from public.build3_push where endpoint=p_endpoint and code=p_code and pid=w.pid;
+end $$;
+grant execute on function public.build3_push_save(text,text,jsonb), public.build3_push_drop(text,text,text) to anon, authenticated;
