@@ -2147,35 +2147,37 @@ addEventListener("keydown",e=>{if(e.key==="Escape"&&fullPlan&&!closeSheet&&!docu
 const DTYPES=[["contract","Contract","clip",1],["quote","Quote","cash",1],["invoice","Invoice","cash",1],["cert","Certificate","check",0],["drawing","Drawing","map",0],["delivery","Delivery note","truck",0],["other","Other","note",0]];
 const dtype=k=>DTYPES.find(t=>t[0]===k)||DTYPES[6];
 const docMoney=d=>!!dtype(d.type)[3];
-const docVisible=d=>!docMoney(d)||(moneyOK&&canMoney());
+const docVisible=d=>docMoney(d)?(moneyOK&&canMoney()):(d.locked?moneyOK:true);
+const docLockedHidden=d=>!docVisible(d)&&(docMoney(d)?canMoney():true);
 const DOC_MAX=10*1048576;
 let docF="all";
 const docIcon=d=>/^image\//.test(d.mime||"")?"image":dtype(d.type)[2];
 const guessType=n=>{n=(n||"").toLowerCase();return /quot|estimate/.test(n)?"quote":/invoice|\binv\b|statement/.test(n)?"invoice":/contract|agreement/.test(n)?"contract":/coc|certificate|compliance|approval/.test(n)?"cert":/plan|drawing|elevation|section|layout/.test(n)?"drawing":/delivery|dn\b|waybill/.test(n)?"delivery":"other"};
 function docsV(){
-  const head=`<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Documents</h2></div><button class="btn primary" data-act="adddoc">${ic("plus")}Add</button></div>`;
-  const vis=S.docs.filter(docVisible),locked=!canMoney()?0:S.docs.length-vis.length;
+  const head=`<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Documents</h2></div><div class="row" style="gap:8px">${moneyOK?`<button class="iconbtn" data-act="lockmoney" aria-label="Lock documents now">${ic("lock")}</button>`:""}<button class="btn primary" data-act="adddoc">${ic("plus")}Add</button></div></div>`;
+  const vis=S.docs.filter(docVisible),locked=S.docs.filter(docLockedHidden).length;
   const types=DTYPES.filter(t=>canMoney()||!t[3]),cnt=k=>vis.filter(d=>d.type===k).length;
   const list=vis.filter(d=>docF==="all"||d.type===docF).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||b.id.localeCompare(a.id));
   if(!S.docs.length)return head+empty("note","No documents yet","Keep quotes, the contract, invoices, delivery notes and certificates in one place, and send any of them on WhatsApp.",`<button class="btn primary" data-act="adddoc">${ic("plus")}Add the first document</button>`);
   return head+`<div class="chips scroll" role="group" aria-label="Filter documents" style="margin-bottom:12px">${[["all","All · "+vis.length],...types.filter(t=>cnt(t[0])).map(t=>[t[0],t[1]+" · "+cnt(t[0])])].map(([k,l])=>`<button type="button" class="chip" data-sub="doc:${k}" aria-pressed="${docF===k}">${esc(l)}</button>`).join("")}</div>
-  ${locked?`<div class="note-card">${ic("lock")}<span><b>${locked} money document${locked===1?" is":"s are"} locked.</b> Contract, quotes and invoices need the money password.<br><button type="button" class="linkbtn" data-act="docunlock" style="padding:0;min-height:32px">Enter password</button></span></div>`:""}
-  <div class="card">${list.length?`<ul class="list">${list.map(d=>`<li class="tap" tabindex="0" data-act="opendoc" data-id="${d.id}"><span class="row-ic ${docMoney(d)?"":"sky"}">${ic(docIcon(d))}</span><div class="grow"><div class="lt">${esc(d.name)}</div><div class="ls">${esc(dtype(d.type)[1])} · ${dshort(d.date)}${d.size?" · "+fmtMB(d.size):""}${d.sup?" · "+esc(supName(d.sup)):""}</div></div>${ic("chev")}</li>`).join("")}</ul>`:`<p class="muted" style="margin:6px 0 0">No documents in this list.</p>`}</div>`;
+  ${locked?`<div class="note-card">${ic("lock")}<span><b>${locked} document${locked===1?" is":"s are"} locked.</b> Contracts, quotes, invoices and any document you lock need the money password.<br><button type="button" class="linkbtn" data-act="docunlock" style="padding:0;min-height:32px">Enter password</button></span></div>`:""}
+  <div class="card">${list.length?`<ul class="list">${list.map(d=>`<li class="tap" tabindex="0" data-act="opendoc" data-id="${d.id}"><span class="row-ic ${docMoney(d)?"":"sky"}">${ic(docIcon(d))}</span><div class="grow"><div class="lt">${esc(d.name)}${d.locked&&!docMoney(d)?` <span class="muted" style="display:inline-flex;vertical-align:middle" aria-label="Locked">${ic("lock","sm")}</span>`:""}</div><div class="ls">${esc(dtype(d.type)[1])} · ${dshort(d.date)}${d.size?" · "+fmtMB(d.size):""}${d.sup?" · "+esc(supName(d.sup)):""}</div></div>${ic("chev")}</li>`).join("")}</ul>`:`<p class="muted" style="margin:6px 0 0">No documents in this list.</p>`}</div>`;
 }
 function docSheet(id,presetType){
   const d=id?S.docs.find(x=>x.id===id):null;
-  const types=DTYPES.filter(t=>canMoney()||!t[3]),st={type:d?.type||presetType||"other"};
+  const types=DTYPES.filter(t=>canMoney()||!t[3]),st={type:d?.type||presetType||"other",lock:d?.locked?"1":"0"};
   let file=null;
   sheet(d?"Edit document":presetType==="drawing"?"Add a drawing":"Add a document",`<form id="f" novalidate>
   ${d?"":`<p class="muted" style="margin:6px 0 0">PDF, picture, Word or Excel file, up to 10 MB.</p><div class="photo-add"><button type="button" class="btn" id="df">${ic("upload")}Choose file</button><button type="button" class="btn" id="dc">${ic("camera")}Take photo</button></div><input type="file" id="fi" hidden><input type="file" id="fc" accept="image/*" capture="environment" hidden><p class="hint" id="fs"></p>`}
   <label class="f" for="dn">Name</label><input id="dn" ${d?"data-autofocus":""} class="t" maxlength="80" value="${esc(d?.name||"")}" placeholder="For example: Roof sheeting quote">
   <label class="f">Type</label>${chipRow("type",types.map(t=>[t[0],t[1]]),st.type,"scroll")}
+  <label class="f">Password lock</label>${chipRow("lock",[["0","Open to the team"],["1","Locked"]],st.lock)}<p class="hint">Locked documents are hidden until someone enters the money password. Contracts, quotes and invoices are always locked.</p>
   ${dateField("dt",d?.date||today())}
   <label class="f" for="ph">Phase (optional)</label><select id="ph" class="t sel"><option value="">None</option>${PH.map(p=>`<option value="${p[0]}" ${p[0]===d?.phase?"selected":""}>${esc(p[1])}</option>`).join("")}</select>
   ${S.sups.length?`<label class="f" for="su">Supplier or contractor (optional)</label><select id="su" class="t sel"><option value="">None</option>${S.sups.map(s=>`<option value="${s.id}" ${s.id===d?.sup?"selected":""}>${esc(s.name)}</option>`).join("")}</select>`:""}
   <label class="f" for="nt">Note (optional)</label><input id="nt" class="t" maxlength="160" value="${esc(d?.note||"")}">
   <div class="foot"><button class="btn primary block" id="go" ${d?"":"disabled"}>${d?"Save changes":"Add document"}</button></div></form>`,(sh,close)=>{
-    wireDc(sh);wireChips(sh,st,"type");
+    wireDc(sh);wireChips(sh,st,"type");wireChips(sh,st,"lock");
     const take=e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
       if(f.size>DOC_MAX){sh.querySelector("#fs").textContent="That file is "+fmtMB(f.size)+". The limit is 10 MB.";return}
       file=f;sh.querySelector("#fs").textContent=f.name+" · "+fmtMB(f.size);sh.querySelector("#go").disabled=false;
@@ -2183,12 +2185,12 @@ function docSheet(id,presetType){
       const g=guessType(f.name);if(types.some(t=>t[0]===g)){st.type=g;sh.querySelectorAll('[data-ch="type"]').forEach(x=>x.setAttribute("aria-pressed",x.dataset.v===g))}};
     if(!d){sh.querySelector("#fi").onchange=take;sh.querySelector("#fc").onchange=take;sh.querySelector("#df").onclick=()=>sh.querySelector("#fi").click();sh.querySelector("#dc").onclick=()=>sh.querySelector("#fc").click()}
     sh.querySelector("#f").onsubmit=async e=>{e.preventDefault();const nm=sh.querySelector("#dn");if(!d&&!file)return;if(!nm.value.trim())return showErr(sh,nm,"Give the document a name.");
-      const vals={name:nm.value.trim(),type:st.type,date:sh.querySelector("#dt").value||today(),phase:sh.querySelector("#ph").value,sup:sh.querySelector("#su")?.value||"",note:sh.querySelector("#nt").value.trim()};
-      if(d){const u=undoEdit(d,vals);save();close();render();toast("Document saved.",u);return}
+      const vals={name:nm.value.trim(),type:st.type,date:sh.querySelector("#dt").value||today(),phase:sh.querySelector("#ph").value,sup:sh.querySelector("#su")?.value||"",note:sh.querySelector("#nt").value.trim(),locked:st.lock==="1"};
+      if(d){const u=undoEdit(d,vals);save();close();render();toast(vals.locked&&!moneyOK?"Document saved and locked. Enter the password to see it.":"Document saved.",u);return}
       const b=sh.querySelector("#go");b.disabled=true;b.textContent="Saving…";
       try{const mid="dc"+uid();await mPut(mid,file);queueMedia(mid);
         const n={id:uid(),...vals,media:mid,fn:file.name,mime:file.type||"",size:file.size,who:me};
-        S.docs.push(n);logAct("Added a document: "+n.name,docMoney(n)?1:0);save();close();render();toast("Document added.",()=>S.docs.splice(S.docs.indexOf(n),1))}
+        S.docs.push(n);logAct("Added a document: "+n.name,docMoney(n)?1:0);save();close();render();toast(n.locked&&!moneyOK&&!docMoney(n)?"Document added and locked. Enter the password to see it.":"Document added.",()=>S.docs.splice(S.docs.indexOf(n),1))}
       catch(err){b.disabled=false;b.textContent="Add document";sh.querySelector("#fs").textContent="Could not save that file. Try a smaller one."}};
   });
 }
@@ -2196,10 +2198,10 @@ const docFileName=d=>{const ext=((d.fn||"").match(/\.[A-Za-z0-9]+$/)||[""])[0];r
 function docView(id){
   const d=S.docs.find(x=>x.id===id);if(!d||!docVisible(d))return;
   const ro=role==="funder";
-  sheet(d.name,`<div class="row wr" style="gap:8px;margin:8px 0 12px"><span class="pill ${docMoney(d)?"type":"sky"}">${esc(dtype(d.type)[1])}</span><span class="pill gone">${dlabel(d.date)}</span>${d.size?`<span class="pill gone">${fmtMB(d.size)}</span>`:""}</div>
+  sheet(d.name,`<div class="row wr" style="gap:8px;margin:8px 0 12px"><span class="pill ${docMoney(d)?"type":"sky"}">${esc(dtype(d.type)[1])}</span>${d.locked&&!docMoney(d)?`<span class="pill watch">${ic("lock","sm")}Locked</span>`:""}<span class="pill gone">${dlabel(d.date)}</span>${d.size?`<span class="pill gone">${fmtMB(d.size)}</span>`:""}</div>
   ${d.sup?`<p class="muted small" style="margin:0 0 6px">${ic("user","sm")} ${esc(supName(d.sup))}</p>`:""}${d.phase&&PSHORT[d.phase]?`<p class="muted small" style="margin:0 0 6px">${esc(PSHORT[d.phase])}</p>`:""}${d.note?`<p style="margin:0 0 12px">${esc(d.note)}</p>`:""}
   <p class="hint" id="dst"></p>
-  <div class="tasks"><button type="button" class="btn primary block" id="do">${ic("eye")}Open</button><button type="button" class="btn block" id="ds">${ic("share")}Share</button><button type="button" class="btn block" id="dg">${ic("cloud")}Save to Google Drive</button><button type="button" class="btn block" id="dd">${ic("download")}Save to this phone</button>${ro?"":`<button type="button" class="btn block" id="de">${ic("pencil")}Edit details</button><button type="button" class="btn block danger" id="dx">${ic("trash")}Delete</button>`}</div>`,(sh,close)=>{
+  <div class="tasks"><button type="button" class="btn primary block" id="do">${ic("eye")}Open</button><button type="button" class="btn block" id="ds">${ic("share")}Share</button><button type="button" class="btn block" id="dg">${ic("cloud")}Save to Google Drive</button><button type="button" class="btn block" id="dd">${ic("download")}Save to this phone</button>${ro||docMoney(d)?"":`<button type="button" class="btn block" id="dl">${ic("lock")}${d.locked?"Remove the password lock":"Lock with the password"}</button>`}${ro?"":`<button type="button" class="btn block" id="de">${ic("pencil")}Edit details</button><button type="button" class="btn block danger" id="dx">${ic("trash")}Delete</button>`}</div>`,(sh,close)=>{
     const st=t=>sh.querySelector("#dst").textContent=t;
     const get=async()=>{const b=await mGet(d.media).catch(()=>null);if(!b){st("This file is still loading from your team. Try again in a moment.");return null}return b};
     const typed=b=>new Blob([b],{type:d.mime||b.type||"application/octet-stream"});
@@ -2209,6 +2211,7 @@ function docView(id){
       if(navigator.canShare&&navigator.canShare({files:[f]})){try{await navigator.share({files:[f],title:d.name})}catch{}}
       else{const a=document.createElement("a");a.href=URL.createObjectURL(f);a.download=f.name;document.body.append(a);a.click();a.remove();st("Sharing files is not available here, so the file was saved to this phone. Attach it in WhatsApp.")}};
     sh.querySelector("#dg").onclick=()=>driveSave([{media:d.media,name:docFileName(d)}],st);sh.querySelector("#dd").onclick=async()=>{const b=await get();if(!b)return;const a=document.createElement("a");a.href=URL.createObjectURL(typed(b));a.download=docFileName(d);document.body.append(a);a.click();a.remove();toast("Saved to this phone.")};
+    if(!ro&&!docMoney(d)){sh.querySelector("#dl").onclick=()=>{const u=undoEdit(d,{locked:!d.locked});save();close();render();toast(d.locked?"Locked. It is hidden until the password is entered.":"The lock is removed.",u)}}
     if(!ro){sh.querySelector("#de").onclick=()=>{close();docSheet(id)};sh.querySelector("#dx").onclick=()=>{close();delRecs(S.docs,x=>x.id===id,"Document")}}
   });
 }
