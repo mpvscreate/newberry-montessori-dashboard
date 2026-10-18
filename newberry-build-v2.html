@@ -1176,6 +1176,7 @@ function more(){
   return `<div class="page-h"><h2>More</h2></div>
   <div class="card"><ul class="list">
    ${row("note","Documents","Quotes, contract, invoices, certificates, drawings and delivery notes","godocs")}
+   ${row("cloud","Back up to Google Drive","Save all documents, photos and project data at once","gbackup")}
    ${row("truck","Materials and stock","Stock, fittings, electrical, sundries and suppliers","gomats")}
    ${row("camera","Site log and issues","Photos, notes and things to fix","gosite")}
    ${row("clock","Activity","Who did what, and when","acts")}
@@ -1198,12 +1199,12 @@ function more(){
 /* ---------- actions ---------- */
 function act(a,id,el){
   closePop();
-  if(role==="funder"&&!["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock","plprev","plnext","phdrive"].includes(a)){toast("This is a view-only copy.");return}
+  if(role==="funder"&&!["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock","plprev","plnext","phdrive","gbackup"].includes(a)){toast("This is a view-only copy.");return}
   if(role==="builder"&&["addcost","editcost","delcost","budget","addpay","editpay","delpay","recpay","paypay","paycost","contract","typicalpay","weekly","resetpays","payall","report"].includes(a)){toast("Money is hidden for builders.");return}
   ({
    cyc:()=>cycTask(id),opentask:()=>taskSheet(...id.split("|")),edittask:()=>taskSheet(...id.split("|")),
    deltask:()=>{const[k]=id.split("|");const f=roomF;delRecs(S.tasks,t=>t.key===k&&(f==="all"||t.room===f||t.room==="shared"),"Task")},
-   addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>quickPhoto(id),phdrive:()=>driveSave(phasePhotoIds(id).map((m,i)=>({media:m,name:(PSHORT[id]||"Phase")+" photo "+(i+1)+".jpg"}))),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),addcost:()=>costSheet(),editcost:()=>costSheet(id),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
+   addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>quickPhoto(id),gbackup:()=>backupSheet(),phdrive:()=>driveSave(phasePhotoIds(id).map((m,i)=>({media:m,name:(PSHORT[id]||"Phase")+" photo "+(i+1)+".jpg"}))),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),addcost:()=>costSheet(),editcost:()=>costSheet(id),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
    payall:()=>{payAll=!payAll;render()},resetpays:()=>{const ps=[...S.pays],cs=S.costs.filter(c=>c.pay);S.pays.length=0;cs.forEach(c=>S.costs.splice(S.costs.indexOf(c),1));payAll=false;save();render();toast("All builder payments reset to R 0.",()=>{ps.forEach(x=>S.pays.push(x));cs.forEach(c=>S.costs.push(c))})},recpay:()=>recPaySheet(),weekly:()=>weeklySheet(),addpay:()=>paySheet(),editpay:()=>paySheet(id),contract:()=>contractSheet(),typicalpay:()=>typicalPays(),
    paypay:()=>{const x=S.pays.find(q=>q.id===id),u=undoEdit(x,{paid:true,paidOn:today()});payCost(x);logAct(`Builder payment of ${money(x.amount)} recorded`,1);save();render();toast(`${money(x.amount)} paid to the builder.`,()=>{u();payCost(x)})},
    delpay:()=>{const x=S.pays.find(q=>q.id===id),lc=S.costs.find(c=>c.id==="pay_"+id);S.pays.splice(S.pays.indexOf(x),1);if(lc)S.costs.splice(S.costs.indexOf(lc),1);save();render();toast("Stage deleted.",()=>{S.pays.push(x);if(lc)S.costs.push(lc)})},
@@ -1544,6 +1545,54 @@ async function driveSave(items,say){
   gBusy=false;
 }
 setTimeout(()=>{if(navigator.onLine)gisLoad().catch(()=>{})},4000);
+/* ---------- back up everything to Google Drive ---------- */
+const gSavedGet=()=>{try{return new Set(JSON.parse(localStorage.getItem("build-gsaved")||"[]"))}catch{return new Set()}};
+const gSavedAdd=id=>{try{const a=gSavedGet();a.add(id);localStorage.setItem("build-gsaved",JSON.stringify([...a]))}catch{}};
+async function gSub(t,root,name){
+  const H={Authorization:"Bearer "+t},q=encodeURIComponent(`mimeType='application/vnd.google-apps.folder' and name='${name}' and '${root}' in parents and trashed=false`);
+  const l=await fetch(`https://www.googleapis.com/drive/v3/files?q=${q}&fields=files(id)&pageSize=1`,{headers:H});if(!l.ok)throw new Error("drive "+l.status);
+  const id=(await l.json()).files?.[0]?.id;if(id)return id;
+  const c=await fetch("https://www.googleapis.com/drive/v3/files?fields=id",{method:"POST",headers:{...H,"Content-Type":"application/json"},body:JSON.stringify({name,mimeType:"application/vnd.google-apps.folder",parents:[root]})});
+  if(!c.ok)throw new Error("drive "+c.status);return (await c.json()).id;
+}
+async function backupPlan(){
+  const keys=((await mTx("readonly",st=>st.getAllKeys()).catch(()=>[]))||[]).filter(k=>typeof k==="string"&&!k.startsWith("lib-"));
+  const money=moneyOK&&role!=="builder",docOf={},hidden=new Set();
+  S.docs.forEach(d=>{if(!d.media)return;if(docVisible(d))docOf[d.media]=d;else hidden.add(d.media)});
+  const nameOf={};
+  logsNewest().forEach(l=>(l.media||[]).forEach((m,i)=>{if(!nameOf[m])nameOf[m]=(l.phase&&PSHORT[l.phase]?PSHORT[l.phase]:"Site log")+" "+(l.date||"")+" "+(i+1)}));
+  const saved=gSavedGet(),items=[];
+  for(const k of keys){if(hidden.has(k))continue;const d=docOf[k];items.push({media:k,doc:!!d,name:d?docFileName(d):(nameOf[k]||"Photo "+k.slice(-6)),done:saved.has(k)})}
+  return{items,money};
+}
+function backupSheet(){
+  sheet("Back up to Google Drive",`<p class="muted" style="margin:6px 0 12px" id="bk-t">Counting what needs saving…</p><div class="bar" style="height:8px;border-radius:99px;background:var(--field);overflow:hidden;margin-bottom:12px"><div id="bk-b" style="height:100%;width:0;background:var(--green);transition:width .2s"></div></div><p class="hint" id="bk-s"></p><div class="foot"><button class="btn primary block" id="bk-go" disabled>${ic("cloud")}Back up now</button></div>`,async(sh,close)=>{
+    const t1=sh.querySelector("#bk-t"),bar=sh.querySelector("#bk-b"),go=sh.querySelector("#bk-go"),stx=sh.querySelector("#bk-s");
+    let plan;try{plan=await backupPlan()}catch{t1.textContent="Could not read the saved files on this phone.";return}
+    const todo=plan.items.filter(x=>!x.done);
+    t1.textContent=todo.length?`${todo.length} file${todo.length===1?"":"s"} to save${plan.items.length-todo.length?`, ${plan.items.length-todo.length} already saved`:""}. A copy of the project data is saved too${plan.money?"":" (without money details)"}.`:`All ${plan.items.length} files are already saved. Tap to save a fresh copy of the project data.`;
+    go.disabled=false;
+    go.onclick=async()=>{
+      let t;try{t=await gToken()}catch(e){
+        if(e.message==="load"){gisLoad().then(()=>{stx.textContent="Google is ready. Tap Back up now again."},()=>{stx.textContent="You need to be online to use Google Drive."})}
+        else stx.textContent=/access_denied|popup|closed|cancel/i.test(e.message)?"Google sign-in was cancelled.":"Could not connect to Google Drive.";
+        return}
+      if(gBusy)return;gBusy=true;go.disabled=true;let n=0,fail=0;const total=todo.length+1;
+      try{const root=await gFolder(t),dd=await gSub(t,root,"Documents"),pp=await gSub(t,root,"Photos"),used={};
+        for(const it of todo){const b=await mGet(it.media).catch(()=>null);
+          if(!b){fail++}else{const ext=(it.name.match(/\.[A-Za-z0-9]{2,4}$/)||[""])[0]||({"image/png":".png","video/mp4":".mp4","application/pdf":".pdf"}[b.type]||".jpg");
+            let nm=it.doc?it.name:it.name.replace(/\.[A-Za-z0-9]{2,4}$/,"")+ext;used[nm]=(used[nm]||0)+1;if(used[nm]>1)nm=nm.replace(/(\.[A-Za-z0-9]+)$/," ("+used[nm]+")$1");
+            try{await gUpload(t,it.doc?dd:pp,b,nm);gSavedAdd(it.media)}catch(e){if(/401|403/.test(e.message))throw e;fail++}}
+          n++;bar.style.width=Math.round(n/total*100)+"%";t1.textContent=`Saving… ${n} of ${total}`}
+        const data=JSON.parse(JSON.stringify(S));if(!plan.money){delete data.costs;delete data.pays;data.docs=(data.docs||[]).filter(docVisible)}
+        await gUpload(t,root,new Blob([JSON.stringify(data,null,1)],{type:"application/json"}),"project-data "+today()+".json");
+        bar.style.width="100%";t1.textContent=fail?`Done. ${fail} file${fail===1?"":"s"} could not be read yet and will be saved next time.`:`Done. Everything is saved in "${gFolderName()}" in your Google Drive.`;
+        stx.textContent="You can run this again any time. Only new files are saved.";go.textContent="Close";go.disabled=false;go.onclick=close;
+      }catch(e){if(/401/.test(e.message))gTok=null;t1.textContent=/403/.test(e.message)?"Google would not allow that. Check that the Drive API is turned on.":"Stopped early. Check your connection and tap Back up now to continue.";go.disabled=false}
+      gBusy=false;
+    };
+  });
+}
 function lightbox(ids,start){
   let i=start;const el=document.createElement("div");el.id="lbx";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","Photo viewer");
   const draw=async()=>{const u=await mUrl(ids[i]);el.innerHTML=`<div class="lb-body">${u?`<img src="${u}" alt="Site photo ${i+1} of ${ids.length}">`:`<div class="mmiss" style="color:#fff">${ic("cloud","xl")}<span>Photo is still loading</span></div>`}</div><button class="lb-b lb-x" aria-label="Close photo">${ic("x")}</button><button class="lb-b lb-g" aria-label="Save this photo to Google Drive">${ic("cloud")}</button>${ids.length>1?`<button class="lb-b lb-n prev" aria-label="Previous photo">${ic("left")}</button><button class="lb-b lb-n next" aria-label="Next photo">${ic("chev")}</button><div class="lb-cap">${i+1} of ${ids.length}</div>`:""}`;
