@@ -369,6 +369,12 @@ body.ro .page-h .btn[data-act="docprint"]{display:inline-flex!important}
 .stack{display:flex;height:14px;border-radius:99px;overflow:hidden;background:var(--field);margin:10px 0}.stack i{display:block;height:100%}
 .legend{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:6px}.legend li{display:flex;align-items:center;gap:8px;font-size:.88rem}.legend li i{width:10px;height:10px;border-radius:50%;flex:none}.legend li b{margin-left:auto}
 .pa-h{font:700 16px/1.3 sans-serif;color:#000;margin:0 0 4px}.pa-row{font:12px/1.45 sans-serif;color:#000;border-bottom:1px solid #aaa;padding:6px 0}
+.micwrap{position:sticky;bottom:calc(96px + env(safe-area-inset-bottom));height:0;z-index:4;text-align:right;pointer-events:none}
+.micfab{pointer-events:auto;transform:translateY(calc(-100% - 8px));display:inline-flex;align-items:center;gap:8px;min-height:58px;padding:0 22px 0 18px;border:0;border-radius:99px;background:var(--accent);color:var(--accent-ink,#1b1300);font:700 .95rem var(--body);box-shadow:0 8px 24px rgba(0,0,0,.45);touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:pointer}
+.micfab .i{width:24px;height:24px}
+.micfab.on{background:var(--red-strong,#d9483b);color:#fff;animation:micpulse 1.1s ease-in-out infinite}
+@keyframes micpulse{50%{box-shadow:0 8px 24px rgba(0,0,0,.45),0 0 0 10px rgba(217,72,59,.28)}}
+.sheet.kbd .micwrap{bottom:14px}
 .dim{opacity:.62}.trcard{cursor:pointer}
 .rn .st,.rn .stp,.rfin .st,.rfin .stp{pointer-events:none}
 .rn [data-fab="task"],.rn [data-fab="mat"],.rn [data-fab="cost"],.rn [data-fab="pay"],.rfin [data-fab="task"],.rfin [data-fab="mat"],.rfin [data-fab="photo"],.rfin [data-fab="issue"],.rn [data-act="addtask"],.rfin [data-act="addtask"],.rn [data-act="editelec"],.rfin [data-act="editelec"],.rn [data-act="reorder"],.rfin [data-act="reorder"]{display:none!important}
@@ -775,7 +781,7 @@ function sheet(title,html,onMount){
   l.querySelector(".scrim").onclick=e=>{if(e.target.classList.contains("scrim"))close()};
   sh.addEventListener("keydown",e=>{if(e.key!=="Tab")return;const f=[...sh.querySelectorAll('button:not([disabled]),[href],input:not([disabled]):not([type=hidden]),select,textarea')].filter(x=>x.offsetParent);if(!f.length)return;const a=f[0],z=f[f.length-1];
     if(e.shiftKey&&document.activeElement===a){e.preventDefault();z.focus()}else if(!e.shiftKey&&document.activeElement===z){e.preventDefault();a.focus()}});
-  onMount?.(sh,close);compactRows(sh);growWire(sh);
+  onMount?.(sh,close);compactRows(sh);growWire(sh);wireMics(sh);
   if(!sh.querySelector(".foot,form,#yes,#re")){const d=document.createElement("div");d.className="foot";d.innerHTML='<button type="button" class="btn primary block" data-done>Done</button>';sh.append(d);d.firstChild.onclick=close}
   (sh.querySelector("[data-autofocus]")||sh).focus({preventScroll:true});return close;
 }
@@ -1883,22 +1889,36 @@ document.addEventListener("visibilitychange",()=>{if(!document.hidden&&Date.now(
 
 /* ---------- voice dictation for task fields ---------- */
 const SPEECH=window.SpeechRecognition||window.webkitSpeechRecognition;
-function micBtn(target,label){return SPEECH?'<button type="button" class="btn small" data-mic="'+target+'" aria-pressed="false" style="margin-top:8px">'+ic("mic")+'<span>'+(label||"Speak")+'</span></button>':""}
+/* one round microphone button at the bottom right of a form: hold it while you speak, let go to stop */
+function micBtn(target){return SPEECH?'<i data-mic-for="'+target+'" hidden></i>':""}
 function wireMics(sh){
-  sh.querySelectorAll("[data-mic]").forEach(b=>{
-    if(b._w)return;b._w=true;let rec=null;const lab=b.querySelector("span"),idle=lab.textContent;
-    b.onclick=()=>{
-      if(rec){rec.stop();return}
-      const f=sh.querySelector("#"+b.dataset.mic);if(!f)return;
-      try{
-        rec=new SPEECH();rec.lang="en-ZA";rec.continuous=true;rec.interimResults=false;
-        rec.onresult=ev=>{const said=Array.from(ev.results).slice(ev.resultIndex).map(r=>r[0].transcript).join(" ").trim();if(said){const cur=f.value.trim();f.value=(cur?cur+" ":"")+(cur?said:said.charAt(0).toUpperCase()+said.slice(1));f.dispatchEvent(new Event("input",{bubbles:true}))}};
-        rec.onend=()=>{rec=null;b.setAttribute("aria-pressed","false");lab.textContent=idle};
-        rec.onerror=e=>{if(e&&(e.error==="not-allowed"||e.error==="service-not-allowed"))toast("Allow the microphone to use voice.")};
-        rec.start();b.setAttribute("aria-pressed","true");lab.textContent="Listening… tap to stop";
-      }catch{rec=null}
-    };
-  });
+  if(!SPEECH)return;
+  const ids=[...sh.querySelectorAll("[data-mic-for]")].map(m=>m.dataset.micFor);
+  let wrap=sh.querySelector(".micwrap");
+  if(!ids.length){if(wrap)wrap.remove();return}
+  sh._micIds=ids;
+  if(!sh._micFocus){sh.addEventListener("focusin",e=>{if(e.target.id&&(sh._micIds||[]).includes(e.target.id))sh._micLast=e.target.id});sh._micFocus=true}
+  if(wrap)return;
+  wrap=document.createElement("div");wrap.className="micwrap";
+  wrap.innerHTML='<button type="button" class="micfab" aria-label="Hold to speak, let go to stop">'+ic("mic")+'<span>Hold to speak</span></button>';
+  const foot=sh.querySelector(".foot");if(foot&&foot.parentNode)foot.parentNode.insertBefore(wrap,foot);else sh.append(wrap);
+  const btn=wrap.querySelector("button"),lab=btn.querySelector("span");let rec=null,t0=0,held=false;
+  const target=()=>sh.querySelector("#"+((sh._micLast&&sh._micIds.includes(sh._micLast))?sh._micLast:sh._micIds[0]));
+  const start=e=>{
+    e.preventDefault();if(rec||held)return;const f=target();if(!f)return;
+    held=true;t0=Date.now();try{btn.setPointerCapture(e.pointerId)}catch{}
+    try{
+      rec=new SPEECH();rec.lang="en-ZA";rec.continuous=true;rec.interimResults=false;
+      rec.onresult=ev=>{const said=Array.from(ev.results).slice(ev.resultIndex).map(r=>r[0].transcript).join(" ").trim();if(said){const cur=f.value.trim();f.value=(cur?cur+" ":"")+(cur?said:said.charAt(0).toUpperCase()+said.slice(1));f.dispatchEvent(new Event("input",{bubbles:true}))}};
+      rec.onend=()=>{rec=null;btn.classList.remove("on");lab.textContent="Hold to speak"};
+      rec.onerror=er=>{if(er&&(er.error==="not-allowed"||er.error==="service-not-allowed"))toast("Allow the microphone to use voice.")};
+      rec.start();btn.classList.add("on");lab.textContent="Listening… let go to stop";buzz(10);
+    }catch{rec=null;held=false}
+  };
+  const stop=()=>{if(!held)return;held=false;if(Date.now()-t0<350)toast("Hold the button down while you speak.");try{rec&&rec.stop()}catch{}};
+  btn.addEventListener("pointerdown",start);
+  ["pointerup","pointercancel","lostpointercapture"].forEach(n=>btn.addEventListener(n,stop));
+  btn.addEventListener("contextmenu",e=>e.preventDefault());
 }
 /* ---------- timeline, progress curves, phase header, radial plus ---------- */
 let curveSub="progress";
