@@ -404,6 +404,9 @@ body.previewing{padding-top:calc(48px + env(safe-area-inset-top,0px))}
 .ro-furn [data-act="addfurn"],.ro-furn [data-act="furnstarter"]{display:none!important}
 .ro-tasks .furnlist .st{pointer-events:auto}
 .ro-furn .furnlist .st{pointer-events:none}
+.segc.ptabs .ptab.mats{color:var(--green);font-weight:600}
+.segc.ptabs .ptab.mats[aria-pressed="true"]{background:var(--green);color:#fff;border-color:var(--green)}
+.na-mats .ptab.mats{display:none!important}
 .dim{opacity:.62}.trcard{cursor:pointer}
 .rn .st,.rn .stp,.rfin .st,.rfin .stp{pointer-events:none}
 .rn [data-fab="task"],.rn [data-fab="mat"],.rn [data-fab="cost"],.rn [data-fab="pay"],.rfin [data-fab="task"],.rfin [data-fab="mat"],.rfin [data-fab="photo"],.rfin [data-fab="issue"],.rn [data-act="addtask"],.rfin [data-act="addtask"],.rn [data-act="editelec"],.rfin [data-act="editelec"],.rn [data-act="reorder"],.rfin [data-act="reorder"]{display:none!important}
@@ -691,8 +694,9 @@ const mOut=m=>sum((m.moves||[]).filter(x=>x.t==="out"),x=>+x.qty||0);
 const mLeft=m=>mIn(m)-mOut(m);
 const mEff=m=>{if(secOf(m)==="stock"&&(m.moves||[]).length){if(+m.min>0&&mLeft(m)<=+m.min)return"low";if(m.qty>0&&mIn(m)>=m.qty)return"got";return"part"}return m.status};
 const needsOrder=m=>["need","low"].includes(mEff(m));
+const MATPH={s_fill:"found",s_stone:"found",s_steel:"found",s_mesh:"found",s_cement:"found",s_sand:"found",s_dpc:"found",s_brick:"walls",s_bforce:"walls",s_ties:"walls",f_w2:"walls",f_w3:"walls",f_w5:"walls",f_w6:"walls",f_d1:"walls",f_d2:"walls",f_d3:"walls",f_d5:"walls",f_truss:"roof",f_sheet:"roof",f_wcb:"svc",f_wcg:"svc",f_wcd:"svc",f_geyser:"svc",f_fan:"svc",e_cond:"svc",e_cab25:"svc",e_cab15:"svc",e_db:"svc",e_brk:"svc",e_led:"svc",e_plug:"svc",e_sw:"svc",s_plsand:"fin",f_tiles:"fin",f_iso:"fin",f_gyp:"fin",f_board:"fin",u_pin:"fin",u_pout:"fin",u_primer:"fin",u_screw:"fin",u_nail:"fin",u_sil:"fin",u_adh:"fin",u_grout:"fin",u_sand:"fin",u_tape:"fin"};
 const seedMats=()=>{
-  const mk=(sec,list)=>list.map(([id,name,qty,unit,room])=>({id,name,qty,unit,sec,room:room||"both",status:"need",sup:"",due:"",moves:[],min:0}));
+  const mk=(sec,list)=>list.map(([id,name,qty,unit,room])=>({id,name,qty,unit,sec,room:room||"both",status:"need",sup:"",due:"",moves:[],min:0,phase:MATPH[id]||""}));
   return[
    ...mk("stock",[["s_brick","Bricks",0,"each"],["s_cement","Cement (50 kg)",0,"bags"],["s_sand","Building sand",0,"m³"],["s_plsand","Plaster sand",0,"m³"],["s_stone","Concrete stone",0,"m³"],["s_fill","Hardcore fill",0,"m³"],["s_steel","Reinforcing steel",0,"m"],["s_mesh","Ref 193 mesh for the floor slabs",202.4,"m²"],["s_dpc","Damp-proof course (DPC)",0,"rolls"],["s_bforce","Brickforce",0,"rolls"],["s_ties","Wall ties",0,"boxes"]]),
    ...mk("fit",[["f_w2","Window W2",1,"each"],["f_w3","Window W3",6,"each"],["f_w5","Window W5",1,"each"],["f_w6","Window W6",1,"each"],["f_d1","Door D1",1,"each"],["f_d2","Door D2",1,"each"],["f_d3","Door D3",1,"each"],["f_d5","Door D5",2,"each"],["f_truss","Roof trusses",0,"each"],["f_sheet","Kliplok 406 roof sheeting",0,"m²"],["f_wcb","Toilet and basin: boys",1,"each","both"],["f_wcg","Toilet and basin: girls",1,"each"],["f_wcd","Toilet and basin: disabled",1,"each"],["f_geyser","Solar geyser",0,"each"],["f_board","Whiteboard (2400 × 1200)",2,"each"],["f_fan","Extraction fan, internal bathroom",1,"each"],["f_tiles","Floor tiles, classrooms",202.4,"m²"],["f_iso","135 mm Isotherm above the ceilings",202.4,"m²"],["f_gyp","6.4 mm gypsum ceiling board",202.4,"m²"]]),
@@ -743,7 +747,8 @@ if(fresh&&!location.hash.includes("join=")){S.tasks=seedTasks();S.sups=[{id:"jon
   S.mats=seedMats()}
 const demoCost=()=>({id:"c_demo",amount:30000,title:"Demolition (price agreed)",cat:"labour",room:"both",date:S.settings.start||today(),paid:false,sup:""});
 function migrate(){
-  if(fresh){S.tplv=6;S.costs.push(demoCost());return}
+  if(fresh){S.tplv=7;S.costs.push(demoCost());return}
+  if((S.tplv||0)===6&&S.tasks.length&&(perm.manage||!sm.code)){S.mats.forEach(m=>{if(m.phase===undefined)m.phase=MATPH[m.id]||""});S.tplv=7}
   if((S.tplv||0)>=6||!S.tasks.length)return;
   if((S.tplv||0)<2){
     const have=new Set(S.tasks.map(t=>t.id));let n=-200;
@@ -958,7 +963,7 @@ function render(){
   v.querySelectorAll("[data-go]").forEach(el=>el.addEventListener("click",()=>{if(el._lp){el._lp=false;return}const[t,f]=el.dataset.go.split(":");if(t==="phase"&&f)curPh=f;if(t==="site"&&f)logSub=f;if(t==="mats"&&f)matF=f;go(t)}));
   v.querySelectorAll("[data-rf]").forEach(el=>el.addEventListener("click",()=>{roomF=el.dataset.rf;render()}));
   v.querySelectorAll("details.gd").forEach(d=>d.addEventListener("toggle",()=>{if(openPh===null)openPh=new Set(curPhases());d.open?openPh.add(d.dataset.ph):openPh.delete(d.dataset.ph)}));
-  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;if(k==="plan"){planSel=val;PV.plan="";PV.had=false}if(k==="doc")docF=val;if(k==="mseg")moneySeg=val;if(k==="tf")taskF=val;if(k==="df")diaryF=val;if(k==="bm"){bmode=val;lsSet("build-bmode",val)}if(k==="fr")fRoom=val;if(k==="fv")fView=val;render()}));
+  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;if(k==="plan"){planSel=val;PV.plan="";PV.had=false}if(k==="doc")docF=val;if(k==="mseg")moneySeg=val;if(k==="tf")taskF=val;if(k==="df")diaryF=val;if(k==="pt")phTab=val;if(k==="mph")matPh=val;if(k==="bm"){bmode=val;lsSet("build-bmode",val)}if(k==="fr")fRoom=val;if(k==="fv")fView=val;render()}));
   v.querySelectorAll("li.tap").forEach(el=>{el.setAttribute("role","button");el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click()}})});
   hydrate(v);hydrateBg(v);countUp(v);if(tab==="plans")initPlanView();
   v.querySelectorAll("svg.chart").forEach(wireChart);if(lvl("tasks")>=2)v.querySelectorAll("ul.reord").forEach(ul=>holdDrag(ul,curPh));
@@ -1185,19 +1190,6 @@ function buildMain(){
   ${rec.length?`<div class="rps">${rec.map(l=>`<button type="button" class="rp" data-go="site"><span class="rpi">${l.media?.length?`<span data-m="${l.media[0]}" style="position:absolute;inset:0"></span>`:ic(l.kind==="issue"?"alert":"note","lg")}</span><span class="rpt"><b style="color:${PCOL[l.phase]||"var(--accent)"}">${esc(l.phase&&PSHORT[l.phase]?PSHORT[l.phase]:"Site")}</b><span>${esc(l.text?l.text.slice(0,48):l.kind==="issue"?"Issue reported":"Added a photo")}</span><small>${dlabel(l.date)}</small></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:0 2px">Photos and notes you add will show up here.</p>`}
   <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="tasks">${ic("check")}<span>Tasks</span>${sm.code&&S.tasks.some(t=>t.assignee===sm.pid&&t.status!=="done")?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${uk(S.tasks.filter(t=>t.assignee===sm.pid&&t.status!=="done"))}</i>`:""}</button><button type="button" class="sc" data-go="diary">${ic("book")}<span>Site diary</span></button><button type="button" class="sc" data-go="docs" style="grid-column:1/-1">${ic("note")}<span>Documents</span>${S.docs.filter(docListed).length?`<small class="muted">${S.docs.filter(docListed).length}</small>`:""}</button></div>`;
 }
-function phaseV(){
-  const id=curPh,p=phase(id);if(!p){tab="build";return buildV()}
-  const f=splitIn(id)?roomF:"all",R=rooms(),ts=G(S.tasks.filter(t=>t.phase===id)),d=doneN(ts),st=ts.filter(t=>t.status==="stuck").length,pc=pct(d,ts.length);
-  const keys=[...new Map(S.tasks.filter(t=>t.phase===id&&(f==="all"||t.room===f||t.room==="shared")).sort((a,b)=>(a.order??0)-(b.order??0)).map(t=>[t.key,1])).keys()];
-  const ph=phasePhotoIds(id);
-  return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2 style="overflow-wrap:anywhere">${esc(PSHORT[id])}</h2></div><button class="btn primary" data-act="addtask" data-id="${id}">${ic("plus")}Add task</button></div>
-  ${phaseHero(id,p,ts,d,st,pc)}
-  ${ts.length&&d===ts.length?completeCard(ts):""}
-  ${splitIn(id)&&ts.some(t=>t.room!=="shared")?`<div class="segc" role="group" aria-label="Show classroom">${[["all","Both"],...R.map(r=>[r.id,r.name])].map(([k,l])=>`<button type="button" data-rf="${k}" aria-pressed="${f===k}">${esc(l)}</button>`).join("")}</div>`:""}
-  ${f==="all"&&!hintSeen()&&ts.some(t=>t.room!=="shared")?`<div class="note-card">${ic("eye")}<span>${sm.code&&!perm.manage?"Tap the circle once when the work is done (yellow). The Project Lead gives the final tick (green) after checking.":sm.code?"Your tick is the final green tick. Work ticked yellow by the team is waiting for your check.":"Tap the circle to tick a task done in both classrooms."} Hold it for more options, or open the task to split the classrooms. Hold a task, then drag it up or down to change the order.</span></div>`:""}
-  <div class="card">${keys.length?`<ul class="list reord">${keys.map(k=>taskRow(k,f==="all"?null:f)).join("")}</ul>`:`<div class="empty">${ic("clip","xl")}<h3>No tasks here</h3><p>Add the first task for this phase.</p><button class="btn primary" data-act="addtask" data-id="${id}">${ic("plus")}Add task</button></div>`}</div>
-  <div class="card"><div class="row between"><h2 style="margin:0">Photos</h2><div class="row" style="gap:8px">${ph.length>=2?`<button class="btn small" data-act="phba" data-id="${id}">Before and after</button>`:""}${ph.length?`<button class="btn small icon" data-act="phdrive" data-id="${id}" aria-label="Save all photos of this phase to Google Drive">${ic("cloud")}</button>`:""}<button class="btn small" data-act="phphoto" data-id="${id}">${ic("camera")}Add photo</button></div></div>${ph.length?`<div class="pthumbs">${ph.slice(0,9).map((m,i)=>`<button type="button" class="etile" style="border:0;padding:0" data-act="phlb" data-id="${id}|${i}" aria-label="Open photo ${i+1}"><span data-m="${m}" style="position:absolute;inset:0"></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:10px 0 0">No photos for this phase yet.</p>`}</div>`;
-}
 async function hydrateBg(root=document){
   for(const el of root.querySelectorAll("[data-bg]")){const u=await mUrl(el.dataset.bg);if(!u)continue;const im=new Image();im.onload=()=>{el.style.backgroundImage='url("'+u+'")';el.classList.add("on")};im.src=u}
 }
@@ -1239,7 +1231,7 @@ function stockRow(m){
   const inn=mIn(m),out=mOut(m),left=mLeft(m),e=mEff(m),pc=m.qty>0?Math.min(100,inn/m.qty*100):0;
   const pill=e==="low"?`<span class="pill unwell">${ic("alert","sm")}${left<=0?"Out of stock":"Running low"}</span>`:e==="got"?`<span class="pill">${ic("check","sm")}All delivered</span>`:e==="part"?`<span class="pill sky">Part delivered</span>`:e==="ordered"?`<span class="pill sky">Ordered</span>`:`<span class="pill watch">To order</span>`;
   return `<li style="align-items:flex-start"><span class="row-ic ${e==="low"?"red":e==="got"?"green":""}">${ic("layers")}</span><div class="grow"><div class="lt">${esc(m.name)}</div>
-   <div class="ls ${e==="low"?"bad":""}">${m.qty>0?`Needed ${num(m.qty,2)}`:"Set how much you need"} ${esc(m.unit)}${m.sup?" · "+esc(supName(m.sup)):""}</div>
+   <div class="ls ${e==="low"?"bad":""}">${m.qty>0?`Needed ${num(m.qty,2)}`:"Set how much you need"} ${esc(m.unit)}${m.sup?" · "+esc(supName(m.sup)):""}${mphTag(m)}</div>
    ${inn||out?`<div class="row" style="gap:14px;margin:6px 0 2px;flex-wrap:wrap"><span><b class="amt">${num(left,2)}</b> <span class="small muted">${esc(m.unit)} left</span></span><span class="small muted">in ${num(inn,2)} · used ${num(out,2)}</span></div>`:""}
    ${m.qty>0&&inn?`<div class="meter ${e==="low"?"low":""}" style="margin:4px 0 6px"><i style="width:${pc}%"></i></div>`:""}
    <div style="margin-top:6px">${pill}</div><div class="row" style="gap:8px;margin-top:8px"><button class="btn small grow" data-act="movein" data-id="${m.id}">${ic("truck","sm")}Delivery</button><button class="btn small grow" data-act="moveout" data-id="${m.id}">${ic("minus","sm")}Used</button></div></div>${rowBtns("mat",m.name,m.id)}</li>`;
@@ -1247,7 +1239,7 @@ function stockRow(m){
 function itemRow(m){
   const L=mst(m),i=Math.max(0,L.findIndex(x=>x[0]===m.status)),done=m.status==="inst"||(L.length===3&&m.status==="got");
   const cls=done?"done":m.status==="got"||m.status==="ordered"?"doing":"";
-  return `<li><button class="st ${cls}" data-act="cycmat" data-id="${m.id}" aria-label="${esc(m.name)}: ${L[i][1]}. Tap to change.">${m.status==="inst"||done?ic("check"):m.status==="got"?ic("check"):m.status==="ordered"?ic("truck"):""}</button><div class="grow"><div class="lt ${done?"dn":""}">${esc(m.name)}</div><div class="ls ${m.due&&m.due<today()&&!done&&m.status!=="got"?"bad":""}">${m.qty>0?num(m.qty,2)+" "+esc(m.unit):"Set how many"} · ${L[i][1]}${m.room!=="both"?" · "+esc(roomName(m.room)):""}${m.sup?" · "+esc(supName(m.sup)):""}${m.due?" · need by "+dshort(m.due):""}</div></div>${rowBtns("mat",m.name,m.id)}</li>`;
+  return `<li><button class="st ${cls}" data-act="cycmat" data-id="${m.id}" aria-label="${esc(m.name)}: ${L[i][1]}. Tap to change.">${m.status==="inst"||done?ic("check"):m.status==="got"?ic("check"):m.status==="ordered"?ic("truck"):""}</button><div class="grow"><div class="lt ${done?"dn":""}">${esc(m.name)}</div><div class="ls ${m.due&&m.due<today()&&!done&&m.status!=="got"?"bad":""}">${m.qty>0?num(m.qty,2)+" "+esc(m.unit):"Set how many"} · ${L[i][1]}${m.room!=="both"?" · "+esc(roomName(m.room)):""}${m.sup?" · "+esc(supName(m.sup)):""}${mphTag(m)}${m.due?" · need by "+dshort(m.due):""}</div></div>${rowBtns("mat",m.name,m.id)}</li>`;
 }
 function elecCard(){
   const e=S.settings.elec||{},c=e.coc||"todo",sp=S.sups.find(x=>x.id===e.sup),lab={todo:["Certificate not booked","watch"],booked:["Certificate booked","sky"],issued:["Certificate issued",""]}[c];
@@ -1256,17 +1248,18 @@ function elecCard(){
   <p class="hint">The Electrical Certificate of Compliance is needed before the school can use the rooms. Add the certificate itself under Documents.</p></div>`;
 }
 function matsV(){
-  const sec=matSec,inSec=S.mats.filter(m=>secOf(m)===sec),L=sec==="fit"||sec==="elec"?MSTAT4:MSTAT;
+  const sec=matSec,inSec=S.mats.filter(m=>secOf(m)===sec&&inPh(m)),L=sec==="fit"||sec==="elec"?MSTAT4:MSTAT;
   const list=(sec==="stock"?inSec:inSec.filter(m=>matF==="all"||m.status===matF)).sort((a,b)=>sec==="stock"?(a.name.localeCompare(b.name)):(a.due||"9999").localeCompare(b.due||"9999")||0);
   const cnt=k=>inSec.filter(m=>m.status===k).length,lowN=S.mats.filter(m=>mEff(m)==="low").length;
   return `<div class="page-h"><div class="row" style="gap:10px">${backBtn()}<h2>Materials</h2></div><button class="btn primary" data-act="addmat">${ic("plus")}Add</button></div>
   <div class="segc" role="group" aria-label="Section">${SECS.map(([k,l])=>`<button type="button" data-sub="sec:${k}" aria-pressed="${sec===k}">${l}</button>`).join("")}</div>
+  <div class="chips scroll" role="group" aria-label="Filter by phase" style="margin:0 0 10px">${[["all","All phases · "+S.mats.length],...PH.map(p=>[p[0],PSHORT[p[0]]+" · "+S.mats.filter(m=>m.phase===p[0]).length]),["none","No phase · "+S.mats.filter(m=>!m.phase).length]].map(([k,l])=>`<button type="button" class="chip" data-sub="mph:${k}" aria-pressed="${matPh===k}">${esc(l)}</button>`).join("")}</div>
   ${sec==="elec"?elecCard():""}
   ${sec==="stock"?(lowN?`<div class="warn">${ic("alert")}<span>${lowN} item${lowN===1?" is":"s are"} running low or out of stock.</span></div>`:""):`<div class="chips scroll" role="group" aria-label="Filter">${[...L.map(([k,l])=>[k,`${l} · ${cnt(k)}`]),["all","All"]].map(([k,l])=>`<button type="button" class="chip" data-sub="mat:${k}" aria-pressed="${matF===k}">${esc(l)}</button>`).join("")}</div>`}
   <div class="card" style="margin-top:12px">
   ${list.length?`<ul class="list">${list.map(m=>sec==="stock"?stockRow(m):itemRow(m)).join("")}</ul>`
   :inSec.length?`<div class="empty">${ic("check","xl")}<h3>Nothing here</h3><p>No items in this list.</p></div>`:`<div class="empty">${ic(SECS.find(x=>x[0]===sec)[2],"xl")}<h3>No items yet</h3><p>Add what you need and keep track of it.</p><button class="btn primary" data-act="addmat">${ic("plus")}Add item</button></div>`}
-  ${S.mats.some(needsOrder)?`<button class="btn block" data-act="shareorder" style="margin-top:12px">${ic("chat")}Send order list on WhatsApp</button>`:""}</div>
+  ${S.mats.some(needsOrder)?`<button class="btn block" data-act="shareorder" data-id="${matPh==="none"?"all":matPh}" style="margin-top:12px">${ic("chat")}Send order list on WhatsApp</button>`:""}</div>
   <div class="card"><div class="row between"><h2 style="margin:0">Suppliers and contractors</h2><button class="btn small" data-act="addsup">${ic("plus")}Add</button></div>
   ${S.sups.length?`<ul class="list">${S.sups.map(s=>`<li><span class="avatar">${esc((s.name||"?")[0].toUpperCase())}</span><div class="grow"><div class="lt">${esc(s.name)}</div><div class="ls">${esc([s.trade,s.phone].filter(Boolean).join(" · "))}</div></div>${s.phone?`<a class="btn small icon" href="tel:${esc(s.phone.replace(/[^\d+]/g,""))}" aria-label="Call ${esc(s.name)}">${ic("phone")}</a>`:""}${rowBtns("sup",s.name,s.id)}</li>`).join("")}</ul>`:`<p class="muted" style="margin:10px 0 0">Add your brick yard, hardware shop and builders so their numbers are one tap away.</p>`}</div>`;
 }
@@ -1323,10 +1316,10 @@ function act(a,id,el){
    payall:()=>{payAll=!payAll;render()},resetpays:()=>{const ps=[...S.pays],cs=S.costs.filter(c=>c.pay);S.pays.length=0;cs.forEach(c=>S.costs.splice(S.costs.indexOf(c),1));payAll=false;save();render();toast("All builder payments reset to R 0.",()=>{ps.forEach(x=>S.pays.push(x));cs.forEach(c=>S.costs.push(c))})},recpay:()=>recPaySheet(),weekly:()=>weeklySheet(),addpay:()=>paySheet(),editpay:()=>paySheet(id),contract:()=>contractSheet(),typicalpay:()=>typicalPays(),
    paypay:()=>{const x=S.pays.find(q=>q.id===id),u=undoEdit(x,{paid:true,paidOn:today()});payCost(x);logAct(`Builder payment of ${money(x.amount)} recorded`,1);save();render();toast(`${money(x.amount)} paid to the builder.`,()=>{u();payCost(x)})},
    delpay:()=>{const x=S.pays.find(q=>q.id===id),lc=S.costs.find(c=>c.id==="pay_"+id);S.pays.splice(S.pays.indexOf(x),1);if(lc)S.costs.splice(S.costs.indexOf(lc),1);save();render();toast("Stage deleted.",()=>{S.pays.push(x);if(lc)S.costs.push(lc)})},
-   paycost:()=>{const c=S.costs.find(x=>x.id===id),u=undoEdit(c,{paid:true});save();render();toast(`${money(c.amount)} marked as paid.`,u)},budget:()=>moneyOK?budgetSheet():moneyGate(budgetSheet),lockmoney:()=>{lockMoney();toast("Money is locked.")},addmat:()=>matSheet(),editmat:()=>matSheet(id),delmat:()=>delRecs(S.mats,m=>m.id===id,"Material"),
+   paycost:()=>{const c=S.costs.find(x=>x.id===id),u=undoEdit(c,{paid:true});save();render();toast(`${money(c.amount)} marked as paid.`,u)},budget:()=>moneyOK?budgetSheet():moneyGate(budgetSheet),lockmoney:()=>{lockMoney();toast("Money is locked.")},addmat:()=>matSheet(undefined,id&&phase(id)?id:undefined),editmat:()=>matSheet(id),delmat:()=>delRecs(S.mats,m=>m.id===id,"Material"),
    cycmat:()=>{const m=S.mats.find(x=>x.id===id),L=mst(m),order=L.map(x=>x[0]),nx=order[(order.indexOf(m.status)+1)%order.length];const u=undoEdit(m,{status:nx});save();render();toast(`${m.name}: ${L.find(x=>x[0]===nx)[1].toLowerCase()}.`,u)},
    movein:()=>moveSheet(id,"in"),moveout:()=>moveSheet(id,"out"),editelec:()=>elecSheet(),
-   shareorder:()=>shareOrder(),addsup:()=>supSheet(),editsup:()=>supSheet(id),delsup:()=>delRecs(S.sups,s=>s.id===id,"Contact"),
+   shareorder:()=>shareOrder(id&&(id==="all"||phase(id))?id:(matPh!=="all"&&matPh!=="none"?matPh:"")),addsup:()=>supSheet(),editsup:()=>supSheet(id),delsup:()=>delRecs(S.sups,s=>s.id===id,"Contact"),
    addphoto:()=>quickPhoto(id&&phase(id)?id:undefined),addissue:()=>logSheet(null,"issue"),editlog:()=>logSheet(id),dellog:()=>delRecs(S.logs,l=>l.id===id,"Entry"),
    fix:()=>{const l=S.logs.find(x=>x.id===id),u=undoEdit(l,{fixed:true});logAct("Marked an issue as fixed");save();render();toast("Issue marked fixed.",u)},
    lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
@@ -1492,8 +1485,8 @@ function budgetSheet(){
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const raw=sh.querySelector("#am").value.trim(),v=raw?parseAmt(raw):0;if(!(v>=0))return showErr(sh,sh.querySelector(".amtin"),"Enter a number, or leave empty.");
       const u=undoEdit(S.settings,{budget:v});save();close();render();toast("Budget saved.",u)}});
 }
-function matSheet(id){
-  const m=id?S.mats.find(x=>x.id===id):null,st={sec:m?secOf(m):matSec,room:m?.room||"both",unit:m?.unit||"each",status:m?.status||"need"};
+function matSheet(id,defPhase){
+  const m=id?S.mats.find(x=>x.id===id):null,st={sec:m?secOf(m):matSec,room:m?.room||"both",unit:m?.unit||"each",status:m?.status||"need",phase:m?(m.phase||""):(defPhase||"")};
   let moves=(m?.moves||[]).map(x=>({...x}));
   const body=()=>{const f=st.sec==="fit"||st.sec==="elec",L=f?MSTAT4:MSTAT;if(!L.some(x=>x[0]===st.status))st.status="need";
    return `<label class="f">How many${st.sec==="stock"?" do you need in total":""}?</label><div class="stepper"><button type="button" data-step="-1" aria-label="Less">${ic("minus")}</button><input id="q" inputmode="decimal" value="${m&&m.qty?num(m.qty,2).replace(/\s/g,""):"1"}" aria-label="Quantity"><button type="button" data-step="1" aria-label="More">${ic("plus")}</button></div>
@@ -1505,6 +1498,7 @@ function matSheet(id){
    ${dateField("du",m?.due||"","Needed by").replace(/<div class="chips"[\s\S]*?<\/div>/,futureChips("du"))}</details>
    ${st.sec==="stock"&&moves.length?`<label class="f">Deliveries and use</label><ul class="list" id="mv">${moves.slice().reverse().map(x=>`<li><div class="grow"><div class="lt">${x.t==="in"?"Delivered":"Used"} ${num(x.qty,2)}</div><div class="ls">${dshort(x.date)}${x.note?" · "+esc(x.note):""}</div></div>${x.doc&&S.docs.some(d=>d.id===x.doc)?`<button type="button" class="btn small" data-docv="${x.doc}" aria-label="View delivery note photo">${ic("image","sm")}Note</button>`:x.photo?`<button type="button" class="btn small" data-note="${x.photo}" aria-label="View delivery note photo">${ic("image","sm")}Note</button>`:""}<button type="button" class="btn small danger" data-rm="${x.id}" aria-label="Remove this entry">${ic("trash","sm")}Remove</button></li>`).join("")}</ul>`:""}`};
   sheet(m?"Edit item":"Add item",`<form id="f" novalidate><label class="f" for="nm">Item</label><input id="nm" class="t" maxlength="100" value="${esc(m?.name||"")}" placeholder="For example: Cement, door, paint">
+  <label class="f" for="mph">Which phase is it for?</label><select id="mph" class="t sel"><option value="">Not assigned</option>${PH.map(p=>`<option value="${p[0]}" ${p[0]===st.phase?"selected":""}>${esc(p[1])}</option>`).join("")}</select>
   <label class="f">Section</label>${chipRow("sec",SECS.map(x=>[x[0],x[1]]),st.sec)}
   <div id="bd">${body()}</div>
   <div class="foot"><button class="btn primary block">${m?"Save changes":"Add item"}</button></div></form>`,(sh,close)=>{
@@ -1517,7 +1511,7 @@ function matSheet(id){
     wire();
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const nm=sh.querySelector("#nm");if(!nm.value.trim())return showErr(sh,nm,"Write what you need.");
       const q=sh.querySelector("#q"),qty=parseAmt(q.value);if(!(qty>=0))return showErr(sh,q,"Enter how many.");
-      const vals={name:nm.value.trim(),qty,unit:st.unit,sec:st.sec,room:st.sec==="stock"?"both":st.room,status:st.status,sup:sh.querySelector("#su")?.value||"",due:sh.querySelector("#du").value||"",min:st.sec==="stock"?(parseAmt(sh.querySelector("#mn")?.value)||0):0,moves};
+      const vals={name:nm.value.trim(),qty,unit:st.unit,sec:st.sec,room:st.sec==="stock"?"both":st.room,status:st.status,sup:sh.querySelector("#su")?.value||"",due:sh.querySelector("#du").value||"",min:st.sec==="stock"?(parseAmt(sh.querySelector("#mn")?.value)||0):0,phase:sh.querySelector("#mph").value,moves};
       if(m){const u=undoEdit(m,vals);save();close();render();toast("Item saved.",u)}else{const n={id:uid(),...vals,moves:[]};S.mats.push(n);matSec=n.sec;save();close();render();toast("Item added.",()=>S.mats.splice(S.mats.indexOf(n),1))}};
   });
 }
@@ -1561,13 +1555,6 @@ function elecSheet(){
       if(st.coc==="issued"){const t=S.tasks.find(x=>x.id==="shared_coc");if(t&&t.status!=="done")ups.push(undoEdit(t,{status:"done",doneOn:today()}))}
       save();close();render();toast("Electrician details saved.",()=>ups.forEach(u=>u()))};
   });
-}
-function shareOrder(){
-  const by=new Map();S.mats.filter(m=>needsOrder(m)&&(m.qty>0||secOf(m)!=="stock")).forEach(m=>{const k=supName(m.sup)||"Other";(by.get(k)||by.set(k,[]).get(k)).push(m)});
-  if(!by.size){toast("Nothing to order right now.");return}
-  let t=`*${S.settings.name||"Classrooms"}: materials to order*\n`;
-  by.forEach((ms,k)=>{t+=`\n*${k}*\n`+ms.map(m=>`- ${m.qty>0?num(m.qty,2)+" "+m.unit+" ":""}${m.name}${m.due?` (by ${dshort(m.due)})`:""}`).join("\n")+"\n"});
-  shareText(t.trim());
 }
 function supSheet(id){
   const s=id?S.sups.find(x=>x.id===id):null;
@@ -3114,6 +3101,49 @@ function furnSheet(id){
 function furnStarter(){
   const made=[];FSTARTER.forEach(([title,qty,unit])=>{const key=uid();FROOMS.forEach(([r])=>made.push({id:uid(),key,room:r,title,qty,unit,status:"todo",due:"",who:"",assignee:"",note:"",media:[],order:made.length,t:Date.now()}))});
   made.forEach(x=>S.furn.push(x));fRoom="ms1";save();render();toast("Starter list added to all four classrooms. Change the numbers to suit.",()=>made.forEach(x=>{const i=S.furn.indexOf(x);if(i>=0)S.furn.splice(i,1)}));
+}
+/* materials for each phase, and one list for the whole project */
+let phTab="tasks",matPh="all";
+const inPh=m=>matPh==="all"||(matPh==="none"?!m.phase:m.phase===matPh);
+const mphTag=m=>(tab==="mats"&&matPh==="all"&&m.phase)?" · "+esc(PSHORT[m.phase]||""):"";
+const toOrder=l=>l.filter(m=>needsOrder(m)&&(m.qty>0||secOf(m)!=="stock"));
+const matFilterOk=m=>matF==="all"||(matF==="need"?needsOrder(m):matF==="ordered"?["ordered","part"].includes(mEff(m)):matF==="got"?mEff(m)==="got":true);
+function phaseMats(id){
+  const list=S.mats.filter(m=>m.phase===id),ord=toOrder(list),canAdd=lvl("mats")>=2;
+  if(!list.length)return `<div class="card">${empty("truck","No materials for this phase yet",`Add what you need for ${esc(PSHORT[id])}. Each phase keeps its own stock and order list, and the Materials page shows all of them together.`,canAdd?`<button class="btn primary" data-act="addmat" data-id="${id}" style="background:var(--green);color:#fff">${ic("plus")}Add material</button>`:"")}</div>`;
+  const shown=list.filter(matFilterOk);
+  const chips=[["all","All · "+list.length],["need","To order · "+toOrder(list).length],["ordered","Ordered · "+list.filter(m=>["ordered","part"].includes(mEff(m))).length],["got","Delivered · "+list.filter(m=>mEff(m)==="got").length]];
+  return `<div class="row between wr" style="margin:0 2px 10px;gap:8px"><span class="muted">${list.length} item${list.length===1?"":"s"} · ${ord.length} to order</span>${ord.length?`<button class="btn small" data-act="shareorder" data-id="${id}">${ic("chat","sm")}Send order list</button>`:""}</div>
+  <div class="chips scroll" role="group" aria-label="Filter" style="margin-bottom:10px">${chips.map(([k,l])=>`<button type="button" class="chip" data-sub="mat:${k}" aria-pressed="${matF===k}">${esc(l)}</button>`).join("")}</div>
+  ${SECS.map(([k,l])=>{const g=shown.filter(m=>secOf(m)===k).sort((a,b)=>a.name.localeCompare(b.name));return g.length?`<div class="eyebrow" style="margin:14px 2px 8px">${esc(l)} · ${g.length}</div><div class="card"><ul class="list">${g.map(m=>k==="stock"?stockRow(m):itemRow(m)).join("")}</ul></div>`:""}).join("")||`<div class="card"><p class="muted" style="margin:0">Nothing in this list.</p></div>`}`;
+}
+function phaseV(){
+  const id=curPh,p=phase(id);if(!p){tab="build";return buildV()}
+  if(lvl("mats")<1)phTab="tasks";const pt=phTab;
+  const f=splitIn(id)?roomF:"all",R=rooms(),ts=G(S.tasks.filter(t=>t.phase===id)),d=doneN(ts),st=ts.filter(t=>t.status==="stuck").length,pc=pct(d,ts.length);
+  const keys=[...new Map(S.tasks.filter(t=>t.phase===id&&(f==="all"||t.room===f||t.room==="shared")).sort((a,b)=>(a.order??0)-(b.order??0)).map(t=>[t.key,1])).keys()];
+  const ph=phasePhotoIds(id),mh=S.mats.filter(m=>m.phase===id),mo=toOrder(mh).length;
+  const tabs=`<div class="segc ptabs" role="group" aria-label="Show">${[["tasks","Tasks"],["mats","Materials"+(mh.length?" · "+mh.length:"")]].map(([k,l])=>`<button type="button" class="ptab ${k}" data-sub="pt:${k}" aria-pressed="${pt===k}">${l}</button>`).join("")}</div>`;
+  const taskPart=`${splitIn(id)&&ts.some(t=>t.room!=="shared")?`<div class="segc" role="group" aria-label="Show classroom">${[["all","Both"],...R.map(r=>[r.id,r.name])].map(([k,l])=>`<button type="button" data-rf="${k}" aria-pressed="${f===k}">${esc(l)}</button>`).join("")}</div>`:""}
+  ${f==="all"&&!hintSeen()&&ts.some(t=>t.room!=="shared")?`<div class="note-card">${ic("eye")}<span>${sm.code&&!perm.manage?"Tap the circle once when the work is done (yellow). The Project Lead gives the final tick (green) after checking.":sm.code?"Your tick is the final green tick. Work ticked yellow by the team is waiting for your check.":"Tap the circle to tick a task done in both classrooms."} Hold it for more options, or open the task to split the classrooms. Hold a task, then drag it up or down to change the order.</span></div>`:""}
+  <div class="card">${keys.length?`<ul class="list reord">${keys.map(k=>taskRow(k,f==="all"?null:f)).join("")}</ul>`:`<div class="empty">${ic("clip","xl")}<h3>No tasks here</h3><p>Add the first task for this phase.</p><button class="btn primary" data-act="addtask" data-id="${id}">${ic("plus")}Add task</button></div>`}</div>
+  <div class="card"><div class="row between"><h2 style="margin:0">Photos</h2><div class="row" style="gap:8px">${ph.length>=2?`<button class="btn small" data-act="phba" data-id="${id}">Before and after</button>`:""}${ph.length?`<button class="btn small icon" data-act="phdrive" data-id="${id}" aria-label="Save all photos of this phase to Google Drive">${ic("cloud")}</button>`:""}<button class="btn small" data-act="phphoto" data-id="${id}">${ic("camera")}Add photo</button></div></div>${ph.length?`<div class="pthumbs">${ph.slice(0,9).map((m,i)=>`<button type="button" class="etile" style="border:0;padding:0" data-act="phlb" data-id="${id}|${i}" aria-label="Open photo ${i+1}"><span data-m="${m}" style="position:absolute;inset:0"></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:10px 0 0">No photos for this phase yet.</p>`}</div>`;
+  return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2 style="overflow-wrap:anywhere">${esc(PSHORT[id])}</h2></div>${pt==="mats"?`<button class="btn primary" data-act="addmat" data-id="${id}" style="background:var(--green);color:#fff">${ic("plus")}Add material</button>`:`<button class="btn primary" data-act="addtask" data-id="${id}">${ic("plus")}Add task</button>`}</div>
+  ${phaseHero(id,p,ts,d,st,pc)}
+  ${ts.length&&d===ts.length?completeCard(ts):""}
+  ${tabs}
+  ${pt==="mats"?phaseMats(id):taskPart}`;
+}
+function shareOrder(ph){
+  ph=ph==="all"?"":ph;
+  const items=toOrder(S.mats).filter(m=>!ph||m.phase===ph);
+  if(!items.length){toast("Nothing to order right now.");return}
+  const line=m=>`- ${m.qty>0?num(m.qty,2)+" "+m.unit+" ":""}${m.name}${m.due?` (by ${dshort(m.due)})`:""}`;
+  const bySup=l=>{const by=new Map();l.forEach(m=>{const k=supName(m.sup)||"Other";(by.get(k)||by.set(k,[]).get(k)).push(m)});return by};
+  let t=`*${S.settings.name||"Classrooms"}: materials to order${ph?" ("+PSHORT[ph]+")":""}*\n`;
+  if(ph)bySup(items).forEach((ms,k)=>{t+=`\n*${k}*\n`+ms.map(line).join("\n")+"\n"});
+  else[...PH.map(p=>p[0]),""].forEach(pid=>{const g=items.filter(m=>(m.phase||"")===pid);if(!g.length)return;t+=`\n*${pid?PSHORT[pid]:"No phase"}*\n`;bySup(g).forEach((ms,k)=>{t+=`${k}:\n`+ms.map(line).join("\n")+"\n"})});
+  shareText(t.trim());
 }
 /* ---------- start ---------- */
 render();
