@@ -1896,6 +1896,20 @@ const verSig=async()=>{try{const r=await fetch(location.pathname,{method:"HEAD",
 let baseSig="",lastVerCheck=0;verSig().then(v=>baseSig=v);
 async function newVersion(){lastVerCheck=Date.now();const v=await verSig();return!!(baseSig&&v&&v!==baseSig)}
 function updateNotice(){clearTimeout(toastT);const t=document.createElement("div");t.className="toast";t.innerHTML='<span>A new version of the app is ready.</span><button type="button">Update</button>';t.querySelector("button").onclick=()=>location.reload();$("#toasts").replaceChildren(t)}
+/* when the app is opened or comes back to the front: sync, and load a newer version by itself when nothing is being typed */
+let autoBusy=false;
+async function autoUpdate(){
+  if(autoBusy||Date.now()-lastVerCheck<15000)return;autoBusy=true;
+  try{
+    if(!await newVersion())return;
+    const typing=document.body.classList.contains("lock")||/^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName||"");
+    let last=0;try{last=+sessionStorage.getItem("b3-autoreload")||0}catch{}
+    if(typing||Date.now()-last<120000){updateNotice();return}
+    try{sessionStorage.setItem("b3-autoreload",String(Date.now()))}catch{}
+    try{await syncNow()}catch{}
+    location.reload();
+  }finally{autoBusy=false}
+}
 let refreshing=false;
 async function refreshApp(){
   if(refreshing)return;refreshing=true;const el=$("#ptr");el.classList.add("spin");el.style.transform="translate(-50%,56px)";
@@ -1918,7 +1932,7 @@ async function refreshApp(){
   const end=()=>{if(y0===null)return;const go=pull>=T/1.4;y0=null;el.classList.remove("ready");if(go)refreshApp();else{el.style.transform="";el.style.opacity=""}pull=0};
   addEventListener("touchend",end);addEventListener("touchcancel",end);
 })();
-document.addEventListener("visibilitychange",()=>{if(!document.hidden&&Date.now()-lastVerCheck>10*6e4)newVersion().then(n=>{if(n)updateNotice()})});
+document.addEventListener("visibilitychange",()=>{if(!document.hidden)autoUpdate()});
 
 /* ---------- voice dictation for task fields ---------- */
 const SPEECH=window.SpeechRecognition||window.webkitSpeechRecognition;
@@ -3149,6 +3163,7 @@ function shareOrder(ph){
 render();
 if(sm.code){setSync("syncing");syncNow()}else setSync("off");
 joinFromHash();addEventListener("hashchange",joinFromHash);
+setTimeout(autoUpdate,1500);
 if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
 </script>
 </body>
