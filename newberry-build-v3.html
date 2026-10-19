@@ -368,6 +368,7 @@ body.ro .page-h .btn[data-act="docprint"]{display:inline-flex!important}
 .pa-img{display:block;max-width:100%;max-height:92vh;margin:0 auto;object-fit:contain}.pa-cap{font:12px/1.4 sans-serif;color:#000;margin:0 0 6px}@page{margin:10mm}}
 .stack{display:flex;height:14px;border-radius:99px;overflow:hidden;background:var(--field);margin:10px 0}.stack i{display:block;height:100%}
 .legend{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:6px}.legend li{display:flex;align-items:center;gap:8px;font-size:.88rem}.legend li i{width:10px;height:10px;border-radius:50%;flex:none}.legend li b{margin-left:auto}
+.pa-h{font:700 16px/1.3 sans-serif;color:#000;margin:0 0 4px}.pa-row{font:12px/1.45 sans-serif;color:#000;border-bottom:1px solid #aaa;padding:6px 0}
 .dim{opacity:.62}.trcard{cursor:pointer}
 .rn .st,.rn .stp,.rfin .st,.rfin .stp{pointer-events:none}
 .rn [data-fab="task"],.rn [data-fab="mat"],.rn [data-fab="cost"],.rn [data-fab="pay"],.rfin [data-fab="task"],.rfin [data-fab="mat"],.rfin [data-fab="photo"],.rfin [data-fab="issue"],.rn [data-act="addtask"],.rfin [data-act="addtask"],.rn [data-act="editelec"],.rfin [data-act="editelec"],.rn [data-act="reorder"],.rfin [data-act="reorder"]{display:none!important}
@@ -581,7 +582,7 @@ share:'<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle c
 camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
 copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',
 chat:'<path d="M4 20l1.4-4.2A8 8 0 1112 20a8 8 0 01-4-1.1z"/><path d="M9 10.5c0 2.5 2 4.5 4.5 4.5l1.2-1.2-1.6-1-.8.6a3 3 0 01-1.6-1.6l.6-.8-1-1.6z"/>',
-print:'<path d="M7 9V4h10v5M7 17H5v-6h14v6h-2M7 14h10v6H7z"/>',bell:'<path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15zM10 21h4"/>',cloud:'<path d="M7 18a4.5 4.5 0 01-.6-9A6 6 0 0118 10.5 3.8 3.8 0 0117.5 18z"/>',
+rain:'<path d="M7 15a4.5 4.5 0 01-.6-9A6 6 0 0118 8.5 3.8 3.8 0 0117 15zM8 18l-1 3M12 18l-1 3M16 18l-1 3"/>',wind:'<path d="M3 9h11a3 3 0 10-3-3M3 14h15a3 3 0 11-3 3M3 19h7"/>',print:'<path d="M7 9V4h10v5M7 17H5v-6h14v6h-2M7 14h10v6H7z"/>',bell:'<path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15zM10 21h4"/>',cloud:'<path d="M7 18a4.5 4.5 0 01-.6-9A6 6 0 0118 10.5 3.8 3.8 0 0117.5 18z"/>',
 cloudoff:'<path d="M3 3l18 18"/><path d="M7 18a4.5 4.5 0 01-.6-9 6 6 0 011.7-2.7M11 5.2A6 6 0 0118 10.5a3.8 3.8 0 011.8 6.2"/><path d="M10 18h7.5"/>',
 logout:'<path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/>',
 sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
@@ -666,7 +667,7 @@ const seedMats=()=>{
 };
 
 const KEY="newberry-build-v3";
-const DEF=()=>({settings:{name:"MS 2 Project",site:"",start:"2026-10-22",target:"2027-01-10",budget:958896,contract:928896,rooms:[{id:"r1",name:"Classroom 1"},{id:"r2",name:"Classroom 2"}]},tasks:[],costs:[],mats:[],sups:[],logs:[],pays:[],acts:[],plans:[],docs:[],msgs:[],rcpt:[],trades:[]});
+const DEF=()=>({settings:{name:"MS 2 Project",site:"",start:"2026-10-22",target:"2027-01-10",budget:958896,contract:928896,rooms:[{id:"r1",name:"Classroom 1"},{id:"r2",name:"Classroom 2"}]},tasks:[],costs:[],mats:[],sups:[],logs:[],pays:[],acts:[],plans:[],docs:[],msgs:[],rcpt:[],trades:[],diary:[]});
 let S;
 function seedTasks(){
   let n=0;const out=[],R=S.settings.rooms;
@@ -743,7 +744,7 @@ const unpaid=()=>sum(S.costs.filter(c=>!c.paid),c=>c.amount);
 /* ---------- ui chrome ---------- */
 let matSec="stock",payAll=false,tab="build",roomF="all",logSub="log",matF="all",costF="all",openPh=null;
 const TABS=[["build","Build","grid"],["home","Overview","home"],["add","Add","plus"],["money","Money","cash"],["more","More","dots"]];
-const navTab=t=>({phase:"build",mats:"build",site:"build",plans:"build",docs:"build",inbox:"more",people:"more",tasks:"build"})[t]||t;
+const navTab=t=>({phase:"build",mats:"build",site:"build",plans:"build",docs:"build",inbox:"more",people:"more",tasks:"build",diary:"build"})[t]||t;
 $("nav.tabs").innerHTML=TABS.map(([k,l,i])=>k==="add"?`<button type="button" class="cap" id="fab" aria-label="Add something" aria-expanded="false" aria-controls="fab-menu">${ic(i)}</button>`:`<button data-tab="${k}">${ic(i)}<span>${l}</span>${k==="build"?'<i class="dot" id="tdot" hidden></i>':""}</button>`).join("");
 $("#today").textContent=new Date().toLocaleDateString("en-ZA",sm.code?{weekday:"short",day:"numeric",month:"short"}:{weekday:"long",day:"numeric",month:"long"});
 $("#fab-menu").innerHTML=[["site","On site",[["photo","camera","Photo"],["issue","alert","Challenges"]]],["build","Build",[["task","clip","Task"],["mat","truck","Material"]]],["money","Money",[["cost","cash","Expense"],["pay","users","Record payment"]]]].map(([g,t,it])=>`<div class="fab-grp" data-g="${g}"><h4>${t}</h4><div class="fab-row">${it.map(([k,i,l])=>`<button class="fab-item" data-fab="${k}"><span class="fi">${ic(i)}</span><span class="fl">${l}</span></button>`).join("")}</div></div>`).join("")+`<p class="fab-hint">Hold the plus button to take a photo straight away.</p>`;
@@ -903,15 +904,15 @@ function render(){
   if(tab==="money"&&!moneyOK)tab="build";
   document.querySelectorAll("nav.tabs button").forEach(b=>b.dataset.tab===navTab(tab)?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
   $("#pname").textContent=S.settings.name||"Newberry Build";
-  document.title=`${({build:"Build",home:"Overview",money:"Money",more:"More",phase:"Phase",plans:"Plans",docs:"Documents",mats:"Materials",site:"Site log",inbox:"Updates",people:"People",tasks:"Tasks"})[tab]} · Newberry Build 3`;
+  document.title=`${({build:"Build",home:"Overview",money:"Money",more:"More",phase:"Phase",plans:"Plans",docs:"Documents",mats:"Materials",site:"Site log",inbox:"Updates",people:"People",tasks:"Tasks",diary:"Site diary"})[tab]} · Newberry Build 3`;
   $("#tdot").hidden=!S.tasks.some(t=>t.status==="stuck");
-  if(tab!=="docs")docSel=null;paintBell();const v=$("#view");v.innerHTML=({build:buildV,home,phase:phaseV,plans:plansV,docs:docsV,money:moneyV,mats:matsV,site:siteV,more,inbox:inboxV,people:peopleV,tasks:tasksV})[tab]();
+  if(tab!=="docs")docSel=null;paintBell();const v=$("#view");v.innerHTML=({build:buildV,home,phase:phaseV,plans:plansV,docs:docsV,money:moneyV,mats:matsV,site:siteV,more,inbox:inboxV,people:peopleV,tasks:tasksV,diary:diaryV})[tab]();
   compactRows(v);
   v.querySelectorAll("[data-act]").forEach(el=>el.addEventListener("click",()=>act(el.dataset.act,el.dataset.id,el)));
   v.querySelectorAll("[data-go]").forEach(el=>el.addEventListener("click",()=>{if(el._lp){el._lp=false;return}const[t,f]=el.dataset.go.split(":");if(t==="phase"&&f)curPh=f;if(t==="site"&&f)logSub=f;if(t==="mats"&&f)matF=f;go(t)}));
   v.querySelectorAll("[data-rf]").forEach(el=>el.addEventListener("click",()=>{roomF=el.dataset.rf;render()}));
   v.querySelectorAll("details.gd").forEach(d=>d.addEventListener("toggle",()=>{if(openPh===null)openPh=new Set(curPhases());d.open?openPh.add(d.dataset.ph):openPh.delete(d.dataset.ph)}));
-  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;if(k==="plan"){planSel=val;PV.plan="";PV.had=false}if(k==="doc")docF=val;if(k==="mseg")moneySeg=val;if(k==="tf")taskF=val;render()}));
+  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;if(k==="plan"){planSel=val;PV.plan="";PV.had=false}if(k==="doc")docF=val;if(k==="mseg")moneySeg=val;if(k==="tf")taskF=val;if(k==="df")diaryF=val;render()}));
   v.querySelectorAll("li.tap").forEach(el=>{el.setAttribute("role","button");el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click()}})});
   hydrate(v);hydrateBg(v);countUp(v);if(tab==="plans")initPlanView();
   v.querySelectorAll("svg.chart").forEach(wireChart);if(perm.edit==="all")v.querySelectorAll("ul.reord").forEach(ul=>holdDrag(ul,curPh));
@@ -1133,10 +1134,10 @@ function buildV(){
   const toOrder=S.mats.filter(m=>needsOrder(m)&&(m.qty>0||secOf(m)!=="stock")).length,issues=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length;
   return `<section class="bhero"><div class="row between" style="align-items:flex-start"><div><div class="eyebrow">Whole build</div><div class="big" data-count="${p}">${p}%</div><div class="sub">${d} of ${all.length} tasks done</div></div></div>
    <div class="row wr" style="gap:8px;margin-top:10px">${sched.chip}${left===null?"":left>=0?`<span class="chip-d">${ic("calendar","sm")}${left} day${left===1?"":"s"} to go</span>`:`<span class="chip-d">${ic("alert","sm")}${-left} day${left===-1?"":"s"} past target</span>`}</div><div class="meter hm"><i style="width:${p}%"></i></div>${fcLine()}</section>
-  ${whoLine()}${attentionV()}${pushPrompt()}${backupDue()}<div class="ptiles" role="list">${tiles}</div>
+  ${whoLine()}${attentionV()}${linkPrompt()}${pushPrompt()}${backupDue()}<div class="ptiles" role="list">${tiles}</div>
   <div class="eyebrow" style="margin:20px 2px 10px">Recently posted</div>
   ${rec.length?`<div class="rps">${rec.map(l=>`<button type="button" class="rp" data-go="site"><span class="rpi">${l.media?.length?`<span data-m="${l.media[0]}" style="position:absolute;inset:0"></span>`:ic(l.kind==="issue"?"alert":"note","lg")}</span><span class="rpt"><b style="color:${PCOL[l.phase]||"var(--accent)"}">${esc(l.phase&&PSHORT[l.phase]?PSHORT[l.phase]:"Site")}</b><span>${esc(l.text?l.text.slice(0,48):l.kind==="issue"?"Issue reported":"Added a photo")}</span><small>${dlabel(l.date)}</small></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:0 2px">Photos and notes you add will show up here.</p>`}
-  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="tasks">${ic("check")}<span>Tasks</span>${sm.code&&S.tasks.some(t=>t.assignee===sm.pid&&t.status!=="done")?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${uk(S.tasks.filter(t=>t.assignee===sm.pid&&t.status!=="done"))}</i>`:""}</button><button type="button" class="sc" data-go="docs">${ic("note")}<span>Documents</span>${S.docs.filter(docListed).length?`<small class="muted">${S.docs.filter(docListed).length}</small>`:""}</button></div>`;
+  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="tasks">${ic("check")}<span>Tasks</span>${sm.code&&S.tasks.some(t=>t.assignee===sm.pid&&t.status!=="done")?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${uk(S.tasks.filter(t=>t.assignee===sm.pid&&t.status!=="done"))}</i>`:""}</button><button type="button" class="sc" data-go="diary">${ic("book")}<span>Site diary</span></button><button type="button" class="sc" data-go="docs" style="grid-column:1/-1">${ic("note")}<span>Documents</span>${S.docs.filter(docListed).length?`<small class="muted">${S.docs.filter(docListed).length}</small>`:""}</button></div>`;
 }
 function phaseV(){
   const id=curPh,p=phase(id);if(!p){tab="build";return buildV()}
@@ -1239,6 +1240,7 @@ function more(){
   <div class="card"><ul class="list">
    ${row("bell","Updates","Messages sent between people"+(unreadMsgs().length?" · "+unreadMsgs().length+" new":""),"goinbox")}
    ${sm.code&&pushSupported()?row("bell","Notifications",lsGet("build-push")==="1"?"On for this phone":"Off. Tap to get phone notifications","pushsheet"):""}
+   ${row("book","Site diary","Daily record: weather, people on site and delays","godiary")}
    ${row("users","People and access",sm.code?"Who is on the project and what they can do":"Share the project and add your team","gopeople")}
    ${row("note","Documents","Quotes, contract, invoices, certificates, drawings and delivery notes","godocs")}
    ${row("truck","Materials","Stock, fittings, electrical, sundries and suppliers","gomats")}
@@ -1270,7 +1272,7 @@ function act(a,id,el){
   ({
    cyc:()=>cycTask(id),opentask:()=>taskSheet(...id.split("|")),edittask:()=>taskSheet(...id.split("|")),
    deltask:()=>{const[k]=id.split("|");const f=roomF;delRecs(S.tasks,t=>t.key===k&&(f==="all"||t.room===f||t.room==="shared"),"Task")},
-   addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>quickPhoto(id),gbackup:()=>backupSheet(),cycboth:()=>cycMany(((el&&el.dataset.ids)||id).split(",")),docselect:()=>{docSel=docSel?null:new Set();render()},docall:()=>{const l=docList();docSel=docSel&&docSel.size===l.length?new Set():new Set(l.map(d=>d.id));render()},docprint:()=>printSelectedDocs(),gotasks:()=>{taskF=id||"";go("tasks")},gotrades:()=>{moneySeg="trades";go("money")},pushsheet:()=>pushSheet(),pushdismiss:()=>{lsSet("build-pushdis","1");render()},restore:()=>restoreSheet(),addtrade:()=>tradeSheet(),edittrade:()=>tradeSheet(id),opentrade:()=>tradeView(id),deltrade:()=>delRecs(S.trades,x=>x.id===id,"Quote"),tradeaccept:()=>{const t=S.trades.find(x=>x.id===id);if(!t)return;const ex=tradeStatus(t,"accepted");logAct(`Accepted the ${t.trade} quote from ${tName(t)}: ${money(tVal(t))}`,1);save();render();toast("Quote accepted."+ex.msg,ex.undo)},paystage:()=>{const[tid,sid]=id.split("|"),t=S.trades.find(x=>x.id===tid),sg=t&&(t.stages||[]).find(x=>x.id===sid);if(!sg)return;const u=undoEdit(sg,{paid:true,paidOn:today()});logAct(`Paid ${money(sg.amount)} to ${tName(t)} (${t.trade})`,1);save();render();toast(`${money(sg.amount)} marked paid.`,u)},goinbox:()=>go("inbox"),gopeople:()=>go("people"),newmsg:()=>newMsgSheet(),addperson:()=>personSheet(),editperson:()=>personSheet(id),msglb:()=>{const[mid,i]=id.split("|");const m=S.msgs.find(x=>x.id===mid);if(m)lightbox(m.media||[],+i)},sharesheet:()=>shareSheet(),bkdismiss:()=>{lsSet("build-bkdis",today());render()},phdrive:()=>driveSave(phasePhotoIds(id).map((m,i)=>({media:m,name:(PSHORT[id]||"Phase")+" photo "+(i+1)+".jpg"}))),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),addcost:()=>costSheet(),editcost:()=>costSheet(id),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
+   addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>quickPhoto(id),gbackup:()=>backupSheet(),adddiary:()=>diarySheet(),editdiary:()=>diarySheet(id),godiary:()=>go("diary"),diaryshare:()=>{const tx=diaryText(14);if(!tx){toast("No diary entries in the last 14 days.");return}shareText(tx)},diaryprint:()=>diaryPrint(),savelink:()=>personSheet(sm.pid),linkdismiss:()=>{lsSet("build-linkdis",today());render()},cycboth:()=>cycMany(((el&&el.dataset.ids)||id).split(",")),docselect:()=>{docSel=docSel?null:new Set();render()},docall:()=>{const l=docList();docSel=docSel&&docSel.size===l.length?new Set():new Set(l.map(d=>d.id));render()},docprint:()=>printSelectedDocs(),gotasks:()=>{taskF=id||"";go("tasks")},gotrades:()=>{moneySeg="trades";go("money")},pushsheet:()=>pushSheet(),pushdismiss:()=>{lsSet("build-pushdis","1");render()},restore:()=>restoreSheet(),addtrade:()=>tradeSheet(),edittrade:()=>tradeSheet(id),opentrade:()=>tradeView(id),deltrade:()=>delRecs(S.trades,x=>x.id===id,"Quote"),tradeaccept:()=>{const t=S.trades.find(x=>x.id===id);if(!t)return;const ex=tradeStatus(t,"accepted");logAct(`Accepted the ${t.trade} quote from ${tName(t)}: ${money(tVal(t))}`,1);save();render();toast("Quote accepted."+ex.msg,ex.undo)},paystage:()=>{const[tid,sid]=id.split("|"),t=S.trades.find(x=>x.id===tid),sg=t&&(t.stages||[]).find(x=>x.id===sid);if(!sg)return;const u=undoEdit(sg,{paid:true,paidOn:today()});logAct(`Paid ${money(sg.amount)} to ${tName(t)} (${t.trade})`,1);save();render();toast(`${money(sg.amount)} marked paid.`,u)},goinbox:()=>go("inbox"),gopeople:()=>go("people"),newmsg:()=>newMsgSheet(),addperson:()=>personSheet(),editperson:()=>personSheet(id),msglb:()=>{const[mid,i]=id.split("|");const m=S.msgs.find(x=>x.id===mid);if(m)lightbox(m.media||[],+i)},sharesheet:()=>shareSheet(),bkdismiss:()=>{lsSet("build-bkdis",today());render()},phdrive:()=>driveSave(phasePhotoIds(id).map((m,i)=>({media:m,name:(PSHORT[id]||"Phase")+" photo "+(i+1)+".jpg"}))),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),addcost:()=>costSheet(),editcost:()=>costSheet(id),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
    payall:()=>{payAll=!payAll;render()},resetpays:()=>{const ps=[...S.pays],cs=S.costs.filter(c=>c.pay);S.pays.length=0;cs.forEach(c=>S.costs.splice(S.costs.indexOf(c),1));payAll=false;save();render();toast("All builder payments reset to R 0.",()=>{ps.forEach(x=>S.pays.push(x));cs.forEach(c=>S.costs.push(c))})},recpay:()=>recPaySheet(),weekly:()=>weeklySheet(),addpay:()=>paySheet(),editpay:()=>paySheet(id),contract:()=>contractSheet(),typicalpay:()=>typicalPays(),
    paypay:()=>{const x=S.pays.find(q=>q.id===id),u=undoEdit(x,{paid:true,paidOn:today()});payCost(x);logAct(`Builder payment of ${money(x.amount)} recorded`,1);save();render();toast(`${money(x.amount)} paid to the builder.`,()=>{u();payCost(x)})},
    delpay:()=>{const x=S.pays.find(q=>q.id===id),lc=S.costs.find(c=>c.id==="pay_"+id);S.pays.splice(S.pays.indexOf(x),1);if(lc)S.costs.splice(S.costs.indexOf(lc),1);save();render();toast("Stage deleted.",()=>{S.pays.push(x);if(lc)S.costs.push(lc)})},
@@ -1702,6 +1704,7 @@ function reportTextFull(){
   if(S.pays.length)t+=`Builder paid: ${money0(paidTotal())} of ${money0(contractAmt())}\n`;
   if(S.trades.length)t+=`Trades: ${money0(tPaidAll())} paid of ${money0(tCommit())} accepted\nWhole project: ${money0(spentAll()+tPaidAll())} paid of ${money0(bud+tCommit())}\n`;
   t+=`Open issues: ${issues}\n`;
+  if(S.diary.length){const dd=diaryStats();t+=`Site diary: ${dd.days} days logged, ${dd.rain} rain day${dd.rain===1?"":"s"}, ${num(dd.lost,1)} day${dd.lost===1?"":"s"} lost to delays\n`}
   if(nu.length)t+=`\nNext up:\n`+nu.map(x=>`- ${x.title}`).join("\n");
   return t;
 }
@@ -1709,7 +1712,7 @@ function reportTextFull(){
 /* ---------- sharing and sync (Supabase, one secret project code, newest change wins) ---------- */
 const SB_URL="https://oikwudpqmbnssttatlhc.supabase.co",SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pa3d1ZHBxbWJuc3N0dGF0bGhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTMzODEsImV4cCI6MjA5NTY4OTM4MX0.p6I9qlvre5TjF3qOVjAIBus3_PNrbvCF2cMXHe3uiXw";
 let sb=null,syncState="off",syncedAt=null,pulling=false,pushing=false,lastErr="";
-const COLS=["tasks","costs","mats","sups","logs","pays","acts","plans","docs","msgs","rcpt","trades"];
+const COLS=["tasks","costs","mats","sups","logs","pays","acts","plans","docs","msgs","rcpt","trades","diary"];
 const canon=v=>Array.isArray(v)?"["+v.map(canon).join(",")+"]":v&&typeof v==="object"?"{"+Object.keys(v).filter(k=>v[k]!==undefined).sort().map(k=>JSON.stringify(k)+":"+canon(v[k])).join(",")+"}":JSON.stringify(v);
 const hashOf=r=>{const s=canon(r);let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return h+":"+s.length};
 function recMap(){const m=new Map();COLS.forEach(k=>S[k].forEach(r=>m.set(k+"|"+r.id,{r})));m.set("settings|main",{r:S.settings});return m}
@@ -2263,12 +2266,14 @@ const ROLES={
   owner:{label:"Owner",perm:{edit:"none",money:"none",send:false}},
   decor:{label:"Decor",perm:{edit:"notes",money:"none",send:false}},
   finance:{label:"Finance",perm:{edit:"none",money:"edit",send:true}},
+  colead:{label:"Co-lead",perm:{edit:"all",money:"edit",send:true}},
   other:{label:"Team member",perm:{edit:"notes",money:"none",send:false}}};
+const rolePick=()=>sm.prole==="lead"?[...ROLE_PICK,"colead"]:ROLE_PICK;
 const ROLE_PICK=["site","builder","owner","decor","finance","other"];
 const roleLabel=r=>(ROLES[r]||ROLES.other).label;
 const DEFAULT_PEOPLE=[["Albert","site"],["Jonathan","builder"],["Newberry","owner"],["Talana","decor"],["Audrey","finance"]];
 const READ_ACTS0=["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock","plprev","plnext","phdrive","gbackup"].concat(["goinbox","gopeople","newmsg","msglb","sharesheet"]);
-const READ_ACTS=READ_ACTS0.concat(["gotasks","gotrades","pushsheet","pushdismiss","opentask","docselect","docall","docprint"]);
+const READ_ACTS=READ_ACTS0.concat(["gotasks","gotrades","pushsheet","pushdismiss","opentask","docselect","docall","docprint","godiary","diaryshare","diaryprint","savelink","linkdismiss"]);
 const MONEY_ACTS=["addcost","editcost","delcost","budget","addpay","editpay","delpay","recpay","paypay","paycost","contract","typicalpay","weekly","resetpays","payall","report"];
 MONEY_ACTS.push("addtrade","edittrade","deltrade","opentrade","tradeaccept","paystage");
 const NOTE_ACTS=["addphoto","phphoto","adddoc"];
@@ -2306,6 +2311,7 @@ async function loadPeople(){
 async function peopleSet(p){
   if(!sb&&!await connect())throw new Error("offline");
   const{data,error}=await sb.rpc("build3_people_set",{p_code:sm.code,p_key:sm.key,p});if(error)throw error;
+  if(data&&data.pid===sm.pid&&data.key&&data.key!==sm.key){sm.key=data.key;persistSync()}
   await loadPeople();return data;
 }
 const isMoneyMedia=mid=>S.docs.some(d=>d.media===mid&&docMoney(d));
@@ -2387,7 +2393,7 @@ function peopleV(){
   if(!sm.code)return head+empty("users","Share the project first","Create the project link, then add your team. Each person gets their own link and sees only what you allow.",`<button class="btn primary" data-act="sharesheet">${ic("share")}Share with your team</button>`);
   const stat=p=>p.pid===sm.pid?"You":!p.active?"Switched off":mg?(p.seen?"Joined · seen "+ago(p.seen):"Not joined yet"):"";
   return head+(mg?`<p class="muted" style="margin:0 2px 12px">Tap a person to change what they can do or to send their link.</p>`:"")+
-  `<div class="card"><ul class="list">${list.map(p=>`<li class="tap" tabindex="0" ${mg?`data-act="editperson" data-id="${p.pid}"`:""}><span class="row-ic" style="font-weight:700">${esc((p.name||"?").charAt(0).toUpperCase())}</span><div class="grow"><div class="lt">${esc(p.name)}</div><div class="ls">${esc(roleLabel(p.role))}${stat(p)?" · "+esc(stat(p)):""}${S.tasks.some(t=>t.assignee===p.pid&&t.status!=="done")?" · "+uk(S.tasks.filter(t=>t.assignee===p.pid&&t.status!=="done"))+" open task"+(uk(S.tasks.filter(t=>t.assignee===p.pid&&t.status!=="done"))===1?"":"s"):""}</div>${mg&&p.perm&&p.pid!==sm.pid&&p.active?`<div class="ls">${esc(accessText({...p.perm,manage:false}))}</div>`:""}</div>${mg?ic("chev"):""}</li>`).join("")}</ul></div>`;
+  `<div class="card"><ul class="list">${list.map(p=>`<li class="tap" tabindex="0" ${canEditPerson(p)?`data-act="editperson" data-id="${p.pid}"`:""}><span class="row-ic" style="font-weight:700">${esc((p.name||"?").charAt(0).toUpperCase())}</span><div class="grow"><div class="lt">${esc(p.name)}</div><div class="ls">${esc(roleLabel(p.role))}${stat(p)?" · "+esc(stat(p)):""}${S.tasks.some(t=>t.assignee===p.pid&&t.status!=="done")?" · "+uk(S.tasks.filter(t=>t.assignee===p.pid&&t.status!=="done"))+" open task"+(uk(S.tasks.filter(t=>t.assignee===p.pid&&t.status!=="done"))===1?"":"s"):""}</div>${mg&&p.perm&&p.pid!==sm.pid&&p.active?`<div class="ls">${esc(accessText({...p.perm,manage:false}))}</div>`:""}</div>${canEditPerson(p)?ic("chev"):""}</li>`).join("")}</ul></div>`;
 }
 function personSheet(pid){
   if(!perm.manage){toast("Only the Project Lead can change people.");return}
@@ -2397,23 +2403,30 @@ function personSheet(pid){
   ${p&&!isMe?`<div class="tasks" style="margin:8px 0 16px"><button type="button" class="btn block" id="wl">${ic("chat")}Send their link on WhatsApp</button><button type="button" class="btn block" id="cl">${ic("copy")}Copy their link</button><button type="button" class="btn block" id="nl">${ic("key")}Make a new link</button><button type="button" class="btn block ${p.active?"danger":""}" id="tg">${p.active?"Switch access off":"Switch access back on"}</button></div><p class="hint">Each link is personal. A new link stops the old one working.</p>`:""}
   <label class="f" for="pn">Name</label><input id="pn" class="t" maxlength="40" ${p?"":"data-autofocus"} value="${esc(p?.name||"")}">
   <label class="f" for="pp">WhatsApp number (optional)</label><input id="pp" class="t" type="tel" inputmode="tel" value="${esc(p?.phone||"")}" placeholder="For example 082 123 4567">
-  ${isMe?`<p class="muted" style="margin:12px 0 0">You are the Project Lead. You always have full control.</p>`:`
-  <label class="f">Role</label>${chipRow("role",ROLE_PICK.map(r=>[r,roleLabel(r)]),st.role)}
+  ${isMe?`<p class="muted" style="margin:12px 0 10px">${sm.prole==="lead"?"You are the Project Lead. You always have full control.":"You are a co-lead."}</p><div class="note-card">${ic("key")}<span><b>Your access link.</b> If you lose this phone, open this link on a new phone to get back in as ${esc(roleLabel(sm.prole))}. Keep it private.</span></div><div class="tasks" style="margin-top:12px"><button type="button" class="btn block" id="ml">${ic("copy")}Copy my access link</button><button type="button" class="btn block" id="md">${ic("cloud")}Save it to Google Drive</button><button type="button" class="btn block" id="mw">${ic("chat")}Send it to myself on WhatsApp</button><button type="button" class="btn block danger" id="mn">${ic("key")}Make a new access link</button></div>`:`
+  <label class="f">Role</label>${chipRow("role",rolePick().map(r=>[r,roleLabel(r)]),st.role)}
   <label class="f">What can they update?</label>${chipRow("edit",[["all","Everything"],["notes","Photos and notes"],["none","View only"]],st.edit)}
   <label class="f">Money</label>${chipRow("money",[["none","Hidden"],["view","View"],["edit","View and record"]],st.money)}
   <label class="f">Can send updates?</label>${chipRow("send",[["yes","Yes"],["no","No, receives only"]],st.send)}
   <p class="hint" id="ah"></p>`}
   <div class="foot"><button class="btn primary block" id="sv">${p?"Save":"Add person"}</button></div></form>`,(sh,close)=>{
     const ah=sh.querySelector("#ah"),paint=n=>sh.querySelectorAll(`[data-ch="${n}"]`).forEach(x=>x.setAttribute("aria-pressed",x.dataset.v===st[n]));
-    const hint=()=>{if(ah)ah.textContent=accessText({edit:st.edit,money:st.money,send:st.send==="yes",manage:false})};
+    const hint=()=>{if(ah)ah.textContent=st.role==="colead"?"A deputy. Can do everything you can, except change you or another co-lead.":accessText({edit:st.edit,money:st.money,send:st.send==="yes",manage:false})};
     if(!isMe){
       wireChips(sh,st,"role",()=>{const r=ROLES[st.role].perm;st.edit=r.edit;st.money=r.money;st.send=r.send?"yes":"no";["edit","money","send"].forEach(paint);hint()});
       ["edit","money","send"].forEach(n=>wireChips(sh,st,n,hint));hint();
     }
-    const body=()=>({pid:p?.pid,name:sh.querySelector("#pn").value.trim(),phone:sh.querySelector("#pp").value.trim(),role:isMe?undefined:st.role,perm:isMe?undefined:{edit:st.edit,money:st.money,send:st.send==="yes"}});
+    const body=()=>({pid:p?.pid,name:sh.querySelector("#pn").value.trim(),phone:sh.querySelector("#pp").value.trim(),role:isMe?undefined:st.role,perm:isMe?undefined:{edit:st.edit,money:st.money,send:st.send==="yes"},colead:!isMe&&st.role==="colead"});
     const guard=async fn=>{try{await fn()}catch(e){console.warn(e);toast(e.message==="offline"?"Connect to the internet to change people.":"Could not save that. Try again.")}};
     sh.querySelector("#f").onsubmit=ev=>{ev.preventDefault();const b=body();if(!b.name)return showErr(sh,sh.querySelector("#pn"),"Write a name.");
       guard(async()=>{const r=await peopleSet(b);close();render();if(!p){toast(b.name+" added. Now send their link.");personSheet(r.pid)}else toast("Saved.")})};
+    if(isMe){
+      const note=()=>{lsSet("build-linksaved","1")};
+      sh.querySelector("#ml").onclick=async()=>{const tx=myLinkText();if(!tx){toast("Your link is still loading. Try again in a moment.");return}try{await navigator.clipboard.writeText(tx.split("\n").filter(l=>l.startsWith("http")).join(""));note();toast("Link copied. Keep it somewhere private.")}catch{toast("Press and hold to copy.")}};
+      sh.querySelector("#md").onclick=()=>saveLinkToDrive();
+      sh.querySelector("#mw").onclick=()=>{const tx=myLinkText();if(!tx){toast("Your link is still loading. Try again in a moment.");return}note();window.open("https://wa.me/?text="+encodeURIComponent(tx),"_blank")};
+      sh.querySelector("#mn").onclick=()=>{close();confirmSheet("Make a new access link?","Your old link stops working, so a lost phone is locked out. This phone stays signed in. Save the new link afterwards.","Make new link",()=>guard(async()=>{await peopleSet({pid:sm.pid,regen:true});lsSet("build-linksaved","");render();toast("New link made. Save it now.");personSheet(sm.pid)}))};
+    }
     if(p&&!isMe){
       const link=()=>({text:`Hi ${p.name}, you have been added to "${S.settings.name}" in Newberry Build as ${roleLabel(p.role)}. Open your personal link to join. It is only for you, so please do not forward it:\n${personLink(p)}`});
       sh.querySelector("#wl").onclick=()=>{window.open(p.phone?waUrl(p.phone,link().text):"https://wa.me/?text="+encodeURIComponent(link().text),"_blank")};
@@ -2664,6 +2677,7 @@ function attentionItems(){
     if(soon.length)out.push(["cash",ov?"red":"",`${soon.length} trade payment${soon.length===1?"":"s"} ${ov?"overdue or ":""}due this week`,"gotrades",""]);
     const w=S.trades.filter(t=>t.status==="received").length;if(w)out.push(["hammer","",`${w} quote${w===1?"":"s"} waiting for a decision`,"gotrades",""]);
   }
+  if(perm.edit==="all"){const hr=new Date().getHours(),dw=new Date().getDay();if(hr>=14&&dw!==0&&(!S.settings.start||S.settings.start<=td)&&(!S.settings.target||td<=S.settings.target)&&!S.diary.some(e=>e.date===td))out.push(["book","","No site diary entry yet today","adddiary",""])}
   const un=unreadMsgs().length;if(un)out.push(["bell","",`${un} unread update${un===1?"":"s"}`,"goinbox",""]);
   const low=S.mats.filter(m=>mEff(m)==="low").length;if(low)out.push(["truck","",`${low} item${low===1?"":"s"} low or out of stock`,"gomats",""]);
   return out;
@@ -2809,6 +2823,89 @@ const splitIn=id=>{const m=new Map();S.tasks.filter(t=>t.phase===id).forEach(t=>
 function classroomsTile(){
   const R=rooms(),per=R.map(r=>{const t=tasksOf(r.id);return pct(doneN(t),t.length)}),g=G(S.tasks),x=pct(doneN(g),g.length),diff=per.some(v=>v!==per[0]);
   return `<button class="tile green s2" data-go="build"><div class="lbl">${ic("home")}${R.length>1?"Classrooms":esc(R[0].name)}</div><div class="big">${x}%</div><div class="sub">${doneN(g)} of ${g.length} tasks done${diff?" · "+R.map((r,i)=>esc(r.name)+" "+per[i]+"%").join(" · "):""}</div><div class="meter"><i style="width:${x}%"></i></div></button>`;
+}
+/* ---------- access recovery: save my link ---------- */
+function myLinkText(){const me2=peopleList().find(p=>p.pid===sm.pid);return me2&&me2.key?`Newberry Build: my private access link (${S.settings.name||"project"}).\nOpen this link on a new phone to get back in as ${roleLabel(sm.prole)}. Do not share it.\n\n${personLink(me2)}\n`:""}
+async function saveLinkToDrive(){
+  const txt=myLinkText();if(!txt){toast("Open People first so your link can load.");return false}
+  let t;try{t=await gToken()}catch(e){if(e.message==="load"){gisLoad().then(()=>toast("Google is ready. Tap Save again."),()=>toast("You need to be online to use Google Drive."))}else toast("Could not connect to Google Drive.");return false}
+  try{const f=await gFolder(t);await gUpload(t,f,new Blob([txt],{type:"text/plain"}),"Newberry Build - my access link (private).txt");lsSet("build-linksaved","1");toast("Saved in your Google Drive.");return true}
+  catch(e){toast("Could not save to Google Drive. Try again.");return false}
+}
+function linkPrompt(){
+  if(!sm.code||!perm.manage||lsGet("build-linksaved")==="1"||lsGet("build-linkdis")===today())return "";
+  return `<div class="note-card" style="margin:0 0 14px">${ic("key")}<span><b>Protect your access.</b> Save your access link now. If you lose this phone, you can get straight back in as ${esc(roleLabel(sm.prole))}.<br><button type="button" class="linkbtn" data-act="savelink" style="padding:0;min-height:36px;margin-right:16px">Save my link</button><button type="button" class="linkbtn" data-act="linkdismiss" style="padding:0;min-height:36px">Later</button></span></div>`;
+}
+const canEditPerson=p=>perm.manage&&(sm.prole==="lead"||p.pid===sm.pid||(!(p.perm&&p.perm.manage)&&p.role!=="lead"));
+
+/* ---------- site diary ---------- */
+const WEATHER=[["sunny","Sunny"],["cloudy","Cloudy"],["rain","Rain"],["wind","Windy"]];
+const WICON={sunny:"sun",cloudy:"cloud",rain:"rain",wind:"wind"};
+const DELAYS=[["none","No delay"],["part","Slowed down"],["full","Stopped for the day"]];
+const REASONS=["Rain","Wind","Materials late","No labour","Power or water","Inspection","Other"];
+const lostDays=e=>e.delay==="full"?1:e.delay==="part"?.5:0;
+const weatherLabel=k=>(WEATHER.find(x=>x[0]===k)||[0,""])[1];
+let diaryF="all";
+function diaryStats(){
+  const dates=new Set(S.diary.map(e=>e.date)),rain=new Set(S.diary.filter(e=>e.weather==="rain").map(e=>e.date)),lost={};
+  S.diary.forEach(e=>{lost[e.date]=Math.max(lost[e.date]||0,lostDays(e))});
+  return{days:dates.size,rain:rain.size,lost:Object.values(lost).reduce((a,b)=>a+b,0)};
+}
+const diaryLine=e=>[weatherLabel(e.weather),e.people?e.people+" people on site":"",e.crews,e.delay&&e.delay!=="none"?(e.delay==="full"?"Stopped for the day":"Slowed down")+(e.reason?" ("+e.reason.toLowerCase()+")":""):"",e.work?"Work: "+e.work:"",e.note].filter(Boolean).join(". ");
+function diaryText(days){
+  const from=addDays(today(),-(days-1)),list=S.diary.filter(e=>e.date>=from).sort((a,b)=>b.date.localeCompare(a.date));
+  if(!list.length)return "";
+  const st=diaryStats();
+  return `*${S.settings.name||"Site"}: site diary*\nLast ${days} days\n\n`+list.map(e=>`${dshort(e.date)}: ${diaryLine(e)}${e.who?" ("+e.who+")":""}`).join("\n")+`\n\nWhole project: ${st.days} days logged, ${st.rain} rain day${st.rain===1?"":"s"}, ${st.lost} day${st.lost===1?"":"s"} lost to delays.`;
+}
+function diaryV(){
+  const st=diaryStats(),canAdd=perm.edit==="all";
+  const head=`<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Site diary</h2></div>${canAdd?`<button class="btn primary" data-act="adddiary">${ic("plus")}Today</button>`:""}</div>`;
+  if(!S.diary.length)return head+empty("book","No diary entries yet","One short note a day: the weather, how many people were on site, any delay and the work done. It is your record if there is ever a dispute about time.",canAdd?`<button class="btn primary" data-act="adddiary">${ic("plus")}Add today's entry</button>`:"");
+  const list=S.diary.filter(e=>diaryF==="all"||(e.delay&&e.delay!=="none")).sort((a,b)=>b.date.localeCompare(a.date)||(b.t||0)-(a.t||0));
+  const dates=[...new Set(list.map(e=>e.date))];
+  return head+`<div class="bento"><section class="tile"><div class="lbl">${ic("calendar")}Days logged</div><div class="big">${st.days}</div></section><section class="tile"><div class="lbl">${ic("rain")}Rain days</div><div class="big">${st.rain}</div></section><section class="tile ${st.lost?"alert":""}"><div class="lbl">${ic("clock")}Days lost</div><div class="big">${num(st.lost,1)}</div></section></div>
+  <div class="row between wr" style="margin:6px 0 12px;gap:8px"><div class="chips" role="group" aria-label="Show">${[["all","All"],["delay","Delays only"]].map(([k,l])=>`<button type="button" class="chip" data-sub="df:${k}" aria-pressed="${diaryF===k}">${l}</button>`).join("")}</div><div class="row" style="gap:8px"><button class="btn small" data-act="diaryshare">${ic("share","sm")}Share</button><button class="btn small" data-act="diaryprint">${ic("print","sm")}Print</button></div></div>
+  ${dates.length?dates.map(d=>`<div class="eyebrow" style="margin:14px 2px 8px">${esc(dlong(d))}</div><ul style="padding:0;margin:0">${list.filter(e=>e.date===d).map(e=>`<li class="card" style="list-style:none;margin:0 0 10px"><div class="row between" style="align-items:flex-start;gap:8px"><div class="row wr" style="gap:6px"><span class="pill sky">${e.weather?ic(WICON[e.weather]||"sun","sm")+esc(weatherLabel(e.weather)):"No weather noted"}</span>${e.people?`<span class="pill gone">${ic("users","sm")}${e.people}</span>`:""}${e.delay&&e.delay!=="none"?`<span class="pill unwell">${ic("clock","sm")}${e.delay==="full"?"Stopped":"Slowed"}${e.reason?" · "+esc(e.reason):""}</span>`:""}</div>${canAdd?`<button class="btn small icon" data-act="editdiary" data-id="${e.id}" aria-label="Edit this entry">${ic("pencil")}</button>`:""}</div>${e.crews?`<div class="ls" style="margin-top:8px">${esc(e.crews)}</div>`:""}${e.work?`<p style="margin:8px 0 0;white-space:pre-wrap">${esc(e.work)}</p>`:""}${e.note?`<p class="muted small" style="margin:6px 0 0">${esc(e.note)}</p>`:""}${e.who?`<div class="muted small" style="margin-top:8px">${esc(e.who)}</div>`:""}</li>`).join("")}</ul>`).join(""):`<div class="empty">${ic("check","xl")}<h3>No delays logged</h3><p>Days with a delay will show here.</p></div>`}`;
+}
+function diarySheet(id){
+  let e=id?S.diary.find(x=>x.id===id):null;
+  if(!e&&!id){e=S.diary.find(x=>x.date===today()&&x.by&&x.by===sm.pid)||null}
+  const st={weather:e?.weather||"",delay:e?.delay||"none",reason:e?.reason||""};let people=e?.people??0;
+  sheet(e?"Edit diary entry":"Site diary",`<form id="f" novalidate>
+  ${dateField("dt",e?.date||today(),"Date")}
+  <label class="f">Weather</label>${chipRow("weather",WEATHER,st.weather)}
+  <label class="f">People on site</label><div class="stepper"><button type="button" data-step="-1" aria-label="Fewer">${ic("minus")}</button><input id="pp" inputmode="numeric" value="${people}" aria-label="People on site"><button type="button" data-step="1" aria-label="More">${ic("plus")}</button></div>
+  <label class="f" for="cr">Who was on site (optional)</label><input id="cr" class="t" maxlength="120" value="${esc(e?.crews||"")}" placeholder="For example: builder's team, tiler, electrician">
+  <label class="f" for="wk">Work done today</label><textarea id="wk" class="t grow-ta" rows="2" maxlength="600" placeholder="What was done on site?">${esc(e?.work||"")}</textarea>${micBtn("wk","Speak the notes")}
+  <label class="f">Was work delayed?</label>${chipRow("delay",DELAYS,st.delay)}
+  <div id="rw" ${st.delay==="none"?"hidden":""}><label class="f">Why?</label>${chipRow("reason",REASONS.map(r=>[r,r]),st.reason)}</div>
+  <label class="f" for="nt">Anything else (optional)</label><input id="nt" class="t" maxlength="200" value="${esc(e?.note||"")}" placeholder="Visitors, inspections, safety">
+  <div class="foot"><button class="btn primary block">${e?"Save entry":"Save today's entry"}</button></div></form>`,(sh,close)=>{
+    wireDc(sh);wireChips(sh,st,"weather");wireChips(sh,st,"reason");wireChips(sh,st,"delay",()=>{sh.querySelector("#rw").hidden=st.delay==="none"});wireMics(sh);
+    const pp=sh.querySelector("#pp");sh.querySelectorAll("[data-step]").forEach(b=>b.onclick=()=>{pp.value=Math.max(0,Math.round((+pp.value||0)+ +b.dataset.step))});
+    sh.querySelector("#f").onsubmit=ev=>{ev.preventDefault();
+      const work=sh.querySelector("#wk").value.trim();
+      if(!st.weather&&!work)return showErr(sh,sh.querySelector("#wk"),"Add the weather or a note on the work done.");
+      const vals={date:sh.querySelector("#dt").value||today(),weather:st.weather,people:Math.max(0,Math.round(+pp.value||0)),crews:sh.querySelector("#cr").value.trim(),work,delay:st.delay,reason:st.delay==="none"?"":st.reason,note:sh.querySelector("#nt").value.trim()};
+      if(e){const u=undoEdit(e,vals);save();close();render();toast("Diary entry saved.",u);return}
+      const n={id:uid(),...vals,by:sm.pid||"",who:me||sm.pname||"",t:Date.now()};
+      S.diary.push(n);logAct(`Site diary entry for ${dshort(n.date)}`);save();close();render();toast("Diary entry saved.",()=>{const i=S.diary.indexOf(n);if(i>=0)S.diary.splice(i,1)});
+    };
+  });
+}
+function printNode(area){
+  document.body.append(area);document.body.classList.add("printing");
+  const done=()=>{window.removeEventListener("afterprint",done);document.body.classList.remove("printing");area.remove()};
+  window.addEventListener("afterprint",done);
+  setTimeout(()=>{try{window.print()}catch{done()}},250);
+  setTimeout(()=>{if(document.body.classList.contains("printing"))done()},120000);
+}
+function diaryPrint(){
+  if(!S.diary.length){toast("There are no diary entries to print yet.");return}
+  const st=diaryStats(),list=S.diary.slice().sort((a,b)=>a.date.localeCompare(b.date)||(a.t||0)-(b.t||0)),area=document.createElement("div");area.id="printarea";
+  area.innerHTML=`<div class="pa-h">${esc(S.settings.name||"Site")}: site diary</div><div class="pa-cap">${st.days} days logged · ${st.rain} rain day${st.rain===1?"":"s"} · ${num(st.lost,1)} day${st.lost===1?"":"s"} lost to delays · printed ${esc(dlong(today()))}</div>`+list.map(e=>`<div class="pa-row"><b>${esc(dlong(e.date))}</b> · ${esc(diaryLine(e))}${e.who?" ("+esc(e.who)+")":""}</div>`).join("");
+  printNode(area);
 }
 /* ---------- start ---------- */
 render();

@@ -1,0 +1,8 @@
+-- Newberry Build 3: co-lead, renewing your own access link, and the site diary. Replaces b3_can_write and build3_people_set from build3-tracker.sql. Applied to Supabase.
+-- 1. b3_can_write: the diary ('diary' records) can be written by people who can update everything, like tasks and materials.
+--    Change: `if k in ('tasks','mats','sups','plans') then return e='all'; end if;` becomes
+--            `if k in ('tasks','mats','sups','plans','diary') then return e='all'; end if;`
+-- 2. build3_people_set: the first lead can make a co-lead (a deputy with the same powers). Nobody can change the first lead.
+--    Only the first lead can change a co-lead. Anyone who can manage may renew their own access link (regen).
+--    Only the first lead can grant the co-lead role, and the role names 'lead' and 'colead' cannot be given to anyone else.
+-- See the migrations build3_colead_selflink_diary and build3_people_role_sanitize in the Supabase project for the full function text.
