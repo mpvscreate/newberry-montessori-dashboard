@@ -939,7 +939,8 @@ const blobToData=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.re
 /* ---------- small form helpers ---------- */
 const dateField=(id,val,label="Date")=>`<label class="f" for="${id}">${label}</label><div class="chips" style="margin-bottom:8px"><button type="button" class="chip" data-dc="${today()}" data-for="${id}">Today</button><button type="button" class="chip" data-dc="${addDays(today(),-1)}" data-for="${id}">Yesterday</button></div><input id="${id}" class="t" type="date" value="${esc(val||"")}">`;
 const futureChips=id=>`<div class="chips" style="margin-bottom:8px"><button type="button" class="chip" data-dc="${addDays(today(),3)}" data-for="${id}">In 3 days</button><button type="button" class="chip" data-dc="${addDays(today(),7)}" data-for="${id}">In a week</button><button type="button" class="chip" data-dc="${addDays(today(),14)}" data-for="${id}">In 2 weeks</button><button type="button" class="chip" data-dc="" data-for="${id}">No date</button></div>`;
-function wireDc(sh){sh.querySelectorAll("[data-dc]").forEach(b=>b.onclick=()=>{const i=sh.querySelector("#"+b.dataset.for);i.value=b.dataset.dc;i.dispatchEvent(new Event("input",{bubbles:true}))})}
+function wireDc(sh){const mark=i=>sh.querySelectorAll('[data-dc][data-for="'+i.id+'"]').forEach(x=>x.setAttribute("aria-pressed",x.dataset.dc===i.value));
+  sh.querySelectorAll("[data-dc]").forEach(b=>{const i=sh.querySelector("#"+b.dataset.for);if(!i)return;if(!i._dm){i._dm=1;i.addEventListener("input",()=>mark(i));i.addEventListener("change",()=>mark(i));mark(i)}b.onclick=()=>{i.value=b.dataset.dc;i.dispatchEvent(new Event("input",{bubbles:true}))}})}
 const chipRow=(name,opts,cur,cls="")=>`<div class="chips ${cls}" role="group">${opts.map(([k,l])=>`<button type="button" class="chip" data-ch="${name}" data-v="${esc(k)}" aria-pressed="${k===cur}">${esc(l)}</button>`).join("")}</div>`;
 function wireChips(sh,state,name,after){sh.querySelectorAll(`[data-ch="${name}"]`).forEach(b=>b.onclick=()=>{state[name]=b.dataset.v;sh.querySelectorAll(`[data-ch="${name}"]`).forEach(x=>x.setAttribute("aria-pressed",x===b));after?.()})}
 const roomOpts=(withBoth=true)=>[...(withBoth?[["both","Both"]]:[]),...rooms().map(r=>[r.id,r.name])];
@@ -3187,17 +3188,17 @@ function extraSheet(ph,id){
   sheet(c?"Edit extra labour":"Add extra labour",`<form id="f" novalidate><label class="f" for="am">Approved amount</label><div class="amtin"><b>R</b><input id="am" data-autofocus inputmode="decimal" autocomplete="off" placeholder="0,00" value="${c?String(c.amount).replace(".",","):""}"></div>
   <label class="f" for="ti">What is the extra labour for?</label><input id="ti" class="t" maxlength="100" value="${esc(c?.title||"")}" placeholder="For example: Extra bricklayer for 3 days">
   <label class="f" for="ap">Approved by</label>${ppl.length?`<div class="chips" style="margin-bottom:8px">${ppl.map(p=>`<button type="button" class="chip" data-ap="${esc(p.name)}">${esc(p.name)}</button>`).join("")}</div>`:""}<input id="ap" class="t" maxlength="60" value="${esc(c?c.appr||"":me)}" placeholder="Name">
-  ${c?"":`<label class="f">Phase</label>${chipRow("phase",PH.map(p=>[p[0],p[1]]),phid||PH[0][0])}`}
+  ${c?"":`<label class="f" for="xph">Phase</label><select id="xph" class="t sel">${PH.map(p=>`<option value="${p[0]}" ${p[0]===(phid||PH[0][0])?"selected":""}>${esc(p[1])}</option>`).join("")}</select>`}
   ${dateField("dt",c?.date||today(),"Date approved")}
   <label class="f">Payment</label>${chipRow("paid",[["1","Paid"],["0","Not paid yet"]],st.paid?"1":"0")}
   <div class="foot"><button class="btn primary block">${c?"Save changes":"Add extra labour"}</button></div></form>`,(sh,close)=>{
-    wireDc(sh);const ps={phase:phid||PH[0][0]};if(!c)wireChips(sh,ps,"phase");
+    wireDc(sh);
     sh.querySelectorAll("[data-ap]").forEach(b=>b.onclick=()=>{sh.querySelector("#ap").value=b.dataset.ap});
     sh.querySelectorAll('[data-ch="paid"]').forEach(b=>b.onclick=()=>{st.paid=b.dataset.v==="1";sh.querySelectorAll('[data-ch="paid"]').forEach(x=>x.setAttribute("aria-pressed",x===b))});
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const am=sh.querySelector("#am"),v=parseAmt(am.value);if(!(v>0))return showErr(sh,am.closest(".amtin"),"Enter the approved amount.");
       const vals={amount:Math.round(v*100)/100,title:sh.querySelector("#ti").value.trim()||"Extra labour",appr:sh.querySelector("#ap").value.trim(),date:sh.querySelector("#dt").value||today(),paid:st.paid};
       if(c){const u=undoEdit(c,vals);save();close();render();toast("Extra labour saved.",u)}
-      else{const n={id:uid(),cat:"labour",room:"both",sup:"",extra:true,phase:ps.phase,...vals};S.costs.push(n);logAct(`Extra labour of ${money(n.amount)} approved: ${n.title}`,1);save();close();render();toast(`Added ${money(n.amount)} extra labour.`,()=>S.costs.splice(S.costs.indexOf(n),1))}};
+      else{const n={id:uid(),cat:"labour",room:"both",sup:"",extra:true,phase:sh.querySelector("#xph").value,...vals};S.costs.push(n);logAct(`Extra labour of ${money(n.amount)} approved: ${n.title}`,1);save();close();render();toast(`Added ${money(n.amount)} extra labour.`,()=>S.costs.splice(S.costs.indexOf(n),1))}};
   });
 }
 /* ---------- start ---------- */
