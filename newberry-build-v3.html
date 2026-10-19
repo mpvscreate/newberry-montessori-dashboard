@@ -404,6 +404,11 @@ body.previewing{padding-top:calc(48px + env(safe-area-inset-top,0px))}
 .ro-furn [data-act="addfurn"],.ro-furn [data-act="furnstarter"]{display:none!important}
 .ro-tasks .furnlist .st{pointer-events:auto}
 .ro-furn .furnlist .st{pointer-events:none}
+.segc.ptabs{gap:2px;align-items:stretch}
+.segc.ptabs .ptab{display:flex;align-items:center;justify-content:center;gap:5px;min-width:0;padding:0 6px;font-size:.9rem;line-height:1.1;white-space:nowrap;text-align:center;font-family:inherit}
+.segc.ptabs .ptab .tn{font-weight:600;opacity:.8;font-variant-numeric:tabular-nums}
+.segc.ptabs .ptab.extra{color:var(--accent)}
+.segc.ptabs .ptab.extra[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink,#fff)}
 .segc.ptabs .ptab.mats{color:var(--green);font-weight:600}
 .segc.ptabs .ptab.mats[aria-pressed="true"]{background:var(--green);color:#fff;border-color:var(--green)}
 .na-mats .ptab.mats{display:none!important}
@@ -3146,12 +3151,12 @@ function phaseV(){
   const keys=[...new Map(S.tasks.filter(t=>t.phase===id&&(f==="all"||t.room===f||t.room==="shared")).sort((a,b)=>(a.order??0)-(b.order??0)).map(t=>[t.key,1])).keys()];
   const ph=phasePhotoIds(id),mh=S.mats.filter(m=>m.phase===id),mo=toOrder(mh).length;
   const xl=S.costs.filter(c=>c.extra&&c.phase===id),canX=lvl("money")>=1;const pt2=canX&&phTab==="extra"?"extra":pt;
-  const tabs=`<div class="segc ptabs" role="group" aria-label="Show">${[["tasks","Tasks"],["mats","Materials"+(mh.length?" · "+mh.length:"")],...(canX?[["extra","Extra labour"+(xl.length?" · "+xl.length:"")]]:[])].map(([k,l])=>`<button type="button" class="ptab ${k}" data-sub="pt:${k}" aria-pressed="${pt2===k}">${l}</button>`).join("")}</div>`;
+  const tabs=`<div class="segc ptabs" role="group" aria-label="Show">${[["tasks","Tasks"],["mats","Materials",mh.length],...(canX?[["extra","Extra labour",xl.length]]:[])].map(([k,l,n])=>`<button type="button" class="ptab ${k}" data-sub="pt:${k}" aria-pressed="${pt2===k}">${l}${n?`<span class="tn">${n}</span>`:""}</button>`).join("")}</div>`;
   const taskPart=`${splitIn(id)&&ts.some(t=>t.room!=="shared")?`<div class="segc" role="group" aria-label="Show classroom">${[["all","Both"],...R.map(r=>[r.id,r.name])].map(([k,l])=>`<button type="button" data-rf="${k}" aria-pressed="${f===k}">${esc(l)}</button>`).join("")}</div>`:""}
   ${f==="all"&&!hintSeen()&&ts.some(t=>t.room!=="shared")?`<div class="note-card">${ic("eye")}<span>${sm.code&&!perm.manage?"Tap the circle once when the work is done (yellow). The Project Lead gives the final tick (green) after checking.":sm.code?"Your tick is the final green tick. Work ticked yellow by the team is waiting for your check.":"Tap the circle to tick a task done in both classrooms."} Hold it for more options, or open the task to split the classrooms. Hold a task, then drag it up or down to change the order.</span></div>`:""}
   <div class="card">${keys.length?`<ul class="list reord">${keys.map(k=>taskRow(k,f==="all"?null:f)).join("")}</ul>`:`<div class="empty">${ic("clip","xl")}<h3>No tasks here</h3><p>Add the first task for this phase.</p><button class="btn primary" data-act="addtask" data-id="${id}">${ic("plus")}Add task</button></div>`}</div>
   <div class="card"><div class="row between"><h2 style="margin:0">Photos</h2><div class="row" style="gap:8px">${ph.length>=2?`<button class="btn small" data-act="phba" data-id="${id}">Before and after</button>`:""}${ph.length?`<button class="btn small icon" data-act="phdrive" data-id="${id}" aria-label="Save all photos of this phase to Google Drive">${ic("cloud")}</button>`:""}<button class="btn small" data-act="phphoto" data-id="${id}">${ic("camera")}Add photo</button></div></div>${ph.length?`<div class="pthumbs">${ph.slice(0,9).map((m,i)=>`<button type="button" class="etile" style="border:0;padding:0" data-act="phlb" data-id="${id}|${i}" aria-label="Open photo ${i+1}"><span data-m="${m}" style="position:absolute;inset:0"></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:10px 0 0">No photos for this phase yet.</p>`}</div>`;
-  return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2 style="overflow-wrap:anywhere">${esc(PSHORT[id])}</h2></div>${pt2==="extra"?`<button class="btn primary" data-act="addextra" data-id="${id}">${ic("plus")}Add extra labour</button>`:pt==="mats"?`<button class="btn primary" data-act="addmat" data-id="${id}" style="background:var(--green);color:#fff">${ic("plus")}Add material</button>`:`<button class="btn primary" data-act="addtask" data-id="${id}">${ic("plus")}Add task</button>`}</div>
+  return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2 style="overflow-wrap:anywhere">${esc(PSHORT[id])}</h2></div>${pt2==="extra"?`<button class="btn primary" data-act="addextra" data-id="${id}" aria-label="Add extra labour">${ic("plus")}Add</button>`:pt==="mats"?`<button class="btn primary" data-act="addmat" data-id="${id}" style="background:var(--green);color:#fff">${ic("plus")}Add material</button>`:`<button class="btn primary" data-act="addtask" data-id="${id}">${ic("plus")}Add task</button>`}</div>
   ${phaseHero(id,p,ts,d,st,pc)}
   ${ts.length&&d===ts.length?completeCard(ts):""}
   ${tabs}
