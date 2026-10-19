@@ -1744,10 +1744,15 @@ async function push(){
       part.forEach(r=>{const m=sm.meta[r.kind+"|"+r.id];if(m){if(r.deleted)m.s="x";else m.s=m.h}})}
     if(!sm.mig){try{const ks=((await mTx("readonly",st=>st.getAllKeys()))||[]).filter(k=>typeof k==="string"&&!k.startsWith("lib-")&&/^[A-Za-z0-9_-]{1,60}$/.test(k));ks.forEach(k=>{if(!sm.pendingMedia.includes(k))sm.pendingMedia.push(k)});sm.mig=1}catch{}}
     for(const mid of[...sm.pendingMedia]){const b=await mGet(mid).catch(()=>null);if(!b||!/^[A-Za-z0-9_-]{1,60}$/.test(mid)){sm.pendingMedia=sm.pendingMedia.filter(x=>x!==mid);continue}
-      const path=sm.code+"/"+mid,up=await sb.storage.from("build-media").upload(path,b,{contentType:b.type||"application/octet-stream",upsert:false});
+      const path=sm.code+"/"+mid;let ab=null;try{ab=await b.arrayBuffer()}catch{}
+      if(!ab||!ab.byteLength){console.warn("empty file skipped",mid);sm.pendingMedia=sm.pendingMedia.filter(x=>x!==mid);continue}
+      const ct=b.type||"application/octet-stream",up=await sb.storage.from("build-media").upload(path,new Blob([ab],{type:ct}),{contentType:ct,upsert:false});
       if(up.error&&!/exist|duplicate|409/i.test((up.error.message||"")+(up.error.statusCode||""))){
-        if(/size|exceed|413|too large|mime|not supported/i.test((up.error.message||"")+(up.error.statusCode||""))){console.warn("media skipped",mid,up.error);sm.pendingMedia=sm.pendingMedia.filter(x=>x!==mid);continue}
+        const em=(up.error.message||"")+(up.error.statusCode||"");
+        if(/size|exceed|413|too large|mime|not supported/i.test(em)){console.warn("media skipped",mid,up.error);sm.pendingMedia=sm.pendingMedia.filter(x=>x!==mid);continue}
+        if(up.error.statusCode||up.error.status){sm.mfail=sm.mfail||{};sm.mfail[mid]=(sm.mfail[mid]||0)+1;if(sm.mfail[mid]>=3){console.warn("media given up",mid,up.error);sm.pendingMedia=sm.pendingMedia.filter(x=>x!==mid);continue}}
         throw up.error}
+      if(sm.mfail)delete sm.mfail[mid];
       const{error}=await sb.rpc("build3_upsert",{p_code:sm.code,p_key:sm.key,p_rows:[{kind:"media",id:mid,data:{p:path,t:b.type||"",n:b.size,...(isMoneyMedia(mid)?{m:1}:{})},deleted:false,u:Date.now()}]});if(error)throw error;sm.pendingMedia=sm.pendingMedia.filter(x=>x!==mid)}
     persistSync();setSync("ok");
   }catch(e){lastErr=e?.message||String(e);if(/denied/.test(lastErr)){sm.off=true;persistSync()}console.warn("sync push",e);setSync(navigator.onLine?"error":"offline")}
@@ -2218,7 +2223,7 @@ let docF="all";
 const docIcon=d=>/^image\//.test(d.mime||"")?"image":dtype(d.type)[2];
 const guessType=n=>{n=(n||"").toLowerCase();return /quot|estimate/.test(n)?"quote":/invoice|\binv\b|statement/.test(n)?"invoice":/contract|agreement/.test(n)?"contract":/coc|certificate|compliance|approval/.test(n)?"cert":/plan|drawing|elevation|section|layout/.test(n)?"drawing":/delivery|dn\b|waybill/.test(n)?"delivery":"other"};
 function docsV(){
-  const head=`<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Documents</h2></div><div class="row" style="gap:8px">${moneyOK?`<button class="iconbtn" data-act="lockmoney" aria-label="Lock documents now">${ic("lock")}</button>`:""}${docSel?`<button class="btn" data-act="docselect">Cancel</button><button class="btn primary" data-act="docprint" ${docSel.size?"":"disabled"}>${ic("print")}Print${docSel.size?" ("+docSel.size+")":""}</button>`:`<button class="btn" data-act="docselect">Select</button><button class="btn primary" data-act="adddoc">${ic("plus")}Add</button>`}</div></div>`;
+  const head=`<div class="page-h"><div class="row" style="gap:10px;min-width:0">${docSel?"":backBtn()}<h2>${docSel?docSel.size+" selected":"Documents"}</h2></div><div class="row" style="gap:8px">${moneyOK?`<button class="iconbtn" data-act="lockmoney" aria-label="Lock documents now">${ic("lock")}</button>`:""}${docSel?`<button class="btn" data-act="docselect">Cancel</button><button class="btn primary" data-act="docprint" ${docSel.size?"":"disabled"}>${ic("print")}Print${docSel.size?" ("+docSel.size+")":""}</button>`:`<button class="iconbtn" data-act="docselect" aria-label="Select documents to print">${ic("check")}</button><button class="btn primary" data-act="adddoc">${ic("plus")}Add</button>`}</div></div>`;
   const vis=S.docs.filter(docListed);
   const types=DTYPES.filter(t=>canMoney()||!t[3]),cnt=k=>vis.filter(d=>d.type===k).length;
   const list=vis.filter(d=>docF==="all"||d.type===docF).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||b.id.localeCompare(a.id));
