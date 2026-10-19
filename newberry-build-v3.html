@@ -1188,7 +1188,7 @@ function buildMain(){
   ${whoLine()}${attentionV()}${linkPrompt()}${pushPrompt()}${backupDue()}<div class="ptiles" role="list">${tiles}</div>
   <div class="eyebrow" style="margin:20px 2px 10px">Recently posted</div>
   ${rec.length?`<div class="rps">${rec.map(l=>`<button type="button" class="rp" data-go="site"><span class="rpi">${l.media?.length?`<span data-m="${l.media[0]}" style="position:absolute;inset:0"></span>`:ic(l.kind==="issue"?"alert":"note","lg")}</span><span class="rpt"><b style="color:${PCOL[l.phase]||"var(--accent)"}">${esc(l.phase&&PSHORT[l.phase]?PSHORT[l.phase]:"Site")}</b><span>${esc(l.text?l.text.slice(0,48):l.kind==="issue"?"Issue reported":"Added a photo")}</span><small>${dlabel(l.date)}</small></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:0 2px">Photos and notes you add will show up here.</p>`}
-  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="tasks">${ic("check")}<span>Tasks</span>${sm.code&&S.tasks.some(t=>t.assignee===sm.pid&&t.status!=="done")?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${uk(S.tasks.filter(t=>t.assignee===sm.pid&&t.status!=="done"))}</i>`:""}</button><button type="button" class="sc" data-go="diary">${ic("book")}<span>Site diary</span></button><button type="button" class="sc" data-go="docs" style="grid-column:1/-1">${ic("note")}<span>Documents</span>${S.docs.filter(docListed).length?`<small class="muted">${S.docs.filter(docListed).length}</small>`:""}</button></div>`;
+  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="tasks">${ic("check")}<span>Tasks</span>${sm.code&&S.tasks.some(t=>asgHas(t,sm.pid)&&t.status!=="done")?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${uk(S.tasks.filter(t=>asgHas(t,sm.pid)&&t.status!=="done"))}</i>`:""}</button><button type="button" class="sc" data-go="diary">${ic("book")}<span>Site diary</span></button><button type="button" class="sc" data-go="docs" style="grid-column:1/-1">${ic("note")}<span>Documents</span>${S.docs.filter(docListed).length?`<small class="muted">${S.docs.filter(docListed).length}</small>`:""}</button></div>`;
 }
 async function hydrateBg(root=document){
   for(const el of root.querySelectorAll("[data-bg]")){const u=await mUrl(el.dataset.bg);if(!u)continue;const im=new Image();im.onload=()=>{el.style.backgroundImage='url("'+u+'")';el.classList.add("on")};im.src=u}
@@ -1384,15 +1384,15 @@ function taskSheet(key,roomId){
   sheet("Task",`<form id="f" novalidate><label class="f" for="ti">Task</label><textarea id="ti" class="t grow-ta" rows="1" maxlength="160">${esc(title)}</textarea>${micBtn("ti","Speak the task name")}
    ${ts.length>1?`<div class="row between" style="margin:10px 0 4px;gap:8px"><span class="muted small" id="spt">${split?"Editing one classroom":"Applies to both classrooms"}</span><button type="button" class="linkbtn" id="spl" style="padding:0;min-height:36px">${split?"Edit both together":"Split by classroom"}</button></div><div class="segc" role="group" id="rm" ${split?"":"hidden"}>${ts.sort((a,b)=>roomNo(a.room)-roomNo(b.room)).map(t=>`<button type="button" data-r="${t.room}" aria-pressed="${t.room===cur}">${esc(roomName(t.room))}</button>`).join("")}</div>`:`<p class="muted small" style="margin:6px 0 0">${esc(roomName(cur))}</p>`}
    <div id="body">${body()}</div><div class="foot"><button class="btn primary block">Save task</button></div></form>`,(sh,close)=>{
-    const read=()=>{const d=draft[cur];d.due=sh.querySelector("#du")?.value||"";d.who=sh.querySelector("#wh")?.value.trim()||"";if(d.assignee&&personOf(d.assignee)&&d.who!==personOf(d.assignee).name)d.assignee="";d.note=sh.querySelector("#nt")?.value.trim()||"";title=sh.querySelector("#ti").value};
+    const read=()=>{const d=draft[cur];d.due=sh.querySelector("#du")?.value||"";d.who=sh.querySelector("#wh")?.value.trim()||"";if(d.assignee&&d.who!==pName(d.assignee))d.assignee="";d.note=sh.querySelector("#nt")?.value.trim()||"";title=sh.querySelector("#ti").value};
     const wire=()=>{wireDc(sh);wireMics(sh);sh.querySelectorAll('[data-ch="status"]').forEach(b=>b.onclick=()=>{draft[cur].status=b.dataset.v;sh.querySelectorAll('[data-ch="status"]').forEach(x=>x.setAttribute("aria-pressed",x===b))});
       sh.querySelectorAll("[data-nm]").forEach(b=>b.onclick=()=>{sh.querySelector("#wh").value=b.dataset.nm});
-      sh.querySelectorAll("[data-as]").forEach(b=>b.onclick=()=>{const pid=b.dataset.as,d=draft[cur],prev=d.assignee&&personOf(d.assignee)?.name,w=sh.querySelector("#wh");d.assignee=pid;if(pid)w.value=pName(pid);else if(w.value===prev)w.value="";sh.querySelectorAll("[data-as]").forEach(x=>x.setAttribute("aria-pressed",x===b))})};
+      sh.querySelectorAll("[data-as]").forEach(b=>b.onclick=()=>{const d=draft[cur],prev=d.assignee&&pName(d.assignee),w=sh.querySelector("#wh");d.assignee=asgToggle(d.assignee,b.dataset.as);if(d.assignee)w.value=pName(d.assignee);else if(w.value===prev)w.value="";asPress(sh,d.assignee)})};
     wire();
     sh.querySelector("#spl")?.addEventListener("click",()=>{read();split=!split;if(!split)ts.forEach(t=>{draft[t.room]={...draft[cur]}});sh.querySelector("#rm").hidden=!split;sh.querySelector("#spt").textContent=split?"Editing one classroom":"Applies to both classrooms";sh.querySelector("#spl").textContent=split?"Edit both together":"Split by classroom";if(!split){sh.querySelector("#body").innerHTML=body();wire()}});
     sh.querySelectorAll("#rm [data-r]").forEach(b=>b.onclick=()=>{read();cur=b.dataset.r;sh.querySelectorAll("#rm [data-r]").forEach(x=>x.setAttribute("aria-pressed",x===b));sh.querySelector("#body").innerHTML=body();wire()});
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();read();if(!split)ts.forEach(t=>{draft[t.room]={...draft[cur]}});const ti=sh.querySelector("#ti");if(!title.trim())return showErr(sh,ti,"A task needs a name.");
-      const nt=ts.filter(t=>draft[t.room].assignee&&draft[t.room].assignee!==(t.assignee||"")&&draft[t.room].assignee!==sm.pid).map(t=>draft[t.room].assignee);
+      const nt=ts.flatMap(t=>asgNew(t.assignee,draft[t.room].assignee));
       const ups=ts.map(t=>{const d=draft[t.room];const stt=(!perm.manage&&t.status==="done")?"done":(!perm.manage&&d.status==="done"?"check":d.status);return undoEdit(t,{title:title.trim(),status:stt,due:d.due,who:d.who,assignee:d.assignee||"",note:d.note,doneOn:stt==="done"?(t.doneOn||today()):""})});
       save();close();render();toast("Task saved.",()=>ups.forEach(u=>u()));[...new Set(nt)].forEach(pid=>notifySend([pid],"New task for you",title.trim().slice(0,100),"tasks"))};
   });
@@ -2345,7 +2345,10 @@ MONEY_ACTS.push("addtrade","edittrade","deltrade","opentrade","tradeaccept","pay
 const NOTE_ACTS=["addphoto","phphoto","adddoc"];
 const peopleList=()=>sm.people||[];
 const personOf=pid=>peopleList().find(p=>p.pid===pid);
-const pName=pid=>personOf(pid)?.name||"Someone";
+const asgL=a=>(a||"").split(",").filter(Boolean),asgHas=(t,pid)=>asgL(t.assignee).includes(pid);
+const pName=a=>asgL(a).map(pid=>personOf(pid)?.name||"Someone").join(", ");
+const asgNew=(was,now)=>asgL(now).filter(p=>!asgL(was).includes(p)&&p!==sm.pid);
+const asgToggle=(cur,pid)=>{if(!pid)return"";const a=asgL(cur),i=a.indexOf(pid);if(i>=0)a.splice(i,1);else a.push(pid);const order=peopleList().map(p=>p.pid);return a.sort((x,y)=>order.indexOf(x)-order.indexOf(y)).join(",")};
 const accessText=p=>{
   if(p.manage)return "You have full control and decide what everyone else can do.";
   const a=normAreas(p),nm={tasks:"tasks",log:"photos and challenges",mats:"materials",docs:"documents",diary:"the site diary",furn:"furniture and decor",money:"money"},can=[],see=[],no=[];
@@ -2458,7 +2461,7 @@ function peopleV(){
   if(!sm.code)return head+empty("users","Share the project first","Create the project link, then add your team. Each person gets their own link and sees only what you allow.",`<button class="btn primary" data-act="sharesheet">${ic("share")}Share with your team</button>`);
   const stat=p=>p.pid===sm.pid?"You":!p.active?"Switched off":mg?(p.seen?"Joined · seen "+ago(p.seen):"Not joined yet"):"";
   return head+(mg?`<p class="muted" style="margin:0 2px 12px">Tap a person to change what they can do or to send their link.</p>`:"")+
-  `<div class="card"><ul class="list">${list.map(p=>`<li class="tap" tabindex="0" ${canEditPerson(p)?`data-act="editperson" data-id="${p.pid}"`:""}><span class="row-ic" style="font-weight:700">${esc((p.name||"?").charAt(0).toUpperCase())}</span><div class="grow"><div class="lt">${esc(p.name)}</div><div class="ls">${esc(roleLabel(p.role))}${stat(p)?" · "+esc(stat(p)):""}${S.tasks.some(t=>t.assignee===p.pid&&t.status!=="done")?" · "+uk(S.tasks.filter(t=>t.assignee===p.pid&&t.status!=="done"))+" open task"+(uk(S.tasks.filter(t=>t.assignee===p.pid&&t.status!=="done"))===1?"":"s"):""}</div>${mg&&p.perm&&p.pid!==sm.pid&&p.active?`<div class="ls">${esc(accessText({...p.perm,manage:false}))}</div>`:""}</div>${canEditPerson(p)?ic("chev"):""}</li>`).join("")}</ul></div>`;
+  `<div class="card"><ul class="list">${list.map(p=>`<li class="tap" tabindex="0" ${canEditPerson(p)?`data-act="editperson" data-id="${p.pid}"`:""}><span class="row-ic" style="font-weight:700">${esc((p.name||"?").charAt(0).toUpperCase())}</span><div class="grow"><div class="lt">${esc(p.name)}</div><div class="ls">${esc(roleLabel(p.role))}${stat(p)?" · "+esc(stat(p)):""}${S.tasks.some(t=>asgHas(t,p.pid)&&t.status!=="done")?" · "+uk(S.tasks.filter(t=>asgHas(t,p.pid)&&t.status!=="done"))+" open task"+(uk(S.tasks.filter(t=>asgHas(t,p.pid)&&t.status!=="done"))===1?"":"s"):""}</div>${mg&&p.perm&&p.pid!==sm.pid&&p.active?`<div class="ls">${esc(accessText({...p.perm,manage:false}))}</div>`:""}</div>${canEditPerson(p)?ic("chev"):""}</li>`).join("")}</ul></div>`;
 }
 /* ---------- access by area ---------- */
 const mkA=a=>({tasks:a[0],log:a[1],mats:a[2],docs:a[3],diary:a[4],money:a[5],upd:a[6],furn:a[7]});
@@ -2771,17 +2774,18 @@ function varSheet(tid){
 }
 /* ---------- tasks by person, needs attention, phone notifications, restore ---------- */
 let taskF="";
+function asPress(sh,a){const l=asgL(a);sh.querySelectorAll("[data-as]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.as?l.includes(x.dataset.as):!l.length))}
 function assignBlock(d,names){
   const ppl=sm.code?peopleList().filter(p=>p.active):[];
   if(!ppl.length)return `<label class="f" for="wh">Who is doing it?</label>${names.length?`<div class="chips" style="margin-bottom:8px">${names.map(n=>`<button type="button" class="chip" data-nm="${esc(n)}">${esc(n)}</button>`).join("")}</div>`:""}<input id="wh" class="t" maxlength="60" value="${esc(d.who)}" placeholder="Name or company">`;
-  return `<label class="f">Assigned to</label><div class="chips" role="group" aria-label="Assigned to"><button type="button" class="chip" data-as="" aria-pressed="${!d.assignee}">Nobody</button>${ppl.map(p=>`<button type="button" class="chip" data-as="${p.pid}" aria-pressed="${d.assignee===p.pid}">${esc(p.pid===sm.pid?"Me":p.name)}</button>`).join("")}</div><label class="f" for="wh">Or someone outside the team</label><input id="wh" class="t" maxlength="60" value="${esc(d.who)}" placeholder="Name or company">`;
+  return `<label class="f">Assigned to <span class="muted small" style="font-weight:400">· choose one or more</span></label><div class="chips" role="group" aria-label="Assigned to (choose one or more)"><button type="button" class="chip" data-as="" aria-pressed="${!d.assignee}">Nobody</button>${ppl.map(p=>`<button type="button" class="chip" data-as="${p.pid}" aria-pressed="${asgHas(d,p.pid)}">${esc(p.pid===sm.pid?"Me":p.name)}</button>`).join("")}</div><label class="f" for="wh">Or someone outside the team</label><input id="wh" class="t" maxlength="60" value="${esc(d.who)}" placeholder="Name or company">`;
 }
 function tasksV(){
   const open=S.tasks.filter(t=>t.status!=="done"),td=today(),ppl=peopleList().filter(p=>p.active);
   const f=taskF||(sm.code?"me":"all");
-  const T={me:t=>sm.code&&t.assignee===sm.pid,check:t=>t.status==="check",all:()=>true,stuck:t=>t.status==="stuck",overdue:t=>t.due&&t.due<td,none:t=>!t.assignee&&!t.who};
-  const test=T[f]||(t=>t.assignee===f),n=fn=>uk(open.filter(fn));
-  const chips=[...(sm.code?[["me","Mine · "+n(T.me)]]:[]),["all","All open · "+uk(open)],["check","To check · "+n(T.check)],["stuck","Stuck · "+n(T.stuck)],["overdue","Overdue · "+n(T.overdue)],["none","Unassigned · "+n(T.none)],...ppl.filter(p=>p.pid!==sm.pid).map(p=>[p.pid,p.name+" · "+n(t=>t.assignee===p.pid)])];
+  const T={me:t=>sm.code&&asgHas(t,sm.pid),check:t=>t.status==="check",all:()=>true,stuck:t=>t.status==="stuck",overdue:t=>t.due&&t.due<td,none:t=>!t.assignee&&!t.who};
+  const test=T[f]||(t=>asgHas(t,f)),n=fn=>uk(open.filter(fn));
+  const chips=[...(sm.code?[["me","Mine · "+n(T.me)]]:[]),["all","All open · "+uk(open)],["check","To check · "+n(T.check)],["stuck","Stuck · "+n(T.stuck)],["overdue","Overdue · "+n(T.overdue)],["none","Unassigned · "+n(T.none)],...ppl.filter(p=>p.pid!==sm.pid).map(p=>[p.pid,p.name+" · "+n(t=>asgHas(t,p.pid))])];
   const list=open.filter(test).sort((a,b)=>((a.due&&a.due<td?0:1)-(b.due&&b.due<td?0:1))||(a.due||"9999").localeCompare(b.due||"9999")||(a.order??0)-(b.order??0));
   const seen=new Set(),rows=[];
   list.forEach(t=>{const sib=S.tasks.filter(x=>x.key===t.key),merged=sib.length>1&&sib.every(x=>x.status===t.status&&(x.assignee||"")===(t.assignee||"")&&x.due===t.due);if(merged){if(seen.has(t.key))return;seen.add(t.key)}rows.push({t,merged,sib})});
@@ -2794,7 +2798,7 @@ function tasksV(){
 }
 function attentionItems(){
   const open=S.tasks.filter(t=>t.status!=="done"),td=today(),out=[];
-  const stuck=uk(open.filter(t=>t.status==="stuck")),od=uk(open.filter(t=>t.due&&t.due<td)),mine=sm.code?uk(open.filter(t=>t.assignee===sm.pid)):0;
+  const stuck=uk(open.filter(t=>t.status==="stuck")),od=uk(open.filter(t=>t.due&&t.due<td)),mine=sm.code?uk(open.filter(t=>asgHas(t,sm.pid))):0;
   const chk=perm.manage?uk(open.filter(t=>t.status==="check")):0;if(chk)out.push(["check","",`${chk} task${chk===1?" is":"s are"} waiting for your check`,"gotasks","check"]);
   {const fchk=perm.manage?S.furn.filter(t=>t.status==="check").length:0;if(fchk)out.push(["check","",`${fchk} furniture item${fchk===1?" is":"s are"} waiting for your check`,"gofurn",""])}
   if(stuck)out.push(["alert","red",`${stuck} task${stuck===1?" is":"s are"} stuck`,"gotasks","stuck"]);
@@ -3092,7 +3096,7 @@ function furnSheet(id){
     if(frc)frc.querySelectorAll("[data-fr]").forEach(b=>b.onclick=()=>{const k=b.dataset.fr;if(k==="all"){const full=FROOMS.every(r=>st.rooms.has(r[0]));st.rooms=full?new Set():new Set(FROOMS.map(r=>r[0]))}else{if(st.rooms.has(k))st.rooms.delete(k);else st.rooms.add(k)}
       frc.querySelectorAll("[data-fr]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.fr==="all"?FROOMS.every(r=>st.rooms.has(r[0])):st.rooms.has(x.dataset.fr)))});
     sh.querySelectorAll("[data-nm]").forEach(b=>b.onclick=()=>{sh.querySelector("#wh").value=b.dataset.nm});
-    sh.querySelectorAll("[data-as]").forEach(b=>b.onclick=()=>{const pid=b.dataset.as,prev=st.assignee&&personOf(st.assignee)?.name,w=sh.querySelector("#wh");st.assignee=pid;if(pid)w.value=pName(pid);else if(w.value===prev)w.value="";sh.querySelectorAll("[data-as]").forEach(x=>x.setAttribute("aria-pressed",x===b))});
+    sh.querySelectorAll("[data-as]").forEach(b=>b.onclick=()=>{const prev=st.assignee&&pName(st.assignee),w=sh.querySelector("#wh");st.assignee=asgToggle(st.assignee,b.dataset.as);if(st.assignee)w.value=pName(st.assignee);else if(w.value===prev)w.value="";asPress(sh,st.assignee)});
     sh.querySelector("#fp").onclick=()=>sh.querySelector("#fpi").click();
     sh.querySelector("#fpi").onchange=e=>{files=[...files,...e.target.files].slice(0,8);e.target.value="";sh.querySelector("#fph").textContent=(media.length+files.length)+" photo"+(media.length+files.length===1?"":"s")};
     if(t)sh.querySelector("#fdel").onclick=()=>{close();delRecs(S.furn,x=>x.id===id,"Item")};
@@ -3102,13 +3106,13 @@ function furnSheet(id){
       if(!t&&!st.rooms.size)return toast("Choose at least one classroom.");
       const b=sh.querySelector("#sv");b.disabled=true;
       const ids=[...media];try{for(const f of files){const blob=await prepPhoto(f,PSIZES[psize][1]),mid=uid();await mPut(mid,blob);queueMedia(mid);ids.push(mid)}}catch{}
-      let who=sh.querySelector("#wh")?.value.trim()||"";if(st.assignee&&personOf(st.assignee)&&who!==personOf(st.assignee).name)st.assignee="";
+      let who=sh.querySelector("#wh")?.value.trim()||"";if(st.assignee&&who!==pName(st.assignee))st.assignee="";
       const vals={title,qty:Math.max(0,parseAmt(fq.value)||1),unit:st.unit,due:sh.querySelector("#du").value||"",who,assignee:st.assignee,note:sh.querySelector("#fnt").value.trim(),media:ids};
-      if(t){const u=undoEdit(t,vals);save();close();render();toast("Item saved.",u);if(st.assignee&&st.assignee!==t.assignee&&st.assignee!==sm.pid)notifySend([st.assignee],"New furniture job",title.slice(0,100),"furn");return}
+      if(t){const nw=asgNew(t.assignee,st.assignee),u=undoEdit(t,vals);save();close();render();toast("Item saved.",u);if(nw.length)notifySend(nw,"New furniture job",title.slice(0,100),"furn");return}
       const key=uid(),rooms=FROOMS.map(r=>r[0]).filter(r=>st.rooms.has(r)),made=rooms.map((r,i)=>({id:uid(),key,room:r,...vals,status:"todo",order:S.furn.length+i,t:Date.now()}));
       made.forEach(x=>S.furn.push(x));fRoom=rooms[0];logAct(`Added ${title} to ${rooms.map(roomName).join(", ")}`);
       save();close();render();toast(`Added to ${rooms.length===4?"all four classrooms":rooms.map(roomName).join(", ")}.`,()=>made.forEach(x=>{const i=S.furn.indexOf(x);if(i>=0)S.furn.splice(i,1)}));
-      if(st.assignee&&st.assignee!==sm.pid)notifySend([st.assignee],"New furniture job",title.slice(0,100),"furn");
+      {const nw=asgNew("",st.assignee);if(nw.length)notifySend(nw,"New furniture job",title.slice(0,100),"furn")}
     };
   });
 }
