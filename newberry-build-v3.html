@@ -2514,8 +2514,8 @@ function personSheet(pid,draft){
   <div class="asum" id="asum"></div>
   <div id="ar"></div>
   <p class="awarn" id="aw" hidden>${ic("lock")} Money is private. You will be asked for the password before this is saved.</p>
-  <div class="foot"><button class="btn primary block" id="sv">${p?"Review and save":"Review and add"}</button></div>
-  ${p?`<div class="adanger"><button type="button" class="btn block ${p.active?"danger":""}" id="tg">${p.active?"Switch access off":"Switch access back on"}</button><p class="hint">${p.active?"They can no longer open the project. You can switch them back on any time.":"They can open the project again with their link."}</p></div>`:""}`}
+  ${p?`<div class="adanger"><button type="button" class="btn block ${p.active?"danger":""}" id="tg">${p.active?"Switch access off":"Switch access back on"}</button><p class="hint">${p.active?"They can no longer open the project. You can switch them back on any time.":"They can open the project again with their link."}</p></div>`:""}
+  <div class="foot"><button class="btn primary block" id="sv">${p?"Review and save":"Review and add"}</button></div>`}
   </form>`,(sh,close)=>{
     const guard=async fn=>{try{await fn()}catch(e){console.warn(e);toast(e.message==="offline"?"Connect to the internet to change people.":"Could not save that. Try again.")}};
     const nameOf=()=>sh.querySelector("#pn").value.trim(),phoneOf=()=>sh.querySelector("#pp").value.trim();
