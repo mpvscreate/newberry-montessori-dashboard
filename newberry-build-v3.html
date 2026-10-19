@@ -483,7 +483,7 @@ body #fab-wrap .fab-menu .fab-item{position:static;transform:none;opacity:1;widt
 body #fab-wrap .fab-menu .fab-item:active{transform:scale(.97)}
 body #fab-wrap .fab-menu .fab-item .fi{width:42px;height:42px;flex:none;background:color-mix(in srgb,var(--gc) 20%,var(--sheet));color:var(--gc);box-shadow:none}
 body #fab-wrap .fab-menu .fab-item .fl{font:600 .94rem/1.15 var(--body);text-shadow:none;color:var(--ink);text-align:left}
-.fab-grp[data-g="site"]{--gc:var(--sky,#5aa7e0)}.fab-grp[data-g="build"]{--gc:var(--green,#3bb98a)}.fab-grp[data-g="money"]{--gc:var(--accent)}
+.fab-grp[data-g="site"]{--gc:var(--sky,#5aa7e0)}.fab-grp[data-g="build"]{--gc:var(--green,#3bb98a)}.fab-grp[data-g="money"]{--gc:var(--accent)}.fab-grp[data-g="team"]{--gc:#b48cf0}
 .fab-hint{margin:2px 6px 4px;text-align:center;font:.75rem var(--body);color:var(--muted)}
 /* quick repeated taps (keypad, steppers) must never trigger double-tap zoom on phones */
 html,body,button,a,input,select,textarea,.chip,.st,.stp,.lk-pad button,[role=button]{touch-action:manipulation}
@@ -805,7 +805,7 @@ const TABS=[["build","Build","grid"],["home","Overview","home"],["add","Add","pl
 const navTab=t=>({phase:"build",mats:"build",site:"build",plans:"build",docs:"build",inbox:"more",people:"more",tasks:"build",diary:"build"})[t]||t;
 $("nav.tabs").innerHTML=TABS.map(([k,l,i])=>k==="add"?`<button type="button" class="cap" id="fab" aria-label="Add something" aria-expanded="false" aria-controls="fab-menu">${ic(i)}</button>`:`<button data-tab="${k}">${ic(i)}<span>${l}</span>${k==="build"?'<i class="dot" id="tdot" hidden></i>':""}</button>`).join("");
 $("#today").textContent=new Date().toLocaleDateString("en-ZA",sm.code?{weekday:"short",day:"numeric",month:"short"}:{weekday:"long",day:"numeric",month:"long"});
-$("#fab-menu").innerHTML=[["site","On site",[["photo","camera","Photo"],["issue","alert","Challenges"]]],["build","Build",[["task","clip","Task"],["mat","truck","Material"]]],["money","Money",[["cost","cash","Expense"],["pay","users","Record payment"]]]].map(([g,t,it])=>`<div class="fab-grp" data-g="${g}"><h4>${t}</h4><div class="fab-row">${it.map(([k,i,l])=>`<button class="fab-item" data-fab="${k}"><span class="fi">${ic(i)}</span><span class="fl">${l}</span></button>`).join("")}</div></div>`).join("")+`<p class="fab-hint">Hold the plus button to take a photo straight away.</p>`;
+$("#fab-menu").innerHTML=[["site","On site",[["photo","camera","Photo"],["issue","alert","Challenges"]]],["build","Build",[["task","clip","Task"],["mat","truck","Material"]]],["money","Money",[["cost","cash","Expense"],["pay","users","Record payment"]]],["team","Team",[["msg","chat","Update everyone"]]]].map(([g,t,it])=>`<div class="fab-grp" data-g="${g}"><h4>${t}</h4><div class="fab-row">${it.map(([k,i,l])=>`<button class="fab-item" data-fab="${k}"><span class="fi">${ic(i)}</span><span class="fl">${l}</span></button>`).join("")}</div></div>`).join("")+`<p class="fab-hint">Hold the plus button to take a photo straight away.</p>`;
 
 let toastT;
 function toast(msg,undo){
@@ -891,7 +891,7 @@ $("#fab").onclick=()=>setFab($("#fab").getAttribute("aria-expanded")!=="true");
   m.addEventListener("pointermove",e=>{if(y0!==null&&e.clientY-y0>60){y0=null;setFab(false)}});
   ["pointerup","pointercancel"].forEach(n=>m.addEventListener(n,()=>{y0=null}));
 })();
-document.querySelectorAll("[data-fab]").forEach(b=>b.onclick=()=>{setFab(false);buzz(10);if(!fabOK(b.dataset.fab))return;({photo:()=>quickPhoto(tab==="phase"?curPh:undefined),cost:()=>costSheet(),pay:()=>recPaySheet(),task:()=>addTaskSheet(tab==="phase"?curPh:undefined),mat:()=>matSheet(),issue:()=>logSheet(null,"issue")})[b.dataset.fab]()});
+document.querySelectorAll("[data-fab]").forEach(b=>b.onclick=()=>{setFab(false);buzz(10);if(!fabOK(b.dataset.fab))return;({photo:()=>quickPhoto(tab==="phase"?curPh:undefined),cost:()=>costSheet(),pay:()=>recPaySheet(),msg:()=>newMsgSheet(true),task:()=>addTaskSheet(tab==="phase"?curPh:undefined),mat:()=>matSheet(),issue:()=>logSheet(null,"issue")})[b.dataset.fab]()});
 addEventListener("keydown",e=>{if(e.key==="Escape"){if(closeSheet)closeSheet();else if($("#fab").getAttribute("aria-expanded")==="true"){setFab(false);$("#fab").focus()}}});
 const reduced=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
 const buzz=n=>{try{navigator.vibrate?.(n)}catch{}};
@@ -2066,6 +2066,7 @@ function completeCard(ts){
   return `<div class="card done-card"><span class="dc-i">${ic("check","xl")}</span><div><h3>Phase complete</h3><p class="muted small" style="margin:2px 0 0">${last?"Finished "+dlong(last)+". ":""}Every task in this phase is done.</p></div></div>`;
 }
 function layoutFab(open){
+  document.querySelectorAll('[data-fab="msg"]').forEach(b=>b.style.display=sm.code&&canSend()?"":"none");
   document.querySelectorAll(".fab-grp").forEach(g=>{g.hidden=![...g.querySelectorAll(".fab-item")].some(b=>getComputedStyle(b).display!=="none")});
   const cap=$("#fab").getBoundingClientRect();$("#fab-menu").style.bottom=Math.max(12,innerHeight-cap.top+26)+"px";
   if(open)buzz(8);
@@ -2369,7 +2370,7 @@ const ago=t=>{const s=Math.max(0,(Date.now()-new Date(t).getTime())/1000);return
 const personLink=p=>location.origin+location.pathname+"#join="+sm.code+"&k="+p.key;
 const waUrl=(phone,text)=>{let d=String(phone||"").replace(/\D/g,"");if(d.startsWith("0"))d="27"+d.slice(1);return "https://wa.me/"+d+"?text="+encodeURIComponent(text)};
 function fabOK(k){
-  const ar={photo:"log",issue:"log",task:"tasks",mat:"mats",cost:"money",pay:"money"}[k];
+  const ar={photo:"log",issue:"log",task:"tasks",mat:"mats",cost:"money",pay:"money",msg:"upd"}[k];if(k==="msg"&&!sm.code){shareSheet();return false}
   if(lvl(ar)>=2)return true;toast(AREA_MSG(ar));return false;
 }
 const whoLine=()=>sm.code&&!perm.manage?`<p class="muted small" style="margin:0 2px 12px">You are <b>${esc(sm.pname||me||"signed in")}</b>, ${esc(roleLabel(sm.prole))}. ${esc(accessText(perm))}</p>`:"";
@@ -2427,15 +2428,15 @@ function inboxV(){
   };
   return head+`<ul style="padding:0;margin:0">${list.map(card).join("")}</ul>`;
 }
-function newMsgSheet(){
+function newMsgSheet(everyone){
   if(!sm.code){shareSheet();return}
   if(!canSend()){toast("Your access is to receive updates.");return}
   const others=peopleList().filter(p=>p.active&&p.pid!==sm.pid);
   if(!others.length){toast("Add people first.");go("people");return}
-  const to=new Set();let files=[];
+  const to=new Set(everyone?["all"]:[]);let files=[];
   sheet("New update",`<form id="f" novalidate><label class="f">Send to</label>
-  <div class="chips" role="group" aria-label="Send to" id="rc"><button type="button" class="chip" data-r="all" aria-pressed="false">Everyone</button>${others.map(p=>`<button type="button" class="chip" data-r="${p.pid}" aria-pressed="false">${esc(p.name)}</button>`).join("")}</div>
-  <p class="hint" id="rt">Choose one person, a few people or everyone.</p>
+  <div class="chips" role="group" aria-label="Send to" id="rc"><button type="button" class="chip" data-r="all" aria-pressed="${to.has("all")}">Everyone</button>${others.map(p=>`<button type="button" class="chip" data-r="${p.pid}" aria-pressed="false">${esc(p.name)}</button>`).join("")}</div>
+  <p class="hint" id="rt">${to.has("all")?"Everyone on the project will get this.":"Choose one person, a few people or everyone."}</p>
   <label class="f" for="mt">Message</label><textarea id="mt" data-autofocus class="t grow-ta" rows="3" maxlength="600" placeholder="What does the team need to know?"></textarea>${micBtn("mt","Speak the message")}
   <div class="photo-add"><button type="button" class="btn" id="mp">${ic("camera")}Add photo</button></div><input type="file" id="mf" accept="image/*" multiple hidden><p class="hint" id="mh"></p>
   <div class="foot"><button class="btn primary block" id="ms">Send update</button><button type="button" class="btn block" id="mw" style="margin-top:8px">${ic("chat")}Send and share on WhatsApp</button></div></form>`,(sh,close)=>{
