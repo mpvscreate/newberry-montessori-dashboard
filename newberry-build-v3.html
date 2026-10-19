@@ -479,6 +479,8 @@ html,body,button,a,input,select,textarea,.chip,.st,.stp,.lk-pad button,[role=but
 .st:active{transform:scale(.94)}
 .st.todo svg{opacity:.28}
 .st.doing{border-color:var(--sky);color:var(--sky);background:var(--sky-soft)}
+.st.check{border-color:#e0a800;background:#f3c13a;color:#2b1d00;box-shadow:0 0 0 4px rgba(243,193,58,.22)}
+.stp.check{border-color:transparent;color:var(--amber);background:var(--amber-soft)}.stp.check b{color:inherit}
 .st.done{border-color:var(--green);background:var(--green);color:#fff;box-shadow:0 0 0 4px var(--glow-green)}
 .st.stuck{border-color:var(--red);color:var(--red);background:var(--red-soft)}
 .stw{display:flex;flex-direction:column;align-items:center;gap:2px;flex:none}.stw small{font:700 .68rem var(--body);color:var(--muted)}
@@ -639,9 +641,10 @@ const phase=id=>PH.find(p=>p[0]===id);
 const CATS=[["materials","Materials","bag"],["labour","Labour","users"],["transport","Transport","truck"],["hire","Equipment hire","hammer"],["fees","Fees and permits","clip"],["other","Other","dots"]];
 const cat=k=>CATS.find(c=>c[0]===k)||CATS[5];
 const UNITS=["each","bags","m","m²","m³","sheets","loads","litres","kg","boxes"];
-const ST=[["todo","Not started"],["doing","In progress"],["done","Done"],["stuck","Stuck"]];
+const ST=[["todo","Not started"],["doing","In progress"],["check","To be checked"],["done","Done"],["stuck","Stuck"]];
+const STX=()=>perm.manage?ST:ST.filter(x=>x[0]!=="done");
 const stLabel=s=>ST.find(x=>x[0]===s)?.[1]||"";
-const stIcon=s=>s==="done"?ic("check"):s==="doing"?ic("clock"):s==="stuck"?ic("alert"):"";
+const stIcon=s=>s==="done"||s==="check"?ic("check"):s==="doing"?ic("clock"):s==="stuck"?ic("alert"):"";
 const MSTAT=[["need","To order"],["ordered","Ordered"],["got","Delivered"]];
 const MSTAT4=MSTAT;
 const SECS=[["stock","Stock","layers"],["fit","Fittings","home"],["elec","Electrical","bolt"],["sund","Sundries","paint"]];
@@ -973,10 +976,10 @@ function quickPhoto(ph,kind){
   i.addEventListener("cancel",()=>i.remove());i.click();
 }
 function cycMany(ids){
-  const rs=ids.map(id=>cycTask(id,true)).filter(Boolean);if(!rs.length)return;
+  const rs=ids.map(id=>cycTask(id,true)).filter(Boolean);if(!rs.length){toast("Checked and approved by the Project Lead. Only the lead can change it.");return}
   buzz(rs.some(r=>r.nx==="done")?[18,40,18]:12);
   const t=rs[0].t,nx=rs[0].nx;logAct(`Marked "${t.title}" ${stLabel(nx).toLowerCase()}${rs.length>1?" in both classrooms":rooms().length>1?` (${roomName(t.room)})`:""}`);
-  save();render();ids.forEach(id=>document.querySelectorAll(`[data-id="${id}"]`).forEach(b=>b.classList.add("popit")));
+  save();render();if(nx==="check")notifyLead(t);ids.forEach(id=>document.querySelectorAll(`[data-id="${id}"]`).forEach(b=>b.classList.add("popit")));
   toast(`${t.title}: ${stLabel(nx).toLowerCase()}${rs.length>1?" (both)":""}.`,()=>rs.forEach(r=>r.u()));
 }
 function swipeRow(li,fn){
@@ -1095,7 +1098,7 @@ function taskRow(key,single){
   const sub=single?[t0.status==="done"&&t0.doneOn?`Done ${dshort(t0.doneOn)}`:t0.due?`${od?"Overdue · ":"Due "}${dshort(t0.due)}`:"",t0.who].filter(Boolean).join(" · "):[stuck?"Stuck":"",od?"Overdue":"",[...new Set(ts.map(t=>t.assignee?pName(t.assignee):t.who).filter(Boolean))].join(", ")].filter(Boolean).join(" · ");
   const lab=t=>`${esc(t.title)}, ${esc(roomName(t.room))}: ${stLabel(t.status)}. Tap to tick done or undo. Hold for more options.`;
   const btn=t=>`<button class="st ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${lab(t)}">${stIcon(t.status)||ic("check")}</button>`;
-  const pill=t=>`<button class="stp ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${lab(t)}">${stIcon(t.status)||ic("minus","sm")}<span><b>${t.room==="shared"?"All":roomNo(t.room)}</b>${{todo:"To do",doing:"In progress",done:"Done",stuck:"Stuck"}[t.status]}</span></button>`;
+  const pill=t=>`<button class="stp ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${lab(t)}">${stIcon(t.status)||ic("minus","sm")}<span><b>${t.room==="shared"?"All":roomNo(t.room)}</b>${{todo:"To do",doing:"In progress",check:"To check",done:"Done",stuck:"Stuck"}[t.status]}</span></button>`;
   const head=`<div class="lt ${allDone?"dn":""}">${esc(t0.title)}</div>${sub?`<div class="ls ${stuck||od?"bad":""}">${esc(sub)}</div>`:""}`;
   const merged=!single&&(ts.length===1||ts.every(t=>t.status===ts[0].status)),ids=ts.map(t=>t.id).join(",");
   const btnAll=`<button class="st ${t0.status}" data-act="cycboth" data-id="${t0.id}" data-ids="${ids}" aria-label="${esc(t0.title)}, both classrooms: ${stLabel(t0.status)}. Tap to tick done or undo. Hold for more options.">${stIcon(t0.status)||ic("check")}</button>`;
@@ -1144,7 +1147,7 @@ function phaseV(){
   ${phaseHero(id,p,ts,d,st,pc)}
   ${ts.length&&d===ts.length?completeCard(ts):""}
   ${splitIn(id)&&ts.some(t=>t.room!=="shared")?`<div class="segc" role="group" aria-label="Show classroom">${[["all","Both"],...R.map(r=>[r.id,r.name])].map(([k,l])=>`<button type="button" data-rf="${k}" aria-pressed="${f===k}">${esc(l)}</button>`).join("")}</div>`:""}
-  ${f==="all"&&!hintSeen()&&ts.some(t=>t.room!=="shared")?`<div class="note-card">${ic("eye")}<span>Tap the circle to tick a task done in both classrooms. Hold it for more options, or open the task to split the classrooms. Hold a task, then drag it up or down to change the order.</span></div>`:""}
+  ${f==="all"&&!hintSeen()&&ts.some(t=>t.room!=="shared")?`<div class="note-card">${ic("eye")}<span>${sm.code&&!perm.manage?"Tap the circle once when the work is done (yellow). The Project Lead gives the final tick (green) after checking.":sm.code?"Your tick is the final green tick. Work ticked yellow by the team is waiting for your check.":"Tap the circle to tick a task done in both classrooms."} Hold it for more options, or open the task to split the classrooms. Hold a task, then drag it up or down to change the order.</span></div>`:""}
   <div class="card">${keys.length?`<ul class="list reord">${keys.map(k=>taskRow(k,f==="all"?null:f)).join("")}</ul>`:`<div class="empty">${ic("clip","xl")}<h3>No tasks here</h3><p>Add the first task for this phase.</p><button class="btn primary" data-act="addtask" data-id="${id}">${ic("plus")}Add task</button></div>`}</div>
   <div class="card"><div class="row between"><h2 style="margin:0">Photos</h2><div class="row" style="gap:8px">${ph.length>=2?`<button class="btn small" data-act="phba" data-id="${id}">Before and after</button>`:""}${ph.length?`<button class="btn small icon" data-act="phdrive" data-id="${id}" aria-label="Save all photos of this phase to Google Drive">${ic("cloud")}</button>`:""}<button class="btn small" data-act="phphoto" data-id="${id}">${ic("camera")}Add photo</button></div></div>${ph.length?`<div class="pthumbs">${ph.slice(0,9).map((m,i)=>`<button type="button" class="etile" style="border:0;padding:0" data-act="phlb" data-id="${id}|${i}" aria-label="Open photo ${i+1}"><span data-m="${m}" style="position:absolute;inset:0"></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:10px 0 0">No photos for this phase yet.</p>`}</div>`;
 }
@@ -1287,9 +1290,9 @@ function act(a,id,el){
 }
 const hintSeen=()=>{try{return!!localStorage.getItem("build-hint")}catch{return true}};
 function stateSheet(id,ids){
-  const list=(ids||id).split(",").map(i=>S.tasks.find(x=>x.id===i)).filter(Boolean),t=list[0];if(!t)return;
-  sheet(t.title,`<p class="muted" style="margin:6px 0 12px">${list.length>1?"Both classrooms":esc(roomName(t.room))}. Tap the circle to tick it done. Choose another state here.</p><div class="tasks">${ST.map(([k,l])=>`<button type="button" class="btn block ${k===t.status?"primary":""}" data-s="${k}">${stIcon(k)||ic("minus")}${esc(l)}</button>`).join("")}<button type="button" class="btn block" data-o="1">${ic("pencil")}Open task</button></div>`,(sh,close)=>{
-    sh.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{close();const k=b.dataset.s;if(list.length>1){const rs=list.map(x=>cycTask(x.id,true,k)).filter(Boolean);if(rs.length){logAct(`Marked "${t.title}" ${stLabel(k).toLowerCase()} in both classrooms`);save();render();toast(`${t.title}: ${stLabel(k).toLowerCase()} (both).`,()=>rs.forEach(r=>r.u()))}}else if(k!==t.status)cycTask(id,false,k)});
+  const list=(ids||id).split(",").map(i=>S.tasks.find(x=>x.id===i)).filter(Boolean),t=list[0];if(!t)return;const locked=!perm.manage&&list.every(x=>x.status==="done");
+  sheet(t.title,`<p class="muted" style="margin:6px 0 12px">${list.length>1?"Both classrooms":esc(roomName(t.room))}. ${locked?"Checked and approved by the Project Lead.":perm.manage?"Your tick is the final one (green). Choose another state here.":"Tap the circle once when the work is done (yellow). The Project Lead gives the final tick (green)."}</p><div class="tasks">${locked?"":STX().map(([k,l])=>`<button type="button" class="btn block ${k===t.status?"primary":""}" data-s="${k}">${stIcon(k)||ic("minus")}${esc(l)}</button>`).join("")}<button type="button" class="btn block" data-o="1">${ic("pencil")}Open task</button></div>`,(sh,close)=>{
+    sh.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{close();const k=b.dataset.s;if(list.length>1){const rs=list.map(x=>cycTask(x.id,true,k)).filter(Boolean);if(rs.length){logAct(`Marked "${t.title}" ${stLabel(k).toLowerCase()} in both classrooms`);save();render();if(k==="check")notifyLead(t);toast(`${t.title}: ${stLabel(k).toLowerCase()} (both).`,()=>rs.forEach(r=>r.u()))}}else if(k!==t.status)cycTask(id,false,k)});
     sh.querySelector("[data-o]").onclick=()=>{close();taskSheet(t.key,t.room)};
   });
 }
@@ -1304,10 +1307,14 @@ let holdFired=false;
 })();
 function cycTask(id,quiet,forced){try{localStorage.setItem("build-hint","1")}catch{}
   const t=S.tasks.find(x=>x.id===id);if(!t)return null;
-  const nx=forced||(t.status==="done"?"todo":"done");
-  const u=undoEdit(t,{status:nx,doneOn:nx==="done"?today():"",...(nx==="done"&&me?{who:t.who||me}:{})});
+  const lead=perm.manage;let nx=forced;
+  if(!nx)nx=t.status==="done"?(lead?"todo":null):t.status==="check"?(lead?"done":"todo"):(lead?"done":"check");
+  if(nx==="done"&&!lead)nx="check";
+  if(!lead&&t.status==="done"&&nx!=="done")nx=null;
+  if(!nx){if(!quiet)toast("Checked and approved by the Project Lead. Only the lead can change it.");return null}
+  const u=undoEdit(t,{status:nx,doneOn:nx==="done"?today():"",...((nx==="done"||nx==="check")&&me?{who:t.who||me}:{})});
   if(quiet)return{u,t,nx};
-  buzz(nx==="done"?[18,40,18]:12);logAct(`Marked "${t.title}" ${stLabel(nx).toLowerCase()}${rooms().length>1&&t.room!=="shared"?` (${roomName(t.room)})`:""}`);save();render();document.querySelectorAll(`[data-id="${id}"]`).forEach(b=>b.classList.add("popit"));toast(`${t.title}: ${stLabel(nx).toLowerCase()}${rooms().length>1&&t.room!=="shared"?` (${roomName(t.room)})`:""}.`,u);
+  buzz(nx==="done"?[18,40,18]:12);logAct(`Marked "${t.title}" ${stLabel(nx).toLowerCase()}${rooms().length>1&&t.room!=="shared"?` (${roomName(t.room)})`:""}`);save();render();if(nx==="check")notifyLead(t);document.querySelectorAll(`[data-id="${id}"]`).forEach(b=>b.classList.add("popit"));toast(`${t.title}: ${stLabel(nx).toLowerCase()}${rooms().length>1&&t.room!=="shared"?` (${roomName(t.room)})`:""}.`,u);
 }
 function addTaskSheet(ph){
   const st={room:"both",phase:ph&&phase(ph)?ph:curPhases()[0]||"site"};
@@ -1328,7 +1335,7 @@ function taskSheet(key,roomId){
   const draft={};ts.forEach(t=>draft[t.room]={status:t.status,due:t.due||"",who:t.who||"",assignee:t.assignee||"",note:t.note||""});
   let cur=ts.some(t=>t.room===roomId)?roomId:ts[0].room,title=ts[0].title,split=ts.length>1&&ts.some(t=>{const a=draft[t.room],b=draft[ts[0].room];return a.status!==b.status||a.due!==b.due||a.who!==b.who||a.assignee!==b.assignee||a.note!==b.note});
   const names=[...new Set([me,...S.tasks.map(t=>t.who)].filter(Boolean))].slice(0,5);
-  const body=()=>{const d=draft[cur];return `<label class="f">Status</label>${chipRow("status",ST,d.status)}
+  const body=()=>{const d=draft[cur];return `<label class="f">Status</label>${chipRow("status",perm.manage?ST:ST.filter(x=>x[0]!=="done"||d.status==="done"),d.status)}${!perm.manage&&d.status==="done"?`<p class="hint">Checked and approved by the Project Lead. Only the lead can change it.</p>`:""}
    ${dateField("du",d.due,"Due date").replace(/<div class="chips"[\s\S]*?<\/div>/,futureChips("du"))}
    ${assignBlock(d,names)}
    <label class="f" for="nt">Note</label><textarea id="nt" class="t" maxlength="400" placeholder="Anything the team should know">${esc(d.note)}</textarea>${micBtn("nt","Speak a note")}`};
@@ -1344,7 +1351,7 @@ function taskSheet(key,roomId){
     sh.querySelectorAll("#rm [data-r]").forEach(b=>b.onclick=()=>{read();cur=b.dataset.r;sh.querySelectorAll("#rm [data-r]").forEach(x=>x.setAttribute("aria-pressed",x===b));sh.querySelector("#body").innerHTML=body();wire()});
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();read();if(!split)ts.forEach(t=>{draft[t.room]={...draft[cur]}});const ti=sh.querySelector("#ti");if(!title.trim())return showErr(sh,ti,"A task needs a name.");
       const nt=ts.filter(t=>draft[t.room].assignee&&draft[t.room].assignee!==(t.assignee||"")&&draft[t.room].assignee!==sm.pid).map(t=>draft[t.room].assignee);
-      const ups=ts.map(t=>{const d=draft[t.room];return undoEdit(t,{title:title.trim(),status:d.status,due:d.due,who:d.who,assignee:d.assignee||"",note:d.note,doneOn:d.status==="done"?(t.doneOn||today()):""})});
+      const ups=ts.map(t=>{const d=draft[t.room];const stt=(!perm.manage&&t.status==="done")?"done":(!perm.manage&&d.status==="done"?"check":d.status);return undoEdit(t,{title:title.trim(),status:stt,due:d.due,who:d.who,assignee:d.assignee||"",note:d.note,doneOn:stt==="done"?(t.doneOn||today()):""})});
       save();close();render();toast("Task saved.",()=>ups.forEach(u=>u()));[...new Set(nt)].forEach(pid=>notifySend([pid],"New task for you",title.trim().slice(0,100),"tasks"))};
   });
 }
@@ -2631,9 +2638,9 @@ function assignBlock(d,names){
 function tasksV(){
   const open=S.tasks.filter(t=>t.status!=="done"),td=today(),ppl=peopleList().filter(p=>p.active);
   const f=taskF||(sm.code?"me":"all");
-  const T={me:t=>sm.code&&t.assignee===sm.pid,all:()=>true,stuck:t=>t.status==="stuck",overdue:t=>t.due&&t.due<td,none:t=>!t.assignee&&!t.who};
+  const T={me:t=>sm.code&&t.assignee===sm.pid,check:t=>t.status==="check",all:()=>true,stuck:t=>t.status==="stuck",overdue:t=>t.due&&t.due<td,none:t=>!t.assignee&&!t.who};
   const test=T[f]||(t=>t.assignee===f),n=fn=>uk(open.filter(fn));
-  const chips=[...(sm.code?[["me","Mine · "+n(T.me)]]:[]),["all","All open · "+uk(open)],["stuck","Stuck · "+n(T.stuck)],["overdue","Overdue · "+n(T.overdue)],["none","Unassigned · "+n(T.none)],...ppl.filter(p=>p.pid!==sm.pid).map(p=>[p.pid,p.name+" · "+n(t=>t.assignee===p.pid)])];
+  const chips=[...(sm.code?[["me","Mine · "+n(T.me)]]:[]),["all","All open · "+uk(open)],["check","To check · "+n(T.check)],["stuck","Stuck · "+n(T.stuck)],["overdue","Overdue · "+n(T.overdue)],["none","Unassigned · "+n(T.none)],...ppl.filter(p=>p.pid!==sm.pid).map(p=>[p.pid,p.name+" · "+n(t=>t.assignee===p.pid)])];
   const list=open.filter(test).sort((a,b)=>((a.due&&a.due<td?0:1)-(b.due&&b.due<td?0:1))||(a.due||"9999").localeCompare(b.due||"9999")||(a.order??0)-(b.order??0));
   const seen=new Set(),rows=[];
   list.forEach(t=>{const sib=S.tasks.filter(x=>x.key===t.key),merged=sib.length>1&&sib.every(x=>x.status===t.status&&(x.assignee||"")===(t.assignee||"")&&x.due===t.due);if(merged){if(seen.has(t.key))return;seen.add(t.key)}rows.push({t,merged,sib})});
@@ -2647,6 +2654,7 @@ function tasksV(){
 function attentionItems(){
   const open=S.tasks.filter(t=>t.status!=="done"),td=today(),out=[];
   const stuck=uk(open.filter(t=>t.status==="stuck")),od=uk(open.filter(t=>t.due&&t.due<td)),mine=sm.code?uk(open.filter(t=>t.assignee===sm.pid)):0;
+  const chk=perm.manage?uk(open.filter(t=>t.status==="check")):0;if(chk)out.push(["check","",`${chk} task${chk===1?" is":"s are"} waiting for your check`,"gotasks","check"]);
   if(stuck)out.push(["alert","red",`${stuck} task${stuck===1?" is":"s are"} stuck`,"gotasks","stuck"]);
   if(od)out.push(["clock","red",`${od} task${od===1?" is":"s are"} overdue`,"gotasks","overdue"]);
   if(mine)out.push(["user","",`${mine} task${mine===1?"":"s"} assigned to you`,"gotasks","me"]);
@@ -2717,7 +2725,8 @@ function pushPrompt(){
   if(!sm.code||!pushSupported()||lsGet("build-push")==="1"||lsGet("build-pushdis")==="1"||Notification.permission==="denied")return "";
   return `<div class="note-card" style="margin:0 0 14px">${ic("bell")}<span><b>Get notified.</b> A phone notification when someone sends you an update or gives you a task.<br><button type="button" class="linkbtn" data-act="pushsheet" style="padding:0;min-height:36px;margin-right:16px">Turn on</button><button type="button" class="linkbtn" data-act="pushdismiss" style="padding:0;min-height:36px">Not now</button></span></div>`;
 }
-function openTarget(t){if(t==="inbox")go("inbox");else if(t==="tasks"){taskF="me";go("tasks")}}
+function notifyLead(t){const ld=peopleList().find(p=>p.role==="lead");if(ld&&ld.pid!==sm.pid)notifySend([ld.pid],"Ready to check",t.title.slice(0,100),"check")}
+function openTarget(t){if(t==="check"){taskF="check";go("tasks")}else if(t==="inbox")go("inbox");else if(t==="tasks"){taskF="me";go("tasks")}}
 try{navigator.serviceWorker?.addEventListener("message",e=>{if(e.data&&e.data.open)openTarget(e.data.open)})}catch{}
 {const m=location.hash.match(/open=([a-z]+)/);if(m){history.replaceState(null,"",location.pathname+location.search);setTimeout(()=>openTarget(m[1]),700)}}
 
@@ -2795,7 +2804,7 @@ async function printDocs(list){
 }
 /* ---------- one classroom view ---------- */
 const uk=a=>new Set(a.map(t=>t.key||t.id)).size;
-const G=list=>{const m=new Map();list.forEach(t=>{const k=t.key||t.id;if(!m.has(k))m.set(k,[]);m.get(k).push(t)});return[...m.values()].map(g=>g.length===1?g[0]:{...g[0],status:g.every(t=>t.status==="done")?"done":g.some(t=>t.status==="stuck")?"stuck":g.some(t=>t.status!=="todo")?"doing":"todo"})};
+const G=list=>{const m=new Map();list.forEach(t=>{const k=t.key||t.id;if(!m.has(k))m.set(k,[]);m.get(k).push(t)});return[...m.values()].map(g=>g.length===1?g[0]:{...g[0],status:g.every(t=>t.status==="done")?"done":g.every(t=>t.status==="done"||t.status==="check")?"check":g.some(t=>t.status==="stuck")?"stuck":g.some(t=>t.status!=="todo")?"doing":"todo"})};
 const splitIn=id=>{const m=new Map();S.tasks.filter(t=>t.phase===id).forEach(t=>{if(!m.has(t.key))m.set(t.key,[]);m.get(t.key).push(t)});return[...m.values()].some(g=>g.length>1&&g.some(t=>t.status!==g[0].status))};
 function classroomsTile(){
   const R=rooms(),per=R.map(r=>{const t=tasksOf(r.id);return pct(doneN(t),t.length)}),g=G(S.tasks),x=pct(doneN(g),g.length),diff=per.some(v=>v!==per[0]);
