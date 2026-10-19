@@ -375,6 +375,31 @@ body.ro .page-h .btn[data-act="docprint"]{display:inline-flex!important}
 .micfab.on{background:var(--red-strong,#d9483b);color:#fff;animation:micpulse 1.1s ease-in-out infinite}
 @keyframes micpulse{50%{box-shadow:0 8px 24px rgba(0,0,0,.45),0 0 0 10px rgba(217,72,59,.28)}}
 .sheet.kbd .micwrap{bottom:14px}
+.na-log [data-go="site"],.na-log [data-act="gosite"],.na-log [data-fab="photo"],.na-log [data-fab="issue"],.na-log [data-act="addphoto"],.na-log [data-act="phphoto"],.na-log [data-act="addissue"],
+.na-mats [data-go="mats"],.na-mats [data-act="gomats"],.na-mats [data-act="gostock"],.na-mats [data-fab="mat"],.na-mats [data-act="addmat"],
+.na-docs [data-go="docs"],.na-docs [data-act="godocs"],.na-docs [data-act="adddoc"],
+.na-diary [data-go="diary"],.na-diary [data-act="godiary"],.na-diary [data-act="adddiary"]{display:none!important}
+.ro-log [data-fab="photo"],.ro-log [data-fab="issue"],.ro-log [data-act="addphoto"],.ro-log [data-act="phphoto"],.ro-log [data-act="addissue"],
+.ro-mats [data-fab="mat"],.ro-mats [data-act="addmat"],.ro-mats [data-act="movein"],.ro-mats [data-act="moveout"],.ro-mats [data-act="editelec"],.ro-mats [data-act="addsup"],
+.ro-docs [data-act="adddoc"],.ro-docs [data-act="addplan"],
+.ro-diary [data-act="adddiary"],.ro-diary [data-act="editdiary"],
+.ro-tasks [data-fab="task"],.ro-tasks [data-act="addtask"],
+.ro-money [data-fab="cost"],.ro-money [data-fab="pay"],.ro-money [data-act="addtrade"],.ro-money [data-act="addcost"],.ro-money [data-act="recpay"]{display:none!important}
+.ro-tasks .st,.ro-tasks .stp{pointer-events:none}
+.arow{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.arow .nm{flex:1;min-width:0}.arow .nm b{display:block;font-weight:600;font-size:.95rem}.arow .nm span{font-size:.8rem;color:var(--muted)}
+.aseg{display:flex;border:1px solid var(--field);border-radius:12px;overflow:hidden;flex:none}
+.aseg button{border:0;background:transparent;color:var(--ink);padding:0 10px;min-height:40px;font:600 .8rem var(--body)}
+.aseg button+button{border-left:1px solid var(--field)}
+.aseg button[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink,#1b1300)}
+.aseg button.off[aria-pressed="true"]{background:var(--red-soft);color:var(--red)}
+.atag{margin-left:6px;font:600 .66rem var(--body);background:var(--amber-soft);color:var(--amber);border-radius:6px;padding:2px 6px}
+.asum{background:var(--sky-soft);color:var(--sky);border-radius:12px;padding:10px 12px;font-size:.88rem;line-height:1.45;margin:10px 0}
+.awarn{background:var(--amber-soft);color:var(--amber);border-radius:12px;padding:10px 12px;font-size:.86rem;margin:10px 0}
+.adanger{border-top:1px solid var(--line);margin-top:14px;padding-top:12px}
+#pvbar{position:fixed;top:0;left:0;right:0;z-index:9999;padding:calc(8px + env(safe-area-inset-top,0px)) 14px 8px;background:var(--accent);color:var(--accent-ink,#1b1300);display:flex;align-items:center;justify-content:space-between;gap:10px;font:600 .88rem var(--body)}
+#pvbar button{border:0;border-radius:99px;background:rgba(0,0,0,.18);color:inherit;padding:0 14px;min-height:34px;font:700 .8rem var(--body)}
+body.previewing{padding-top:calc(48px + env(safe-area-inset-top,0px))}
 .dim{opacity:.62}.trcard{cursor:pointer}
 .rn .st,.rn .stp,.rfin .st,.rfin .stp{pointer-events:none}
 .rn [data-fab="task"],.rn [data-fab="mat"],.rn [data-fab="cost"],.rn [data-fab="pay"],.rfin [data-fab="task"],.rfin [data-fab="mat"],.rfin [data-fab="photo"],.rfin [data-fab="issue"],.rn [data-act="addtask"],.rfin [data-act="addtask"],.rn [data-act="editelec"],.rfin [data-act="editelec"],.rn [data-act="reorder"],.rfin [data-act="reorder"]{display:none!important}
@@ -692,13 +717,21 @@ let sm={meta:{},lastPull:null,pendingMedia:[],code:"",joinedAt:0};
 const SYNC_KEY="newberry-build3-sync";
 try{sm={...sm,...JSON.parse(localStorage.getItem(SYNC_KEY))}}catch{}
 const persistSync=()=>{try{localStorage.setItem(SYNC_KEY,JSON.stringify(sm))}catch{}};
-const FULL={edit:"all",money:"edit",send:true,manage:true};
-let perm=sm.perm||FULL;
-const deriveRole=()=>perm.edit==="none"&&perm.money!=="edit"?"funder":perm.money==="none"?"builder":"owner";
+const AREA_KEYS=["tasks","log","mats","docs","diary","money","upd"];
+const AREA_MIN={tasks:1,log:0,mats:0,docs:0,diary:0,money:0,upd:1};
+const normAreas=p=>{p=p||{};const a=p.areas||{},ed=p.edit,leg={tasks:ed==="all"?2:1,log:(ed==="all"||ed==="notes")?2:1,mats:ed==="all"?2:1,docs:(ed==="all"||ed==="notes")?2:1,diary:ed==="all"?2:1,money:({none:0,view:1,edit:2})[p.money]??0,upd:p.send?2:1},o={};AREA_KEYS.forEach(k=>{o[k]=Math.max(AREA_MIN[k],Math.min(2,a[k]!=null?+a[k]:leg[k]))});return o};
+const legacyOf=a=>({edit:a.tasks>=2?"all":(a.log>=2||a.docs>=2)?"notes":"none",money:["none","view","edit"][a.money||0],send:a.upd>=2});
+const mkPerm=p=>{const ar=normAreas(p);return{...legacyOf(ar),manage:!!(p&&p.manage),areas:ar}};
+const FULL=mkPerm({manage:true,areas:{tasks:2,log:2,mats:2,docs:2,diary:2,money:2,upd:2}});
+let perm=mkPerm(sm.perm||FULL);
+let PREVIEW=null;
+const writesBuild=()=>perm.areas.tasks>=2||perm.areas.log>=2||perm.areas.mats>=2||perm.areas.docs>=2||perm.areas.diary>=2;
+const deriveRole=()=>!writesBuild()&&perm.money!=="edit"?"funder":perm.money==="none"?"builder":"owner";
 let role=deriveRole();
 const canMoney=()=>perm.money!=="none",canMoneyEdit=()=>perm.money==="edit",canSend=()=>!!perm.send;
-const applyRole=()=>{const b=document.body.classList;b.toggle("ro",role==="funder");b.toggle("rb",!canMoney());b.toggle("rn",perm.edit==="notes");b.toggle("rfin",perm.edit==="none"&&role!=="funder")};
-const setPerm=p=>{perm={edit:p.edit||"none",money:p.money||"none",send:!!p.send,manage:!!p.manage};role=deriveRole();sm.perm=perm;applyRole()};
+const lvl=a=>(perm.areas&&perm.areas[a]!=null)?perm.areas[a]:1;
+const applyRole=()=>{const b=document.body.classList;b.toggle("ro",role==="funder");b.toggle("rb",!canMoney());b.toggle("rn",false);b.toggle("rfin",false);AREA_KEYS.forEach(k=>{b.toggle("na-"+k,lvl(k)===0);b.toggle("ro-"+k,lvl(k)===1)})};
+const setPerm=(p,temp)=>{perm=mkPerm(p);role=deriveRole();if(!temp)sm.perm=perm;applyRole()};
 applyRole();
 if(fresh&&!location.hash.includes("join=")){S.tasks=seedTasks();S.sups=[{id:"jonathan",name:"Jonathan",trade:"Builder",phone:""}];
   S.settings.site="Newberry School, Lourensford Wine Estate, Somerset West";
@@ -921,8 +954,8 @@ function render(){
   v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;if(k==="plan"){planSel=val;PV.plan="";PV.had=false}if(k==="doc")docF=val;if(k==="mseg")moneySeg=val;if(k==="tf")taskF=val;if(k==="df")diaryF=val;render()}));
   v.querySelectorAll("li.tap").forEach(el=>{el.setAttribute("role","button");el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click()}})});
   hydrate(v);hydrateBg(v);countUp(v);if(tab==="plans")initPlanView();
-  v.querySelectorAll("svg.chart").forEach(wireChart);if(perm.edit==="all")v.querySelectorAll("ul.reord").forEach(ul=>holdDrag(ul,curPh));
-  if(perm.edit==="all"){v.querySelectorAll(".ptile").forEach(tl=>longPress(tl,()=>tileMenu(tl)));v.querySelectorAll(".list li").forEach(li=>{const bs=[...li.querySelectorAll('[data-act="cyc"],[data-act="cycboth"]')];if(bs.length)swipeRow(li,()=>cycMany(bs.flatMap(b=>(b.dataset.ids||b.dataset.id).split(","))))})}
+  v.querySelectorAll("svg.chart").forEach(wireChart);if(lvl("tasks")>=2)v.querySelectorAll("ul.reord").forEach(ul=>holdDrag(ul,curPh));
+  if(lvl("tasks")>=2){v.querySelectorAll(".ptile").forEach(tl=>longPress(tl,()=>tileMenu(tl)));v.querySelectorAll(".list li").forEach(li=>{const bs=[...li.querySelectorAll('[data-act="cyc"],[data-act="cycboth"]')];if(bs.length)swipeRow(li,()=>cycMany(bs.flatMap(b=>(b.dataset.ids||b.dataset.id).split(","))))})}
   setSync(syncState);
 }
 const empty=(icon,h,p,btn)=>`<div class="card empty">${ic(icon,"xl")}<h3>${h}</h3><p>${p}</p>${btn||""}</div>`;
@@ -1270,11 +1303,12 @@ function more(){
 /* ---------- actions ---------- */
 function act(a,id,el){
   closePop();
+  if(PREVIEW&&!READ_ACTS.includes(a)){toast("This is a preview. Nothing can be changed.");return}
   if(role==="funder"&&!READ_ACTS.includes(a)){toast("This is a view-only copy.");return}
   if(!canMoney()&&MONEY_ACTS.includes(a)){toast("Money is hidden for you.");return}
   if(canMoney()&&!canMoneyEdit()&&MONEY_ACTS.includes(a)&&!["payall","report","opentrade"].includes(a)){toast("You can see money but not change it.");return}
-  if(role!=="funder"&&perm.edit==="none"&&!MONEY_ACTS.includes(a)&&!READ_ACTS.includes(a)&&a!=="adddoc"){toast("Your access is for money and documents.");return}
-  if(perm.edit==="notes"&&!NOTE_ACTS.includes(a)&&!READ_ACTS.includes(a)){toast("You can add photos, notes and documents.");return}
+  {const ar=ACT_AREA[a];if(ar&&lvl(ar)<2){toast(AREA_MSG(ar));return}}
+  if(!perm.manage&&["erase","import","project"].includes(a)){toast("Only the Project Lead can do this.");return}
   ({
    cyc:()=>cycTask(id),opentask:()=>taskSheet(...id.split("|")),edittask:()=>taskSheet(...id.split("|")),
    deltask:()=>{const[k]=id.split("|");const f=roomF;delRecs(S.tasks,t=>t.key===k&&(f==="all"||t.room===f||t.room==="shared"),"Task")},
@@ -1860,7 +1894,7 @@ async function joinFromHash(){
     sh.querySelector("#yes").onclick=async()=>{clean();close();toast("Joining…");
       me=who.name;try{localStorage.setItem("build-who",me)}catch{}
       S=DEF();sm={meta:{},lastPull:null,pendingMedia:[],code,key,pid:who.pid,pname:who.name,prole:who.role,joinedAt:Date.now(),mig:1};setPerm(who.perm);try{await mClear()}catch{}urls.clear();persistSync();
-      await pull();if(!S.tasks.length&&perm.edit==="all"){S.tasks=seedTasks()}save();scan();await push();render();toast("You are in. Welcome, "+who.name+"!")}});
+      await pull();if(!S.tasks.length&&lvl("tasks")>=2){S.tasks=seedTasks()}save();scan();await push();render();toast("You are in. Welcome, "+who.name+"!")}});
 }
 
 /* ---------- pull down to refresh, and a notice when a new version is out ---------- */
@@ -2291,9 +2325,8 @@ const ROLES={
   owner:{label:"Owner",perm:{edit:"none",money:"none",send:false}},
   decor:{label:"Decor",perm:{edit:"notes",money:"none",send:false}},
   finance:{label:"Finance",perm:{edit:"none",money:"edit",send:true}},
-  colead:{label:"Co-lead",perm:{edit:"all",money:"edit",send:true}},
   other:{label:"Team member",perm:{edit:"notes",money:"none",send:false}}};
-const rolePick=()=>sm.prole==="lead"?[...ROLE_PICK,"colead"]:ROLE_PICK;
+const rolePick=()=>ROLE_PICK;
 const ROLE_PICK=["site","builder","owner","decor","finance","other"];
 const roleLabel=r=>(ROLES[r]||ROLES.other).label;
 const DEFAULT_PEOPLE=[["Albert","site"],["Jonathan","builder"],["Newberry","owner"],["Talana","decor"],["Audrey","finance"]];
@@ -2307,25 +2340,24 @@ const personOf=pid=>peopleList().find(p=>p.pid===pid);
 const pName=pid=>personOf(pid)?.name||"Someone";
 const accessText=p=>{
   if(p.manage)return "You have full control and decide what everyone else can do.";
-  const a={all:"Can update tasks, photos, materials and documents.",notes:"Can add photos, notes and documents.",none:"Can look at progress and photos."}[p.edit]||"";
-  const m={none:"Money is hidden.",view:"Can see money.",edit:"Can see and record money."}[p.money]||"";
-  return [a,m,p.send?"Can send updates.":"Receives updates."].filter(Boolean).join(" ");
+  const a=normAreas(p),nm={tasks:"tasks",log:"photos and challenges",mats:"materials",docs:"documents",diary:"the site diary",money:"money"},can=[],see=[],no=[];
+  ["tasks","log","mats","docs","diary","money"].forEach(k=>{(a[k]>=2?can:a[k]===1?see:no).push(nm[k])});
+  return [can.length?"Can change "+can.join(", ")+".":"Can look but not change anything.",no.length?"No access to "+no.join(", ")+".":"",a.upd>=2?"Can send updates.":"Receives updates."].filter(Boolean).join(" ");
 };
 const ago=t=>{const s=Math.max(0,(Date.now()-new Date(t).getTime())/1000);return s<90?"just now":s<3600?Math.round(s/60)+" min ago":s<86400?Math.round(s/3600)+" h ago":Math.round(s/86400)+" d ago"};
 const personLink=p=>location.origin+location.pathname+"#join="+sm.code+"&k="+p.key;
 const waUrl=(phone,text)=>{let d=String(phone||"").replace(/\D/g,"");if(d.startsWith("0"))d="27"+d.slice(1);return "https://wa.me/"+d+"?text="+encodeURIComponent(text)};
 function fabOK(k){
-  if(k==="cost"||k==="pay"){if(!canMoneyEdit()){toast(canMoney()?"You can see money but not change it.":"Money is hidden for you.");return false}return true}
-  if(perm.edit==="all")return true;
-  if(perm.edit==="notes"&&(k==="photo"||k==="issue"))return true;
-  toast(perm.edit==="notes"?"You can add photos and notes.":"Your access is view only here.");return false;
+  const ar={photo:"log",issue:"log",task:"tasks",mat:"mats",cost:"money",pay:"money"}[k];
+  if(lvl(ar)>=2)return true;toast(AREA_MSG(ar));return false;
 }
 const whoLine=()=>sm.code&&!perm.manage?`<p class="muted small" style="margin:0 2px 12px">You are <b>${esc(sm.pname||me||"signed in")}</b>, ${esc(roleLabel(sm.prole))}. ${esc(accessText(perm))}</p>`:"";
 
 async function loadMe(){
   const{data,error}=await sb.rpc("build3_me",{p_code:sm.code,p_key:sm.key});if(error)throw error;
   sm.pname=data.name;sm.prole=data.role;
-  if(JSON.stringify(data.perm)!==JSON.stringify({edit:perm.edit,money:perm.money,send:perm.send,manage:perm.manage})){setPerm(data.perm);persistSync();return true}
+  if(PREVIEW)return false;
+  if(JSON.stringify([mkPerm(data.perm).areas,!!data.perm.manage])!==JSON.stringify([perm.areas,perm.manage])){setPerm(data.perm);persistSync();return true}
   return false;
 }
 async function loadPeople(){
@@ -2420,31 +2452,91 @@ function peopleV(){
   return head+(mg?`<p class="muted" style="margin:0 2px 12px">Tap a person to change what they can do or to send their link.</p>`:"")+
   `<div class="card"><ul class="list">${list.map(p=>`<li class="tap" tabindex="0" ${canEditPerson(p)?`data-act="editperson" data-id="${p.pid}"`:""}><span class="row-ic" style="font-weight:700">${esc((p.name||"?").charAt(0).toUpperCase())}</span><div class="grow"><div class="lt">${esc(p.name)}</div><div class="ls">${esc(roleLabel(p.role))}${stat(p)?" · "+esc(stat(p)):""}${S.tasks.some(t=>t.assignee===p.pid&&t.status!=="done")?" · "+uk(S.tasks.filter(t=>t.assignee===p.pid&&t.status!=="done"))+" open task"+(uk(S.tasks.filter(t=>t.assignee===p.pid&&t.status!=="done"))===1?"":"s"):""}</div>${mg&&p.perm&&p.pid!==sm.pid&&p.active?`<div class="ls">${esc(accessText({...p.perm,manage:false}))}</div>`:""}</div>${canEditPerson(p)?ic("chev"):""}</li>`).join("")}</ul></div>`;
 }
-function personSheet(pid){
+/* ---------- access by area ---------- */
+const mkA=a=>({tasks:a[0],log:a[1],mats:a[2],docs:a[3],diary:a[4],money:a[5],upd:a[6]});
+const PRESET_AREAS={lead:mkA([2,2,2,2,2,2,2]),site:mkA([2,2,2,2,2,0,2]),builder:mkA([2,2,2,1,2,0,2]),owner:mkA([1,1,1,1,1,0,1]),decor:mkA([1,2,1,2,1,0,1]),finance:mkA([1,1,1,2,1,2,2]),other:mkA([1,2,1,2,1,0,1])};
+Object.keys(ROLES).forEach(k=>{const ar=PRESET_AREAS[k]||PRESET_AREAS.other;ROLES[k].perm={...legacyOf(ar),areas:ar}});
+const AREAS=[
+  ["tasks","Tasks and progress","Tick off, assign and add tasks",1,["See only","Update"]],
+  ["log","Photos and challenges","Site log, photos and challenges",0,["No access","See only","Add"]],
+  ["mats","Materials","Orders, stock and deliveries",0,["No access","See only","Update"]],
+  ["docs","Documents","Plans, certificates, delivery notes",0,["No access","See only","Add"]],
+  ["diary","Site diary","Weather, people and delays",0,["No access","See only","Write"]],
+  ["money","Money","Costs, trades and payments",0,["No access","See only","Record"]],
+  ["upd","Updates","Messages to and from the team",1,["Receive","Send"]]];
+const ACT_AREA={cyc:"tasks",cycboth:"tasks",edittask:"tasks",deltask:"tasks",addtask:"tasks",reorder:"tasks",mvup:"tasks",mvdn:"tasks",phphoto:"log",addphoto:"log",addissue:"log",editlog:"log",dellog:"log",fix:"log",addmat:"mats",editmat:"mats",delmat:"mats",cycmat:"mats",movein:"mats",moveout:"mats",editelec:"mats",addsup:"mats",editsup:"mats",delsup:"mats",adddoc:"docs",addplan:"docs",adddiary:"diary",editdiary:"diary"};
+const AREA_MSG=ar=>lvl(ar)===0?"You do not have access to this area.":"You can look at this area but not change it.";
+const areaLabel=(k,v)=>{const a=AREAS.find(x=>x[0]===k);return a?a[4][Math.max(0,v-a[3])]||"":""};
+function areaRows(st,pre){
+  return AREAS.map(([k,name,sub,min,labels])=>{
+    const lv=st.areas[k],changed=pre&&lv!==pre[k];
+    return `<div class="arow"><div class="nm"><b>${esc(name)}${changed?'<span class="atag">changed</span>':""}</b><span>${esc(sub)}</span></div><div class="aseg" role="group" aria-label="${esc(name)}">${labels.map((l,i)=>{const val=min+i;return `<button type="button" data-ak="${k}" data-av="${val}" class="${val===0?"off":""}" aria-pressed="${lv===val}">${esc(l)}</button>`}).join("")}</div></div>`;
+  }).join("");
+}
+function startPreview(p){
+  PREVIEW=p.pid;setPerm({...p.perm,manage:false},true);
+  let bar=document.getElementById("pvbar");if(!bar){bar=document.createElement("div");bar.id="pvbar";document.body.append(bar)}
+  bar.innerHTML=`<span>Previewing as <b>${esc(p.name)}</b>. Nothing can be changed.</span><button type="button" id="pvx">Exit preview</button>`;
+  bar.querySelector("#pvx").onclick=endPreview;document.body.classList.add("previewing");
+  go("build");render();window.scrollTo(0,0);
+}
+function endPreview(){
+  PREVIEW=null;const bar=document.getElementById("pvbar");if(bar)bar.remove();document.body.classList.remove("previewing");
+  setPerm(sm.perm||FULL);go("people");render();
+}
+function reviewAccess(name,lines,needPin,onSave,onBack){
+  sheet("Review the changes",`<p class="muted" style="margin:6px 0 10px">${esc(name)} will be told about this change.</p><ul class="list">${lines.map(l=>`<li><span class="row-ic">${ic("check")}</span><div class="grow"><div class="lt">${esc(l)}</div></div></li>`).join("")}</ul>${needPin?`<p class="awarn">${ic("lock")} Money is private. You will be asked for the password.</p>`:""}<div class="foot"><button type="button" class="btn primary block" id="rs">Save changes</button><button type="button" class="btn block" id="rb" style="margin-top:8px">Go back</button></div>`,(sh,close)=>{
+    sh.querySelector("#rs").onclick=()=>{close();if(needPin)moneyGate(onSave,"access change");else onSave()};
+    sh.querySelector("#rb").onclick=()=>{close();onBack()};
+  });
+}
+function personSheet(pid,draft){
   if(!perm.manage){toast("Only the Project Lead can change people.");return}
   const p=pid?personOf(pid):null,isMe=!!p&&p.pid===sm.pid;
-  const st={role:p?.role||"other",edit:p?.perm?.edit||ROLES.other.perm.edit,money:p?.perm?.money||ROLES.other.perm.money,send:(p?p.perm?.send:ROLES.other.perm.send)?"yes":"no"};
+  const orig=p&&p.perm?normAreas(p.perm):{...PRESET_AREAS.other};
+  const st=draft?{role:draft.role,areas:{...draft.areas}}:{role:(p&&ROLES[p.role]&&p.role!=="lead")?p.role:"other",areas:{...orig}};
+  const pre=()=>PRESET_AREAS[st.role]||PRESET_AREAS.other;
   sheet(p?p.name:"Add a person",`<form id="f" novalidate>
-  ${p&&!isMe?`<div class="tasks" style="margin:8px 0 16px"><button type="button" class="btn block" id="wl">${ic("chat")}Send their link on WhatsApp</button><button type="button" class="btn block" id="cl">${ic("copy")}Copy their link</button><button type="button" class="btn block" id="nl">${ic("key")}Make a new link</button><button type="button" class="btn block ${p.active?"danger":""}" id="tg">${p.active?"Switch access off":"Switch access back on"}</button></div><p class="hint">Each link is personal. A new link stops the old one working.</p>`:""}
-  <label class="f" for="pn">Name</label><input id="pn" class="t" maxlength="40" ${p?"":"data-autofocus"} value="${esc(p?.name||"")}">
-  <label class="f" for="pp">WhatsApp number (optional)</label><input id="pp" class="t" type="tel" inputmode="tel" value="${esc(p?.phone||"")}" placeholder="For example 082 123 4567">
-  ${isMe?`<p class="muted" style="margin:12px 0 10px">${sm.prole==="lead"?"You are the Project Lead. You always have full control.":"You are a co-lead."}</p><div class="note-card">${ic("key")}<span><b>Your access link.</b> If you lose this phone, open this link on a new phone to get back in as ${esc(roleLabel(sm.prole))}. Keep it private.</span></div><div class="tasks" style="margin-top:12px"><button type="button" class="btn block" id="ml">${ic("copy")}Copy my access link</button><button type="button" class="btn block" id="md">${ic("cloud")}Save it to Google Drive</button><button type="button" class="btn block" id="mw">${ic("chat")}Send it to myself on WhatsApp</button><button type="button" class="btn block danger" id="mn">${ic("key")}Make a new access link</button></div>`:`
-  <label class="f">Role</label>${chipRow("role",rolePick().map(r=>[r,roleLabel(r)]),st.role)}
-  <label class="f">What can they update?</label>${chipRow("edit",[["all","Everything"],["notes","Photos and notes"],["none","View only"]],st.edit)}
-  <label class="f">Money</label>${chipRow("money",[["none","Hidden"],["view","View"],["edit","View and record"]],st.money)}
-  <label class="f">Can send updates?</label>${chipRow("send",[["yes","Yes"],["no","No, receives only"]],st.send)}
-  <p class="hint" id="ah"></p>`}
-  <div class="foot"><button class="btn primary block" id="sv">${p?"Save":"Add person"}</button></div></form>`,(sh,close)=>{
-    const ah=sh.querySelector("#ah"),paint=n=>sh.querySelectorAll(`[data-ch="${n}"]`).forEach(x=>x.setAttribute("aria-pressed",x.dataset.v===st[n]));
-    const hint=()=>{if(ah)ah.textContent=st.role==="colead"?"A deputy. Can do everything you can, except change you or another co-lead.":accessText({edit:st.edit,money:st.money,send:st.send==="yes",manage:false})};
-    if(!isMe){
-      wireChips(sh,st,"role",()=>{const r=ROLES[st.role].perm;st.edit=r.edit;st.money=r.money;st.send=r.send?"yes":"no";["edit","money","send"].forEach(paint);hint()});
-      ["edit","money","send"].forEach(n=>wireChips(sh,st,n,hint));hint();
-    }
-    const body=()=>({pid:p?.pid,name:sh.querySelector("#pn").value.trim(),phone:sh.querySelector("#pp").value.trim(),role:isMe?undefined:st.role,perm:isMe?undefined:{edit:st.edit,money:st.money,send:st.send==="yes"},colead:!isMe&&st.role==="colead"});
+  ${p&&!isMe?`<div class="tasks" style="margin:8px 0 16px"><button type="button" class="btn block" id="wl">${ic("chat")}Send their link on WhatsApp</button><button type="button" class="btn block" id="cl">${ic("copy")}Copy their link</button><button type="button" class="btn block" id="nl">${ic("key")}Make a new link</button><button type="button" class="btn block" id="pv">${ic("eye")}See the app as ${esc(p.name)}</button></div><p class="hint">Each link is personal. A new link stops the old one working.</p>`:""}
+  <label class="f" for="pn">Name</label><input id="pn" class="t" maxlength="40" ${p?"":"data-autofocus"} value="${esc(draft?.name??p?.name??"")}">
+  <label class="f" for="pp">WhatsApp number (optional)</label><input id="pp" class="t" type="tel" inputmode="tel" value="${esc(draft?.phone??p?.phone??"")}" placeholder="For example 082 123 4567">
+  ${isMe?`<p class="muted" style="margin:12px 0 10px">You are the Project Lead. You always have full control.</p><div class="note-card">${ic("key")}<span><b>Your access link.</b> If you lose this phone, open this link on a new phone to get back in as ${esc(roleLabel(sm.prole))}. Keep it private.</span></div><div class="tasks" style="margin-top:12px"><button type="button" class="btn block" id="ml">${ic("copy")}Copy my access link</button><button type="button" class="btn block" id="md">${ic("cloud")}Save it to Google Drive</button><button type="button" class="btn block" id="mw">${ic("chat")}Send it to myself on WhatsApp</button><button type="button" class="btn block danger" id="mn">${ic("key")}Make a new access link</button></div><div class="foot"><button class="btn primary block" id="sv">Save</button></div>`:`
+  <label class="f">Start from a role</label>${chipRow("role",ROLE_PICK.map(r=>[r,roleLabel(r)]),st.role)}
+  <div class="asum" id="asum"></div>
+  <div id="ar"></div>
+  <p class="awarn" id="aw" hidden>${ic("lock")} Money is private. You will be asked for the password before this is saved.</p>
+  <div class="foot"><button class="btn primary block" id="sv">${p?"Review and save":"Review and add"}</button></div>
+  ${p?`<div class="adanger"><button type="button" class="btn block ${p.active?"danger":""}" id="tg">${p.active?"Switch access off":"Switch access back on"}</button><p class="hint">${p.active?"They can no longer open the project. You can switch them back on any time.":"They can open the project again with their link."}</p></div>`:""}`}
+  </form>`,(sh,close)=>{
     const guard=async fn=>{try{await fn()}catch(e){console.warn(e);toast(e.message==="offline"?"Connect to the internet to change people.":"Could not save that. Try again.")}};
-    sh.querySelector("#f").onsubmit=ev=>{ev.preventDefault();const b=body();if(!b.name)return showErr(sh,sh.querySelector("#pn"),"Write a name.");
-      guard(async()=>{const r=await peopleSet(b);close();render();if(!p){toast(b.name+" added. Now send their link.");personSheet(r.pid)}else toast("Saved.")})};
+    const nameOf=()=>sh.querySelector("#pn").value.trim(),phoneOf=()=>sh.querySelector("#pp").value.trim();
+    if(!isMe){
+      const redraw=()=>{sh.querySelector("#ar").innerHTML=areaRows(st,pre());sh.querySelector("#asum").textContent=(nameOf()||"This person")+": "+accessText({areas:st.areas});sh.querySelector("#aw").hidden=!((st.areas.money||0)>(orig.money||0))};
+      wireChips(sh,st,"role",()=>{st.areas={...pre()};redraw()});
+      sh.querySelector("#ar").onclick=e=>{const b=e.target.closest("[data-ak]");if(!b)return;st.areas[b.dataset.ak]=+b.dataset.av;redraw()};
+      sh.querySelector("#pn").addEventListener("input",()=>{sh.querySelector("#asum").textContent=(nameOf()||"This person")+": "+accessText({areas:st.areas})});
+      redraw();
+    }
+    sh.querySelector("#f").onsubmit=ev=>{
+      ev.preventDefault();const name=nameOf();if(!name)return showErr(sh,sh.querySelector("#pn"),"Write a name.");
+      if(isMe){guard(async()=>{await peopleSet({pid:p.pid,name,phone:phoneOf()});if(name!==me){me=name;try{localStorage.setItem("build-who",me)}catch{}}sm.pname=name;persistSync();close();render();toast("Saved.")});return}
+      const body={pid:p?.pid,name,phone:phoneOf(),role:st.role,perm:{areas:st.areas}};
+      const lines=[];
+      if(!p)lines.push(`Add ${name} as ${roleLabel(st.role)}`);
+      else{if(name!==p.name)lines.push(`Name: ${p.name} to ${name}`);if(st.role!==p.role)lines.push(`Role: ${roleLabel(p.role)} to ${roleLabel(st.role)}`)}
+      AREAS.forEach(([k,nm])=>{if(!p||st.areas[k]!==orig[k])lines.push(p?`${nm}: ${areaLabel(k,orig[k])} to ${areaLabel(k,st.areas[k])}`:`${nm}: ${areaLabel(k,st.areas[k])}`)});
+      const keep={role:st.role,areas:{...st.areas},name,phone:phoneOf()};
+      const accessChanged=!p||AREAS.some(([k])=>st.areas[k]!==orig[k]);
+      const run=()=>guard(async()=>{
+        const r=await peopleSet(body);
+        if(accessChanged){logAct(`${me||"Project Lead"} changed access for ${name}: ${lines.filter(l=>/:/.test(l)||/^Add/.test(l)).slice(0,6).join("; ")}`,1);if(p)notifySend([r.pid],"Your access changed",`${me||"The Project Lead"} changed what you can do in the app. Open it to see.`,"")}
+        save();render();
+        if(!p){toast(name+" added. Now send their link.");personSheet(r.pid)}else toast("Access saved.");
+      });
+      if(!accessChanged&&p){close();run();return}
+      const needPin=(st.areas.money||0)>(orig.money||0);
+      close();reviewAccess(name,lines,needPin,run,()=>personSheet(pid,keep));
+    };
     if(isMe){
       const note=()=>{lsSet("build-linksaved","1")};
       sh.querySelector("#ml").onclick=async()=>{const tx=myLinkText();if(!tx){toast("Your link is still loading. Try again in a moment.");return}try{await navigator.clipboard.writeText(tx.split("\n").filter(l=>l.startsWith("http")).join(""));note();toast("Link copied. Keep it somewhere private.")}catch{toast("Press and hold to copy.")}};
@@ -2457,7 +2549,9 @@ function personSheet(pid){
       sh.querySelector("#wl").onclick=()=>{window.open(p.phone?waUrl(p.phone,link().text):"https://wa.me/?text="+encodeURIComponent(link().text),"_blank")};
       sh.querySelector("#cl").onclick=async()=>{try{await navigator.clipboard.writeText(personLink(p));toast("Link copied.")}catch{toast("Press and hold the link to copy it.")}};
       sh.querySelector("#nl").onclick=()=>{close();confirmSheet("Make a new link?",p.name+"'s old link will stop working. You will need to send them the new one.","Make new link",()=>guard(async()=>{await peopleSet({pid:p.pid,regen:true});render();personSheet(p.pid)}))};
-      sh.querySelector("#tg").onclick=()=>guard(async()=>{await peopleSet({pid:p.pid,active:!p.active});close();render();toast(p.active?p.name+" can no longer open the project.":p.name+" can open the project again.")});
+      sh.querySelector("#pv").onclick=()=>{close();startPreview(p)};
+      const flip=()=>guard(async()=>{await peopleSet({pid:p.pid,active:!p.active});logAct(`${me||"Project Lead"} ${p.active?"switched off":"switched back on"} ${p.name}`,1);save();close();render();toast(p.active?p.name+" can no longer open the project.":p.name+" can open the project again.")});
+      sh.querySelector("#tg").onclick=()=>{if(p.active){close();confirmSheet("Switch "+p.name+" off?",p.name+" can no longer open the project. You can switch them back on at any time.","Switch off",flip)}else flip()};
     }
   });
 }
@@ -2696,15 +2790,15 @@ function attentionItems(){
   if(stuck)out.push(["alert","red",`${stuck} task${stuck===1?" is":"s are"} stuck`,"gotasks","stuck"]);
   if(od)out.push(["clock","red",`${od} task${od===1?" is":"s are"} overdue`,"gotasks","overdue"]);
   if(mine)out.push(["user","",`${mine} task${mine===1?"":"s"} assigned to you`,"gotasks","me"]);
-  const iss=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length;if(iss)out.push(["alert","",`${iss} open issue${iss===1?"":"s"}`,"gosite",""]);
+  const iss=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length;if(iss&&lvl("log")>=1)out.push(["alert","",`${iss} open issue${iss===1?"":"s"}`,"gosite",""]);
   if(canMoney()){
     const soon=tLive().flatMap(t=>(t.stages||[]).filter(s=>!s.paid&&s.due&&s.due<=addDays(td,7))),ov=soon.filter(s=>s.due<td).length;
     if(soon.length)out.push(["cash",ov?"red":"",`${soon.length} trade payment${soon.length===1?"":"s"} ${ov?"overdue or ":""}due this week`,"gotrades",""]);
     const w=S.trades.filter(t=>t.status==="received").length;if(w)out.push(["hammer","",`${w} quote${w===1?"":"s"} waiting for a decision`,"gotrades",""]);
   }
-  if(perm.edit==="all"){const hr=new Date().getHours(),dw=new Date().getDay();if(hr>=14&&dw!==0&&(!S.settings.start||S.settings.start<=td)&&(!S.settings.target||td<=S.settings.target)&&!S.diary.some(e=>e.date===td))out.push(["book","","No site diary entry yet today","adddiary",""])}
+  if(lvl("diary")>=2){const hr=new Date().getHours(),dw=new Date().getDay();if(hr>=14&&dw!==0&&(!S.settings.start||S.settings.start<=td)&&(!S.settings.target||td<=S.settings.target)&&!S.diary.some(e=>e.date===td))out.push(["book","","No site diary entry yet today","adddiary",""])}
   const un=unreadMsgs().length;if(un)out.push(["bell","",`${un} unread update${un===1?"":"s"}`,"goinbox",""]);
-  const low=S.mats.filter(m=>mEff(m)==="low").length;if(low)out.push(["truck","",`${low} item${low===1?"":"s"} low or out of stock`,"gomats",""]);
+  const low=S.mats.filter(m=>mEff(m)==="low").length;if(low&&lvl("mats")>=1)out.push(["truck","",`${low} item${low===1?"":"s"} low or out of stock`,"gomats",""]);
   return out;
 }
 function attentionV(){
@@ -2884,7 +2978,7 @@ function diaryText(days){
   return `*${S.settings.name||"Site"}: site diary*\nLast ${days} days\n\n`+list.map(e=>`${dshort(e.date)}: ${diaryLine(e)}${e.who?" ("+e.who+")":""}`).join("\n")+`\n\nWhole project: ${st.days} days logged, ${st.rain} rain day${st.rain===1?"":"s"}, ${st.lost} day${st.lost===1?"":"s"} lost to delays.`;
 }
 function diaryV(){
-  const st=diaryStats(),canAdd=perm.edit==="all";
+  const st=diaryStats(),canAdd=lvl("diary")>=2;
   const head=`<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Site diary</h2></div>${canAdd?`<button class="btn primary" data-act="adddiary">${ic("plus")}Today</button>`:""}</div>`;
   if(!S.diary.length)return head+empty("book","No diary entries yet","One short note a day: the weather, how many people were on site, any delay and the work done. It is your record if there is ever a dispute about time.",canAdd?`<button class="btn primary" data-act="adddiary">${ic("plus")}Add today's entry</button>`:"");
   const list=S.diary.filter(e=>diaryF==="all"||(e.delay&&e.delay!=="none")).sort((a,b)=>b.date.localeCompare(a.date)||(b.t||0)-(a.t||0));

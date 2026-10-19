@@ -1,0 +1,9 @@
+-- Newberry Build 3: access by area. Applied to Supabase as the migrations build3_access_by_area and build3_delivery_notes_follow_materials.
+-- perm now carries one level per area: perm.areas = {tasks 1-2, log 0-2, mats 0-2, docs 0-2, diary 0-2, money 0-2, upd 1-2}
+--   0 = no access (the server does not send it), 1 = see only, 2 = can change (Updates: 1 = receive, 2 = send).
+-- b3_areas(p)  reads perm.areas, or derives it from the older edit / money / send fields.
+-- b3_perm(p)   returns {areas, edit, money, send, manage:false}; the older fields are derived from the areas.
+-- b3_can_write checks the area for each kind of record: tasks, mats and sups, plans, logs, diary, costs/pays/trades, docs (money documents need money access, delivery notes follow materials or documents), msgs.
+-- build3_pull filters what each person can read by the same areas.
+-- build3_people_set no longer creates co-leads (removed for now). build3_start gives the project lead full areas.
+-- See the Supabase migrations for the full function text.
