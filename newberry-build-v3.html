@@ -1821,8 +1821,9 @@ function applyRemote(rows){
 async function pull(){
   if(!sm.code||!sb||pulling)return;pulling=true;
   try{
-    let from=sm.lastPull,max=sm.lastPull,changed=false,gotMedia=false;
+    let changed=false,gotMedia=false;
     if(await loadMe())changed=true;await loadPeople();
+    let from=sm.lastPull,max=sm.lastPull;
     for(;;){
       const{data,error}=await sb.rpc("build3_pull",{p_code:sm.code,p_key:sm.key,p_since:from||null,p_lim:40});if(error)throw error;
       if(!data.length)break;
@@ -2379,7 +2380,7 @@ async function loadMe(){
   const{data,error}=await sb.rpc("build3_me",{p_code:sm.code,p_key:sm.key});if(error)throw error;
   sm.pname=data.name;sm.prole=data.role;
   if(PREVIEW)return false;
-  if(JSON.stringify([mkPerm(data.perm).areas,!!data.perm.manage])!==JSON.stringify([perm.areas,perm.manage])){setPerm(data.perm);persistSync();return true}
+  if(JSON.stringify([mkPerm(data.perm).areas,!!data.perm.manage])!==JSON.stringify([perm.areas,perm.manage])){setPerm(data.perm);sm.lastPull=null;persistSync();return true}
   return false;
 }
 async function loadPeople(){
