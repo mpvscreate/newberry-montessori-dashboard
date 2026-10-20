@@ -66,7 +66,7 @@ header.top img{width:44px;height:44px;border-radius:12px;object-fit:cover}
 header.top h1{font-size:1.45rem}
 .page-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:4px 0 14px}
 .page-h h2{font-size:clamp(1.6rem,5vw,2.1rem)}
-nav.tabs{position:fixed;left:0;right:0;bottom:0;background:color-mix(in srgb,var(--sheet) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:20}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;transform:translateZ(0);-webkit-transform:translateZ(0);will-change:transform;background:color-mix(in srgb,var(--sheet) 92%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line);display:flex;padding:6px 6px calc(6px + env(safe-area-inset-bottom));z-index:20}
 nav.tabs button{position:relative;flex:1;border:0;background:none;padding:8px 2px;border-radius:14px;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;font-size:.72rem;font-weight:600;cursor:pointer;min-height:56px;transition:box-shadow .25s,background .15s}
 nav.tabs button .i{width:1.5rem;height:1.5rem}
 nav.tabs button[aria-current=page]{color:var(--accent);background:var(--accent-soft);box-shadow:0 4px 16px var(--glow-soft)}
@@ -3203,6 +3203,16 @@ function extraSheet(ph,id){
       else{const n={id:uid(),cat:"labour",room:"both",sup:"",extra:true,phase:sh.querySelector("#xph").value,...vals};S.costs.push(n);logAct(`Extra labour of ${money(n.amount)} approved: ${n.title}`,1);save();close();render();toast(`Added ${money(n.amount)} extra labour.`,()=>S.costs.splice(S.costs.indexOf(n),1))}};
   });
 }
+/* the bottom bar must stay at the bottom of the screen: phones can leave it floating after the keyboard, a sheet or a reload */
+(()=>{const nav=document.querySelector("nav.tabs"),vv=window.visualViewport;if(!nav)return;let t;
+  const fix=()=>{clearTimeout(t);t=setTimeout(()=>{const a=document.activeElement;if(a&&/^(INPUT|TEXTAREA|SELECT)$/.test(a.tagName))return;
+    if(vv&&Math.abs(vv.offsetTop)>1&&vv.scale<=1.01)scrollTo(scrollX,scrollY);
+    nav.style.bottom="1px";requestAnimationFrame(()=>{nav.style.bottom=""})},150)};
+  ["focusout","pageshow","orientationchange","resize"].forEach(e=>addEventListener(e,fix));
+  if(vv)["resize","scroll"].forEach(e=>vv.addEventListener(e,fix));
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)fix()});
+  new MutationObserver(fix).observe(document.body,{attributes:true,attributeFilter:["class"]});
+})();
 /* ---------- start ---------- */
 render();
 if(sm.code){setSync("syncing");syncNow()}else setSync("off");
