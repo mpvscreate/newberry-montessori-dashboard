@@ -384,7 +384,7 @@ body.ro .page-h .btn[data-act="docprint"]{display:inline-flex!important}
 .ro-docs [data-act="adddoc"],.ro-docs [data-act="addplan"],
 .ro-diary [data-act="adddiary"],.ro-diary [data-act="editdiary"],
 .ro-tasks [data-fab="task"],.ro-tasks [data-act="addtask"],
-.ro-money [data-fab="cost"],.ro-money [data-fab="pay"],.ro-money [data-act="addtrade"],.ro-money [data-act="addcost"],.ro-money [data-act="recpay"]{display:none!important}
+.ro-money [data-act="estimate"],.ro-money [data-act="contract"],.ro-money [data-fab="cost"],.ro-money [data-fab="pay"],.ro-money [data-act="addtrade"],.ro-money [data-act="addcost"],.ro-money [data-act="recpay"]{display:none!important}
 .ro-tasks .st,.ro-tasks .stp{pointer-events:none}
 .arow{display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
 .arow .nm{flex:1;min-width:0}.arow .nm b{display:block;font-weight:600;font-size:.95rem}.arow .nm span{font-size:.8rem;color:var(--muted)}
@@ -1227,6 +1227,7 @@ function moneyBuild(){
    <section class="tile ${unpaid()?"alert":""}"><div class="lbl">${ic("clock")}Still to pay</div><div class="big">${money0(unpaid())}</div><div class="sub">${S.costs.filter(c=>!c.paid).length} unpaid</div></section>
    ${S.costs.some(c=>c.room!=="both")?R.map(r=>`<section class="tile"><div class="lbl">${ic("home")}${esc(r.name)}</div><div class="big">${money0(spentRoom(r.id))}</div><div class="sub">incl. half of shared costs</div></section>`).join(""):""}
   </div>
+  <div class="card"><div class="row between"><div><div class="muted small">Whole project estimate</div><div class="lt" style="font-size:1.15rem">${+S.settings.estimate?money0(+S.settings.estimate):"Not set"}</div></div><button type="button" class="btn small" data-act="estimate">${+S.settings.estimate?"Edit":"Set"}</button></div></div>
   ${builderCard()}
   ${curveCard("budget")}
   ${byCat.length?`<div class="card"><h2>Where the money went</h2><div class="cbars">${byCat.map(([k,l,i,v])=>`<div class="cbar"><span class="catrow">${ic(i)}${esc(l)}</span><b>${money0(v)}</b><div class="tr"><i style="width:${v/maxC*100}%"></i></div></div>`).join("")}</div></div>`:""}
@@ -1321,7 +1322,7 @@ function act(a,id,el){
    cyc:()=>cycTask(id),opentask:()=>taskSheet(...id.split("|")),edittask:()=>taskSheet(...id.split("|")),
    deltask:()=>{const[k]=id.split("|");const f=roomF;delRecs(S.tasks,t=>t.key===k&&(f==="all"||t.room===f||t.room==="shared"),"Task")},
    addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>quickPhoto(id),gbackup:()=>backupSheet(),addfurn:()=>furnSheet(),editfurn:()=>furnSheet(id),delfurn:()=>delRecs(S.furn,x=>x.id===id,"Item"),furnstarter:()=>furnStarter(),furnlb:()=>{const[rid,i]=id.split("|"),r=S.furn.find(x=>x.id===rid);if(r)lightbox(r.media||[],+i)},gofurn:()=>{bmode="furn";lsSet("build-bmode","furn");if(id)fRoom=id;go("build");render()},adddiary:()=>diarySheet(),editdiary:()=>diarySheet(id),godiary:()=>go("diary"),diaryshare:()=>{const tx=diaryText(14);if(!tx){toast("No diary entries in the last 14 days.");return}shareText(tx)},diaryprint:()=>diaryPrint(),savelink:()=>personSheet(sm.pid),linkdismiss:()=>{lsSet("build-linkdis",today());render()},cycboth:()=>cycMany(((el&&el.dataset.ids)||id).split(",")),docselect:()=>{docSel=docSel?null:new Set();render()},docall:()=>{const l=docList();docSel=docSel&&docSel.size===l.length?new Set():new Set(l.map(d=>d.id));render()},docprint:()=>printSelectedDocs(),gotasks:()=>{taskF=id||"";go("tasks")},gotrades:()=>{moneySeg="trades";go("money")},pushsheet:()=>pushSheet(),pushdismiss:()=>{lsSet("build-pushdis","1");render()},restore:()=>restoreSheet(),addtrade:()=>tradeSheet(),edittrade:()=>tradeSheet(id),opentrade:()=>tradeView(id),deltrade:()=>delRecs(S.trades,x=>x.id===id,"Quote"),tradeaccept:()=>{const t=S.trades.find(x=>x.id===id);if(!t)return;const ex=tradeStatus(t,"accepted");logAct(`Accepted the ${t.trade} quote from ${tName(t)}: ${money(tVal(t))}`,1);save();render();toast("Quote accepted."+ex.msg,ex.undo)},paystage:()=>{const[tid,sid]=id.split("|"),t=S.trades.find(x=>x.id===tid),sg=t&&(t.stages||[]).find(x=>x.id===sid);if(!sg)return;const u=undoEdit(sg,{paid:true,paidOn:today()});logAct(`Paid ${money(sg.amount)} to ${tName(t)} (${t.trade})`,1);save();render();toast(`${money(sg.amount)} marked paid.`,u)},goinbox:()=>go("inbox"),gopeople:()=>go("people"),newmsg:()=>newMsgSheet(),addperson:()=>personSheet(),editperson:()=>personSheet(id),msglb:()=>{const[mid,i]=id.split("|");const m=S.msgs.find(x=>x.id===mid);if(m)lightbox(m.media||[],+i)},sharesheet:()=>shareSheet(),bkdismiss:()=>{lsSet("build-bkdis",today());render()},phdrive:()=>driveSave(phasePhotoIds(id).map((m,i)=>({media:m,name:(PSHORT[id]||"Phase")+" photo "+(i+1)+".jpg"}))),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),addcost:()=>costSheet(),editcost:()=>S.costs.find(x=>x.id===id)?.extra?extraSheet(null,id):costSheet(id),addextra:()=>extraSheet(id),editextra:()=>extraSheet(null,id),delextra:()=>delRecs(S.costs,c=>c.id===id,"Extra labour"),unlockextra:()=>moneyGate(()=>render()),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
-   payall:()=>{payAll=!payAll;render()},resetpays:()=>{const ps=[...S.pays],cs=S.costs.filter(c=>c.pay);S.pays.length=0;cs.forEach(c=>S.costs.splice(S.costs.indexOf(c),1));payAll=false;save();render();toast("All builder payments reset to R 0.",()=>{ps.forEach(x=>S.pays.push(x));cs.forEach(c=>S.costs.push(c))})},recpay:()=>recPaySheet(),weekly:()=>weeklySheet(),addpay:()=>paySheet(),editpay:()=>paySheet(id),contract:()=>contractSheet(),typicalpay:()=>typicalPays(),
+   payall:()=>{payAll=!payAll;render()},resetpays:()=>{const ps=[...S.pays],cs=S.costs.filter(c=>c.pay);S.pays.length=0;cs.forEach(c=>S.costs.splice(S.costs.indexOf(c),1));payAll=false;save();render();toast("All builder payments reset to R 0.",()=>{ps.forEach(x=>S.pays.push(x));cs.forEach(c=>S.costs.push(c))})},recpay:()=>recPaySheet(),weekly:()=>weeklySheet(),addpay:()=>paySheet(),editpay:()=>paySheet(id),contract:()=>contractSheet(),estimate:()=>estimateSheet(),typicalpay:()=>typicalPays(),
    paypay:()=>{const x=S.pays.find(q=>q.id===id),u=undoEdit(x,{paid:true,paidOn:today()});payCost(x);logAct(`Builder payment of ${money(x.amount)} recorded`,1);save();render();toast(`${money(x.amount)} paid to the builder.`,()=>{u();payCost(x)})},
    delpay:()=>{const x=S.pays.find(q=>q.id===id),lc=S.costs.find(c=>c.id==="pay_"+id);S.pays.splice(S.pays.indexOf(x),1);if(lc)S.costs.splice(S.costs.indexOf(lc),1);save();render();toast("Stage deleted.",()=>{S.pays.push(x);if(lc)S.costs.push(lc)})},
    paycost:()=>{const c=S.costs.find(x=>x.id===id),u=undoEdit(c,{paid:true});save();render();toast(`${money(c.amount)} marked as paid.`,u)},budget:()=>moneyOK?budgetSheet():moneyGate(budgetSheet),lockmoney:()=>{lockMoney();toast("Money is locked.")},addmat:()=>matSheet(undefined,id&&phase(id)?id:undefined),editmat:()=>matSheet(id),delmat:()=>delRecs(S.mats,m=>m.id===id,"Material"),
@@ -1489,6 +1490,11 @@ function paySheet(id){
       const vals={title:ti.value.trim(),amount:Math.round(v*100)/100,phase:sh.querySelector("#ph").value,due:sh.querySelector("#du").value||"",paid:st.paid,paidOn:st.paid?(sh.querySelector("#po").value||today()):"",note:sh.querySelector("#nt").value.trim()};
       if(x){const u=undoEdit(x,vals);payCost(x);save();close();render();toast("Stage saved.",()=>{u();payCost(x)})}else{const n={id:uid(),...vals};S.pays.push(n);payCost(n);save();close();render();toast("Stage added.",()=>{S.pays.splice(S.pays.indexOf(n),1);payCost({...n,paid:false})})}};
   });
+}
+function estimateSheet(){
+  sheet("Whole project estimate",`<form id="f" novalidate><p class="muted" style="margin:6px 0 0">What you expect the whole project to cost: the builder, the other quotes and other expenses together.</p><label class="f" for="am">Estimate</label><div class="amtin"><b>R</b><input id="am" data-autofocus inputmode="decimal" placeholder="0" value="${S.settings.estimate?String(S.settings.estimate).replace(".",","):""}"></div><div class="foot"><button class="btn primary block">Save estimate</button></div></form>`,(sh,close)=>{
+    sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const raw=sh.querySelector("#am").value.trim(),v=raw?parseAmt(raw):0;if(!(v>=0))return showErr(sh,sh.querySelector(".amtin"),"Enter a number, or leave empty.");
+      const u=undoEdit(S.settings,{estimate:v});save();close();render();toast("Estimate saved.",u)}});
 }
 function budgetSheet(){
   sheet("Budget",`<form id="f" novalidate><p class="muted" style="margin:6px 0 0">The total you can spend on both classrooms together.</p><label class="f" for="am">Total budget</label><div class="amtin"><b>R</b><input id="am" data-autofocus inputmode="decimal" placeholder="0" value="${S.settings.budget?String(S.settings.budget).replace(".",","):""}"></div><div class="foot"><button class="btn primary block">Save budget</button></div></form>`,(sh,close)=>{
@@ -2488,7 +2494,7 @@ const AREAS=[
   ["furn","Furniture and decor","What we build for the classrooms",0,["No access","See only","Update"]],
   ["money","Money","Costs, trades and payments",0,["No access","See only","Record"]],
   ["upd","Updates","Messages to and from the team",1,["Receive","Send"]]];
-const ACT_AREA={addextra:"money",editextra:"money",cyc:"tasks",cycboth:"tasks",edittask:"tasks",deltask:"tasks",addtask:"tasks",reorder:"tasks",mvup:"tasks",mvdn:"tasks",phphoto:"log",addphoto:"log",addissue:"log",editlog:"log",dellog:"log",fix:"log",addmat:"mats",editmat:"mats",delmat:"mats",cycmat:"mats",movein:"mats",moveout:"mats",editelec:"mats",addsup:"mats",editsup:"mats",delsup:"mats",adddoc:"docs",addplan:"docs",adddiary:"diary",editdiary:"diary",addfurn:"furn",editfurn:"furn",delfurn:"furn",furnstarter:"furn"};
+const ACT_AREA={estimate:"money",contract:"money",addextra:"money",editextra:"money",cyc:"tasks",cycboth:"tasks",edittask:"tasks",deltask:"tasks",addtask:"tasks",reorder:"tasks",mvup:"tasks",mvdn:"tasks",phphoto:"log",addphoto:"log",addissue:"log",editlog:"log",dellog:"log",fix:"log",addmat:"mats",editmat:"mats",delmat:"mats",cycmat:"mats",movein:"mats",moveout:"mats",editelec:"mats",addsup:"mats",editsup:"mats",delsup:"mats",adddoc:"docs",addplan:"docs",adddiary:"diary",editdiary:"diary",addfurn:"furn",editfurn:"furn",delfurn:"furn",furnstarter:"furn"};
 const AREA_MSG=ar=>lvl(ar)===0?"You do not have access to this area.":"You can look at this area but not change it.";
 const areaLabel=(k,v)=>{const a=AREAS.find(x=>x[0]===k);return a?a[4][Math.max(0,v-a[3])]||"":""};
 function areaRows(st,pre){
@@ -2625,24 +2631,34 @@ function moneyV(){
   return head+tabs+(seg==="trades"?tradesV():seg==="build"?moneyBuild():overallV());
 }
 function overallV(){
-  const bud=+S.settings.budget||0,sp=sum(S.costs.filter(c=>c.paid),c=>c.amount),tc=tCommit(),tp=tPaidAll(),wait=tWait();
-  const total=bud+tc,paid=sp+tp,left=total-paid,base=Math.max(total,paid,1),up=tUpcoming();
-  const seg=(v,c)=>v>0?`<i style="width:${v/base*100}%;background:${c}"></i>`:"";
-  return `<div class="bento">
-   <section class="tile hero s2"><div class="lbl">${ic("cash")}Whole project</div><div class="big">${money0(total)}</div><div class="sub">Build budget ${bud?money0(bud):"not set"}${tc?` + trades ${money0(tc)}`:""}</div></section>
-   <section class="tile green"><div class="lbl">${ic("check")}Paid so far</div><div class="big">${money0(paid)}</div><div class="sub">${total?pct(paid,total)+"% of the total":"&nbsp;"}</div></section>
-   <section class="tile ${left<0?"alert":""}"><div class="lbl">${ic("clock")}${left<0?"Over by":"Still to pay"}</div><div class="big">${money0(Math.abs(left))}</div><div class="sub">${left<0?"more than planned":"still to come"}</div></section>
+  const ct=contractAmt(),est=+S.settings.estimate||0,paidB=paidTotal(),bLeft=Math.max(0,ct-paidB),tc=tCommit(),tp=tPaidAll(),tLeft=Math.max(0,tc-tp),wait=tWait(),up=tUpcoming();
+  const oth=S.costs.filter(c=>!c.pay),othAll=sum(oth,c=>c.amount),othPaid=sum(oth.filter(c=>c.paid),c=>c.amount),othDue=othAll-othPaid;
+  const committed=ct+tc+othAll,paid=paidB+tp+othPaid,left=bLeft+tLeft+othDue,free=est-committed;
+  const bar=(v,t,cls)=>`<div class="meter ${cls||""}" role="img" aria-label="${money0(v)} of ${money0(t)}"><i style="width:${t>0?Math.min(100,v/t*100):0}%"></i></div>`;
+  const live=tLive().slice().sort((x,y)=>tVal(y)-tVal(x));
+  return `<section class="tile hero" style="margin-bottom:12px"><div class="lbl">${ic("cash")}Whole project estimate</div>
+   <div class="big">${est?money0(est):"Not set"}</div>
+   <div class="sub">${est?`${money0(committed)} committed · ${free>=0?money0(free)+" left":"over by "+money0(-free)}`:"Set the estimate on the Build tab"}</div>${est?bar(committed,est,free<0?"low":free<est*.1?"mid":""):""}</section>
+  <div class="card"><div class="row between wr"><h2 style="margin:0">Builder's quote</h2></div>
+   <div class="big" style="margin:8px 0 2px;font-size:1.7rem">${ct?money0(ct):"Not set"}</div>${ct?bar(paidB,ct):""}
+   <div class="row between" style="margin-top:8px"><span class="ls">Paid <b>${money0(paidB)}</b></span><span class="ls">Still to pay <b>${money0(bLeft)}</b></span></div>
+   <button type="button" class="linkbtn" data-sub="mseg:build" style="padding:0;min-height:40px">Builder payments and costs</button></div>
+  <div class="card"><div class="row between wr"><h2 style="margin:0">Other quotes</h2><button type="button" class="btn small" data-sub="mseg:trades">View all</button></div>
+   ${live.length?`<div class="big" style="margin:8px 0 2px;font-size:1.7rem">${money0(tc)}</div>${bar(tp,tc)}
+   <div class="row between" style="margin-top:8px"><span class="ls">Paid <b>${money0(tp)}</b></span><span class="ls">Still to pay <b>${money0(tLeft)}</b></span></div>
+   <ul class="list" style="margin-top:8px">${live.slice(0,6).map(t=>`<li class="tap" tabindex="0" data-act="opentrade" data-id="${t.id}"><div class="grow"><div class="lt">${esc(t.trade)}</div><div class="ls">${esc(tName(t))} · paid ${money0(tPaid(t))} · left ${money0(Math.max(0,tVal(t)-tPaid(t)))}</div></div><span class="amt">${money0(tVal(t))}</span></li>`).join("")}</ul>${live.length>6?`<p class="hint">and ${live.length-6} more</p>`:""}`
+   :`<p class="muted" style="margin:8px 0 0">No accepted quotes yet. Add quotes from your tiler, electrician and other trades.</p>`}
+   ${wait?`<p class="note-card" style="margin:10px 0 0">${ic("clock")}<span><b>${money0(wait)}</b> in quotes waiting for a decision.</span></p>`:""}</div>
+  ${othAll?`<div class="card"><div class="row between wr"><h2 style="margin:0">Other expenses</h2><button type="button" class="btn small" data-sub="mseg:build">View</button></div><div class="row between" style="margin-top:8px"><span class="ls">Paid <b>${money0(othPaid)}</b></span><span class="ls">Still to pay <b>${money0(othDue)}</b></span></div><p class="hint">Materials, extra labour and other costs outside the quotes.</p></div>`:""}
+  <div class="bento">
+   <section class="tile green"><div class="lbl">${ic("check")}Paid so far</div><div class="big">${money0(paid)}</div><div class="sub">${committed?pct(paid,committed)+"% of what is committed":"&nbsp;"}</div></section>
+   <section class="tile"><div class="lbl">${ic("clock")}Still to pay</div><div class="big">${money0(left)}</div><div class="sub">builder ${money0(bLeft)} · quotes ${money0(tLeft)}</div></section>
   </div>
   <div class="card"><h2>Where it stands</h2>
-   <div class="stack" role="img" aria-label="Paid on the build ${money0(sp)}, paid to trades ${money0(tp)}, still to pay ${money0(Math.max(0,left))}">${seg(sp,"var(--green)")}${seg(tp,"var(--sky)")}</div>
-   <ul class="legend"><li><i style="background:var(--green)"></i>Paid on the build<b>${money0(sp)}</b></li><li><i style="background:var(--sky)"></i>Paid to trades<b>${money0(tp)}</b></li><li><i style="background:var(--field)"></i>Still to pay<b>${money0(Math.max(0,left))}</b></li></ul></div>
-  <div class="card"><ul class="list">
-   <li class="tap" tabindex="0" data-sub="mseg:build"><span class="row-ic">${ic("home")}</span><div class="grow"><div class="lt">Builder and costs</div><div class="ls">${money0(sp)} paid${bud?` of ${money0(bud)} budget`:""}</div></div>${ic("chev")}</li>
-   <li class="tap" tabindex="0" data-sub="mseg:trades"><span class="row-ic sky">${ic("hammer")}</span><div class="grow"><div class="lt">Trades and contractors</div><div class="ls">${tLive().length?`${tLive().length} accepted · ${money0(tp)} paid of ${money0(tc)}`:"No accepted quotes yet"}</div></div>${ic("chev")}</li>
-  </ul></div>
-  ${wait?`<div class="note-card">${ic("clock")}<span><b>${money0(wait)}</b> in quotes waiting for a decision.<br><button type="button" class="linkbtn" data-sub="mseg:trades" style="padding:0;min-height:36px">Review the quotes</button></span></div>`:""}
+   <div class="stack" role="img" aria-label="Paid on the build ${money0(paidB+othPaid)}, paid to trades ${money0(tp)}, still to pay ${money0(left)}">${[[paidB+othPaid,"var(--green)"],[tp,"var(--sky)"]].map(([v,c])=>v>0?`<i style="width:${v/Math.max(paid+left,1)*100}%;background:${c}"></i>`:"").join("")}</div>
+   <ul class="legend"><li><i style="background:var(--green)"></i>Paid on the build<b>${money0(paidB+othPaid)}</b></li><li><i style="background:var(--sky)"></i>Paid to trades<b>${money0(tp)}</b></li><li><i style="background:var(--field)"></i>Still to pay<b>${money0(left)}</b></li></ul></div>
   ${up.length?`<div class="card"><h2>Coming up</h2><ul class="list">${up.map(({t,s})=>{const od=s.due&&s.due<today();return `<li class="tap" tabindex="0" data-act="opentrade" data-id="${t.id}"><span class="row-ic ${od?"red":"sky"}">${ic("calendar")}</span><div class="grow"><div class="lt">${esc(s.label||"Payment")}</div><div class="ls ${od?"bad":""}">${esc(t.trade)} · ${esc(tName(t))}${s.due?` · ${od?"overdue, ":"due "}${dshort(s.due)}`:""}</div></div><span class="amt">${money(s.amount)}</span></li>`}).join("")}</ul></div>`:""}
-  <p class="hint">Trades are quoted and paid separately. They do not change the builder's contract or the build budget, and they are added to the whole project.</p>`;
+  <p class="hint">Each payment comes off that quote's balance. Trades are quoted and paid separately from the builder.</p>`;
 }
 function tradesV(){
   if(!S.trades.length)return empty("hammer","No contractor quotes yet","Add quotes from your tiler, electrician and other trades. They are paid separately from the builder and counted in the whole project.",`<button class="btn primary" data-act="addtrade">${ic("plus")}Add the first quote</button>`);

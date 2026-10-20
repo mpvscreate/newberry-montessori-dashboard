@@ -1,0 +1,7 @@
+-- Newberry Build 3: the whole project estimate (settings.estimate) is money information, like budget and contract.
+-- People without money access do not receive it (build3_pull) and cannot overwrite it (build3_upsert).
+-- Migration name: build3_estimate_money_private. Replace the two functions with the versions in Supabase,
+-- changing only these places:
+--   build3_pull:   b.data-'budget'-'contract'            ->  b.data-'budget'-'contract'-'estimate'
+--   build3_upsert: nd:=(d-'budget'-'contract')           ->  nd:=(d-'budget'-'contract'-'estimate')
+--                  plus, after the 'contract' line:      ||case when old.data ? 'estimate' then jsonb_build_object('estimate',old.data->'estimate') else '{}'::jsonb end
