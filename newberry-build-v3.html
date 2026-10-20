@@ -414,6 +414,9 @@ body.previewing{padding-top:calc(48px + env(safe-area-inset-top,0px))}
 .na-mats .ptab.mats{display:none!important}
 .na-money .ptab.extra{display:none!important}
 .xsum{display:flex;gap:10px;margin:0 0 10px}.xsum>div{flex:1;background:var(--card,#fff);border:1px solid var(--line,#e6dfd2);border-radius:14px;padding:10px 12px}.xsum b{display:block;font-size:1.1rem}
+.gtw{display:flex;flex-direction:column;gap:6px;min-width:0}.gtw .ptile{flex:1;min-height:124px;width:100%}.gtb{display:flex;gap:6px;justify-content:center;flex-wrap:wrap}
+.gadd{border-style:dashed;background:none}.gadd .pring{opacity:.8}
+.na-tasks [data-go="garden"]{display:none!important}
 .dim{opacity:.62}.trcard{cursor:pointer}
 .rn .st,.rn .stp,.rfin .st,.rfin .stp{pointer-events:none}
 .rn [data-fab="task"],.rn [data-fab="mat"],.rn [data-fab="cost"],.rn [data-fab="pay"],.rfin [data-fab="task"],.rfin [data-fab="mat"],.rfin [data-fab="photo"],.rfin [data-fab="issue"],.rn [data-act="addtask"],.rfin [data-act="addtask"],.rn [data-act="editelec"],.rfin [data-act="editelec"],.rn [data-act="reorder"],.rfin [data-act="reorder"]{display:none!important}
@@ -630,6 +633,7 @@ chat:'<path d="M4 20l1.4-4.2A8 8 0 1112 20a8 8 0 01-4-1.1z"/><path d="M9 10.5c0 
 rain:'<path d="M7 15a4.5 4.5 0 01-.6-9A6 6 0 0118 8.5 3.8 3.8 0 0117 15zM8 18l-1 3M12 18l-1 3M16 18l-1 3"/>',wind:'<path d="M3 9h11a3 3 0 10-3-3M3 14h15a3 3 0 11-3 3M3 19h7"/>',print:'<path d="M7 9V4h10v5M7 17H5v-6h14v6h-2M7 14h10v6H7z"/>',bell:'<path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15zM10 21h4"/>',cloud:'<path d="M7 18a4.5 4.5 0 01-.6-9A6 6 0 0118 10.5 3.8 3.8 0 0117.5 18z"/>',
 cloudoff:'<path d="M3 3l18 18"/><path d="M7 18a4.5 4.5 0 01-.6-9 6 6 0 011.7-2.7M11 5.2A6 6 0 0118 10.5a3.8 3.8 0 011.8 6.2"/><path d="M10 18h7.5"/>',
 logout:'<path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/>',
+leaf:'<path d="M5 19c0-9 5-14 15-14 0 9-5 15-13 15"/><path d="M5 19l8-8"/>',
 sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
 moon:'<path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z"/>',
 device:'<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
@@ -683,6 +687,9 @@ const PH=[
  ["ext","Stoep, deck & ramp","sun",[["stoep","Covered stoep screed and finish","s"],["deck","Timber deck (by engineer)","s"],["rail","Balustrades 1 m high on 80 × 80 steel posts","s"],["ramp","Ramp for disabled pupils (SANS 10400)","s"]]],
  ["hand","Inspections & handover","key",[["snag","Snag list walk-through"],["coc","Electrical certificate of compliance","s"],["plumbc","Plumbing certificate","s"],["eng","Engineer's completion certificate","s"],["fixes","Fix all snags"],["clean","Final clean"],["occ","Occupation certificate from council","s"],["over","Hand over to the school","s"]]]
 ];
+const PHS=[...PH];
+const isG=id=>String(id).startsWith("ga_");
+const BT=()=>S.tasks.filter(t=>!isG(t.phase));
 const phase=id=>PH.find(p=>p[0]===id);
 const CATS=[["materials","Materials","bag"],["labour","Labour","users"],["transport","Transport","truck"],["hire","Equipment hire","hammer"],["fees","Fees and permits","clip"],["other","Other","dots"]];
 const cat=k=>CATS.find(c=>c[0]===k)||CATS[5];
@@ -752,15 +759,30 @@ if(fresh&&!location.hash.includes("join=")){S.tasks=seedTasks();S.sups=[{id:"jon
   S.settings.site="Newberry School, Lourensford Wine Estate, Somerset West";
   /* quantities from the drawings: classroom floor 101,2 m² each; window and door counts are the tags on the floor plan. The builder confirms before ordering */
   S.mats=seedMats()}
+const GCOL=["#6fbf5f","#4fb08a","#8bc34a","#3fb0b0","#a3c86a","#5aa7e0"];
+const GDEF=[["plan","Plan and levels",[["gplan","Agree the garden plan and planting list with the owner"],["gclear","Clear and level the garden areas"],["gsoil","Topsoil and compost"]]],["irr","Irrigation and taps",[["girrig","Irrigation lines and outside taps"],["girrt","Test the irrigation"]]],["path","Paths and paving",[["gpath","Paths, paving and edging"],["gdrain","Drainage for the paved areas"]]],["lawn","Lawn and planting",[["glawn","Lawn"],["gplant","Trees, shrubs and flower beds"],["gtidy","Final tidy of the garden"]]]];
+function seedGarden(){
+  let n=Math.max(0,...S.tasks.map(t=>t.order??0))+1;
+  S.settings.garden=GDEF.map(([id,name])=>({id,name}));
+  const have=new Set(S.tasks.map(t=>t.id));
+  GDEF.forEach(([id,name,list])=>list.forEach(([k,t])=>{if(!have.has("shared_"+k))S.tasks.push({id:"shared_"+k,key:k,room:"shared",phase:"ga_"+id,title:t,status:"todo",due:"",who:"",note:"",order:n++})}));
+}
+function syncGarden(){
+  for(let i=PH.length-1;i>=0;i--)if(isG(PH[i][0]))PH.splice(i,1);
+  (S.settings.garden||[]).forEach((a,i)=>{const id="ga_"+a.id;PH.push([id,a.name,"leaf",[]]);PSHORT[id]=a.name;PCOL[id]=GCOL[i%GCOL.length]});
+}
 const demoCost=()=>({id:"c_demo",amount:30000,title:"Demolition (price agreed)",cat:"labour",room:"both",date:S.settings.start||today(),paid:false,sup:""});
 function migrate(){
-  if(fresh){S.tplv=8;S.costs.push(demoCost());return}
+  if(fresh){seedGarden();S.tplv=9;S.costs.push(demoCost());return}
   if((S.tplv||0)===6&&S.tasks.length&&(perm.manage||!sm.code)){S.mats.forEach(m=>{if(m.phase===undefined)m.phase=MATPH[m.id]||""});S.tplv=7}
   if((S.tplv||0)===7&&S.tasks.length&&(perm.manage||!sm.code)){
     const have=new Set(S.tasks.map(t=>t.id)),hm=new Set(S.mats.map(m=>m.id)),top=Math.max(0,...S.tasks.filter(t=>t.phase==="svc").map(t=>t.order??0));let n=1;
     seedTasks().filter(t=>t.phase==="svc"&&t.key.startsWith("it")&&!have.has(t.id)).forEach(t=>{t.order=top+n++;S.tasks.push(t)});
     seedMats().filter(m=>["e_cat6","e_netpt","e_ap","e_patch"].includes(m.id)&&!hm.has(m.id)).forEach(m=>S.mats.push(m));
     S.tplv=8}
+  if((S.tplv||0)===8&&S.tasks.length&&(perm.manage||!sm.code)){
+    if(!(S.settings.garden||[]).length)seedGarden();
+    S.tplv=9}
   if((S.tplv||0)>=6||!S.tasks.length)return;
   if((S.tplv||0)<2){
     const have=new Set(S.tasks.map(t=>t.id));let n=-200;
@@ -807,7 +829,7 @@ const unpaid=()=>sum(S.costs.filter(c=>!c.paid),c=>c.amount);
 /* ---------- ui chrome ---------- */
 let matSec="stock",payAll=false,tab="build",roomF="all",logSub="log",matF="all",costF="all",openPh=null;
 const TABS=[["build","Build","grid"],["home","Overview","home"],["add","Add","plus"],["money","Money","cash"],["more","More","dots"]];
-const navTab=t=>({phase:"build",mats:"build",site:"build",plans:"build",docs:"build",inbox:"more",people:"more",tasks:"build",diary:"build"})[t]||t;
+const navTab=t=>({phase:"build",mats:"build",site:"build",plans:"build",docs:"build",inbox:"more",people:"more",tasks:"build",diary:"build",garden:"build"})[t]||t;
 $("nav.tabs").innerHTML=TABS.map(([k,l,i])=>k==="add"?`<button type="button" class="cap" id="fab" aria-label="Add something" aria-expanded="false" aria-controls="fab-menu">${ic(i)}</button>`:`<button data-tab="${k}">${ic(i)}<span>${l}</span>${k==="build"?'<i class="dot" id="tdot" hidden></i>':""}</button>`).join("");
 $("#today").textContent=new Date().toLocaleDateString("en-ZA",sm.code?{weekday:"short",day:"numeric",month:"short"}:{weekday:"long",day:"numeric",month:"long"});
 $("#fab-menu").innerHTML=[["site","On site",[["photo","camera","Photo"],["issue","alert","Challenges"]]],["build","Build",[["task","clip","Task"],["mat","truck","Material"]]],["money","Money",[["cost","cash","Expense"],["pay","users","Record payment"]]],["team","Team",[["msg","chat","Update everyone"]]]].map(([g,t,it])=>`<div class="fab-grp" data-g="${g}"><h4>${t}</h4><div class="fab-row">${it.map(([k,i,l])=>`<button class="fab-item" data-fab="${k}"><span class="fi">${ic(i)}</span><span class="fl">${l}</span></button>`).join("")}</div></div>`).join("")+`<p class="fab-hint">Hold the plus button to take a photo straight away.</p>`;
@@ -965,12 +987,13 @@ function delRecs(arr,pred,label){
 
 /* ---------- views ---------- */
 function render(){
+  syncGarden();
   if(tab==="money"&&!moneyOK)tab="build";
   document.querySelectorAll("nav.tabs button").forEach(b=>b.dataset.tab===navTab(tab)?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
   $("#pname").textContent=S.settings.name||"Newberry Build";
-  document.title=`${({build:"Build",home:"Overview",money:"Money",more:"More",phase:"Phase",plans:"Plans",docs:"Documents",mats:"Materials",site:"Site log",inbox:"Updates",people:"People",tasks:"Tasks",diary:"Site diary"})[tab]} · Newberry Build 3`;
+  document.title=`${({build:"Build",home:"Overview",money:"Money",more:"More",phase:"Phase",plans:"Plans",docs:"Documents",mats:"Materials",site:"Site log",inbox:"Updates",people:"People",tasks:"Tasks",diary:"Site diary",garden:"Garden"})[tab]} · Newberry Build 3`;
   $("#tdot").hidden=!S.tasks.some(t=>t.status==="stuck");
-  if(tab!=="docs")docSel=null;paintBell();const v=$("#view");v.innerHTML=({build:buildV,home,phase:phaseV,plans:plansV,docs:docsV,money:moneyV,mats:matsV,site:siteV,more,inbox:inboxV,people:peopleV,tasks:tasksV,diary:diaryV})[tab]();
+  if(tab!=="docs")docSel=null;paintBell();const v=$("#view");v.innerHTML=({build:buildV,home,phase:phaseV,plans:plansV,docs:docsV,money:moneyV,mats:matsV,site:siteV,more,inbox:inboxV,people:peopleV,tasks:tasksV,diary:diaryV,garden:gardenV})[tab]();
   compactRows(v);
   v.querySelectorAll("[data-act]").forEach(el=>el.addEventListener("click",()=>act(el.dataset.act,el.dataset.id,el)));
   v.querySelectorAll("[data-go]").forEach(el=>el.addEventListener("click",()=>{if(el._lp){el._lp=false;return}const[t,f]=el.dataset.go.split(":");if(t==="phase"&&f)curPh=f;if(t==="site"&&f)logSub=f;if(t==="mats"&&f)matF=f;go(t)}));
@@ -985,7 +1008,7 @@ function render(){
 }
 const empty=(icon,h,p,btn)=>`<div class="card empty">${ic(icon,"xl")}<h3>${h}</h3><p>${p}</p>${btn||""}</div>`;
 const phaseName=id=>phase(id)?.[1]||"Other";
-const curPhases=()=>{const p=PH.find(p=>S.tasks.some(t=>t.phase===p[0]&&t.status!=="done"));return p?[p[0]]:[]};
+const curPhases=()=>{const p=PHS.find(p=>S.tasks.some(t=>t.phase===p[0]&&t.status!=="done"));return p?[p[0]]:[]};
 const nextUp=()=>{
   const g=new Map();
   S.tasks.filter(t=>t.status!=="done").forEach(t=>{const x=g.get(t.key)||{key:t.key,title:t.title,phase:t.phase,ts:[]};x.ts.push(t);g.set(t.key,x)});
@@ -995,13 +1018,13 @@ const nextUp=()=>{
 };
 const heroRing=f=>{const r=34,c=2*Math.PI*r;return `<svg width="84" height="84" viewBox="0 0 84 84" style="transform:rotate(-90deg)"><circle cx="42" cy="42" r="${r}" fill="none" stroke="rgba(255,255,255,.25)" stroke-width="9"/><circle cx="42" cy="42" r="${r}" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-dasharray="${c*Math.max(0,Math.min(1,f))} ${c}"/></svg>`};
 /* ---------- forecast, paid versus built, activity ---------- */
-const workPct=()=>{const g=G(S.tasks);return g.length?doneN(g)/g.length:0};
+const workPct=()=>{const g=G(BT());return g.length?doneN(g)/g.length:0};
 function forecast(){
   const st=S.settings.start,en=S.settings.target;if(!st||!en||!S.tasks.length)return null;
-  const D=x=>new Date(x+"T12:00").getTime(),t=D(today()),a=D(st),b=D(en),done=doneN(G(S.tasks)),days=(t-a)/864e5;
+  const D=x=>new Date(x+"T12:00").getTime(),t=D(today()),a=D(st),b=D(en),done=doneN(G(BT())),days=(t-a)/864e5;
   if(days<7)return{none:true,why:"A forecast appears after the first week of work."};
   if(done<3)return{none:true,why:"A forecast appears once a few tasks are finished."};
-  const rate=done/days,need=(G(S.tasks).length-done)/rate,fin=iso(new Date(t+need*864e5));
+  const rate=done/days,need=(G(BT()).length-done)/rate,fin=iso(new Date(t+need*864e5));
   return{date:fin,late:Math.round((D(fin)-b)/864e5),perWeek:rate*7};
 }
 function fcLine(){
@@ -1085,7 +1108,7 @@ async function progressCard(){
   x.textBaseline="top";x.fillStyle="#fff";
   x.font=F(700,66);x.fillText(fit(S.settings.name||"Classroom build",W-128),64,64);
   x.font=F(500,32);x.globalAlpha=.85;x.fillText(dlong(today()),64,146);x.globalAlpha=1;
-  const all=G(S.tasks),d=doneN(all),p=all.length?d/all.length:0,cx=210,cy=420,r=112;
+  const all=G(BT()),d=doneN(all),p=all.length?d/all.length:0,cx=210,cy=420,r=112;
   x.lineWidth=30;x.lineCap="round";x.strokeStyle="rgba(255,255,255,.22)";x.beginPath();x.arc(cx,cy,r,0,Math.PI*2);x.stroke();
   x.strokeStyle="#fff";x.beginPath();x.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*Math.max(.001,p));x.stroke();
   x.textAlign="center";x.font=F(700,78);x.fillText(Math.round(p*100)+"%",cx,cy-44);x.textAlign="left";
@@ -1130,7 +1153,7 @@ async function baSheet(id){
 }
 
 function schedule(){
-  const st=S.settings.start,en=S.settings.target,all=G(S.tasks);if(!st||!en||!all.length)return{chip:""};
+  const st=S.settings.start,en=S.settings.target,all=G(BT());if(!st||!en||!all.length)return{chip:""};
   const D=x=>new Date(x+"T12:00").getTime(),t=D(today()),a=D(st),b=D(en);
   if(t<a){const n=Math.round((a-t)/864e5);return{chip:`<span class="chip-d">${ic("clock","sm")}Starts in ${n} day${n===1?"":"s"}</span>`}}
   const plan=Math.min(1,(t-a)/Math.max(1,b-a)),act=doneN(all)/all.length,gap=Math.round((plan-act)*100);
@@ -1140,7 +1163,7 @@ function nextCard(nu,R){
   return `<div class="card"><h2 style="margin:0">Next up</h2>${nu.length?`<ul class="list">${nu.map(x=>{const rs=x.ts.map(t=>t.room),stuck=x.ts.some(t=>t.status==="stuck"),od=x.ts.some(t=>t.due&&t.due<today()),doing=x.ts.some(t=>t.status==="doing");return `<li class="tap" tabindex="0" data-act="opentask" data-id="${x.key}|${x.ts[0].room}"><span class="row-ic ${stuck?"red":doing?"sky":""}">${ic(stuck?"alert":doing?"clock":phase(x.phase)?.[2]||"clip")}</span><div class="grow"><div class="lt">${esc(x.title)}</div><div class="ls ${stuck||od?"bad":""}">${stuck?"Stuck · ":od?"Overdue · ":""}${esc(phaseName(x.phase))} · ${rs.length===R.length?"Both classrooms":rs.map(roomName).join(", ")}</div></div>${ic("chev")}</li>`}).join("")}</ul>`:`<p class="muted" style="margin:10px 0 0">Every task is done. Well done!</p>`}</div>`;
 }
 function home(){
-  const all=G(S.tasks),d=doneN(all),p=pct(d,all.length),R=rooms();
+  const all=G(BT()),d=doneN(all),p=pct(d,all.length),R=rooms();
   const left=S.settings.target?Math.ceil((new Date(S.settings.target+"T12:00")-new Date(today()+"T12:00"))/864e5):null;
   const bud=+S.settings.budget||0,sp=spentAll(),bp=bud?sp/bud:0;
   const issues=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length;
@@ -1175,7 +1198,7 @@ function taskRow(key,single){
 const PSHORT={demo:"Demolition",site:"Site prep",found:"Foundations",walls:"Walls & Windows",roof:"Roof",svc:"IT & Services",fin:"Finishes",ext:"Stoep & deck",hand:"Handover"};
 const PCOL={demo:"#e0852f",site:"#3b93de",found:"#a77bd6",walls:"#e0603c",roof:"#2fb88a",svc:"#e3b43a",fin:"#d35d9c",ext:"#3fb0b0",hand:"#8c9be0"};
 let curPh="found";
-const backBtn=(to)=>`<button class="iconbtn" data-go="${to||"build"}" aria-label="Back to ${to==="docs"?"Documents":to==="more"?"More":"Build"}">${ic("left")}</button>`;
+const backBtn=(to)=>`<button class="iconbtn" data-go="${to||"build"}" aria-label="Back to ${to==="docs"?"Documents":to==="more"?"More":to==="garden"?"Garden":"Build"}">${ic("left")}</button>`;
 const logsNewest=()=>[...S.logs].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||b.id.localeCompare(a.id));
 const phasePhotoIds=id=>logsNewest().filter(l=>l.phase===id).flatMap(l=>l.media||[]);
 const phasePhoto=id=>phasePhotoIds(id)[0]||"";
@@ -1189,9 +1212,9 @@ function backupDue(){
   return `<div class="note-card" style="margin:0 0 14px">${ic("cloud")}<span><b>Friday backup.</b> Save this week's photos and documents to Google Drive.<br><button type="button" class="linkbtn" data-act="gbackup" style="padding:0;min-height:36px;margin-right:16px">Back up now</button><button type="button" class="linkbtn" data-act="bkdismiss" style="padding:0;min-height:36px">Not today</button></span></div>`;
 }
 function buildMain(){
-  const all=G(S.tasks),d=doneN(all),p=pct(d,all.length),cur=curPhases()[0],sched=schedule();
+  const all=G(BT()),d=doneN(all),p=pct(d,all.length),cur=curPhases()[0],sched=schedule();
   const left=S.settings.target?Math.ceil((new Date(S.settings.target+"T12:00")-new Date(today()+"T12:00"))/864e5):null;
-  const tiles=PH.map(([id,name,icon],i)=>{
+  const tiles=PHS.map(([id,name,icon],i)=>{
     const ts=G(S.tasks.filter(t=>t.phase===id)),dn=doneN(ts),st=ts.filter(t=>t.status==="stuck").length,ph=phasePhoto(id),full=ts.length>0&&dn===ts.length;
     return `<button type="button" class="ptile ${ph?"has":""} ${id===cur?"cur":""}" data-go="phase:${id}" style="--pc:${PCOL[id]};--i:${i}" aria-label="${esc(name)}: ${dn} of ${ts.length} tasks done${st?", "+st+" stuck":""}">${ph?`<span class="tbg" data-bg="${ph}"></span>`:""}${st?`<span class="pbadge">${st}</span>`:full?`<span class="pbadge ok">${ic("check","sm")}</span>`:""}<span class="pi"><span class="pring ${full?"full":""}">${ringSvg(pct(dn,ts.length))}<span class="pav">${ic(icon)}</span></span><b>${esc(PSHORT[id])}</b><span class="pq">${dn}/${ts.length}</span></span></button>`}).join("");
   const rec=logsNewest().slice(0,6);
@@ -1201,7 +1224,7 @@ function buildMain(){
   ${whoLine()}${attentionV()}${linkPrompt()}${pushPrompt()}${backupDue()}<div class="ptiles" role="list">${tiles}</div>
   <div class="eyebrow" style="margin:20px 2px 10px">Recently posted</div>
   ${rec.length?`<div class="rps">${rec.map(l=>`<button type="button" class="rp" data-go="site"><span class="rpi">${l.media?.length?`<span data-m="${l.media[0]}" style="position:absolute;inset:0"></span>`:ic(l.kind==="issue"?"alert":"note","lg")}</span><span class="rpt"><b style="color:${PCOL[l.phase]||"var(--accent)"}">${esc(l.phase&&PSHORT[l.phase]?PSHORT[l.phase]:"Site")}</b><span>${esc(l.text?l.text.slice(0,48):l.kind==="issue"?"Issue reported":"Added a photo")}</span><small>${dlabel(l.date)}</small></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:0 2px">Photos and notes you add will show up here.</p>`}
-  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="tasks">${ic("check")}<span>Tasks</span>${sm.code&&S.tasks.some(t=>asgHas(t,sm.pid)&&t.status!=="done")?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${uk(S.tasks.filter(t=>asgHas(t,sm.pid)&&t.status!=="done"))}</i>`:""}</button><button type="button" class="sc" data-go="diary">${ic("book")}<span>Site diary</span></button><button type="button" class="sc" data-go="docs" style="grid-column:1/-1">${ic("note")}<span>Documents</span>${S.docs.filter(docListed).length?`<small class="muted">${S.docs.filter(docListed).length}</small>`:""}</button></div>`;
+  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="tasks">${ic("check")}<span>Tasks</span>${sm.code&&S.tasks.some(t=>asgHas(t,sm.pid)&&t.status!=="done")?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${uk(S.tasks.filter(t=>asgHas(t,sm.pid)&&t.status!=="done"))}</i>`:""}</button><button type="button" class="sc" data-go="diary">${ic("book")}<span>Site diary</span></button><button type="button" class="sc" data-go="docs">${ic("note")}<span>Documents</span>${S.docs.filter(docListed).length?`<small class="muted">${S.docs.filter(docListed).length}</small>`:""}</button><button type="button" class="sc" data-go="garden">${ic("leaf")}<span>Garden</span>${(()=>{const g=S.tasks.filter(t=>isG(t.phase)&&t.status!=="done");return g.length?`<small class="muted">${uk(g)}</small>`:""})()}</button></div>`;
 }
 async function hydrateBg(root=document){
   for(const el of root.querySelectorAll("[data-bg]")){const u=await mUrl(el.dataset.bg);if(!u)continue;const im=new Image();im.onload=()=>{el.style.backgroundImage='url("'+u+'")';el.classList.add("on")};im.src=u}
@@ -1327,7 +1350,7 @@ function act(a,id,el){
    cyc:()=>cycTask(id),opentask:()=>taskSheet(...id.split("|")),edittask:()=>taskSheet(...id.split("|")),
    deltask:()=>{const[k]=id.split("|");const f=roomF;delRecs(S.tasks,t=>t.key===k&&(f==="all"||t.room===f||t.room==="shared"),"Task")},
    addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>quickPhoto(id),gbackup:()=>backupSheet(),addfurn:()=>furnSheet(),editfurn:()=>furnSheet(id),delfurn:()=>delRecs(S.furn,x=>x.id===id,"Item"),furnstarter:()=>furnStarter(),furnlb:()=>{const[rid,i]=id.split("|"),r=S.furn.find(x=>x.id===rid);if(r)lightbox(r.media||[],+i)},gofurn:()=>{bmode="furn";lsSet("build-bmode","furn");if(id)fRoom=id;go("build");render()},adddiary:()=>diarySheet(),editdiary:()=>diarySheet(id),godiary:()=>go("diary"),diaryshare:()=>{const tx=diaryText(14);if(!tx){toast("No diary entries in the last 14 days.");return}shareText(tx)},diaryprint:()=>diaryPrint(),savelink:()=>personSheet(sm.pid),linkdismiss:()=>{lsSet("build-linkdis",today());render()},cycboth:()=>cycMany(((el&&el.dataset.ids)||id).split(",")),docselect:()=>{docSel=docSel?null:new Set();render()},docall:()=>{const l=docList();docSel=docSel&&docSel.size===l.length?new Set():new Set(l.map(d=>d.id));render()},docprint:()=>printSelectedDocs(),gotasks:()=>{taskF=id||"";go("tasks")},gotrades:()=>{moneySeg="trades";go("money")},pushsheet:()=>pushSheet(),pushdismiss:()=>{lsSet("build-pushdis","1");render()},restore:()=>restoreSheet(),addtrade:()=>tradeSheet(),edittrade:()=>tradeSheet(id),opentrade:()=>tradeView(id),deltrade:()=>delRecs(S.trades,x=>x.id===id,"Quote"),tradeaccept:()=>{const t=S.trades.find(x=>x.id===id);if(!t)return;const ex=tradeStatus(t,"accepted");logAct(`Accepted the ${t.trade} quote from ${tName(t)}: ${money(tVal(t))}`,1);save();render();toast("Quote accepted."+ex.msg,ex.undo)},paystage:()=>{const[tid,sid]=id.split("|"),t=S.trades.find(x=>x.id===tid),sg=t&&(t.stages||[]).find(x=>x.id===sid);if(!sg)return;const u=undoEdit(sg,{paid:true,paidOn:today()});logAct(`Paid ${money(sg.amount)} to ${tName(t)} (${t.trade})`,1);save();render();toast(`${money(sg.amount)} marked paid.`,u)},goinbox:()=>go("inbox"),gopeople:()=>go("people"),newmsg:()=>newMsgSheet(),addperson:()=>personSheet(),editperson:()=>personSheet(id),msglb:()=>{const[mid,i]=id.split("|");const m=S.msgs.find(x=>x.id===mid);if(m)lightbox(m.media||[],+i)},sharesheet:()=>shareSheet(),bkdismiss:()=>{lsSet("build-bkdis",today());render()},phdrive:()=>driveSave(phasePhotoIds(id).map((m,i)=>({media:m,name:(PSHORT[id]||"Phase")+" photo "+(i+1)+".jpg"}))),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),addcost:()=>costSheet(),editcost:()=>S.costs.find(x=>x.id===id)?.extra?extraSheet(null,id):costSheet(id),addextra:()=>extraSheet(id),editextra:()=>extraSheet(null,id),delextra:()=>delRecs(S.costs,c=>c.id===id,"Extra labour"),unlockextra:()=>moneyGate(()=>render()),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
-   payall:()=>{payAll=!payAll;render()},resetpays:()=>{const ps=[...S.pays],cs=S.costs.filter(c=>c.pay);S.pays.length=0;cs.forEach(c=>S.costs.splice(S.costs.indexOf(c),1));payAll=false;save();render();toast("All builder payments reset to R 0.",()=>{ps.forEach(x=>S.pays.push(x));cs.forEach(c=>S.costs.push(c))})},recpay:()=>recPaySheet(),weekly:()=>weeklySheet(),addpay:()=>paySheet(),editpay:()=>paySheet(id),contract:()=>contractSheet(),estimate:()=>estimateSheet(),typicalpay:()=>typicalPays(),
+   payall:()=>{payAll=!payAll;render()},resetpays:()=>{const ps=[...S.pays],cs=S.costs.filter(c=>c.pay);S.pays.length=0;cs.forEach(c=>S.costs.splice(S.costs.indexOf(c),1));payAll=false;save();render();toast("All builder payments reset to R 0.",()=>{ps.forEach(x=>S.pays.push(x));cs.forEach(c=>S.costs.push(c))})},recpay:()=>recPaySheet(),weekly:()=>weeklySheet(),addpay:()=>paySheet(),editpay:()=>paySheet(id),contract:()=>contractSheet(),gedit:()=>{gEdit=!gEdit;render()},gadd:()=>gardenNameSheet(),gren:()=>gardenNameSheet(id),gdel:()=>gardenDel(id),estimate:()=>estimateSheet(),typicalpay:()=>typicalPays(),
    paypay:()=>{const x=S.pays.find(q=>q.id===id),u=undoEdit(x,{paid:true,paidOn:today()});payCost(x);logAct(`Builder payment of ${money(x.amount)} recorded`,1);save();render();toast(`${money(x.amount)} paid to the builder.`,()=>{u();payCost(x)})},
    delpay:()=>{const x=S.pays.find(q=>q.id===id),lc=S.costs.find(c=>c.id==="pay_"+id);S.pays.splice(S.pays.indexOf(x),1);if(lc)S.costs.splice(S.costs.indexOf(lc),1);save();render();toast("Stage deleted.",()=>{S.pays.push(x);if(lc)S.costs.push(lc)})},
    paycost:()=>{const c=S.costs.find(x=>x.id===id),u=undoEdit(c,{paid:true});save();render();toast(`${money(c.amount)} marked as paid.`,u)},budget:()=>moneyOK?budgetSheet():moneyGate(budgetSheet),lockmoney:()=>{lockMoney();toast("Money is locked.")},addmat:()=>matSheet(undefined,id&&phase(id)?id:undefined),editmat:()=>matSheet(id),delmat:()=>delRecs(S.mats,m=>m.id===id,"Material"),
@@ -1373,7 +1396,7 @@ function cycTask(id,quiet,forced){try{localStorage.setItem("build-hint","1")}cat
   buzz(nx==="done"?[18,40,18]:12);logAct(`Marked "${t.title}" ${stLabel(nx).toLowerCase()}${rooms().length>1&&t.room!=="shared"?` (${roomName(t.room)})`:""}`);save();render();if(nx==="check")notifyLead(t);document.querySelectorAll(`[data-id="${id}"]`).forEach(b=>b.classList.add("popit"));toast(`${t.title}: ${stLabel(nx).toLowerCase()}${rooms().length>1&&t.room!=="shared"?` (${roomName(t.room)})`:""}.`,u);
 }
 function addTaskSheet(ph){
-  const st={room:"both",phase:ph&&phase(ph)?ph:curPhases()[0]||"site",assignee:""};
+  const st={room:"both",phase:ph&&phase(ph)?ph:curPhases()[0]||"site",assignee:""};if(isG(st.phase))st.room="shared";
   sheet("Add a task",`<form id="f" novalidate><label class="f" for="ti">What needs doing?</label><textarea id="ti" class="t grow-ta" rows="1" maxlength="160" placeholder="For example: Order roof sheets"></textarea>${micBtn("ti","Speak the task")}
   <label class="f">Phase</label>${chipRow("phase",PH.map(p=>[p[0],p[1]]),st.phase)}
   <details class="more"><summary>More details: classroom</summary><label class="f">Which classroom?</label>${chipRow("room",[...roomOpts(),["shared","Shared (done once)"]],st.room)}</details>
@@ -1753,7 +1776,7 @@ function reportText(){const t=reportTextFull();return moneyOK?t:t.split("\n").fi
 function reportTextFull(){
   const all=S.tasks,R=rooms(),bud=+S.settings.budget||0,issues=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length,nu=nextUp().slice(0,3);
   let t=`*${S.settings.name||"Classroom build"}*: update ${dlong(today())}\n\n`;
-  {const g=G(S.tasks),per=R.map(r=>{const x=tasksOf(r.id);return pct(doneN(x),x.length)});if(per.every(v=>v===per[0]))t+=`${R.length>1?"Both classrooms":R[0].name}: ${doneN(g)} of ${g.length} tasks done (${pct(doneN(g),g.length)}%)\n`;else R.forEach(r=>{const x=tasksOf(r.id);t+=`${r.name}: ${doneN(x)} of ${x.length} tasks done (${pct(doneN(x),x.length)}%)\n`})}
+  {const g=G(BT()),per=R.map(r=>{const x=tasksOf(r.id);return pct(doneN(x),x.length)});if(per.every(v=>v===per[0]))t+=`${R.length>1?"Both classrooms":R[0].name}: ${doneN(g)} of ${g.length} tasks done (${pct(doneN(g),g.length)}%)\n`;else R.forEach(r=>{const x=tasksOf(r.id);t+=`${r.name}: ${doneN(x)} of ${x.length} tasks done (${pct(doneN(x),x.length)}%)\n`})}
   t+=`\nSpent: ${money0(spentAll())}${bud?` of ${money0(bud)} (${bud>=spentAll()?money0(bud-spentAll())+" left":money0(spentAll()-bud)+" over"})`:""}\n`;
   if(unpaid())t+=`Still to pay: ${money0(unpaid())}\n`;
   if(S.pays.length)t+=`Builder paid: ${money0(paidTotal())} of ${money0(contractAmt())}\n`;
@@ -2001,8 +2024,8 @@ const DMS=x=>new Date(x+"T12:00").getTime();
 function timelineCard(){
   const st=S.settings.start,en=S.settings.target;
   if(!st||!en)return `<div class="card"><h2>Timeline</h2><p class="muted small">Set a start and finish date in More, Project details, to see the timeline.</p></div>`;
-  const a=DMS(st),b=DMS(en),span=Math.max(1,b-a),tot=G(S.tasks).length||1,td=DMS(today());let acc=0;
-  const rows=PH.map(([id])=>{
+  const a=DMS(st),b=DMS(en),span=Math.max(1,b-a),tot=G(BT()).length||1,td=DMS(today());let acc=0;
+  const rows=PHS.map(([id])=>{
     const ts=G(S.tasks.filter(t=>t.phase===id)),w=ts.length/tot,s0=acc;acc+=w;
     const dn=doneN(ts),f=ts.length?dn/ts.length:0,endT=a+acc*span,late=td>endT&&f<1;
     return `<button type="button" class="gr" data-go="phase:${id}" style="--pc:${PCOL[id]}" aria-label="${esc(PSHORT[id])}: ${dn} of ${ts.length} tasks done${late?", behind plan":""}"><span class="gl">${esc(PSHORT[id])}</span><span class="gt"><span class="gp" style="left:${(s0*100).toFixed(2)}%;width:${(w*100).toFixed(2)}%"><i class="gf ${late?"late":f===1?"ok":""}" style="width:${(f*100).toFixed(1)}%"></i></span></span></button>`;
@@ -2068,16 +2091,17 @@ function swipeHoriz(el,fn){
   el.addEventListener("touchend",e=>{if(x0===null)return;const t=e.changedTouches[0],dx=t.clientX-x0,dy=t.clientY-y0;x0=null;if(Math.abs(dx)>70&&Math.abs(dy)<Math.abs(dx)*.6)fn(dx<0?1:-1)},{passive:true});
 }
 function phaseStep(dir){
-  const i=PH.findIndex(p=>p[0]===curPh),n=PH[i+dir];if(!n)return;buzz(10);curPh=n[0];go("phase");
+  const i=PHS.findIndex(p=>p[0]===curPh),n=PHS[i+dir];if(!n)return;buzz(10);curPh=n[0];go("phase");
 }
 const ringSvg=(pct,cls="")=>`<svg class="pr ${cls}" viewBox="0 0 64 64" aria-hidden="true"><circle class="rt" cx="32" cy="32" r="28" pathLength="100"/>${pct>0?`<circle class="rp" cx="32" cy="32" r="28" pathLength="100" stroke-dasharray="${Math.min(100,pct)} 100"/>`:""}</svg>`;
 function phaseHero(id,p,ts,d,st,pc){
   const ph=phasePhoto(id),full=ts.length>0&&d===ts.length;
-  return `<section class="phero ${ph?"has":""}" style="--pc:${PCOL[id]}">${ph?`<span class="tbg" data-bg="${ph}"></span>`:""}<div class="phi"><div class="row" style="gap:12px"><div class="grow" style="min-width:0"><div class="eyebrow" style="color:rgba(255,255,255,.88)">Phase ${PH.findIndex(x=>x[0]===id)+1} of ${PH.length}</div><h3 style="color:#fff;font-size:1.3rem;margin-top:6px">${esc(p[1])}</h3><div class="ph-d">${d} of ${ts.length} tasks done${st?` · ${st} stuck`:""}</div></div><div class="pbig">${ringSvg(pc,"w")}<span class="pc">${full?ic("check","lg"):pc+"%"}</span></div></div></div></section>`;
+  return `<section class="phero ${ph?"has":""}" style="--pc:${PCOL[id]}">${ph?`<span class="tbg" data-bg="${ph}"></span>`:""}<div class="phi"><div class="row" style="gap:12px"><div class="grow" style="min-width:0"><div class="eyebrow" style="color:rgba(255,255,255,.88)">${isG(id)?"Garden":"Phase "+(PHS.findIndex(x=>x[0]===id)+1)+" of "+PHS.length}</div><h3 style="color:#fff;font-size:1.3rem;margin-top:6px">${esc(p[1])}</h3><div class="ph-d">${d} of ${ts.length} tasks done${st?` · ${st} stuck`:""}</div></div><div class="pbig">${ringSvg(pc,"w")}<span class="pc">${full?ic("check","lg"):pc+"%"}</span></div></div></div></section>`;
 }
 function phaseNav(id){
+  if(isG(id))return "";
   const i=PH.findIndex(x=>x[0]===id),pv=PH[i-1],nx=PH[i+1];
-  return `<div class="pnav">${pv?`<button type="button" class="btn small" data-act="phstep" data-id="-1" aria-label="Previous phase: ${esc(PSHORT[pv[0]])}">${ic("left","sm")}${esc(PSHORT[pv[0]])}</button>`:"<span></span>"}<span class="pdots" aria-hidden="true">${PH.map((x,k)=>`<i class="${k===i?"on":""}"></i>`).join("")}</span>${nx?`<button type="button" class="btn small" data-act="phstep" data-id="1" aria-label="Next phase: ${esc(PSHORT[nx[0]])}">${esc(PSHORT[nx[0]])}${ic("chev","sm")}</button>`:"<span></span>"}</div>`;
+  return `<div class="pnav">${pv?`<button type="button" class="btn small" data-act="phstep" data-id="-1" aria-label="Previous phase: ${esc(PSHORT[pv[0]])}">${ic("left","sm")}${esc(PSHORT[pv[0]])}</button>`:"<span></span>"}<span class="pdots" aria-hidden="true">${PHS.map((x,k)=>`<i class="${k===i?"on":""}"></i>`).join("")}</span>${nx?`<button type="button" class="btn small" data-act="phstep" data-id="1" aria-label="Next phase: ${esc(PSHORT[nx[0]])}">${esc(PSHORT[nx[0]])}${ic("chev","sm")}</button>`:"<span></span>"}</div>`;
 }
 function completeCard(ts){
   const last=ts.map(t=>t.doneOn).filter(Boolean).sort().pop();
@@ -2505,7 +2529,7 @@ const AREAS=[
   ["furn","Furniture and decor","What we build for the classrooms",0,["No access","See only","Update"]],
   ["money","Money","Costs, trades and payments",0,["No access","See only","Record"]],
   ["upd","Updates","Messages to and from the team",1,["Receive","Send"]]];
-const ACT_AREA={estimate:"money",contract:"money",addextra:"money",editextra:"money",cyc:"tasks",cycboth:"tasks",edittask:"tasks",deltask:"tasks",addtask:"tasks",reorder:"tasks",mvup:"tasks",mvdn:"tasks",phphoto:"log",addphoto:"log",addissue:"log",editlog:"log",dellog:"log",fix:"log",addmat:"mats",editmat:"mats",delmat:"mats",cycmat:"mats",movein:"mats",moveout:"mats",editelec:"mats",addsup:"mats",editsup:"mats",delsup:"mats",adddoc:"docs",addplan:"docs",adddiary:"diary",editdiary:"diary",addfurn:"furn",editfurn:"furn",delfurn:"furn",furnstarter:"furn"};
+const ACT_AREA={gedit:"tasks",gadd:"tasks",gren:"tasks",gdel:"tasks",estimate:"money",contract:"money",addextra:"money",editextra:"money",cyc:"tasks",cycboth:"tasks",edittask:"tasks",deltask:"tasks",addtask:"tasks",reorder:"tasks",mvup:"tasks",mvdn:"tasks",phphoto:"log",addphoto:"log",addissue:"log",editlog:"log",dellog:"log",fix:"log",addmat:"mats",editmat:"mats",delmat:"mats",cycmat:"mats",movein:"mats",moveout:"mats",editelec:"mats",addsup:"mats",editsup:"mats",delsup:"mats",adddoc:"docs",addplan:"docs",adddiary:"diary",editdiary:"diary",addfurn:"furn",editfurn:"furn",delfurn:"furn",furnstarter:"furn"};
 const AREA_MSG=ar=>lvl(ar)===0?"You do not have access to this area.":"You can look at this area but not change it.";
 const areaLabel=(k,v)=>{const a=AREAS.find(x=>x[0]===k);return a?a[4][Math.max(0,v-a[3])]||"":""};
 function areaRows(st,pre){
@@ -2993,7 +3017,7 @@ const uk=a=>new Set(a.map(t=>t.key||t.id)).size;
 const G=list=>{const m=new Map();list.forEach(t=>{const k=t.key||t.id;if(!m.has(k))m.set(k,[]);m.get(k).push(t)});return[...m.values()].map(g=>g.length===1?g[0]:{...g[0],status:g.every(t=>t.status==="done")?"done":g.every(t=>t.status==="done"||t.status==="check")?"check":g.some(t=>t.status==="stuck")?"stuck":g.some(t=>t.status!=="todo")?"doing":"todo"})};
 const splitIn=id=>{const m=new Map();S.tasks.filter(t=>t.phase===id).forEach(t=>{if(!m.has(t.key))m.set(t.key,[]);m.get(t.key).push(t)});return[...m.values()].some(g=>g.length>1&&g.some(t=>t.status!==g[0].status))};
 function classroomsTile(){
-  const R=rooms(),per=R.map(r=>{const t=tasksOf(r.id);return pct(doneN(t),t.length)}),g=G(S.tasks),x=pct(doneN(g),g.length),diff=per.some(v=>v!==per[0]);
+  const R=rooms(),per=R.map(r=>{const t=tasksOf(r.id);return pct(doneN(t),t.length)}),g=G(BT()),x=pct(doneN(g),g.length),diff=per.some(v=>v!==per[0]);
   return `<button class="tile green s2" data-go="build"><div class="lbl">${ic("home")}${R.length>1?"Classrooms":esc(R[0].name)}</div><div class="big">${x}%</div><div class="sub">${doneN(g)} of ${g.length} tasks done${diff?" · "+R.map((r,i)=>esc(r.name)+" "+per[i]+"%").join(" · "):""}</div><div class="meter"><i style="width:${x}%"></i></div></button>`;
 }
 /* ---------- access recovery: save my link ---------- */
@@ -3186,7 +3210,7 @@ function phaseV(){
   ${f==="all"&&!hintSeen()&&ts.some(t=>t.room!=="shared")?`<div class="note-card">${ic("eye")}<span>${sm.code&&!perm.manage?"Tap the circle once when the work is done (yellow). The Project Lead gives the final tick (green) after checking.":sm.code?"Your tick is the final green tick. Work ticked yellow by the team is waiting for your check.":"Tap the circle to tick a task done in both classrooms."} Hold it for more options, or open the task to split the classrooms. Hold a task, then drag it up or down to change the order.</span></div>`:""}
   <div class="card">${keys.length?`<ul class="list reord">${keys.map(k=>taskRow(k,f==="all"?null:f)).join("")}</ul>`:`<div class="empty">${ic("clip","xl")}<h3>No tasks here</h3><p>Add the first task for this phase.</p><button class="btn primary" data-act="addtask" data-id="${id}">${ic("plus")}Add task</button></div>`}</div>
   <div class="card"><div class="row between"><h2 style="margin:0">Photos</h2><div class="row" style="gap:8px">${ph.length>=2?`<button class="btn small" data-act="phba" data-id="${id}">Before and after</button>`:""}${ph.length?`<button class="btn small icon" data-act="phdrive" data-id="${id}" aria-label="Save all photos of this phase to Google Drive">${ic("cloud")}</button>`:""}<button class="btn small" data-act="phphoto" data-id="${id}">${ic("camera")}Add photo</button></div></div>${ph.length?`<div class="pthumbs">${ph.slice(0,9).map((m,i)=>`<button type="button" class="etile" style="border:0;padding:0" data-act="phlb" data-id="${id}|${i}" aria-label="Open photo ${i+1}"><span data-m="${m}" style="position:absolute;inset:0"></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:10px 0 0">No photos for this phase yet.</p>`}</div>`;
-  return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2 style="overflow-wrap:anywhere">${esc(PSHORT[id])}</h2></div>${pt2==="extra"?`<button class="btn primary" data-act="addextra" data-id="${id}" aria-label="Add extra labour">${ic("plus")}Add</button>`:pt==="mats"?`<button class="btn primary" data-act="addmat" data-id="${id}" style="background:var(--green);color:#fff">${ic("plus")}Add material</button>`:`<button class="btn primary" data-act="addtask" data-id="${id}">${ic("plus")}Add task</button>`}</div>
+  return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn(isG(id)?"garden":"")}<h2 style="overflow-wrap:anywhere">${esc(PSHORT[id])}</h2></div>${pt2==="extra"?`<button class="btn primary" data-act="addextra" data-id="${id}" aria-label="Add extra labour">${ic("plus")}Add</button>`:pt==="mats"?`<button class="btn primary" data-act="addmat" data-id="${id}" style="background:var(--green);color:#fff">${ic("plus")}Add material</button>`:`<button class="btn primary" data-act="addtask" data-id="${id}">${ic("plus")}Add task</button>`}</div>
   ${phaseHero(id,p,ts,d,st,pc)}
   ${ts.length&&d===ts.length?completeCard(ts):""}
   ${tabs}
@@ -3240,6 +3264,35 @@ function extraSheet(ph,id){
   document.addEventListener("visibilitychange",()=>{if(!document.hidden)fix()});
   new MutationObserver(fix).observe(document.body,{attributes:true,attributeFilter:["class"]});
 })();
+/* the garden: areas you can add, rename and remove. Each area has its own tasks, materials, photos and extra labour */
+let gEdit=false;
+function gardenV(){
+  const R=PH.filter(p=>isG(p[0])),all=G(S.tasks.filter(t=>isG(t.phase))),d=doneN(all),pc=pct(d,all.length),can=lvl("tasks")>=2;
+  if(!can)gEdit=false;
+  const tiles=R.map(([id,name],i)=>{
+    const ts=G(S.tasks.filter(t=>t.phase===id)),dn=doneN(ts),st=ts.filter(t=>t.status==="stuck").length,full=ts.length>0&&dn===ts.length;
+    return `<div class="gtw"><button type="button" class="ptile" data-go="phase:${id}" style="--pc:${PCOL[id]};--i:${i}" aria-label="${esc(name)}: ${dn} of ${ts.length} tasks done${st?", "+st+" stuck":""}">${st?`<span class="pbadge">${st}</span>`:full?`<span class="pbadge ok">${ic("check","sm")}</span>`:""}<span class="pi"><span class="pring ${full?"full":""}">${ringSvg(pct(dn,ts.length))}<span class="pav">${ic("leaf")}</span></span><b>${esc(name)}</b><span class="pq">${dn}/${ts.length}</span></span></button>${gEdit?`<div class="gtb"><button type="button" class="btn small" data-act="gren" data-id="${id.slice(3)}">Rename</button><button type="button" class="btn small danger" data-act="gdel" data-id="${id.slice(3)}">Remove</button></div>`:""}</div>`}).join("");
+  const add=can?`<div class="gtw"><button type="button" class="ptile gadd" data-act="gadd" aria-label="Add a garden area"><span class="pi"><span class="pring"><span class="pav">${ic("plus")}</span></span><b>Add area</b></span></button></div>`:"";
+  return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Garden</h2></div>${can&&R.length?`<button class="btn ${gEdit?"primary":""}" data-act="gedit">${gEdit?"Done":"Edit"}</button>`:""}</div>
+  <section class="bhero" style="margin-bottom:12px"><div class="eyebrow">Garden</div><div class="big">${pc}%</div><div class="sub">${d} of ${all.length} tasks done</div><div class="meter hm"><i style="width:${pc}%"></i></div></section>
+  ${gEdit?`<p class="hint" style="margin:0 2px 10px">Rename or remove an area, or add a new one.</p>`:""}
+  <div class="ptiles" role="list">${tiles}${add}</div>`;
+}
+function gardenNameSheet(id){
+  const a=id?(S.settings.garden||[]).find(x=>x.id===id):null;
+  sheet(a?"Rename area":"Add a garden area",`<form id="f" novalidate><label class="f" for="gn">Name</label><input id="gn" data-autofocus class="t" maxlength="40" value="${esc(a?.name||"")}" placeholder="For example: Vegetable garden"><div class="foot"><button class="btn primary block">${a?"Save":"Add area"}</button></div></form>`,(sh,close)=>{
+    sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const i=sh.querySelector("#gn"),n=i.value.trim();if(!n)return showErr(sh,i,"Give the area a name.");
+      const old=S.settings.garden||[];
+      if(a){const u=undoEdit(a,{name:n});save();close();render();toast("Area renamed.",u)}
+      else{S.settings.garden=[...old,{id:uid(),name:n}];save();close();render();toast("Area added.",()=>{S.settings.garden=old;save();render()})}}});
+}
+function gardenDel(id){
+  const a=(S.settings.garden||[]).find(x=>x.id===id);if(!a)return;const pid="ga_"+id;
+  confirmSheet("Remove "+a.name+"?","Its tasks are removed too. Materials and extra labour you added stay in the project without an area.","Remove",()=>{
+    const old=S.settings.garden,ts=S.tasks.filter(t=>t.phase===pid),ms=S.mats.filter(m=>m.phase===pid),cs=S.costs.filter(c=>c.phase===pid);
+    ts.forEach(t=>S.tasks.splice(S.tasks.indexOf(t),1));ms.forEach(m=>m.phase="");cs.forEach(c=>c.phase="");S.settings.garden=old.filter(x=>x.id!==id);save();render();
+    toast(a.name+" removed.",()=>{S.settings.garden=old;ts.forEach(t=>S.tasks.push(t));ms.forEach(m=>m.phase=pid);cs.forEach(c=>c.phase=pid);save();render()})});
+}
 /* ---------- start ---------- */
 render();
 if(sm.code){setSync("syncing");syncNow()}else setSync("off");
