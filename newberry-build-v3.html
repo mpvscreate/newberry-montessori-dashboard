@@ -1876,9 +1876,15 @@ function shareSheet(){
     return;
   }
   if(!sm.code){
-    sheet("Share with your team",`<p class="muted" style="margin:6px 0 12px">Create the project, then add your team. Each person gets their own link and sees only what you allow. Works offline and catches up when there is signal.</p>
-    <div class="note-card">${ic("link")}<span>Every link is personal. Send it only to that person. You can switch anyone off at any time.</span></div>
-    <div class="foot"><button class="btn primary block" id="on">${ic("share")}Create the project and add my team</button></div>`,(sh,close)=>{
+    sheet("Not connected to the team",`<p class="muted" style="margin:6px 0 10px"><b>Are you part of the team?</b> Then this phone is not connected yet. Paste the personal link the Project Lead sent you and you will see the shared project.</p>
+    <label class="f" for="jl">Your personal link</label><input id="jl" class="t" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste your link here">
+    <div class="tasks" style="margin-top:8px"><button class="btn primary block" id="jb">${ic("link")}Join with this link</button></div>
+    <p class="hint">Added the app to your Home Screen after opening your link in the browser? Then paste the link here, because the Home Screen app keeps its own copy.</p>
+    <details class="more" style="margin-top:14px"><summary>I am the Project Lead and want to start a new project</summary><p class="muted" style="margin:8px 0 12px">Create the project, then add your team. Each person gets their own link and sees only what you allow. Works offline and catches up when there is signal.</p>
+    <button class="btn block" id="on">${ic("share")}Create the project and add my team</button></details>`,(sh,close)=>{
+      const jb=sh.querySelector("#jb"),jl=sh.querySelector("#jl");
+      jb.onclick=()=>{const m=(jl.value||"").match(/join=([a-z0-9]{20,})&k=([a-f0-9]{32,})/);if(!m)return showErr(sh,jl,"That does not look like your personal link. Paste the whole link.");close();location.hash="join="+m[1]+"&k="+m[2]};
+      jl.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();jb.click()}});
       sh.querySelector("#on").onclick=async e=>{const b=e.currentTarget;b.disabled=true;b.textContent="Setting up…";const ok=await startSharing();close();if(ok){render();go("people");toast("Your team is ready. Tap a person to send their link.")}}});
     return;
   }
