@@ -419,6 +419,16 @@ body.previewing{padding-top:calc(48px + env(safe-area-inset-top,0px))}
 .na-tasks [data-go="garden"]{display:none!important}
 .estbar{display:flex;position:relative;height:12px;border-radius:99px;background:rgba(0,0,0,.3);overflow:hidden;margin-top:14px}.estbar i{height:100%;flex:none}.estmk{position:absolute;top:0;bottom:0;width:3px;background:#1b1300;transform:translateX(-1px)}
 .estleg{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:5px;font-size:.84rem;color:rgba(255,255,255,.95)}.estleg li{display:flex;align-items:center;gap:8px}.estleg li i{width:10px;height:10px;border-radius:50%;flex:none}.estleg li b{margin-left:auto;font-variant-numeric:tabular-nums}
+.rhero{padding:20px;background:linear-gradient(150deg,color-mix(in srgb,var(--vc) 20%,var(--sheet)),var(--sheet) 70%);border-color:color-mix(in srgb,var(--vc) 35%,var(--line))}
+.rbig{font:800 clamp(1.7rem,8vw,2.3rem)/1.05 var(--display);color:var(--vc)}.rlead{margin:10px 0 0;font-size:1.02rem;line-height:1.4}.rico{color:var(--vc);flex:none}
+.rstats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:18px}.rstats>div{min-width:0}.rstats .eyebrow,.rfcs .eyebrow{display:block;font-size:.66rem;margin:0 0 4px}.rstats b,.rfcs b{display:block;font:700 clamp(.98rem,4.4vw,1.25rem)/1.15 var(--display)}.rstats b{white-space:nowrap}
+.rc .eyebrow{margin:0 0 10px}.rc>.eyebrow:first-child{margin-bottom:12px}
+.rphs{display:grid;grid-template-columns:repeat(2,1fr);gap:14px 16px}.rph{background:none;border:0;padding:0;text-align:left;color:inherit;font:inherit;cursor:pointer;min-width:0}.rph i{display:block;height:6px;border-radius:99px;margin-bottom:8px}.rph b{display:block;font-size:.88rem;line-height:1.15;margin:2px 0}.rpn{display:block;font-size:.78rem;color:var(--muted)}
+.rs{font-size:.8rem;color:var(--muted);line-height:1.3}.rt{font-weight:600;line-height:1.25}
+.rtiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.rtile{display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;border-radius:14px;border:1px solid var(--line);background:color-mix(in srgb,var(--sheet) 80%,#000);color:var(--muted);font:inherit;font-size:.72rem;cursor:pointer}.rtile b{font:700 1.15rem var(--display);color:var(--ink)}.rtile.on{color:var(--accent);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.rlist{margin-top:6px}.rrow{display:flex;align-items:center;gap:12px;padding:12px 0;border-top:1px solid var(--line)}.rrow:first-child{border-top:0}.rv{font:700 1.15rem var(--display);white-space:nowrap}.rv.red,.rfcs b.red{color:var(--red)}.rv.amber{color:var(--accent)}.rfcs b.green{color:var(--green)}
+.rsoon{display:grid;gap:8px;margin-top:10px}.rsr{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--sheet) 80%,#000);font-size:.88rem}.rsr b{min-width:52px}.rsr .i{color:var(--accent);flex:none}.rsv{font-weight:600;min-width:0;overflow-wrap:anywhere}.rsr .rs{margin-left:auto;text-align:right;max-width:40%}
+.rfcs{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.rfcs>div{padding:12px;border-radius:14px;border:1px solid var(--line);background:color-mix(in srgb,var(--sheet) 80%,#000);min-width:0}
 .dim{opacity:.62}.trcard{cursor:pointer}
 .rn .st,.rn .stp,.rfin .st,.rfin .stp{pointer-events:none}
 .rn [data-fab="task"],.rn [data-fab="mat"],.rn [data-fab="cost"],.rn [data-fab="pay"],.rfin [data-fab="task"],.rfin [data-fab="mat"],.rfin [data-fab="photo"],.rfin [data-fab="issue"],.rn [data-act="addtask"],.rfin [data-act="addtask"],.rn [data-act="editelec"],.rfin [data-act="editelec"],.rn [data-act="reorder"],.rfin [data-act="reorder"]{display:none!important}
@@ -833,7 +843,7 @@ const unpaid=()=>sum(S.costs.filter(c=>!c.paid),c=>c.amount);
 /* ---------- ui chrome ---------- */
 let matSec="stock",payAll=false,tab="build",roomF="all",logSub="log",matF="all",costF="all",openPh=null;
 const TABS=[["build","Build","grid"],["home","Overview","home"],["add","Add","plus"],["money","Money","cash"],["more","More","dots"]];
-const navTab=t=>({phase:"build",mats:"build",site:"build",plans:"build",docs:"build",inbox:"more",people:"more",tasks:"build",diary:"build",garden:"build"})[t]||t;
+const navTab=t=>({phase:"build",mats:"build",site:"build",plans:"build",docs:"build",inbox:"more",people:"more",tasks:"build",diary:"build",garden:"build",report:"home"})[t]||t;
 $("nav.tabs").innerHTML=TABS.map(([k,l,i])=>k==="add"?`<button type="button" class="cap" id="fab" aria-label="Add something" aria-expanded="false" aria-controls="fab-menu">${ic(i)}</button>`:`<button data-tab="${k}">${ic(i)}<span>${l}</span>${k==="build"?'<i class="dot" id="tdot" hidden></i>':""}</button>`).join("");
 $("#today").textContent=new Date().toLocaleDateString("en-ZA",sm.code?{weekday:"short",day:"numeric",month:"short"}:{weekday:"long",day:"numeric",month:"long"});
 $("#fab-menu").innerHTML=[["site","On site",[["photo","camera","Photo"],["issue","alert","Challenges"]]],["build","Build",[["task","clip","Task"],["mat","truck","Material"]]],["money","Money",[["cost","cash","Expense"],["pay","users","Record payment"]]],["team","Team",[["msg","chat","Update everyone"]]]].map(([g,t,it])=>`<div class="fab-grp" data-g="${g}"><h4>${t}</h4><div class="fab-row">${it.map(([k,i,l])=>`<button class="fab-item" data-fab="${k}"><span class="fi">${ic(i)}</span><span class="fl">${l}</span></button>`).join("")}</div></div>`).join("")+`<p class="fab-hint">Hold the plus button to take a photo straight away.</p>`;
@@ -995,9 +1005,9 @@ function render(){
   if(tab==="money"&&!moneyOK)tab="build";
   document.querySelectorAll("nav.tabs button").forEach(b=>b.dataset.tab===navTab(tab)?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
   $("#pname").textContent=S.settings.name||"Newberry Build";
-  document.title=`${({build:"Build",home:"Overview",money:"Money",more:"More",phase:"Phase",plans:"Plans",docs:"Documents",mats:"Materials",site:"Site log",inbox:"Updates",people:"People",tasks:"Tasks",diary:"Site diary",garden:"Garden"})[tab]} · Newberry Build 3`;
+  document.title=`${({build:"Build",home:"Overview",money:"Money",more:"More",phase:"Phase",plans:"Plans",docs:"Documents",mats:"Materials",site:"Site log",inbox:"Updates",people:"People",tasks:"Tasks",diary:"Site diary",garden:"Garden",report:"Report"})[tab]} · Newberry Build 3`;
   $("#tdot").hidden=!S.tasks.some(t=>t.status==="stuck");
-  if(tab!=="docs")docSel=null;paintBell();const v=$("#view");v.innerHTML=({build:buildV,home,phase:phaseV,plans:plansV,docs:docsV,money:moneyV,mats:matsV,site:siteV,more,inbox:inboxV,people:peopleV,tasks:tasksV,diary:diaryV,garden:gardenV})[tab]();
+  if(tab!=="docs")docSel=null;paintBell();const v=$("#view");v.innerHTML=({build:buildV,home,phase:phaseV,plans:plansV,docs:docsV,money:moneyV,mats:matsV,site:siteV,more,inbox:inboxV,people:peopleV,tasks:tasksV,diary:diaryV,garden:gardenV,report:reportV})[tab]();
   compactRows(v);
   v.querySelectorAll("[data-act]").forEach(el=>el.addEventListener("click",()=>act(el.dataset.act,el.dataset.id,el)));
   v.querySelectorAll("[data-go]").forEach(el=>el.addEventListener("click",()=>{if(el._lp){el._lp=false;return}const[t,f]=el.dataset.go.split(":");if(t==="phase"&&f)curPh=f;if(t==="site"&&f)logSub=f;if(t==="mats"&&f)matF=f;go(t)}));
@@ -1174,7 +1184,7 @@ function home(){
   const toOrder=S.mats.filter(m=>needsOrder(m)&&(m.qty>0||secOf(m)!=="stock")).length;
   const nu=nextUp();
   const sched=schedule();
-  return `<div class="page-h"><h2>Overview</h2><button class="btn primary" data-act="report">${ic("share")}Report</button></div>
+  return `<div class="page-h"><h2>Overview</h2><button class="btn primary" data-go="report">${ic("trend")}Report</button></div>
   <div class="qa two"><button class="main" data-act="addphoto">${ic("camera","lg")}Photo</button><button data-act="gostock">${ic("truck","lg")}Material</button></div>
   <div class="bento">
    <section class="tile hero s2"><div class="lbl">${ic("calendar")}Schedule</div><div class="big">${left===null?"–":left>=0?left:-left}<small> ${left===null?"":left>=0?"days to go":"days past target"}</small></div><div class="sub">${S.settings.start?dshort(S.settings.start):"?"} to ${S.settings.target?dshort(S.settings.target):"?"}</div><div class="row wr" style="gap:8px">${sched.chip}</div>${fcLine()}</section>
@@ -1202,7 +1212,7 @@ function taskRow(key,single){
 const PSHORT={demo:"Demolition",site:"Site prep",found:"Foundations",walls:"Walls & Windows",roof:"Roof",svc:"IT & Services",fin:"Finishes",ext:"Stoep & deck",hand:"Handover"};
 const PCOL={demo:"#e0852f",site:"#3b93de",found:"#a77bd6",walls:"#e0603c",roof:"#2fb88a",svc:"#e3b43a",fin:"#d35d9c",ext:"#3fb0b0",hand:"#8c9be0"};
 let curPh="found";
-const backBtn=(to)=>`<button class="iconbtn" data-go="${to||"build"}" aria-label="Back to ${to==="docs"?"Documents":to==="more"?"More":to==="garden"?"Garden":"Build"}">${ic("left")}</button>`;
+const backBtn=(to)=>`<button class="iconbtn" data-go="${to||"build"}" aria-label="Back to ${to==="docs"?"Documents":to==="more"?"More":to==="garden"?"Garden":to==="home"?"Overview":"Build"}">${ic("left")}</button>`;
 const logsNewest=()=>[...S.logs].sort((a,b)=>(b.date||"").localeCompare(a.date||"")||b.id.localeCompare(a.id));
 const phasePhotoIds=id=>logsNewest().filter(l=>l.phase===id).flatMap(l=>l.media||[]);
 const phasePhoto=id=>phasePhotoIds(id)[0]||"";
@@ -3310,6 +3320,75 @@ function gardenDel(id){
     const old=S.settings.garden,ts=S.tasks.filter(t=>t.phase===pid),ms=S.mats.filter(m=>m.phase===pid),cs=S.costs.filter(c=>c.phase===pid);
     ts.forEach(t=>S.tasks.splice(S.tasks.indexOf(t),1));ms.forEach(m=>m.phase="");cs.forEach(c=>c.phase="");S.settings.garden=old.filter(x=>x.id!==id);save();render();
     toast(a.name+" removed.",()=>{S.settings.garden=old;ts.forEach(t=>S.tasks.push(t));ms.forEach(m=>m.phase=pid);cs.forEach(c=>c.phase=pid);save();render()})});
+}
+/* ---------- the report page: where the project stands, in cards ---------- */
+function reportV(){
+  const all=G(BT()),d=doneN(all),p=pct(d,all.length),td=today(),D=x=>new Date(x+"T12:00").getTime(),st=S.settings.start,en=S.settings.target;
+  const left=en?Math.ceil((D(en)-D(td))/864e5):null,f=forecast(),canM=lvl("money")>=1;
+  /* the headline */
+  let head="Set your dates",vc="var(--sky)",ico="calendar",line=`${d} of ${all.length} tasks done (${p}%).`;
+  if(st&&en&&all.length){
+    const a=D(st),b=D(en),t=D(td);
+    if(t<a){const n=Math.round((a-t)/864e5);head="Not started yet";vc="var(--sky)";ico="clock";line=`Work starts in ${n} day${n===1?"":"s"}.`}
+    else{const plan=Math.min(1,(t-a)/Math.max(1,b-a)),gap=Math.round((plan-d/all.length)*100);
+      if(gap<=5){head="On track";vc="var(--green)";ico="check"}else if(gap<=15){head=gap+"% behind plan";vc="var(--accent)";ico="alert"}else{head=gap+"% behind plan";vc="var(--red)";ico="alert"}
+      line=`${d} of ${all.length} tasks done (${p}%). ${left>=0?left+" day"+(left===1?"":"s")+" to the target.":-left+" day"+(left===-1?"":"s")+" past the target."}`}
+  }
+  const fcTxt=f&&!f.none?(f.late>3?` At this pace it finishes about ${dlong(f.date)}, ${f.late} days late.`:f.late<-3?` At this pace it finishes about ${dlong(f.date)}, ${-f.late} days early.`:` At this pace it finishes around ${dlong(f.date)}, on time.`):"";
+  const open=S.tasks.filter(t=>t.status!=="done"),issues=S.logs.filter(l=>l.kind==="issue"&&!l.fixed);
+  /* what needs attention */
+  const chk=open.filter(t=>t.status==="check"),stuck=open.filter(t=>t.status==="stuck"),od=open.filter(t=>t.due&&t.due<td).sort((a,b)=>a.due.localeCompare(b.due));
+  const ord=S.mats.filter(m=>needsOrder(m)&&(m.qty>0||secOf(m)!=="stock")),ordDue=ord.filter(m=>m.due).sort((a,b)=>a.due.localeCompare(b.due));
+  const cut=(t,n)=>t.length>n?t.slice(0,n-1)+"…":t;
+  const row=(title,sub,val,cls)=>`<div class="rrow"><div class="grow"><div class="rt">${esc(title)}</div><div class="rs">${esc(sub)}</div></div><div class="rv ${cls||""}">${val}</div></div>`;
+  const tile=(i,l,n,go)=>`<button type="button" class="rtile ${n?"on":""}" ${go?`data-go="${go}"`:""}>${ic(i)}<span>${l}</span><b>${n}</b></button>`;
+  const attn=[];
+  if(chk.length)attn.push(row("Waiting for the final check","Oldest: "+cut(chk[0].title||"",46),uk(chk),"amber"));
+  if(od.length)attn.push(row("Overdue tasks","Longest: "+cut(od[0].title,34)+" ("+Math.max(1,Math.round((D(td)-D(od[0].due))/864e5))+" days)",uk(od),"red"));
+  if(stuck.length)attn.push(row("Stuck tasks",cut(stuck[0].title,52),uk(stuck),"red"));
+  if(ord.length)attn.push(row("Materials to order",ordDue.length?"Needed first: "+ordDue[0].name+" by "+dshort(ordDue[0].due):"None have a date yet",ord.length,"amber"));
+  if(issues.length)attn.push(row("Open issues","Latest: "+cut((logsNewest().find(l=>l.kind==="issue"&&!l.fixed)||{}).text||"",48),issues.length,"red"));
+  /* the next dates */
+  const soon=[];
+  [...new Map(open.filter(t=>t.due&&t.due>=td).map(t=>[t.key,t])).values()].forEach(t=>soon.push({d:t.due,i:"clip",v:t.title.slice(0,34),x:phaseName(t.phase)}));
+  if(canM&&moneyOK){S.pays.filter(x=>!x.paid&&x.due&&x.due>=td).forEach(x=>soon.push({d:x.due,i:"cash",v:money0(x.amount),x:"Builder: "+(x.title||"payment")}));tUpcoming().filter(({s})=>s.due&&s.due>=td).forEach(({t,s})=>soon.push({d:s.due,i:"cash",v:money0(s.amount),x:t.trade+": "+(s.label||"payment")}))}
+  soon.sort((a,b)=>a.d.localeCompare(b.d));
+  /* phases */
+  const ci=Math.max(0,PHS.findIndex(x=>x[0]===curPhases()[0])),i0=Math.min(ci,Math.max(0,PHS.length-4)),strip=PHS.slice(i0,i0+4);
+  const pcol=ts=>{if(ts.some(t=>t.status==="stuck"))return"var(--red)";const dn=doneN(ts);return dn===ts.length&&ts.length?"var(--green)":dn||ts.some(t=>t.status==="doing"||t.status==="check")?"var(--accent)":"var(--line)"};
+  const phc=strip.map(([id])=>{const ts=G(S.tasks.filter(t=>t.phase===id)),dn=doneN(ts),sk=ts.filter(t=>t.status==="stuck").length,nm=dn===ts.length&&ts.length?"Done":sk?sk+" stuck":ts.some(t=>t.status==="doing"||t.status==="check")?"In progress":"Not started";
+    return `<button type="button" class="rph" data-go="phase:${id}"><i style="background:${pcol(ts)}"></i><span class="rpn">${dn}/${ts.length}</span><b>${esc(PSHORT[id])}</b><span class="rs">${nm}</span></button>`}).join("");
+  /* this week */
+  const wk=addDays(td,-6),doneWk=uk(S.tasks.filter(t=>t.status==="done"&&t.doneOn&&t.doneOn>=wk)),photos=sum(S.logs.filter(l=>l.date>=wk),l=>(l.media||[]).length),sent=S.msgs.filter(m=>new Date(m.t)>=new Date(wk+"T00:00")).length;
+  const fl=S.furn.length?fStats(S.furn):null,gt=S.tasks.filter(t=>isG(t.phase)),gd=gt.length?doneN(G(gt)):0,gn=gt.length?G(gt).length:0;
+  /* money */
+  let money="";
+  if(canM){
+    if(!moneyOK)money=`<div class="card rc"><div class="eyebrow">Project money</div><p class="muted" style="margin:8px 0 10px">The money figures are locked.</p><button class="btn" data-act="unlockextra">${ic("lock")}Unlock</button></div>`;
+    else{
+      const ct=contractAmt(),est=+S.settings.estimate||0,paidB=paidTotal(),tc=tCommit(),tp=tPaidAll(),oth=S.costs.filter(c=>!c.pay),othAll=sum(oth,c=>c.amount),othPaid=sum(oth.filter(c=>c.paid),c=>c.amount);
+      const committed=ct+tc+othAll,paid=paidB+tp+othPaid,still=Math.max(0,ct-paidB)+Math.max(0,tc-tp)+(othAll-othPaid),free=est-committed;
+      money=`<div class="card rc"><div class="eyebrow">Project money</div>
+       <div class="rstats"><div><span class="eyebrow">Estimate</span><b>${est?money0(est):"Not set"}</b></div><div><span class="eyebrow">Paid</span><b>${money0(paid)}</b></div><div><span class="eyebrow">To pay</span><b>${money0(still)}</b></div></div>
+       ${est?estBreak(est,committed,paid,free):""}
+       <div class="rlist">${row("Builder's quote","Paid "+money0(paidB)+" · still to pay "+money0(Math.max(0,ct-paidB)),money0(ct))}${tc?row("Other quotes","Paid "+money0(tp)+" · still to pay "+money0(Math.max(0,tc-tp)),money0(tc)):""}${othAll?row("Other expenses","Paid "+money0(othPaid)+" · still to pay "+money0(othAll-othPaid),money0(othAll)):""}</div>
+       <button type="button" class="linkbtn" data-go="money" style="padding:0;min-height:40px">Open the money page</button></div>`;
+    }
+  }
+  const dst=lvl("diary")>=1&&S.diary.length?diaryStats():null;
+  return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn("home")}<h2>Report</h2></div><button class="btn" data-act="report" aria-label="Share a progress update">${ic("share")}Share</button></div>
+  <section class="card rhero" style="--vc:${vc}"><div class="row between" style="align-items:flex-start;gap:10px"><div class="grow"><div class="rbig">${esc(head)}</div><p class="rlead">${esc(line)}${esc(fcTxt)}</p></div><span class="rico">${ic(ico,"xl")}</span></div>
+   <div class="rstats"><div><span class="eyebrow">Work done</span><b>${p}%</b></div><div><span class="eyebrow">Days to go</span><b>${left===null?"–":left>=0?left:"-"+(-left)}</b></div><div><span class="eyebrow">Open issues</span><b>${issues.length}</b></div></div></section>
+  <div class="card rc"><div class="eyebrow">Phases · now and next</div><div class="rphs">${phc}</div></div>
+  <div class="card rc"><div class="eyebrow">Needs attention</div>
+   <div class="rtiles">${tile("check","To check",uk(chk),"tasks")}${tile("alert","Stuck",uk(stuck),"tasks")}${tile("clock","Overdue",uk(od),"tasks")}${tile("truck","To order",ord.length,"mats:need")}</div>
+   <div class="rlist">${attn.join("")||`<p class="muted" style="margin:10px 0 0">Nothing needs attention right now.</p>`}</div>
+   ${soon.length?`<div class="rsoon">${soon.slice(0,3).map(x=>`<div class="rsr"><b>${dshort(x.d)}</b>${ic(x.i)}<span class="rsv">${esc(x.v)}</span><span class="rs">${esc(x.x)}</span></div>`).join("")}</div>`:""}</div>
+  <div class="card rc"><div class="eyebrow">Finish forecast</div><div class="rfcs"><div><span class="eyebrow">Planned</span><b>${en?dshort(en):"–"}</b></div><div><span class="eyebrow">Forecast</span><b>${f&&!f.none?dshort(f.date):"–"}</b></div><div><span class="eyebrow">Difference</span><b class="${f&&!f.none?(f.late>3?"red":f.late<-3?"green":""):""}">${f&&!f.none?(f.late>3?"+"+f.late+" days":f.late<-3?-f.late+" days early":"On time"):"–"}</b></div></div>${f&&f.none?`<p class="hint">${esc(f.why)}</p>`:""}</div>
+  ${money}
+  <div class="card rc"><div class="eyebrow">This week</div><div class="rstats"><div><span class="eyebrow">Tasks done</span><b>${doneWk}</b></div><div><span class="eyebrow">Photos</span><b>${photos}</b></div><div><span class="eyebrow">Updates sent</span><b>${sent}</b></div></div></div>
+  ${dst?`<div class="card rc"><div class="eyebrow">Site days</div><div class="rstats"><div><span class="eyebrow">Logged</span><b>${dst.days}</b></div><div><span class="eyebrow">Rain days</span><b>${dst.rain}</b></div><div><span class="eyebrow">Days lost</span><b>${num(dst.lost,1)}</b></div></div></div>`:""}
+  ${fl||gn?`<div class="card rc"><div class="eyebrow">Furniture, decor and garden</div><div class="rlist">${fl?row("Furniture and decor",fl.c?fl.c+" waiting for your check":"Items done",fl.d+" of "+fl.n):""}${gn?row("Garden","Tasks done",gd+" of "+gn):""}</div></div>`:""}`;
 }
 /* ---------- start ---------- */
 render();
