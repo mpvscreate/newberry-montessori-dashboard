@@ -2445,9 +2445,14 @@ const isMoneyMedia=mid=>S.docs.some(d=>d.media===mid&&docMoney(d));
 const toMe=m=>(m.to||[]).includes("all")||(m.to||[]).includes(sm.pid);
 const myMsgs=()=>S.msgs.filter(m=>m.from===sm.pid||toMe(m)).sort((a,b)=>b.t-a.t);
 const unreadMsgs=()=>sm.code?S.msgs.filter(m=>m.from!==sm.pid&&toMe(m)&&!S.rcpt.some(r=>r.m===m.id&&r.p===sm.pid)):[];
+/* the red number on the app icon follows the unread updates (works for the app added to the Home Screen) */
+function badgeSet(n){
+  try{if(navigator.setAppBadge){if(n>0)navigator.setAppBadge(n).catch(()=>{});else navigator.clearAppBadge().catch(()=>{})}}catch{}
+  try{caches.open("b3-badge").then(c=>c.put("n",new Response(String(n)))).catch(()=>{})}catch{}
+}
 function paintBell(){
   const b=$("#bell");if(!b)return;b.hidden=!sm.code;if(!sm.code)return;
-  const n=unreadMsgs().length;b.innerHTML=ic("bell")+(n?`<span class="bdg">${n>9?"9+":n}</span>`:"");
+  const n=unreadMsgs().length;badgeSet(n);b.innerHTML=ic("bell")+(n?`<span class="bdg">${n>9?"9+":n}</span>`:"");
   b.setAttribute("aria-label",n?`Updates, ${n} new`:"Updates");
 }
 function markReadNow(){
