@@ -368,7 +368,8 @@ body.ro .page-h .btn[data-act="docprint"]{display:inline-flex!important}
 .pa-img{display:block;max-width:100%;max-height:92vh;margin:0 auto;object-fit:contain}.pa-cap{font:12px/1.4 sans-serif;color:#000;margin:0 0 6px}@page{margin:10mm}}
 .stack{display:flex;height:14px;border-radius:99px;overflow:hidden;background:var(--field);margin:10px 0}.stack i{display:block;height:100%}
 .legend{list-style:none;padding:0;margin:8px 0 0;display:grid;gap:6px}.legend li{display:flex;align-items:center;gap:8px;font-size:.88rem}.legend li i{width:10px;height:10px;border-radius:50%;flex:none}.legend li b{margin-left:auto}
-.pa-h{font:700 16px/1.3 sans-serif;color:#000;margin:0 0 4px}.pa-row{font:12px/1.45 sans-serif;color:#000;border-bottom:1px solid #aaa;padding:6px 0}
+.pa-h{font:700 16px/1.3 sans-serif;color:#000;margin:0 0 4px}.pa-ph{font:700 14px/1.3 sans-serif;color:#000;margin:14px 0 6px;padding-bottom:3px;border-bottom:2px solid #000;break-after:avoid}.pa-task{break-inside:avoid;border-bottom:1px solid #aaa;padding:6px 0 8px}.pa-task b{font:700 12.5px/1.4 sans-serif}.pa-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:6px}.pa-thumb{display:block;width:100%;aspect-ratio:4/3;object-fit:cover;background:#ddd}.pa-vm{font:11px/1.3 sans-serif;color:#555;display:grid;place-items:center;aspect-ratio:4/3;background:#eee}
+.mct{display:inline-flex;align-items:center;gap:3px;margin-left:8px;font:600 .78rem var(--body);color:var(--muted);vertical-align:middle}.pa-row{font:12px/1.45 sans-serif;color:#000;border-bottom:1px solid #aaa;padding:6px 0}
 .micwrap{position:sticky;bottom:calc(96px + env(safe-area-inset-bottom));height:0;z-index:4;text-align:right;pointer-events:none}
 .micfab{pointer-events:auto;transform:translateY(calc(-100% - 8px));display:inline-flex;align-items:center;gap:8px;min-height:58px;padding:0 22px 0 18px;border:0;border-radius:99px;background:var(--accent);color:var(--accent-ink,#1b1300);font:700 .95rem var(--body);box-shadow:0 8px 24px rgba(0,0,0,.45);touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;cursor:pointer}
 .micfab .i{width:24px;height:24px}
@@ -967,11 +968,12 @@ async function prepPhoto(file,maxPx){
   return new Promise(r=>c.toBlob(b=>r(b||file),"image/jpeg",maxPx>1600?.86:.76));
 }
 const urls=new Map();
-async function mUrl(id){if(urls.has(id))return urls.get(id);const b=await mGet(id).catch(()=>null);if(!b)return null;const u=URL.createObjectURL(b);urls.set(id,u);return u}
+const mtype=new Map(),isVid=id=>/^video\//.test(mtype.get(id)||"");
+async function mUrl(id){if(urls.has(id))return urls.get(id);const b=await mGet(id).catch(()=>null);if(!b)return null;mtype.set(id,b.type||"");const u=URL.createObjectURL(b);urls.set(id,u);return u}
 async function hydrate(root=document){
   for(const el of root.querySelectorAll("[data-m]")){
     const id=el.dataset.m,u=await mUrl(id);
-    if(u){el.innerHTML=`<img src="${u}" alt="${esc(el.dataset.alt||"Site photo")}" loading="lazy">`}
+    if(u){el.innerHTML=isVid(id)?`<video src="${u}#t=0.1" preload="metadata" muted playsinline></video><span class="play" aria-hidden="true"></span>`:`<img src="${u}" alt="${esc(el.dataset.alt||"Site photo")}" loading="lazy">`}
     else el.innerHTML=`<div class="mmiss">${ic("cloud","lg")}<span class="small">Photo is still loading from the shared project</span></div>`;
   }
 }
@@ -1201,7 +1203,7 @@ function taskRow(key,single){
   const lab=t=>`${esc(t.title)}, ${esc(roomName(t.room))}: ${stLabel(t.status)}. Tap to tick done or undo. Hold for more options.`;
   const btn=t=>`<button class="st ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${lab(t)}">${stIcon(t.status)||ic("check")}</button>`;
   const pill=t=>`<button class="stp ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${lab(t)}">${stIcon(t.status)||ic("minus","sm")}<span><b>${t.room==="shared"?"All":roomNo(t.room)}</b>${{todo:"To do",doing:"In progress",check:"To check",done:"Done",stuck:"Stuck"}[t.status]}</span></button>`;
-  const head=`<div class="lt ${allDone?"dn":""}">${esc(t0.title)}</div>${sub?`<div class="ls ${stuck||od?"bad":""}">${esc(sub)}</div>`:""}`;
+  const mn=new Set(ts.flatMap(t=>t.media||[])).size,head=`<div class="lt ${allDone?"dn":""}">${esc(t0.title)}${mn?`<span class="mct" aria-label="${mn} photo${mn===1?"":"s"} or video${mn===1?"":"s"}">${ic("camera","sm")}${mn}</span>`:""}</div>${sub?`<div class="ls ${stuck||od?"bad":""}">${esc(sub)}</div>`:""}`;
   const merged=!single&&(ts.length===1||ts.every(t=>t.status===ts[0].status)),ids=ts.map(t=>t.id).join(",");
   const btnAll=`<button class="st ${t0.status}" data-act="cycboth" data-id="${t0.id}" data-ids="${ids}" aria-label="${esc(t0.title)}, both classrooms: ${stLabel(t0.status)}. Tap to tick done or undo. Hold for more options.">${stIcon(t0.status)||ic("check")}</button>`;
   return single?`<li data-mv="${key}">${btn(t0)}<div class="grow">${head}${t0.note?`<div class="ls">${esc(t0.note)}</div>`:""}</div>${rowBtns("task",t0.title,t0.key+"|"+t0.room)}</li>`
@@ -1371,6 +1373,7 @@ function more(){
    ${row("truck","Materials","Stock, fittings, electrical, sundries and suppliers","gomats")}
    ${lvl("money")>=1&&canMoney()?row("users","Extra labour","Approved extra work and what is still to pay"+(moneyOK?"":" · Locked"),"goextra"):""}
    ${row("camera","Site log and issues","Photos, notes and things to fix","gosite")}
+   ${row("download","Export report","Tasks with their photos and videos, as a PDF or a folder of files","goexport")}
    ${row("clock","Activity log","Automatic history of what changed","acts")}
   </ul></div>
     <div class="card"><ul class="list">
@@ -1399,7 +1402,7 @@ function act(a,id,el){
   ({
    cyc:()=>cycTask(id),opentask:()=>taskSheet(...id.split("|")),edittask:()=>taskSheet(...id.split("|")),
    deltask:()=>{const[k]=id.split("|");const f=roomF;delRecs(S.tasks,t=>t.key===k&&(f==="all"||t.room===f||t.room==="shared"),"Task")},
-   addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>quickPhoto(id),gbackup:()=>backupSheet(),addfurn:()=>furnSheet(),editfurn:()=>furnSheet(id),delfurn:()=>delRecs(S.furn,x=>x.id===id,"Item"),furnstarter:()=>furnStarter(),furnlb:()=>{const[rid,i]=id.split("|"),r=S.furn.find(x=>x.id===rid);if(r)lightbox(r.media||[],+i)},gofurn:()=>{bmode="furn";lsSet("build-bmode","furn");if(id)fRoom=id;go("build");render()},adddiary:()=>diarySheet(),editdiary:()=>diarySheet(id),godiary:()=>go("diary"),goextra:()=>go("extra"),diaryshare:()=>{const tx=diaryText(14);if(!tx){toast("No diary entries in the last 14 days.");return}shareText(tx)},diaryprint:()=>diaryPrint(),savelink:()=>personSheet(sm.pid),linkdismiss:()=>{lsSet("build-linkdis",today());render()},cycboth:()=>cycMany(((el&&el.dataset.ids)||id).split(",")),docselect:()=>{docSel=docSel?null:new Set();render()},docall:()=>{const l=docList();docSel=docSel&&docSel.size===l.length?new Set():new Set(l.map(d=>d.id));render()},docprint:()=>printSelectedDocs(),gotasks:()=>{taskF=id||"";go("tasks")},gotrades:()=>{moneySeg="trades";go("money")},pushsheet:()=>pushSheet(),pushdismiss:()=>{lsSet("build-pushdis",today());render()},restore:()=>restoreSheet(),addtrade:()=>tradeSheet(),edittrade:()=>tradeSheet(id),opentrade:()=>tradeView(id),deltrade:()=>delRecs(S.trades,x=>x.id===id,"Quote"),tradeaccept:()=>{const t=S.trades.find(x=>x.id===id);if(!t)return;const ex=tradeStatus(t,"accepted");logAct(`Accepted the ${t.trade} quote from ${tName(t)}: ${money(tVal(t))}`,1);save();render();toast("Quote accepted."+ex.msg,ex.undo)},paystage:()=>{const[tid,sid]=id.split("|"),t=S.trades.find(x=>x.id===tid),sg=t&&(t.stages||[]).find(x=>x.id===sid);if(!sg)return;const u=undoEdit(sg,{paid:true,paidOn:today()});logAct(`Paid ${money(sg.amount)} to ${tName(t)} (${t.trade})`,1);save();render();toast(`${money(sg.amount)} marked paid.`,u)},goinbox:()=>go("inbox"),gopeople:()=>go("people"),newmsg:()=>newMsgSheet(),addperson:()=>personSheet(),editperson:()=>personSheet(id),msglb:()=>{const[mid,i]=id.split("|");const m=S.msgs.find(x=>x.id===mid);if(m)lightbox(m.media||[],+i)},sharesheet:()=>shareSheet(),bkdismiss:()=>{lsSet("build-bkdis",today());render()},phdrive:()=>driveSave(phasePhotoIds(id).map((m,i)=>({media:m,name:(PSHORT[id]||"Phase")+" photo "+(i+1)+".jpg"}))),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),addcost:()=>costSheet(),editcost:()=>S.costs.find(x=>x.id===id)?.extra?extraSheet(null,id):costSheet(id),addextra:()=>extraSheet(id),editextra:()=>extraSheet(null,id),delextra:()=>delRecs(S.costs,c=>c.id===id,"Extra labour"),unlockextra:()=>moneyGate(()=>render()),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
+   addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>quickPhoto(id),gbackup:()=>backupSheet(),addfurn:()=>furnSheet(),editfurn:()=>furnSheet(id),delfurn:()=>delRecs(S.furn,x=>x.id===id,"Item"),furnstarter:()=>furnStarter(),furnlb:()=>{const[rid,i]=id.split("|"),r=S.furn.find(x=>x.id===rid);if(r)lightbox(r.media||[],+i)},gofurn:()=>{bmode="furn";lsSet("build-bmode","furn");if(id)fRoom=id;go("build");render()},adddiary:()=>diarySheet(),editdiary:()=>diarySheet(id),godiary:()=>go("diary"),goexport:()=>exportSheet(),goextra:()=>go("extra"),diaryshare:()=>{const tx=diaryText(14);if(!tx){toast("No diary entries in the last 14 days.");return}shareText(tx)},diaryprint:()=>diaryPrint(),savelink:()=>personSheet(sm.pid),linkdismiss:()=>{lsSet("build-linkdis",today());render()},cycboth:()=>cycMany(((el&&el.dataset.ids)||id).split(",")),docselect:()=>{docSel=docSel?null:new Set();render()},docall:()=>{const l=docList();docSel=docSel&&docSel.size===l.length?new Set():new Set(l.map(d=>d.id));render()},docprint:()=>printSelectedDocs(),gotasks:()=>{taskF=id||"";go("tasks")},gotrades:()=>{moneySeg="trades";go("money")},pushsheet:()=>pushSheet(),pushdismiss:()=>{lsSet("build-pushdis",today());render()},restore:()=>restoreSheet(),addtrade:()=>tradeSheet(),edittrade:()=>tradeSheet(id),opentrade:()=>tradeView(id),deltrade:()=>delRecs(S.trades,x=>x.id===id,"Quote"),tradeaccept:()=>{const t=S.trades.find(x=>x.id===id);if(!t)return;const ex=tradeStatus(t,"accepted");logAct(`Accepted the ${t.trade} quote from ${tName(t)}: ${money(tVal(t))}`,1);save();render();toast("Quote accepted."+ex.msg,ex.undo)},paystage:()=>{const[tid,sid]=id.split("|"),t=S.trades.find(x=>x.id===tid),sg=t&&(t.stages||[]).find(x=>x.id===sid);if(!sg)return;const u=undoEdit(sg,{paid:true,paidOn:today()});logAct(`Paid ${money(sg.amount)} to ${tName(t)} (${t.trade})`,1);save();render();toast(`${money(sg.amount)} marked paid.`,u)},goinbox:()=>go("inbox"),gopeople:()=>go("people"),newmsg:()=>newMsgSheet(),addperson:()=>personSheet(),editperson:()=>personSheet(id),msglb:()=>{const[mid,i]=id.split("|");const m=S.msgs.find(x=>x.id===mid);if(m)lightbox(m.media||[],+i)},sharesheet:()=>shareSheet(),bkdismiss:()=>{lsSet("build-bkdis",today());render()},phdrive:()=>driveSave(phasePhotoIds(id).map((m,i)=>({media:m,name:(PSHORT[id]||"Phase")+" photo "+(i+1)+".jpg"}))),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),addcost:()=>costSheet(),editcost:()=>S.costs.find(x=>x.id===id)?.extra?extraSheet(null,id):costSheet(id),addextra:()=>extraSheet(id),editextra:()=>extraSheet(null,id),delextra:()=>delRecs(S.costs,c=>c.id===id,"Extra labour"),unlockextra:()=>moneyGate(()=>render()),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
    payall:()=>{payAll=!payAll;render()},resetpays:()=>{const ps=[...S.pays],cs=S.costs.filter(c=>c.pay);S.pays.length=0;cs.forEach(c=>S.costs.splice(S.costs.indexOf(c),1));payAll=false;save();render();toast("All builder payments reset to R 0.",()=>{ps.forEach(x=>S.pays.push(x));cs.forEach(c=>S.costs.push(c))})},recpay:()=>recPaySheet(),weekly:()=>weeklySheet(),addpay:()=>paySheet(),editpay:()=>paySheet(id),contract:()=>contractSheet(),joinlink:()=>shareSheet(),iosdismiss:()=>{lsSet("build-iosdis",today());render()},ncdismiss:()=>{lsSet("build-ncdis",today());render()},gedit:()=>{gEdit=!gEdit;render()},gadd:()=>gardenNameSheet(),gren:()=>gardenNameSheet(id),gdel:()=>gardenDel(id),pedit:()=>{if(!perm.manage)return;pEdit=!pEdit;render()},padd:()=>{if(perm.manage)phaseNameSheet()},pren:()=>{if(perm.manage)phaseNameSheet(id)},pdel:()=>{if(perm.manage)phaseDel(id)},pmv:()=>{if(!perm.manage)return;const[k,d]=id.split("|");phaseMove(k,+d)},estimate:()=>estimateSheet(),typicalpay:()=>typicalPays(),
    paypay:()=>{const x=S.pays.find(q=>q.id===id),u=undoEdit(x,{paid:true,paidOn:today()});payCost(x);logAct(`Builder payment of ${money(x.amount)} recorded`,1);save();render();toast(`${money(x.amount)} paid to the builder.`,()=>{u();payCost(x)})},
    delpay:()=>{const x=S.pays.find(q=>q.id===id),lc=S.costs.find(c=>c.id==="pay_"+id);S.pays.splice(S.pays.indexOf(x),1);if(lc)S.costs.splice(S.costs.indexOf(lc),1);save();render();toast("Stage deleted.",()=>{S.pays.push(x);if(lc)S.costs.push(lc)})},
@@ -1466,23 +1469,38 @@ function taskSheet(key,roomId){
   const draft={};ts.forEach(t=>draft[t.room]={status:t.status,due:t.due||"",who:t.who||"",assignee:t.assignee||"",note:t.note||""});
   let cur=ts.some(t=>t.room===roomId)?roomId:ts[0].room,title=ts[0].title,split=ts.length>1&&ts.some(t=>{const a=draft[t.room],b=draft[ts[0].room];return a.status!==b.status||a.due!==b.due||a.who!==b.who||a.assignee!==b.assignee||a.note!==b.note});
   const names=[...new Set([me,...S.tasks.map(t=>t.who)].filter(Boolean))].slice(0,5);
+  let keepM=[...new Set(ts.flatMap(t=>t.media||[]))],addM=[];const mdate0={};ts.forEach(t=>Object.assign(mdate0,t.mdate||{}));
   const body=()=>{const d=draft[cur];return `<label class="f">Status</label>${chipRow("status",perm.manage?ST:ST.filter(x=>x[0]!=="done"||d.status==="done"),d.status)}${!perm.manage&&d.status==="done"?`<p class="hint">Checked and approved by the Project Lead. Only the lead can change it.</p>`:""}
    ${dateField("du",d.due,"Due date").replace(/<div class="chips"[\s\S]*?<\/div>/,futureChips("du"))}
    ${assignBlock(d,names)}
    <label class="f" for="nt">Note</label><textarea id="nt" class="t" maxlength="400" placeholder="Anything the team should know">${esc(d.note)}</textarea>${micBtn("nt","Speak a note")}`};
   sheet("Task",`<form id="f" novalidate><label class="f" for="ti">Task</label><textarea id="ti" class="t grow-ta" rows="1" maxlength="160">${esc(title)}</textarea>${micBtn("ti","Speak the task name")}
    ${ts.length>1?`<div class="row between" style="margin:10px 0 4px;gap:8px"><span class="muted small" id="spt">${split?"Editing one classroom":"Applies to both classrooms"}</span><button type="button" class="linkbtn" id="spl" style="padding:0;min-height:36px">${split?"Edit both together":"Split by classroom"}</button></div><div class="segc" role="group" id="rm" ${split?"":"hidden"}>${ts.sort((a,b)=>roomNo(a.room)-roomNo(b.room)).map(t=>`<button type="button" data-r="${t.room}" aria-pressed="${t.room===cur}">${esc(roomName(t.room))}</button>`).join("")}</div>`:`<p class="muted small" style="margin:6px 0 0">${esc(roomName(cur))}</p>`}
-   <div id="body">${body()}</div><div class="foot"><button class="btn primary block">Save task</button></div></form>`,(sh,close)=>{
+   <div id="body">${body()}</div>
+   <label class="f">Photos and videos</label><div class="photo-add"><button type="button" class="btn" id="tcam">${ic("camera")}Take photo</button><button type="button" class="btn" id="tpick">${ic("image")}From gallery</button></div><input type="file" id="tfc" accept="image/*" capture="environment" hidden><input type="file" id="tfp" accept="image/*,video/*" multiple hidden><div class="pthumbs" id="tth"></div><p class="hint">Videos can be up to 15 MB, about 20 seconds. Photos are shrunk to your chosen photo size.</p>
+   <div class="foot"><button class="btn primary block">Save task</button></div></form>`,(sh,close)=>{
     const read=()=>{const d=draft[cur];d.due=sh.querySelector("#du")?.value||"";d.who=sh.querySelector("#wh")?.value.trim()||"";if(d.assignee&&d.who!==pName(d.assignee))d.assignee="";d.note=sh.querySelector("#nt")?.value.trim()||"";title=sh.querySelector("#ti").value};
     const wire=()=>{wireDc(sh);wireMics(sh);sh.querySelectorAll('[data-ch="status"]').forEach(b=>b.onclick=()=>{draft[cur].status=b.dataset.v;sh.querySelectorAll('[data-ch="status"]').forEach(x=>x.setAttribute("aria-pressed",x===b))});
       sh.querySelectorAll("[data-nm]").forEach(b=>b.onclick=()=>{sh.querySelector("#wh").value=b.dataset.nm});
       sh.querySelectorAll("[data-as]").forEach(b=>b.onclick=()=>{const d=draft[cur],prev=d.assignee&&pName(d.assignee),w=sh.querySelector("#wh");d.assignee=asgToggle(d.assignee,b.dataset.as);if(d.assignee)w.value=pName(d.assignee);else if(w.value===prev)w.value="";asPress(sh,d.assignee)})};
+    const paintM=()=>{const th=sh.querySelector("#tth");
+      th.innerHTML=keepM.map((m,i)=>`<div class="etile"><span data-m="${m}" style="position:absolute;inset:0"></span><button type="button" data-open="${i}" aria-label="Open photo or video ${i+1}" style="position:absolute;inset:0;border:0;padding:0;background:none"></button><button type="button" class="rm" data-k="${m}" aria-label="Remove">${ic("x","sm")}</button></div>`).join("")+addM.map((a,i)=>`<div class="etile">${a.video?`<video src="${a.url}#t=0.1" muted playsinline preload="metadata"></video><span class="play"></span>`:`<img src="${a.url}" alt="New photo ${i+1}">`}<button type="button" class="rm" data-a="${i}" aria-label="Remove">${ic("x","sm")}</button></div>`).join("");
+      th.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>lightbox(keepM,+b.dataset.open));
+      th.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{keepM=keepM.filter(x=>x!==b.dataset.k);paintM()});
+      th.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{URL.revokeObjectURL(addM[+b.dataset.a].url);addM.splice(+b.dataset.a,1);paintM()});
+      hydrate(th)};
+    const takeM=e=>{[...e.target.files].forEach(fl=>{const v=/^video\//.test(fl.type);if(v&&fl.size>15*1048576){toast("That video is over 15 MB. Record a shorter clip.");return}if(!v&&!/^image\//.test(fl.type))return;addM.push({file:fl,url:URL.createObjectURL(fl),video:v})});e.target.value="";paintM()};
+    sh.querySelector("#tfc").onchange=takeM;sh.querySelector("#tfp").onchange=takeM;sh.querySelector("#tcam").onclick=()=>sh.querySelector("#tfc").click();sh.querySelector("#tpick").onclick=()=>sh.querySelector("#tfp").click();paintM();
     wire();
     sh.querySelector("#spl")?.addEventListener("click",()=>{read();split=!split;if(!split)ts.forEach(t=>{draft[t.room]={...draft[cur]}});sh.querySelector("#rm").hidden=!split;sh.querySelector("#spt").textContent=split?"Editing one classroom":"Applies to both classrooms";sh.querySelector("#spl").textContent=split?"Edit both together":"Split by classroom";if(!split){sh.querySelector("#body").innerHTML=body();wire()}});
     sh.querySelectorAll("#rm [data-r]").forEach(b=>b.onclick=()=>{read();cur=b.dataset.r;sh.querySelectorAll("#rm [data-r]").forEach(x=>x.setAttribute("aria-pressed",x===b));sh.querySelector("#body").innerHTML=body();wire()});
-    sh.querySelector("#f").onsubmit=e=>{e.preventDefault();read();if(!split)ts.forEach(t=>{draft[t.room]={...draft[cur]}});const ti=sh.querySelector("#ti");if(!title.trim())return showErr(sh,ti,"A task needs a name.");
+    sh.querySelector("#f").onsubmit=async e=>{e.preventDefault();read();if(!split)ts.forEach(t=>{draft[t.room]={...draft[cur]}});const ti=sh.querySelector("#ti");if(!title.trim())return showErr(sh,ti,"A task needs a name.");
+      const sb2=sh.querySelector(".foot .btn");sb2.disabled=true;sb2.textContent="Saving…";
+      const mids=[...keepM],md={};keepM.forEach(m=>{if(mdate0[m])md[m]=mdate0[m]});
+      for(const a of addM){const blob=a.video?a.file:await prepPhoto(a.file,PSIZES[psize][1]),mid=uid();await mPut(mid,blob);queueMedia(mid);mids.push(mid);md[mid]=today()}
+      addM.forEach(a=>URL.revokeObjectURL(a.url));
       const nt=ts.flatMap(t=>asgNew(t.assignee,draft[t.room].assignee));
-      const ups=ts.map(t=>{const d=draft[t.room];const stt=(!perm.manage&&t.status==="done")?"done":(!perm.manage&&d.status==="done"?"check":d.status);return undoEdit(t,{title:title.trim(),status:stt,due:d.due,who:d.who,assignee:d.assignee||"",note:d.note,doneOn:stt==="done"?(t.doneOn||today()):""})});
+      const ups=ts.map(t=>{const d=draft[t.room];const stt=(!perm.manage&&t.status==="done")?"done":(!perm.manage&&d.status==="done"?"check":d.status);return undoEdit(t,{title:title.trim(),status:stt,due:d.due,who:d.who,assignee:d.assignee||"",note:d.note,doneOn:stt==="done"?(t.doneOn||today()):"",media:mids,mdate:md})});
       save();close();render();toast("Task saved.",()=>ups.forEach(u=>u()));[...new Set(nt)].forEach(pid=>notifySend([pid],"New task for you",title.trim().slice(0,100),"tasks"))};
   });
 }
@@ -1798,8 +1816,8 @@ function backupSheet(){
 }
 function lightbox(ids,start){
   let i=start;const el=document.createElement("div");el.id="lbx";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","Photo viewer");
-  const draw=async()=>{const u=await mUrl(ids[i]);el.innerHTML=`<div class="lb-body">${u?`<img src="${u}" alt="Site photo ${i+1} of ${ids.length}">`:`<div class="mmiss" style="color:#fff">${ic("cloud","xl")}<span>Photo is still loading</span></div>`}</div><button class="lb-b lb-x" aria-label="Close photo">${ic("x")}</button><button class="lb-b lb-g" aria-label="Save this photo to Google Drive">${ic("cloud")}</button>${ids.length>1?`<button class="lb-b lb-n prev" aria-label="Previous photo">${ic("left")}</button><button class="lb-b lb-n next" aria-label="Next photo">${ic("chev")}</button><div class="lb-cap">${i+1} of ${ids.length}</div>`:""}`;
-    el.querySelector(".lb-x").onclick=close;el.querySelector(".lb-g").onclick=()=>driveSave([{media:ids[i],name:"Site photo "+ids[i].slice(-6)+".jpg"}]);el.querySelector(".prev")?.addEventListener("click",()=>{i=(i-1+ids.length)%ids.length;draw()});el.querySelector(".next")?.addEventListener("click",()=>{i=(i+1)%ids.length;draw()});el.querySelector(".lb-x").focus()};
+  const draw=async()=>{const u=await mUrl(ids[i]);el.innerHTML=`<div class="lb-body">${u?(isVid(ids[i])?`<video src="${u}" controls playsinline autoplay></video>`:`<img src="${u}" alt="Site photo ${i+1} of ${ids.length}">`):`<div class="mmiss" style="color:#fff">${ic("cloud","xl")}<span>Photo is still loading</span></div>`}</div><button class="lb-b lb-x" aria-label="Close photo">${ic("x")}</button><button class="lb-b lb-g" aria-label="Save this photo to Google Drive">${ic("cloud")}</button>${ids.length>1?`<button class="lb-b lb-n prev" aria-label="Previous photo">${ic("left")}</button><button class="lb-b lb-n next" aria-label="Next photo">${ic("chev")}</button><div class="lb-cap">${i+1} of ${ids.length}</div>`:""}`;
+    el.querySelector(".lb-x").onclick=close;el.querySelector(".lb-g").onclick=()=>driveSave([{media:ids[i],name:"Site photo "+ids[i].slice(-6)+(isVid(ids[i])?(mtype.get(ids[i])==="video/quicktime"?".mov":".mp4"):".jpg")}]);el.querySelector(".prev")?.addEventListener("click",()=>{i=(i-1+ids.length)%ids.length;draw()});el.querySelector(".next")?.addEventListener("click",()=>{i=(i+1)%ids.length;draw()});el.querySelector(".lb-x").focus()};
   const key=e=>{if(e.key==="Escape"){e.stopPropagation();close()}else if(e.key==="ArrowLeft")el.querySelector(".prev")?.click();else if(e.key==="ArrowRight")el.querySelector(".next")?.click()};
   function close(){document.removeEventListener("keydown",key,true);el.remove();if(!closeSheet){document.body.classList.remove("lock");[$("#app"),$("nav.tabs")].forEach(x=>x.inert=false)}}
   document.addEventListener("keydown",key,true);document.body.append(el);document.body.classList.add("lock");[$("#app"),$("nav.tabs")].forEach(x=>x.inert=true);draw();
@@ -2443,7 +2461,7 @@ const ROLE_PICK=["site","builder","owner","decor","finance","other"];
 const roleLabel=r=>(ROLES[r]||ROLES.other).label;
 const DEFAULT_PEOPLE=[["Albert","site"],["Jonathan","builder"],["Newberry","owner"],["Talana","decor"],["Audrey","finance"]];
 const READ_ACTS0=["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock","plprev","plnext","phdrive","gbackup"].concat(["goinbox","gopeople","newmsg","msglb","sharesheet"]);
-const READ_ACTS=READ_ACTS0.concat(["gotasks","gotrades","pushsheet","pushdismiss","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb"]);
+const READ_ACTS=READ_ACTS0.concat(["gotasks","gotrades","pushsheet","pushdismiss","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb"]);
 const MONEY_ACTS=["addcost","editcost","delcost","budget","addpay","editpay","delpay","recpay","paypay","paycost","contract","typicalpay","weekly","resetpays","payall","report"];
 MONEY_ACTS.push("addtrade","edittrade","deltrade","opentrade","tradeaccept","paystage");
 const NOTE_ACTS=["addphoto","phphoto","adddoc"];
@@ -2913,7 +2931,7 @@ function tasksV(){
   const list=open.filter(test).sort((a,b)=>((a.due&&a.due<td?0:1)-(b.due&&b.due<td?0:1))||(a.due||"9999").localeCompare(b.due||"9999")||(a.order??0)-(b.order??0));
   const seen=new Set(),rows=[];
   list.forEach(t=>{const sib=S.tasks.filter(x=>x.key===t.key),merged=sib.length>1&&sib.every(x=>x.status===t.status&&(x.assignee||"")===(t.assignee||"")&&x.due===t.due);if(merged){if(seen.has(t.key))return;seen.add(t.key)}rows.push({t,merged,sib})});
-  const row=({t,merged,sib})=>{const od=t.due&&t.due<td,meta=[merged?"Both classrooms":roomName(t.room),PSHORT[t.phase]||"",t.due?`${od?"Overdue · ":"Due "}${dshort(t.due)}`:"",t.assignee?pName(t.assignee):t.who].filter(Boolean).join(" · ");
+  const row=({t,merged,sib})=>{const od=t.due&&t.due<td,meta=[merged?"Both classrooms":roomName(t.room),PSHORT[t.phase]||"",t.media?.length?t.media.length+" attached":"",t.due?`${od?"Overdue · ":"Due "}${dshort(t.due)}`:"",t.assignee?pName(t.assignee):t.who].filter(Boolean).join(" · ");
     const tick=merged?`<button class="st ${t.status}" data-act="cycboth" data-id="${t.id}" data-ids="${sib.map(x=>x.id).join(",")}" aria-label="${esc(t.title)}, both classrooms: ${stLabel(t.status)}. Tap to tick done or undo. Hold for more options.">${stIcon(t.status)||ic("check")}</button>`:`<button class="st ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${esc(t.title)}: ${stLabel(t.status)}. Tap to tick done or undo. Hold for more options.">${stIcon(t.status)||ic("check")}</button>`;
     return `<li>${tick}<div class="grow tap" tabindex="0" data-act="opentask" data-id="${t.key}|${t.room}"><div class="lt">${esc(t.title)}</div><div class="ls ${od||t.status==="stuck"?"bad":""}">${esc(meta)}</div></div></li>`};
   return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Tasks</h2></div></div>
@@ -3173,6 +3191,115 @@ function diaryPrint(){
   const st=diaryStats(),list=S.diary.slice().sort((a,b)=>a.date.localeCompare(b.date)||(a.t||0)-(b.t||0)),area=document.createElement("div");area.id="printarea";
   area.innerHTML=`<div class="pa-h">${esc(S.settings.name||"Site")}: site diary</div><div class="pa-cap">${st.days} days logged · ${st.rain} rain day${st.rain===1?"":"s"} · ${num(st.lost,1)} day${st.lost===1?"":"s"} lost to delays · printed ${esc(dlong(today()))}</div>`+list.map(e=>`<div class="pa-row"><b>${esc(dlong(e.date))}</b> · ${esc(diaryLine(e))}${e.who?" ("+esc(e.who)+")":""}</div>`).join("");
   printNode(area);
+}
+/* ---------- export a report: tasks with their photos and videos ---------- */
+const exSafe=x=>String(x||"").replace(/[\\/:*?"'<>|]/g,"").replace(/\s+/g," ").trim().slice(0,60)||"Untitled";
+const exExt=b=>({"image/jpeg":".jpg","image/png":".png","image/webp":".webp","image/heic":".heic","image/gif":".gif","video/mp4":".mp4","video/quicktime":".mov","video/webm":".webm"})[b.type]||(/^video\//.test(b.type)?".mp4":".jpg");
+function exportItems(phaseId,from,to,which){
+  const inR=d=>(!from||(d&&d>=from))&&(!to||(d&&d<=to)),ranged=!!(from||to),out=[],seen=new Set(),pOrder=id=>Math.max(0,PH.findIndex(p=>p[0]===id));
+  S.tasks.slice().sort((a,b)=>pOrder(a.phase)-pOrder(b.phase)||(a.order??0)-(b.order??0)).forEach(t0=>{
+    if(seen.has(t0.key))return;seen.add(t0.key);
+    if(phaseId&&t0.phase!==phaseId)return;
+    const ts=S.tasks.filter(t=>t.key===t0.key),md={};ts.forEach(t=>Object.assign(md,t.mdate||{}));
+    const ids=[...new Set(ts.flatMap(t=>t.media||[]))],media=ids.filter(m=>!ranged||inR(md[m])).map(m=>({id:m,date:md[m]||""}));
+    const doneIn=ts.some(t=>t.doneOn&&inR(t.doneOn));
+    if(which==="media"?!media.length:(ranged&&!media.length&&!doneIn))return;
+    out.push({key:t0.key,phase:t0.phase,title:t0.title,ts,media});
+  });
+  return out;
+}
+const exStatus=ts=>ts.every(t=>t.status===ts[0].status)?stLabel(ts[0].status):ts.map(t=>roomName(t.room)+": "+stLabel(t.status)).join(" · ");
+async function vPoster(blob){return new Promise(res=>{const u=URL.createObjectURL(blob),v=document.createElement("video");v.muted=true;v.playsInline=true;v.preload="auto";let done=false;
+  const fin=d=>{if(done)return;done=true;URL.revokeObjectURL(u);res(d)};
+  v.onloadeddata=()=>{v.currentTime=Math.min(.2,(v.duration||1)/2)};
+  v.onseeked=()=>{try{const w=480,h=Math.round(w*(v.videoHeight||270)/(v.videoWidth||480)),c=document.createElement("canvas");c.width=w;c.height=h;const x=c.getContext("2d");x.drawImage(v,0,0,w,h);x.fillStyle="rgba(0,0,0,.55)";x.beginPath();x.arc(w/2,h/2,34,0,7);x.fill();x.fillStyle="#fff";x.beginPath();x.moveTo(w/2-10,h/2-17);x.lineTo(w/2+18,h/2);x.lineTo(w/2-10,h/2+17);x.fill();fin(c.toDataURL("image/jpeg",.8))}catch{fin("")}};
+  v.onerror=()=>fin("");setTimeout(()=>fin(""),6000);v.src=u})}
+async function exportPdf(items,label){
+  toast("Getting the report ready…");
+  const area=document.createElement("div");area.id="printarea";const objs=[];let lastPh=null;
+  area.innerHTML=`<div class="pa-h">${esc(S.settings.name||"Project")}: progress report</div><div class="pa-cap">${esc(label)} · ${items.length} task${items.length===1?"":"s"} · printed ${esc(dlong(today()))}</div>`;
+  for(const it of items){
+    if(it.phase!==lastPh){lastPh=it.phase;area.insertAdjacentHTML("beforeend",`<div class="pa-ph">${esc(PSHORT[it.phase]||"Other")}</div>`)}
+    const t0=it.ts[0],who=[...new Set(it.ts.map(t=>t.assignee?pName(t.assignee):t.who).filter(Boolean))].join(", "),notes=[...new Set(it.ts.map(t=>t.note).filter(Boolean))].join(" / "),done=it.ts.map(t=>t.doneOn).filter(Boolean).sort().pop();
+    const box=document.createElement("div");box.className="pa-task";
+    box.innerHTML=`<b>${esc(t0.title)}</b><div class="pa-cap" style="margin:2px 0 0">${esc([exStatus(it.ts),done?"Done "+dshort(done):"",t0.due&&!done?"Due "+dshort(t0.due):"",who].filter(Boolean).join(" · "))}</div>${notes?`<div class="pa-cap" style="margin:2px 0 0">${esc(notes)}</div>`:""}`;
+    if(it.media.length){const g=document.createElement("div");g.className="pa-grid";
+      for(const m of it.media){const b=await mGet(m.id).catch(()=>null);const c=document.createElement("div");
+        if(!b){c.className="pa-vm";c.textContent="Not loaded yet"}
+        else if(/^video\//.test(b.type)){const p=await vPoster(b);if(p){const im=new Image();im.src=p;im.className="pa-thumb";c.append(im)}else{c.className="pa-vm";c.textContent="Video"}}
+        else{const im=new Image(),u=URL.createObjectURL(b);objs.push(u);im.src=u;im.className="pa-thumb";await im.decode().catch(()=>{});c.append(im)}
+        if(m.date){const d=document.createElement("div");d.className="pa-cap";d.style.margin="2px 0 0";d.textContent=dshort(m.date);c.append(d)}
+        g.append(c)}
+      box.append(g)}
+    area.append(box);
+  }
+  printNode(area);setTimeout(()=>objs.forEach(u=>URL.revokeObjectURL(u)),130000);
+}
+async function exportFiles(items){
+  const files=[],used={};let missing=0,txt=(S.settings.name||"Project")+": progress report\nMade "+today()+"\n",lastPh=null;
+  for(const it of items){
+    const ph=exSafe(PSHORT[it.phase]||"Other"),tk=exSafe(it.title);
+    if(it.phase!==lastPh){lastPh=it.phase;txt+="\n== "+ph+" ==\n"}
+    const t0=it.ts[0],notes=[...new Set(it.ts.map(t=>t.note).filter(Boolean))].join(" / ");
+    txt+="\n"+t0.title+" ["+exStatus(it.ts)+"]"+(notes?"\n  "+notes:"")+"\n";
+    let n=0;
+    for(const m of it.media){const b=await mGet(m.id).catch(()=>null);if(!b){missing++;continue}
+      n++;let path=ph+"/"+tk+"/"+String(n).padStart(2,"0")+(m.date?" "+m.date:"")+exExt(b);used[path]=(used[path]||0)+1;if(used[path]>1)path=path.replace(/(\.[A-Za-z0-9]+)$/," ("+used[path]+")$1");
+      files.push({path,blob:b});txt+="  - "+path+"\n"}
+  }
+  files.push({path:"Report.txt",blob:new Blob([txt],{type:"text/plain"})});
+  return{files,missing};
+}
+const CRC32=(()=>{const t=new Uint32Array(256);for(let n=0;n<256;n++){let c=n;for(let k=0;k<8;k++)c=c&1?0xEDB88320^(c>>>1):c>>>1;t[n]=c>>>0}return t})();
+const crc32=u=>{let c=0xFFFFFFFF;for(let i=0;i<u.length;i++)c=CRC32[(c^u[i])&255]^(c>>>8);return(c^0xFFFFFFFF)>>>0};
+async function makeZip(files){
+  const enc=new TextEncoder(),parts=[],central=[],dt=new Date();let off=0;
+  const dd=((dt.getFullYear()-1980)<<9)|((dt.getMonth()+1)<<5)|dt.getDate(),tt=(dt.getHours()<<11)|(dt.getMinutes()<<5)|(dt.getSeconds()>>1);
+  for(const f of files){
+    const data=new Uint8Array(await f.blob.arrayBuffer()),name=enc.encode(f.path),crc=crc32(data);
+    const h=new DataView(new ArrayBuffer(30));h.setUint32(0,0x04034b50,true);h.setUint16(4,20,true);h.setUint16(6,0x0800,true);h.setUint16(10,tt,true);h.setUint16(12,dd,true);h.setUint32(14,crc,true);h.setUint32(18,data.length,true);h.setUint32(22,data.length,true);h.setUint16(26,name.length,true);
+    parts.push(h.buffer,name,data);
+    const c=new DataView(new ArrayBuffer(46));c.setUint32(0,0x02014b50,true);c.setUint16(4,20,true);c.setUint16(6,20,true);c.setUint16(8,0x0800,true);c.setUint16(12,tt,true);c.setUint16(14,dd,true);c.setUint32(16,crc,true);c.setUint32(20,data.length,true);c.setUint32(24,data.length,true);c.setUint16(28,name.length,true);c.setUint32(42,off,true);
+    central.push(c.buffer,name);off+=30+name.length+data.length;
+  }
+  const cs=central.reduce((a,b)=>a+b.byteLength,0),e=new DataView(new ArrayBuffer(22));e.setUint32(0,0x06054b50,true);e.setUint16(8,files.length,true);e.setUint16(10,files.length,true);e.setUint32(12,cs,true);e.setUint32(16,off,true);
+  return new Blob([...parts,...central,e.buffer],{type:"application/zip"});
+}
+async function exportToDrive(files,say){
+  let t;try{t=await gToken()}catch(e){
+    if(e.message==="load"){gisLoad().then(()=>say("Google is ready. Tap Save to Google Drive again."),()=>say("You need to be online to use Google Drive."))}
+    else say(/access_denied|popup|closed|cancel/i.test(e.message)?"Google sign-in was cancelled.":"Could not connect to Google Drive.");
+    return false}
+  if(gBusy)return false;gBusy=true;let n=0,ok=false;
+  try{const root=await gFolder(t),ex=await gSub(t,root,"Reports"),top=await gSub(t,ex,"Report "+today()),cache={};
+    for(const f of files){const segs=f.path.split("/"),nm=segs.pop();let pid=top;for(const sg of segs){const k=pid+"/"+sg;cache[k]=cache[k]||await gSub(t,pid,sg);pid=cache[k]}
+      await gUpload(t,pid,f.blob,nm);n++;say("Saving to Google Drive… "+n+" of "+files.length)}
+    say("Saved "+n+" file"+(n===1?"":"s")+' to "'+gFolderName()+" / Reports / Report "+today()+'" in Google Drive.');ok=true;
+  }catch(e){if(/401/.test(e.message))gTok=null;say("Could not save to Google Drive. Check your connection and try again.")}
+  gBusy=false;return ok;
+}
+function exportSheet(){
+  const opts='<option value="">All phases</option>'+PH.map(p=>`<option value="${p[0]}">${esc(PSHORT[p[0]]||p[1])}</option>`).join("");
+  sheet("Export report",`<form id="f" novalidate><p class="muted" style="margin:6px 0 4px">Choose what goes into the report. Photos and videos come from the tasks.</p>
+   <label class="f" for="xp">Phase</label><select id="xp" class="t sel">${opts}</select>
+   <label class="f" for="xf">From (optional)</label><input id="xf" class="t" type="date"><label class="f" for="xt">Up to (optional)</label><input id="xt" class="t" type="date">
+   <label class="f">Which tasks</label>${chipRow("xw",[["media","With photos or videos"],["all","All tasks"]],"media")}
+   <p class="hint" id="xn" aria-live="polite" style="margin-top:10px"></p><p class="hint" id="xs"></p>
+   <div class="foot"><button type="button" class="btn primary block" id="xpdf">${ic("print")}PDF report</button><button type="button" class="btn block" id="xzip" style="margin-top:8px">${ic("download")}Folder of files (zip)</button><button type="button" class="btn block" id="xdrv" style="margin-top:8px">${ic("cloud")}Save folder to Google Drive</button></div></form>`,(sh,close)=>{
+    const st={xw:"media"},stx=sh.querySelector("#xs"),btns=["#xpdf","#xzip","#xdrv"].map(q=>sh.querySelector(q));
+    const get=()=>exportItems(sh.querySelector("#xp").value,sh.querySelector("#xf").value,sh.querySelector("#xt").value,st.xw);
+    const label=()=>{const p=sh.querySelector("#xp").value,f=sh.querySelector("#xf").value,t=sh.querySelector("#xt").value;return (p?PSHORT[p]:"All phases")+(f||t?" · "+(f?dshort(f):"start")+" to "+(t?dshort(t):"today"):"")};
+    function upd(){const it=get(),m=sum(it,x=>x.media.length);sh.querySelector("#xn").textContent=it.length?`${it.length} task${it.length===1?"":"s"} · ${m} photo${m===1?"":"s"} or video${m===1?"":"s"}`:"Nothing matches these choices yet."}
+    wireChips(sh,st,"xw",upd);["#xp","#xf","#xt"].forEach(q=>sh.querySelector(q).addEventListener("change",upd));upd();
+    const run=fn=>async()=>{const it=get();if(!it.length){stx.textContent="Nothing to export with these choices.";return}btns.forEach(b=>b.disabled=true);try{await fn(it)}catch(e){console.warn("export",e);stx.textContent="Something went wrong. Try again."}btns.forEach(b=>b.disabled=false)};
+    sh.querySelector("#xpdf").onclick=run(async it=>{close();await exportPdf(it,label())});
+    sh.querySelector("#xzip").onclick=run(async it=>{stx.textContent="Collecting files…";const{files,missing}=await exportFiles(it),z=await makeZip(files),nm=exSafe(S.settings.name||"Project")+" report "+today()+".zip";
+      const file=new File([z],nm,{type:"application/zip"});
+      if(navigator.canShare&&navigator.canShare({files:[file]})&&/iPhone|iPad|Android/i.test(navigator.userAgent)){try{await navigator.share({files:[file]});stx.textContent="Done.";return}catch(e){if(e?.name==="AbortError"){stx.textContent="";return}}}
+      const a=document.createElement("a");a.href=URL.createObjectURL(z);a.download=nm;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),60000);
+      stx.textContent="Saved "+(files.length-1)+" file"+(files.length-1===1?"":"s")+" to this device."+(missing?" "+missing+" still loading from the team, export again later.":"")});
+    sh.querySelector("#xdrv").onclick=run(async it=>{stx.textContent="Collecting files…";const{files,missing}=await exportFiles(it);await exportToDrive(files,m=>{stx.textContent=m+(missing&&/^Saved/.test(m)?" "+missing+" still loading from the team, export again later.":"")})});
+  });
 }
 /* ---------- furniture and decor for MS 1, MS 2, Spier and Rooibos ---------- */
 let bmode=lsGet("build-bmode")==="furn"?"furn":"build",fRoom="ms1",fView="room";
