@@ -1,0 +1,8 @@
+-- Newberry Build 3: plans and drawings are open to everyone on the team, whatever their Documents access.
+-- Documents (everything that is not a drawing) keep their permission. Quotes, contracts and invoices still need money access.
+-- Migration name: build3_plans_open_to_all. Replace build3_pull with the live version, changing only the 'docs' case:
+--   when 'docs' then case when coalesce(b.data->>'type','') in ('contract','quote','invoice') then mv>=1
+--                         when coalesce(b.data->>'type','')='drawing' then true                      -- added
+--                         when coalesce(b.data->>'type','')='delivery' then (ar->>'docs')::int>=1 or (ar->>'mats')::int>=1
+--                         else (ar->>'docs')::int>=1 end
+-- Writing is unchanged: only people with Documents "Write" (or money edit) can add or change a drawing.
