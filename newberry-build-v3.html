@@ -471,7 +471,7 @@ label.f{margin:12px 0 4px;font-size:.85rem}.t{padding:9px 12px;min-height:42px;b
 .chip{min-height:36px;padding:5px 13px;font-size:.9rem}.btn.small{min-height:38px}
 body #fab-wrap .fab-menu .fab-item{min-height:50px!important;padding:6px 10px!important;border-radius:15px!important}.fab-grp{margin:0 0 8px}.fab-grp h4{margin:0 4px 5px}
 body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!important}
-.card.today{padding:10px 14px;margin:0 0 12px;border-radius:18px}.card.today .list li{padding:8px 0}
+.card.today{padding:8px 14px 6px;margin:0 0 10px;border-radius:16px}.card.today .eyebrow{font-size:.66rem}.card.today .list li{padding:6px 0;gap:10px}.card.today .list li .st{width:30px;height:30px}.card.today .list li .st .i{width:16px;height:16px}.card.today .lt,.card.today .ls{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card.today .lt{font-size:.88rem}.card.today .ls{font-size:.74rem}.card.today .grow{min-width:0}.card.today .row-ic{width:30px;height:30px}.card.today .linkbtn{min-height:28px!important;font-size:.8rem}
 .phg{margin:0 0 16px}.phg h3{margin:0 0 6px;font:700 .95rem var(--display);letter-spacing:.01em}.ptg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border-radius:14px;overflow:hidden}.ptg .mtile{aspect-ratio:1}.ptg .pdt{position:absolute;left:4px;bottom:4px;z-index:2;background:rgba(0,0,0,.55);color:#fff;border-radius:6px;padding:1px 6px;font-size:.66rem;font-weight:600}
 .dim{opacity:.62}.trcard{cursor:pointer}
 .rn .st,.rn .stp,.rfin .st,.rfin .stp{pointer-events:none}
@@ -1267,7 +1267,7 @@ function todayCard(){
   const sorted=pool.slice().sort((a,b)=>((a.due&&a.due<td?0:1)-(b.due&&b.due<td?0:1))||(a.due||"9999").localeCompare(b.due||"9999")||(a.order??0)-(b.order??0));
   const seen=new Set(),rows=[];
   sorted.forEach(t=>{const sib=S.tasks.filter(x=>x.key===t.key),merged=sib.length>1&&sib.every(x=>x.status===t.status&&(x.assignee||"")===(t.assignee||"")&&x.due===t.due);if(merged){if(seen.has(t.key))return;seen.add(t.key)}rows.push({t,merged,sib})});
-  const row=({t,merged,sib})=>{const od=t.due&&t.due<td,meta=[merged?"Both classrooms":roomName(t.room),PSHORT[t.phase]||"",t.due?(t.due===td?"Due today":(od?"Overdue · ":"Due ")+dshort(t.due)):"",t.assignee&&!useMine?pName(t.assignee):""].filter(Boolean).join(" · ");
+  const row=({t,merged,sib})=>{const od=t.due&&t.due<td,meta=[merged||t.room==="shared"?"":roomName(t.room),PSHORT[t.phase]||"",t.due?(t.due===td?"Today":(od?"Overdue ":"")+dshort(t.due)):"",t.assignee&&!useMine?pName(t.assignee):""].filter(Boolean).join(" · ");
     const tick=merged?`<button class="st ${t.status}" data-act="cycboth" data-id="${t.id}" data-ids="${sib.map(x=>x.id).join(",")}" aria-label="${esc(t.title)}, both classrooms: ${stLabel(t.status)}. Tap to tick done or undo.">${stIcon(t.status)||ic("check")}</button>`:`<button class="st ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${esc(t.title)}: ${stLabel(t.status)}. Tap to tick done or undo.">${stIcon(t.status)||ic("check")}</button>`;
     return `<li>${tick}<div class="grow tap" tabindex="0" data-act="opentask" data-id="${t.key}|${t.room}"><div class="lt">${esc(t.title)}</div><div class="ls ${od||t.status==="stuck"?"bad":""}">${esc(meta)}</div></div></li>`};
   const dRow=lvl("diary")>=2&&!S.diary.some(e=>e.date===td)?`<li class="tap" tabindex="0" data-act="adddiary"><span class="row-ic">${ic("book")}</span><div class="grow"><div class="lt">Fill in today's site diary</div><div class="ls">Weather, people on site and the work done</div></div>${ic("chev")}</li>`:"";
