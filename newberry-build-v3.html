@@ -1548,7 +1548,7 @@ function act(a,id,el){
    shareorder:()=>shareOrder(id&&(id==="all"||phase(id))?id:(matPh!=="all"&&matPh!=="none"?matPh:"")),addsup:()=>supSheet(),editsup:()=>supSheet(id),delsup:()=>delRecs(S.sups,s=>s.id===id,"Contact"),
    addphoto:()=>quickPhoto(id&&phase(id)?id:undefined),addissue:()=>logSheet(null,"issue"),editlog:()=>logSheet(id),dellog:()=>delRecs(S.logs,l=>l.id===id,"Entry"),
    fix:()=>{const l=S.logs.find(x=>x.id===id),u=undoEdit(l,{fixed:true});logAct("Marked an issue as fixed");save();render();toast("Issue marked fixed.",u)},
-   phtlb:()=>lightbox(photoList().map(p=>p.m),+id),phcmp:()=>compareView(id||""),scanslip:()=>scanSlip(),thread:()=>threadSheet(id),msgdec:()=>{const[a,b]=id.split("|");msgDecide(a,b)},snagedit:()=>snagSheet(id),snagexport:()=>snagExportSheet(),snagclose:()=>{if(!perm.manage)return;const l=S.logs.find(x=>x.id===id);if(!l)return;const u=undoEdit(l,{closed:true,closedOn:today()});logAct("Closed a snag");save();render();toast("Snag closed.",u)},snagreopen:()=>{const l=S.logs.find(x=>x.id===id);if(!l)return;const u=undoEdit(l,{fixed:false,closed:false,closedOn:""});save();render();toast("Snag reopened.",u)},slipexport:()=>slipExportSheet(),slipview:()=>{const[cid,i]=id.split("|"),c=S.costs.find(x=>x.id===cid);if(c)lightbox(c.media||[],+i)},mbar:()=>{const r=MCH.months[+id],el=$("#mbread");if(!r||!el)return;const p=r.b+r.t+r.o;el.innerHTML=`${mLab(r.ym,1)}: paid <b>${money0(p)}</b>${p?` (builder ${money0(r.b)}${r.t?", trades "+money0(r.t):""}${r.o?", other "+money0(r.o):""})`:""}${r.p?`, planned <b>${money0(r.p)}</b>`:""}.`},weekshare:()=>shareText(weekText()),lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
+   phtlb:()=>lightbox(photoList().map(p=>p.m),+id),phcmp:()=>compareView(id||""),scanslip:()=>scanSlip(),msgdel:()=>msgRemove(id),msgclear:()=>msgClearOld(),thread:()=>threadSheet(id),msgdec:()=>{const[a,b]=id.split("|");msgDecide(a,b)},snagedit:()=>snagSheet(id),snagexport:()=>snagExportSheet(),snagclose:()=>{if(!perm.manage)return;const l=S.logs.find(x=>x.id===id);if(!l)return;const u=undoEdit(l,{closed:true,closedOn:today()});logAct("Closed a snag");save();render();toast("Snag closed.",u)},snagreopen:()=>{const l=S.logs.find(x=>x.id===id);if(!l)return;const u=undoEdit(l,{fixed:false,closed:false,closedOn:""});save();render();toast("Snag reopened.",u)},slipexport:()=>slipExportSheet(),slipview:()=>{const[cid,i]=id.split("|"),c=S.costs.find(x=>x.id===cid);if(c)lightbox(c.media||[],+i)},mbar:()=>{const r=MCH.months[+id],el=$("#mbread");if(!r||!el)return;const p=r.b+r.t+r.o;el.innerHTML=`${mLab(r.ym,1)}: paid <b>${money0(p)}</b>${p?` (builder ${money0(r.b)}${r.t?", trades "+money0(r.t):""}${r.o?", other "+money0(r.o):""})`:""}${r.p?`, planned <b>${money0(r.p)}</b>`:""}.`},weekshare:()=>shareText(weekText()),lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
    refresh:()=>refreshApp(),adddoc:()=>docSheet(),opendoc:()=>{if(docSel){docPick(id);return}const d=S.docs.find(x=>x.id===id);if(d&&docListed(d)&&!docVisible(d))moneyGate(()=>docView(id),"document");else docView(id)},docunlock:()=>moneyGate(()=>render()),godocs:()=>go("docs"),addplan:()=>docSheet(undefined,"drawing"),plprev:()=>turnPage(-1),plnext:()=>turnPage(1),plzin:()=>zoomCenter(1.5),plzout:()=>zoomCenter(1/1.5),plfit:()=>fitView(),plfull:()=>{fullPlan=!fullPlan;PV.had=false;document.body.classList.toggle("lock",fullPlan);render()},goplans:()=>go("plans"),gostock:()=>{matSec="stock";matF="all";go("mats")},mvup:()=>moveKey(curPh,id,-1),mvdn:()=>moveKey(curPh,id,1),phstep:()=>phaseStep(+id),report:()=>reportSheet(),acts:()=>actsSheet(),phba:()=>baSheet(id),outdoor:()=>{outdoor=!outdoor;try{localStorage.setItem("build2-outdoor",outdoor?"1":"0")}catch{}applyOutdoor();render()},share:()=>shareSheet(),project:()=>projectSheet(),whoami:()=>whoSheet(),
    theme:()=>{if(id==="auto"){document.documentElement.removeAttribute("data-theme");try{localStorage.setItem("build2-theme","auto")}catch{}}else{document.documentElement.setAttribute("data-theme",id);try{localStorage.setItem("build2-theme",id)}catch{}}paintTheme();render()},
    export:()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`newberry-build-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")},
@@ -2620,7 +2620,7 @@ const ROLE_PICK=["site","builder","owner","decor","finance","other"];
 const roleLabel=r=>(ROLES[r]||ROLES.other).label;
 const DEFAULT_PEOPLE=[["Albert","site"],["Jonathan","builder"],["Newberry","owner"],["Talana","decor"],["Audrey","finance"]];
 const READ_ACTS0=["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock","plprev","plnext","phdrive","gbackup"].concat(["goinbox","gopeople","newmsg","msglb","sharesheet"]);
-const READ_ACTS=READ_ACTS0.concat(["gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp","mbar","slipexport","slipview","thread","msgdec","snagexport"]);
+const READ_ACTS=READ_ACTS0.concat(["gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp","mbar","slipexport","slipview","thread","msgdec","snagexport","msgdel","msgclear"]);
 const MONEY_ACTS=["addcost","editcost","delcost","budget","addpay","editpay","delpay","recpay","paypay","paycost","contract","typicalpay","weekly","resetpays","payall","report"];
 MONEY_ACTS.push("addtrade","edittrade","deltrade","opentrade","tradeaccept","paystage");
 const NOTE_ACTS=["addphoto","phphoto","adddoc"];
@@ -2667,8 +2667,23 @@ const isMoneyMedia=mid=>S.docs.some(d=>d.media===mid&&docMoney(d));
 
 /* updates inbox */
 const toMe=m=>(m.to||[]).includes("all")||(m.to||[]).includes(sm.pid);
-const myMsgs=()=>S.msgs.filter(m=>m.from===sm.pid||toMe(m)).sort((a,b)=>b.t-a.t);
-const unreadMsgs=()=>sm.code?S.msgs.filter(m=>m.from!==sm.pid&&toMe(m)&&!S.rcpt.some(r=>r.m===m.id&&r.p===sm.pid)):[];
+/* updates you removed from this phone stay on the team's copy; updates you sent can be deleted for everyone */
+let hidMsg=new Set();try{hidMsg=new Set(JSON.parse(localStorage.getItem("build-hidmsg")||"[]"))}catch{}
+const hidSave=()=>{try{localStorage.setItem("build-hidmsg",JSON.stringify([...hidMsg].slice(-800)))}catch{}};
+const myMsgs=()=>S.msgs.filter(m=>(m.from===sm.pid||toMe(m))&&!hidMsg.has(m.id)).sort((a,b)=>b.t-a.t);
+const unreadMsgs=()=>sm.code?S.msgs.filter(m=>m.from!==sm.pid&&toMe(m)&&!hidMsg.has(m.id)&&!S.rcpt.some(r=>r.m===m.id&&r.p===sm.pid)):[];
+function msgRemove(id){
+  const m=S.msgs.find(x=>x.id===id);if(!m)return;
+  if(m.from===sm.pid){confirmSheet("Delete this update?","It is deleted for everyone it was sent to.","Delete",()=>{delRecs(S.msgs,x=>x.id===id,"Update");paintBell()})}
+  else{hidMsg.add(id);hidSave();render();paintBell();toast("Removed from this phone.",()=>{hidMsg.delete(id);hidSave();render();paintBell()})}
+}
+function msgClearOld(){
+  const cut=Date.now()-30*864e5,old=S.msgs.filter(m=>m.t<cut&&(m.from===sm.pid||toMe(m))&&!hidMsg.has(m.id)),mine=old.filter(m=>m.from===sm.pid),rec=old.filter(m=>m.from!==sm.pid);
+  if(!old.length){toast("No updates older than 30 days.");return}
+  confirmSheet("Clear old updates?",`${mine.length?mine.length+" you sent "+(mine.length===1?"is":"are")+" deleted for everyone. ":""}${rec.length?rec.length+" you received "+(rec.length===1?"is":"are")+" removed from this phone only. ":""}Updates from the last 30 days stay.`,"Clear",()=>{
+    const ids=new Set(mine.map(m=>m.id));mine.forEach(m=>S.msgs.splice(S.msgs.indexOf(m),1));rec.forEach(m=>hidMsg.add(m.id));hidSave();save();render();paintBell();
+    toast("Old updates cleared.",()=>{mine.forEach(m=>S.msgs.push(m));rec.forEach(m=>hidMsg.delete(m.id));hidSave();save();render();paintBell()})});
+}
 /* the red number on the app icon follows the unread updates (works for the app added to the Home Screen) */
 function badgeSet(n){
   try{if(navigator.setAppBadge){if(n>0)navigator.setAppBadge(n).catch(()=>{});else navigator.clearAppBadge().catch(()=>{})}}catch{}
@@ -2700,9 +2715,9 @@ function inboxV(){
     ${m.text?`<p style="margin:10px 0 0;white-space:pre-wrap">${esc(m.text)}</p>`:""}
     ${(m.media||[]).length?`<div class="pthumbs" style="margin-top:10px">${m.media.map((id,i)=>`<button type="button" class="etile" style="border:0;padding:0" data-act="msglb" data-id="${m.id}|${i}" aria-label="Open photo ${i+1}"><span data-m="${id}" style="position:absolute;inset:0"></span></button>`).join("")}</div>`:""}
     ${m.re?`<button type="button" class="linkbtn" data-act="thread" data-id="${esc(m.re)}" style="padding:0;min-height:32px">About: ${esc(refTitle(m.re))}</button>`:""}${askBlock(m)}
-    ${readTxt?`<p class="muted small" style="margin:10px 0 0">${ic("check","sm")} ${readTxt}</p>`:""}</li>`;
+    ${readTxt?`<p class="muted small" style="margin:10px 0 0">${ic("check","sm")} ${readTxt}</p>`:""}<div class="row" style="justify-content:flex-end;margin-top:6px"><button type="button" class="btn small" data-act="msgdel" data-id="${m.id}" aria-label="${mine?"Delete this update for everyone":"Remove this update from this phone"}">${ic("trash","sm")}${mine?"Delete":"Remove"}</button></div></li>`;
   };
-  return head+`<ul style="padding:0;margin:0">${list.map(card).join("")}</ul>`;
+  return head+`<ul style="padding:0;margin:0">${list.map(card).join("")}</ul><div class="row" style="justify-content:center"><button type="button" class="linkbtn" data-act="msgclear" style="min-height:44px">Clear updates older than 30 days</button></div>`;
 }
 function newMsgSheet(everyone){
   if(!sm.code){shareSheet();return}
@@ -3017,7 +3032,7 @@ function slipExportSheet(){
 /* ---------- Discussion on a task or a snag, and "needs your OK" requests ---------- */
 let curThread="";
 const REPLY_ALL=false,canReply=()=>canSend()||REPLY_ALL;
-const msgVisible=m=>m.from===sm.pid||toMe(m);
+const msgVisible=m=>(m.from===sm.pid||toMe(m))&&!hidMsg.has(m.id);
 const threadMsgs=ref=>S.msgs.filter(m=>m.re===ref&&msgVisible(m)).sort((a,b)=>a.t-b.t);
 const decOf=(m,pid)=>(S.rcpt.find(r=>r.m===m.id&&r.p===pid&&r.dec)||{}).dec||"";
 function refTitle(ref){
