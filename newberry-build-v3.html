@@ -481,6 +481,8 @@ body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!importan
 .hbars{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:12px}.hb{height:12px;border-radius:6px;background:var(--accent-soft);border:1px dashed var(--muted);margin:6px 0 4px;overflow:hidden;box-sizing:border-box}.hb i{display:block;height:100%;background:var(--green)}.mb{cursor:pointer;outline:none}.mb:focus-visible rect:nth-of-type(2){stroke:var(--ink)}
 .sthumb{position:relative;width:44px;height:44px;border-radius:10px;overflow:hidden;flex:none;background:var(--accent-soft);display:grid;place-items:center;color:var(--accent)}
 .slipprev{display:flex;gap:12px;align-items:center;margin:0 0 6px}.slipprev img{width:64px;height:64px;object-fit:cover;border-radius:12px;flex:none}.slipbusy{display:grid;gap:12px;justify-items:center;padding:6px 0 4px}.slipimg{max-height:34vh;max-width:100%;border-radius:12px}.slipbusy .meter{width:100%}
+.tmsg{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:0 0 8px;background:var(--paper)}.tmsg.me{background:var(--accent-soft)}.tthread{max-height:36vh;overflow:auto;margin-bottom:8px}.askbox{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}
+.snagh{margin:16px 2px 8px;font:700 .95rem var(--display)}.card.snag{padding:12px 14px}
 .qa.one{gap:8px;margin:2px 0 10px}.qa.one button{flex-direction:row;gap:7px;min-height:46px;padding:6px 8px;border-radius:15px;font-size:.92rem}.qa.one button .i{width:20px;height:20px;flex:none}
 .card.today{padding:8px 14px 6px;margin:0 0 10px;border-radius:16px}.card.today .eyebrow{font-size:.66rem}.card.today .list li{padding:6px 0;gap:10px}.card.today .list li .st{width:30px;height:30px}.card.today .list li .st .i{width:16px;height:16px}.card.today .lt,.card.today .ls{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card.today .lt{font-size:.88rem}.card.today .ls{font-size:.74rem}.card.today .grow{min-width:0}.card.today .row-ic{width:30px;height:30px}.card.today .linkbtn{min-height:28px!important;font-size:.8rem}
 .phg{margin:0 0 16px}.phg h3{margin:0 0 6px;font:700 .95rem var(--display);letter-spacing:.01em}.ptg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border-radius:14px;overflow:hidden}.ptg .mtile{aspect-ratio:1}.ptg .pdt{position:absolute;left:4px;bottom:4px;z-index:2;background:rgba(0,0,0,.55);color:#fff;border-radius:6px;padding:1px 6px;font-size:.66rem;font-weight:600}
@@ -898,7 +900,7 @@ const unpaid=()=>sum(S.costs.filter(c=>!c.paid),c=>c.amount);
 /* ---------- ui chrome ---------- */
 let matSec="stock",payAll=false,tab="build",roomF="all",logSub="log",matF="all",costF="all",openPh=null;
 const TABS=[["build","Build","grid"],["home","Overview","home"],["add","Add","plus"],["money","Money","cash"],["more","More","dots"]];
-const navTab=t=>({phase:"build",mats:"build",site:"build",plans:"build",docs:"build",inbox:"more",people:"more",tasks:"build",diary:"build",garden:"build",extra:"more",report:"home",weather:"build",photos:"build"})[t]||t;
+const navTab=t=>({phase:"build",mats:"build",site:"build",plans:"build",docs:"build",inbox:"more",people:"more",tasks:"build",diary:"build",garden:"build",extra:"more",report:"home",weather:"build",photos:"build",snags:"build"})[t]||t;
 $("nav.tabs").innerHTML=TABS.map(([k,l,i])=>k==="add"?`<button type="button" class="cap" id="fab" aria-label="Add something" aria-expanded="false" aria-controls="fab-menu">${ic(i)}</button>`:`<button data-tab="${k}">${ic(i)}<span>${l}</span>${k==="build"?'<i class="dot" id="tdot" hidden></i>':""}</button>`).join("");
 $("#today").textContent=new Date().toLocaleDateString("en-ZA",sm.code?{weekday:"short",day:"numeric",month:"short"}:{weekday:"long",day:"numeric",month:"long"});
 $("#fab-menu").innerHTML=[["site","On site",[["photo","camera","Photo"],["issue","alert","Challenges"]]],["build","Build",[["task","clip","Task"],["mat","truck","Material"]]],["money","Money",[["cost","cash","Expense"],["pay","users","Record payment"]]],["team","Team",[["msg","chat","Update everyone"],["diary","book","Site diary"]]]].map(([g,t,it])=>`<div class="fab-grp" data-g="${g}"><h4>${t}</h4><div class="fab-row">${it.map(([k,i,l])=>`<button class="fab-item" data-fab="${k}"><span class="fi">${ic(i)}</span><span class="fl">${l}</span></button>`).join("")}</div></div>`).join("")+`<p class="fab-hint">Hold the plus button to take a photo straight away.</p>`;
@@ -1062,15 +1064,15 @@ function render(){
   if((tab==="money"||tab==="extra")&&!moneyOK)tab="build";
   document.querySelectorAll("nav.tabs button").forEach(b=>b.dataset.tab===navTab(tab)?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
   $("#pname").textContent=S.settings.name||"Newberry Build";
-  document.title=`${({build:"Build",home:"Overview",money:"Money",more:"More",phase:"Phase",plans:"Plans",docs:"Documents",mats:"Materials",site:"Site log",inbox:"Updates",people:"People",tasks:"Tasks",diary:"Site diary",garden:"Garden",extra:"Extra labour",report:"Report",weather:"Weather",photos:"Photos"})[tab]} · Newberry Build 3`;
+  document.title=`${({build:"Build",home:"Overview",money:"Money",more:"More",phase:"Phase",plans:"Plans",docs:"Documents",mats:"Materials",site:"Site log",inbox:"Updates",people:"People",tasks:"Tasks",diary:"Site diary",garden:"Garden",extra:"Extra labour",report:"Report",weather:"Weather",photos:"Photos",snags:"Snags"})[tab]} · Newberry Build 3`;
   $("#tdot").hidden=!S.tasks.some(t=>t.status==="stuck");
-  if(tab!=="docs")docSel=null;paintBell();const v=$("#view");v.innerHTML=({build:buildV,home,phase:phaseV,plans:plansV,docs:docsV,money:moneyV,mats:matsV,site:siteV,more,inbox:inboxV,people:peopleV,tasks:tasksV,diary:diaryV,garden:gardenV,extra:extraV,report:reportV,weather:weatherV,photos:photosV})[tab]();
+  if(tab!=="docs")docSel=null;paintBell();const v=$("#view");v.innerHTML=({build:buildV,home,phase:phaseV,plans:plansV,docs:docsV,money:moneyV,mats:matsV,site:siteV,more,inbox:inboxV,people:peopleV,tasks:tasksV,diary:diaryV,garden:gardenV,extra:extraV,report:reportV,weather:weatherV,photos:photosV,snags:snagsV})[tab]();
   compactRows(v);
   v.querySelectorAll("[data-act]").forEach(el=>el.addEventListener("click",()=>act(el.dataset.act,el.dataset.id,el)));
   v.querySelectorAll("[data-go]").forEach(el=>el.addEventListener("click",()=>{if(el._lp){el._lp=false;return}const[t,f]=el.dataset.go.split(":");if(t==="phase"&&f)curPh=f;if(t==="site"&&f)logSub=f;if(t==="mats"&&f)matF=f;go(t)}));
   v.querySelectorAll("[data-rf]").forEach(el=>el.addEventListener("click",()=>{roomF=el.dataset.rf;render()}));
   v.querySelectorAll("details.gd").forEach(d=>d.addEventListener("toggle",()=>{if(openPh===null)openPh=new Set(curPhases());d.open?openPh.add(d.dataset.ph):openPh.delete(d.dataset.ph)}));
-  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;if(k==="plan"){planSel=val;PV.plan="";PV.had=false}if(k==="doc")docF=val;if(k==="mseg")moneySeg=val;if(k==="tf")taskF=val;if(k==="df")diaryF=val;if(k==="pf")photoF=val;if(k==="sm")slipM=val;if(k==="sc")slipC=val;if(k==="pt")phTab=val;if(k==="mph")matPh=val;if(k==="bm"){bmode=val;lsSet("build-bmode",val)}if(k==="fr")fRoom=val;if(k==="fv")fView=val;render()}));
+  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;if(k==="plan"){planSel=val;PV.plan="";PV.had=false}if(k==="doc")docF=val;if(k==="mseg")moneySeg=val;if(k==="tf")taskF=val;if(k==="df")diaryF=val;if(k==="pf")photoF=val;if(k==="sm")slipM=val;if(k==="sg")snagF=val;if(k==="sc")slipC=val;if(k==="pt")phTab=val;if(k==="mph")matPh=val;if(k==="bm"){bmode=val;lsSet("build-bmode",val)}if(k==="fr")fRoom=val;if(k==="fv")fView=val;render()}));
   v.querySelectorAll("li.tap").forEach(el=>{el.setAttribute("role","button");el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click()}})});
   hydrate(v);hydrateBg(v);countUp(v);if(tab==="plans")initPlanView();
   v.querySelectorAll("svg.chart").forEach(wireChart);if(lvl("tasks")>=2)v.querySelectorAll("ul.reord").forEach(ul=>holdDrag(ul,curPh));
@@ -1409,7 +1411,7 @@ function buildMain(){
   ${whoLine()}${wxCard()}${connectPrompt()}${attentionV()}${linkPrompt()}${iosPrompt()}${pushPrompt()}${backupDue()}${can?`<div class="row between" style="margin:0 2px 10px"><div class="eyebrow" style="margin:0">Phases</div><button type="button" class="btn small ${pEdit?"primary":""}" data-act="pedit">${pEdit?"Done":"Edit phases"}</button></div>${pEdit?`<p class="hint" style="margin:0 2px 10px">Rename, move or remove a phase, or add a new one.</p>`:""}`:""}<div class="ptiles" role="list">${tiles}</div>
   <div class="eyebrow" style="margin:20px 2px 10px">Recently posted</div>
   ${rec.length?`<div class="rps">${rec.map(l=>`<button type="button" class="rp" data-go="site"><span class="rpi">${l.media?.length?`<span data-m="${l.media[0]}" style="position:absolute;inset:0"></span>`:ic(l.kind==="issue"?"alert":"note","lg")}</span><span class="rpt"><b style="color:${PCOL[l.phase]||"var(--accent)"}">${esc(l.phase&&PSHORT[l.phase]?PSHORT[l.phase]:"Site")}</b><span>${esc(l.text?l.text.slice(0,48):l.kind==="issue"?"Issue reported":"Added a photo")}</span><small>${dlabel(l.date)}</small></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:0 2px">Photos and notes you add will show up here.</p>`}
-  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="tasks">${ic("check")}<span>Tasks</span>${sm.code&&S.tasks.some(t=>asgHas(t,sm.pid)&&t.status!=="done")?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${uk(S.tasks.filter(t=>asgHas(t,sm.pid)&&t.status!=="done"))}</i>`:""}</button><button type="button" class="sc" data-go="diary">${ic("book")}<span>Site diary</span></button><button type="button" class="sc" data-go="docs">${ic("note")}<span>Documents</span>${S.docs.filter(docListed).length?`<small class="muted">${S.docs.filter(docListed).length}</small>`:""}</button><button type="button" class="sc" data-go="plans">${ic("map")}<span>Plans</span></button><button type="button" class="sc" data-go="photos">${ic("image")}<span>Photos</span>${(()=>{const n=allPhotos().length;return n?`<small class="muted">${n}</small>`:""})()}</button><button type="button" class="sc" data-go="garden">${ic("leaf")}<span>Garden</span>${(()=>{const g=S.tasks.filter(t=>isG(t.phase)&&t.status!=="done");return g.length?`<small class="muted">${uk(g)}</small>`:""})()}</button></div>`;
+  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="tasks">${ic("check")}<span>Tasks</span>${sm.code&&S.tasks.some(t=>asgHas(t,sm.pid)&&t.status!=="done")?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${uk(S.tasks.filter(t=>asgHas(t,sm.pid)&&t.status!=="done"))}</i>`:""}</button><button type="button" class="sc" data-go="diary">${ic("book")}<span>Site diary</span></button><button type="button" class="sc" data-go="docs">${ic("note")}<span>Documents</span>${S.docs.filter(docListed).length?`<small class="muted">${S.docs.filter(docListed).length}</small>`:""}</button><button type="button" class="sc" data-go="plans">${ic("map")}<span>Plans</span></button><button type="button" class="sc" data-go="photos">${ic("image")}<span>Photos</span>${(()=>{const n=allPhotos().length;return n?`<small class="muted">${n}</small>`:""})()}</button><button type="button" class="sc" data-go="snags">${ic("alert")}<span>Snags</span>${(()=>{const n=S.logs.filter(l=>l.kind==="issue"&&!l.closed).length;return n?`<i class="pbadge" style="position:static">${n}</i>`:""})()}</button><button type="button" class="sc" data-go="garden" style="grid-column:1/-1">${ic("leaf")}<span>Garden</span>${(()=>{const g=S.tasks.filter(t=>isG(t.phase)&&t.status!=="done");return g.length?`<small class="muted">${uk(g)}</small>`:""})()}</button></div>`;
 }
 async function hydrateBg(root=document){
   for(const el of root.querySelectorAll("[data-bg]")){const u=await mUrl(el.dataset.bg);if(!u)continue;const im=new Image();im.onload=()=>{el.style.backgroundImage='url("'+u+'")';el.classList.add("on")};im.src=u}
@@ -1546,7 +1548,7 @@ function act(a,id,el){
    shareorder:()=>shareOrder(id&&(id==="all"||phase(id))?id:(matPh!=="all"&&matPh!=="none"?matPh:"")),addsup:()=>supSheet(),editsup:()=>supSheet(id),delsup:()=>delRecs(S.sups,s=>s.id===id,"Contact"),
    addphoto:()=>quickPhoto(id&&phase(id)?id:undefined),addissue:()=>logSheet(null,"issue"),editlog:()=>logSheet(id),dellog:()=>delRecs(S.logs,l=>l.id===id,"Entry"),
    fix:()=>{const l=S.logs.find(x=>x.id===id),u=undoEdit(l,{fixed:true});logAct("Marked an issue as fixed");save();render();toast("Issue marked fixed.",u)},
-   phtlb:()=>lightbox(photoList().map(p=>p.m),+id),phcmp:()=>compareView(id||""),scanslip:()=>scanSlip(),slipexport:()=>slipExportSheet(),slipview:()=>{const[cid,i]=id.split("|"),c=S.costs.find(x=>x.id===cid);if(c)lightbox(c.media||[],+i)},mbar:()=>{const r=MCH.months[+id],el=$("#mbread");if(!r||!el)return;const p=r.b+r.t+r.o;el.innerHTML=`${mLab(r.ym,1)}: paid <b>${money0(p)}</b>${p?` (builder ${money0(r.b)}${r.t?", trades "+money0(r.t):""}${r.o?", other "+money0(r.o):""})`:""}${r.p?`, planned <b>${money0(r.p)}</b>`:""}.`},weekshare:()=>shareText(weekText()),lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
+   phtlb:()=>lightbox(photoList().map(p=>p.m),+id),phcmp:()=>compareView(id||""),scanslip:()=>scanSlip(),thread:()=>threadSheet(id),msgdec:()=>{const[a,b]=id.split("|");msgDecide(a,b)},snagedit:()=>snagSheet(id),snagexport:()=>snagExportSheet(),snagclose:()=>{if(!perm.manage)return;const l=S.logs.find(x=>x.id===id);if(!l)return;const u=undoEdit(l,{closed:true,closedOn:today()});logAct("Closed a snag");save();render();toast("Snag closed.",u)},snagreopen:()=>{const l=S.logs.find(x=>x.id===id);if(!l)return;const u=undoEdit(l,{fixed:false,closed:false,closedOn:""});save();render();toast("Snag reopened.",u)},slipexport:()=>slipExportSheet(),slipview:()=>{const[cid,i]=id.split("|"),c=S.costs.find(x=>x.id===cid);if(c)lightbox(c.media||[],+i)},mbar:()=>{const r=MCH.months[+id],el=$("#mbread");if(!r||!el)return;const p=r.b+r.t+r.o;el.innerHTML=`${mLab(r.ym,1)}: paid <b>${money0(p)}</b>${p?` (builder ${money0(r.b)}${r.t?", trades "+money0(r.t):""}${r.o?", other "+money0(r.o):""})`:""}${r.p?`, planned <b>${money0(r.p)}</b>`:""}.`},weekshare:()=>shareText(weekText()),lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
    refresh:()=>refreshApp(),adddoc:()=>docSheet(),opendoc:()=>{if(docSel){docPick(id);return}const d=S.docs.find(x=>x.id===id);if(d&&docListed(d)&&!docVisible(d))moneyGate(()=>docView(id),"document");else docView(id)},docunlock:()=>moneyGate(()=>render()),godocs:()=>go("docs"),addplan:()=>docSheet(undefined,"drawing"),plprev:()=>turnPage(-1),plnext:()=>turnPage(1),plzin:()=>zoomCenter(1.5),plzout:()=>zoomCenter(1/1.5),plfit:()=>fitView(),plfull:()=>{fullPlan=!fullPlan;PV.had=false;document.body.classList.toggle("lock",fullPlan);render()},goplans:()=>go("plans"),gostock:()=>{matSec="stock";matF="all";go("mats")},mvup:()=>moveKey(curPh,id,-1),mvdn:()=>moveKey(curPh,id,1),phstep:()=>phaseStep(+id),report:()=>reportSheet(),acts:()=>actsSheet(),phba:()=>baSheet(id),outdoor:()=>{outdoor=!outdoor;try{localStorage.setItem("build2-outdoor",outdoor?"1":"0")}catch{}applyOutdoor();render()},share:()=>shareSheet(),project:()=>projectSheet(),whoami:()=>whoSheet(),
    theme:()=>{if(id==="auto"){document.documentElement.removeAttribute("data-theme");try{localStorage.setItem("build2-theme","auto")}catch{}}else{document.documentElement.setAttribute("data-theme",id);try{localStorage.setItem("build2-theme",id)}catch{}}paintTheme();render()},
    export:()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`newberry-build-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")},
@@ -1612,6 +1614,7 @@ function taskSheet(key,roomId){
    ${ts.length>1?`<div class="row between" style="margin:10px 0 4px;gap:8px"><span class="muted small" id="spt">${split?"Editing one classroom":"Applies to both classrooms"}</span><button type="button" class="linkbtn" id="spl" style="padding:0;min-height:36px">${split?"Edit both together":"Split by classroom"}</button></div><div class="segc" role="group" id="rm" ${split?"":"hidden"}>${ts.sort((a,b)=>roomNo(a.room)-roomNo(b.room)).map(t=>`<button type="button" data-r="${t.room}" aria-pressed="${t.room===cur}">${esc(roomName(t.room))}</button>`).join("")}</div>`:`<p class="muted small" style="margin:6px 0 0">${esc(roomName(cur))}</p>`}
    <div id="body">${body()}</div>
    <label class="f">Photos and videos</label><div class="photo-add"><button type="button" class="btn" id="tcam">${ic("camera")}Take photo</button><button type="button" class="btn" id="tpick">${ic("image")}From gallery</button></div><input type="file" id="tfc" accept="image/*" capture="environment" hidden><input type="file" id="tfp" accept="image/*,video/*" multiple hidden><div class="pthumbs" id="tth"></div><p class="hint">Videos can be up to 15 MB, about 20 seconds. Photos are shrunk to your chosen photo size.</p>
+   ${sm.code?`<button type="button" class="btn block" id="tdisc" style="margin-top:12px">${ic("chat")}Discuss this task${threadMsgs("task|"+key).length?" · "+threadMsgs("task|"+key).length:""}</button>`:""}
    <div class="foot"><button class="btn primary block">Save task</button></div></form>`,(sh,close)=>{
     const read=()=>{const d=draft[cur];d.due=sh.querySelector("#du")?.value||"";d.who=sh.querySelector("#wh")?.value.trim()||"";if(d.assignee&&d.who!==pName(d.assignee))d.assignee="";d.note=sh.querySelector("#nt")?.value.trim()||"";title=sh.querySelector("#ti").value};
     const wire=()=>{wireDc(sh);wireMics(sh);sh.querySelectorAll('[data-ch="status"]').forEach(b=>b.onclick=()=>{draft[cur].status=b.dataset.v;sh.querySelectorAll('[data-ch="status"]').forEach(x=>x.setAttribute("aria-pressed",x===b))});
@@ -1626,6 +1629,7 @@ function taskSheet(key,roomId){
     const takeM=e=>{[...e.target.files].forEach(fl=>{const v=/^video\//.test(fl.type);if(v&&fl.size>15*1048576){toast("That video is over 15 MB. Record a shorter clip.");return}if(!v&&!/^image\//.test(fl.type))return;addM.push({file:fl,url:URL.createObjectURL(fl),video:v})});e.target.value="";paintM()};
     sh.querySelector("#tfc").onchange=takeM;sh.querySelector("#tfp").onchange=takeM;sh.querySelector("#tcam").onclick=()=>sh.querySelector("#tfc").click();sh.querySelector("#tpick").onclick=()=>sh.querySelector("#tfp").click();paintM();
     wire();
+    sh.querySelector("#tdisc")?.addEventListener("click",()=>{close();threadSheet("task|"+key)});
     sh.querySelector("#spl")?.addEventListener("click",()=>{read();split=!split;if(!split)ts.forEach(t=>{draft[t.room]={...draft[cur]}});sh.querySelector("#rm").hidden=!split;sh.querySelector("#spt").textContent=split?"Editing one classroom":"Applies to both classrooms";sh.querySelector("#spl").textContent=split?"Edit both together":"Split by classroom";if(!split){sh.querySelector("#body").innerHTML=body();wire()}});
     sh.querySelectorAll("#rm [data-r]").forEach(b=>b.onclick=()=>{read();cur=b.dataset.r;sh.querySelectorAll("#rm [data-r]").forEach(x=>x.setAttribute("aria-pressed",x===b));sh.querySelector("#body").innerHTML=body();wire()});
     sh.querySelector("#f").onsubmit=async e=>{e.preventDefault();read();if(!split)ts.forEach(t=>{draft[t.room]={...draft[cur]}});const ti=sh.querySelector("#ti");if(!title.trim())return showErr(sh,ti,"A task needs a name.");
@@ -2616,7 +2620,7 @@ const ROLE_PICK=["site","builder","owner","decor","finance","other"];
 const roleLabel=r=>(ROLES[r]||ROLES.other).label;
 const DEFAULT_PEOPLE=[["Albert","site"],["Jonathan","builder"],["Newberry","owner"],["Talana","decor"],["Audrey","finance"]];
 const READ_ACTS0=["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock","plprev","plnext","phdrive","gbackup"].concat(["goinbox","gopeople","newmsg","msglb","sharesheet"]);
-const READ_ACTS=READ_ACTS0.concat(["gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp","mbar","slipexport","slipview"]);
+const READ_ACTS=READ_ACTS0.concat(["gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp","mbar","slipexport","slipview","thread","msgdec","snagexport"]);
 const MONEY_ACTS=["addcost","editcost","delcost","budget","addpay","editpay","delpay","recpay","paypay","paycost","contract","typicalpay","weekly","resetpays","payall","report"];
 MONEY_ACTS.push("addtrade","edittrade","deltrade","opentrade","tradeaccept","paystage");
 const NOTE_ACTS=["addphoto","phphoto","adddoc"];
@@ -2695,6 +2699,7 @@ function inboxV(){
     <div class="ls">To ${esc(toTxt)}</div>
     ${m.text?`<p style="margin:10px 0 0;white-space:pre-wrap">${esc(m.text)}</p>`:""}
     ${(m.media||[]).length?`<div class="pthumbs" style="margin-top:10px">${m.media.map((id,i)=>`<button type="button" class="etile" style="border:0;padding:0" data-act="msglb" data-id="${m.id}|${i}" aria-label="Open photo ${i+1}"><span data-m="${id}" style="position:absolute;inset:0"></span></button>`).join("")}</div>`:""}
+    ${m.re?`<button type="button" class="linkbtn" data-act="thread" data-id="${esc(m.re)}" style="padding:0;min-height:32px">About: ${esc(refTitle(m.re))}</button>`:""}${askBlock(m)}
     ${readTxt?`<p class="muted small" style="margin:10px 0 0">${ic("check","sm")} ${readTxt}</p>`:""}</li>`;
   };
   return head+`<ul style="padding:0;margin:0">${list.map(card).join("")}</ul>`;
@@ -2758,7 +2763,7 @@ const AREAS=[
   ["furn","Furniture and decor","What we build for the classrooms",0,["No access","See only","Update"]],
   ["money","Money","Costs, trades and payments",0,["No access","See only","Record"]],
   ["upd","Updates","Messages to and from the team",1,["Receive","Send"]]];
-const ACT_AREA={pedit:"tasks",padd:"tasks",pren:"tasks",pdel:"tasks",pmv:"tasks",gedit:"tasks",gadd:"tasks",gren:"tasks",gdel:"tasks",estimate:"money",scanslip:"money",contract:"money",addextra:"money",editextra:"money",cyc:"tasks",cycboth:"tasks",edittask:"tasks",deltask:"tasks",addtask:"tasks",reorder:"tasks",mvup:"tasks",mvdn:"tasks",phphoto:"log",addphoto:"log",addissue:"log",editlog:"log",dellog:"log",fix:"log",addmat:"mats",editmat:"mats",delmat:"mats",cycmat:"mats",movein:"mats",moveout:"mats",editelec:"mats",addsup:"mats",editsup:"mats",delsup:"mats",adddoc:"docs",addplan:"docs",adddiary:"diary",editdiary:"diary",addfurn:"furn",editfurn:"furn",delfurn:"furn",furnstarter:"furn"};
+const ACT_AREA={pedit:"tasks",padd:"tasks",pren:"tasks",pdel:"tasks",pmv:"tasks",gedit:"tasks",gadd:"tasks",gren:"tasks",gdel:"tasks",estimate:"money",scanslip:"money",snagedit:"log",snagreopen:"log",contract:"money",addextra:"money",editextra:"money",cyc:"tasks",cycboth:"tasks",edittask:"tasks",deltask:"tasks",addtask:"tasks",reorder:"tasks",mvup:"tasks",mvdn:"tasks",phphoto:"log",addphoto:"log",addissue:"log",editlog:"log",dellog:"log",fix:"log",addmat:"mats",editmat:"mats",delmat:"mats",cycmat:"mats",movein:"mats",moveout:"mats",editelec:"mats",addsup:"mats",editsup:"mats",delsup:"mats",adddoc:"docs",addplan:"docs",adddiary:"diary",editdiary:"diary",addfurn:"furn",editfurn:"furn",delfurn:"furn",furnstarter:"furn"};
 const AREA_MSG=ar=>lvl(ar)===0?"You do not have access to this area.":"You can look at this area but not change it.";
 const areaLabel=(k,v)=>{const a=AREAS.find(x=>x[0]===k);return a?a[4][Math.max(0,v-a[3])]||"":""};
 function areaRows(st,pre){
@@ -3006,6 +3011,127 @@ function slipExportSheet(){
     sh.querySelector("#xp").onclick=run(async()=>{xs.textContent="Getting ready…";const area=document.createElement("div");area.id="printarea";
       const imgs=await Promise.all(list.map(c=>c.media?.[0]?mUrl(c.media[0]):""));
       area.innerHTML=`<div class="pa-h">${esc(S.settings.name||"Site")}: slips</div><div class="pa-cap">${list.length} slips · ${money0(tot)} · printed ${esc(dlong(today()))}</div>`+list.map((c,i)=>`<div class="pa-row"><b>${esc(dshort(c.date))}</b> · ${esc(c.title||cat(c.cat)[1])} · ${esc(cat(c.cat)[1])} · ${money(c.amount)}${c.vat?" (VAT "+money(c.vat)+")":""}${imgs[i]?`<br><img src="${imgs[i]}" alt="" style="max-height:7cm;max-width:100%;margin-top:4px">`:""}</div>`).join("");
+      close();printNode(area)});
+  });
+}
+/* ---------- Discussion on a task or a snag, and "needs your OK" requests ---------- */
+let curThread="";
+const REPLY_ALL=false,canReply=()=>canSend()||REPLY_ALL;
+const msgVisible=m=>m.from===sm.pid||toMe(m);
+const threadMsgs=ref=>S.msgs.filter(m=>m.re===ref&&msgVisible(m)).sort((a,b)=>a.t-b.t);
+const decOf=(m,pid)=>(S.rcpt.find(r=>r.m===m.id&&r.p===pid&&r.dec)||{}).dec||"";
+function refTitle(ref){
+  const[t,id]=String(ref||"").split("|");
+  if(t==="task"){const x=S.tasks.find(q=>q.key===id);return x?x.title:"Task"}
+  if(t==="snag"){const l=S.logs.find(q=>q.id===id);return l?(l.text||"Snag").slice(0,70):"Snag"}
+  return "Discussion";
+}
+function askBlock(m){
+  if(!m.ask)return "";
+  const all=(m.to||[]).includes("all"),peers=peopleList().filter(p=>p.active&&p.pid!==m.from),targets=all?peers:peers.filter(p=>(m.to||[]).includes(p.pid));
+  const chips=targets.map(p=>{const d=decOf(m,p.pid);return `<span class="pill ${d==="ok"?"":d==="no"?"unwell":"watch"}">${d==="ok"?ic("check","sm")+"OK":d==="no"?ic("x","sm")+"Not yet":"Waiting"} · ${esc(p.name)}</span>`}).join(" ");
+  const mineOpen=sm.code&&m.from!==sm.pid&&toMe(m)&&!decOf(m,sm.pid);
+  return `<div class="askbox"><div class="small muted" style="margin-bottom:6px">${ic("check","sm")} Needs an OK</div><div class="row wr" style="gap:6px">${chips}</div>${mineOpen?`<div class="row" style="gap:8px;margin-top:8px"><button type="button" class="btn small good" data-act="msgdec" data-id="${m.id}|ok">${ic("check","sm")}Approve</button><button type="button" class="btn small" data-act="msgdec" data-id="${m.id}|no">Not yet</button></div>`:""}</div>`;
+}
+function msgDecide(mid,d){
+  const m=S.msgs.find(x=>x.id===mid);if(!m||!sm.code)return;
+  const r=S.rcpt.find(x=>x.m===mid&&x.p===sm.pid&&x.dec);
+  if(r){r.dec=d;r.t=Date.now()}else S.rcpt.push({id:mid+"-"+sm.pid+"-d",m:mid,p:sm.pid,from:m.from,t:Date.now(),dec:d});
+  const what=m.re?refTitle(m.re):(m.text||"a request").slice(0,70);
+  logAct((d==="ok"?"Approved: ":"Said not yet: ")+what);save();
+  notifySend([m.from],(me||sm.pname||"Someone")+(d==="ok"?" approved":" says not yet"),what,"inbox");
+  if(curThread&&tab!=="inbox"&&$("#layer .sheet"))threadSheet(curThread);else render();
+  toast(d==="ok"?"Approved.":"Marked not yet.");
+}
+function threadSheet(ref){
+  if(!sm.code){toast("Share the project with your team to discuss things.");return}
+  curThread=ref;
+  const list=threadMsgs(ref),title=refTitle(ref),can=canReply(),others=peopleList().filter(p=>p.active&&p.pid!==sm.pid);
+  const t0=ref.startsWith("task|")?S.tasks.find(x=>x.key===ref.slice(5)):ref.startsWith("snag|")?S.logs.find(x=>x.id===ref.slice(5)):null;
+  const own=t0?.owner&&!String(t0.owner).startsWith("sup:")?[t0.owner]:[];
+  const to=new Set([...asgL(t0?.assignee||""),...own,...list.flatMap(m=>[m.from,...(m.to||[])])].filter(p=>p&&p!=="all"&&p!==sm.pid&&others.some(o=>o.pid===p)));
+  let ask=false;
+  const msgHtml=m=>`<div class="tmsg ${m.from===sm.pid?"me":""}"><div class="row between" style="gap:8px"><b class="small">${m.from===sm.pid?"You":esc(pName(m.from))}</b><span class="muted small">${ago(m.t)}</span></div>${m.text?`<p style="margin:4px 0 0;white-space:pre-wrap">${esc(m.text)}</p>`:""}${askBlock(m)}</div>`;
+  sheet("Discussion",`<p class="lt" style="margin:6px 0 10px">${esc(title)}</p>
+  <div class="tthread" id="tth2">${list.length?list.map(msgHtml).join(""):`<p class="muted small">Nothing said yet.</p>`}</div>
+  ${can?`<form id="f" novalidate><label class="f">Send to</label><div class="chips" role="group" aria-label="Send to">${others.map(p=>`<button type="button" class="chip" data-r="${p.pid}" aria-pressed="${to.has(p.pid)}">${esc(p.name)}</button>`).join("")}</div>
+  <label class="f" for="tm">Message</label><textarea id="tm" class="t grow-ta" rows="2" maxlength="400" placeholder="Ask a question or reply"></textarea>${micBtn("tm","Speak the message")}
+  <div class="chips" role="group" aria-label="Kind of message" style="margin-top:8px"><button type="button" class="chip" id="tk" aria-pressed="false">Needs an OK</button></div><p class="hint">With "Needs an OK" the people you chose can approve or say not yet, and you see who has.</p>
+  <div class="foot"><button class="btn primary block">Send</button></div></form>`:`<p class="hint">Your access is to receive updates, so you can read this and approve requests, but not write here.</p>`}`,(sh,close)=>{
+    const th=sh.querySelector("#tth2");th.scrollTop=th.scrollHeight;
+    if(!can)return;
+    sh.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{const k=b.dataset.r;if(to.has(k))to.delete(k);else to.add(k);b.setAttribute("aria-pressed",to.has(k))});
+    const tk=sh.querySelector("#tk");tk.onclick=()=>{ask=!ask;tk.setAttribute("aria-pressed",ask)};
+    sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const tx=sh.querySelector("#tm"),text=tx.value.trim();
+      if(!to.size){toast("Choose who to send it to.");return}
+      if(!text)return showErr(sh,tx,"Write a message first.");
+      const m={id:uid(),from:sm.pid,t:Date.now(),to:[...to],text,media:[],re:ref};if(ask)m.ask=true;
+      S.msgs.push(m);logAct((ask?"Asked for an OK: ":"Replied on: ")+title);save();
+      notifySend(m.to,(ask?"OK needed: ":"New message: ")+title.slice(0,60),(me||sm.pname||"Someone")+": "+text.slice(0,100),"inbox");
+      threadSheet(ref);toast(ask?"Request sent.":"Sent.");
+    };
+  });
+}
+/* ---------- Snags: the list of things to fix, with an owner, a check and an export ---------- */
+let snagF="open";
+const snagState=l=>l.closed?"closed":l.fixed?"fixed":"open";
+const ownerName=o=>!o?"":String(o).startsWith("sup:")?(supName(String(o).slice(4))||"Contractor"):pName(o);
+const snagWhere=l=>[roomName(l.room),l.where,l.phase&&phase(l.phase)?phaseName(l.phase):""].filter(Boolean).join(" · ");
+function snagsV(){
+  const all=S.logs.filter(l=>l.kind==="issue"),td=today();
+  const n=k=>all.filter(l=>snagState(l)===k).length,mine=sm.code?all.filter(l=>snagState(l)!=="closed"&&l.owner===sm.pid).length:0;
+  const TEST={open:l=>snagState(l)==="open",fixed:l=>snagState(l)==="fixed",closed:l=>snagState(l)==="closed",mine:l=>l.owner===sm.pid&&snagState(l)!=="closed",all:()=>true};
+  const f=TEST[snagF]?snagF:"open",list=all.filter(TEST[f]).sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999")||(b.date||"").localeCompare(a.date||""));
+  const canLog=lvl("log")>=2,rooms2=[...new Set(list.map(l=>l.room||"both"))];
+  const chips=[["open","To fix · "+n("open")],["fixed","To check · "+n("fixed")],["closed","Closed · "+n("closed")],...(sm.code?[["mine","Mine · "+mine]]:[]),["all","All · "+all.length]];
+  const card=l=>{
+    const s=snagState(l),od=s!=="closed"&&l.due&&l.due<td,th=threadMsgs("snag|"+l.id).length;
+    return `<li class="card snag" style="list-style:none;margin-bottom:12px"><div class="meta row wr" style="gap:6px"><span class="pill ${s==="open"?"unwell":s==="fixed"?"watch":""}">${s==="open"?ic("alert","sm")+"To fix":s==="fixed"?ic("clock","sm")+"To check":ic("check","sm")+"Closed"}</span>${l.phase&&phase(l.phase)?`<span class="pill type">${esc(phaseName(l.phase))}</span>`:""}<span class="pill sky">${esc(roomName(l.room))}</span></div>
+    ${l.where?`<div class="ls" style="margin-top:6px">${ic("map","sm")} ${esc(l.where)}</div>`:""}
+    ${l.text?`<p style="margin:8px 0 0">${esc(l.text)}</p>`:""}
+    ${l.media?.length?`<div class="mg n${Math.min(l.media.length,4)}" style="margin-top:10px">${l.media.slice(0,4).map((m,i)=>`<button type="button" class="mtile" data-act="lb" data-id="${l.id}|${i}" aria-label="Open photo ${i+1}"><span data-m="${m}" style="position:absolute;inset:0"></span>${i===3&&l.media.length>4?`<span class="more">+${l.media.length-4}</span>`:""}</button>`).join("")}</div>`:""}
+    <div class="ls ${od?"bad":""}" style="margin-top:8px">${l.owner?"Owner: "+esc(ownerName(l.owner)):"No owner yet"}${l.due?` · ${od?"overdue, ":"due "}${dshort(l.due)}`:""}${l.closedOn?` · closed ${dshort(l.closedOn)}`:""}</div>
+    <div class="row wr" style="gap:8px;margin-top:10px">${canLog?`<button class="btn small" data-act="snagedit" data-id="${l.id}">${ic("user","sm")}Owner and date</button>`:""}${canLog&&s==="open"?`<button class="btn small good" data-act="fix" data-id="${l.id}">${ic("check","sm")}Mark fixed</button>`:""}${perm.manage&&s==="fixed"?`<button class="btn small good" data-act="snagclose" data-id="${l.id}">${ic("check","sm")}Check and close</button>`:""}${canLog&&s!=="open"?`<button class="btn small" data-act="snagreopen" data-id="${l.id}">Reopen</button>`:""}${sm.code?`<button class="btn small" data-act="thread" data-id="snag|${l.id}">${ic("chat","sm")}Discuss${th?" · "+th:""}</button>`:""}${rowBtns("log","entry",l.id)}</div></li>`};
+  return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Snags</h2></div><button class="btn primary" data-act="addissue">${ic("plus")}Add</button></div>
+  <div class="dstrip" role="group" aria-label="Snag totals"><div class="${n("open")?"warn":""}">${ic("alert","sm")}<b>${n("open")}</b><span>to fix</span></div><div>${ic("clock","sm")}<b>${n("fixed")}</b><span>to check</span></div><div>${ic("check","sm")}<b>${n("closed")}</b><span>closed</span></div></div>
+  <div class="row between" style="gap:8px;margin:10px 0"><div class="chips scroll grow" role="group" aria-label="Show snags">${chips.map(([k,l])=>`<button type="button" class="chip" data-sub="sg:${k}" aria-pressed="${f===k}">${esc(l)}</button>`).join("")}</div>${all.length?`<button class="btn small" data-act="snagexport">${ic("download","sm")}Export</button>`:""}</div>
+  ${list.length?rooms2.map(r=>`<h3 class="snagh">${esc(roomName(r))} · ${list.filter(l=>(l.room||"both")===r).length}</h3><ul style="padding:0;margin:0">${list.filter(l=>(l.room||"both")===r).map(card).join("")}</ul>`).join(""):empty("check",f==="open"?"Nothing to fix":"Nothing here",f==="open"?"Report anything that needs fixing, with a photo, and give it an owner.":"No snags match this list.",f==="open"&&canLog?`<button class="btn primary" data-act="addissue">${ic("alert")}Add a snag</button>`:"")}`;
+}
+function snagSheet(id){
+  const l=S.logs.find(x=>x.id===id);if(!l)return;
+  const opts=[...peopleList().filter(p=>p.active).map(p=>[p.pid,p.name]),...S.sups.map(s=>["sup:"+s.id,s.name+" (contractor)"])];
+  sheet("Snag owner and date",`<form id="f" novalidate><p class="lt" style="margin:6px 0 0">${esc((l.text||"Snag").slice(0,90))}</p>
+  <label class="f" for="so">Who fixes it?</label><select id="so" class="t sel"><option value="">Not assigned</option>${opts.map(([k,n])=>`<option value="${esc(k)}" ${l.owner===k?"selected":""}>${esc(n)}</option>`).join("")}</select>
+  ${dateField("du",l.due||"","Fix by")}
+  <label class="f" for="sw">Where exactly (optional)</label><input id="sw" class="t" maxlength="80" value="${esc(l.where||"")}" placeholder="For example: north wall, by the door">
+  <div class="foot"><button class="btn primary block">Save</button></div></form>`,(sh,close)=>{
+    wireDc(sh);
+    sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const owner=sh.querySelector("#so").value,due=sh.querySelector("#du").value||"",where=sh.querySelector("#sw").value.trim(),was=l.owner;
+      const u=undoEdit(l,{owner,due,where});save();close();render();toast("Snag saved.",u);
+      if(owner&&owner!==was&&!owner.startsWith("sup:")&&owner!==sm.pid)notifySend([owner],"Snag for you",(l.text||"Something to fix").slice(0,100),"snags");
+    };
+  });
+}
+function snagRows(list){return list.slice().sort((a,b)=>roomName(a.room).localeCompare(roomName(b.room))||(a.due||"9999").localeCompare(b.due||"9999"))}
+function snagCsv(list){
+  const rows=[["Classroom","Where","Snag","Status","Owner","Fix by","Phase","Reported","Closed","Photo"]];
+  snagRows(list).forEach((l,i)=>rows.push([roomName(l.room),l.where||"",l.text||"",{open:"To fix",fixed:"To check",closed:"Closed"}[snagState(l)],ownerName(l.owner),l.due||"",l.phase&&phase(l.phase)?phaseName(l.phase):"",l.date||"",l.closedOn||"",l.media?.length?"photos/"+String(i+1).padStart(3,"0")+" "+exSafe(roomName(l.room)+" "+(l.text||"snag").slice(0,30))+".jpg":""]));
+  return "﻿"+rows.map(r=>r.map(csvQ).join(",")).join("\r\n");
+}
+function snagExportSheet(){
+  const list=S.logs.filter(l=>l.kind==="issue"&&(snagF==="all"||snagF==="mine"||snagState(l)===snagF));if(!list.length){toast("No snags to export.");return}
+  const base=exSafe(S.settings.name||"Project")+" snags "+today();
+  sheet("Export snags",`<p class="muted" style="margin:6px 0 10px">${list.length} snag${list.length===1?"":"s"} in the list you are looking at. Send it to the builder or a contractor.</p>
+  <div class="tasks"><button class="btn block" id="xc">${ic("download")}Spreadsheet (CSV)</button><button class="btn block" id="xz">${ic("download")}Zip with the photos</button><button class="btn block" id="xp">${ic("print")}Print the list</button></div><p class="hint" id="xs" aria-live="polite"></p>`,(sh,close)=>{
+    const xs=sh.querySelector("#xs"),btns=[...sh.querySelectorAll(".btn")],run=fn=>async()=>{btns.forEach(b=>b.disabled=true);try{await fn()}catch(e){console.warn("snags",e);xs.textContent="Something went wrong. Try again."}btns.forEach(b=>b.disabled=false)};
+    sh.querySelector("#xc").onclick=run(async()=>{xs.textContent=await slipSave(new Blob([snagCsv(list)],{type:"text/csv"}),base+".csv")});
+    sh.querySelector("#xz").onclick=run(async()=>{xs.textContent="Collecting the photos…";const rows=snagRows(list),files=[{path:"snags.csv",blob:new Blob([snagCsv(list)],{type:"text/csv"})}];let miss=0;
+      for(let i=0;i<rows.length;i++){const l=rows[i];if(!l.media?.length)continue;const b=await mGet(l.media[0]).catch(()=>null);if(b)files.push({path:"photos/"+String(i+1).padStart(3,"0")+" "+exSafe(roomName(l.room)+" "+(l.text||"snag").slice(0,30))+".jpg",blob:b});else miss++}
+      xs.textContent=(await slipSave(await makeZip(files),base+".zip"))+(miss?" "+miss+" photo"+(miss===1?" is":"s are")+" still loading from the team, export again later.":"")});
+    sh.querySelector("#xp").onclick=run(async()=>{xs.textContent="Getting ready…";const rows=snagRows(list),area=document.createElement("div");area.id="printarea";
+      const imgs=await Promise.all(rows.map(l=>l.media?.[0]?mUrl(l.media[0]):""));let room="";
+      area.innerHTML=`<div class="pa-h">${esc(S.settings.name||"Site")}: snag list</div><div class="pa-cap">${list.length} snags · printed ${esc(dlong(today()))}</div>`+rows.map((l,i)=>{const h=roomName(l.room)!==room?(room=roomName(l.room),`<div class="pa-h" style="font-size:1.1em;margin-top:14px">${esc(room)}</div>`):"";
+        return h+`<div class="pa-row"><b>${{open:"To fix",fixed:"To check",closed:"Closed"}[snagState(l)]}</b> · ${esc(l.text||"Snag")}${l.where?" · "+esc(l.where):""} · ${l.owner?"Owner: "+esc(ownerName(l.owner)):"No owner"}${l.due?" · fix by "+esc(dshort(l.due)):""}${imgs[i]?`<br><img src="${imgs[i]}" alt="" style="max-height:6cm;max-width:100%;margin-top:4px">`:""}</div>`}).join("");
       close();printNode(area)});
   });
 }
@@ -3344,7 +3470,7 @@ function pushPrompt(){
   return `<div class="note-card slim">${ic("bell")}<span class="nt"><b>Get the red number.</b> Turn on notifications.</span><span class="nb"><button type="button" class="linkbtn" data-act="pushsheet">Turn on</button><button type="button" class="linkbtn nx" data-act="pushdismiss" aria-label="Not now">${ic("x","sm")}</button></span></div>`;
 }
 function notifyLead(t){const ld=peopleList().find(p=>p.role==="lead");if(ld&&ld.pid!==sm.pid)notifySend([ld.pid],"Ready to check",t.title.slice(0,100),"check")}
-function openTarget(t){if(t==="furn"){bmode="furn";lsSet("build-bmode","furn");go("build");render()}else if(t==="check"){taskF="check";go("tasks")}else if(t==="inbox")go("inbox");else if(t==="tasks"){taskF="me";go("tasks")}else if(t==="diary")go("diary");else if(t==="report")go("report")}
+function openTarget(t){if(t==="furn"){bmode="furn";lsSet("build-bmode","furn");go("build");render()}else if(t==="check"){taskF="check";go("tasks")}else if(t==="inbox")go("inbox");else if(t==="tasks"){taskF="me";go("tasks")}else if(t==="diary")go("diary");else if(t==="report")go("report");else if(t==="snags")go("snags")}
 try{navigator.serviceWorker?.addEventListener("message",e=>{if(e.data&&e.data.open)openTarget(e.data.open)})}catch{}
 {const m=location.hash.match(/open=([a-z]+)/);if(m){history.replaceState(null,"",location.pathname+location.search);setTimeout(()=>openTarget(m[1]),700)}}
 
