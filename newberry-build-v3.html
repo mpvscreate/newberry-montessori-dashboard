@@ -478,6 +478,7 @@ body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!importan
 #cmpx .cmp-h{position:absolute;top:0;bottom:0;width:3px;margin-left:-1.5px;background:#fff;box-shadow:0 0 8px rgba(0,0,0,.5)}#cmpx .cmp-h i{position:absolute;top:50%;left:50%;width:40px;height:40px;margin:-20px 0 0 -20px;border-radius:50%;background:#fff;color:#222;display:flex;align-items:center;justify-content:center}
 #cmpx .cmp-l{position:absolute;bottom:10px;background:rgba(0,0,0,.6);color:#fff;border-radius:8px;padding:3px 9px;font-size:.78rem;font-weight:600}#cmpx .cmp-l.l{left:10px}#cmpx .cmp-l.r{right:10px}
 #cmpx .lb-b{position:absolute;width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;display:grid;place-items:center;cursor:pointer}#cmpx .lb-x{top:calc(env(safe-area-inset-top,0px) + 12px);right:12px}#cmpx .cmp-h i{gap:0}
+.hbars{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:12px}.hb{height:12px;border-radius:6px;background:var(--accent-soft);border:1px dashed var(--muted);margin:6px 0 4px;overflow:hidden;box-sizing:border-box}.hb i{display:block;height:100%;background:var(--green)}.mb{cursor:pointer;outline:none}.mb:focus-visible rect:nth-of-type(2){stroke:var(--ink)}
 .qa.one{gap:8px;margin:2px 0 10px}.qa.one button{flex-direction:row;gap:7px;min-height:46px;padding:6px 8px;border-radius:15px;font-size:.92rem}.qa.one button .i{width:20px;height:20px;flex:none}
 .card.today{padding:8px 14px 6px;margin:0 0 10px;border-radius:16px}.card.today .eyebrow{font-size:.66rem}.card.today .list li{padding:6px 0;gap:10px}.card.today .list li .st{width:30px;height:30px}.card.today .list li .st .i{width:16px;height:16px}.card.today .lt,.card.today .ls{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card.today .lt{font-size:.88rem}.card.today .ls{font-size:.74rem}.card.today .grow{min-width:0}.card.today .row-ic{width:30px;height:30px}.card.today .linkbtn{min-height:28px!important;font-size:.8rem}
 .phg{margin:0 0 16px}.phg h3{margin:0 0 6px;font:700 .95rem var(--display);letter-spacing:.01em}.ptg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border-radius:14px;overflow:hidden}.ptg .mtile{aspect-ratio:1}.ptg .pdt{position:absolute;left:4px;bottom:4px;z-index:2;background:rgba(0,0,0,.55);color:#fff;border-radius:6px;padding:1px 6px;font-size:.66rem;font-weight:600}
@@ -1543,7 +1544,7 @@ function act(a,id,el){
    shareorder:()=>shareOrder(id&&(id==="all"||phase(id))?id:(matPh!=="all"&&matPh!=="none"?matPh:"")),addsup:()=>supSheet(),editsup:()=>supSheet(id),delsup:()=>delRecs(S.sups,s=>s.id===id,"Contact"),
    addphoto:()=>quickPhoto(id&&phase(id)?id:undefined),addissue:()=>logSheet(null,"issue"),editlog:()=>logSheet(id),dellog:()=>delRecs(S.logs,l=>l.id===id,"Entry"),
    fix:()=>{const l=S.logs.find(x=>x.id===id),u=undoEdit(l,{fixed:true});logAct("Marked an issue as fixed");save();render();toast("Issue marked fixed.",u)},
-   phtlb:()=>lightbox(photoList().map(p=>p.m),+id),phcmp:()=>compareView(id||""),weekshare:()=>shareText(weekText()),lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
+   phtlb:()=>lightbox(photoList().map(p=>p.m),+id),phcmp:()=>compareView(id||""),mbar:()=>{const r=MCH.months[+id],el=$("#mbread");if(!r||!el)return;const p=r.b+r.t+r.o;el.innerHTML=`${mLab(r.ym,1)}: paid <b>${money0(p)}</b>${p?` (builder ${money0(r.b)}${r.t?", trades "+money0(r.t):""}${r.o?", other "+money0(r.o):""})`:""}${r.p?`, planned <b>${money0(r.p)}</b>`:""}.`},weekshare:()=>shareText(weekText()),lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
    refresh:()=>refreshApp(),adddoc:()=>docSheet(),opendoc:()=>{if(docSel){docPick(id);return}const d=S.docs.find(x=>x.id===id);if(d&&docListed(d)&&!docVisible(d))moneyGate(()=>docView(id),"document");else docView(id)},docunlock:()=>moneyGate(()=>render()),godocs:()=>go("docs"),addplan:()=>docSheet(undefined,"drawing"),plprev:()=>turnPage(-1),plnext:()=>turnPage(1),plzin:()=>zoomCenter(1.5),plzout:()=>zoomCenter(1/1.5),plfit:()=>fitView(),plfull:()=>{fullPlan=!fullPlan;PV.had=false;document.body.classList.toggle("lock",fullPlan);render()},goplans:()=>go("plans"),gostock:()=>{matSec="stock";matF="all";go("mats")},mvup:()=>moveKey(curPh,id,-1),mvdn:()=>moveKey(curPh,id,1),phstep:()=>phaseStep(+id),report:()=>reportSheet(),acts:()=>actsSheet(),phba:()=>baSheet(id),outdoor:()=>{outdoor=!outdoor;try{localStorage.setItem("build2-outdoor",outdoor?"1":"0")}catch{}applyOutdoor();render()},share:()=>shareSheet(),project:()=>projectSheet(),whoami:()=>whoSheet(),
    theme:()=>{if(id==="auto"){document.documentElement.removeAttribute("data-theme");try{localStorage.setItem("build2-theme","auto")}catch{}}else{document.documentElement.setAttribute("data-theme",id);try{localStorage.setItem("build2-theme",id)}catch{}}paintTheme();render()},
    export:()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`newberry-build-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")},
@@ -2610,7 +2611,7 @@ const ROLE_PICK=["site","builder","owner","decor","finance","other"];
 const roleLabel=r=>(ROLES[r]||ROLES.other).label;
 const DEFAULT_PEOPLE=[["Albert","site"],["Jonathan","builder"],["Newberry","owner"],["Talana","decor"],["Audrey","finance"]];
 const READ_ACTS0=["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock","plprev","plnext","phdrive","gbackup"].concat(["goinbox","gopeople","newmsg","msglb","sharesheet"]);
-const READ_ACTS=READ_ACTS0.concat(["gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp"]);
+const READ_ACTS=READ_ACTS0.concat(["gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp","mbar"]);
 const MONEY_ACTS=["addcost","editcost","delcost","budget","addpay","editpay","delpay","recpay","paypay","paycost","contract","typicalpay","weekly","resetpays","payall","report"];
 MONEY_ACTS.push("addtrade","edittrade","deltrade","opentrade","tradeaccept","paystage");
 const NOTE_ACTS=["addphoto","phphoto","adddoc"];
@@ -2893,6 +2894,51 @@ function estBreak(est,committed,paid,free){
   return `<div class="estbar" role="img" aria-label="Estimate ${money0(est)}: paid ${money0(pc)}, committed and still to pay ${money0(up)}, ${free>=0?"left "+money0(free):"over by "+money0(-free)}">${seg(pc,"#fff")}${seg(up,"rgba(255,255,255,.5)")}${committed>est?`<b class="estmk" style="left:${est/base*100}%" title="Estimate"></b>`:""}</div>
   <ul class="estleg"><li><i style="background:#fff"></i>Paid<b>${money0(pc)}</b></li><li><i style="background:rgba(255,255,255,.5)"></i>To pay<b>${money0(up)}</b></li><li><i style="background:rgba(0,0,0,.3)"></i>${free>=0?"Left":"Over"}<b>${money0(Math.abs(free))}</b></li></ul>`;
 }
+/* ---------- Money charts: payments by month, and where each rand sits ---------- */
+const MCH={months:[]};
+const mYM=d=>(d||"").slice(0,7),mLab=(ym,long)=>{const dt=new Date(ym+"-01T12:00");return dt.toLocaleString("en-ZA",{month:long?"long":"short"})+(long||ym.endsWith("-01")?" "+(long?dt.getFullYear():String(dt.getFullYear()).slice(2)):"")};
+function mNice(max){const p=Math.pow(10,Math.floor(Math.log10(Math.max(max,1)))),n=max/p,s=n<=1?1:n<=2?2:n<=5?5:10;return s*p}
+const mShort=v=>v>=1e6?(v/1e6).toFixed(v%1e6?1:0).replace(".",",")+"m":v>=1e3?Math.round(v/1e3)+"k":String(Math.round(v));
+function moneyCharts(){
+  const nowYM=mYM(today()),rows={};
+  const put=(ym,k,v)=>{if(!ym||!(v>0))return;(rows[ym]=rows[ym]||{b:0,t:0,o:0,p:0})[k]+=v};
+  S.pays.forEach(p=>put(mYM(p.paid?(p.paidOn||p.due):p.due),p.paid?"b":"p",+p.amount||0));
+  let undated=S.pays.filter(p=>!p.paid&&!p.due).length;
+  tLive().forEach(t=>(t.stages||[]).forEach(s=>{if(s.paid)put(mYM(s.paidOn||s.due),"t",+s.amount||0);else if(s.due)put(mYM(s.due),"p",+s.amount||0);else undated++}));
+  S.costs.filter(c=>!c.pay).forEach(c=>{if(c.paid)put(mYM(c.date)||nowYM,"o",+c.amount||0);else put(mYM(c.date)>=nowYM?mYM(c.date):nowYM,"p",+c.amount||0)});
+  const keys=Object.keys(rows).sort();if(!keys.length)return "";
+  const last=keys[keys.length-1]>nowYM?keys[keys.length-1]:nowYM;
+  const months=[];let y=+keys[0].slice(0,4),m=+keys[0].slice(5);
+  for(;;){const ym=y+"-"+String(m).padStart(2,"0");months.push(ym);if(ym>=last)break;if(++m>12){m=1;y++}}
+  const ms=months.slice(-12).map(ym=>({ym,...(rows[ym]||{b:0,t:0,o:0,p:0})}));
+  MCH.months=ms;
+  const tot=r=>r.b+r.t+r.o+r.p,max=mNice(Math.max(...ms.map(tot),1)),W=360,H=210,pl=40,pr=8,pt=12,pb=28,iw=W-pl-pr,ih=H-pt-pb,Y=v=>pt+ih-v/max*ih,bw=Math.min(30,iw/ms.length*.62),cx=i=>pl+(i+.5)*iw/ms.length;
+  const grid=[.5,1].map(q=>`<line class="grid" x1="${pl}" x2="${W-pr}" y1="${Y(max*q)}" y2="${Y(max*q)}"/><text x="${pl-6}" y="${Y(max*q)+4}" text-anchor="end">${mShort(max*q)}</text>`).join("");
+  const segs=[["b","var(--green)"],["t","var(--sky)"],["o","var(--accent)"]];
+  const bars=ms.map((r,i)=>{let acc=0;const g=segs.map(([k,c])=>{if(!(r[k]>0))return "";const y1=Y(acc+r[k]),h=Y(acc)-y1;acc+=r[k];return `<rect x="${cx(i)-bw/2}" y="${y1}" width="${bw}" height="${Math.max(0,h)}" style="fill:${c};stroke:var(--sheet)" stroke-width="2" rx="3"/>`}).join("");
+    const pl2=r.p>0?`<rect x="${cx(i)-bw/2}" y="${Y(acc+r.p)}" width="${bw}" height="${Math.max(0,Y(acc)-Y(acc+r.p))}" style="fill:var(--accent-soft);stroke:var(--muted)" stroke-width="1.5" stroke-dasharray="4 3" rx="3"/>`:"";
+    const now=r.ym===nowYM?`<line x1="${cx(i)-bw/2-3}" x2="${cx(i)+bw/2+3}" y1="${Y(0)+5}" y2="${Y(0)+5}" style="stroke:var(--accent)" stroke-width="2.5" stroke-linecap="round"/>`:"";
+    return `<g class="mb" data-act="mbar" data-id="${i}" tabindex="0" role="button" aria-label="${mLab(r.ym,1)}: paid ${money0(r.b+r.t+r.o)}, planned ${money0(r.p)}"><rect x="${cx(i)-iw/ms.length/2}" y="${pt}" width="${iw/ms.length}" height="${ih+pb-6}" fill="transparent"/>${g}${pl2}${now}</g>`}).join("");
+  const step=ms.length>8?2:1,xs=ms.map((r,i)=>i%step===0?`<text x="${cx(i)}" y="${H-8}" text-anchor="middle">${mLab(r.ym)}</text>`:"").join("");
+  const sumB=sum(ms,r=>r.b),sumT=sum(ms,r=>r.t),sumO=sum(ms,r=>r.o),sumP=sum(ms,r=>r.p);
+  /* where each rand sits: the builder, every trade and other costs, paid and still to pay */
+  const parties=[];
+  const ct=contractAmt(),paidB=paidTotal();if(ct>0)parties.push({n:"Builder",v:ct,p:Math.min(ct,paidB)});
+  tGroups().forEach(g=>{const live=g.items.filter(t=>t.status==="accepted"),v=sum(live,tVal);if(v>0)parties.push({n:g.name,v,p:Math.min(v,sum(live,tPaid))})});
+  const oth=S.costs.filter(c=>!c.pay),ov=sum(oth,c=>c.amount);if(ov>0)parties.push({n:"Other expenses",v:ov,p:sum(oth.filter(c=>c.paid),c=>c.amount)});
+  parties.sort((a,b)=>b.v-a.v);const top=parties.slice(0,8),rest=parties.slice(8);if(rest.length)top.push({n:"Other trades ("+rest.length+")",v:sum(rest,x=>x.v),p:sum(rest,x=>x.p)});
+  const pmax=Math.max(...top.map(x=>x.v),1);
+  const hb=top.length?`<div class="card"><h2>Where each rand sits</h2>
+   <div class="lg"><span><i class="ln" style="background:var(--green)"></i>Paid</span><span><i class="ln" style="background:var(--accent-soft);border:1px solid var(--muted)"></i>Still to pay</span></div>
+   <ul class="hbars">${top.map(x=>`<li><div class="row between"><span class="lt">${esc(x.n)}</span><span class="ls"><b>${money0(x.v)}</b></span></div><div class="hb" role="img" aria-label="${esc(x.n)}: ${money0(x.v)} in total, ${money0(x.p)} paid, ${money0(x.v-x.p)} still to pay" style="width:${Math.max(3,x.v/pmax*100)}%"><i style="width:${x.v?x.p/x.v*100:0}%"></i></div><div class="ls">Paid ${money0(x.p)} · to pay ${money0(x.v-x.p)}</div></li>`).join("")}</ul>
+   <details class="tv"><summary>View as table</summary><table class="dt"><thead><tr><th>Who</th><th>Total</th><th>Paid</th><th>To pay</th></tr></thead><tbody>${top.map(x=>`<tr><td>${esc(x.n)}</td><td>${money0(x.v)}</td><td>${money0(x.p)}</td><td>${money0(x.v-x.p)}</td></tr>`).join("")}</tbody></table></details></div>`:"";
+  return `<div class="card"><h2>Payments by month</h2>
+   <div class="lg"><span><i class="ln" style="background:var(--green)"></i>Builder</span>${sumT?`<span><i class="ln" style="background:var(--sky)"></i>Trades</span>`:""}${sumO?`<span><i class="ln" style="background:var(--accent)"></i>Other</span>`:""}${sumP?`<span><i class="ln" style="background:var(--accent-soft);border:1px solid var(--muted)"></i>Planned</span>`:""}</div>
+   <svg class="chart" viewBox="0 0 ${W} ${H}" role="group" aria-label="Money paid and planned, month by month">${grid}<line class="base" x1="${pl}" x2="${W-pr}" y1="${Y(0)}" y2="${Y(0)}"/>${bars}${xs}</svg>
+   <p class="chart-read" id="mbread" aria-live="polite">Paid so far <b>${money0(sumB+sumT+sumO)}</b>${sumP?`, planned <b>${money0(sumP)}</b>`:""}. Touch a month to read it.</p>
+   ${undated?`<p class="hint">${undated} payment${undated===1?" has":"s have"} no due date yet, so ${undated===1?"it is":"they are"} not shown.</p>`:""}
+   <details class="tv"><summary>View as table</summary><table class="dt"><thead><tr><th>Month</th><th>Builder</th><th>Trades</th><th>Other</th><th>Planned</th></tr></thead><tbody>${ms.map(r=>`<tr><td>${mLab(r.ym)}</td><td>${money0(r.b)}</td><td>${money0(r.t)}</td><td>${money0(r.o)}</td><td>${money0(r.p)}</td></tr>`).join("")}</tbody></table></details></div>${hb}`;
+}
 function overallV(){
   const ct=contractAmt(),est=+S.settings.estimate||0,paidB=paidTotal(),bLeft=Math.max(0,ct-paidB),tc=tCommit(),tp=tPaidAll(),tLeft=Math.max(0,tc-tp),wait=tWait(),up=tUpcoming();
   const oth=S.costs.filter(c=>!c.pay),othAll=sum(oth,c=>c.amount),othPaid=sum(oth.filter(c=>c.paid),c=>c.amount),othDue=othAll-othPaid;
@@ -2920,6 +2966,7 @@ function overallV(){
   <div class="card"><h2>Where it stands</h2>
    <div class="stack" role="img" aria-label="Paid on the build ${money0(paidB+othPaid)}, paid to trades ${money0(tp)}, still to pay ${money0(left)}">${[[paidB+othPaid,"var(--green)"],[tp,"var(--sky)"]].map(([v,c])=>v>0?`<i style="width:${v/Math.max(paid+left,1)*100}%;background:${c}"></i>`:"").join("")}</div>
    <ul class="legend"><li><i style="background:var(--green)"></i>Paid on the build<b>${money0(paidB+othPaid)}</b></li><li><i style="background:var(--sky)"></i>Paid to trades<b>${money0(tp)}</b></li><li><i style="background:var(--field)"></i>Still to pay<b>${money0(left)}</b></li></ul></div>
+  ${moneyCharts()}
   ${up.length?`<div class="card"><h2>Coming up</h2><ul class="list">${up.map(({t,s})=>{const od=s.due&&s.due<today();return `<li class="tap" tabindex="0" data-act="opentrade" data-id="${t.id}"><span class="row-ic ${od?"red":"sky"}">${ic("calendar")}</span><div class="grow"><div class="lt">${esc(s.label||"Payment")}</div><div class="ls ${od?"bad":""}">${esc(t.trade)} · ${esc(tName(t))}${s.due?` · ${od?"overdue, ":"due "}${dshort(s.due)}`:""}</div></div><span class="amt">${money(s.amount)}</span></li>`}).join("")}</ul></div>`:""}
   <p class="hint">Each payment comes off that quote's balance. Trades are quoted and paid separately from the builder.</p>`;
 }
