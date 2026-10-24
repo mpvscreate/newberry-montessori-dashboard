@@ -457,6 +457,17 @@ body.previewing{padding-top:calc(48px + env(safe-area-inset-top,0px))}
 .list li .lt{font-size:.93rem}.list li .st{width:38px;height:38px}.list li .btn.icon{width:36px;min-height:36px}.list li .btn.small{min-height:36px;padding:4px 12px}
 .note-card{padding:8px 12px;font-size:.82rem}
 .dstrip{display:flex;align-items:center;justify-content:space-around;gap:6px;background:var(--sheet);border:1px solid var(--line);border-radius:16px;padding:8px 10px;margin:0 0 10px}.dstrip>div{display:flex;align-items:center;gap:6px;min-width:0}.dstrip .i{color:var(--accent);flex:none}.dstrip b{font:700 1.15rem var(--display);font-variant-numeric:tabular-nums}.dstrip span{font-size:.74rem;color:var(--muted);line-height:1.1}.dstrip .warn b,.dstrip .warn .i{color:var(--red)}
+/* streamline */
+.moreV .ls{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.moreV .list li{padding:7px 0}
+.page-h{margin:2px 0 10px}.page-h h2{font-size:clamp(1.35rem,4.6vw,1.7rem)}
+.card{padding:14px 16px;border-radius:20px;margin-bottom:12px}.card>h2,.card .row>h2{font-size:1.02rem}
+.bento{gap:8px;margin-bottom:12px}.bento .tile{padding:12px 14px;border-radius:18px;gap:3px}.bento .tile:not(.hero){min-height:0}
+.tile .lbl{font-size:.76rem}.tile .sub{font-size:.78rem}.bento .tile:not(.hero) .big{font-size:clamp(1.2rem,5.2vw,1.6rem)}.tile.hero .big{font-size:clamp(2rem,9vw,2.6rem)}.tile .big small{font-size:.45em}
+.qa{gap:8px;margin:0 0 10px}.qa button{min-height:60px;border-radius:16px;padding:8px 6px}.qa.two button{min-height:48px;border-radius:16px}
+label.f{margin:12px 0 4px;font-size:.85rem}.t{padding:9px 12px;min-height:42px;border-radius:12px;font-size:.97rem}
+.chip{min-height:36px;padding:5px 13px;font-size:.9rem}.btn.small{min-height:38px}
+body #fab-wrap .fab-menu .fab-item{min-height:50px!important;padding:6px 10px!important;border-radius:15px!important}.fab-grp{margin:0 0 8px}.fab-grp h4{margin:0 4px 5px}
+body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!important}
 .dim{opacity:.62}.trcard{cursor:pointer}
 .rn .st,.rn .stp,.rfin .st,.rfin .stp{pointer-events:none}
 .rn [data-fab="task"],.rn [data-fab="mat"],.rn [data-fab="cost"],.rn [data-fab="pay"],.rfin [data-fab="task"],.rfin [data-fab="mat"],.rfin [data-fab="photo"],.rfin [data-fab="issue"],.rn [data-act="addtask"],.rfin [data-act="addtask"],.rn [data-act="editelec"],.rfin [data-act="editelec"],.rn [data-act="reorder"],.rfin [data-act="reorder"]{display:none!important}
@@ -1410,7 +1421,7 @@ function siteV(){
 function more(){
   const s=S.settings,row=(i,t,sub,act)=>`<li class="tap" tabindex="0" data-act="${act}"><span class="row-ic">${ic(i)}</span><div class="grow"><div class="lt">${t}</div><div class="ls">${sub}</div></div>${ic("chev")}</li>`;
   return `<div class="page-h"><h2>More</h2></div>
-  <div class="card"><ul class="list">
+  <div class="card moreV"><ul class="list">
    ${row("bell","Updates","Messages sent between people"+(unreadMsgs().length?" · "+unreadMsgs().length+" new":""),"goinbox")}
    ${sm.code&&pushSupported()?row("bell","Notifications",lsGet("build-push")==="1"?"On for this phone":"Off. Tap to get phone notifications","pushsheet"):""}
    ${row("book","Site diary","Daily record: weather, people on site and delays","godiary")}
