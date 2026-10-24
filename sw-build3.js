@@ -8,7 +8,7 @@ const bump=async()=>{
 self.addEventListener("push",e=>{
   let d={};try{d=e.data.json()}catch{}
   e.waitUntil((async()=>{
-    await self.registration.showNotification(d.title||"Newberry Build",{body:d.body||"",icon:"icons/build-192.png",badge:"icons/build-48.png",tag:"build3-"+(d.open||"update"),data:{open:d.open||""}});
+    await self.registration.showNotification(d.title||"Newberry Build",{body:d.body||"",icon:new URL("/icons/build-192.png",self.location.origin).href,badge:new URL("/icons/build-badge-96.png",self.location.origin).href,tag:"build3-"+(d.open||"update"),data:{open:d.open||""}});
     const n=await bump();
     try{if(self.navigator&&self.navigator.setAppBadge)await self.navigator.setAppBadge(n)}catch{}
   })());

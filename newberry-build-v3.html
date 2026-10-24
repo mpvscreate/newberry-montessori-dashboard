@@ -3438,10 +3438,16 @@ async function pushState(){
   if(Notification.permission==="denied")return "blocked";
   try{const reg=await navigator.serviceWorker.getRegistration();const sub=reg&&await reg.pushManager.getSubscription();return sub&&Notification.permission==="granted"?"on":"off"}catch{return "off"}
 }
+/* the worker must cover exactly the installed app (the manifest scope). On Android, a worker with a wider scope makes notifications show as coming from Chrome. sw.js has no push code, so it must never hold this app's push subscription */
+async function swRegister(){
+  const reg=await navigator.serviceWorker.register("sw-build3.js",{scope:"./newberry-build-v3.html"});
+  try{for(const r of await navigator.serviceWorker.getRegistrations()){if(r===reg||new URL(r.scope).pathname!=="/")continue;const sub=await r.pushManager.getSubscription();if(sub)await r.unregister()}}catch{}
+  return reg;
+}
 async function enablePush(){
   if(!sm.code)return "share";
   const perm=await Notification.requestPermission();if(perm!=="granted")return "blocked";
-  const reg=await navigator.serviceWorker.register("sw-build3.js");await navigator.serviceWorker.ready;
+  const reg=await swRegister();await navigator.serviceWorker.ready;
   const pub=(await(await fetch(PUSH_FN)).json()).publicKey;if(!pub)return "error";
   const sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:b64u(pub)});
   if(!sb&&!await connect())return "offline";
@@ -4134,7 +4140,7 @@ render();
 if(sm.code){setSync("syncing");syncNow()}else setSync("off");
 joinFromHash();addEventListener("hashchange",joinFromHash);
 setTimeout(autoUpdate,1500);
-if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw-build3.js").catch(()=>{});/* the same worker that shows notifications and the red number: sw.js has no push code and replaced it on every open */
+if("serviceWorker"in navigator&&location.protocol.startsWith("http"))swRegister().catch(()=>{});
 </script>
 </body>
 </html>
