@@ -471,6 +471,8 @@ label.f{margin:12px 0 4px;font-size:.85rem}.t{padding:9px 12px;min-height:42px;b
 .chip{min-height:36px;padding:5px 13px;font-size:.9rem}.btn.small{min-height:38px}
 body #fab-wrap .fab-menu .fab-item{min-height:50px!important;padding:6px 10px!important;border-radius:15px!important}.fab-grp{margin:0 0 8px}.fab-grp h4{margin:0 4px 5px}
 body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!important}
+.card.today{padding:10px 14px;margin:0 0 12px;border-radius:18px}.card.today .list li{padding:8px 0}
+.phg{margin:0 0 16px}.phg h3{margin:0 0 6px;font:700 .95rem var(--display);letter-spacing:.01em}.ptg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border-radius:14px;overflow:hidden}.ptg .mtile{aspect-ratio:1}.ptg .pdt{position:absolute;left:4px;bottom:4px;z-index:2;background:rgba(0,0,0,.55);color:#fff;border-radius:6px;padding:1px 6px;font-size:.66rem;font-weight:600}
 .dim{opacity:.62}.trcard{cursor:pointer}
 .rn .st,.rn .stp,.rfin .st,.rfin .stp{pointer-events:none}
 .rn [data-fab="task"],.rn [data-fab="mat"],.rn [data-fab="cost"],.rn [data-fab="pay"],.rfin [data-fab="task"],.rfin [data-fab="mat"],.rfin [data-fab="photo"],.rfin [data-fab="issue"],.rn [data-act="addtask"],.rfin [data-act="addtask"],.rn [data-act="editelec"],.rfin [data-act="editelec"],.rn [data-act="reorder"],.rfin [data-act="reorder"]{display:none!important}
@@ -885,7 +887,7 @@ const unpaid=()=>sum(S.costs.filter(c=>!c.paid),c=>c.amount);
 /* ---------- ui chrome ---------- */
 let matSec="stock",payAll=false,tab="build",roomF="all",logSub="log",matF="all",costF="all",openPh=null;
 const TABS=[["build","Build","grid"],["home","Overview","home"],["add","Add","plus"],["money","Money","cash"],["more","More","dots"]];
-const navTab=t=>({phase:"build",mats:"build",site:"build",plans:"build",docs:"build",inbox:"more",people:"more",tasks:"build",diary:"build",garden:"build",extra:"more",report:"home",weather:"build"})[t]||t;
+const navTab=t=>({phase:"build",mats:"build",site:"build",plans:"build",docs:"build",inbox:"more",people:"more",tasks:"build",diary:"build",garden:"build",extra:"more",report:"home",weather:"build",photos:"build"})[t]||t;
 $("nav.tabs").innerHTML=TABS.map(([k,l,i])=>k==="add"?`<button type="button" class="cap" id="fab" aria-label="Add something" aria-expanded="false" aria-controls="fab-menu">${ic(i)}</button>`:`<button data-tab="${k}">${ic(i)}<span>${l}</span>${k==="build"?'<i class="dot" id="tdot" hidden></i>':""}</button>`).join("");
 $("#today").textContent=new Date().toLocaleDateString("en-ZA",sm.code?{weekday:"short",day:"numeric",month:"short"}:{weekday:"long",day:"numeric",month:"long"});
 $("#fab-menu").innerHTML=[["site","On site",[["photo","camera","Photo"],["issue","alert","Challenges"]]],["build","Build",[["task","clip","Task"],["mat","truck","Material"]]],["money","Money",[["cost","cash","Expense"],["pay","users","Record payment"]]],["team","Team",[["msg","chat","Update everyone"],["diary","book","Site diary"]]]].map(([g,t,it])=>`<div class="fab-grp" data-g="${g}"><h4>${t}</h4><div class="fab-row">${it.map(([k,i,l])=>`<button class="fab-item" data-fab="${k}"><span class="fi">${ic(i)}</span><span class="fl">${l}</span></button>`).join("")}</div></div>`).join("")+`<p class="fab-hint">Hold the plus button to take a photo straight away.</p>`;
@@ -1049,15 +1051,15 @@ function render(){
   if((tab==="money"||tab==="extra")&&!moneyOK)tab="build";
   document.querySelectorAll("nav.tabs button").forEach(b=>b.dataset.tab===navTab(tab)?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
   $("#pname").textContent=S.settings.name||"Newberry Build";
-  document.title=`${({build:"Build",home:"Overview",money:"Money",more:"More",phase:"Phase",plans:"Plans",docs:"Documents",mats:"Materials",site:"Site log",inbox:"Updates",people:"People",tasks:"Tasks",diary:"Site diary",garden:"Garden",extra:"Extra labour",report:"Report",weather:"Weather"})[tab]} · Newberry Build 3`;
+  document.title=`${({build:"Build",home:"Overview",money:"Money",more:"More",phase:"Phase",plans:"Plans",docs:"Documents",mats:"Materials",site:"Site log",inbox:"Updates",people:"People",tasks:"Tasks",diary:"Site diary",garden:"Garden",extra:"Extra labour",report:"Report",weather:"Weather",photos:"Photos"})[tab]} · Newberry Build 3`;
   $("#tdot").hidden=!S.tasks.some(t=>t.status==="stuck");
-  if(tab!=="docs")docSel=null;paintBell();const v=$("#view");v.innerHTML=({build:buildV,home,phase:phaseV,plans:plansV,docs:docsV,money:moneyV,mats:matsV,site:siteV,more,inbox:inboxV,people:peopleV,tasks:tasksV,diary:diaryV,garden:gardenV,extra:extraV,report:reportV,weather:weatherV})[tab]();
+  if(tab!=="docs")docSel=null;paintBell();const v=$("#view");v.innerHTML=({build:buildV,home,phase:phaseV,plans:plansV,docs:docsV,money:moneyV,mats:matsV,site:siteV,more,inbox:inboxV,people:peopleV,tasks:tasksV,diary:diaryV,garden:gardenV,extra:extraV,report:reportV,weather:weatherV,photos:photosV})[tab]();
   compactRows(v);
   v.querySelectorAll("[data-act]").forEach(el=>el.addEventListener("click",()=>act(el.dataset.act,el.dataset.id,el)));
   v.querySelectorAll("[data-go]").forEach(el=>el.addEventListener("click",()=>{if(el._lp){el._lp=false;return}const[t,f]=el.dataset.go.split(":");if(t==="phase"&&f)curPh=f;if(t==="site"&&f)logSub=f;if(t==="mats"&&f)matF=f;go(t)}));
   v.querySelectorAll("[data-rf]").forEach(el=>el.addEventListener("click",()=>{roomF=el.dataset.rf;render()}));
   v.querySelectorAll("details.gd").forEach(d=>d.addEventListener("toggle",()=>{if(openPh===null)openPh=new Set(curPhases());d.open?openPh.add(d.dataset.ph):openPh.delete(d.dataset.ph)}));
-  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;if(k==="plan"){planSel=val;PV.plan="";PV.had=false}if(k==="doc")docF=val;if(k==="mseg")moneySeg=val;if(k==="tf")taskF=val;if(k==="df")diaryF=val;if(k==="pt")phTab=val;if(k==="mph")matPh=val;if(k==="bm"){bmode=val;lsSet("build-bmode",val)}if(k==="fr")fRoom=val;if(k==="fv")fView=val;render()}));
+  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;if(k==="plan"){planSel=val;PV.plan="";PV.had=false}if(k==="doc")docF=val;if(k==="mseg")moneySeg=val;if(k==="tf")taskF=val;if(k==="df")diaryF=val;if(k==="pf")photoF=val;if(k==="pt")phTab=val;if(k==="mph")matPh=val;if(k==="bm"){bmode=val;lsSet("build-bmode",val)}if(k==="fr")fRoom=val;if(k==="fv")fView=val;render()}));
   v.querySelectorAll("li.tap").forEach(el=>{el.setAttribute("role","button");el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click()}})});
   hydrate(v);hydrateBg(v);countUp(v);if(tab==="plans")initPlanView();
   v.querySelectorAll("svg.chart").forEach(wireChart);if(lvl("tasks")>=2)v.querySelectorAll("ul.reord").forEach(ul=>holdDrag(ul,curPh));
@@ -1248,12 +1250,73 @@ function home(){
   const sched=schedule();
   return `<div class="page-h"><h2>Overview</h2><button class="btn primary" data-go="report">${ic("trend")}Report</button></div>
   <div class="qa two"><button class="main" data-act="addphoto">${ic("camera","lg")}Photo</button><button data-act="gostock">${ic("truck","lg")}Material</button></div>
+  ${todayCard()}
   <div class="bento">
    <section class="tile hero s2"><div class="lbl">${ic("calendar")}Schedule</div><div class="big">${left===null?"–":left>=0?left:-left}<small> ${left===null?"":left>=0?"days to go":"days past target"}</small></div><div class="sub">${S.settings.start?dshort(S.settings.start):"?"} to ${S.settings.target?dshort(S.settings.target):"?"}</div><div class="row wr" style="gap:8px">${sched.chip}</div>${fcLine()}</section>
    ${classroomsTile()}${furnTile()}
    <button class="tile ${issues?"alert":""}" data-go="site:issues"><div class="lbl">${ic("alert")}Open issues</div><div class="big">${issues}</div><div class="sub">${issues?"Tap to see them":"Nothing to fix"}</div></button>
    <button class="tile sky" data-go="mats:all"><div class="lbl">${ic("truck")}To order</div><div class="big">${toOrder}</div><div class="sub">${toOrder?"materials waiting":"All ordered"}</div></button>
   </div>${nextCard(nu,R)}${timelineCard()}${curveCard("progress")}${actCard()}`;
+}
+/* ---------- Today on Overview: what is due or yours, ticked off in one tap ---------- */
+function todayCard(){
+  if(lvl("tasks")<1)return "";
+  const td=today(),open=S.tasks.filter(t=>t.status!=="done");
+  const mine=sm.code?open.filter(t=>asgHas(t,sm.pid)&&(t.status==="doing"||t.status==="check"||(t.due&&t.due<=td))):[];
+  const useMine=mine.length>0,pool=useMine?mine:open.filter(t=>t.due&&t.due<=td);
+  const sorted=pool.slice().sort((a,b)=>((a.due&&a.due<td?0:1)-(b.due&&b.due<td?0:1))||(a.due||"9999").localeCompare(b.due||"9999")||(a.order??0)-(b.order??0));
+  const seen=new Set(),rows=[];
+  sorted.forEach(t=>{const sib=S.tasks.filter(x=>x.key===t.key),merged=sib.length>1&&sib.every(x=>x.status===t.status&&(x.assignee||"")===(t.assignee||"")&&x.due===t.due);if(merged){if(seen.has(t.key))return;seen.add(t.key)}rows.push({t,merged,sib})});
+  const row=({t,merged,sib})=>{const od=t.due&&t.due<td,meta=[merged?"Both classrooms":roomName(t.room),PSHORT[t.phase]||"",t.due?(t.due===td?"Due today":(od?"Overdue · ":"Due ")+dshort(t.due)):"",t.assignee&&!useMine?pName(t.assignee):""].filter(Boolean).join(" · ");
+    const tick=merged?`<button class="st ${t.status}" data-act="cycboth" data-id="${t.id}" data-ids="${sib.map(x=>x.id).join(",")}" aria-label="${esc(t.title)}, both classrooms: ${stLabel(t.status)}. Tap to tick done or undo.">${stIcon(t.status)||ic("check")}</button>`:`<button class="st ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${esc(t.title)}: ${stLabel(t.status)}. Tap to tick done or undo.">${stIcon(t.status)||ic("check")}</button>`;
+    return `<li>${tick}<div class="grow tap" tabindex="0" data-act="opentask" data-id="${t.key}|${t.room}"><div class="lt">${esc(t.title)}</div><div class="ls ${od||t.status==="stuck"?"bad":""}">${esc(meta)}</div></div></li>`};
+  const dRow=lvl("diary")>=2&&!S.diary.some(e=>e.date===td)?`<li class="tap" tabindex="0" data-act="adddiary"><span class="row-ic">${ic("book")}</span><div class="grow"><div class="lt">Fill in today's site diary</div><div class="ls">Weather, people on site and the work done</div></div>${ic("chev")}</li>`:"";
+  if(!rows.length&&!dRow)return "";
+  const shown=rows.slice(0,5),more=rows.length-shown.length;
+  return `<section class="card today" aria-label="Today"><div class="row between" style="margin-bottom:2px"><div class="eyebrow" style="margin:0">${useMine?"Your day":"Due today and overdue"}</div>${rows.length?`<span class="small muted">${rows.length} task${rows.length===1?"":"s"}</span>`:""}</div><ul class="list">${shown.map(row).join("")}${dRow}</ul>${more>0?`<button type="button" class="linkbtn" data-act="gotasks" data-id="${useMine?"me":"all"}" style="padding:0;min-height:36px">and ${more} more</button>`:""}</section>`;
+}
+/* ---------- Photos: every photo and video, grouped by phase ---------- */
+let photoF="all";
+function allPhotos(){
+  const seen=new Set(),out=[],add=(m,ph,date)=>{if(!m||seen.has(m))return;seen.add(m);out.push({m,ph,date:date||""})};
+  if(lvl("log")>=1)logsNewest().forEach(l=>(l.media||[]).forEach(m=>add(m,l.phase||"",l.date)));
+  if(lvl("tasks")>=1)S.tasks.forEach(t=>(t.media||[]).forEach(m=>add(m,t.phase||"",(t.mdate||{})[m]||t.doneOn||"")));
+  if(lvl("diary")>=1)S.diary.forEach(e=>(e.media||[]).forEach(m=>add(m,"_diary",(e.mdate||{})[m]||e.date)));
+  return out.sort((a,b)=>b.date.localeCompare(a.date));
+}
+const photoName=k=>k==="_diary"?"Site diary":k===""?"Other":PSHORT[k]||"Other";
+function photoGroups(){
+  const g={};allPhotos().forEach(p=>(g[p.ph]=g[p.ph]||[]).push(p));
+  return[...PH.map(p=>p[0]),"","_diary"].filter(k=>g[k]).map(k=>[k,g[k]]);
+}
+function photoList(){const gr=photoGroups(),f=gr.some(([k])=>k===photoF)?photoF:"all";return(f==="all"?gr:gr.filter(([k])=>k===f)).flatMap(([,a])=>a)}
+function photosV(){
+  const gr=photoGroups(),total=gr.reduce((a,[,x])=>a+x.length,0),f=gr.some(([k])=>k===photoF)?photoF:"all";
+  const shown=f==="all"?gr:gr.filter(([k])=>k===f);let idx=0;
+  const chips=[["all","All · "+total],...gr.map(([k,a])=>[k,photoName(k)+" · "+a.length])];
+  const body=shown.map(([k,a])=>`<section class="phg"><div class="row between"><h3 style="color:${PCOL[k]||"var(--accent)"}">${esc(photoName(k))}</h3><span class="small muted">${a.length}</span></div><div class="ptg">${a.map(p=>`<button type="button" class="mtile" data-act="phtlb" data-id="${idx++}" aria-label="Open photo or video, ${esc(photoName(k))}${p.date?", "+dshort(p.date):""}"><span data-m="${p.m}" style="position:absolute;inset:0"></span>${p.date?`<small class="pdt">${dshort(p.date)}</small>`:""}</button>`).join("")}</div></section>`).join("");
+  return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Photos</h2></div><button class="btn primary" data-act="addphoto">${ic("camera")}Add</button></div>
+  ${total?`<div class="chips scroll" role="group" aria-label="Show photos of" style="margin-bottom:12px">${chips.map(([k,l])=>`<button type="button" class="chip" data-sub="pf:${k}" aria-pressed="${f===k}">${esc(l)}</button>`).join("")}</div>${body}`:empty("image","No photos yet","Photos and videos from the site log, tasks and the site diary are collected here, grouped by phase.",`<button class="btn primary" data-act="addphoto">${ic("camera")}Add the first photo</button>`)}`;
+}
+/* ---------- the week, ready to send ---------- */
+function weekText(){
+  const td=today(),wk=addDays(td,-6),nx=addDays(td,7),all=G(BT()),p=pct(doneN(all),all.length);
+  const done=[],seen=new Set();S.tasks.filter(t=>t.status==="done"&&t.doneOn&&t.doneOn>=wk).forEach(t=>{if(seen.has(t.key))return;seen.add(t.key);done.push(t.title)});
+  const soon=[],s2=new Set();S.tasks.filter(t=>t.status!=="done"&&t.due&&t.due>td&&t.due<=nx).sort((a,b)=>a.due.localeCompare(b.due)).forEach(t=>{if(s2.has(t.key))return;s2.add(t.key);soon.push(t.title+" ("+dshort(t.due)+")")});
+  const open=S.tasks.filter(t=>t.status!=="done"),od=uk(open.filter(t=>t.due&&t.due<td)),stuck=uk(open.filter(t=>t.status==="stuck")),iss=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length;
+  const ph=allPhotos().filter(x=>x.date>=wk).length;
+  const left=S.settings.target?Math.ceil((new Date(S.settings.target+"T12:00")-new Date(td+"T12:00"))/864e5):null;
+  const L=["*"+(S.settings.name||"Site")+": week to "+dshort(td)+"*",""];
+  L.push("Whole build: "+p+"% done"+(left===null?"":left>=0?", "+left+" day"+(left===1?"":"s")+" to go":", "+(-left)+" day"+(left===-1?"":"s")+" past the target")+".");
+  L.push(done.length?"Done this week ("+done.length+"): "+done.slice(0,8).join(", ")+(done.length>8?" and "+(done.length-8)+" more":"")+".":"No tasks were finished this week.");
+  if(soon.length)L.push("Coming up next week: "+soon.slice(0,6).join(", ")+(soon.length>6?" and "+(soon.length-6)+" more":"")+".");
+  const flags=[od?od+" overdue":"",stuck?stuck+" stuck":"",iss?iss+" open issue"+(iss===1?"":"s"):""].filter(Boolean);
+  L.push(flags.length?"Needs attention: "+flags.join(", ")+".":"Nothing needs attention.");
+  if(lvl("diary")>=1){const w=S.diary.filter(e=>e.date>=wk),days=new Set(w.map(e=>e.date)).size,rain=new Set(w.filter(e=>e.weather==="rain").map(e=>e.date)).size,lost={};w.forEach(e=>{lost[e.date]=Math.max(lost[e.date]||0,lostHrs(e))});
+    if(days)L.push("Site diary: "+days+" day"+(days===1?"":"s")+" logged, "+rain+" rain day"+(rain===1?"":"s")+", "+hrsTxt(Object.values(lost).reduce((a,b)=>a+b,0))+" lost to delays.")}
+  if(ph)L.push(ph+" photo"+(ph===1?"":"s")+" or video"+(ph===1?"":"s")+" added.");
+  L.push("",diaryFollow());
+  return L.join("\n");
 }
 function taskRow(key,single){
   const ts=S.tasks.filter(t=>t.key===key&&(single?t.room===single||t.room==="shared":true)).sort((a,b)=>roomNo(a.room)-roomNo(b.room));
@@ -1335,7 +1398,7 @@ function buildMain(){
   ${whoLine()}${wxCard()}${connectPrompt()}${attentionV()}${linkPrompt()}${iosPrompt()}${pushPrompt()}${backupDue()}${can?`<div class="row between" style="margin:0 2px 10px"><div class="eyebrow" style="margin:0">Phases</div><button type="button" class="btn small ${pEdit?"primary":""}" data-act="pedit">${pEdit?"Done":"Edit phases"}</button></div>${pEdit?`<p class="hint" style="margin:0 2px 10px">Rename, move or remove a phase, or add a new one.</p>`:""}`:""}<div class="ptiles" role="list">${tiles}</div>
   <div class="eyebrow" style="margin:20px 2px 10px">Recently posted</div>
   ${rec.length?`<div class="rps">${rec.map(l=>`<button type="button" class="rp" data-go="site"><span class="rpi">${l.media?.length?`<span data-m="${l.media[0]}" style="position:absolute;inset:0"></span>`:ic(l.kind==="issue"?"alert":"note","lg")}</span><span class="rpt"><b style="color:${PCOL[l.phase]||"var(--accent)"}">${esc(l.phase&&PSHORT[l.phase]?PSHORT[l.phase]:"Site")}</b><span>${esc(l.text?l.text.slice(0,48):l.kind==="issue"?"Issue reported":"Added a photo")}</span><small>${dlabel(l.date)}</small></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:0 2px">Photos and notes you add will show up here.</p>`}
-  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="tasks">${ic("check")}<span>Tasks</span>${sm.code&&S.tasks.some(t=>asgHas(t,sm.pid)&&t.status!=="done")?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${uk(S.tasks.filter(t=>asgHas(t,sm.pid)&&t.status!=="done"))}</i>`:""}</button><button type="button" class="sc" data-go="diary">${ic("book")}<span>Site diary</span></button><button type="button" class="sc" data-go="docs">${ic("note")}<span>Documents</span>${S.docs.filter(docListed).length?`<small class="muted">${S.docs.filter(docListed).length}</small>`:""}</button><button type="button" class="sc" data-go="plans">${ic("map")}<span>Plans</span></button><button type="button" class="sc" data-go="garden" style="grid-column:1/-1">${ic("leaf")}<span>Garden</span>${(()=>{const g=S.tasks.filter(t=>isG(t.phase)&&t.status!=="done");return g.length?`<small class="muted">${uk(g)}</small>`:""})()}</button></div>`;
+  <div class="scs"><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="site">${ic("camera")}<span>Site log</span>${issues?`<i class="pbadge" style="position:static">${issues}</i>`:""}</button><button type="button" class="sc" data-go="tasks">${ic("check")}<span>Tasks</span>${sm.code&&S.tasks.some(t=>asgHas(t,sm.pid)&&t.status!=="done")?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${uk(S.tasks.filter(t=>asgHas(t,sm.pid)&&t.status!=="done"))}</i>`:""}</button><button type="button" class="sc" data-go="diary">${ic("book")}<span>Site diary</span></button><button type="button" class="sc" data-go="docs">${ic("note")}<span>Documents</span>${S.docs.filter(docListed).length?`<small class="muted">${S.docs.filter(docListed).length}</small>`:""}</button><button type="button" class="sc" data-go="plans">${ic("map")}<span>Plans</span></button><button type="button" class="sc" data-go="photos">${ic("image")}<span>Photos</span>${(()=>{const n=allPhotos().length;return n?`<small class="muted">${n}</small>`:""})()}</button><button type="button" class="sc" data-go="garden">${ic("leaf")}<span>Garden</span>${(()=>{const g=S.tasks.filter(t=>isG(t.phase)&&t.status!=="done");return g.length?`<small class="muted">${uk(g)}</small>`:""})()}</button></div>`;
 }
 async function hydrateBg(root=document){
   for(const el of root.querySelectorAll("[data-bg]")){const u=await mUrl(el.dataset.bg);if(!u)continue;const im=new Image();im.onload=()=>{el.style.backgroundImage='url("'+u+'")';el.classList.add("on")};im.src=u}
@@ -1472,7 +1535,7 @@ function act(a,id,el){
    shareorder:()=>shareOrder(id&&(id==="all"||phase(id))?id:(matPh!=="all"&&matPh!=="none"?matPh:"")),addsup:()=>supSheet(),editsup:()=>supSheet(id),delsup:()=>delRecs(S.sups,s=>s.id===id,"Contact"),
    addphoto:()=>quickPhoto(id&&phase(id)?id:undefined),addissue:()=>logSheet(null,"issue"),editlog:()=>logSheet(id),dellog:()=>delRecs(S.logs,l=>l.id===id,"Entry"),
    fix:()=>{const l=S.logs.find(x=>x.id===id),u=undoEdit(l,{fixed:true});logAct("Marked an issue as fixed");save();render();toast("Issue marked fixed.",u)},
-   lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
+   phtlb:()=>lightbox(photoList().map(p=>p.m),+id),weekshare:()=>shareText(weekText()),lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
    refresh:()=>refreshApp(),adddoc:()=>docSheet(),opendoc:()=>{if(docSel){docPick(id);return}const d=S.docs.find(x=>x.id===id);if(d&&docListed(d)&&!docVisible(d))moneyGate(()=>docView(id),"document");else docView(id)},docunlock:()=>moneyGate(()=>render()),godocs:()=>go("docs"),addplan:()=>docSheet(undefined,"drawing"),plprev:()=>turnPage(-1),plnext:()=>turnPage(1),plzin:()=>zoomCenter(1.5),plzout:()=>zoomCenter(1/1.5),plfit:()=>fitView(),plfull:()=>{fullPlan=!fullPlan;PV.had=false;document.body.classList.toggle("lock",fullPlan);render()},goplans:()=>go("plans"),gostock:()=>{matSec="stock";matF="all";go("mats")},mvup:()=>moveKey(curPh,id,-1),mvdn:()=>moveKey(curPh,id,1),phstep:()=>phaseStep(+id),report:()=>reportSheet(),acts:()=>actsSheet(),phba:()=>baSheet(id),outdoor:()=>{outdoor=!outdoor;try{localStorage.setItem("build2-outdoor",outdoor?"1":"0")}catch{}applyOutdoor();render()},share:()=>shareSheet(),project:()=>projectSheet(),whoami:()=>whoSheet(),
    theme:()=>{if(id==="auto"){document.documentElement.removeAttribute("data-theme");try{localStorage.setItem("build2-theme","auto")}catch{}}else{document.documentElement.setAttribute("data-theme",id);try{localStorage.setItem("build2-theme",id)}catch{}}paintTheme();render()},
    export:()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`newberry-build-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")},
@@ -1912,7 +1975,7 @@ function reportTextFull(){
   if(S.trades.length)t+=`Trades: ${money0(tPaidAll())} paid of ${money0(tCommit())} accepted\nWhole project: ${money0(spentAll()+tPaidAll())} paid of ${money0(bud+tCommit())}\n`;
   t+=`Open issues: ${issues}\n`;
   if(S.furn.length){const ff=fStats(S.furn);t+=`Furniture and decor: ${ff.d} of ${ff.n} items done\n`}
-  if(S.diary.length){const dd=diaryStats();t+=`Site diary: ${dd.days} days logged, ${dd.rain} rain day${dd.rain===1?"":"s"}, ${num(dd.lost,1)} day${dd.lost===1?"":"s"} lost to delays\n`}
+  if(S.diary.length){const dd=diaryStats();t+=`Site diary: ${dd.days} days logged, ${dd.rain} rain day${dd.rain===1?"":"s"}, ${hrsTxt(dd.lost)} lost to delays\n`}
   if(nu.length)t+=`\nNext up:\n`+nu.map(x=>`- ${x.title}`).join("\n");
   return t;
 }
@@ -2522,7 +2585,7 @@ const ROLE_PICK=["site","builder","owner","decor","finance","other"];
 const roleLabel=r=>(ROLES[r]||ROLES.other).label;
 const DEFAULT_PEOPLE=[["Albert","site"],["Jonathan","builder"],["Newberry","owner"],["Talana","decor"],["Audrey","finance"]];
 const READ_ACTS0=["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock","plprev","plnext","phdrive","gbackup"].concat(["goinbox","gopeople","newmsg","msglb","sharesheet"]);
-const READ_ACTS=READ_ACTS0.concat(["gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb"]);
+const READ_ACTS=READ_ACTS0.concat(["gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare"]);
 const MONEY_ACTS=["addcost","editcost","delcost","budget","addpay","editpay","delpay","recpay","paypay","paycost","contract","typicalpay","weekly","resetpays","payall","report"];
 MONEY_ACTS.push("addtrade","edittrade","deltrade","opentrade","tradeaccept","paystage");
 const NOTE_ACTS=["addphoto","phphoto","adddoc"];
@@ -3258,24 +3321,26 @@ const WEATHER=[["sunny","Sunny"],["cloudy","Cloudy"],["rain","Rain"],["wind","Wi
 const WICON={sunny:"sun",cloudy:"cloud",rain:"rain",wind:"wind"};
 const DELAYS=[["none","No delay"],["part","Slowed down"],["full","Stopped for the day"]];
 const REASONS=["Rain","Wind","Materials late","No labour","Power or water","Inspection","Other"];
-const lostDays=e=>e.delay==="full"?1:e.delay==="part"?.5:0;
+const defHrs=d=>d==="full"?8:d==="part"?4:0;
+const lostHrs=e=>e.delay==="none"||!e.delay?0:(typeof e.hrs==="number"?e.hrs:defHrs(e.delay));
+const hrsTxt=h=>num(h,1)+" hour"+(h===1?"":"s");
 const weatherLabel=k=>(WEATHER.find(x=>x[0]===k)||[0,""])[1];
 let diaryF="all";
 function diaryStats(){
   const dates=new Set(S.diary.map(e=>e.date)),rain=new Set(S.diary.filter(e=>e.weather==="rain").map(e=>e.date)),lost={};
-  S.diary.forEach(e=>{lost[e.date]=Math.max(lost[e.date]||0,lostDays(e))});
+  S.diary.forEach(e=>{lost[e.date]=Math.max(lost[e.date]||0,lostHrs(e))});
   return{days:dates.size,rain:rain.size,lost:Object.values(lost).reduce((a,b)=>a+b,0)};
 }
 const diaryWx=e=>e.wx?wxText(e.wx):weatherLabel(e.weather);
 const appUrl=()=>location.origin+location.pathname;
 const diaryFollow=()=>"Follow the daily updates by using the app: "+appUrl();
 function diaryEntryText(e){return `*${S.settings.name||"Site"}: site diary*\n${dlong(e.date)}\n\n${diaryLine(e)}${e.who?" ("+e.who+")":""}\n\n${diaryFollow()}`}
-const diaryLine=e=>[diaryWx(e),e.people?e.people+" people on site":"",e.crews,e.delay&&e.delay!=="none"?(e.delay==="full"?"Stopped for the day":"Slowed down")+(e.reason?" ("+e.reason.toLowerCase()+")":""):"",e.work?"Work: "+e.work:"",e.note,(e.media||[]).length?(e.media.length+" photo"+(e.media.length===1?"":"s")+" or video"+(e.media.length===1?"":"s")):""].filter(Boolean).join(". ");
+const diaryLine=e=>[diaryWx(e),e.people?e.people+" people on site":"",e.crews,e.delay&&e.delay!=="none"?(e.delay==="full"?"Stopped for the day":"Slowed down")+(lostHrs(e)?", "+hrsTxt(lostHrs(e))+" lost":"")+(e.reason?" ("+e.reason.toLowerCase()+")":""):"",e.work?"Work: "+e.work:"",e.note,(e.media||[]).length?(e.media.length+" photo"+(e.media.length===1?"":"s")+" or video"+(e.media.length===1?"":"s")):""].filter(Boolean).join(". ");
 function diaryText(days){
   const from=addDays(today(),-(days-1)),list=S.diary.filter(e=>e.date>=from).sort((a,b)=>b.date.localeCompare(a.date));
   if(!list.length)return "";
   const st=diaryStats();
-  return `*${S.settings.name||"Site"}: site diary*\nLast ${days} days\n\n`+list.map(e=>`${dshort(e.date)}: ${diaryLine(e)}${e.who?" ("+e.who+")":""}`).join("\n")+`\n\nWhole project: ${st.days} days logged, ${st.rain} rain day${st.rain===1?"":"s"}, ${st.lost} day${st.lost===1?"":"s"} lost to delays.\n\n${diaryFollow()}`;
+  return `*${S.settings.name||"Site"}: site diary*\nLast ${days} days\n\n`+list.map(e=>`${dshort(e.date)}: ${diaryLine(e)}${e.who?" ("+e.who+")":""}`).join("\n")+`\n\nWhole project: ${st.days} days logged, ${st.rain} rain day${st.rain===1?"":"s"}, ${hrsTxt(st.lost)} lost to delays.\n\n${diaryFollow()}`;
 }
 function diaryV(){
   const st=diaryStats(),canAdd=lvl("diary")>=2;
@@ -3283,7 +3348,7 @@ function diaryV(){
   if(!S.diary.length)return head+empty("book","No diary entries yet","One short note a day: the weather, how many people were on site, any delay and the work done. It is your record if there is ever a dispute about time.",canAdd?`<button class="btn primary" data-act="adddiary">${ic("plus")}Add today's entry</button>`:"");
   const list=S.diary.filter(e=>diaryF==="all"||(e.delay&&e.delay!=="none")).sort((a,b)=>b.date.localeCompare(a.date)||(b.t||0)-(a.t||0));
   const dates=[...new Set(list.map(e=>e.date))];
-  return head+`<div class="dstrip" role="group" aria-label="Diary totals"><div>${ic("calendar","sm")}<b>${st.days}</b><span>days logged</span></div><div>${ic("rain","sm")}<b>${st.rain}</b><span>rain days</span></div><div class="${st.lost?"warn":""}">${ic("clock","sm")}<b>${num(st.lost,1)}</b><span>days lost</span></div></div>
+  return head+`<div class="dstrip" role="group" aria-label="Diary totals"><div>${ic("calendar","sm")}<b>${st.days}</b><span>days logged</span></div><div>${ic("rain","sm")}<b>${st.rain}</b><span>rain days</span></div><div class="${st.lost?"warn":""}">${ic("clock","sm")}<b>${num(st.lost,1)}</b><span>hours lost</span></div></div>
   <div class="row between wr" style="margin:6px 0 12px;gap:8px"><div class="chips" role="group" aria-label="Show">${[["all","All"],["delay","Delays only"]].map(([k,l])=>`<button type="button" class="chip" data-sub="df:${k}" aria-pressed="${diaryF===k}">${l}</button>`).join("")}</div><div class="row" style="gap:8px"><button class="btn small" data-act="diaryshare">${ic("share","sm")}Share</button><button class="btn small" data-act="diaryprint">${ic("print","sm")}Print</button></div></div>
   ${dates.length?dates.map(d=>`<div class="eyebrow" style="margin:14px 2px 8px">${esc(dlong(d))}</div><ul style="padding:0;margin:0">${list.filter(e=>e.date===d).map(e=>`<li class="card" style="list-style:none;margin:0 0 10px"><div class="row between" style="align-items:flex-start;gap:8px"><div class="row wr" style="gap:6px"><span class="pill sky">${e.wx?ic(wxInfo(e.wx.code)[1],"sm")+esc(wxInfo(e.wx.code)[0])+" "+r0(e.wx.lo)+"–"+r0(e.wx.hi)+"°"+(e.wx.rain>=1?" · "+(Math.round(e.wx.rain*10)/10)+" mm":""):e.weather?ic(WICON[e.weather]||"sun","sm")+esc(weatherLabel(e.weather)):"No weather noted"}</span>${e.people?`<span class="pill gone">${ic("users","sm")}${e.people}</span>`:""}${e.delay&&e.delay!=="none"?`<span class="pill unwell">${ic("clock","sm")}${e.delay==="full"?"Stopped":"Slowed"}${e.reason?" · "+esc(e.reason):""}</span>`:""}</div><div class="row" style="gap:6px;flex:none"><button class="btn small icon" data-act="diaryone" data-id="${e.id}" aria-label="Share this entry on WhatsApp">${ic("share","sm")}</button>${canAdd?`<button class="btn small icon" data-act="editdiary" data-id="${e.id}" aria-label="Edit this entry">${ic("pencil")}</button>`:""}</div></div>${e.crews?`<div class="ls" style="margin-top:8px">${esc(e.crews)}</div>`:""}${e.work?`<p style="margin:8px 0 0;white-space:pre-wrap">${esc(e.work)}</p>`:""}${e.note?`<p class="muted small" style="margin:6px 0 0">${esc(e.note)}</p>`:""}${(e.media||[]).length?`<div class="pthumbs" style="margin-top:10px">${e.media.map((id,i)=>`<button type="button" class="etile" style="border:0;padding:0" data-act="diarylb" data-id="${e.id}|${i}" aria-label="Open photo or video ${i+1}"><span data-m="${id}" style="position:absolute;inset:0"></span></button>`).join("")}</div>`:""}${e.who?`<div class="muted small" style="margin-top:8px">${esc(e.who)}</div>`:""}</li>`).join("")}</ul>`).join(""):`<div class="empty">${ic("check","xl")}<h3>No delays logged</h3><p>Days with a delay will show here.</p></div>`}`;
 }
@@ -3298,7 +3363,7 @@ function diarySheet(id){
   <label class="f" for="cr">Who was on site (optional)</label><input id="cr" class="t" maxlength="120" value="${esc(e?.crews||"")}" placeholder="For example: builder's team, tiler, electrician">
   <label class="f" for="wk">Work done today</label><textarea id="wk" class="t grow-ta" rows="2" maxlength="600" placeholder="What was done on site?">${esc(e?.work||"")}</textarea>${micBtn("wk","Speak the notes")}
   <label class="f">Was work delayed?</label>${chipRow("delay",DELAYS,st.delay)}
-  <div id="rw" ${st.delay==="none"?"hidden":""}><label class="f">Why?</label>${chipRow("reason",REASONS.map(r=>[r,r]),st.reason)}</div>
+  <div id="rw" ${st.delay==="none"?"hidden":""}><label class="f">Why?</label>${chipRow("reason",REASONS.map(r=>[r,r]),st.reason)}<label class="f">Hours lost</label><div class="stepper"><button type="button" data-hs="-1" aria-label="Fewer hours">${ic("minus")}</button><input id="hl" inputmode="decimal" value="${num(e?lostHrs(e):defHrs(st.delay),1)}" aria-label="Hours lost"><button type="button" data-hs="1" aria-label="More hours">${ic("plus")}</button></div></div>
   <label class="f" for="nt">Anything else (optional)</label><input id="nt" class="t" maxlength="200" value="${esc(e?.note||"")}" placeholder="Visitors, inspections, safety">
   <label class="f">Photos and videos</label><div class="photo-add"><button type="button" class="btn" id="dcam">${ic("camera")}Take photo</button><button type="button" class="btn" id="dpick">${ic("image")}From gallery</button></div><input type="file" id="dfc" accept="image/*" capture="environment" hidden><input type="file" id="dfp" accept="image/*,video/*" multiple hidden><div class="pthumbs" id="dth"></div><p class="hint">Videos can be up to 15 MB, about 20 seconds. Photos are shrunk to your chosen photo size.</p>
   <div class="foot"><button class="btn primary block">${e?"Save entry":"Save today's entry"}</button></div></form>`,(sh,close)=>{
@@ -3311,7 +3376,9 @@ function diarySheet(id){
       else if(dt>today()){st.wx=null;wbox.textContent="That day has not happened yet.";wman.hidden=false}
       else{st.wx=null;wbox.textContent=wxFail?"Could not load the weather.":"Loading the weather…";wman.hidden=!wxFail}};
     paintWx();dtI.addEventListener("input",paintWx);dtI.addEventListener("change",paintWx);
-    wxLoad().then(()=>{if(sh.isConnected)paintWx()});wireChips(sh,st,"delay",()=>{sh.querySelector("#rw").hidden=st.delay==="none"});wireMics(sh);
+    wxLoad().then(()=>{if(sh.isConnected)paintWx()});const hl=sh.querySelector("#hl");let hT=!!(e&&e.delay&&e.delay!=="none"&&typeof e.hrs==="number");hl.addEventListener("input",()=>{hT=true});
+    sh.querySelectorAll("[data-hs]").forEach(b=>b.onclick=()=>{hT=true;hl.value=num(Math.max(0,Math.min(24,(+String(hl.value).replace(",",".")||0)+ +b.dataset.hs)),1)});
+    wireChips(sh,st,"delay",()=>{sh.querySelector("#rw").hidden=st.delay==="none";if(!hT)hl.value=num(defHrs(st.delay),1)});wireMics(sh);
     const pp=sh.querySelector("#pp");sh.querySelectorAll("[data-step]").forEach(b=>b.onclick=()=>{pp.value=Math.max(0,Math.round((+pp.value||0)+ +b.dataset.step))});
     let keepM=[...(e?.media||[])],addM=[];const mdate0={...(e?.mdate||{})};
     const paintM=()=>{const th=sh.querySelector("#dth");
@@ -3329,7 +3396,7 @@ function diarySheet(id){
       const mids=[...keepM],md={};keepM.forEach(m=>{if(mdate0[m])md[m]=mdate0[m]});
       for(const a of addM){try{const blob=a.video?a.file:await prepPhoto(a.file,PSIZES[psize][1]),mid=uid();await mPut(mid,blob);queueMedia(mid);mids.push(mid);md[mid]=today()}catch(er){console.warn(er)}}
       addM.forEach(a=>URL.revokeObjectURL(a.url));
-      const vals={media:mids,mdate:md,date:sh.querySelector("#dt").value||today(),weather:st.weather,wx:st.wx||null,people:Math.max(0,Math.round(+pp.value||0)),crews:sh.querySelector("#cr").value.trim(),work,delay:st.delay,reason:st.delay==="none"?"":st.reason,note:sh.querySelector("#nt").value.trim()};
+      const vals={media:mids,mdate:md,date:sh.querySelector("#dt").value||today(),weather:st.weather,wx:st.wx||null,people:Math.max(0,Math.round(+pp.value||0)),crews:sh.querySelector("#cr").value.trim(),work,delay:st.delay,hrs:st.delay==="none"?0:Math.max(0,Math.min(24,Math.round((+String(hl.value).replace(",",".")||0)*10)/10)),reason:st.delay==="none"?"":st.reason,note:sh.querySelector("#nt").value.trim()};
       if(e){const u=undoEdit(e,vals);save();close();render();toast("Diary entry saved.",u);return}
       const n={id:uid(),...vals,by:sm.pid||"",who:me||sm.pname||"",t:Date.now()};
       S.diary.push(n);logAct(`Site diary entry for ${dshort(n.date)}`);save();close();render();toast("Diary entry saved.",()=>{const i=S.diary.indexOf(n);if(i>=0)S.diary.splice(i,1)});
@@ -3346,7 +3413,7 @@ function printNode(area){
 function diaryPrint(){
   if(!S.diary.length){toast("There are no diary entries to print yet.");return}
   const st=diaryStats(),list=S.diary.slice().sort((a,b)=>a.date.localeCompare(b.date)||(a.t||0)-(b.t||0)),area=document.createElement("div");area.id="printarea";
-  area.innerHTML=`<div class="pa-h">${esc(S.settings.name||"Site")}: site diary</div><div class="pa-cap">${esc(diaryFollow())}</div><div class="pa-cap">${st.days} days logged · ${st.rain} rain day${st.rain===1?"":"s"} · ${num(st.lost,1)} day${st.lost===1?"":"s"} lost to delays · printed ${esc(dlong(today()))}</div>`+list.map(e=>`<div class="pa-row"><b>${esc(dlong(e.date))}</b> · ${esc(diaryLine(e))}${e.who?" ("+esc(e.who)+")":""}</div>`).join("");
+  area.innerHTML=`<div class="pa-h">${esc(S.settings.name||"Site")}: site diary</div><div class="pa-cap">${esc(diaryFollow())}</div><div class="pa-cap">${st.days} days logged · ${st.rain} rain day${st.rain===1?"":"s"} · ${hrsTxt(st.lost)} lost to delays · printed ${esc(dlong(today()))}</div>`+list.map(e=>`<div class="pa-row"><b>${esc(dlong(e.date))}</b> · ${esc(diaryLine(e))}${e.who?" ("+esc(e.who)+")":""}</div>`).join("");
   printNode(area);
 }
 /* ---------- export a report: tasks with their photos and videos ---------- */
@@ -3685,7 +3752,7 @@ function reportV(){
   const phc=strip.map(([id])=>{const ts=G(S.tasks.filter(t=>t.phase===id)),dn=doneN(ts),sk=ts.filter(t=>t.status==="stuck").length,nm=dn===ts.length&&ts.length?"Done":sk?sk+" stuck":ts.some(t=>t.status==="doing"||t.status==="check")?"In progress":"Not started";
     return `<button type="button" class="rph" data-go="phase:${id}"><i style="background:${pcol(ts)}"></i><span class="rpn">${dn}/${ts.length}</span><b>${esc(PSHORT[id])}</b><span class="rs">${nm}</span></button>`}).join("");
   /* this week */
-  const wk=addDays(td,-6),doneWk=uk(S.tasks.filter(t=>t.status==="done"&&t.doneOn&&t.doneOn>=wk)),photos=sum(S.logs.filter(l=>l.date>=wk),l=>(l.media||[]).length),sent=S.msgs.filter(m=>new Date(m.t)>=new Date(wk+"T00:00")).length;
+  const wk=addDays(td,-6),doneWk=uk(S.tasks.filter(t=>t.status==="done"&&t.doneOn&&t.doneOn>=wk)),photos=allPhotos().filter(x=>x.date>=wk).length,sent=S.msgs.filter(m=>new Date(m.t)>=new Date(wk+"T00:00")).length;
   const fl=S.furn.length?fStats(S.furn):null,gt=S.tasks.filter(t=>isG(t.phase)),gd=gt.length?doneN(G(gt)):0,gn=gt.length?G(gt).length:0;
   /* money */
   let money="";
@@ -3712,8 +3779,8 @@ function reportV(){
    ${soon.length?`<div class="rsoon">${soon.slice(0,3).map(x=>`<div class="rsr"><b>${dshort(x.d)}</b>${ic(x.i)}<span class="rsv">${esc(x.v)}</span><span class="rs">${esc(x.x)}</span></div>`).join("")}</div>`:""}</div>
   <div class="card rc"><div class="eyebrow">Finish forecast</div><div class="rfcs"><div><span class="eyebrow">Planned</span><b>${en?dshort(en):"–"}</b></div><div><span class="eyebrow">Forecast</span><b>${f&&!f.none?dshort(f.date):"–"}</b></div><div><span class="eyebrow">Difference</span><b class="${f&&!f.none?(f.late>3?"red":f.late<-3?"green":""):""}">${f&&!f.none?(f.late>3?"+"+f.late+" days":f.late<-3?-f.late+" days early":"On time"):"–"}</b></div></div>${f&&f.none?`<p class="hint">${esc(f.why)}</p>`:""}</div>
   ${money}
-  <div class="card rc"><div class="eyebrow">This week</div><div class="rstats"><div><span class="eyebrow">Tasks done</span><b>${doneWk}</b></div><div><span class="eyebrow">Photos</span><b>${photos}</b></div><div><span class="eyebrow">Updates sent</span><b>${sent}</b></div></div></div>
-  ${dst?`<div class="card rc"><div class="eyebrow">Site days</div><div class="rstats"><div><span class="eyebrow">Logged</span><b>${dst.days}</b></div><div><span class="eyebrow">Rain days</span><b>${dst.rain}</b></div><div><span class="eyebrow">Days lost</span><b>${num(dst.lost,1)}</b></div></div></div>`:""}
+  <div class="card rc"><div class="eyebrow">This week</div><div class="rstats"><div><span class="eyebrow">Tasks done</span><b>${doneWk}</b></div><div><span class="eyebrow">Photos</span><b>${photos}</b></div><div><span class="eyebrow">Updates sent</span><b>${sent}</b></div></div><button type="button" class="btn block" data-act="weekshare" style="margin-top:12px">${ic("share")}Share the week</button></div>
+  ${dst?`<div class="card rc"><div class="eyebrow">Site days</div><div class="rstats"><div><span class="eyebrow">Logged</span><b>${dst.days}</b></div><div><span class="eyebrow">Rain days</span><b>${dst.rain}</b></div><div><span class="eyebrow">Hours lost</span><b>${num(dst.lost,1)}</b></div></div></div>`:""}
   ${fl||gn?`<div class="card rc"><div class="eyebrow">Furniture, decor and garden</div><div class="rlist">${fl?row("Furniture and decor",fl.c?fl.c+" waiting for your check":"Items done",fl.d+" of "+fl.n):""}${gn?row("Garden","Tasks done",gd+" of "+gn):""}</div></div>`:""}`;
 }
 /* ---------- start ---------- */
