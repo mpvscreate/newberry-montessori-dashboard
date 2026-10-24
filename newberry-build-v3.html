@@ -471,6 +471,7 @@ label.f{margin:12px 0 4px;font-size:.85rem}.t{padding:9px 12px;min-height:42px;b
 .chip{min-height:36px;padding:5px 13px;font-size:.9rem}.btn.small{min-height:38px}
 body #fab-wrap .fab-menu .fab-item{min-height:50px!important;padding:6px 10px!important;border-radius:15px!important}.fab-grp{margin:0 0 8px}.fab-grp h4{margin:0 4px 5px}
 body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!important}
+.qa.one{gap:8px;margin:2px 0 10px}.qa.one button{flex-direction:row;gap:7px;min-height:46px;padding:6px 8px;border-radius:15px;font-size:.92rem}.qa.one button .i{width:20px;height:20px;flex:none}
 .card.today{padding:8px 14px 6px;margin:0 0 10px;border-radius:16px}.card.today .eyebrow{font-size:.66rem}.card.today .list li{padding:6px 0;gap:10px}.card.today .list li .st{width:30px;height:30px}.card.today .list li .st .i{width:16px;height:16px}.card.today .lt,.card.today .ls{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card.today .lt{font-size:.88rem}.card.today .ls{font-size:.74rem}.card.today .grow{min-width:0}.card.today .row-ic{width:30px;height:30px}.card.today .linkbtn{min-height:28px!important;font-size:.8rem}
 .phg{margin:0 0 16px}.phg h3{margin:0 0 6px;font:700 .95rem var(--display);letter-spacing:.01em}.ptg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border-radius:14px;overflow:hidden}.ptg .mtile{aspect-ratio:1}.ptg .pdt{position:absolute;left:4px;bottom:4px;z-index:2;background:rgba(0,0,0,.55);color:#fff;border-radius:6px;padding:1px 6px;font-size:.66rem;font-weight:600}
 .dim{opacity:.62}.trcard{cursor:pointer}
@@ -1248,8 +1249,8 @@ function home(){
   const toOrder=S.mats.filter(m=>needsOrder(m)&&(m.qty>0||secOf(m)!=="stock")).length;
   const nu=nextUp();
   const sched=schedule();
-  return `<div class="page-h"><h2>Overview</h2><button class="btn primary" data-go="report">${ic("trend")}Report</button></div>
-  <div class="qa two"><button class="main" data-act="addphoto">${ic("camera","lg")}Photo</button><button data-act="gostock">${ic("truck","lg")}Material</button></div>
+  return `<h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);margin:-1px">Overview</h2>
+  <div class="qa one"><button class="main" data-act="addphoto">${ic("camera")}Photo</button><button data-act="gostock">${ic("truck")}Material</button><button data-go="report">${ic("trend")}Report</button></div>
   ${todayCard()}
   <div class="bento">
    <section class="tile hero s2"><div class="lbl">${ic("calendar")}Schedule</div><div class="big">${left===null?"–":left>=0?left:-left}<small> ${left===null?"":left>=0?"days to go":"days past target"}</small></div><div class="sub">${S.settings.start?dshort(S.settings.start):"?"} to ${S.settings.target?dshort(S.settings.target):"?"}</div><div class="row wr" style="gap:8px">${sched.chip}</div>${fcLine()}</section>
