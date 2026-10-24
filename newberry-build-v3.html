@@ -479,6 +479,8 @@ body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!importan
 #cmpx .cmp-l{position:absolute;bottom:10px;background:rgba(0,0,0,.6);color:#fff;border-radius:8px;padding:3px 9px;font-size:.78rem;font-weight:600}#cmpx .cmp-l.l{left:10px}#cmpx .cmp-l.r{right:10px}
 #cmpx .lb-b{position:absolute;width:48px;height:48px;border-radius:50%;border:0;background:rgba(255,255,255,.16);color:#fff;display:grid;place-items:center;cursor:pointer}#cmpx .lb-x{top:calc(env(safe-area-inset-top,0px) + 12px);right:12px}#cmpx .cmp-h i{gap:0}
 .hbars{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:12px}.hb{height:12px;border-radius:6px;background:var(--accent-soft);border:1px dashed var(--muted);margin:6px 0 4px;overflow:hidden;box-sizing:border-box}.hb i{display:block;height:100%;background:var(--green)}.mb{cursor:pointer;outline:none}.mb:focus-visible rect:nth-of-type(2){stroke:var(--ink)}
+.sthumb{position:relative;width:44px;height:44px;border-radius:10px;overflow:hidden;flex:none;background:var(--accent-soft);display:grid;place-items:center;color:var(--accent)}
+.slipprev{display:flex;gap:12px;align-items:center;margin:0 0 6px}.slipprev img{width:64px;height:64px;object-fit:cover;border-radius:12px;flex:none}.slipbusy{display:grid;gap:12px;justify-items:center;padding:6px 0 4px}.slipimg{max-height:34vh;max-width:100%;border-radius:12px}.slipbusy .meter{width:100%}
 .qa.one{gap:8px;margin:2px 0 10px}.qa.one button{flex-direction:row;gap:7px;min-height:46px;padding:6px 8px;border-radius:15px;font-size:.92rem}.qa.one button .i{width:20px;height:20px;flex:none}
 .card.today{padding:8px 14px 6px;margin:0 0 10px;border-radius:16px}.card.today .eyebrow{font-size:.66rem}.card.today .list li{padding:6px 0;gap:10px}.card.today .list li .st{width:30px;height:30px}.card.today .list li .st .i{width:16px;height:16px}.card.today .lt,.card.today .ls{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card.today .lt{font-size:.88rem}.card.today .ls{font-size:.74rem}.card.today .grow{min-width:0}.card.today .row-ic{width:30px;height:30px}.card.today .linkbtn{min-height:28px!important;font-size:.8rem}
 .phg{margin:0 0 16px}.phg h3{margin:0 0 6px;font:700 .95rem var(--display);letter-spacing:.01em}.ptg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border-radius:14px;overflow:hidden}.ptg .mtile{aspect-ratio:1}.ptg .pdt{position:absolute;left:4px;bottom:4px;z-index:2;background:rgba(0,0,0,.55);color:#fff;border-radius:6px;padding:1px 6px;font-size:.66rem;font-weight:600}
@@ -1068,7 +1070,7 @@ function render(){
   v.querySelectorAll("[data-go]").forEach(el=>el.addEventListener("click",()=>{if(el._lp){el._lp=false;return}const[t,f]=el.dataset.go.split(":");if(t==="phase"&&f)curPh=f;if(t==="site"&&f)logSub=f;if(t==="mats"&&f)matF=f;go(t)}));
   v.querySelectorAll("[data-rf]").forEach(el=>el.addEventListener("click",()=>{roomF=el.dataset.rf;render()}));
   v.querySelectorAll("details.gd").forEach(d=>d.addEventListener("toggle",()=>{if(openPh===null)openPh=new Set(curPhases());d.open?openPh.add(d.dataset.ph):openPh.delete(d.dataset.ph)}));
-  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;if(k==="plan"){planSel=val;PV.plan="";PV.had=false}if(k==="doc")docF=val;if(k==="mseg")moneySeg=val;if(k==="tf")taskF=val;if(k==="df")diaryF=val;if(k==="pf")photoF=val;if(k==="pt")phTab=val;if(k==="mph")matPh=val;if(k==="bm"){bmode=val;lsSet("build-bmode",val)}if(k==="fr")fRoom=val;if(k==="fv")fView=val;render()}));
+  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;if(k==="plan"){planSel=val;PV.plan="";PV.had=false}if(k==="doc")docF=val;if(k==="mseg")moneySeg=val;if(k==="tf")taskF=val;if(k==="df")diaryF=val;if(k==="pf")photoF=val;if(k==="sm")slipM=val;if(k==="sc")slipC=val;if(k==="pt")phTab=val;if(k==="mph")matPh=val;if(k==="bm"){bmode=val;lsSet("build-bmode",val)}if(k==="fr")fRoom=val;if(k==="fv")fView=val;render()}));
   v.querySelectorAll("li.tap").forEach(el=>{el.setAttribute("role","button");el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click()}})});
   hydrate(v);hydrateBg(v);countUp(v);if(tab==="plans")initPlanView();
   v.querySelectorAll("svg.chart").forEach(wireChart);if(lvl("tasks")>=2)v.querySelectorAll("ul.reord").forEach(ul=>holdDrag(ul,curPh));
@@ -1544,7 +1546,7 @@ function act(a,id,el){
    shareorder:()=>shareOrder(id&&(id==="all"||phase(id))?id:(matPh!=="all"&&matPh!=="none"?matPh:"")),addsup:()=>supSheet(),editsup:()=>supSheet(id),delsup:()=>delRecs(S.sups,s=>s.id===id,"Contact"),
    addphoto:()=>quickPhoto(id&&phase(id)?id:undefined),addissue:()=>logSheet(null,"issue"),editlog:()=>logSheet(id),dellog:()=>delRecs(S.logs,l=>l.id===id,"Entry"),
    fix:()=>{const l=S.logs.find(x=>x.id===id),u=undoEdit(l,{fixed:true});logAct("Marked an issue as fixed");save();render();toast("Issue marked fixed.",u)},
-   phtlb:()=>lightbox(photoList().map(p=>p.m),+id),phcmp:()=>compareView(id||""),mbar:()=>{const r=MCH.months[+id],el=$("#mbread");if(!r||!el)return;const p=r.b+r.t+r.o;el.innerHTML=`${mLab(r.ym,1)}: paid <b>${money0(p)}</b>${p?` (builder ${money0(r.b)}${r.t?", trades "+money0(r.t):""}${r.o?", other "+money0(r.o):""})`:""}${r.p?`, planned <b>${money0(r.p)}</b>`:""}.`},weekshare:()=>shareText(weekText()),lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
+   phtlb:()=>lightbox(photoList().map(p=>p.m),+id),phcmp:()=>compareView(id||""),scanslip:()=>scanSlip(),slipexport:()=>slipExportSheet(),slipview:()=>{const[cid,i]=id.split("|"),c=S.costs.find(x=>x.id===cid);if(c)lightbox(c.media||[],+i)},mbar:()=>{const r=MCH.months[+id],el=$("#mbread");if(!r||!el)return;const p=r.b+r.t+r.o;el.innerHTML=`${mLab(r.ym,1)}: paid <b>${money0(p)}</b>${p?` (builder ${money0(r.b)}${r.t?", trades "+money0(r.t):""}${r.o?", other "+money0(r.o):""})`:""}${r.p?`, planned <b>${money0(r.p)}</b>`:""}.`},weekshare:()=>shareText(weekText()),lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
    refresh:()=>refreshApp(),adddoc:()=>docSheet(),opendoc:()=>{if(docSel){docPick(id);return}const d=S.docs.find(x=>x.id===id);if(d&&docListed(d)&&!docVisible(d))moneyGate(()=>docView(id),"document");else docView(id)},docunlock:()=>moneyGate(()=>render()),godocs:()=>go("docs"),addplan:()=>docSheet(undefined,"drawing"),plprev:()=>turnPage(-1),plnext:()=>turnPage(1),plzin:()=>zoomCenter(1.5),plzout:()=>zoomCenter(1/1.5),plfit:()=>fitView(),plfull:()=>{fullPlan=!fullPlan;PV.had=false;document.body.classList.toggle("lock",fullPlan);render()},goplans:()=>go("plans"),gostock:()=>{matSec="stock";matF="all";go("mats")},mvup:()=>moveKey(curPh,id,-1),mvdn:()=>moveKey(curPh,id,1),phstep:()=>phaseStep(+id),report:()=>reportSheet(),acts:()=>actsSheet(),phba:()=>baSheet(id),outdoor:()=>{outdoor=!outdoor;try{localStorage.setItem("build2-outdoor",outdoor?"1":"0")}catch{}applyOutdoor();render()},share:()=>shareSheet(),project:()=>projectSheet(),whoami:()=>whoSheet(),
    theme:()=>{if(id==="auto"){document.documentElement.removeAttribute("data-theme");try{localStorage.setItem("build2-theme","auto")}catch{}}else{document.documentElement.setAttribute("data-theme",id);try{localStorage.setItem("build2-theme",id)}catch{}}paintTheme();render()},
    export:()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`newberry-build-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")},
@@ -1636,21 +1638,24 @@ function taskSheet(key,roomId){
       save();close();render();toast("Task saved.",()=>ups.forEach(u=>u()));[...new Set(nt)].forEach(pid=>notifySend([pid],"New task for you",title.trim().slice(0,100),"tasks"))};
   });
 }
-function costSheet(id){
-  const c=id?S.costs.find(x=>x.id===id):null,st={cat:c?.cat||"materials",room:c?.room||"both",paid:c?c.paid:true,sup:c?.sup||""};
-  sheet(c?"Edit expense":"Add expense",`<form id="f" novalidate><label class="f" for="am">Amount</label><div class="amtin"><b>R</b><input id="am" inputmode="decimal" autocomplete="off" placeholder="0,00" value="${c?String(c.amount).replace(".",","):""}"></div>
-  <label class="f" for="ti">What was it for?</label><input id="ti" class="t" maxlength="100" value="${esc(c?.title||"")}" placeholder="For example: 2000 bricks">
+function costSheet(id,pre){
+  const c=id?S.costs.find(x=>x.id===id):null,P=c?null:pre||null,st={cat:c?.cat||P?.cat||"materials",room:c?.room||"both",paid:c?c.paid:true,sup:c?.sup||""};
+  sheet(c?"Edit expense":P?"Check the slip":"Add expense",`<form id="f" novalidate>${slipBlock(c,P)}<label class="f" for="am">Amount</label><div class="amtin"><b>R</b><input id="am" inputmode="decimal" autocomplete="off" placeholder="0,00" value="${c?String(c.amount).replace(".",","):P?.amount?(+P.amount).toFixed(2).replace(".",","):""}"></div>
+  <label class="f" for="ti">What was it for?</label><input id="ti" class="t" maxlength="100" value="${esc(c?.title||P?.title||"")}" placeholder="For example: 2000 bricks">
   <label class="f">Type</label>${chipRow("cat",CATS.map(x=>[x[0],x[1]]),st.cat)}
   <details class="more"><summary>More details: classroom</summary><label class="f">Which classroom?</label>${chipRow("room",[["both","Both classrooms"],...rooms().map(r=>[r.id,r.name])],st.room)}
   <p class="hint">A cost for both classrooms is split equally between them.</p></details>
-  ${dateField("dt",c?.date||today())}
+  ${dateField("dt",c?.date||P?.date||today())}
+  <label class="f" for="vt">VAT on the slip (optional)</label><div class="amtin"><b>R</b><input id="vt" inputmode="decimal" autocomplete="off" placeholder="0,00" value="${(c?.vat||P?.vat)?String(c?.vat||P?.vat).replace(".",","):""}"></div>
   <label class="f">Payment</label>${chipRow("paid",[["1","Paid"],["0","Not paid yet"]],st.paid?"1":"0")}
   ${S.sups.length?`<label class="f" for="su">Paid to</label><select id="su" class="t sel"><option value="">Not listed</option>${S.sups.map(s=>`<option value="${s.id}" ${s.id===st.sup?"selected":""}>${esc(s.name)}</option>`).join("")}</select>`:""}
   ${S.sups.some(x=>x.id==="jonathan")?`<p class="warn" id="sw" hidden>${ic("alert")}<span>Payments to ${esc(supName("jonathan"))} are recorded under Builder payments in the Money tab. Adding them here as well would count them twice.</span></p>`:""}
   <div class="foot"><button class="btn primary block">${c?"Save changes":"Add expense"}</button></div></form>`,(sh,close)=>{
-    wireDc(sh);{const sw=sh.querySelector("#sw"),su=sh.querySelector("#su");const chk=()=>{if(sw&&su)sw.hidden=su.value!=="jonathan"};if(su)su.addEventListener("change",chk);chk()}["cat","room"].forEach(n=>wireChips(sh,st,n));sh.querySelectorAll('[data-ch="paid"]').forEach(b=>b.onclick=()=>{st.paid=b.dataset.v==="1";sh.querySelectorAll('[data-ch="paid"]').forEach(x=>x.setAttribute("aria-pressed",x===b))});
-    sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const am=sh.querySelector("#am"),v=parseAmt(am.value);if(!(v>0))return showErr(sh,am.closest(".amtin"),"Enter an amount above zero.");
+    wireDc(sh);hydrate(sh);{const sw=sh.querySelector("#sw"),su=sh.querySelector("#su");const chk=()=>{if(sw&&su)sw.hidden=su.value!=="jonathan"};if(su)su.addEventListener("change",chk);chk()}["cat","room"].forEach(n=>wireChips(sh,st,n));sh.querySelectorAll('[data-ch="paid"]').forEach(b=>b.onclick=()=>{st.paid=b.dataset.v==="1";sh.querySelectorAll('[data-ch="paid"]').forEach(x=>x.setAttribute("aria-pressed",x===b))});
+    sh.querySelector("#f").onsubmit=async e=>{e.preventDefault();const am=sh.querySelector("#am"),v=parseAmt(am.value);if(!(v>0))return showErr(sh,am.closest(".amtin"),"Enter an amount above zero.");
       const vals={amount:Math.round(v*100)/100,title:sh.querySelector("#ti").value.trim(),cat:st.cat,room:st.room,date:sh.querySelector("#dt").value||today(),paid:st.paid,sup:sh.querySelector("#su")?.value||""};
+      const vt=parseAmt(sh.querySelector("#vt").value);if(vt>0)vals.vat=Math.round(vt*100)/100;else if(c?.vat)vals.vat=0;
+      if(P){vals.slip=true;vals.media=[P.mid];vals.ocr=P.ocr||"";try{await mPut(P.mid,P.blob);queueMedia(P.mid)}catch(er){console.warn(er)}}
       if(c){const u=undoEdit(c,vals);save();close();render();toast("Expense saved.",u)}else{const n={id:uid(),...vals};S.costs.push(n);logAct(`Expense of ${money(n.amount)}${n.title?": "+n.title:""}`,1);save();close();render();toast(`Added ${money(n.amount)}.`,()=>S.costs.splice(S.costs.indexOf(n),1))}};
   });
 }
@@ -2611,7 +2616,7 @@ const ROLE_PICK=["site","builder","owner","decor","finance","other"];
 const roleLabel=r=>(ROLES[r]||ROLES.other).label;
 const DEFAULT_PEOPLE=[["Albert","site"],["Jonathan","builder"],["Newberry","owner"],["Talana","decor"],["Audrey","finance"]];
 const READ_ACTS0=["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock","plprev","plnext","phdrive","gbackup"].concat(["goinbox","gopeople","newmsg","msglb","sharesheet"]);
-const READ_ACTS=READ_ACTS0.concat(["gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp","mbar"]);
+const READ_ACTS=READ_ACTS0.concat(["gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp","mbar","slipexport","slipview"]);
 const MONEY_ACTS=["addcost","editcost","delcost","budget","addpay","editpay","delpay","recpay","paypay","paycost","contract","typicalpay","weekly","resetpays","payall","report"];
 MONEY_ACTS.push("addtrade","edittrade","deltrade","opentrade","tradeaccept","paystage");
 const NOTE_ACTS=["addphoto","phphoto","adddoc"];
@@ -2753,7 +2758,7 @@ const AREAS=[
   ["furn","Furniture and decor","What we build for the classrooms",0,["No access","See only","Update"]],
   ["money","Money","Costs, trades and payments",0,["No access","See only","Record"]],
   ["upd","Updates","Messages to and from the team",1,["Receive","Send"]]];
-const ACT_AREA={pedit:"tasks",padd:"tasks",pren:"tasks",pdel:"tasks",pmv:"tasks",gedit:"tasks",gadd:"tasks",gren:"tasks",gdel:"tasks",estimate:"money",contract:"money",addextra:"money",editextra:"money",cyc:"tasks",cycboth:"tasks",edittask:"tasks",deltask:"tasks",addtask:"tasks",reorder:"tasks",mvup:"tasks",mvdn:"tasks",phphoto:"log",addphoto:"log",addissue:"log",editlog:"log",dellog:"log",fix:"log",addmat:"mats",editmat:"mats",delmat:"mats",cycmat:"mats",movein:"mats",moveout:"mats",editelec:"mats",addsup:"mats",editsup:"mats",delsup:"mats",adddoc:"docs",addplan:"docs",adddiary:"diary",editdiary:"diary",addfurn:"furn",editfurn:"furn",delfurn:"furn",furnstarter:"furn"};
+const ACT_AREA={pedit:"tasks",padd:"tasks",pren:"tasks",pdel:"tasks",pmv:"tasks",gedit:"tasks",gadd:"tasks",gren:"tasks",gdel:"tasks",estimate:"money",scanslip:"money",contract:"money",addextra:"money",editextra:"money",cyc:"tasks",cycboth:"tasks",edittask:"tasks",deltask:"tasks",addtask:"tasks",reorder:"tasks",mvup:"tasks",mvdn:"tasks",phphoto:"log",addphoto:"log",addissue:"log",editlog:"log",dellog:"log",fix:"log",addmat:"mats",editmat:"mats",delmat:"mats",cycmat:"mats",movein:"mats",moveout:"mats",editelec:"mats",addsup:"mats",editsup:"mats",delsup:"mats",adddoc:"docs",addplan:"docs",adddiary:"diary",editdiary:"diary",addfurn:"furn",editfurn:"furn",delfurn:"furn",furnstarter:"furn"};
 const AREA_MSG=ar=>lvl(ar)===0?"You do not have access to this area.":"You can look at this area but not change it.";
 const areaLabel=(k,v)=>{const a=AREAS.find(x=>x[0]===k);return a?a[4][Math.max(0,v-a[3])]||"":""};
 function areaRows(st,pre){
@@ -2883,11 +2888,132 @@ function tradeStatus(t,ns){
 
 /* money page: Overall, Builder and costs, Trades */
 let moneySeg="overall";
+/* ---------- Slips: scan a till slip, read it on the phone, keep it with the expense, export ---------- */
+let slipM="all",slipC="all",tessP=null,SLIPX=[];
+const SLIPCATS=[["transport",/\b(fuel|petrol|diesel|engen|shell|sasol|caltex|toll|totalenergies)\b/],["hire",/\b(hire|rental)\b/],["fees",/\b(permit|council|municipal|levy)\b/],["materials",/(cement|brick|sand|stone|timber|wood|paint|tile|pipe|nail|screw|bolt|glue|adhesive|build\s?it|cashbuild|builders|mica|hardware|plaster|steel|wire|cable|plumb|electr|gypsum|ceiling|door|window|lock|hinge|drill|blade)/]];
+const slipCat=t=>{const x=String(t).toLowerCase();for(const[k,re]of SLIPCATS)if(re.test(x))return k;return "materials"};
+const slipAmts=line=>{const out=[],re=/(^|[^\d.,])(\d{1,3}(?:[ ,.]\d{3})+|\d+)[.,](\d{2})(?!\d)/g;let m;while((m=re.exec(line))){out.push(+m[2].replace(/[ ,.]/g,"")+ +m[3]/100)}return out};
+function parseSlip(text){
+  const lines=String(text||"").split(/\r?\n/).map(l=>l.trim()).filter(Boolean),td=today();
+  const bad=/sub\s*-?\s*total|vat|tax|excl|incl|saving|change|tender|cash|card|rounding|discount|qty|points/i;
+  const hi=[],mid=[];
+  lines.forEach((l,i)=>{
+    const strong=/(total\s*due|amount\s*due|balance\s*due|to\s*pay|amt\s*due|total\s*payable|grand\s*total|amount\s*payable)/i.test(l),weak=/\btotal\b/i.test(l)&&!/sub\s*-?\s*total|vat|tax|excl|saving|items/i.test(l);
+    if(!strong&&!weak)return;
+    let a=slipAmts(l);if(!a.length&&lines[i+1])a=slipAmts(lines[i+1]);
+    if(a.length)(strong?hi:mid).push(a[a.length-1]);
+  });
+  let total=0,sure=false;
+  if(hi.length){total=Math.max(...hi);sure=true}else if(mid.length){total=Math.max(...mid);sure=true}
+  else{const all=lines.filter(l=>!bad.test(l)).flatMap(slipAmts);if(all.length)total=Math.max(...all)}
+  const MON="jan feb mar apr may jun jul aug sep oct nov dec".split(" ");
+  const okD=(y,m,d)=>{if(y<100)y+=2000;const s=y+"-"+String(m).padStart(2,"0")+"-"+String(d).padStart(2,"0"),dt=new Date(s+"T12:00");return dt.getMonth()+1===m&&s<=td&&s>=addDays(td,-730)?s:""};
+  let date="";
+  for(const l of lines){
+    let m=l.match(/(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/);if(m&&(date=okD(+m[1],+m[2],+m[3])))break;
+    m=l.match(/(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4}|\d{2})\b/);if(m&&(date=okD(+m[3],+m[2],+m[1])))break;
+    m=l.match(/(\d{1,2})\s*([a-z]{3})[a-z]*\.?,?\s*(\d{2,4})/i);if(m&&MON.includes(m[2].toLowerCase())&&(date=okD(+m[3],MON.indexOf(m[2].toLowerCase())+1,+m[1])))break;
+  }
+  const skip=/(tax\s*invoice|invoice|vat|reg\b|tel\b|phone|www|\.com|\.co\.za|date|slip|till|cashier|receipt|copy|customer|address|street|road|po box)/i;
+  let shop="";
+  for(const l of lines.slice(0,8)){const letters=(l.match(/[A-Za-z]/g)||[]).length;if(letters>=3&&letters>=l.length*.5&&!skip.test(l)){shop=l.replace(/[^A-Za-z0-9&' .-]/g,"").replace(/\s+/g," ").trim();break}}
+  shop=shop.toLowerCase().replace(/\b[a-z]/g,c=>c.toUpperCase()).slice(0,50);
+  let vat=0;
+  if(total){const exp=total*15/115;for(const l of lines){if(/vat|tax/i.test(l)){const a=slipAmts(l).filter(v=>v<total).sort((x,y)=>Math.abs(x-exp)-Math.abs(y-exp));if(a.length&&Math.abs(a[0]-exp)<=Math.max(1,exp*.05)){vat=a[0];break}}}}
+  return{amount:Math.round(total*100)/100,shop,date:date||td,vat:Math.round(vat*100)/100,cat:slipCat(text),sure};
+}
+function loadTess(){
+  if(window.Tesseract)return Promise.resolve(window.Tesseract);
+  return tessP||(tessP=new Promise((ok,no)=>{const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js";s.onload=()=>ok(window.Tesseract);s.onerror=()=>{tessP=null;no(new Error("load"))};document.head.append(s)}));
+}
+/* grey, stretched contrast and a sensible size make thermal slips much easier to read */
+async function slipCanvas(blob){
+  const bmp=await createImageBitmap(blob),k=Math.min(1.5,2000/Math.max(bmp.width,bmp.height)),cv=document.createElement("canvas");
+  cv.width=Math.round(bmp.width*k);cv.height=Math.round(bmp.height*k);const x=cv.getContext("2d");x.drawImage(bmp,0,0,cv.width,cv.height);
+  const im=x.getImageData(0,0,cv.width,cv.height),d=im.data,h=new Uint32Array(256);
+  for(let i=0;i<d.length;i+=4){const g=Math.round(d[i]*.3+d[i+1]*.59+d[i+2]*.11);d[i]=d[i+1]=d[i+2]=g;h[g]++}
+  const n=cv.width*cv.height;let a=0,lo=0,hi=255;for(let i=0;i<256;i++){a+=h[i];if(a>=n*.02){lo=i;break}}a=0;for(let i=255;i>=0;i--){a+=h[i];if(a>=n*.02){hi=i;break}}
+  const sp=Math.max(40,hi-lo);for(let i=0;i<d.length;i+=4){const v=Math.max(0,Math.min(255,(d[i]-lo)*255/sp));d[i]=d[i+1]=d[i+2]=v}
+  x.putImageData(im,0,0);return cv;
+}
+async function slipRead(blob,say){
+  say("Getting ready…",0);
+  const T=await loadTess(),cv=await slipCanvas(blob);
+  const w=await T.createWorker("eng",1,{logger:m=>{if(m.status==="recognizing text")say("Reading the slip…",m.progress);else say(/language/.test(m.status)?"Downloading the reader, once only…":"Getting ready…",m.progress||0)}});
+  try{const r=await w.recognize(cv);return r.data.text||""}finally{await w.terminate().catch(()=>{})}
+}
+function scanSlip(){
+  sheet("Scan a slip",`<p class="muted" style="margin:6px 0 10px">Lay the slip flat in good light and fill the photo with it.</p>
+  <div class="photo-add"><button type="button" class="btn primary" id="sc">${ic("camera")}Take photo</button><button type="button" class="btn" id="sg">${ic("image")}From gallery</button></div>
+  <p class="hint">The slip is read on your phone. The first time, it downloads a reader of about 15 MB, so use wifi. You always check the amount before it is saved.</p>`,(sh,close)=>{
+    const pick=cam=>{const i=document.createElement("input");i.type="file";i.accept="image/*";if(cam)i.setAttribute("capture","environment");i.style.display="none";document.body.append(i);i.onchange=()=>{const f=i.files[0];i.remove();if(f){close();setTimeout(()=>slipRun(f),60)}};i.addEventListener("cancel",()=>i.remove());i.click()};
+    sh.querySelector("#sc").onclick=()=>pick(true);sh.querySelector("#sg").onclick=()=>pick(false);
+  });
+}
+async function slipRun(file){
+  let blob;try{blob=await prepPhoto(file,1600)}catch(e){toast("Could not open that photo.");return}
+  const mid=uid();let pre={media:[mid],mid,blob,url:URL.createObjectURL(blob)};
+  sheet("Reading the slip",`<div class="slipbusy"><img class="slipimg" src="${pre.url}" alt="The slip"><p id="sst" class="muted" aria-live="polite">Getting ready…</p><div class="meter"><i id="sbar" style="width:0%"></i></div></div>`,async(sh,close)=>{
+    const st=sh.querySelector("#sst"),bar=sh.querySelector("#sbar"),say=(t,p)=>{if(!sh.isConnected)return;st.textContent=t;bar.style.width=Math.round((p||0)*100)+"%"};
+    let text="";
+    try{text=await slipRead(blob,say)}catch(e){console.warn("slip",e);if(sh.isConnected){close();toast("The reader could not start. Fill the slip in by hand, the photo is attached.");setTimeout(()=>costSheet(null,pre),80)}return}
+    if(!sh.isConnected)return;
+    const r=parseSlip(text);pre={...pre,amount:r.amount,title:r.shop,date:r.date,cat:r.cat,vat:r.vat,ocr:text.slice(0,1500),sure:r.sure,found:r.amount>0};
+    close();setTimeout(()=>costSheet(null,pre),80);
+  });
+}
+function slipBlock(c,P){
+  if(P)return `<div class="slipprev"><img src="${P.url}" alt="The slip"><div class="grow"><b>${P.found?"Read from the slip":"Could not read the amount"}</b><p class="hint" style="margin:2px 0 0">${P.found?"Check the amount and date against the photo."+(P.sure?"":" The total is a guess."):"Type the amount from the photo."}</p></div></div>`;
+  const ids=c?.media||[];if(!ids.length)return "";
+  return `<div class="pthumbs" style="margin:0 0 6px">${ids.map((m,i)=>`<button type="button" class="etile" style="border:0;padding:0" data-act="slipview" data-id="${c.id}|${i}" aria-label="Open the slip photo"><span data-m="${m}" style="position:absolute;inset:0"></span></button>`).join("")}</div>`;
+}
+function slipsV(){
+  const all=S.costs.filter(c=>c.slip||(c.media||[]).length).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||b.id.localeCompare(a.id));
+  const canScan=lvl("money")>=2;
+  if(!all.length){SLIPX=[];return empty("camera","No slips yet","Scan a till slip and the shop, date and total are read for you. Each slip stays with its expense, ready to export.",canScan?`<button class="btn primary" data-act="scanslip">${ic("camera")}Scan your first slip</button>`:"")}
+  const months=[...new Set(all.map(c=>mYM(c.date)))].filter(Boolean),cats=[...new Set(all.map(c=>c.cat||"other"))];
+  const m=months.includes(slipM)?slipM:"all",cf=cats.includes(slipC)?slipC:"all";
+  const list=all.filter(c=>(m==="all"||mYM(c.date)===m)&&(cf==="all"||(c.cat||"other")===cf));SLIPX=list;
+  const tot=sum(list,c=>+c.amount||0),vat=sum(list,c=>+c.vat||0);
+  return `<div class="dstrip" role="group" aria-label="Slip totals"><div>${ic("camera","sm")}<b>${list.length}</b><span>slips</span></div><div>${ic("cash","sm")}<b>${money0(tot)}</b><span>total</span></div><div>${ic("clock","sm")}<b>${money0(vat)}</b><span>VAT</span></div></div>
+  <div class="chips scroll" role="group" aria-label="Month" style="margin:8px 0 6px">${[["all","All months"],...months.map(x=>[x,mLab(x)])].map(([k,l])=>`<button type="button" class="chip" data-sub="sm:${k}" aria-pressed="${m===k}">${esc(l)}</button>`).join("")}</div>
+  <div class="row between" style="gap:8px;margin-bottom:10px"><div class="chips scroll grow" role="group" aria-label="Type">${[["all","All types"],...cats.map(k=>[k,cat(k)[1]])].map(([k,l])=>`<button type="button" class="chip" data-sub="sc:${k}" aria-pressed="${cf===k}">${esc(l)}</button>`).join("")}</div><button class="btn small" data-act="slipexport">${ic("download","sm")}Export</button></div>
+  <div class="card"><ul class="list">${list.map(c=>{const ct=cat(c.cat);return `<li class="tap" tabindex="0" data-act="editcost" data-id="${c.id}"><span class="sthumb">${c.media?.[0]?`<span data-m="${c.media[0]}" style="position:absolute;inset:0"></span>`:ic(ct[2])}</span><div class="grow"><div class="lt">${esc(c.title||ct[1])}</div><div class="ls">${dshort(c.date)} · ${esc(ct[1])}${c.vat?" · VAT "+money0(c.vat):""}</div></div><span class="amt">${money(c.amount)}</span></li>`}).join("")||`<li class="muted">No slips match.</li>`}</ul></div>`;
+}
+const csvQ=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
+const slipFile=(c,i)=>c.media?.length?"photos/"+String(i+1).padStart(3,"0")+" "+exSafe((c.date||"")+" "+(c.title||"slip")+" "+(+c.amount||0).toFixed(2))+".jpg":"";
+function slipCsv(list){
+  const rows=[["Date","Shop or item","Category","Classroom","Paid","Amount","VAT","Photo"]];
+  list.forEach((c,i)=>rows.push([c.date||"",c.title||"",cat(c.cat)[1],roomName(c.room),c.paid?"Yes":"No",(+c.amount||0).toFixed(2),c.vat?(+c.vat).toFixed(2):"",slipFile(c,i)]));
+  rows.push([]);rows.push(["","","","","Total",sum(list,c=>+c.amount||0).toFixed(2),sum(list,c=>+c.vat||0).toFixed(2),""]);
+  return "﻿"+rows.map(r=>r.map(csvQ).join(",")).join("\r\n");
+}
+async function slipSave(blob,name){
+  const file=new File([blob],name,{type:blob.type});
+  if(navigator.canShare&&navigator.canShare({files:[file]})&&/iPhone|iPad|Android/i.test(navigator.userAgent)){try{await navigator.share({files:[file]});return "Done."}catch(e){if(e?.name==="AbortError")return ""}}
+  const a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),60000);return "Saved to this device.";
+}
+function slipExportSheet(){
+  const list=SLIPX.slice();if(!list.length){toast("No slips to export.");return}
+  const tot=sum(list,c=>+c.amount||0),base=exSafe(S.settings.name||"Project")+" slips "+today();
+  sheet("Export slips",`<p class="muted" style="margin:6px 0 10px">${list.length} slip${list.length===1?"":"s"}, ${money0(tot)} in total, with the month and type you have chosen.</p>
+  <div class="tasks"><button class="btn block" id="xc">${ic("download")}Spreadsheet (CSV)</button><button class="btn block" id="xz">${ic("download")}Zip with the photos</button><button class="btn block" id="xp">${ic("print")}Print the list</button></div><p class="hint" id="xs" aria-live="polite"></p>`,(sh,close)=>{
+    const xs=sh.querySelector("#xs"),btns=[...sh.querySelectorAll(".btn")],run=fn=>async()=>{btns.forEach(b=>b.disabled=true);try{await fn()}catch(e){console.warn("slips",e);xs.textContent="Something went wrong. Try again."}btns.forEach(b=>b.disabled=false)};
+    sh.querySelector("#xc").onclick=run(async()=>{xs.textContent=await slipSave(new Blob([slipCsv(list)],{type:"text/csv"}),base+".csv")});
+    sh.querySelector("#xz").onclick=run(async()=>{xs.textContent="Collecting the photos…";const files=[{path:"slips.csv",blob:new Blob([slipCsv(list)],{type:"text/csv"})}];let miss=0;
+      for(let i=0;i<list.length;i++){const c=list[i];if(!c.media?.length)continue;const b=await mGet(c.media[0]).catch(()=>null);if(b)files.push({path:slipFile(c,i),blob:b});else miss++}
+      const z=await makeZip(files);xs.textContent=(await slipSave(z,base+".zip"))+(miss?" "+miss+" photo"+(miss===1?" is":"s are")+" still loading from the team, export again later.":"")});
+    sh.querySelector("#xp").onclick=run(async()=>{xs.textContent="Getting ready…";const area=document.createElement("div");area.id="printarea";
+      const imgs=await Promise.all(list.map(c=>c.media?.[0]?mUrl(c.media[0]):""));
+      area.innerHTML=`<div class="pa-h">${esc(S.settings.name||"Site")}: slips</div><div class="pa-cap">${list.length} slips · ${money0(tot)} · printed ${esc(dlong(today()))}</div>`+list.map((c,i)=>`<div class="pa-row"><b>${esc(dshort(c.date))}</b> · ${esc(c.title||cat(c.cat)[1])} · ${esc(cat(c.cat)[1])} · ${money(c.amount)}${c.vat?" (VAT "+money(c.vat)+")":""}${imgs[i]?`<br><img src="${imgs[i]}" alt="" style="max-height:7cm;max-width:100%;margin-top:4px">`:""}</div>`).join("");
+      close();printNode(area)});
+  });
+}
 function moneyV(){
   const seg=moneySeg;
-  const head=`<div class="page-h"><h2>Money</h2><div class="row" style="gap:8px"><button class="iconbtn" data-act="lockmoney" aria-label="Lock money now">${ic("lock")}</button>${seg==="build"?`<button class="btn primary" data-act="addcost">${ic("plus")}Add expense</button>`:seg==="trades"?`<button class="btn primary" data-act="addtrade">${ic("plus")}Add quote</button>`:""}</div></div>`;
-  const tabs=`<div class="segc" role="group" aria-label="Money view">${[["overall","Overall"],["build","Build"],["trades","Trades"]].map(([k,l])=>`<button type="button" data-sub="mseg:${k}" aria-pressed="${seg===k}">${l}</button>`).join("")}</div>`;
-  return head+tabs+(seg==="trades"?tradesV():seg==="build"?moneyBuild():overallV());
+  const head=`<div class="page-h"><h2>Money</h2><div class="row" style="gap:8px"><button class="iconbtn" data-act="lockmoney" aria-label="Lock money now">${ic("lock")}</button>${seg==="build"?`<button class="btn" data-act="scanslip" aria-label="Scan a slip">${ic("camera")}</button><button class="btn primary" data-act="addcost">${ic("plus")}Add expense</button>`:seg==="slips"?`<button class="btn primary" data-act="scanslip">${ic("camera")}Scan slip</button>`:seg==="trades"?`<button class="btn primary" data-act="addtrade">${ic("plus")}Add quote</button>`:""}</div></div>`;
+  const tabs=`<div class="segc" role="group" aria-label="Money view">${[["overall","Overall"],["build","Build"],["slips","Slips"],["trades","Trades"]].map(([k,l])=>`<button type="button" data-sub="mseg:${k}" aria-pressed="${seg===k}">${l}</button>`).join("")}</div>`;
+  return head+tabs+(seg==="trades"?tradesV():seg==="build"?moneyBuild():seg==="slips"?slipsV():overallV());
 }
 function estBreak(est,committed,paid,free){
   const pc=Math.min(paid,committed),up=Math.max(0,committed-pc),base=Math.max(est,committed,1),seg=(v,c)=>v>0?`<i style="width:${v/base*100}%;background:${c}"></i>`:"";
