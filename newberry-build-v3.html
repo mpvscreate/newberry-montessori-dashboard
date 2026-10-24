@@ -1141,7 +1141,7 @@ let outdoor=false;try{outdoor=localStorage.getItem("build2-outdoor")==="1"}catch
 const applyOutdoor=()=>document.documentElement.classList.toggle("outdoor",outdoor);applyOutdoor();
 
 /* ---------- premium reporting ---------- */
-async function progressCard(){
+async function progressCard(noMoney){
   const W=1080,H=1570,c=document.createElement("canvas");c.width=W;c.height=H;const x=c.getContext("2d");
   try{await document.fonts.ready}catch{}
   const F=(w,s)=>`${w} ${s}px "Bricolage Grotesque","Instrument Sans",system-ui,sans-serif`;
@@ -1156,7 +1156,7 @@ async function progressCard(){
   x.strokeStyle="#fff";x.beginPath();x.arc(cx,cy,r,-Math.PI/2,-Math.PI/2+Math.PI*2*Math.max(.001,p));x.stroke();
   x.textAlign="center";x.font=F(700,78);x.fillText(Math.round(p*100)+"%",cx,cy-44);x.textAlign="left";
   const issues=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length;
-  const lines=[`${d} of ${all.length} tasks done`,...rooms().map(rm=>{const t=tasksOf(rm.id);return`${rm.name}: ${pct(doneN(t),t.length)}%`}),canMoney()&&moneyOK&&paidTotal()?`Paid ${money0(paidTotal())} · work ${Math.round(p*100)}%`:null,`Open issues: ${issues}`].filter(Boolean);
+  const lines=[`${d} of ${all.length} tasks done`,...rooms().map(rm=>{const t=tasksOf(rm.id);return`${rm.name}: ${pct(doneN(t),t.length)}%`}),canMoney()&&moneyOK&&!noMoney&&paidTotal()?`Paid ${money0(paidTotal())} · work ${Math.round(p*100)}%`:null,`Open issues: ${issues}`].filter(Boolean);
   lines.forEach((t,i)=>{x.font=F(i?500:700,i?36:46);x.fillText(fit(t,W-420),380,285+i*64)});
   const ids=logsNewest().flatMap(l=>l.media||[]).slice(0,4),pw=484,ph=300;
   for(let i=0;i<4;i++){
@@ -1171,8 +1171,26 @@ async function progressCard(){
   return new Promise(res=>c.toBlob(b=>res(b),"image/jpeg",.9));
 }
 function reportSheet(){
-  sheet("Share a progress update",`<p class="muted" style="margin:6px 0 10px">An image card with the latest photos, or a short text summary. Both are ready for WhatsApp.</p><div id="pv" class="cardprev"><div class="small muted" style="padding:40px 12px;text-align:center">Making your card…</div></div>
-  <div class="tasks" style="margin-top:12px"><button class="btn primary block" id="si" disabled>${ic("chat")}Send the card</button><button class="btn block" id="sv" disabled>${ic("download")}Save the image</button><button class="btn block" id="st">${ic("note")}Send text instead</button></div>`,async(sh,close)=>{
+  const others=sm.code&&canSend()?peopleList().filter(p=>p.active&&p.pid!==sm.pid):[],to=new Set();
+  sheet("Send the report",`${others.length?`<label class="f">Send to</label>
+  <div class="chips" role="group" aria-label="Send the report to" id="rc"><button type="button" class="chip" data-r="all" aria-pressed="false">Everyone</button>${others.map(p=>`<button type="button" class="chip" data-r="${p.pid}" aria-pressed="false">${esc(p.name)}</button>`).join("")}</div>
+  <p class="hint" id="rt">Choose one person, a few people or everyone. They get it in Updates with a notification. Money figures are left out.</p>
+  <div class="tasks" style="margin-top:8px"><button class="btn primary block" id="sa" disabled>${ic("chat")}Send to the selected</button></div>`:""}
+  <label class="f" style="margin-top:14px">Or share outside the app</label><div id="pv" class="cardprev"><div class="small muted" style="padding:40px 12px;text-align:center">Making your card…</div></div>
+  <div class="tasks" style="margin-top:12px"><button class="btn block" id="si" disabled>${ic("share")}Share the card</button><button class="btn block" id="sv" disabled>${ic("download")}Save the image</button><button class="btn block" id="st">${ic("note")}Send text on WhatsApp</button></div>`,async(sh,close)=>{
+    const sa=sh.querySelector("#sa");
+    const paint=()=>{sh.querySelectorAll("[data-r]").forEach(b=>b.setAttribute("aria-pressed",to.has(b.dataset.r)));
+      const t=sh.querySelector("#rt");if(t)t.textContent=to.has("all")?"Everyone on the project will get this. Money figures are left out.":to.size?[...to].map(pName).join(", ")+(to.size===1?" will get this.":" will get this.")+" Money figures are left out.":"Choose one person, a few people or everyone. They get it in Updates with a notification. Money figures are left out.";
+      if(sa)sa.disabled=!to.size};
+    sh.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{const k=b.dataset.r;if(k==="all"){if(to.has("all"))to.clear();else{to.clear();to.add("all")}}else{to.delete("all");if(to.has(k))to.delete(k);else to.add(k)}paint()});
+    if(sa)sa.onclick=async()=>{
+      if(!to.size)return;sa.disabled=true;sa.textContent="Sending…";
+      const ids=[];try{const bl=await progressCard(true);if(bl){const mid=uid();await mPut(mid,bl);queueMedia(mid);ids.push(mid)}}catch(e){console.warn("card",e)}
+      const m={id:uid(),from:sm.pid,t:Date.now(),to:to.has("all")?["all"]:[...to],text:reportTextSafe(),media:ids};
+      S.msgs.push(m);notifySend(m.to,"Report from "+(me||sm.pname||"the team"),"Progress report, "+dshort(today()),"inbox");logAct("Sent the progress report");save();close();render();
+      const names=to.has("all")?"everyone":[...to].map(pName).join(", ");
+      toast("Report sent to "+names+".",()=>{const i=S.msgs.indexOf(m);if(i>=0)S.msgs.splice(i,1)});syncNow();
+    };
     sh.querySelector("#st").onclick=()=>{close();shareText(reportText())};
     let blob=null;try{blob=await progressCard()}catch(e){console.warn("card",e)}
     if(!sh.isConnected)return;const pv=sh.querySelector("#pv");
@@ -1868,6 +1886,7 @@ function whoSheet(){
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();me=sh.querySelector("#nm").value.trim();try{localStorage.setItem("build-who",me)}catch{}if(sm.code&&perm.manage&&me){sm.pname=me;persistSync();peopleSet({pid:sm.pid,name:me}).catch(()=>{})}close();render();toast("Saved.")}});
 }
 function reportText(){const t=reportTextFull();return moneyOK?t:t.split("\n").filter(l=>!/^(Spent|Still to pay|Builder paid|Trades|Whole project)/.test(l)).join("\n")}
+const reportTextSafe=()=>reportTextFull().split("\n").filter(l=>!/^(Spent|Still to pay|Builder paid|Trades|Whole project)/.test(l)).join("\n");
 function reportTextFull(){
   const all=S.tasks,R=rooms(),bud=+S.settings.budget||0,issues=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length,nu=nextUp().slice(0,3);
   let t=`*${S.settings.name||"Classroom build"}*: update ${dlong(today())}\n\n`;
