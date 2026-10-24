@@ -444,6 +444,18 @@ body.previewing{padding-top:calc(48px + env(safe-area-inset-top,0px))}
 .attn{margin:0 0 10px!important;padding:8px 12px 8px!important;border-radius:18px}.attn h2{font-size:.82rem!important;letter-spacing:.04em}.attn .pill{font-size:.7rem;padding:1px 8px}
 .attn .list li{padding:5px 0;gap:8px}.attn .list li .row-ic{width:26px;height:26px}.attn .list li .row-ic .i{width:15px;height:15px}.attn .list li .lt{font-size:.84rem;font-weight:500;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .segc.bmode{padding:2px;border-radius:12px;margin-bottom:8px}.segc.bmode button{min-height:28px;font-size:.8rem;border-radius:10px;padding:0 8px}
+.note-card.slim{align-items:center;gap:8px;padding:6px 6px 6px 10px;font-size:.8rem;margin:0 0 8px;border-radius:12px;line-height:1.25}
+.note-card.slim .i{margin-top:0;flex:none;width:18px;height:18px}.note-card.slim .nt{flex:1;min-width:0}.note-card.slim b{font-weight:600}
+.note-card.slim .nb{display:flex;align-items:center;gap:2px;flex:none}.note-card.slim .linkbtn{padding:0 8px!important;min-height:30px!important;font-size:.8rem;margin:0!important;font-weight:600}.note-card.slim .linkbtn.nx{width:30px;padding:0!important;display:grid;place-items:center;font-weight:400;opacity:.8}
+.phero{min-height:84px!important;padding:10px 14px!important;border-radius:20px!important;margin-bottom:8px!important}.phero h3{font-size:1.05rem!important;margin-top:2px!important}.phero .eyebrow{font-size:.62rem}.phero .ph-d{font-size:.78rem;margin-top:2px}
+.pbig{width:48px!important;height:48px!important}.pbig .pc{font-size:.76rem!important}.pbig .i.lg{width:22px!important;height:22px!important}
+.tile.hero.est{min-height:0;padding:12px 14px;gap:2px;border-radius:20px}.tile.hero.est .big{font-size:clamp(1.9rem,8.5vw,2.4rem)}.tile.hero.est .sub{font-size:.8rem}.tile.hero.est .estbar{margin-top:8px;height:10px}
+.estleg{grid-template-columns:repeat(3,1fr)!important;gap:6px!important;margin-top:8px!important}.estleg li{display:block!important;font-size:.7rem;line-height:1.2}.estleg li i{display:inline-block;vertical-align:middle;margin-right:5px}.estleg li b{display:block;margin:2px 0 0!important;font-size:.82rem}
+.card.ov{padding:10px 14px;margin-bottom:10px;border-radius:18px}.card.ov h2{font-size:.95rem}.card.ov .big{font-size:1.35rem!important;margin:2px 0 0!important}.card.ov .meter{margin-top:4px}.card.ov .linkbtn{min-height:30px!important}
+.ovb .tile{min-height:0;padding:10px 14px;border-radius:18px;gap:2px}.ovb .tile .big{font-size:1.4rem}
+.list li{padding:8px 0;gap:10px}.list li .row-ic{width:36px;height:36px}.list li .row-ic .i{width:18px;height:18px}.list li .lt{line-height:1.25}.list li .ls{line-height:1.25;font-size:.8rem}
+.list li .lt{font-size:.93rem}.list li .st{width:38px;height:38px}.list li .btn.icon{width:36px;min-height:36px}.list li .btn.small{min-height:36px;padding:4px 12px}
+.note-card{padding:8px 12px;font-size:.82rem}
 .dim{opacity:.62}.trcard{cursor:pointer}
 .rn .st,.rn .stp,.rfin .st,.rfin .stp{pointer-events:none}
 .rn [data-fab="task"],.rn [data-fab="mat"],.rn [data-fab="cost"],.rn [data-fab="pay"],.rfin [data-fab="task"],.rfin [data-fab="mat"],.rfin [data-fab="photo"],.rfin [data-fab="issue"],.rn [data-act="addtask"],.rfin [data-act="addtask"],.rn [data-act="editelec"],.rfin [data-act="editelec"],.rn [data-act="reorder"],.rfin [data-act="reorder"]{display:none!important}
@@ -1273,7 +1285,7 @@ function backupDue(){
   if(lsGet("build-bkdis")===today())return "";
   const last=lsGet("build-lastbk");if(last&&(new Date(today()+"T12:00")-new Date(last+"T12:00"))/864e5<5)return "";
   if(!S.docs.length&&!S.logs.some(l=>(l.media||[]).length))return "";
-  return `<div class="note-card" style="margin:0 0 14px">${ic("cloud")}<span><b>Friday backup.</b> Save this week's photos and documents to Google Drive.<br><button type="button" class="linkbtn" data-act="gbackup" style="padding:0;min-height:36px;margin-right:16px">Back up now</button><button type="button" class="linkbtn" data-act="bkdismiss" style="padding:0;min-height:36px">Not today</button></span></div>`;
+  return `<div class="note-card slim">${ic("cloud")}<span class="nt"><b>Friday backup to Google Drive.</b></span><span class="nb"><button type="button" class="linkbtn" data-act="gbackup">Back up</button><button type="button" class="linkbtn nx" data-act="bkdismiss" aria-label="Not today">${ic("x","sm")}</button></span></div>`;
 }
 function buildMain(){
   const all=G(BT()),d=doneN(all),p=pct(d,all.length),cur=curPhases()[0],sched=schedule();
@@ -2757,7 +2769,7 @@ function moneyV(){
 function estBreak(est,committed,paid,free){
   const pc=Math.min(paid,committed),up=Math.max(0,committed-pc),base=Math.max(est,committed,1),seg=(v,c)=>v>0?`<i style="width:${v/base*100}%;background:${c}"></i>`:"";
   return `<div class="estbar" role="img" aria-label="Estimate ${money0(est)}: paid ${money0(pc)}, committed and still to pay ${money0(up)}, ${free>=0?"left "+money0(free):"over by "+money0(-free)}">${seg(pc,"#fff")}${seg(up,"rgba(255,255,255,.5)")}${committed>est?`<b class="estmk" style="left:${est/base*100}%" title="Estimate"></b>`:""}</div>
-  <ul class="estleg"><li><i style="background:#fff"></i>Paid<b>${money0(pc)}</b></li><li><i style="background:rgba(255,255,255,.5)"></i>Committed, still to pay<b>${money0(up)}</b></li><li><i style="background:rgba(0,0,0,.3)"></i>${free>=0?"Left of the estimate":"Over the estimate"}<b>${money0(Math.abs(free))}</b></li></ul>`;
+  <ul class="estleg"><li><i style="background:#fff"></i>Paid<b>${money0(pc)}</b></li><li><i style="background:rgba(255,255,255,.5)"></i>To pay<b>${money0(up)}</b></li><li><i style="background:rgba(0,0,0,.3)"></i>${free>=0?"Left":"Over"}<b>${money0(Math.abs(free))}</b></li></ul>`;
 }
 function overallV(){
   const ct=contractAmt(),est=+S.settings.estimate||0,paidB=paidTotal(),bLeft=Math.max(0,ct-paidB),tc=tCommit(),tp=tPaidAll(),tLeft=Math.max(0,tc-tp),wait=tWait(),up=tUpcoming();
@@ -2765,21 +2777,21 @@ function overallV(){
   const committed=ct+tc+othAll,paid=paidB+tp+othPaid,left=bLeft+tLeft+othDue,free=est-committed;
   const bar=(v,t,cls)=>`<div class="meter ${cls||""}" role="img" aria-label="${money0(v)} of ${money0(t)}"><i style="width:${t>0?Math.min(100,v/t*100):0}%"></i></div>`;
   const live=tLive().slice().sort((x,y)=>tVal(y)-tVal(x));
-  return `<section class="tile hero" style="margin-bottom:12px"><div class="lbl">${ic("cash")}Whole project estimate</div>
+  return `<section class="tile hero est" style="margin-bottom:10px"><div class="lbl">${ic("cash")}Whole project estimate</div>
    <div class="big">${est?money0(est):"Not set"}</div>
    <div class="sub">${est?`${money0(committed)} committed, ${pct(committed,est)}% of the estimate`:"Set the estimate on the Build tab"}</div>${est?estBreak(est,committed,paid,free):""}</section>
-  <div class="card"><div class="row between wr"><h2 style="margin:0">Builder's quote</h2></div>
+  <div class="card ov"><div class="row between wr"><h2 style="margin:0">Builder's quote</h2></div>
    <div class="big" style="margin:8px 0 2px;font-size:1.7rem">${ct?money0(ct):"Not set"}</div>${ct?bar(paidB,ct):""}
    <div class="row between" style="margin-top:8px"><span class="ls">Paid <b>${money0(paidB)}</b></span><span class="ls">Still to pay <b>${money0(bLeft)}</b></span></div>
    <button type="button" class="linkbtn" data-sub="mseg:build" style="padding:0;min-height:40px">Builder payments and costs</button></div>
-  <div class="card"><div class="row between wr"><h2 style="margin:0">Other quotes</h2><button type="button" class="btn small" data-sub="mseg:trades">View all</button></div>
+  <div class="card ov"><div class="row between wr"><h2 style="margin:0">Other quotes</h2><button type="button" class="btn small" data-sub="mseg:trades">View all</button></div>
    ${live.length?`<div class="big" style="margin:8px 0 2px;font-size:1.7rem">${money0(tc)}</div>${bar(tp,tc)}
    <div class="row between" style="margin-top:8px"><span class="ls">Paid <b>${money0(tp)}</b></span><span class="ls">Still to pay <b>${money0(tLeft)}</b></span></div>
    <ul class="list" style="margin-top:8px">${live.slice(0,6).map(t=>`<li class="tap" tabindex="0" data-act="opentrade" data-id="${t.id}"><div class="grow"><div class="lt">${esc(t.trade)}</div><div class="ls">${esc(tName(t))} · paid ${money0(tPaid(t))} · left ${money0(Math.max(0,tVal(t)-tPaid(t)))}</div></div><span class="amt">${money0(tVal(t))}</span></li>`).join("")}</ul>${live.length>6?`<p class="hint">and ${live.length-6} more</p>`:""}`
    :`<p class="muted" style="margin:8px 0 0">No accepted quotes yet. Add quotes from your tiler, electrician and other trades.</p>`}
    ${wait?`<p class="note-card" style="margin:10px 0 0">${ic("clock")}<span><b>${money0(wait)}</b> in quotes waiting for a decision.</span></p>`:""}</div>
-  ${othAll?`<div class="card"><div class="row between wr"><h2 style="margin:0">Other expenses</h2><button type="button" class="btn small" data-sub="mseg:build">View</button></div><div class="row between" style="margin-top:8px"><span class="ls">Paid <b>${money0(othPaid)}</b></span><span class="ls">Still to pay <b>${money0(othDue)}</b></span></div><p class="hint">Materials, extra labour and other costs outside the quotes.</p></div>`:""}
-  <div class="bento">
+  ${othAll?`<div class="card ov"><div class="row between wr"><h2 style="margin:0">Other expenses</h2><button type="button" class="btn small" data-sub="mseg:build">View</button></div><div class="row between" style="margin-top:8px"><span class="ls">Paid <b>${money0(othPaid)}</b></span><span class="ls">Still to pay <b>${money0(othDue)}</b></span></div><p class="hint">Materials, extra labour and other costs outside the quotes.</p></div>`:""}
+  <div class="bento ovb">
    <section class="tile green"><div class="lbl">${ic("check")}Paid so far</div><div class="big">${money0(paid)}</div><div class="sub">${committed?pct(paid,committed)+"% of what is committed":"&nbsp;"}</div></section>
    <section class="tile"><div class="lbl">${ic("clock")}Still to pay</div><div class="big">${money0(left)}</div><div class="sub">builder ${money0(bLeft)} · quotes ${money0(tLeft)}</div></section>
   </div>
@@ -3030,11 +3042,11 @@ const recentDis=(k,days)=>{const d=lsGet(k);return !!d&&(new Date(today()+"T12:0
 /* an iPhone only gives notifications and the red number to an app added to the Home Screen */
 function iosPrompt(){
   if(!sm.code||!isIOS()||isStandalone()||recentDis("build-iosdis",3))return "";
-  return `<div class="note-card" style="margin:0 0 14px">${ic("bell")}<span><b>Add the app to your Home Screen.</b> That is how you get the red number on the app icon and phone notifications. Tap the Share button in Safari, then Add to Home Screen, and open the app from there.<br><button type="button" class="linkbtn" data-act="iosdismiss" style="padding:0;min-height:36px">Got it</button></span></div>`;
+  return `<div class="note-card slim">${ic("bell")}<span class="nt"><b>Add to Home Screen:</b> tap Share, then Add to Home Screen. You get notifications and the red number.</span><span class="nb"><button type="button" class="linkbtn" data-act="iosdismiss">Got it</button></span></div>`;
 }
 function pushPrompt(){
   if(!sm.code||!pushSupported()||lsGet("build-push")==="1"||recentDis("build-pushdis",2)||Notification.permission==="denied")return "";
-  return `<div class="note-card" style="margin:0 0 14px">${ic("bell")}<span><b>Get the red number.</b> Turn on notifications to see a red number on the app icon and get a phone notification when someone sends you an update or a task.<br><button type="button" class="linkbtn" data-act="pushsheet" style="padding:0;min-height:36px;margin-right:16px">Turn on</button><button type="button" class="linkbtn" data-act="pushdismiss" style="padding:0;min-height:36px">Not now</button></span></div>`;
+  return `<div class="note-card slim">${ic("bell")}<span class="nt"><b>Get the red number.</b> Turn on notifications.</span><span class="nb"><button type="button" class="linkbtn" data-act="pushsheet">Turn on</button><button type="button" class="linkbtn nx" data-act="pushdismiss" aria-label="Not now">${ic("x","sm")}</button></span></div>`;
 }
 function notifyLead(t){const ld=peopleList().find(p=>p.role==="lead");if(ld&&ld.pid!==sm.pid)notifySend([ld.pid],"Ready to check",t.title.slice(0,100),"check")}
 function openTarget(t){if(t==="furn"){bmode="furn";lsSet("build-bmode","furn");go("build");render()}else if(t==="check"){taskF="check";go("tasks")}else if(t==="inbox")go("inbox");else if(t==="tasks"){taskF="me";go("tasks")}}
@@ -3131,11 +3143,11 @@ async function saveLinkToDrive(){
 }
 function connectPrompt(){
   if(sm.code)return "";const d=lsGet("build-ncdis");if(d&&(new Date(today()+"T12:00")-new Date(d+"T12:00"))/864e5<3)return "";
-  return `<div class="note-card warn" style="margin:0 0 14px">${ic("cloudoff")}<span><b>This phone is not connected to the team.</b> If you are part of the team, paste the personal link you were sent to see the shared project.<br><button type="button" class="linkbtn" data-act="joinlink" style="padding:0;min-height:36px;margin-right:16px">Join with my link</button><button type="button" class="linkbtn" data-act="ncdismiss" style="padding:0;min-height:36px">Not now</button></span></div>`;
+  return `<div class="note-card warn slim">${ic("cloudoff")}<span class="nt"><b>Not connected to the team.</b> Paste the link you were sent.</span><span class="nb"><button type="button" class="linkbtn" data-act="joinlink">Join</button><button type="button" class="linkbtn nx" data-act="ncdismiss" aria-label="Not now">${ic("x","sm")}</button></span></div>`;
 }
 function linkPrompt(){
   if(!sm.code||!perm.manage||lsGet("build-linksaved")==="1"||lsGet("build-linkdis")===today())return "";
-  return `<div class="note-card" style="margin:0 0 14px">${ic("key")}<span><b>Protect your access.</b> Save your access link now. If you lose this phone, you can get straight back in as ${esc(roleLabel(sm.prole))}.<br><button type="button" class="linkbtn" data-act="savelink" style="padding:0;min-height:36px;margin-right:16px">Save my link</button><button type="button" class="linkbtn" data-act="linkdismiss" style="padding:0;min-height:36px">Later</button></span></div>`;
+  return `<div class="note-card slim">${ic("key")}<span class="nt"><b>Save your access link</b> in case you lose this phone.</span><span class="nb"><button type="button" class="linkbtn" data-act="savelink">Save</button><button type="button" class="linkbtn nx" data-act="linkdismiss" aria-label="Later">${ic("x","sm")}</button></span></div>`;
 }
 const canEditPerson=p=>perm.manage&&(sm.prole==="lead"||p.pid===sm.pid||(!(p.perm&&p.perm.manage)&&p.role!=="lead"));
 
