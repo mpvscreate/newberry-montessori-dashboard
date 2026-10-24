@@ -3986,7 +3986,7 @@ render();
 if(sm.code){setSync("syncing");syncNow()}else setSync("off");
 joinFromHash();addEventListener("hashchange",joinFromHash);
 setTimeout(autoUpdate,1500);
-if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw.js").catch(()=>{});
+if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw-build3.js").catch(()=>{});/* the same worker that shows notifications and the red number: sw.js has no push code and replaced it on every open */
 </script>
 </body>
 </html>
