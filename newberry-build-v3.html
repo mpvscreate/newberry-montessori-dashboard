@@ -457,6 +457,7 @@ body.previewing{padding-top:calc(48px + env(safe-area-inset-top,0px))}
 .list li .lt{font-size:.93rem}.list li .st{width:38px;height:38px}.list li .btn.icon{width:36px;min-height:36px}.list li .btn.small{min-height:36px;padding:4px 12px}
 .note-card{padding:8px 12px;font-size:.82rem}
 .dstrip{display:flex;align-items:center;justify-content:space-around;gap:6px;background:var(--sheet);border:1px solid var(--line);border-radius:16px;padding:8px 10px;margin:0 0 10px}.dstrip>div{display:flex;align-items:center;gap:6px;min-width:0}.dstrip .i{color:var(--accent);flex:none}.dstrip b{font:700 1.15rem var(--display);font-variant-numeric:tabular-nums}.dstrip span{font-size:.74rem;color:var(--muted);line-height:1.1}.dstrip .warn b,.dstrip .warn .i{color:var(--red)}
+.na-diary [data-fab="diary"],.ro-diary [data-fab="diary"]{display:none!important}
 /* streamline */
 .moreV .ls{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.moreV .list li{padding:7px 0}
 .page-h{margin:2px 0 10px}.page-h h2{font-size:clamp(1.35rem,4.6vw,1.7rem)}
@@ -885,7 +886,7 @@ const TABS=[["build","Build","grid"],["home","Overview","home"],["add","Add","pl
 const navTab=t=>({phase:"build",mats:"build",site:"build",plans:"build",docs:"build",inbox:"more",people:"more",tasks:"build",diary:"build",garden:"build",extra:"more",report:"home",weather:"build"})[t]||t;
 $("nav.tabs").innerHTML=TABS.map(([k,l,i])=>k==="add"?`<button type="button" class="cap" id="fab" aria-label="Add something" aria-expanded="false" aria-controls="fab-menu">${ic(i)}</button>`:`<button data-tab="${k}">${ic(i)}<span>${l}</span>${k==="build"?'<i class="dot" id="tdot" hidden></i>':""}</button>`).join("");
 $("#today").textContent=new Date().toLocaleDateString("en-ZA",sm.code?{weekday:"short",day:"numeric",month:"short"}:{weekday:"long",day:"numeric",month:"long"});
-$("#fab-menu").innerHTML=[["site","On site",[["photo","camera","Photo"],["issue","alert","Challenges"]]],["build","Build",[["task","clip","Task"],["mat","truck","Material"]]],["money","Money",[["cost","cash","Expense"],["pay","users","Record payment"]]],["team","Team",[["msg","chat","Update everyone"]]]].map(([g,t,it])=>`<div class="fab-grp" data-g="${g}"><h4>${t}</h4><div class="fab-row">${it.map(([k,i,l])=>`<button class="fab-item" data-fab="${k}"><span class="fi">${ic(i)}</span><span class="fl">${l}</span></button>`).join("")}</div></div>`).join("")+`<p class="fab-hint">Hold the plus button to take a photo straight away.</p>`;
+$("#fab-menu").innerHTML=[["site","On site",[["photo","camera","Photo"],["issue","alert","Challenges"]]],["build","Build",[["task","clip","Task"],["mat","truck","Material"]]],["money","Money",[["cost","cash","Expense"],["pay","users","Record payment"]]],["team","Team",[["msg","chat","Update everyone"],["diary","book","Site diary"]]]].map(([g,t,it])=>`<div class="fab-grp" data-g="${g}"><h4>${t}</h4><div class="fab-row">${it.map(([k,i,l])=>`<button class="fab-item" data-fab="${k}"><span class="fi">${ic(i)}</span><span class="fl">${l}</span></button>`).join("")}</div></div>`).join("")+`<p class="fab-hint">Hold the plus button to take a photo straight away.</p>`;
 
 let toastT;
 function toast(msg,undo){
@@ -971,7 +972,7 @@ $("#fab").onclick=()=>setFab($("#fab").getAttribute("aria-expanded")!=="true");
   m.addEventListener("pointermove",e=>{if(y0!==null&&e.clientY-y0>60){y0=null;setFab(false)}});
   ["pointerup","pointercancel"].forEach(n=>m.addEventListener(n,()=>{y0=null}));
 })();
-document.querySelectorAll("[data-fab]").forEach(b=>b.onclick=()=>{setFab(false);buzz(10);if(!fabOK(b.dataset.fab))return;({photo:()=>quickPhoto(tab==="phase"?curPh:undefined),cost:()=>costSheet(),pay:()=>recPaySheet(),msg:()=>newMsgSheet(true),task:()=>addTaskSheet(tab==="phase"?curPh:undefined),mat:()=>matSheet(),issue:()=>logSheet(null,"issue")})[b.dataset.fab]()});
+document.querySelectorAll("[data-fab]").forEach(b=>b.onclick=()=>{setFab(false);buzz(10);if(!fabOK(b.dataset.fab))return;({photo:()=>quickPhoto(tab==="phase"?curPh:undefined),cost:()=>costSheet(),pay:()=>recPaySheet(),msg:()=>newMsgSheet(true),diary:()=>diarySheet(),task:()=>addTaskSheet(tab==="phase"?curPh:undefined),mat:()=>matSheet(),issue:()=>logSheet(null,"issue")})[b.dataset.fab]()});
 addEventListener("keydown",e=>{if(e.key==="Escape"){if(closeSheet)closeSheet();else if($("#fab").getAttribute("aria-expanded")==="true"){setFab(false);$("#fab").focus()}}});
 const reduced=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
 const buzz=n=>{try{navigator.vibrate?.(n)}catch{}};
@@ -2539,7 +2540,7 @@ const ago=t=>{const s=Math.max(0,(Date.now()-new Date(t).getTime())/1000);return
 const personLink=p=>location.origin+location.pathname+"#join="+sm.code+"&k="+p.key;
 const waUrl=(phone,text)=>{let d=String(phone||"").replace(/\D/g,"");if(d.startsWith("0"))d="27"+d.slice(1);return "https://wa.me/"+d+"?text="+encodeURIComponent(text)};
 function fabOK(k){
-  const ar={photo:"log",issue:"log",task:"tasks",mat:"mats",cost:"money",pay:"money",msg:"upd"}[k];if(k==="msg"&&!sm.code){shareSheet();return false}
+  const ar={photo:"log",issue:"log",task:"tasks",mat:"mats",cost:"money",pay:"money",msg:"upd",diary:"diary"}[k];if(k==="msg"&&!sm.code){shareSheet();return false}
   if(lvl(ar)>=2)return true;toast(AREA_MSG(ar));return false;
 }
 const whoLine=()=>sm.code&&!perm.manage?`<p class="muted small" style="margin:0 2px 12px">You are <b>${esc(sm.pname||me||"signed in")}</b>, ${esc(roleLabel(sm.prole))}. ${esc(accessText(perm))}</p>`:"";
