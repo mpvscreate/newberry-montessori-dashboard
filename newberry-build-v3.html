@@ -496,6 +496,7 @@ body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!importan
 .card.ovs{padding:12px 14px;margin:0 0 10px;border-radius:18px}.ovbs{display:grid;gap:10px;margin-top:12px}.ovb{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;border:0;background:none;padding:0;color:inherit;font:inherit;text-align:left;cursor:pointer}.ovb .ovl{font-size:.85rem;color:var(--muted)}.ovb b{font:700 1rem var(--display)}.ovb .meter{grid-column:1/-1;margin:0}
 .ovd{margin:0 0 10px}.ovd>summary{list-style:none;display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 14px;border-radius:14px;border:1px solid var(--line);background:var(--sheet);cursor:pointer;font:500 .88rem var(--body)}.ovd>summary::-webkit-details-marker{display:none}.ovd>summary span{flex:1}.ovd[open]>summary{margin-bottom:10px}.ovd[open]>summary>.i:last-child{transform:rotate(90deg)}
 .mrows{padding:4px 14px}.mrow{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:12px 0;color:inherit;font:inherit;cursor:pointer}.mrow:first-child{border-top:0}.mrow .lt{font-weight:600}.mrow b{font:700 1rem var(--display)}.mrow .meter{margin:6px 0 4px}
+.nrep [data-act="report"],.nrep [data-act="goexport"],.nrep [data-act="weekshare"],.nrep [data-act="diaryshare"],.nrep [data-act="diaryprint"],.nrep [data-act="slipexport"],.nrep [data-act="snagexport"]{display:none!important}
 .qa.one{gap:8px;margin:2px 0 10px}.qa.one button{flex-direction:row;gap:7px;min-height:46px;padding:6px 8px;border-radius:15px;font-size:.92rem}.qa.one button .i{width:20px;height:20px;flex:none}
 .card.today{padding:8px 14px 6px;margin:0 0 10px;border-radius:16px}.card.today .eyebrow{font-size:.66rem}.card.today .list li{padding:6px 0;gap:10px}.card.today .list li .st{width:30px;height:30px}.card.today .list li .st .i{width:16px;height:16px}.card.today .lt,.card.today .ls{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card.today .lt{font-size:.88rem}.card.today .ls{font-size:.74rem}.card.today .grow{min-width:0}.card.today .row-ic{width:30px;height:30px}.card.today .linkbtn{min-height:28px!important;font-size:.8rem}
 .phg{margin:0 0 16px}.phg h3{margin:0 0 6px;font:700 .95rem var(--display);letter-spacing:.01em}.ptg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border-radius:14px;overflow:hidden}.ptg .mtile{aspect-ratio:1}.ptg .pdt{position:absolute;left:4px;bottom:4px;z-index:2;background:rgba(0,0,0,.55);color:#fff;border-radius:6px;padding:1px 6px;font-size:.66rem;font-weight:600}
@@ -504,7 +505,7 @@ body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!importan
 .rn [data-fab="task"],.rn [data-fab="mat"],.rn [data-fab="cost"],.rn [data-fab="pay"],.rfin [data-fab="task"],.rfin [data-fab="mat"],.rfin [data-fab="photo"],.rfin [data-fab="issue"],.rn [data-act="addtask"],.rfin [data-act="addtask"],.rn [data-act="editelec"],.rfin [data-act="editelec"],.rn [data-act="reorder"],.rfin [data-act="reorder"]{display:none!important}
 #bell{position:relative}#bell[hidden]{display:none!important}
 #bell .bdg{position:absolute;top:2px;right:2px;min-width:18px;height:18px;padding:0 5px;border-radius:99px;background:var(--red,#c0392b);color:#fff;font:700 .7rem/18px var(--body);text-align:center}
-.rb nav.tabs [data-tab="money"],.rb [data-go="money"],.rb [data-act="report"],.rb [data-act="budget"],.rb [data-act="addcost"],.rb [data-fab="cost"],.rb [data-fab="pay"]{display:none!important}
+.rb nav.tabs [data-tab="money"],.rb [data-go="money"],.rb [data-act="budget"],.rb [data-act="addcost"],.rb [data-fab="cost"],.rb [data-fab="pay"]{display:none!important}
 html.outdoor{font-size:19px}
 html.outdoor{--muted:#3f372a;--line:#c9bb9a;--field:#5f5440}
 html.outdoor[data-theme="dark"]{--muted:#e3d9c3;--line:#5c5442;--field:#b7aa86}
@@ -835,8 +836,11 @@ const writesBuild=()=>perm.areas.tasks>=2||perm.areas.log>=2||perm.areas.mats>=2
 const deriveRole=()=>!writesBuild()&&perm.money!=="edit"?"funder":perm.money==="none"?"builder":"owner";
 let role=deriveRole();
 const canMoney=()=>perm.money!=="none",canMoneyEdit=()=>perm.money==="edit",canSend=()=>!!perm.send;
+/* making and sharing a report, an export or a printout is for the Project Lead and people allowed to send updates */
+const canReport=()=>!!perm.manage||canSend();
+const REPORT_ACTS=["report","goexport","weekshare","diaryshare","diaryprint","slipexport","snagexport"];
 const lvl=a=>(perm.areas&&perm.areas[a]!=null)?perm.areas[a]:1;
-const applyRole=()=>{const b=document.body.classList;b.toggle("ro",role==="funder");b.toggle("rb",!canMoney());b.toggle("rn",false);b.toggle("rfin",false);AREA_KEYS.forEach(k=>{b.toggle("na-"+k,lvl(k)===0);b.toggle("ro-"+k,lvl(k)===1)})};
+const applyRole=()=>{const b=document.body.classList;b.toggle("ro",role==="funder");b.toggle("rb",!canMoney());b.toggle("rn",false);b.toggle("rfin",false);b.toggle("nrep",!canReport());AREA_KEYS.forEach(k=>{b.toggle("na-"+k,lvl(k)===0);b.toggle("ro-"+k,lvl(k)===1)})};
 const setPerm=(p,temp)=>{perm=mkPerm(p);role=deriveRole();if(!temp)sm.perm=perm;applyRole()};
 applyRole();
 if(fresh&&!location.hash.includes("join=")){S.tasks=seedTasks();S.sups=[{id:"jonathan",name:"Jonathan",trade:"Builder",phone:""}];
@@ -1564,6 +1568,7 @@ function act(a,id,el){
   closePop();
   if(PREVIEW&&!READ_ACTS.includes(a)){toast("This is a preview. Nothing can be changed.");return}
   if(role==="funder"&&!READ_ACTS.includes(a)){toast("This is a view-only copy.");return}
+  if(REPORT_ACTS.includes(a)&&!canReport()){toast("Reports are for people with report access. Ask the Project Lead.");return}
   if(!canMoney()&&MONEY_ACTS.includes(a)){toast("Money is hidden for you.");return}
   if(canMoney()&&!canMoneyEdit()&&MONEY_ACTS.includes(a)&&!["payall","report","opentrade"].includes(a)){toast("You can see money but not change it.");return}
   {let ar=ACT_AREA[a];if((a==="cyc"||a==="cycboth")&&isFurn(id))ar="furn";if(ar&&lvl(ar)<2){toast(AREA_MSG(ar));return}}
