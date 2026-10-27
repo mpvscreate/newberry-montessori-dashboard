@@ -1845,6 +1845,7 @@ function budgetSheet(){
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const raw=sh.querySelector("#am").value.trim(),v=raw?parseAmt(raw):0;if(!(v>=0))return showErr(sh,sh.querySelector(".amtin"),"Enter a number, or leave empty.");
       const u=undoEdit(S.settings,{budget:v});save();close();render();toast("Budget saved.",u)}});
 }
+let matAgain=false;
 function matSheet(id,defPhase){
   const m=id?S.mats.find(x=>x.id===id):null,st={sec:m?secOf(m):matSec,room:m?.room||"both",unit:m?.unit||"each",status:m?.status||"need",phase:m?(m.phase||""):(defPhase||"")};
   let moves=(m?.moves||[]).map(x=>({...x}));
@@ -1861,7 +1862,7 @@ function matSheet(id,defPhase){
   <label class="f" for="mph">Which phase is it for?</label><select id="mph" class="t sel"><option value="">Not assigned</option>${PH.map(p=>`<option value="${p[0]}" ${p[0]===st.phase?"selected":""}>${esc(p[1])}</option>`).join("")}</select>
   <label class="f">Section</label>${chipRow("sec",SECS.map(x=>[x[0],x[1]]),st.sec)}
   <div id="bd">${body()}</div>
-  <div class="foot"><button class="btn primary block">${m?"Save changes":"Add item"}</button></div></form>`,(sh,close)=>{
+  <div class="foot">${m?"":`<button type="button" class="chip" id="again" aria-pressed="${matAgain}" style="margin-bottom:8px">${ic("check","sm")}Add another of this product</button>`}<button class="btn primary block">${m?"Save changes":"Add item"}</button></div></form>`,(sh,close)=>{
     const wire=()=>{wireDc(sh);["unit","room","status"].forEach(n=>wireChips(sh,st,n));const q=sh.querySelector("#q");
       sh.querySelectorAll("[data-step]").forEach(b=>b.onclick=()=>{q.value=Math.max(0,(parseAmt(q.value)||0)+ +b.dataset.step)});
       sh.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{q.value=(parseAmt(q.value)||0)+ +b.dataset.add});
@@ -1869,10 +1870,11 @@ function matSheet(id,defPhase){
     const keepq=()=>{};
     wireChips(sh,st,"sec",()=>{const nm=sh.querySelector("#nm").value,keep=["#q","#mn","#du","#su"].map(k=>[k,sh.querySelector(k)?.value]);sh.querySelector("#bd").innerHTML=body();wire();sh.querySelector("#nm").value=nm;keep.forEach(([k,v])=>{const e=sh.querySelector(k);if(e&&v!==undefined)e.value=v})});
     wire();
+    const ag=sh.querySelector("#again");if(ag)ag.onclick=()=>{matAgain=ag.getAttribute("aria-pressed")!=="true";ag.setAttribute("aria-pressed",matAgain)};
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const nm=sh.querySelector("#nm");if(!nm.value.trim())return showErr(sh,nm,"Write what you need.");
       const q=sh.querySelector("#q"),qty=parseAmt(q.value);if(!(qty>=0))return showErr(sh,q,"Enter how many.");
       const vals={name:nm.value.trim(),qty,unit:st.unit,sec:st.sec,room:st.sec==="stock"?"both":st.room,status:st.status,sup:sh.querySelector("#su")?.value||"",due:sh.querySelector("#du").value||"",min:st.sec==="stock"?(parseAmt(sh.querySelector("#mn")?.value)||0):0,phase:sh.querySelector("#mph").value,moves};
-      if(m){const u=undoEdit(m,vals);save();close();render();toast("Item saved.",u)}else{const n={id:uid(),...vals,moves:[]};S.mats.push(n);matSec=n.sec;save();close();render();toast("Item added.",()=>S.mats.splice(S.mats.indexOf(n),1))}};
+      if(m){const u=undoEdit(m,vals);save();close();render();toast("Item saved.",u)}else{const n={id:uid(),...vals,moves:[]};S.mats.push(n);matSec=n.sec;save();const un=()=>S.mats.splice(S.mats.indexOf(n),1);if(matAgain){render();toast("Item added. Add the next one.",un);q.value="1";nm.focus();nm.select()}else{close();render();toast("Item added.",un)}}};
   });
 }
 function moveSheet(id,t){
