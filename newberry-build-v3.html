@@ -503,6 +503,14 @@ body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!importan
 .card .chip-d.tone-ok{background:var(--green-soft);color:var(--green)}.card .chip-d.tone-warn{background:var(--amber-soft);color:var(--accent)}.card .chip-d.tone-bad{background:var(--red-soft);color:var(--red)}
 .chip.tone-bad{color:var(--red);border-color:var(--red)}.chip.tone-info{color:var(--sky)}.attline>.i:first-child{color:var(--sky)}
 .card .wxchip{background:var(--accent-soft);color:var(--ink)}.brief{padding:14px 14px 10px}.bdate{font:700 1.15rem var(--display)}.badv{display:flex;gap:8px;align-items:flex-start;margin:8px 0 0;font-size:.84rem;line-height:1.3;color:var(--muted)}.badv i{flex:none;width:9px;height:9px;border-radius:50%;margin-top:.4em;background:var(--green)}.badv.red i{background:var(--red)}.badv.amber i{background:var(--accent)}.badv b{color:var(--ink);font-weight:600}
+#splash{position:fixed;inset:0;z-index:300;background:var(--paper);color:var(--ink);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;transition:opacity .4s}#splash.out{opacity:0;pointer-events:none}#splash img{width:88px;height:88px;border-radius:24px;box-shadow:0 10px 36px rgba(0,0,0,.35);animation:splashin .6s cubic-bezier(.2,.9,.3,1.1) both}#splash b{font:700 1.25rem var(--display);letter-spacing:.01em;animation:splashin .6s .1s both}@keyframes splashin{from{opacity:0;transform:translateY(8px) scale(.94)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#splash img,#splash b{animation:none}}
+.pring.rs-doing .pr .rp{stroke:var(--sky)}.pring.rs-doing .pr .rt{stroke:var(--sky);opacity:.4}.pring.rs-stuck .pr .rp{stroke:var(--red)}.pring.rs-stuck .pr .rt{stroke:var(--red);opacity:.7}.ptile.has .pring.rs-doing .pr .rp{stroke:var(--sky)}.ptile.has .pring.rs-stuck .pr .rp,.ptile.has .pring.rs-stuck .pr .rt{stroke:var(--red)}
+.celeb{position:fixed;inset:0;z-index:250;display:grid;place-items:center;pointer-events:none;background:radial-gradient(circle at 50% 45%,rgba(79,209,161,.22),transparent 60%);animation:celin .3s both}.celeb.out{opacity:0;transition:opacity .45s}.celeb .cb{display:grid;justify-items:center;gap:6px;padding:24px 30px;border-radius:26px;background:var(--sheet);border:1px solid var(--line);box-shadow:0 20px 60px rgba(0,0,0,.45);text-align:center;max-width:82vw}.celeb .cc{width:68px;height:68px;border-radius:50%;display:grid;place-items:center;background:var(--green);color:#fff;animation:celpop .55s cubic-bezier(.2,1.2,.3,1) both}.celeb .cc .i{width:34px;height:34px}.celeb b{font:700 1.15rem var(--display)}.celeb .cb>span:last-child{color:var(--muted);font-size:.9rem}@keyframes celin{from{opacity:0}to{opacity:1}}@keyframes celpop{0%{transform:scale(.3)}100%{transform:scale(1)}}
+@media (prefers-reduced-motion:reduce){.celeb .cc{animation:none}}
+@media (max-width:899px){.fbar{position:fixed;left:0;right:0;bottom:calc(92px + env(safe-area-inset-bottom));z-index:19;margin:0!important;padding:8px 14px;flex-wrap:nowrap;overflow-x:auto;background:color-mix(in srgb,var(--paper) 88%,transparent);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid var(--line)}.fbar-sp{height:60px}}
+@media (min-width:900px){.fbar-sp{display:none}}
+@media (max-width:899px){body:has(.fbar) #toasts{bottom:calc(150px + 58px + env(safe-area-inset-bottom))}}
 .qa.one{gap:8px;margin:2px 0 10px}.qa.one button{flex-direction:row;gap:7px;min-height:46px;padding:6px 8px;border-radius:15px;font-size:.92rem}.qa.one button .i{width:20px;height:20px;flex:none}
 .card.today{padding:8px 14px 6px;margin:0 0 10px;border-radius:16px}.card.today .eyebrow{font-size:.66rem}.card.today .list li{padding:6px 0;gap:10px}.card.today .list li .st{width:30px;height:30px}.card.today .list li .st .i{width:16px;height:16px}.card.today .lt,.card.today .ls{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card.today .lt{font-size:.88rem}.card.today .ls{font-size:.74rem}.card.today .grow{min-width:0}.card.today .row-ic{width:30px;height:30px}.card.today .linkbtn{min-height:28px!important;font-size:.8rem}
 .phg{margin:0 0 16px}.phg h3{margin:0 0 6px;font:700 .95rem var(--display);letter-spacing:.01em}.ptg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border-radius:14px;overflow:hidden}.ptg .mtile{aspect-ratio:1}.ptg .pdt{position:absolute;left:4px;bottom:4px;z-index:2;background:rgba(0,0,0,.55);color:#fff;border-radius:6px;padding:1px 6px;font-size:.66rem;font-weight:600}
@@ -677,6 +685,8 @@ a.btn{color:inherit;text-decoration:none}.btn{white-space:nowrap}
 </style>
 </head>
 <body>
+<div id="splash" aria-hidden="true"><img src="newberry-house-logo.webp" alt=""><b id="spn"></b></div>
+<script>try{if(sessionStorage.getItem("b3s"))document.getElementById("splash").remove();else{sessionStorage.setItem("b3s","1");document.getElementById("spn").textContent=(JSON.parse(localStorage.getItem("newberry-build-v3")||"{}").settings||{}).name||""}}catch(e){}</script>
 <a class="skip" href="#view">Skip to content</a>
 <div class="wrap" id="app">
   <header class="top"><img src="newberry-house-logo.webp" alt="" onerror="this.style.display='none'"><div class="grow"><h1 id="pname">MS 2 Project</h1><div class="small muted"><span id="today"></span><span class="sep"> · </span><button class="sync" id="sync" type="button" aria-label="Sharing and sync status"></button></div></div>
@@ -1159,11 +1169,27 @@ function quickPhoto(ph,kind,gallery){
   i.addEventListener("change",()=>{const f=[...i.files];i.remove();if(f.length)logSheet(null,kind||"update",ph,f)});
   i.addEventListener("cancel",()=>i.remove());i.click();
 }
+/* a small moment of thanks when a whole phase is finished */
+function celebrate(msg){
+  buzz([30,50,30,50,60]);
+  const el=document.createElement("div");el.className="celeb";el.setAttribute("role","status");
+  el.innerHTML=`<div class="cb"><span class="cc">${ic("check","xl")}</span><b>${esc(msg)}</b><span>Well done, team.</span></div>`;
+  document.body.append(el);setTimeout(()=>el.classList.add("out"),2300);setTimeout(()=>el.remove(),2800);
+}
+function celebrateCheck(phaseId){
+  try{
+    const seen=new Set(JSON.parse(lsGet("build-celeb")||"[]")),all=G(BT());
+    const ts=G(S.tasks.filter(t=>t.phase===phaseId));
+    if(ts.length&&doneN(ts)===ts.length&&!seen.has(phaseId)){seen.add(phaseId);lsSet("build-celeb",JSON.stringify([...seen]));
+      if(all.length&&doneN(all)===all.length&&!seen.has("_all")){seen.add("_all");lsSet("build-celeb",JSON.stringify([...seen]));celebrate("The whole build is complete")}
+      else celebrate((PSHORT[phaseId]||"The phase")+" is complete")}
+  }catch{}
+}
 function cycMany(ids){
   const rs=ids.map(id=>cycTask(id,true)).filter(Boolean);if(!rs.length){toast("Checked and approved by the Project Lead. Only the lead can change it.");return}
   buzz(rs.some(r=>r.nx==="done")?[18,40,18]:12);
   const t=rs[0].t,nx=rs[0].nx;logAct(`Marked "${t.title}" ${stLabel(nx).toLowerCase()}${rs.length>1?" in both classrooms":rooms().length>1?` (${roomName(t.room)})`:""}`);
-  save();render();if(nx==="check")notifyLead(t);ids.forEach(id=>document.querySelectorAll(`[data-id="${id}"]`).forEach(b=>b.classList.add("popit")));
+  save();render();if(nx==="done")celebrateCheck(t.phase);if(nx==="check")notifyLead(t);ids.forEach(id=>document.querySelectorAll(`[data-id="${id}"]`).forEach(b=>b.classList.add("popit")));
   toast(`${t.title}: ${stLabel(nx).toLowerCase()}${rs.length>1?" (both)":""}.`,()=>rs.forEach(r=>r.u()));
 }
 function swipeRow(li,fn,fnLeft){
@@ -1334,7 +1360,7 @@ function todayCard(){
     return `<li>${tick}<div class="grow tap" tabindex="0" data-act="opentask" data-id="${t.key}|${t.room}"><div class="lt">${esc(t.title)}</div><div class="ls ${od||t.status==="stuck"?"bad":""}">${esc(meta)}</div></div></li>`};
   const dRow=lvl("diary")>=2&&!S.diary.some(e=>e.date===td)?`<li class="tap" tabindex="0" data-act="adddiary"><span class="row-ic">${ic("book")}</span><div class="grow"><div class="lt">Fill in today's site diary</div><div class="ls">Weather, people on site and the work done</div></div>${ic("chev")}</li>`:"";
   const shown=rows.slice(0,3),more=rows.length-shown.length;
-  return `<section class="card today brief" aria-label="Today">${briefHead()}<div class="row between" style="margin:12px 0 2px"><div class="eyebrow" style="margin:0">${useMine?"Your day":"Due today and overdue"}</div>${rows.length?`<span class="small muted">${rows.length} task${rows.length===1?"":"s"}</span>`:""}</div>${rows.length||dRow?`<ul class="list">${shown.map(row).join("")}${dRow}</ul>`:`<p class="muted small" style="margin:6px 0 4px">Nothing due today.</p>`}${more>0?`<button type="button" class="linkbtn" data-act="gotasks" data-id="${useMine?"me":"all"}" style="padding:0;min-height:36px">and ${more} more</button>`:""}</section>`;
+  return `<section class="card today brief" aria-label="Today">${briefHead()}<div class="row between" style="margin:12px 0 2px"><div class="eyebrow" style="margin:0">${useMine?"Your day":"Due today and overdue"}</div>${rows.length?`<span class="small muted">${rows.length} task${rows.length===1?"":"s"}</span>`:""}</div>${rows.length||dRow?`<ul class="list">${shown.map(row).join("")}${dRow}</ul>`:`<p class="muted small" style="margin:6px 0 4px">Nothing due today. All clear.</p>`}${more>0?`<button type="button" class="linkbtn" data-act="gotasks" data-id="${useMine?"me":"all"}" style="padding:0;min-height:36px">and ${more} more</button>`:""}</section>`;
 }
 /* ---------- Photos: every photo and video, grouped by phase ---------- */
 let photoF="all";
@@ -1357,7 +1383,7 @@ function photosV(){
   const chips=[["all","All · "+total],...gr.map(([k,a])=>[k,photoName(k)+" · "+a.length])];
   const body=shown.map(([k,a])=>`<section class="phg"><div class="row between"><h3 style="color:${PCOL[k]||"var(--accent)"}">${esc(photoName(k))}</h3><span class="small muted">${a.length>1?`<button type="button" class="linkbtn" data-act="phcmp" data-id="${esc(k)}" style="padding:0 10px 0 0;min-height:28px;font-size:.8rem">Before and after</button>`:""}${a.length&&k&&k!=="_diary"&&phase(k)&&canPick()?`<button type="button" class="linkbtn" data-act="phcover" data-id="${esc(k)}" style="padding:0 10px 0 0;min-height:28px;font-size:.8rem">Banner</button>`:""}${a.length}</span></div><div class="ptg">${a.map(p=>`<button type="button" class="mtile" data-act="phtlb" data-id="${idx++}" aria-label="Open photo or video, ${esc(photoName(k))}${p.date?", "+dshort(p.date):""}"><span data-m="${p.m}" style="position:absolute;inset:0"></span>${p.date?`<small class="pdt">${dshort(p.date)}</small>`:""}</button>`).join("")}</div></section>`).join("");
   return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Photos</h2></div><button class="btn primary" data-act="addphoto">${ic("camera")}Add</button></div>
-  ${total?`<div class="chips scroll" role="group" aria-label="Show photos of" style="margin-bottom:12px">${chips.map(([k,l])=>`<button type="button" class="chip" data-sub="pf:${k}" aria-pressed="${f===k}">${esc(l)}</button>`).join("")}</div>${body}`:empty("image","No photos yet","Photos and videos from the site log, tasks and the site diary are collected here, grouped by phase.",`<button class="btn primary" data-act="addphoto">${ic("camera")}Add the first photo</button>`)}`;
+  ${total?`<div class="chips scroll fbar" role="group" aria-label="Show photos of">${chips.map(([k,l])=>`<button type="button" class="chip" data-sub="pf:${k}" aria-pressed="${f===k}">${esc(l)}</button>`).join("")}</div>${body}`:empty("image","No photos yet","Photos and videos from the site log, tasks and the site diary are collected here, grouped by phase.",`<button class="btn primary" data-act="addphoto">${ic("camera")}Add the first photo</button>`)}<div class="fbar-sp"></div>`;
 }
 /* ---------- the week, ready to send ---------- */
 function weekText(){
@@ -1462,8 +1488,8 @@ function buildMain(){
   const left=S.settings.target?Math.ceil((new Date(S.settings.target+"T12:00")-new Date(today()+"T12:00"))/864e5):null;
   const can=perm.manage&&lvl("tasks")>=2;if(!can)pEdit=false;
   const tiles=PHS.map(([id,name,icon],i)=>{
-    const ts=G(S.tasks.filter(t=>t.phase===id)),dn=doneN(ts),st=ts.filter(t=>t.status==="stuck").length,ph=phasePhoto(id),full=ts.length>0&&dn===ts.length;
-    const tile=`<button type="button" class="ptile ${ph?"has":""} ${id===cur?"cur":""}" data-go="phase:${id}" style="--pc:${PCOL[id]};--i:${i}" aria-label="${esc(name)}: ${dn} of ${ts.length} tasks done${st?", "+st+" stuck":""}">${ph?`<span class="tbg" data-bg="${ph}"></span>`:""}${st?`<span class="pbadge">${st}</span>`:full?`<span class="pbadge ok">${ic("check","sm")}</span>`:""}<span class="pi"><span class="pring ${full?"full":""}">${ringSvg(pct(dn,ts.length))}<span class="pav">${ic(icon)}</span></span><b>${esc(PSHORT[id])}</b><span class="pq">${dn}/${ts.length}</span></span></button>`;
+    const ts=G(S.tasks.filter(t=>t.phase===id)),dn=doneN(ts),st=ts.filter(t=>t.status==="stuck").length,ph=phasePhoto(id),full=ts.length>0&&dn===ts.length,rs=st>0?"stuck":full?"full":(dn>0||ts.some(t=>t.status==="doing"||t.status==="check"))?"doing":"none";
+    const tile=`<button type="button" class="ptile ${ph?"has":""} ${id===cur?"cur":""}" data-go="phase:${id}" style="--pc:${PCOL[id]};--i:${i}" aria-label="${esc(name)}: ${dn} of ${ts.length} tasks done${st?", "+st+" stuck":""}">${ph?`<span class="tbg" data-bg="${ph}"></span>`:""}${st?`<span class="pbadge">${st}</span>`:full?`<span class="pbadge ok">${ic("check","sm")}</span>`:""}<span class="pi"><span class="pring ${full?"full":""} rs-${rs}">${ringSvg(pct(dn,ts.length))}<span class="pav">${ic(icon)}</span></span><b>${esc(PSHORT[id])}</b><span class="pq">${dn}/${ts.length}</span></span></button>`;
     return pEdit?`<div class="gtw">${tile}<div class="gtb"><button type="button" class="btn small" data-act="pmv" data-id="${id}|-1" aria-label="Move ${esc(name)} earlier" ${i===0?"disabled":""}>${ic("left")}</button><button type="button" class="btn small" data-act="pmv" data-id="${id}|1" aria-label="Move ${esc(name)} later" ${i===PHS.length-1?"disabled":""}>${ic("right")}</button><button type="button" class="btn small" data-act="pren" data-id="${id}">Rename</button><button type="button" class="btn small danger" data-act="pdel" data-id="${id}">Remove</button></div></div>`:tile}).join("")+(pEdit?`<div class="gtw"><button type="button" class="ptile gadd" data-act="padd" aria-label="Add a phase"><span class="pi"><span class="pring"><span class="pav">${ic("plus")}</span></span><b>Add phase</b></span></button></div>`:"");
   const rec=logsNewest().filter(l=>l.kind!=="issue").slice(0,6);
   const toOrder=S.mats.filter(m=>needsOrder(m)&&(m.qty>0||secOf(m)!=="stock")).length,issues=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length;
@@ -1650,7 +1676,7 @@ function cycTask(id,quiet,forced){try{localStorage.setItem("build-hint","1")}cat
   if(!nx){if(!quiet)toast("Checked and approved by the Project Lead. Only the lead can change it.");return null}
   const u=undoEdit(t,{status:nx,doneOn:nx==="done"?today():"",...((nx==="done"||nx==="check")&&me?{who:t.who||me}:{})});
   if(quiet)return{u,t,nx};
-  buzz(nx==="done"?[18,40,18]:12);logAct(`Marked "${t.title}" ${stLabel(nx).toLowerCase()}${rooms().length>1&&t.room!=="shared"?` (${roomName(t.room)})`:""}`);save();render();if(nx==="check")notifyLead(t);document.querySelectorAll(`[data-id="${id}"]`).forEach(b=>b.classList.add("popit"));toast(`${t.title}: ${stLabel(nx).toLowerCase()}${rooms().length>1&&t.room!=="shared"?` (${roomName(t.room)})`:""}.`,u);
+  buzz(nx==="done"?[18,40,18]:12);logAct(`Marked "${t.title}" ${stLabel(nx).toLowerCase()}${rooms().length>1&&t.room!=="shared"?` (${roomName(t.room)})`:""}`);save();render();if(nx==="done")celebrateCheck(t.phase);if(nx==="check")notifyLead(t);document.querySelectorAll(`[data-id="${id}"]`).forEach(b=>b.classList.add("popit"));toast(`${t.title}: ${stLabel(nx).toLowerCase()}${rooms().length>1&&t.room!=="shared"?` (${roomName(t.room)})`:""}.`,u);
 }
 const roomLine=r=>r==="both"?"Both classrooms":r==="shared"?"Shared, done once":roomName(r);
 function addTaskSheet(ph){
@@ -3189,8 +3215,8 @@ function snagsV(){
     <div class="row wr" style="gap:8px;margin-top:10px">${canLog?`<button class="btn small" data-act="snagedit" data-id="${l.id}">${ic("user","sm")}Owner and date</button>`:""}${canLog&&s==="open"?`<button class="btn small good" data-act="fix" data-id="${l.id}">${ic("check","sm")}Mark fixed</button>`:""}${perm.manage&&s==="fixed"?`<button class="btn small good" data-act="snagclose" data-id="${l.id}">${ic("check","sm")}Check and close</button>`:""}${canLog&&s!=="open"?`<button class="btn small" data-act="snagreopen" data-id="${l.id}">Reopen</button>`:""}${sm.code?`<button class="btn small" data-act="thread" data-id="snag|${l.id}">${ic("chat","sm")}Discuss${th?" · "+th:""}</button>`:""}${rowBtns("log","entry",l.id)}</div></li>`};
   return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Snags</h2></div><button class="btn primary" data-act="addissue">${ic("plus")}Add</button></div>
   <div class="dstrip" role="group" aria-label="Snag totals"><div class="${n("open")?"warn":""}">${ic("alert","sm")}<b>${n("open")}</b><span>to fix</span></div><div>${ic("clock","sm")}<b>${n("fixed")}</b><span>to check</span></div><div>${ic("check","sm")}<b>${n("closed")}</b><span>closed</span></div></div>
-  <div class="row between" style="gap:8px;margin:10px 0"><div class="chips scroll grow" role="group" aria-label="Show snags">${chips.map(([k,l])=>`<button type="button" class="chip" data-sub="sg:${k}" aria-pressed="${f===k}">${esc(l)}</button>`).join("")}</div>${all.length?`<button class="btn small" data-act="snagexport">${ic("download","sm")}Export</button>`:""}</div>
-  ${list.length?rooms2.map(r=>`<h3 class="snagh">${esc(roomName(r))} · ${list.filter(l=>(l.room||"both")===r).length}</h3><ul style="padding:0;margin:0">${list.filter(l=>(l.room||"both")===r).map(card).join("")}</ul>`).join(""):empty("check",f==="open"?"Nothing to fix":"Nothing here",f==="open"?"Report anything that needs fixing, with a photo, and give it an owner.":"No snags match this list.",f==="open"&&canLog?`<button class="btn primary" data-act="addissue">${ic("alert")}Add a snag</button>`:"")}`;
+  <div class="row between" style="gap:8px;margin:10px 0"><div class="chips scroll grow fbar" role="group" aria-label="Show snags">${chips.map(([k,l])=>`<button type="button" class="chip" data-sub="sg:${k}" aria-pressed="${f===k}">${esc(l)}</button>`).join("")}</div>${all.length?`<button class="btn small" data-act="snagexport">${ic("download","sm")}Export</button>`:""}</div>
+  ${list.length?rooms2.map(r=>`<h3 class="snagh">${esc(roomName(r))} · ${list.filter(l=>(l.room||"both")===r).length}</h3><ul style="padding:0;margin:0">${list.filter(l=>(l.room||"both")===r).map(card).join("")}</ul>`).join(""):empty("check",f==="open"?"Nothing to fix":"Nothing here",f==="open"?"Report anything that needs fixing, with a photo, and give it an owner.":"No snags match this list.",f==="open"&&canLog?`<button class="btn primary" data-act="addissue">${ic("alert")}Add a snag</button>`:"")}<div class="fbar-sp"></div>`;
 }
 function snagSheet(id){
   const l=S.logs.find(x=>x.id===id);if(!l)return;
@@ -3478,8 +3504,8 @@ function tasksV(){
     const tick=merged?`<button class="st ${t.status}" data-act="cycboth" data-id="${t.id}" data-ids="${sib.map(x=>x.id).join(",")}" aria-label="${esc(t.title)}, both classrooms: ${stLabel(t.status)}. Tap to tick done or undo. Hold for more options.">${stIcon(t.status)||ic("check")}</button>`:`<button class="st ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${esc(t.title)}: ${stLabel(t.status)}. Tap to tick done or undo. Hold for more options.">${stIcon(t.status)||ic("check")}</button>`;
     return `<li>${tick}<div class="grow tap" tabindex="0" data-act="opentask" data-id="${t.key}|${t.room}"><div class="lt">${esc(t.title)}</div><div class="ls ${od||t.status==="stuck"?"bad":""}">${esc(meta)}</div></div></li>`};
   return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Tasks</h2></div></div>
-  <div class="chips scroll" role="group" aria-label="Show tasks" style="margin-bottom:12px">${chips.map(([k,l])=>`<button type="button" class="chip" data-sub="tf:${k}" aria-pressed="${f===k}">${esc(l)}</button>`).join("")}</div>
-  <div class="card">${rows.length?`<ul class="list">${rows.map(row).join("")}</ul>`:`<div class="empty">${ic("check","xl")}<h3>Nothing here</h3><p>${f==="me"?"No open tasks are assigned to you.":"No open tasks match this list."}</p></div>`}</div>`;
+  <div class="chips scroll fbar" role="group" aria-label="Show tasks">${chips.map(([k,l])=>`<button type="button" class="chip" data-sub="tf:${k}" aria-pressed="${f===k}">${esc(l)}</button>`).join("")}</div>
+  <div class="card">${rows.length?`<ul class="list">${rows.map(row).join("")}</ul>`:`<div class="empty">${ic("check","xl")}<h3>All clear</h3><p>${f==="me"?"Nothing is waiting for you right now.":"Nothing waiting in this list. Nice work."}</p></div>`}</div><div class="fbar-sp"></div>`;
 }
 function attentionItems(){
   const open=S.tasks.filter(t=>t.status!=="done"),td=today(),out=[];
@@ -4230,6 +4256,7 @@ function reportV(){
 }
 /* ---------- start ---------- */
 render();
+setTimeout(()=>{const sp=document.getElementById("splash");if(sp){sp.classList.add("out");setTimeout(()=>sp.remove(),450)}},reduced()?150:700);
 if(sm.code){setSync("syncing");syncNow()}else setSync("off");
 joinFromHash();addEventListener("hashchange",joinFromHash);
 setTimeout(autoUpdate,1500);
