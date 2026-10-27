@@ -837,8 +837,8 @@ const writesBuild=()=>perm.areas.tasks>=2||perm.areas.log>=2||perm.areas.mats>=2
 const deriveRole=()=>!writesBuild()&&perm.money!=="edit"?"funder":perm.money==="none"?"builder":"owner";
 let role=deriveRole();
 const canMoney=()=>perm.money!=="none",canMoneyEdit=()=>perm.money==="edit",canSend=()=>!!perm.send;
-/* making and sharing a report, an export or a printout is for the Project Lead and people allowed to send updates */
-const canReport=()=>!!perm.manage||canSend();
+/* making and sharing a report, an export or a printout is for the Project Lead and the people the lead chose (People and access, Reports). Adding tasks and updates is separate */
+const canReport=()=>!!perm.manage||!!(typeof S==="object"&&S&&S.settings&&(S.settings.rep||[]).includes(sm.pid));
 const REPORT_ACTS=["report","goexport","weekshare","diaryshare","diaryprint","slipexport","snagexport"];
 const lvl=a=>(perm.areas&&perm.areas[a]!=null)?perm.areas[a]:1;
 const applyRole=()=>{const b=document.body.classList;b.toggle("ro",role==="funder");b.toggle("rb",!canMoney());b.toggle("rn",false);b.toggle("rfin",false);b.toggle("nrep",!canReport());AREA_KEYS.forEach(k=>{b.toggle("na-"+k,lvl(k)===0);b.toggle("ro-"+k,lvl(k)===1)})};
@@ -1084,7 +1084,7 @@ function render(){
   $("#pname").textContent=S.settings.name||"Newberry Build";
   document.title=`${({build:"Build",home:"Overview",money:"Money",more:"More",phase:"Phase",plans:"Plans",docs:"Documents",mats:"Materials",site:"Site log",inbox:"Updates",people:"People",tasks:"Tasks",diary:"Site diary",garden:"Garden",extra:"Extra labour",report:"Report",weather:"Weather",photos:"Photos",snags:"Snags"})[tab]} · Newberry Build 3`;
   $("#tdot").hidden=!S.tasks.some(t=>t.status==="stuck");
-  if(tab!=="docs")docSel=null;paintBell();const v=$("#view");v.innerHTML=({build:buildV,home,phase:phaseV,plans:plansV,docs:docsV,money:moneyV,mats:matsV,site:siteV,more,inbox:inboxV,people:peopleV,tasks:tasksV,diary:diaryV,garden:gardenV,extra:extraV,report:reportV,weather:weatherV,photos:photosV,snags:snagsV})[tab]();
+  if(tab!=="docs")docSel=null;paintBell();document.body.classList.toggle("nrep",!canReport());if(tab==="report"&&!canReport()){tab="home"}const v=$("#view");v.innerHTML=({build:buildV,home,phase:phaseV,plans:plansV,docs:docsV,money:moneyV,mats:matsV,site:siteV,more,inbox:inboxV,people:peopleV,tasks:tasksV,diary:diaryV,garden:gardenV,extra:extraV,report:reportV,weather:weatherV,photos:photosV,snags:snagsV})[tab]();
   compactRows(v);
   v.querySelectorAll("[data-act]").forEach(el=>el.addEventListener("click",()=>act(el.dataset.act,el.dataset.id,el)));
   v.querySelectorAll("[data-go]").forEach(el=>el.addEventListener("click",()=>{if(el._lp){el._lp=false;return}const[t,f]=el.dataset.go.split(":");if(t==="phase"&&f)curPh=f;if(t==="site"&&f)logSub=f;if(t==="mats"&&f)matF=f;go(t)}));
@@ -2854,7 +2854,8 @@ function personSheet(pid,draft){
   if(!perm.manage){toast("Only the Project Lead can change people.");return}
   const p=pid?personOf(pid):null,isMe=!!p&&p.pid===sm.pid;
   const orig=p&&p.perm?normAreas(p.perm):{...PRESET_AREAS.other};
-  const st=draft?{role:draft.role,areas:{...draft.areas}}:{role:(p&&ROLES[p.role]&&p.role!=="lead")?p.role:"other",areas:{...orig}};
+  const wasRep=!!p&&(S.settings.rep||[]).includes(p.pid);
+  const st=draft?{role:draft.role,areas:{...draft.areas},rep:draft.rep}:{role:(p&&ROLES[p.role]&&p.role!=="lead")?p.role:"other",areas:{...orig},rep:wasRep?"1":"0"};
   const pre=()=>PRESET_AREAS[st.role]||PRESET_AREAS.other;
   sheet(p?p.name:"Add a person",`<form id="f" novalidate>
   ${p&&!isMe?`<div class="tasks" style="margin:8px 0 16px"><button type="button" class="btn block" id="wl">${ic("chat")}Send their link on WhatsApp</button><button type="button" class="btn block" id="cl">${ic("copy")}Copy their link</button><button type="button" class="btn block" id="nl">${ic("key")}Make a new link</button><button type="button" class="btn block" id="pv">${ic("eye")}See the app as ${esc(p.name)}</button></div><p class="hint">Each link is personal. A new link stops the old one working.</p>`:""}
@@ -2864,6 +2865,8 @@ function personSheet(pid,draft){
   <label class="f">Start from a role</label>${chipRow("role",ROLE_PICK.map(r=>[r,roleLabel(r)]),st.role)}
   <div class="asum" id="asum"></div>
   <div id="ar"></div>
+  <label class="f">Reports</label>${chipRow("rep",[["0","Cannot make reports"],["1","Can make reports"]],st.rep)}
+  <p class="hint">Making and sharing reports, exports and printouts is separate from adding tasks. Only people you choose here, and you, can do it.</p>
   <p class="awarn" id="aw" hidden>${ic("lock")} Money is private. You will be asked for the password before this is saved.</p>
   ${p?`<div class="adanger"><button type="button" class="btn block ${p.active?"danger":""}" id="tg">${p.active?"Switch access off":"Switch access back on"}</button><p class="hint">${p.active?"They can no longer open the project. You can switch them back on any time.":"They can open the project again with their link."}</p></div>`:""}
   <div class="foot"><button class="btn primary block" id="sv">${p?"Review and save":"Review and add"}</button></div>`}
@@ -2872,7 +2875,7 @@ function personSheet(pid,draft){
     const nameOf=()=>sh.querySelector("#pn").value.trim(),phoneOf=()=>sh.querySelector("#pp").value.trim();
     if(!isMe){
       const redraw=()=>{sh.querySelector("#ar").innerHTML=areaRows(st,pre());sh.querySelector("#asum").textContent=(nameOf()||"This person")+": "+accessText({areas:st.areas});sh.querySelector("#aw").hidden=!((st.areas.money||0)>(orig.money||0))};
-      wireChips(sh,st,"role",()=>{st.areas={...pre()};redraw()});
+      wireChips(sh,st,"role",()=>{st.areas={...pre()};redraw()});wireChips(sh,st,"rep");
       sh.querySelector("#ar").onclick=e=>{const b=e.target.closest("[data-ak]");if(!b)return;st.areas[b.dataset.ak]=+b.dataset.av;redraw()};
       sh.querySelector("#pn").addEventListener("input",()=>{sh.querySelector("#asum").textContent=(nameOf()||"This person")+": "+accessText({areas:st.areas})});
       redraw();
@@ -2885,10 +2888,12 @@ function personSheet(pid,draft){
       if(!p)lines.push(`Add ${name} as ${roleLabel(st.role)}`);
       else{if(name!==p.name)lines.push(`Name: ${p.name} to ${name}`);if(st.role!==p.role)lines.push(`Role: ${roleLabel(p.role)} to ${roleLabel(st.role)}`)}
       AREAS.forEach(([k,nm])=>{if(!p||st.areas[k]!==orig[k])lines.push(p?`${nm}: ${areaLabel(k,orig[k])} to ${areaLabel(k,st.areas[k])}`:`${nm}: ${areaLabel(k,st.areas[k])}`)});
-      const keep={role:st.role,areas:{...st.areas},name,phone:phoneOf()};
+      if(!p&&st.rep==="1"||p&&st.rep!==(wasRep?"1":"0"))lines.push(`Reports: ${st.rep==="1"?"can make reports":"cannot make reports"}`);
+      const keep={role:st.role,areas:{...st.areas},name,phone:phoneOf(),rep:st.rep};
       const accessChanged=!p||AREAS.some(([k])=>st.areas[k]!==orig[k]);
       const run=()=>guard(async()=>{
         const r=await peopleSet(body);
+        {const reps=new Set(S.settings.rep||[]);if(st.rep==="1")reps.add(r.pid);else reps.delete(r.pid);S.settings.rep=[...reps]}
         if(accessChanged){logAct(`${me||"Project Lead"} changed access for ${name}: ${lines.filter(l=>/:/.test(l)||/^Add/.test(l)).slice(0,6).join("; ")}`,1);if(p)notifySend([r.pid],"Your access changed",`${me||"The Project Lead"} changed what you can do in the app. Open it to see.`,"")}
         save();render();
         if(!p){toast(name+" added. Now send their link.");personSheet(r.pid)}else toast("Access saved.");
