@@ -500,6 +500,9 @@ body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!importan
 .nrep [data-act="report"],.nrep [data-act="goexport"],.nrep [data-act="weekshare"],.nrep [data-act="diaryshare"],.nrep [data-act="diaryprint"],.nrep [data-act="slipexport"],.nrep [data-act="snagexport"]{display:none!important}
 @media (max-width:899px){body header.top{margin-bottom:6px;padding-bottom:6px}body header.top img{width:36px;height:36px;border-radius:10px}body header.top h1{font-size:1.2rem;line-height:1.2}body header.top #today,body header.top .sep{display:none}body.sync-ok header.top .small{display:none}body header.top .sync{min-height:22px;padding:0;font-size:.74rem}body header.top .iconbtn{width:40px;height:40px}}
 .msec{list-style:none;font:700 .68rem var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding:12px 4px 2px}.moreV .msec:first-child{padding-top:4px}
+.card .chip-d.tone-ok{background:var(--green-soft);color:var(--green)}.card .chip-d.tone-warn{background:var(--amber-soft);color:var(--accent)}.card .chip-d.tone-bad{background:var(--red-soft);color:var(--red)}
+.chip.tone-bad{color:var(--red);border-color:var(--red)}.chip.tone-info{color:var(--sky)}.attline>.i:first-child{color:var(--sky)}
+.card .wxchip{background:var(--accent-soft);color:var(--ink)}.brief{padding:14px 14px 10px}.bdate{font:700 1.15rem var(--display)}.badv{display:flex;gap:8px;align-items:flex-start;margin:8px 0 0;font-size:.84rem;line-height:1.3;color:var(--muted)}.badv i{flex:none;width:9px;height:9px;border-radius:50%;margin-top:.4em;background:var(--green)}.badv.red i{background:var(--red)}.badv.amber i{background:var(--accent)}.badv b{color:var(--ink);font-weight:600}
 .qa.one{gap:8px;margin:2px 0 10px}.qa.one button{flex-direction:row;gap:7px;min-height:46px;padding:6px 8px;border-radius:15px;font-size:.92rem}.qa.one button .i{width:20px;height:20px;flex:none}
 .card.today{padding:8px 14px 6px;margin:0 0 10px;border-radius:16px}.card.today .eyebrow{font-size:.66rem}.card.today .list li{padding:6px 0;gap:10px}.card.today .list li .st{width:30px;height:30px}.card.today .list li .st .i{width:16px;height:16px}.card.today .lt,.card.today .ls{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card.today .lt{font-size:.88rem}.card.today .ls{font-size:.74rem}.card.today .grow{min-width:0}.card.today .row-ic{width:30px;height:30px}.card.today .linkbtn{min-height:28px!important;font-size:.8rem}
 .phg{margin:0 0 16px}.phg h3{margin:0 0 6px;font:700 .95rem var(--display);letter-spacing:.01em}.ptg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border-radius:14px;overflow:hidden}.ptg .mtile{aspect-ratio:1}.ptg .pdt{position:absolute;left:4px;bottom:4px;z-index:2;background:rgba(0,0,0,.55);color:#fff;border-radius:6px;padding:1px 6px;font-size:.66rem;font-weight:600}
@@ -1096,7 +1099,7 @@ function render(){
   v.querySelectorAll("li.tap").forEach(el=>{el.setAttribute("role","button");el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click()}})});
   hydrate(v);hydrateBg(v);countUp(v);if(tab==="plans")initPlanView();
   v.querySelectorAll("svg.chart").forEach(wireChart);if(lvl("tasks")>=2)v.querySelectorAll("ul.reord").forEach(ul=>holdDrag(ul,curPh));
-  if(lvl("tasks")>=2){v.querySelectorAll(".ptile").forEach(tl=>longPress(tl,()=>tileMenu(tl)));v.querySelectorAll(".list li").forEach(li=>{const bs=[...li.querySelectorAll('[data-act="cyc"],[data-act="cycboth"]')];if(bs.length)swipeRow(li,()=>cycMany(bs.flatMap(b=>(b.dataset.ids||b.dataset.id).split(","))))})}
+  if(lvl("tasks")>=2){v.querySelectorAll(".ptile").forEach(tl=>longPress(tl,()=>tileMenu(tl)));v.querySelectorAll(".list li").forEach(li=>{const bs=[...li.querySelectorAll('[data-act="cyc"],[data-act="cycboth"]')];if(bs.length){const q=li.querySelector('[data-act="opentask"],[data-act="edittask"]');swipeRow(li,()=>cycMany(bs.flatMap(b=>(b.dataset.ids||b.dataset.id).split(","))),q?()=>taskQuick(q.dataset.id):null)}})}
   setSync(syncState);
 }
 const empty=(icon,h,p,btn)=>`<div class="card empty">${ic(icon,"xl")}<h3>${h}</h3><p>${p}</p>${btn||""}</div>`;
@@ -1163,12 +1166,38 @@ function cycMany(ids){
   save();render();if(nx==="check")notifyLead(t);ids.forEach(id=>document.querySelectorAll(`[data-id="${id}"]`).forEach(b=>b.classList.add("popit")));
   toast(`${t.title}: ${stLabel(nx).toLowerCase()}${rs.length>1?" (both)":""}.`,()=>rs.forEach(r=>r.u()));
 }
-function swipeRow(li,fn){
+function swipeRow(li,fn,fnLeft){
   let x0=null,y0=0,dx=0;
   li.addEventListener("touchstart",e=>{if(e.touches.length!==1){x0=null;return}x0=e.touches[0].clientX;y0=e.touches[0].clientY;dx=0},{passive:true});
-  li.addEventListener("touchmove",e=>{if(x0===null||DRAG.on)return;dx=e.touches[0].clientX-x0;const dy=e.touches[0].clientY-y0;if(Math.abs(dy)>Math.abs(dx)||dx<0){li.style.transform="";return}li.style.transform=`translateX(${Math.min(dx,120)*.45}px)`;li.style.background=dx>90?"var(--green-soft)":""},{passive:true});
-  const end=()=>{if(x0===null)return;const go=dx>90&&!DRAG.on;x0=null;li.style.transform="";li.style.background="";if(go)fn()};
+  li.addEventListener("touchmove",e=>{if(x0===null||DRAG.on)return;dx=e.touches[0].clientX-x0;const dy=e.touches[0].clientY-y0;if(Math.abs(dy)>Math.abs(dx)||(dx<0&&!fnLeft)){li.style.transform="";li.style.background="";return}li.style.transform=`translateX(${Math.max(-120,Math.min(dx,120))*.45}px)`;li.style.background=dx>90?"var(--green-soft)":dx<-90?"var(--sky-soft,var(--accent-soft))":""},{passive:true});
+  const end=()=>{if(x0===null)return;const r=dx>90&&!DRAG.on,l=dx<-90&&!DRAG.on&&fnLeft;x0=null;li.style.transform="";li.style.background="";if(r)fn();else if(l)fnLeft()};
   li.addEventListener("touchend",end);li.addEventListener("touchcancel",()=>{x0=null;li.style.transform="";li.style.background=""});
+}
+/* swipe a task left: assign it, discuss it or open it */
+function taskQuick(id){
+  const[key,room]=String(id).split("|"),t=S.tasks.find(x=>x.key===key&&(!room||x.room===room))||S.tasks.find(x=>x.key===key);if(!t)return;
+  const rows=[["user","Assign to someone","assign"],...(sm.code?[["chat","Discuss this task","thread"]]:[]),["clip","Open and edit","open"]];
+  sheet(t.title.slice(0,60),`<ul class="list" style="margin-top:6px">${rows.map(([i,l,k])=>`<li class="tap" tabindex="0" data-q="${k}"><span class="row-ic">${ic(i)}</span><div class="grow"><div class="lt">${l}</div></div>${ic("chev","sm")}</li>`).join("")}</ul>`,(sh,close)=>{
+    sh.querySelectorAll("li[data-q]").forEach(li=>li.addEventListener("click",()=>{const k=li.dataset.q;close();setTimeout(()=>{if(k==="assign")assignQuick(key);else if(k==="thread")threadSheet("task|"+key);else taskSheet(key,t.room)},60)}));
+    sh.querySelectorAll("li.tap").forEach(li=>li.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();li.click()}}));
+  });
+}
+function assignQuick(key){
+  const ts=S.tasks.filter(t=>t.key===key);if(!ts.length)return;
+  const ppl=sm.code?peopleList().filter(p=>p.active):[];let as=ts[0].assignee||"";
+  if(!ppl.length){taskSheet(key,ts[0].room);return}
+  sheet("Assign: "+ts[0].title.slice(0,40),`<div class="avs" role="group" aria-label="Assigned to">${ppl.map(p=>avBtn(`data-as="${p.pid}"`,p.pid===sm.pid?"Me":p.name,esc(avIni(p.name)),asgHas({assignee:as},p.pid))).join("")}</div><p class="hint">Tap one or more people.</p><div class="foot"><button class="btn primary block" id="go">Save</button></div>`,(sh,close)=>{
+    sh.querySelectorAll("[data-as]").forEach(b=>b.onclick=()=>{as=asgToggle(as,b.dataset.as);asPress(sh,as)});
+    sh.querySelector("#go").onclick=()=>{const nt=ts.flatMap(t=>asgNew(t.assignee,as)),ups=ts.map(t=>undoEdit(t,{assignee:as,who:as?pName(as):((t.assignee&&t.who===pName(t.assignee))?"":t.who)}));save();close();render();toast("Assigned.",()=>ups.forEach(u=>u()));[...new Set(nt)].forEach(pid=>notifySend([pid],"New task for you",ts[0].title.slice(0,100),"tasks"))};
+  });
+}
+function briefHead(){
+  const dt=new Date().toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long"}),n=wxNow();
+  let chip=`<button type="button" class="wxchip" data-go="weather" aria-label="Weather at the site. Open the forecast.">${ic("cloud","sm")}<span>Weather</span></button>`,adv="";
+  if(n){const i=wxInfo(n.code),a=wxAdvice(n.day,n),bad=a.find(x=>x[2]==="red")||a.find(x=>x[2]==="amber");
+    chip=`<button type="button" class="wxchip" data-go="weather" aria-label="Weather at the site: ${r0(n.t)} degrees, ${i[0]}. Open the forecast.">${ic(i[1],"sm")}<b>${r0(n.t)}°</b><span>${esc(i[0])}</span></button>`;
+    adv=bad?`<p class="badv ${bad[2]}"><i></i><span><b>${esc(bad[0])}:</b> ${esc(bad[1])}</span></p>`:`<p class="badv ok"><i></i><span>Good working weather today.</span></p>`}
+  return `<div class="row between" style="align-items:center;gap:8px"><div class="bdate">${esc(dt)}</div>${chip}</div>${adv}`;
 }
 function tileMenu(tile){
   closePop();const id=tile.dataset.go.split(":")[1];
@@ -1268,7 +1297,7 @@ function schedule(){
   const D=x=>new Date(x+"T12:00").getTime(),t=D(today()),a=D(st),b=D(en);
   if(t<a){const n=Math.round((a-t)/864e5);return{chip:`<span class="chip-d">${ic("clock","sm")}Starts in ${n} day${n===1?"":"s"}</span>`}}
   const plan=Math.min(1,(t-a)/Math.max(1,b-a)),act=doneN(all)/all.length,gap=Math.round((plan-act)*100);
-  return{chip:gap<=5?`<span class="chip-d">${ic("check","sm")}On track</span>`:`<span class="chip-d">${ic("alert","sm")}${gap}% behind plan</span>`};
+  return{chip:gap<=5?`<span class="chip-d tone-ok">${ic("check","sm")}On track</span>`:`<span class="chip-d ${gap>15?"tone-bad":"tone-warn"}">${ic("alert","sm")}${gap}% behind plan</span>`};
 }
 function nextCard(nu,R){
   return `<div class="card"><h2 style="margin:0">Next up</h2>${nu.length?`<ul class="list">${nu.map(x=>{const rs=x.ts.map(t=>t.room),stuck=x.ts.some(t=>t.status==="stuck"),od=x.ts.some(t=>t.due&&t.due<today()),doing=x.ts.some(t=>t.status==="doing");return `<li class="tap" tabindex="0" data-act="opentask" data-id="${x.key}|${x.ts[0].room}"><span class="row-ic ${stuck?"red":doing?"sky":""}">${ic(stuck?"alert":doing?"clock":phase(x.phase)?.[2]||"clip")}</span><div class="grow"><div class="lt">${esc(x.title)}</div><div class="ls ${stuck||od?"bad":""}">${stuck?"Stuck · ":od?"Overdue · ":""}${esc(phaseName(x.phase))} · ${rs.length===R.length?"Both classrooms":rs.map(roomName).join(", ")}</div></div>${ic("chev")}</li>`}).join("")}</ul>`:`<p class="muted" style="margin:10px 0 0">Every task is done. Well done!</p>`}</div>`;
@@ -1287,7 +1316,7 @@ function home(){
   ${(()=>{const f=S.furn.length&&lvl("furn")>=1?fStats(S.furn):null,bar=(go,l,v)=>`<button type="button" class="ovb" ${go}><span class="ovl">${l}</span><b>${v}%</b><span class="meter"><i style="width:${v}%"></i></span></button>`;
    return `<section class="card ovs"><div class="row between" style="gap:10px;align-items:flex-start"><div><div class="eyebrow" style="margin:0">Schedule</div><div class="big" style="font-size:1.7rem;line-height:1.1">${left===null?"–":left>=0?left:-left}<small style="font-size:.9rem;font-weight:500"> ${left===null?"":left>=0?"days to go":"days past target"}</small></div><div class="muted small">${S.settings.start?dshort(S.settings.start):"?"} to ${S.settings.target?dshort(S.settings.target):"?"}</div></div><div class="row wr" style="gap:6px;justify-content:flex-end">${sched.chip}</div></div>
    <div class="ovbs">${bar('data-go="build"',R.length>1?"Classrooms":esc(R[0].name),p)}${f?bar('data-act="gofurn"',"Furniture",f.p):""}</div>
-   <div class="row wr" style="gap:8px;margin-top:12px"><button type="button" class="chip" data-go="snags" aria-pressed="false">${ic("alert","sm")}${issues} snag${issues===1?"":"s"} to fix</button><button type="button" class="chip" data-go="mats:all" aria-pressed="false">${ic("truck","sm")}${toOrder} to order</button></div></section>`})()}
+   <div class="row wr" style="gap:8px;margin-top:12px"><button type="button" class="chip ${issues?"tone-bad":""}" data-go="snags" aria-pressed="false">${ic("alert","sm")}${issues} snag${issues===1?"":"s"} to fix</button><button type="button" class="chip tone-info" data-go="mats:all" aria-pressed="false">${ic("truck","sm")}${toOrder} to order</button></div></section>`})()}
   ${nextCard(nu,R)}
   <details class="ovd"><summary>${ic("trend","sm")}<span>Timeline, progress curve and activity</span>${ic("chev","sm")}</summary>${timelineCard()}${curveCard("progress")}${actCard()}</details>`;
 }
@@ -1304,9 +1333,8 @@ function todayCard(){
     const tick=merged?`<button class="st ${t.status}" data-act="cycboth" data-id="${t.id}" data-ids="${sib.map(x=>x.id).join(",")}" aria-label="${esc(t.title)}, both classrooms: ${stLabel(t.status)}. Tap to tick done or undo.">${stIcon(t.status)||ic("check")}</button>`:`<button class="st ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${esc(t.title)}: ${stLabel(t.status)}. Tap to tick done or undo.">${stIcon(t.status)||ic("check")}</button>`;
     return `<li>${tick}<div class="grow tap" tabindex="0" data-act="opentask" data-id="${t.key}|${t.room}"><div class="lt">${esc(t.title)}</div><div class="ls ${od||t.status==="stuck"?"bad":""}">${esc(meta)}</div></div></li>`};
   const dRow=lvl("diary")>=2&&!S.diary.some(e=>e.date===td)?`<li class="tap" tabindex="0" data-act="adddiary"><span class="row-ic">${ic("book")}</span><div class="grow"><div class="lt">Fill in today's site diary</div><div class="ls">Weather, people on site and the work done</div></div>${ic("chev")}</li>`:"";
-  if(!rows.length&&!dRow)return "";
-  const shown=rows.slice(0,5),more=rows.length-shown.length;
-  return `<section class="card today" aria-label="Today"><div class="row between" style="margin-bottom:2px"><div class="eyebrow" style="margin:0">${useMine?"Your day":"Due today and overdue"}</div>${rows.length?`<span class="small muted">${rows.length} task${rows.length===1?"":"s"}</span>`:""}</div><ul class="list">${shown.map(row).join("")}${dRow}</ul>${more>0?`<button type="button" class="linkbtn" data-act="gotasks" data-id="${useMine?"me":"all"}" style="padding:0;min-height:36px">and ${more} more</button>`:""}</section>`;
+  const shown=rows.slice(0,3),more=rows.length-shown.length;
+  return `<section class="card today brief" aria-label="Today">${briefHead()}<div class="row between" style="margin:12px 0 2px"><div class="eyebrow" style="margin:0">${useMine?"Your day":"Due today and overdue"}</div>${rows.length?`<span class="small muted">${rows.length} task${rows.length===1?"":"s"}</span>`:""}</div>${rows.length||dRow?`<ul class="list">${shown.map(row).join("")}${dRow}</ul>`:`<p class="muted small" style="margin:6px 0 4px">Nothing due today.</p>`}${more>0?`<button type="button" class="linkbtn" data-act="gotasks" data-id="${useMine?"me":"all"}" style="padding:0;min-height:36px">and ${more} more</button>`:""}</section>`;
 }
 /* ---------- Photos: every photo and video, grouped by phase ---------- */
 let photoF="all";
