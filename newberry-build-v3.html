@@ -493,6 +493,9 @@ body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!importan
 .wxchip{display:inline-flex;align-items:center;gap:5px;min-height:30px;padding:0 10px;border-radius:999px;border:0;background:rgba(255,255,255,.18);color:inherit;font:600 .8rem var(--body);cursor:pointer;flex:none}.wxchip b{font-weight:700}.wxchip span{opacity:.85;font-weight:500}.wxchip .i{width:16px;height:16px}
 .attline{display:flex;align-items:center;gap:10px;width:100%;min-height:44px;padding:8px 14px;margin:0 0 10px;border-radius:14px;border:1px solid var(--line);background:var(--sheet);color:var(--ink);font:500 .88rem var(--body);text-align:left;cursor:pointer}.attline>.i:first-child{color:var(--accent);flex:none}.attline.red>.i:first-child{color:var(--red)}.attline .grow{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.attline .muted{color:var(--muted)}
 .iconbtn.sm{width:36px;height:36px}
+.card.ovs{padding:12px 14px;margin:0 0 10px;border-radius:18px}.ovbs{display:grid;gap:10px;margin-top:12px}.ovb{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;border:0;background:none;padding:0;color:inherit;font:inherit;text-align:left;cursor:pointer}.ovb .ovl{font-size:.85rem;color:var(--muted)}.ovb b{font:700 1rem var(--display)}.ovb .meter{grid-column:1/-1;margin:0}
+.ovd{margin:0 0 10px}.ovd>summary{list-style:none;display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 14px;border-radius:14px;border:1px solid var(--line);background:var(--sheet);cursor:pointer;font:500 .88rem var(--body)}.ovd>summary::-webkit-details-marker{display:none}.ovd>summary span{flex:1}.ovd[open]>summary{margin-bottom:10px}.ovd[open]>summary>.i:last-child{transform:rotate(90deg)}
+.mrows{padding:4px 14px}.mrow{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:12px 0;color:inherit;font:inherit;cursor:pointer}.mrow:first-child{border-top:0}.mrow .lt{font-weight:600}.mrow b{font:700 1rem var(--display)}.mrow .meter{margin:6px 0 4px}
 .qa.one{gap:8px;margin:2px 0 10px}.qa.one button{flex-direction:row;gap:7px;min-height:46px;padding:6px 8px;border-radius:15px;font-size:.92rem}.qa.one button .i{width:20px;height:20px;flex:none}
 .card.today{padding:8px 14px 6px;margin:0 0 10px;border-radius:16px}.card.today .eyebrow{font-size:.66rem}.card.today .list li{padding:6px 0;gap:10px}.card.today .list li .st{width:30px;height:30px}.card.today .list li .st .i{width:16px;height:16px}.card.today .lt,.card.today .ls{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card.today .lt{font-size:.88rem}.card.today .ls{font-size:.74rem}.card.today .grow{min-width:0}.card.today .row-ic{width:30px;height:30px}.card.today .linkbtn{min-height:28px!important;font-size:.8rem}
 .phg{margin:0 0 16px}.phg h3{margin:0 0 6px;font:700 .95rem var(--display);letter-spacing:.01em}.ptg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border-radius:14px;overflow:hidden}.ptg .mtile{aspect-ratio:1}.ptg .pdt{position:absolute;left:4px;bottom:4px;z-index:2;background:rgba(0,0,0,.55);color:#fff;border-radius:6px;padding:1px 6px;font-size:.66rem;font-weight:600}
@@ -1274,12 +1277,12 @@ function home(){
   return `<h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);margin:-1px">Overview</h2>
   <div class="qa one"><button class="main" data-act="addphoto">${ic("camera")}Photo</button><button data-act="gostock">${ic("truck")}Material</button><button data-go="report">${ic("trend")}Report</button></div>
   ${todayCard()}
-  <div class="bento">
-   <section class="tile hero s2"><div class="lbl">${ic("calendar")}Schedule</div><div class="big">${left===null?"–":left>=0?left:-left}<small> ${left===null?"":left>=0?"days to go":"days past target"}</small></div><div class="sub">${S.settings.start?dshort(S.settings.start):"?"} to ${S.settings.target?dshort(S.settings.target):"?"}</div><div class="row wr" style="gap:8px">${sched.chip}</div>${fcLine()}</section>
-   ${classroomsTile()}${furnTile()}
-   <button class="tile ${issues?"alert":""}" data-go="snags"><div class="lbl">${ic("alert")}Snags to fix</div><div class="big">${issues}</div><div class="sub">${issues?"Tap to see them":"Nothing to fix"}</div></button>
-   <button class="tile sky" data-go="mats:all"><div class="lbl">${ic("truck")}To order</div><div class="big">${toOrder}</div><div class="sub">${toOrder?"materials waiting":"All ordered"}</div></button>
-  </div>${nextCard(nu,R)}${timelineCard()}${curveCard("progress")}${actCard()}`;
+  ${(()=>{const f=S.furn.length&&lvl("furn")>=1?fStats(S.furn):null,bar=(go,l,v)=>`<button type="button" class="ovb" ${go}><span class="ovl">${l}</span><b>${v}%</b><span class="meter"><i style="width:${v}%"></i></span></button>`;
+   return `<section class="card ovs"><div class="row between" style="gap:10px;align-items:flex-start"><div><div class="eyebrow" style="margin:0">Schedule</div><div class="big" style="font-size:1.7rem;line-height:1.1">${left===null?"–":left>=0?left:-left}<small style="font-size:.9rem;font-weight:500"> ${left===null?"":left>=0?"days to go":"days past target"}</small></div><div class="muted small">${S.settings.start?dshort(S.settings.start):"?"} to ${S.settings.target?dshort(S.settings.target):"?"}</div></div><div class="row wr" style="gap:6px;justify-content:flex-end">${sched.chip}</div></div>
+   <div class="ovbs">${bar('data-go="build"',R.length>1?"Classrooms":esc(R[0].name),p)}${f?bar('data-act="gofurn"',"Furniture",f.p):""}</div>
+   <div class="row wr" style="gap:8px;margin-top:12px"><button type="button" class="chip" data-go="snags" aria-pressed="false">${ic("alert","sm")}${issues} snag${issues===1?"":"s"} to fix</button><button type="button" class="chip" data-go="mats:all" aria-pressed="false">${ic("truck","sm")}${toOrder} to order</button></div></section>`})()}
+  ${nextCard(nu,R)}
+  <details class="ovd"><summary>${ic("trend","sm")}<span>Timeline, progress curve and activity</span>${ic("chev","sm")}</summary>${timelineCard()}${curveCard("progress")}${actCard()}</details>`;
 }
 /* ---------- Today on Overview: what is due or yours, ticked off in one tap ---------- */
 function todayCard(){
@@ -1475,8 +1478,8 @@ function moneyBuild(){
   </div>
   <div class="card"><div class="row between"><div><div class="muted small">Whole project estimate</div><div class="lt" style="font-size:1.15rem">${+S.settings.estimate?money0(+S.settings.estimate):"Not set"}</div></div><button type="button" class="btn small" data-act="estimate">${+S.settings.estimate?"Edit":"Set"}</button></div></div>
   ${builderCard()}
-  ${curveCard("budget")}
-  ${byCat.length?`<div class="card"><h2>Where the money went</h2><div class="cbars">${byCat.map(([k,l,i,v])=>`<div class="cbar"><span class="catrow">${ic(i)}${esc(l)}</span><b>${money0(v)}</b><div class="tr"><i style="width:${v/maxC*100}%"></i></div></div>`).join("")}</div></div>`:""}
+  <details class="ovd"><summary>${ic("trend","sm")}<span>Charts: spending against plan, where the money went</span>${ic("chev","sm")}</summary>${curveCard("budget")}
+  ${byCat.length?`<div class="card"><h2>Where the money went</h2><div class="cbars">${byCat.map(([k,l,i,v])=>`<div class="cbar"><span class="catrow">${ic(i)}${esc(l)}</span><b>${money0(v)}</b><div class="tr"><i style="width:${v/maxC*100}%"></i></div></div>`).join("")}</div></div>`:""}</details>
   <div class="card"><div class="row between wr"><h2 style="margin:0">Expenses</h2></div>
    <div class="chips scroll" style="${S.costs.some(c=>c.room!=="both")?"":"display:none;"}margin-top:10px" role="group" aria-label="Filter expenses">${[["all","All"],["both","Shared"],...R.map(r=>[r.id,r.name])].map(([k,l])=>`<button type="button" class="chip" data-sub="cost:${k}" aria-pressed="${costF===k}">${esc(l)}</button>`).join("")}</div>
    ${list.length?`<ul class="list">${list.map(c=>{const ct=cat(c.cat);return `<li><span class="row-ic ${c.paid?"green":""}">${ic(ct[2])}</span><div class="grow"><div class="lt">${esc(c.title||ct[1])}</div><div class="ls">${dshort(c.date)} · ${esc(roomName(c.room))}${c.sup?" · "+esc(supName(c.sup)):""}${c.pay?" · from Builder payments":""}${c.extra?" · Extra labour"+(c.phase?", "+esc(PSHORT[c.phase]||""):"")+(c.appr?", approved by "+esc(c.appr):""):""}</div><div style="margin-top:4px"><span class="pill ${c.paid?"":"watch"}">${c.paid?"Paid":"Not paid"}</span>${c.paid?"":` <button class="btn small good" data-act="paycost" data-id="${c.id}" style="margin-left:6px">${ic("check","sm")}Mark paid</button>`}</div></div><span class="amt">${money(c.amount)}</span>${c.pay?"":rowBtns("cost",c.title||ct[1],c.id)}</li>`}).join("")}</ul>`:`<div class="empty">${ic("cash","xl")}<h3>No expenses yet</h3><p>Add what you buy or pay for, and the totals fill in here.</p><button class="btn primary" data-act="addcost">${ic("plus")}Add expense</button></div>`}
@@ -1528,19 +1531,19 @@ function siteV(){
   ${logs.length?`<ul class="list tl-list" style="display:grid;gap:12px">${logs.map(card).join("")}</ul>`:empty("camera","No updates yet","Take photos of the work as it goes up. Add a short note so everyone knows what changed.",`<button class="btn primary" data-act="addphoto">${ic("camera")}Add the first photo</button>`)}`;
 }
 function more(){
-  const s=S.settings,row=(i,t,sub,act)=>`<li class="tap" tabindex="0" data-act="${act}"><span class="row-ic">${ic(i)}</span><div class="grow"><div class="lt">${t}</div><div class="ls">${sub}</div></div>${ic("chev")}</li>`;
+  const s=S.settings,row=(i,t,sub,act)=>`<li class="tap" tabindex="0" data-act="${act}"><span class="row-ic">${ic(i)}</span><div class="grow"><div class="lt">${t}</div>${sub?`<div class="ls">${sub}</div>`:""}</div>${ic("chev")}</li>`;
   return `<div class="page-h"><h2>More</h2></div>
   <div class="card moreV"><ul class="list">
    ${row("bell","Updates","Messages sent between people"+(unreadMsgs().length?" · "+unreadMsgs().length+" new":""),"goinbox")}
    ${sm.code&&pushSupported()?row("bell","Notifications",lsGet("build-push")==="1"?"On for this phone":"Off. Tap to get phone notifications","pushsheet"):""}
-   ${row("book","Site diary","Daily record: weather, people on site and delays","godiary")}
+   ${row("book","Site diary","","godiary")}
    ${perm.manage?row("users","People and access",sm.code?"Who is on the project and what they can do":"Share the project and add your team","gopeople"):""}
-   ${row("note","Documents","Quotes, contract, invoices, certificates, drawings and delivery notes","godocs")}
-   ${row("truck","Materials","Stock, fittings, electrical, sundries and suppliers","gomats")}
+   ${row("note","Documents","","godocs")}
+   ${row("truck","Materials","","gomats")}
    ${lvl("money")>=1&&canMoney()?row("users","Extra labour","Approved extra work and what is still to pay"+(moneyOK?"":" · Locked"),"goextra"):""}
-   ${row("camera","Site log","Photos and notes as the work goes up","gosite")}
-   ${row("download","Export report","Tasks with their photos and videos, as a PDF or a folder of files","goexport")}
-   ${row("clock","Activity log","Automatic history of what changed","acts")}
+   ${row("camera","Site log","","gosite")}
+   ${row("download","Export report","","goexport")}
+   ${row("clock","Activity log","","acts")}
   </ul></div>
     <div class="card"><ul class="list">
    ${row("home","Project details",esc([s.name,s.site].filter(Boolean).join(" · ")||"Name, site and dates"),"project")}
@@ -3252,24 +3255,11 @@ function overallV(){
   return `<section class="tile hero est" style="margin-bottom:10px"><div class="lbl">${ic("cash")}Whole project estimate</div>
    <div class="big">${est?money0(est):"Not set"}</div>
    <div class="sub">${est?`${money0(committed)} committed, ${pct(committed,est)}% of the estimate`:"Set the estimate on the Build tab"}</div>${est?estBreak(est,committed,paid,free):""}</section>
-  <div class="card ov"><div class="row between wr"><h2 style="margin:0">Builder's quote</h2></div>
-   <div class="big" style="margin:8px 0 2px;font-size:1.7rem">${ct?money0(ct):"Not set"}</div>${ct?bar(paidB,ct):""}
-   <div class="row between" style="margin-top:8px"><span class="ls">Paid <b>${money0(paidB)}</b></span><span class="ls">Still to pay <b>${money0(bLeft)}</b></span></div>
-   <button type="button" class="linkbtn" data-sub="mseg:build" style="padding:0;min-height:40px">Builder payments and costs</button></div>
-  <div class="card ov"><div class="row between wr"><h2 style="margin:0">Other quotes</h2><button type="button" class="btn small" data-sub="mseg:trades">View all</button></div>
-   ${live.length?`<div class="big" style="margin:8px 0 2px;font-size:1.7rem">${money0(tc)}</div>${bar(tp,tc)}
-   <div class="row between" style="margin-top:8px"><span class="ls">Paid <b>${money0(tp)}</b></span><span class="ls">Still to pay <b>${money0(tLeft)}</b></span></div>
-   <ul class="list" style="margin-top:8px">${live.slice(0,6).map(t=>`<li class="tap" tabindex="0" data-act="opentrade" data-id="${t.id}"><div class="grow"><div class="lt">${esc(t.trade)}</div><div class="ls">${esc(tName(t))} · paid ${money0(tPaid(t))} · left ${money0(Math.max(0,tVal(t)-tPaid(t)))}</div></div><span class="amt">${money0(tVal(t))}</span></li>`).join("")}</ul>${live.length>6?`<p class="hint">and ${live.length-6} more</p>`:""}`
-   :`<p class="muted" style="margin:8px 0 0">No accepted quotes yet. Add quotes from your tiler, electrician and other trades.</p>`}
-   ${wait?`<p class="note-card" style="margin:10px 0 0">${ic("clock")}<span><b>${money0(wait)}</b> in quotes waiting for a decision.</span></p>`:""}</div>
-  ${othAll?`<div class="card ov"><div class="row between wr"><h2 style="margin:0">Other expenses</h2><button type="button" class="btn small" data-sub="mseg:build">View</button></div><div class="row between" style="margin-top:8px"><span class="ls">Paid <b>${money0(othPaid)}</b></span><span class="ls">Still to pay <b>${money0(othDue)}</b></span></div><p class="hint">Materials, extra labour and other costs outside the quotes.</p></div>`:""}
-  <div class="bento ovb">
-   <section class="tile green"><div class="lbl">${ic("check")}Paid so far</div><div class="big">${money0(paid)}</div><div class="sub">${committed?pct(paid,committed)+"% of what is committed":"&nbsp;"}</div></section>
-   <section class="tile"><div class="lbl">${ic("clock")}Still to pay</div><div class="big">${money0(left)}</div><div class="sub">builder ${money0(bLeft)} · quotes ${money0(tLeft)}</div></section>
+  <div class="card ov mrows">
+  <button type="button" class="mrow" data-sub="mseg:build"><div class="row between"><span class="lt">Builder's quote</span><b>${ct?money0(ct):"Not set"}</b></div>${ct?bar(paidB,ct):""}<div class="ls">Paid ${money0(paidB)} · to pay ${money0(bLeft)}</div></button>
+  <button type="button" class="mrow" data-sub="mseg:trades"><div class="row between"><span class="lt">Other quotes</span><b>${live.length?money0(tc):"None yet"}</b></div>${live.length?bar(tp,tc):""}<div class="ls">${live.length?`Paid ${money0(tp)} · to pay ${money0(tLeft)}`:"Add quotes from your tiler, electrician and other trades."}${wait?` · ${money0(wait)} waiting for a decision`:""}</div></button>
+  ${othAll?`<button type="button" class="mrow" data-sub="mseg:build"><div class="row between"><span class="lt">Other expenses</span><b>${money0(othAll)}</b></div>${bar(othPaid,othAll)}<div class="ls">Paid ${money0(othPaid)} · to pay ${money0(othDue)}</div></button>`:""}
   </div>
-  <div class="card"><h2>Where it stands</h2>
-   <div class="stack" role="img" aria-label="Paid on the build ${money0(paidB+othPaid)}, paid to trades ${money0(tp)}, still to pay ${money0(left)}">${[[paidB+othPaid,"var(--green)"],[tp,"var(--sky)"]].map(([v,c])=>v>0?`<i style="width:${v/Math.max(paid+left,1)*100}%;background:${c}"></i>`:"").join("")}</div>
-   <ul class="legend"><li><i style="background:var(--green)"></i>Paid on the build<b>${money0(paidB+othPaid)}</b></li><li><i style="background:var(--sky)"></i>Paid to trades<b>${money0(tp)}</b></li><li><i style="background:var(--field)"></i>Still to pay<b>${money0(left)}</b></li></ul></div>
   ${moneyCharts()}
   ${up.length?`<div class="card"><h2>Coming up</h2><ul class="list">${up.map(({t,s})=>{const od=s.due&&s.due<today();return `<li class="tap" tabindex="0" data-act="opentrade" data-id="${t.id}"><span class="row-ic ${od?"red":"sky"}">${ic("calendar")}</span><div class="grow"><div class="lt">${esc(s.label||"Payment")}</div><div class="ls ${od?"bad":""}">${esc(t.trade)} · ${esc(tName(t))}${s.due?` · ${od?"overdue, ":"due "}${dshort(s.due)}`:""}</div></div><span class="amt">${money(s.amount)}</span></li>`}).join("")}</ul></div>`:""}
   <p class="hint">Each payment comes off that quote's balance. Trades are quoted and paid separately from the builder.</p>`;
@@ -4044,7 +4034,7 @@ function phaseV(){
   const ph=phasePhotoIds(id),mh=S.mats.filter(m=>m.phase===id),mo=toOrder(mh).length;
   const tabs=`<div class="segc ptabs" role="group" aria-label="Show">${[["tasks","Tasks"],["mats","Materials",mh.length]].map(([k,l,n])=>`<button type="button" class="ptab ${k}" data-sub="pt:${k}" aria-pressed="${pt===k}">${l}${n?`<span class="tn">${n}</span>`:""}</button>`).join("")}</div>`;
   const taskPart=`${splitIn(id)&&ts.some(t=>t.room!=="shared")?`<div class="segc" role="group" aria-label="Show classroom">${[["all","Both"],...R.map(r=>[r.id,r.name])].map(([k,l])=>`<button type="button" data-rf="${k}" aria-pressed="${f===k}">${esc(l)}</button>`).join("")}</div>`:""}
-  ${f==="all"&&!hintSeen()&&ts.some(t=>t.room!=="shared")?`<div class="note-card">${ic("eye")}<span>${sm.code&&!perm.manage?"Tap the circle once when the work is done (yellow). The Project Lead gives the final tick (green) after checking.":sm.code?"Your tick is the final green tick. Work ticked yellow by the team is waiting for your check.":"Tap the circle to tick a task done in both classrooms."} Hold it for more options, or open the task to split the classrooms. Hold a task, then drag it up or down to change the order.</span></div>`:""}
+  ${f==="all"&&!hintSeen()&&ts.some(t=>t.room!=="shared")?`<div class="note-card slim">${ic("eye")}<span class="nt">${sm.code&&!perm.manage?"Tap the circle once when the work is done (yellow). The Project Lead gives the final tick (green) after checking.":sm.code?"Your tick is the final green tick. Work ticked yellow by the team is waiting for your check.":"Tap the circle to tick a task done in both classrooms."} Hold it for more options.</span></div>`:""}
   <div class="card">${keys.length?`<ul class="list reord">${keys.map(k=>taskRow(k,f==="all"?null:f)).join("")}</ul>`:`<div class="empty">${ic("clip","xl")}<h3>No tasks here</h3><p>Add the first task for this phase.</p><button class="btn primary" data-act="addtask" data-id="${id}">${ic("plus")}Add task</button></div>`}</div>
   <div class="card"><div class="row between"><h2 style="margin:0">Photos</h2><div class="row" style="gap:8px"><button class="btn small" data-act="phphoto" data-id="${id}|g">${ic("image")}Gallery</button><button class="btn small" data-act="phphoto" data-id="${id}">${ic("camera")}Camera</button></div></div>${ph.length?`<div class="row" style="gap:8px;margin-top:10px">${ph.length>=2?`<button class="btn small" data-act="phba" data-id="${id}">Before and after</button>`:""}${ph.length&&canPick()?`<button class="btn small" data-act="phcover" data-id="${id}">${ic("image","sm")}Banner photo</button>`:""}<button class="btn small" data-act="phdrive" data-id="${id}" aria-label="Save all photos of this phase to Google Drive">${ic("cloud")}Save to Drive</button></div><div class="pthumbs">${ph.slice(0,9).map((m,i)=>`<button type="button" class="etile" style="border:0;padding:0" data-act="phlb" data-id="${id}|${i}" aria-label="Open photo ${i+1}"><span data-m="${m}" style="position:absolute;inset:0"></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:10px 0 0">No photos for this phase yet.</p>`}</div>`;
   return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn(isG(id)?"garden":"")}<h2 style="overflow-wrap:anywhere">${esc(PSHORT[id])}</h2></div>${pt==="mats"?`<button class="btn primary" data-act="addmat" data-id="${id}" style="background:var(--green);color:#fff">${ic("plus")}Add material</button>`:`<button class="btn primary" data-act="addtask" data-id="${id}">${ic("plus")}Add task</button>`}</div>
@@ -4193,7 +4183,6 @@ function reportV(){
    <div class="rtiles">${tile("check","To check",uk(chk),"tasks")}${tile("alert","Stuck",uk(stuck),"tasks")}${tile("clock","Overdue",uk(od),"tasks")}${tile("truck","To order",ord.length,"mats:need")}</div>
    <div class="rlist">${attn.join("")||`<p class="muted" style="margin:10px 0 0">Nothing needs attention right now.</p>`}</div>
    ${soon.length?`<div class="rsoon">${soon.slice(0,3).map(x=>`<div class="rsr"><b>${dshort(x.d)}</b>${ic(x.i)}<span class="rsv">${esc(x.v)}</span><span class="rs">${esc(x.x)}</span></div>`).join("")}</div>`:""}</div>
-  <div class="card rc"><div class="eyebrow">Finish forecast</div><div class="rfcs"><div><span class="eyebrow">Planned</span><b>${en?dshort(en):"–"}</b></div><div><span class="eyebrow">Forecast</span><b>${f&&!f.none?dshort(f.date):"–"}</b></div><div><span class="eyebrow">Difference</span><b class="${f&&!f.none?(f.late>3?"red":f.late<-3?"green":""):""}">${f&&!f.none?(f.late>3?"+"+f.late+" days":f.late<-3?-f.late+" days early":"On time"):"–"}</b></div></div>${f&&f.none?`<p class="hint">${esc(f.why)}</p>`:""}</div>
   ${money}
   <div class="card rc"><div class="eyebrow">This week</div><div class="rstats"><div><span class="eyebrow">Tasks done</span><b>${doneWk}</b></div><div><span class="eyebrow">Photos</span><b>${photos}</b></div><div><span class="eyebrow">Updates sent</span><b>${sent}</b></div></div><button type="button" class="btn block" data-act="weekshare" style="margin-top:12px">${ic("share")}Share the week</button></div>
   ${dst?`<div class="card rc"><div class="eyebrow">Site days</div><div class="rstats"><div><span class="eyebrow">Logged</span><b>${dst.days}</b></div><div><span class="eyebrow">Rain days</span><b>${dst.rain}</b></div><div><span class="eyebrow">Hours lost</span><b>${num(dst.lost,1)}</b></div></div></div>`:""}
