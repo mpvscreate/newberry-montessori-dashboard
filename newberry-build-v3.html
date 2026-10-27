@@ -512,6 +512,10 @@ body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!importan
 @media (min-width:900px){.fbar-sp{display:none}}
 @media (max-width:899px){body:has(.fbar) #toasts{bottom:calc(150px + 58px + env(safe-area-inset-bottom))}}
 @media (max-width:899px){html,body{overflow-x:clip}}
+.skel{background:linear-gradient(90deg,var(--accent-soft) 25%,color-mix(in srgb,var(--accent-soft) 55%,var(--sheet)) 50%,var(--accent-soft) 75%);background-size:200% 100%;animation:skelmv 1.4s linear infinite}@keyframes skelmv{to{background-position:-200% 0}}
+.mmiss.skel{display:grid;place-items:center;color:var(--muted);padding:0}.mmiss.skel .i{width:22px;height:22px;opacity:.7}
+.wxchip.skel{position:relative;inset:auto;color:var(--muted)}
+@media (prefers-reduced-motion:reduce){.skel{animation:none}}
 .qa.one{gap:8px;margin:2px 0 10px}.qa.one button{flex-direction:row;gap:7px;min-height:46px;padding:6px 8px;border-radius:15px;font-size:.92rem}.qa.one button .i{width:20px;height:20px;flex:none}
 .card.today{padding:8px 14px 6px;margin:0 0 10px;border-radius:16px}.card.today .eyebrow{font-size:.66rem}.card.today .list li{padding:6px 0;gap:10px}.card.today .list li .st{width:30px;height:30px}.card.today .list li .st .i{width:16px;height:16px}.card.today .lt,.card.today .ls{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card.today .lt{font-size:.88rem}.card.today .ls{font-size:.74rem}.card.today .grow{min-width:0}.card.today .row-ic{width:30px;height:30px}.card.today .linkbtn{min-height:28px!important;font-size:.8rem}
 .phg{margin:0 0 16px}.phg h3{margin:0 0 6px;font:700 .95rem var(--display);letter-spacing:.01em}.ptg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border-radius:14px;overflow:hidden}.ptg .mtile{aspect-ratio:1}.ptg .pdt{position:absolute;left:4px;bottom:4px;z-index:2;background:rgba(0,0,0,.55);color:#fff;border-radius:6px;padding:1px 6px;font-size:.66rem;font-weight:600}
@@ -1060,11 +1064,14 @@ async function prepPhoto(file,maxPx){
 const urls=new Map();
 const mtype=new Map(),isVid=id=>/^video\//.test(mtype.get(id)||"");
 async function mUrl(id){if(urls.has(id))return urls.get(id);const b=await mGet(id).catch(()=>null);if(!b)return null;mtype.set(id,b.type||"");const u=URL.createObjectURL(b);urls.set(id,u);return u}
+/* photos show a soft grey shimmer while they load; one still on its way from the team keeps the shimmer with a small cloud */
 async function hydrate(root=document){
-  for(const el of root.querySelectorAll("[data-m]")){
+  const els=[...root.querySelectorAll("[data-m]")];
+  els.forEach(el=>{if(!el.firstChild)el.innerHTML='<span class="skel" aria-hidden="true"></span>'});
+  for(const el of els){
     const id=el.dataset.m,u=await mUrl(id);
     if(u){el.innerHTML=isVid(id)?`<video src="${u}#t=0.1" preload="metadata" muted playsinline></video><span class="play" aria-hidden="true"></span>`:`<img src="${u}" alt="${esc(el.dataset.alt||"Site photo")}" loading="lazy">`}
-    else el.innerHTML=`<div class="mmiss">${ic("cloud","lg")}<span class="small">Photo is still loading from the shared project</span></div>`;
+    else el.innerHTML=`<div class="mmiss skel" role="img" aria-label="Photo still loading from the team" title="Still loading from the team">${ic("cloud")}</div>`;
   }
 }
 const blobToData=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.result);f.readAsDataURL(b)});
@@ -3542,7 +3549,7 @@ function attSheet(){
 /* the weather as a small chip in the corner of the progress banner */
 function wxChip(){
   const n=wxNow();
-  if(!n)return `<button type="button" class="wxchip" data-go="weather" aria-label="Weather at the site. Open the forecast.">${ic("cloud","sm")}<span>Weather</span></button>`;
+  if(!n)return `<button type="button" class="wxchip ${wxFail?"":"skel"}" data-go="weather" aria-label="Weather at the site. Open the forecast.">${ic("cloud","sm")}<span>${wxFail?"Weather":"Loading"}</span></button>`;
   const i=wxInfo(n.code);
   return `<button type="button" class="wxchip" data-go="weather" aria-label="Weather at the site: ${r0(n.t)} degrees, ${i[0]}. Open the forecast.">${ic(i[1],"sm")}<b>${r0(n.t)}°</b><span>${esc(i[0])}</span></button>`;
 }
