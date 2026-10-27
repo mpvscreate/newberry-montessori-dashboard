@@ -484,6 +484,12 @@ body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!importan
 .slipprev{display:flex;gap:12px;align-items:center;margin:0 0 6px}.slipprev img{width:64px;height:64px;object-fit:cover;border-radius:12px;flex:none}.slipbusy{display:grid;gap:12px;justify-items:center;padding:6px 0 4px}.slipimg{max-height:34vh;max-width:100%;border-radius:12px}.slipbusy .meter{width:100%}
 .tmsg{border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:0 0 8px;background:var(--paper)}.tmsg.me{background:var(--accent-soft)}.tthread{max-height:36vh;overflow:auto;margin-bottom:8px}.askbox{margin-top:10px;padding-top:8px;border-top:1px dashed var(--line)}
 .snagh{margin:16px 2px 8px;font:700 .95rem var(--display)}.card.snag{padding:12px 14px}
+.avs{display:flex;gap:10px;overflow-x:auto;padding:4px 2px 6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}.avs::-webkit-scrollbar{display:none}
+.av{flex:none;display:grid;justify-items:center;gap:4px;width:60px;background:none;border:0;padding:0;color:var(--muted);cursor:pointer;font:inherit}
+.av .avc{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--line);background:var(--sheet);color:var(--ink);font:700 .95rem var(--body)}.av .avc .i{width:20px;height:20px}
+.av .avn{font-size:.7rem;line-height:1.1;max-width:60px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.av[aria-pressed=true] .avc{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 2px 10px var(--glow-soft)}.av[aria-pressed=true] .avn{color:var(--ink);font-weight:600}
+.duerow{display:flex;align-items:center;gap:8px}.duebtn{position:relative;flex:1;display:flex;align-items:center;justify-content:space-between;gap:8px;min-height:48px;padding:0 14px;border:1.5px solid var(--line);border-radius:14px;background:var(--paper);color:var(--ink)}.duebtn input{position:absolute;inset:0;width:100%;height:100%;opacity:0;cursor:pointer;border:0}
 .qa.one{gap:8px;margin:2px 0 10px}.qa.one button{flex-direction:row;gap:7px;min-height:46px;padding:6px 8px;border-radius:15px;font-size:.92rem}.qa.one button .i{width:20px;height:20px;flex:none}
 .card.today{padding:8px 14px 6px;margin:0 0 10px;border-radius:16px}.card.today .eyebrow{font-size:.66rem}.card.today .list li{padding:6px 0;gap:10px}.card.today .list li .st{width:30px;height:30px}.card.today .list li .st .i{width:16px;height:16px}.card.today .lt,.card.today .ls{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card.today .lt{font-size:.88rem}.card.today .ls{font-size:.74rem}.card.today .grow{min-width:0}.card.today .row-ic{width:30px;height:30px}.card.today .linkbtn{min-height:28px!important;font-size:.8rem}
 .phg{margin:0 0 16px}.phg h3{margin:0 0 6px;font:700 .95rem var(--display);letter-spacing:.01em}.ptg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border-radius:14px;overflow:hidden}.ptg .mtile{aspect-ratio:1}.ptg .pdt{position:absolute;left:4px;bottom:4px;z-index:2;background:rgba(0,0,0,.55);color:#fff;border-radius:6px;padding:1px 6px;font-size:.66rem;font-weight:600}
@@ -1038,8 +1044,8 @@ const blobToData=b=>new Promise(r=>{const f=new FileReader();f.onload=()=>r(f.re
 
 /* ---------- small form helpers ---------- */
 const dateField=(id,val,label="Date")=>`<label class="f" for="${id}">${label}</label><div class="chips" style="margin-bottom:8px"><button type="button" class="chip" data-dc="${today()}" data-for="${id}">Today</button><button type="button" class="chip" data-dc="${addDays(today(),-1)}" data-for="${id}">Yesterday</button></div><input id="${id}" class="t" type="date" value="${esc(val||"")}">`;
-const futureChips=id=>`<div class="chips" style="margin-bottom:8px"><button type="button" class="chip" data-dc="${addDays(today(),3)}" data-for="${id}">In 3 days</button><button type="button" class="chip" data-dc="${addDays(today(),7)}" data-for="${id}">In a week</button><button type="button" class="chip" data-dc="${addDays(today(),14)}" data-for="${id}">In 2 weeks</button><button type="button" class="chip" data-dc="" data-for="${id}">No date</button></div>`;
-function wireDc(sh){const mark=i=>sh.querySelectorAll('[data-dc][data-for="'+i.id+'"]').forEach(x=>x.setAttribute("aria-pressed",x.dataset.dc===i.value));
+const futureChips=id=>`<div class="chips" style="margin-bottom:8px"><button type="button" class="chip" data-dc="" data-for="${id}">No date</button></div>`;
+function wireDc(sh){sh.querySelectorAll(".duebtn input").forEach(i=>wireDue(sh,i.id));const mark=i=>sh.querySelectorAll('[data-dc][data-for="'+i.id+'"]').forEach(x=>x.setAttribute("aria-pressed",x.dataset.dc===i.value));
   sh.querySelectorAll("[data-dc]").forEach(b=>{const i=sh.querySelector("#"+b.dataset.for);if(!i)return;if(!i._dm){i._dm=1;i.addEventListener("input",()=>mark(i));i.addEventListener("change",()=>mark(i));mark(i)}b.onclick=()=>{i.value=b.dataset.dc;i.dispatchEvent(new Event("input",{bubbles:true}))}})}
 const chipRow=(name,opts,cur,cls="")=>`<div class="chips ${cls}" role="group">${opts.map(([k,l])=>`<button type="button" class="chip" data-ch="${name}" data-v="${esc(k)}" aria-pressed="${k===cur}">${esc(l)}</button>`).join("")}</div>`;
 function wireChips(sh,state,name,after){sh.querySelectorAll(`[data-ch="${name}"]`).forEach(b=>b.onclick=()=>{state[name]=b.dataset.v;sh.querySelectorAll(`[data-ch="${name}"]`).forEach(x=>x.setAttribute("aria-pressed",x===b));after?.()})}
@@ -1204,7 +1210,7 @@ async function progressCard(noMoney){
 function reportSheet(){
   const others=sm.code&&canSend()?peopleList().filter(p=>p.active&&p.pid!==sm.pid):[],to=new Set();
   sheet("Send the report",`${others.length?`<label class="f">Send to</label>
-  <div class="chips" role="group" aria-label="Send the report to" id="rc"><button type="button" class="chip" data-r="all" aria-pressed="false">Everyone</button>${others.map(p=>`<button type="button" class="chip" data-r="${p.pid}" aria-pressed="false">${esc(p.name)}</button>`).join("")}</div>
+  <div class="avs" role="group" aria-label="Send the report to" id="rc">${avBtn('data-r="all"',"Everyone",ic("users"),false)}${others.map(p=>avBtn(`data-r="${p.pid}"`,p.name,esc(avIni(p.name)),false)).join("")}</div>
   <p class="hint" id="rt">Choose one person, a few people or everyone. They get it in Updates with a notification. Money figures are left out.</p>
   <div class="tasks" style="margin-top:8px"><button class="btn primary block" id="sa" disabled>${ic("chat")}Send to the selected</button></div>`:""}
   <label class="f" style="margin-top:14px">Or share outside the app</label><div id="pv" class="cardprev"><div class="small muted" style="padding:40px 12px;text-align:center">Making your card…</div></div>
@@ -1598,16 +1604,21 @@ function cycTask(id,quiet,forced){try{localStorage.setItem("build-hint","1")}cat
   if(quiet)return{u,t,nx};
   buzz(nx==="done"?[18,40,18]:12);logAct(`Marked "${t.title}" ${stLabel(nx).toLowerCase()}${rooms().length>1&&t.room!=="shared"?` (${roomName(t.room)})`:""}`);save();render();if(nx==="check")notifyLead(t);document.querySelectorAll(`[data-id="${id}"]`).forEach(b=>b.classList.add("popit"));toast(`${t.title}: ${stLabel(nx).toLowerCase()}${rooms().length>1&&t.room!=="shared"?` (${roomName(t.room)})`:""}.`,u);
 }
+const roomLine=r=>r==="both"?"Both classrooms":r==="shared"?"Shared, done once":roomName(r);
 function addTaskSheet(ph){
   const st={room:"both",phase:ph&&phase(ph)?ph:curPhases()[0]||"site",assignee:""};if(isG(st.phase))st.room="shared";
   sheet("Add a task",`<form id="f" novalidate><label class="f" for="ti">What needs doing?</label><textarea id="ti" class="t grow-ta" rows="1" maxlength="160" placeholder="For example: Order roof sheets"></textarea>${micBtn("ti","Speak the task")}
-  <label class="f">Phase</label>${chipRow("phase",PH.map(p=>[p[0],p[1]]),st.phase)}
-  <details class="more"><summary>More details: classroom</summary><label class="f">Which classroom?</label>${chipRow("room",[...roomOpts(),["shared","Shared (done once)"]],st.room)}</details>
-  ${dateField("du","","Due date (optional)").replace(/<div class="chips"[\s\S]*?<\/div>/,futureChips("du"))}
   ${assignBlock({assignee:"",who:""},[])}
+  ${dueRow("du","")}
+  <div style="${SPEECH?"padding-right:66px":""}"><label class="f" for="ph">Phase</label><select id="ph" class="t sel">${PH.map(p=>`<option value="${p[0]}" ${p[0]===st.phase?"selected":""}>${esc(p[1])}</option>`).join("")}</select>
+  <div class="row between" style="margin-top:12px;gap:8px"><span class="muted small" id="rml">${esc(roomLine(st.room))}</span><button type="button" class="linkbtn" id="rmb" style="padding:0;min-height:36px">Change</button></div></div>
+  <div id="rmw" hidden>${chipRow("room",[...roomOpts(),["shared","Shared (done once)"]],st.room)}</div>
   <div class="foot"><button class="btn primary block">Add task</button></div></form>`,(sh,close)=>{
-    wireDc(sh);wireMics(sh);wireChips(sh,st,"room");wireChips(sh,st,"phase");
-    sh.querySelectorAll("[data-as]").forEach(b=>b.onclick=()=>{const prev=st.assignee&&pName(st.assignee),w=sh.querySelector("#wh");st.assignee=asgToggle(st.assignee,b.dataset.as);if(st.assignee)w.value=pName(st.assignee);else if(w.value===prev)w.value="";asPress(sh,st.assignee)});
+    wireDc(sh);wireDue(sh);wireMics(sh);wireChips(sh,st,"room",()=>{sh.querySelector("#rml").textContent=roomLine(st.room);sh.querySelector("#rmw").hidden=true});
+    sh.querySelector("#ph").onchange=e=>{st.phase=e.target.value};
+    sh.querySelector("#rmb").onclick=()=>{const w=sh.querySelector("#rmw");w.hidden=!w.hidden};
+    wireOther(sh,()=>{st.assignee=""});
+    sh.querySelectorAll("[data-as]").forEach(b=>b.onclick=()=>{const prev=st.assignee&&pName(st.assignee),w=sh.querySelector("#wh");st.assignee=asgToggle(st.assignee,b.dataset.as);if(st.assignee)w.value=pName(st.assignee);else if(w.value===prev)w.value="";asPress(sh,st.assignee);otherOff(sh)});
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const ti=sh.querySelector("#ti"),title=ti.value.trim();if(!title)return showErr(sh,ti,"Write what needs doing.");
       const who=sh.querySelector("#wh")?.value.trim()||"",as=st.assignee&&who===pName(st.assignee)?st.assignee:"",key=uid(),rs=st.room==="both"?rooms().map(r=>r.id):[st.room],base=Math.max(-1,...S.tasks.map(t=>t.order??0))+1;
       const mk=rs.map((r,i)=>({id:r+"_"+key,key,room:r,phase:st.phase,title,status:"todo",due:sh.querySelector("#du").value||"",who:who,assignee:as,note:"",order:base+i}));
@@ -1621,8 +1632,8 @@ function taskSheet(key,roomId){
   const names=[...new Set([me,...S.tasks.map(t=>t.who)].filter(Boolean))].slice(0,5);
   let keepM=[...new Set(ts.flatMap(t=>t.media||[]))],addM=[];const mdate0={};ts.forEach(t=>Object.assign(mdate0,t.mdate||{}));
   const body=()=>{const d=draft[cur];return `<label class="f">Status</label>${chipRow("status",perm.manage?ST:ST.filter(x=>x[0]!=="done"||d.status==="done"),d.status)}${!perm.manage&&d.status==="done"?`<p class="hint">Checked and approved by the Project Lead. Only the lead can change it.</p>`:""}
-   ${dateField("du",d.due,"Due date").replace(/<div class="chips"[\s\S]*?<\/div>/,futureChips("du"))}
    ${assignBlock(d,names)}
+   ${dueRow("du",d.due)}
    <label class="f" for="nt">Note</label><textarea id="nt" class="t" maxlength="400" placeholder="Anything the team should know">${esc(d.note)}</textarea>${micBtn("nt","Speak a note")}`};
   sheet("Task",`<form id="f" novalidate><label class="f" for="ti">Task</label><textarea id="ti" class="t grow-ta" rows="1" maxlength="160">${esc(title)}</textarea>${micBtn("ti","Speak the task name")}
    ${ts.length>1?`<div class="row between" style="margin:10px 0 4px;gap:8px"><span class="muted small" id="spt">${split?"Editing one classroom":"Applies to both classrooms"}</span><button type="button" class="linkbtn" id="spl" style="padding:0;min-height:36px">${split?"Edit both together":"Split by classroom"}</button></div><div class="segc" role="group" id="rm" ${split?"":"hidden"}>${ts.sort((a,b)=>roomNo(a.room)-roomNo(b.room)).map(t=>`<button type="button" data-r="${t.room}" aria-pressed="${t.room===cur}">${esc(roomName(t.room))}</button>`).join("")}</div>`:`<p class="muted small" style="margin:6px 0 0">${esc(roomName(cur))}</p>`}
@@ -1631,9 +1642,9 @@ function taskSheet(key,roomId){
    ${sm.code?`<button type="button" class="btn block" id="tdisc" style="margin-top:12px">${ic("chat")}Discuss this task${threadMsgs("task|"+key).length?" · "+threadMsgs("task|"+key).length:""}</button>`:""}
    <div class="foot"><button class="btn primary block">Save task</button></div></form>`,(sh,close)=>{
     const read=()=>{const d=draft[cur];d.due=sh.querySelector("#du")?.value||"";d.who=sh.querySelector("#wh")?.value.trim()||"";if(d.assignee&&d.who!==pName(d.assignee))d.assignee="";d.note=sh.querySelector("#nt")?.value.trim()||"";title=sh.querySelector("#ti").value};
-    const wire=()=>{wireDc(sh);wireMics(sh);sh.querySelectorAll('[data-ch="status"]').forEach(b=>b.onclick=()=>{draft[cur].status=b.dataset.v;sh.querySelectorAll('[data-ch="status"]').forEach(x=>x.setAttribute("aria-pressed",x===b))});
+    const wire=()=>{wireDc(sh);wireDue(sh);wireMics(sh);sh.querySelectorAll('[data-ch="status"]').forEach(b=>b.onclick=()=>{draft[cur].status=b.dataset.v;sh.querySelectorAll('[data-ch="status"]').forEach(x=>x.setAttribute("aria-pressed",x===b))});
       sh.querySelectorAll("[data-nm]").forEach(b=>b.onclick=()=>{sh.querySelector("#wh").value=b.dataset.nm});
-      sh.querySelectorAll("[data-as]").forEach(b=>b.onclick=()=>{const d=draft[cur],prev=d.assignee&&pName(d.assignee),w=sh.querySelector("#wh");d.assignee=asgToggle(d.assignee,b.dataset.as);if(d.assignee)w.value=pName(d.assignee);else if(w.value===prev)w.value="";asPress(sh,d.assignee)})};
+      sh.querySelectorAll("[data-as]").forEach(b=>b.onclick=()=>{const d=draft[cur],prev=d.assignee&&pName(d.assignee),w=sh.querySelector("#wh");d.assignee=asgToggle(d.assignee,b.dataset.as);if(d.assignee)w.value=pName(d.assignee);else if(w.value===prev)w.value="";asPress(sh,d.assignee);otherOff(sh)});wireOther(sh,()=>{draft[cur].assignee=""})};
     const paintM=()=>{const th=sh.querySelector("#tth");
       th.innerHTML=keepM.map((m,i)=>`<div class="etile"><span data-m="${m}" style="position:absolute;inset:0"></span><button type="button" data-open="${i}" aria-label="Open photo or video ${i+1}" style="position:absolute;inset:0;border:0;padding:0;background:none"></button><button type="button" class="rm" data-k="${m}" aria-label="Remove">${ic("x","sm")}</button></div>`).join("")+addM.map((a,i)=>`<div class="etile">${a.video?`<video src="${a.url}#t=0.1" muted playsinline preload="metadata"></video><span class="play"></span>`:`<img src="${a.url}" alt="New photo ${i+1}">`}<button type="button" class="rm" data-a="${i}" aria-label="Remove">${ic("x","sm")}</button></div>`).join("");
       th.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>lightbox(keepM,+b.dataset.open));
@@ -1728,7 +1739,7 @@ function paySheet(id){
   <label class="f" for="am">Amount</label><div class="amtin"><b>R</b><input id="am" inputmode="decimal" autocomplete="off" placeholder="0,00" value="${x?String(x.amount).replace(".",","):""}"></div>
   ${ct?`<div class="chips" style="margin-top:8px">${[10,15,20,25,30].map(n=>`<button type="button" class="chip" data-pc="${n}">${n}%</button>`).join("")}</div><p class="hint">Percentages are of the ${money0(ct)} contract.</p>`:""}
   <label class="f" for="ph">Due when this phase is finished</label><select id="ph" class="t sel"><option value="">Not linked to a phase</option>${PH.map(p=>`<option value="${p[0]}" ${p[0]===st.phase?"selected":""}>${esc(p[1])}</option>`).join("")}</select>
-  ${dateField("du",x?.due||"","Due date (optional)").replace(/<div class="chips"[\s\S]*?<\/div>/,futureChips("du"))}
+  ${dueRow("du",x?.due||"","Due")}
   <label class="f">Status</label>${chipRow("paid",[["0","Not paid yet"],["1","Paid"]],st.paid?"1":"0")}
   <div id="pd" ${st.paid?"":"hidden"}>${dateField("po",x?.paidOn||today(),"Date paid")}</div>
   <label class="f" for="nt">Note or invoice number</label><input id="nt" class="t" maxlength="120" value="${esc(x?.note||"")}">
@@ -1762,7 +1773,7 @@ function matSheet(id,defPhase){
    ${st.sec==="stock"?`<label class="f" for="mn">Warn me when less than this is left</label><input id="mn" class="t" inputmode="decimal" placeholder="Leave empty for no warning" value="${m?.min?String(m.min).replace(".",","):""}">`:""}
    <label class="f">${st.sec==="stock"?"Order status (before the first delivery)":"Status"}</label>${chipRow("status",L,st.status)}
    <details class="more" ${m&&(m.sup||m.due||(m.room&&m.room!=="both"))?"open":""}><summary>More details: classroom, supplier and date needed</summary>${st.sec==="stock"?"":`<label class="f">For which classroom?</label>${chipRow("room",roomOpts(),st.room)}`}${S.sups.length?`<label class="f" for="su">Supplier</label><select id="su" class="t sel"><option value="">Not chosen</option>${S.sups.map(s=>`<option value="${s.id}" ${s.id===m?.sup?"selected":""}>${esc(s.name)}</option>`).join("")}</select>`:""}
-   ${dateField("du",m?.due||"","Needed by").replace(/<div class="chips"[\s\S]*?<\/div>/,futureChips("du"))}</details>
+   ${dueRow("du",m?.due||"","Needed by")}</details>
    ${st.sec==="stock"&&moves.length?`<label class="f">Deliveries and use</label><ul class="list" id="mv">${moves.slice().reverse().map(x=>`<li><div class="grow"><div class="lt">${x.t==="in"?"Delivered":"Used"} ${num(x.qty,2)}</div><div class="ls">${dshort(x.date)}${x.note?" · "+esc(x.note):""}</div></div>${x.doc&&S.docs.some(d=>d.id===x.doc)?`<button type="button" class="btn small" data-docv="${x.doc}" aria-label="View delivery note photo">${ic("image","sm")}Note</button>`:x.photo?`<button type="button" class="btn small" data-note="${x.photo}" aria-label="View delivery note photo">${ic("image","sm")}Note</button>`:""}<button type="button" class="btn small danger" data-rm="${x.id}" aria-label="Remove this entry">${ic("trash","sm")}Remove</button></li>`).join("")}</ul>`:""}`};
   sheet(m?"Edit item":"Add item",`<form id="f" novalidate><label class="f" for="nm">Item</label><input id="nm" class="t" maxlength="100" value="${esc(m?.name||"")}" placeholder="For example: Cement, door, paint">
   <label class="f" for="mph">Which phase is it for?</label><select id="mph" class="t sel"><option value="">Not assigned</option>${PH.map(p=>`<option value="${p[0]}" ${p[0]===st.phase?"selected":""}>${esc(p[1])}</option>`).join("")}</select>
@@ -1845,11 +1856,11 @@ function logSheet(id,kind,ph,files){
   <div class="pthumbs" id="th"></div>
   <label class="f">Photo size</label>${chipRow("psize",PSIZES.map((p,i)=>[String(i),p[0]]),String(psize))}<p class="hint" id="pshint">${PSIZES[psize][2]}. Smaller photos send faster on WhatsApp and share faster with your team.</p>
   <label class="f" for="tx">What happened?</label><textarea id="tx" class="t" maxlength="600" placeholder="${st.kind==="issue"?"Describe what needs fixing":"For example: first row of bricks done on Classroom 1"}">${esc(l?.text||"")}</textarea>${SR?`<button type="button" class="btn small" id="mic" style="margin-top:8px" aria-pressed="false">${ic("mic")}<span>Dictate</span></button>`:""}
-  <label class="f">Which classroom?</label>${chipRow("room",roomOpts(),st.room)}
   <label class="f" for="ph">Phase</label><select id="ph" class="t sel"><option value="">Not sure</option>${PH.map(p=>`<option value="${p[0]}" ${p[0]===(st.phase||(l?"":curPhases()[0]))?"selected":""}>${esc(p[1])}</option>`).join("")}</select>
+  ${roomRow(st,roomOpts())}
   ${dateField("dt",l?.date||today())}
   <div class="foot"><button class="btn primary block" id="go">${l?"Save changes":"Save to site log"}</button></div></form>`,(sh,close)=>{
-    wireDc(sh);["kind","room"].forEach(n=>wireChips(sh,st,n));
+    wireDc(sh);wireChips(sh,st,"kind");wireRoomRow(sh,st);
     sh.querySelectorAll('[data-ch="psize"]').forEach(b=>b.onclick=()=>{psize=+b.dataset.v;try{localStorage.setItem("build-psize",psize)}catch{}sh.querySelectorAll('[data-ch="psize"]').forEach(x=>x.setAttribute("aria-pressed",x===b));sh.querySelector("#pshint").textContent=PSIZES[psize][2]+". Smaller photos send faster on WhatsApp and share faster with your team."});
     const paint=async()=>{const th=sh.querySelector("#th");th.innerHTML=keep.map(m=>`<div class="etile"><span data-m="${m}" style="position:absolute;inset:0"></span><button type="button" class="rm" data-k="${m}" aria-label="Remove photo">${ic("x","sm")}</button></div>`).join("")+add.map((a,i)=>`<div class="etile"><img src="${a.url}" alt="New photo ${i+1}"><button type="button" class="rm" data-a="${i}" aria-label="Remove photo">${ic("x","sm")}</button></div>`).join("");
       th.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>{keep=keep.filter(x=>x!==b.dataset.k);paint()});th.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{URL.revokeObjectURL(add[+b.dataset.a].url);add.splice(+b.dataset.a,1);paint()});hydrate(th)};
@@ -2743,7 +2754,7 @@ function newMsgSheet(everyone){
   if(!others.length){toast("Add people first.");go("people");return}
   const to=new Set(everyone?["all"]:[]);let files=[];
   sheet("New update",`<form id="f" novalidate><label class="f">Send to</label>
-  <div class="chips" role="group" aria-label="Send to" id="rc"><button type="button" class="chip" data-r="all" aria-pressed="${to.has("all")}">Everyone</button>${others.map(p=>`<button type="button" class="chip" data-r="${p.pid}" aria-pressed="false">${esc(p.name)}</button>`).join("")}</div>
+  <div class="avs" role="group" aria-label="Send to" id="rc">${avBtn('data-r="all"',"Everyone",ic("users"),to.has("all"))}${others.map(p=>avBtn(`data-r="${p.pid}"`,p.name,esc(avIni(p.name)),false)).join("")}</div>
   <p class="hint" id="rt">${to.has("all")?"Everyone on the project will get this.":"Choose one person, a few people or everyone."}</p>
   <label class="f" for="mt">Message</label><textarea id="mt" data-autofocus class="t grow-ta" rows="3" maxlength="600" placeholder="What does the team need to know?"></textarea>${micBtn("mt","Speak the message")}
   <div class="photo-add"><button type="button" class="btn" id="mp">${ic("camera")}Add photo</button></div><input type="file" id="mf" accept="image/*" multiple hidden><p class="hint" id="mh"></p>
@@ -3086,7 +3097,7 @@ function threadSheet(ref){
   const msgHtml=m=>`<div class="tmsg ${m.from===sm.pid?"me":""}"><div class="row between" style="gap:8px"><b class="small">${m.from===sm.pid?"You":esc(pName(m.from))}</b><span class="muted small">${ago(m.t)}</span></div>${m.text?`<p style="margin:4px 0 0;white-space:pre-wrap">${esc(m.text)}</p>`:""}${askBlock(m)}</div>`;
   sheet("Discussion",`<p class="lt" style="margin:6px 0 10px">${esc(title)}</p>
   <div class="tthread" id="tth2">${list.length?list.map(msgHtml).join(""):`<p class="muted small">Nothing said yet.</p>`}</div>
-  ${can?`<form id="f" novalidate><label class="f">Send to</label><div class="chips" role="group" aria-label="Send to">${others.map(p=>`<button type="button" class="chip" data-r="${p.pid}" aria-pressed="${to.has(p.pid)}">${esc(p.name)}</button>`).join("")}</div>
+  ${can?`<form id="f" novalidate><label class="f">Send to</label><div class="avs" role="group" aria-label="Send to">${others.map(p=>avBtn(`data-r="${p.pid}"`,p.name,esc(avIni(p.name)),to.has(p.pid))).join("")}</div>
   <label class="f" for="tm">Message</label><textarea id="tm" class="t grow-ta" rows="2" maxlength="400" placeholder="Ask a question or reply"></textarea>${micBtn("tm","Speak the message")}
   <div class="chips" role="group" aria-label="Kind of message" style="margin-top:8px"><button type="button" class="chip" id="tk" aria-pressed="false">Needs an OK</button></div><p class="hint">With "Needs an OK" the people you chose can approve or say not yet, and you see who has.</p>
   <div class="foot"><button class="btn primary block">Send</button></div></form>`:`<p class="hint">Your access is to receive updates, so you can read this and approve requests, but not write here.</p>`}`,(sh,close)=>{
@@ -3134,7 +3145,7 @@ function snagSheet(id){
   const opts=[...peopleList().filter(p=>p.active).map(p=>[p.pid,p.name]),...S.sups.map(s=>["sup:"+s.id,s.name+" (contractor)"])];
   sheet("Snag owner and date",`<form id="f" novalidate><p class="lt" style="margin:6px 0 0">${esc((l.text||"Snag").slice(0,90))}</p>
   <label class="f" for="so">Who fixes it?</label><select id="so" class="t sel"><option value="">Not assigned</option>${opts.map(([k,n])=>`<option value="${esc(k)}" ${l.owner===k?"selected":""}>${esc(n)}</option>`).join("")}</select>
-  ${dateField("du",l.due||"","Fix by")}
+  ${dueRow("du",l.due||"","Fix by")}
   <label class="f" for="sw">Where exactly (optional)</label><input id="sw" class="t" maxlength="80" value="${esc(l.where||"")}" placeholder="For example: north wall, by the door">
   <div class="foot"><button class="btn primary block">Save</button></div></form>`,(sh,close)=>{
     wireDc(sh);
@@ -3359,7 +3370,7 @@ function stageSheet(tid,sid){
   <div class="chips" style="margin-top:8px">${["Deposit","Progress payment","Final payment","Retention"].map(x=>`<button type="button" class="chip" data-lb="${x}" aria-pressed="false">${x}</button>`).join("")}</div>
   <label class="f" for="am">Amount</label><div class="amtin"><b id="cu">R</b><input id="am" inputmode="decimal" autocomplete="off" placeholder="0,00" value="${s?String(s.amount).replace(".",","):""}"></div>
   ${chipRow("mode",[["r","Rand"],["p","% of the total"]],st.mode)}<p class="hint" id="mh">Quote total ${money(val)}.</p>
-  ${dateField("du",s?.due||"","Due date (optional)").replace(/<div class="chips"[\s\S]*?<\/div>/,futureChips("du"))}
+  ${dueRow("du",s?.due||"","Due")}
   <label class="f">Payment</label>${chipRow("paid",[["1","Paid"],["0","Not paid yet"]],st.paid?"1":"0")}
   <div id="pdw" ${st.paid?"":"hidden"}>${dateField("pd",s?.paidOn||today(),"Date paid")}</div>
   <div class="foot"><button class="btn primary block">${s?"Save payment":"Add payment"}</button></div>${s?`<button type="button" class="btn block danger" id="dx" style="margin-top:8px">${ic("trash")}Delete this payment</button>`:""}</form>`,(sh,close)=>{
@@ -3400,8 +3411,21 @@ function asPress(sh,a){const l=asgL(a);sh.querySelectorAll("[data-as]").forEach(
 function assignBlock(d,names){
   const ppl=sm.code?peopleList().filter(p=>p.active):[];
   if(!ppl.length)return `<label class="f" for="wh">Who is doing it?</label>${names.length?`<div class="chips" style="margin-bottom:8px">${names.map(n=>`<button type="button" class="chip" data-nm="${esc(n)}">${esc(n)}</button>`).join("")}</div>`:""}<input id="wh" class="t" maxlength="60" value="${esc(d.who)}" placeholder="Name or company">`;
-  return `<label class="f">Assigned to <span class="muted small" style="font-weight:400">· choose one or more</span></label><div class="chips" role="group" aria-label="Assigned to (choose one or more)"><button type="button" class="chip" data-as="" aria-pressed="${!d.assignee}">Nobody</button>${ppl.map(p=>`<button type="button" class="chip" data-as="${p.pid}" aria-pressed="${asgHas(d,p.pid)}">${esc(p.pid===sm.pid?"Me":p.name)}</button>`).join("")}</div><label class="f" for="wh">Or someone outside the team</label><input id="wh" class="t" maxlength="60" value="${esc(d.who)}" placeholder="Name or company">`;
+  /* the team as round initials: tap one or more, or "Other" for someone outside the team */
+  const outside=!!d.who&&!(d.assignee&&d.who===pName(d.assignee)),ini=n=>String(n).trim().split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
+  const av=(attrs,label,inner,on)=>`<button type="button" class="av" ${attrs} aria-pressed="${on}" aria-label="${esc(label)}"><span class="avc">${inner}</span><span class="avn">${esc(label)}</span></button>`;
+  return `<label class="f">Who <span class="muted small" style="font-weight:400">· tap one or more</span></label><div class="avs" role="group" aria-label="Assigned to">${ppl.map(p=>av(`data-as="${p.pid}"`,p.pid===sm.pid?"Me":p.name,esc(ini(p.name)),asgHas(d,p.pid))).join("")}${av('data-other="1"',"Other",ic("plus"),outside)}</div><input id="wh" class="t" maxlength="60" value="${esc(d.who)}" placeholder="Name or company" style="margin-top:8px" ${outside?"":"hidden"}>`;
 }
+/* choosing a person hides the outside-name box; "Other" clears the team choice and asks for a name */
+function otherOff(sh){const o=sh.querySelector("[data-other]"),w=sh.querySelector("#wh");if(!o||!w)return;if(sh.querySelector("[data-as][aria-pressed=true]")){o.setAttribute("aria-pressed","false");w.hidden=true}}
+function wireOther(sh,clear){const o=sh.querySelector("[data-other]"),w=sh.querySelector("#wh");if(!o||!w)return;o.onclick=()=>{clear();sh.querySelectorAll("[data-as]").forEach(x=>x.setAttribute("aria-pressed","false"));const on=o.getAttribute("aria-pressed")!=="true";o.setAttribute("aria-pressed",on);w.hidden=!on;w.value="";if(on)w.focus()}}
+/* one quiet row for the due date: tap it and the phone's date picker opens */
+const avIni=n=>String(n).trim().split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
+const avBtn=(attrs,label,inner,on)=>`<button type="button" class="av" ${attrs} aria-pressed="${on}" aria-label="${esc(label)}"><span class="avc">${inner}</span><span class="avn">${esc(label)}</span></button>`;
+const roomRow=(st,opts)=>`<div class="row between" style="margin-top:12px;gap:8px"><span class="muted small" id="rml">${esc(roomLine(st.room))}</span><button type="button" class="linkbtn" id="rmb" style="padding:0;min-height:36px">Change</button></div><div id="rmw" hidden>${chipRow("room",opts,st.room)}</div>`;
+function wireRoomRow(sh,st){wireChips(sh,st,"room",()=>{sh.querySelector("#rml").textContent=roomLine(st.room);sh.querySelector("#rmw").hidden=true});sh.querySelector("#rmb").onclick=()=>{const w=sh.querySelector("#rmw");w.hidden=!w.hidden}}
+const dueRow=(id,val,label="When")=>`<label class="f">${label} <span class="muted small" style="font-weight:400">· optional</span></label><div class="duerow"><div class="duebtn"><span id="${id}t">${val?esc(dlong(val)):"No due date"}</span>${ic("calendar","sm")}<input id="${id}" type="date" value="${esc(val||"")}" aria-label="Due date"></div><button type="button" class="linkbtn" data-dc="" data-for="${id}" ${val?"":"hidden"}>Clear</button></div>`;
+function wireDue(sh,id="du"){const i=sh.querySelector("#"+id),t=sh.querySelector("#"+id+"t"),c=sh.querySelector('[data-dc][data-for="'+id+'"]');if(!i||!t||i._dw)return;i._dw=1;const upd=()=>{t.textContent=i.value?dlong(i.value):"No due date";if(c)c.hidden=!i.value};i.addEventListener("input",upd);i.addEventListener("change",upd);i.addEventListener("click",()=>{try{i.showPicker()}catch{}})}
 function tasksV(){
   const open=S.tasks.filter(t=>t.status!=="done"),td=today(),ppl=peopleList().filter(p=>p.active);
   const f=taskF||(sm.code?"me":"all");
@@ -3937,20 +3961,20 @@ function furnSheet(id){
   <label class="f">How many?</label><div class="stepper"><button type="button" data-step="-1" aria-label="Fewer">${ic("minus")}</button><input id="fq" inputmode="decimal" value="${t?String(t.qty||1).replace(".",","):"1"}" aria-label="Quantity"><button type="button" data-step="1" aria-label="More">${ic("plus")}</button></div>
   ${chipRow("unit",[...new Set([...FUNITS,st.unit])].map(u=>[u,u]),st.unit)}
   <details class="more" ${t&&(t.due||t.who||t.note||media.length)?"open":""}><summary>More details: due date, who is making it, notes, photos</summary>
-  ${dateField("du",t?.due||"","Due date (optional)").replace(/<div class="chips"[\s\S]*?<\/div>/,futureChips("du"))}
+  ${dueRow("du",t?.due||"")}
   ${assignBlock({assignee:st.assignee,who:t?.who||""},names)}
   <label class="f" for="fnt">Note (optional)</label><textarea id="fnt" class="t" maxlength="300" placeholder="Size, colour, anything the maker should know">${esc(t?.note||"")}</textarea>
   <div class="photo-add"><button type="button" class="btn" id="fp">${ic("camera")}Add photos or drawings</button></div><input type="file" id="fpi" accept="image/*" multiple hidden><p class="hint" id="fph">${media.length?media.length+" photo"+(media.length===1?"":"s")+" saved.":""}</p>
   </details>
   <div class="foot"><button class="btn primary block" id="sv">${t?"Save changes":"Add"}</button></div>${t?`<button type="button" class="btn block danger" id="fdel" style="margin-top:8px">${ic("trash")}Delete this item</button>`:""}</form>`,(sh,close)=>{
-    wireDc(sh);wireChips(sh,st,"unit");
+    wireDc(sh);wireDue(sh);wireChips(sh,st,"unit");
     const fq=sh.querySelector("#fq");sh.querySelectorAll("[data-step]").forEach(b=>b.onclick=()=>{fq.value=String(Math.max(0,Math.round(((parseAmt(fq.value)||0)+ +b.dataset.step)*100)/100)).replace(".",",")});
     sh.querySelectorAll("[data-fs]").forEach(b=>b.onclick=()=>{sh.querySelector("#fn").value=b.dataset.fs});
     const frc=sh.querySelector("#frc");
     if(frc)frc.querySelectorAll("[data-fr]").forEach(b=>b.onclick=()=>{const k=b.dataset.fr;if(k==="all"){const full=FROOMS.every(r=>st.rooms.has(r[0]));st.rooms=full?new Set():new Set(FROOMS.map(r=>r[0]))}else{if(st.rooms.has(k))st.rooms.delete(k);else st.rooms.add(k)}
       frc.querySelectorAll("[data-fr]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.fr==="all"?FROOMS.every(r=>st.rooms.has(r[0])):st.rooms.has(x.dataset.fr)))});
     sh.querySelectorAll("[data-nm]").forEach(b=>b.onclick=()=>{sh.querySelector("#wh").value=b.dataset.nm});
-    sh.querySelectorAll("[data-as]").forEach(b=>b.onclick=()=>{const prev=st.assignee&&pName(st.assignee),w=sh.querySelector("#wh");st.assignee=asgToggle(st.assignee,b.dataset.as);if(st.assignee)w.value=pName(st.assignee);else if(w.value===prev)w.value="";asPress(sh,st.assignee)});
+    sh.querySelectorAll("[data-as]").forEach(b=>b.onclick=()=>{const prev=st.assignee&&pName(st.assignee),w=sh.querySelector("#wh");st.assignee=asgToggle(st.assignee,b.dataset.as);if(st.assignee)w.value=pName(st.assignee);else if(w.value===prev)w.value="";asPress(sh,st.assignee);otherOff(sh)});wireOther(sh,()=>{st.assignee=""});
     sh.querySelector("#fp").onclick=()=>sh.querySelector("#fpi").click();
     sh.querySelector("#fpi").onchange=e=>{files=[...files,...e.target.files].slice(0,8);e.target.value="";sh.querySelector("#fph").textContent=(media.length+files.length)+" photo"+(media.length+files.length===1?"":"s")};
     if(t)sh.querySelector("#fdel").onclick=()=>{close();delRecs(S.furn,x=>x.id===id,"Item")};
