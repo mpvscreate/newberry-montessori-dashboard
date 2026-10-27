@@ -516,6 +516,9 @@ body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!importan
 .mmiss.skel{display:grid;place-items:center;color:var(--muted);padding:0}.mmiss.skel .i{width:22px;height:22px;opacity:.7}
 .wxchip.skel{position:relative;inset:auto;color:var(--muted)}
 @media (prefers-reduced-motion:reduce){.skel{animation:none}}
+.tipc{padding:14px}.tipc .tipt{display:block;font:700 1.05rem var(--display)}
+.topt{display:block;width:100%;text-align:left;padding:12px 14px;margin-bottom:8px;border-radius:14px;border:1px solid var(--line);background:var(--sheet);color:var(--ink);font:inherit;cursor:pointer}.topt b{display:block;font-weight:600}.topt span{display:block;margin-top:2px;font-size:.88rem;color:var(--muted);line-height:1.35}.topt small{display:block;margin-top:4px;font-size:.75rem;color:var(--muted)}.topt[aria-pressed="true"]{border:2px solid var(--accent);padding:11px 13px;background:var(--accent-soft)}
+.tprev{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--paper)}.tprev img{width:30px;height:30px;border-radius:8px;flex:none}.tprev div{min-width:0;flex:1}.tprev b{display:block;font-size:.9rem}.tprev span{display:block;font-size:.84rem;color:var(--muted);line-height:1.35}.tprev small{flex:none;font-size:.72rem;color:var(--muted)}
 .qa.one{gap:8px;margin:2px 0 10px}.qa.one button{flex-direction:row;gap:7px;min-height:46px;padding:6px 8px;border-radius:15px;font-size:.92rem}.qa.one button .i{width:20px;height:20px;flex:none}
 .card.today{padding:8px 14px 6px;margin:0 0 10px;border-radius:16px}.card.today .eyebrow{font-size:.66rem}.card.today .list li{padding:6px 0;gap:10px}.card.today .list li .st{width:30px;height:30px}.card.today .list li .st .i{width:16px;height:16px}.card.today .lt,.card.today .ls{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card.today .lt{font-size:.88rem}.card.today .ls{font-size:.74rem}.card.today .grow{min-width:0}.card.today .row-ic{width:30px;height:30px}.card.today .linkbtn{min-height:28px!important;font-size:.8rem}
 .phg{margin:0 0 16px}.phg h3{margin:0 0 6px;font:700 .95rem var(--display);letter-spacing:.01em}.ptg{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;border-radius:14px;overflow:hidden}.ptg .mtile{aspect-ratio:1}.ptg .pdt{position:absolute;left:4px;bottom:4px;z-index:2;background:rgba(0,0,0,.55);color:#fff;border-radius:6px;padding:1px 6px;font-size:.66rem;font-weight:600}
@@ -1347,6 +1350,7 @@ function home(){
   return `<h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);margin:-1px">Overview</h2>
   <div class="qa one"><button class="main" data-act="addphoto">${ic("camera")}Photo</button><button data-act="gostock">${ic("truck")}Material</button><button data-go="report">${ic("trend")}Report</button></div>
   ${todayCard()}
+  ${tipCard()}
   ${(()=>{const f=S.furn.length&&lvl("furn")>=1?fStats(S.furn):null,bar=(go,l,v)=>`<button type="button" class="ovb" ${go}><span class="ovl">${l}</span><b>${v}%</b><span class="meter"><i style="width:${v}%"></i></span></button>`;
    return `<section class="card ovs"><div class="row between" style="gap:10px;align-items:flex-start"><div><div class="eyebrow" style="margin:0">Schedule</div><div class="big" style="font-size:1.7rem;line-height:1.1">${left===null?"–":left>=0?left:-left}<small style="font-size:.9rem;font-weight:500"> ${left===null?"":left>=0?"days to go":"days past target"}</small></div><div class="muted small">${S.settings.start?dshort(S.settings.start):"?"} to ${S.settings.target?dshort(S.settings.target):"?"}</div></div><div class="row wr" style="gap:6px;justify-content:flex-end">${sched.chip}</div></div>
    <div class="ovbs">${bar('data-go="build"',R.length>1?"Classrooms":esc(R[0].name),p)}${f?bar('data-act="gofurn"',"Furniture",f.p):""}</div>
@@ -1606,6 +1610,7 @@ function more(){
    <li class="msec">Team</li>
    ${row("bell","Updates","Messages sent between people"+(unreadMsgs().length?" · "+unreadMsgs().length+" new":""),"goinbox")}
    ${sm.code&&pushSupported()?row("bell","Notifications",lsGet("build-push")==="1"?"On for this phone":"Off. Tap to get phone notifications","pushsheet"):""}
+   ${sm.code&&perm.manage?row("bell","Daily tip","Choose the 7:00 tip for the team"+(TIP.sent?" · Sent today":TIP.id?" · Picked for today":""),"tipsheet"):""}
    ${perm.manage?row("users","People and access",sm.code?"Who is on the project and what they can do":"Share the project and add your team","gopeople"):""}
    <li class="msec">Money, reports and history</li>
    ${lvl("money")>=1&&canMoney()?row("users","Extra labour","Approved extra work and what is still to pay"+(moneyOK?"":" · Locked"),"goextra"):""}
@@ -1638,7 +1643,7 @@ function act(a,id,el){
   {let ar=ACT_AREA[a];if((a==="cyc"||a==="cycboth")&&isFurn(id))ar="furn";if(ar&&lvl(ar)<2){toast(AREA_MSG(ar));return}}
   if(!perm.manage&&["erase","import","project","gopeople"].includes(a)){toast("Only the Project Lead can do this.");return}
   ({
-   cyc:()=>cycTask(id),opentask:()=>taskSheet(...id.split("|")),edittask:()=>taskSheet(...id.split("|")),
+   tipgo:()=>{const t=tipById(TIP.id);if(t)openTarget(t[3])},tipx:()=>{lsSet("b3-tipx",TIP.day);render()},tipsheet:()=>tipSheet(),cyc:()=>cycTask(id),opentask:()=>taskSheet(...id.split("|")),edittask:()=>taskSheet(...id.split("|")),
    deltask:()=>{const[k]=id.split("|");const f=roomF;delRecs(S.tasks,t=>t.key===k&&(f==="all"||t.room===f||t.room==="shared"),"Task")},
    addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>{const[i,g]=id.split("|");quickPhoto(i,undefined,!!g)},gbackup:()=>backupSheet(),addfurn:()=>furnSheet(),editfurn:()=>furnSheet(id),delfurn:()=>delRecs(S.furn,x=>x.id===id,"Item"),furnstarter:()=>furnStarter(),furnlb:()=>{const[rid,i]=id.split("|"),r=S.furn.find(x=>x.id===rid);if(r)lightbox(r.media||[],+i)},gofurn:()=>{bmode="furn";lsSet("build-bmode","furn");if(id)fRoom=id;go("build");render()},adddiary:()=>diarySheet(),editdiary:()=>diarySheet(id),godiary:()=>go("diary"),goexport:()=>exportSheet(),goextra:()=>go("extra"),diaryshare:()=>{const tx=diaryText(14);if(!tx){toast("No diary entries in the last 14 days.");return}shareText(tx)},diaryprint:()=>diaryPrint(),savelink:()=>personSheet(sm.pid),linkdismiss:()=>{lsSet("build-linkdis",today());render()},cycboth:()=>cycMany(((el&&el.dataset.ids)||id).split(",")),docselect:()=>{docSel=docSel?null:new Set();render()},docall:()=>{const l=docList();docSel=docSel&&docSel.size===l.length?new Set():new Set(l.map(d=>d.id));render()},docprint:()=>printSelectedDocs(),gotasks:()=>{taskF=id||"";go("tasks")},gotrades:()=>{moneySeg="trades";go("money")},pushsheet:()=>pushSheet(),pushdismiss:()=>{lsSet("build-pushdis",today());render()},restore:()=>restoreSheet(),addtrade:()=>tradeSheet(),edittrade:()=>tradeSheet(id),opentrade:()=>tradeView(id),deltrade:()=>delRecs(S.trades,x=>x.id===id,"Quote"),tradeaccept:()=>{const t=S.trades.find(x=>x.id===id);if(!t)return;const ex=tradeStatus(t,"accepted");logAct(`Accepted the ${t.trade} quote from ${tName(t)}: ${money(tVal(t))}`,1);save();render();toast("Quote accepted."+ex.msg,ex.undo)},paystage:()=>{const[tid,sid]=id.split("|"),t=S.trades.find(x=>x.id===tid),sg=t&&(t.stages||[]).find(x=>x.id===sid);if(!sg)return;const u=undoEdit(sg,{paid:true,paidOn:today()});logAct(`Paid ${money(sg.amount)} to ${tName(t)} (${t.trade})`,1);save();render();toast(`${money(sg.amount)} marked paid.`,u)},goinbox:()=>go("inbox"),gopeople:()=>go("people"),newmsg:()=>newMsgSheet(),addperson:()=>personSheet(),editperson:()=>personSheet(id),msglb:()=>{const[mid,i]=id.split("|");const m=S.msgs.find(x=>x.id===mid);if(m)lightbox(m.media||[],+i)},sharesheet:()=>shareSheet(),bkdismiss:()=>{lsSet("build-bkdis",today());render()},phdrive:()=>driveSave(phasePhotoIds(id).map((m,i)=>({media:m,name:(PSHORT[id]||"Phase")+" photo "+(i+1)+".jpg"}))),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),gosnags:()=>go("snags"),addcost:()=>costSheet(),editcost:()=>S.costs.find(x=>x.id===id)?.extra?extraSheet(null,id):costSheet(id),addextra:()=>extraSheet(id),editextra:()=>extraSheet(null,id),delextra:()=>delRecs(S.costs,c=>c.id===id,"Extra labour"),unlockextra:()=>moneyGate(()=>render()),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
    payall:()=>{payAll=!payAll;render()},resetpays:()=>{const ps=[...S.pays],cs=S.costs.filter(c=>c.pay);S.pays.length=0;cs.forEach(c=>S.costs.splice(S.costs.indexOf(c),1));payAll=false;save();render();toast("All builder payments reset to R 0.",()=>{ps.forEach(x=>S.pays.push(x));cs.forEach(c=>S.costs.push(c))})},recpay:()=>recPaySheet(),weekly:()=>weeklySheet(),addpay:()=>paySheet(),editpay:()=>paySheet(id),contract:()=>contractSheet(),diaryone:()=>{const e=S.diary.find(x=>x.id===id);if(e)shareText(diaryEntryText(e))},diarylb:()=>{const[eid,i]=id.split("|"),d=S.diary.find(x=>x.id===eid);if(d)lightbox(d.media||[],+i)},attmore:()=>{lsSet("build-attall",lsGet("build-attall")==="1"?"":"1");render()},wxrefresh:()=>{toast("Updating the weather…");wxLoad(true).then(()=>{render();toast(wx&&Date.now()-wx.t<6e4?"Weather is up to date.":"Could not load the weather. Check your connection.")})},joinlink:()=>shareSheet(),iosdismiss:()=>{lsSet("build-iosdis",today());render()},ncdismiss:()=>{lsSet("build-ncdis",today());render()},gedit:()=>{gEdit=!gEdit;render()},gadd:()=>gardenNameSheet(),gren:()=>gardenNameSheet(id),gdel:()=>gardenDel(id),pedit:()=>{if(!perm.manage)return;pEdit=!pEdit;render()},padd:()=>{if(perm.manage)phaseNameSheet()},pren:()=>{if(perm.manage)phaseNameSheet(id)},pdel:()=>{if(perm.manage)phaseDel(id)},pmv:()=>{if(!perm.manage)return;const[k,d]=id.split("|");phaseMove(k,+d)},estimate:()=>estimateSheet(),typicalpay:()=>typicalPays(),
@@ -2194,7 +2199,7 @@ async function pull(){
   if(!sm.code||!sb||pulling)return;pulling=true;
   try{
     let changed=false,gotMedia=false;
-    if(await loadMe())changed=true;await loadPeople();
+    if(await loadMe())changed=true;await loadPeople();tipLoad();
     let from=sm.lastPull,max=sm.lastPull;
     for(;;){
       const{data,error}=await sb.rpc("build3_pull",{p_code:sm.code,p_key:sm.key,p_since:from||null,p_lim:40});if(error)throw error;
@@ -2731,7 +2736,7 @@ const ROLE_PICK=["site","builder","owner","decor","finance","other"];
 const roleLabel=r=>(ROLES[r]||ROLES.other).label;
 const DEFAULT_PEOPLE=[["Albert","site"],["Jonathan","builder"],["Newberry","owner"],["Talana","decor"],["Audrey","finance"]];
 const READ_ACTS0=["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock","plprev","plnext","phdrive","gbackup"].concat(["goinbox","gopeople","newmsg","msglb","sharesheet"]);
-const READ_ACTS=READ_ACTS0.concat(["gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp","mbar","slipexport","slipview","thread","msgdec","snagexport","msgdel","msgclear","gosnags","attsheet","bmore"]);
+const READ_ACTS=READ_ACTS0.concat(["gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp","mbar","slipexport","slipview","thread","msgdec","snagexport","msgdel","msgclear","gosnags","attsheet","bmore","tipgo","tipx","tipsheet"]);
 const MONEY_ACTS=["addcost","editcost","delcost","budget","addpay","editpay","delpay","recpay","paypay","paycost","contract","typicalpay","weekly","resetpays","payall","report"];
 MONEY_ACTS.push("addtrade","edittrade","deltrade","opentrade","tradeaccept","paystage");
 const NOTE_ACTS=["addphoto","phphoto","adddoc"];
@@ -3628,7 +3633,69 @@ function pushPrompt(){
   return `<div class="note-card slim">${ic("bell")}<span class="nt"><b>Get the red number.</b> Turn on notifications.</span><span class="nb"><button type="button" class="linkbtn" data-act="pushsheet">Turn on</button><button type="button" class="linkbtn nx" data-act="pushdismiss" aria-label="Not now">${ic("x","sm")}</button></span></div>`;
 }
 function notifyLead(t){const ld=peopleList().find(p=>p.role==="lead");if(ld&&ld.pid!==sm.pid)notifySend([ld.pid],"Ready to check",t.title.slice(0,100),"check")}
-function openTarget(t){if(t==="furn"){bmode="furn";lsSet("build-bmode","furn");go("build");render()}else if(t==="check"){taskF="check";go("tasks")}else if(t==="inbox")go("inbox");else if(t==="tasks"){taskF="me";go("tasks")}else if(t==="diary")go("diary");else if(t==="report")go("report");else if(t==="snags")go("snags")}
+/* ---------- daily tip: the lead picks one at 6:30, the team gets it at 7:00 ---------- */
+const TIPS=[
+  ["swipe","Swipe to finish","Swipe a task right to tick it done. Swipe left to assign it or start a discussion.","tasks",""],
+  ["again","Add another","Adding several of the same product? Tick \"Add another of this product\" and the sheet stays open.","mats",""],
+  ["slip","Scan a slip","Photograph a slip and the app reads the total and files it for the export.","money","money"],
+  ["cmp","Before and after","Pick a before and an after photo for each phase, then slide to compare them.","photos",""],
+  ["snag","Snags have a thread","Tap a snag to give it an owner and chat about it. Needs an OK asks the lead to sign it off.","snags",""],
+  ["speak","Hold to speak","Hold the mic in the site diary and say what happened. No typing.","diary",""],
+  ["week","Share the week","Send a photo summary of the week to WhatsApp in one tap.","report","manage"],
+  ["wx","Weather on Today","Today shows the site weather and warns you when it is a poor day for pouring or painting.","home",""],
+  ["plans","Plans in your pocket","All the plans are under Plans on the Build screen. Open them on site, no printing.","plans",""],
+  ["undo","Made a mistake?","After you add or change something, tap Undo in the message at the bottom.","build",""],
+  ["chart","Money charts","Money shows where the budget goes in simple charts.","money","money"],
+  ["upd","Send an update","Send a message with a photo to the whole team from Updates.","inbox",""],
+  ["ban","Choose the phase photo","Pick the photo shown on each phase banner so Build looks like your site.","build",""],
+  ["slipx","Export your slips","Export every scanned slip with its total when the finance team asks for them.","money","money"]
+];
+let TIP={day:"",id:"",sent:false,used:[],at:0};
+const tipDay=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"Africa/Johannesburg"}).format(new Date());
+const tipById=id=>TIPS.find(t=>t[0]===id);
+async function tipLoad(force){
+  if(!sm.code||sm.off)return;
+  if(!force&&Date.now()-TIP.at<6e5)return;TIP.at=Date.now();
+  try{
+    if(!sb&&!await connect())return;
+    const{data,error}=await sb.rpc("b3_tips_get",{p_code:sm.code,p_key:sm.key});if(error)throw error;
+    const was=TIP.id+TIP.sent;TIP={...TIP,day:data.day||tipDay(),id:data.tip||"",sent:!!data.sent,used:data.used||[]};
+    if(was!==TIP.id+TIP.sent&&!closeSheet)render();
+  }catch{}
+}
+function tipCard(){
+  const t=TIP.sent&&tipById(TIP.id);
+  if(!t||lsGet("b3-tipx")===TIP.day||(t[4]==="money"&&!canMoney())||(t[4]==="manage"&&!perm.manage))return "";
+  return `<section class="card tipc" aria-label="Tip of the day"><div class="eyebrow" style="margin:0 0 4px">Did you know?</div><b class="tipt">${esc(t[1])}</b><p class="muted small" style="margin:2px 0 10px">${esc(t[2])}</p><div class="row" style="gap:8px"><button type="button" class="btn small primary" data-act="tipgo">Show me</button><button type="button" class="btn small" data-act="tipx">Got it</button></div></section>`;
+}
+function tipOffers(n){
+  const ids=TIPS.map(t=>t[0]),recent=(TIP.used||[]).slice(0,Math.max(0,ids.length-3));
+  let pool=ids.filter(i=>!recent.includes(i));if(pool.length<3)pool=ids;
+  const h=s=>{let x=2166136261;for(const c of s){x^=c.charCodeAt(0);x=Math.imul(x,16777619)}return x>>>0};
+  return pool.map(i=>[h(i+tipDay()+n),i]).sort((a,b)=>a[0]-b[0]).slice(0,3).map(x=>x[1]);
+}
+async function tipSheet(){
+  await tipLoad(true);
+  if(TIP.sent){const t=tipById(TIP.id);sheet("Daily tip",`<p class="muted" style="margin:6px 0 12px">Today's tip went out at 7:00${t?": "+esc(t[1]):""}. You pick the next one tomorrow, after 6:30.</p>`);return}
+  const nk="b3-tipn-"+tipDay();let n=+lsGet(nk)||0,offers=tipOffers(n),sel=TIP.id&&tipById(TIP.id)?TIP.id:offers[0];
+  if(!offers.includes(sel))offers[2]=sel;
+  sheet("Pick today's tip",`<p class="muted" style="margin:6px 0 10px">Choose what the team gets at 7:00. If you do nothing, the first idea goes out.</p><div id="to"></div><div class="eyebrow" style="margin:12px 0 6px">The team sees</div><div id="tp"></div><p class="hint" id="ts" role="status"></p><div class="foot"><button type="button" class="btn block" id="tsh">Shuffle 3 new ideas</button><button type="button" class="btn primary block" id="tgo" style="margin-top:8px">Send at 7:00</button></div>`,(sh,close)=>{
+    const say=m=>sh.querySelector("#ts").textContent=m;
+    const draw=()=>{
+      sh.querySelector("#to").innerHTML=offers.map((id,i)=>{const t=tipById(id);return `<button type="button" class="topt" data-t="${id}" aria-pressed="${id===sel}"><b>${esc(t[1])}</b><span>${esc(t[2])}</span><small>${i===0&&!TIP.id?"Goes out if you do nothing":""}</small></button>`}).join("");
+      const t=tipById(sel);sh.querySelector("#tp").innerHTML=`<div class="tprev"><img src="/icons/build-192.png" alt=""><div><b>Did you know? ${esc(t[1])}</b><span>${esc(t[2])}</span></div><small>07:00</small></div>`;
+      sh.querySelectorAll(".topt").forEach(b=>b.onclick=()=>{sel=b.dataset.t;say("");draw()});
+    };
+    draw();
+    sh.querySelector("#tsh").onclick=()=>{n++;lsSet(nk,String(n));offers=tipOffers(n);sel=offers[0];say("");draw()};
+    sh.querySelector("#tgo").onclick=async()=>{
+      const b=sh.querySelector("#tgo");b.disabled=true;say("Saving…");
+      try{if(!sb&&!await connect())throw 0;const{error}=await sb.rpc("b3_tips_pick",{p_code:sm.code,p_key:sm.key,p_tip:sel,p_offered:offers});if(error)throw error;TIP.id=sel;close();render();toast("Locked in. It goes out at 7:00.")}
+      catch{b.disabled=false;say("Couldn't save. Check your connection and try again.")}
+    };
+  });
+}
+function openTarget(t){if(t==="tip"){go("home");return}if(t==="tippick"){if(perm.manage)tipSheet();return}if(["mats","money","photos","plans","build","home"].includes(t)){go(t);return}if(t==="furn"){bmode="furn";lsSet("build-bmode","furn");go("build");render()}else if(t==="check"){taskF="check";go("tasks")}else if(t==="inbox")go("inbox");else if(t==="tasks"){taskF="me";go("tasks")}else if(t==="diary")go("diary");else if(t==="report")go("report");else if(t==="snags")go("snags")}
 try{navigator.serviceWorker?.addEventListener("message",e=>{if(e.data&&e.data.open)openTarget(e.data.open)})}catch{}
 {const m=location.hash.match(/open=([a-z]+)/);if(m){history.replaceState(null,"",location.pathname+location.search);setTimeout(()=>openTarget(m[1]),700)}}
 
