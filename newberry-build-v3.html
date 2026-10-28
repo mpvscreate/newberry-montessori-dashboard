@@ -847,7 +847,10 @@ if(fresh&&!location.hash.includes("join=")){try{const o=JSON.parse(localStorage.
 let sm={meta:{},lastPull:null,pendingMedia:[],code:"",joinedAt:0};
 const SYNC_KEY="newberry-build3-sync";
 try{sm={...sm,...JSON.parse(localStorage.getItem(SYNC_KEY))}}catch{}
-const persistSync=()=>{try{localStorage.setItem(SYNC_KEY,JSON.stringify(sm))}catch{}};
+/* the join is kept in two places (this and a second copy in the phone's database), so a full or wiped first copy does not log the phone out */
+function idbSm(mode,val){return new Promise(res=>{try{const r=indexedDB.open("b3-sm",1);r.onupgradeneeded=()=>r.result.createObjectStore("k");r.onerror=()=>res(null);r.onsuccess=()=>{try{const db=r.result,w=mode==="w",tx=db.transaction("k",w?"readwrite":"readonly"),st=tx.objectStore("k");if(w){st.put(val,"sm");tx.oncomplete=()=>{db.close();res(true)};tx.onerror=tx.onabort=()=>{db.close();res(false)}}else{const g=st.get("sm");g.onsuccess=()=>{db.close();res(g.result||null)};g.onerror=()=>{db.close();res(null)}}}catch{res(null)}}}catch{res(null)}})}
+const persistSync=()=>{let ok=true;try{localStorage.setItem(SYNC_KEY,JSON.stringify(sm))}catch{ok=false}
+  idbSm("w",sm.code&&sm.key?{code:sm.code,key:sm.key,pid:sm.pid,pname:sm.pname,prole:sm.prole,perm:sm.perm,joinedAt:sm.joinedAt}:null);return ok};
 const AREA_KEYS=["tasks","log","mats","docs","diary","furn","money","upd"];
 const AREA_MIN={tasks:1,log:0,mats:0,docs:0,diary:0,furn:0,money:0,upd:1};
 const normAreas=p=>{p=p||{};const a=p.areas||{},ed=p.edit,leg={tasks:ed==="all"?2:1,log:(ed==="all"||ed==="notes")?2:1,mats:ed==="all"?2:1,docs:(ed==="all"||ed==="notes")?2:1,diary:ed==="all"?2:1,furn:ed==="all"?2:1,money:({none:0,view:1,edit:2})[p.money]??0,upd:p.send?2:1},o={};AREA_KEYS.forEach(k=>{o[k]=Math.max(AREA_MIN[k],Math.min(2,a[k]!=null?+a[k]:leg[k]))});return o};
@@ -2281,7 +2284,8 @@ async function joinFromHash(){
   <div class="foot"><button class="btn primary block" id="yes">Join as ${esc(who.name)}</button></div>`,(sh,close)=>{
     sh.querySelector("#yes").onclick=async()=>{clean();close();toast("Joining…");
       me=who.name;try{localStorage.setItem("build-who",me)}catch{}
-      S=DEF();sm={meta:{},lastPull:null,pendingMedia:[],code,key,pid:who.pid,pname:who.name,prole:who.role,joinedAt:Date.now(),mig:1};setPerm(who.perm);try{await mClear()}catch{}urls.clear();persistSync();
+      S=DEF();sm={meta:{},lastPull:null,pendingMedia:[],code,key,pid:who.pid,pname:who.name,prole:who.role,joinedAt:Date.now(),mig:1};setPerm(who.perm);try{await mClear()}catch{}urls.clear();const kept=persistSync();try{navigator.storage?.persist?.()}catch{}
+      if(!kept)setTimeout(()=>toast("This phone is short of space, so the join is kept a different way. Free some space if it forgets you."),2500);
       await pull();if(!S.tasks.length&&lvl("tasks")>=2){S.tasks=seedTasks()}save();scan();await push();render();toast("You are in. Welcome, "+who.name+"!")}});
 }
 
@@ -4334,7 +4338,13 @@ function reportV(){
 /* ---------- start ---------- */
 render();
 setTimeout(()=>{const sp=document.getElementById("splash");if(sp){sp.classList.add("out");setTimeout(()=>sp.remove(),450)}},reduced()?150:700);
-if(sm.code){setSync("syncing");syncNow()}else setSync("off");
+if(sm.code){setSync("syncing");syncNow();try{navigator.storage?.persist?.()}catch{}}else setSync("off");
+/* the phone forgot the join (full or cleared storage): bring it back from the second copy */
+if(!sm.code&&!/join=/.test(location.hash))idbSm("r").then(async j=>{
+  if(sm.code||!j||!j.code||!j.key||!j.perm)return;
+  sm={meta:{},lastPull:null,pendingMedia:[],code:j.code,key:j.key,pid:j.pid,pname:j.pname,prole:j.prole,joinedAt:j.joinedAt||Date.now(),mig:1};setPerm(j.perm);persistSync();
+  setSync("syncing");await syncNow();render();toast("You are connected again"+(j.pname?", "+j.pname:"")+".");
+});
 joinFromHash();addEventListener("hashchange",joinFromHash);
 setTimeout(autoUpdate,1500);
 if("serviceWorker"in navigator&&location.protocol.startsWith("http"))swRegister().catch(()=>{});
