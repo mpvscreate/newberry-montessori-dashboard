@@ -4280,8 +4280,7 @@ function weekData(){
   const doneWk=all.filter(t=>t.status==="done"&&t.doneOn&&t.doneOn>=wk).sort((a,b)=>po(a)-po(b)||a.doneOn.localeCompare(b.doneOn));
   const next=all.filter(t=>t.status!=="done"&&t.due&&t.due>td&&t.due<=nx).sort(byDue);
   const late=all.filter(t=>t.status!=="done"&&t.due&&t.due<wk);
-  const mats=S.mats.filter(m=>needsOrder(m)&&m.due&&m.due>td&&m.due<=nx).sort((a,b)=>a.due.localeCompare(b.due));
-  return{td,wk,nx,targets,reached,carried,doneWk,extra:doneWk.length-doneWk.filter(inWk).length,next,late,mats};
+  return{td,wk,nx,targets,reached,carried,doneWk,extra:doneWk.length-doneWk.filter(inWk).length,next,late};
 }
 const wkWho=t=>t.assignee&&sm.code?pName(t.assignee):(t.who||"");
 const wkDay=d=>new Date(d+"T12:00").toLocaleDateString("en-ZA",{weekday:"short",day:"numeric",month:"short"});
@@ -4294,7 +4293,6 @@ function weekGoalsText(){
   L.push(w.next.length?"*Next week's targets ("+w.next.length+")*":"Next week: no tasks have a due date yet.");
   w.next.slice(0,10).forEach(t=>L.push("- "+t.title+" ("+dshort(t.due)+")"+(wkWho(t)?", "+wkWho(t):"")));
   if(w.next.length>10)L.push("and "+(w.next.length-10)+" more");
-  if(w.mats.length)L.push("","To order: "+w.mats.slice(0,5).map(m=>m.name+" by "+dshort(m.due)).join(", ")+".");
   return L.join("\n");
 }
 /* a before and after slider inside the weekly report: the phase that moved most this week comes first */
@@ -4339,8 +4337,7 @@ function weekV(){
   <div class="card rc"><div class="eyebrow">Reached this week</div>${w.doneWk.length?`<div class="rlist">${more(w.doneWk,row,6)}</div>`:`<p class="muted" style="margin:0">Nothing was finished this week.</p>`}</div>
   ${lvl("log")>=1||lvl("tasks")>=1?`<div class="card rc wkba" id="wkba"><div class="eyebrow">Before and after</div><div class="skel" style="height:200px;border-radius:14px"></div></div>`:""}
   ${w.carried.length||w.late.length?`<div class="card rc"><div class="eyebrow">Carried over</div>${w.carried.length?`<div class="rlist">${more(w.carried,t=>rowD(t,"red"),5)}</div>`:""}${w.late.length?`<p class="muted small" style="margin:10px 0 0">${w.late.length} more task${w.late.length===1?" is":"s are"} overdue from before this week. <button type="button" class="linkbtn" data-act="gotasks" data-id="all" style="padding:0;min-height:32px">See tasks</button></p>`:""}</div>`:""}
-  <div class="card rc"><div class="eyebrow">Next week's targets</div>${w.next.length?days.map(d=>`<div class="wkday">${esc(wkDay(d))}</div><div class="rlist">${w.next.filter(t=>t.due===d).map(row).join("")}</div>`).join(""):`<p class="muted" style="margin:0 0 10px">No tasks have a due date next week yet. Give tasks a due date and they appear here as targets.</p><button type="button" class="btn" data-act="gotasks" data-id="all">${ic("clip")}Open tasks</button>`}
-   ${w.mats.length?`<div class="wkday">To order</div><div class="rlist">${w.mats.map(m=>`<div class="rrow"><div class="grow"><div class="rt">${esc(m.name)}</div><div class="rs">Needed by ${esc(wkDay(m.due))}</div></div></div>`).join("")}</div>`:""}</div>`;
+  <div class="card rc"><div class="eyebrow">Next week's targets</div>${w.next.length?days.map(d=>`<div class="wkday">${esc(wkDay(d))}</div><div class="rlist">${w.next.filter(t=>t.due===d).map(row).join("")}</div>`).join(""):`<p class="muted" style="margin:0 0 10px">No tasks have a due date next week yet. Give tasks a due date and they appear here as targets.</p><button type="button" class="btn" data-act="gotasks" data-id="all">${ic("clip")}Open tasks</button>`}</div>`;
 }
 function reportV(){
   const all=G(BT()),d=doneN(all),p=pct(d,all.length),td=today(),D=x=>new Date(x+"T12:00").getTime(),st=S.settings.start,en=S.settings.target;
