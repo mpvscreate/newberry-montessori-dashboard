@@ -1659,7 +1659,7 @@ function act(a,id,el){
    shareorder:()=>shareOrder(id&&(id==="all"||phase(id))?id:(matPh!=="all"&&matPh!=="none"?matPh:"")),addsup:()=>supSheet(),editsup:()=>supSheet(id),delsup:()=>delRecs(S.sups,s=>s.id===id,"Contact"),
    addphoto:()=>quickPhoto(id&&phase(id)?id:undefined),addissue:()=>logSheet(null,"issue"),editlog:()=>logSheet(id),dellog:()=>delRecs(S.logs,l=>l.id===id,"Entry"),
    fix:()=>{const l=S.logs.find(x=>x.id===id),u=undoEdit(l,{fixed:true});logAct("Marked an issue as fixed");save();render();toast("Issue marked fixed.",u)},
-   phtlb:()=>lightbox(photoList().map(p=>p.m),+id),phcmp:()=>compareView(id||""),scanslip:()=>scanSlip(),attsheet:()=>attSheet(),bmore:()=>bmoreSheet(),msgdel:()=>msgRemove(id),msgclear:()=>msgClearOld(),thread:()=>threadSheet(id),msgdec:()=>{const[a,b]=id.split("|");msgDecide(a,b)},snagedit:()=>snagSheet(id),snagexport:()=>snagExportSheet(),snagclose:()=>{if(!perm.manage)return;const l=S.logs.find(x=>x.id===id);if(!l)return;const u=undoEdit(l,{closed:true,closedOn:today()});logAct("Closed a snag");save();render();toast("Snag closed.",u)},snagreopen:()=>{const l=S.logs.find(x=>x.id===id);if(!l)return;const u=undoEdit(l,{fixed:false,closed:false,closedOn:""});save();render();toast("Snag reopened.",u)},slipexport:()=>slipExportSheet(),slipview:()=>{const[cid,i]=id.split("|"),c=S.costs.find(x=>x.id===cid);if(c)lightbox(c.media||[],+i)},mbar:()=>{const r=MCH.months[+id],el=$("#mbread");if(!r||!el)return;const p=r.b+r.t+r.o;el.innerHTML=`${mLab(r.ym,1)}: paid <b>${money0(p)}</b>${p?` (builder ${money0(r.b)}${r.t?", trades "+money0(r.t):""}${r.o?", other "+money0(r.o):""})`:""}${r.p?`, planned <b>${money0(r.p)}</b>`:""}.`},weekshare:()=>shareText(weekText()),wkgoals:()=>shareText(weekGoalsText()),lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
+   phtlb:()=>lightbox(photoList().map(p=>p.m),+id),phcmp:()=>compareView(id||""),scanslip:()=>scanSlip(),attsheet:()=>attSheet(),bmore:()=>bmoreSheet(),msgdel:()=>msgRemove(id),msgclear:()=>msgClearOld(),thread:()=>threadSheet(id),msgdec:()=>{const[a,b]=id.split("|");msgDecide(a,b)},snagedit:()=>snagSheet(id),snagexport:()=>snagExportSheet(),snagclose:()=>{if(!perm.manage)return;const l=S.logs.find(x=>x.id===id);if(!l)return;const u=undoEdit(l,{closed:true,closedOn:today()});logAct("Closed a snag");save();render();toast("Snag closed.",u)},snagreopen:()=>{const l=S.logs.find(x=>x.id===id);if(!l)return;const u=undoEdit(l,{fixed:false,closed:false,closedOn:""});save();render();toast("Snag reopened.",u)},slipexport:()=>slipExportSheet(),slipview:()=>{const[cid,i]=id.split("|"),c=S.costs.find(x=>x.id===cid);if(c)lightbox(c.media||[],+i)},mbar:()=>{const r=MCH.months[+id],el=$("#mbread");if(!r||!el)return;const p=r.b+r.t+r.o;el.innerHTML=`${mLab(r.ym,1)}: paid <b>${money0(p)}</b>${p?` (builder ${money0(r.b)}${r.t?", trades "+money0(r.t):""}${r.o?", other "+money0(r.o):""})`:""}${r.p?`, planned <b>${money0(r.p)}</b>`:""}.`},weekshare:()=>shareText(weekText()),wkgoals:()=>shareWeekSheet(),lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
    refresh:()=>refreshApp(),adddoc:()=>docSheet(),opendoc:()=>{if(docSel){docPick(id);return}const d=S.docs.find(x=>x.id===id);if(d&&docListed(d)&&!docVisible(d))moneyGate(()=>docView(id),"document");else docView(id)},docunlock:()=>moneyGate(()=>render()),godocs:()=>go("docs"),addplan:()=>docSheet(undefined,"drawing"),plprev:()=>turnPage(-1),plnext:()=>turnPage(1),plzin:()=>zoomCenter(1.5),plzout:()=>zoomCenter(1/1.5),plfit:()=>fitView(),plfull:()=>{fullPlan=!fullPlan;PV.had=false;document.body.classList.toggle("lock",fullPlan);render()},goplans:()=>go("plans"),gostock:()=>{matSec="stock";matF="all";go("mats")},mvup:()=>moveKey(curPh,id,-1),mvdn:()=>moveKey(curPh,id,1),phstep:()=>phaseStep(+id),report:()=>reportSheet(),acts:()=>actsSheet(),phba:()=>compareView(id),phcover:()=>{const pics=allPhotos().filter(p=>p.ph===id);pickPhoto({title:"Banner photo: "+(PSHORT[id]||"phase"),pics,current:phasePhoto(id),pick:m=>{S.settings.pcover={...(S.settings.pcover||{}),[id]:m};save();render();toast("Banner photo set.")},clear:()=>{const c={...(S.settings.pcover||{})};delete c[id];S.settings.pcover=c;save();render();toast("Using the newest photo again.")},clearLabel:"Use the newest photo"})},outdoor:()=>{outdoor=!outdoor;try{localStorage.setItem("build2-outdoor",outdoor?"1":"0")}catch{}applyOutdoor();render()},share:()=>shareSheet(),project:()=>projectSheet(),whoami:()=>whoSheet(),
    theme:()=>{if(id==="auto"){document.documentElement.removeAttribute("data-theme");try{localStorage.setItem("build2-theme","auto")}catch{}}else{document.documentElement.setAttribute("data-theme",id);try{localStorage.setItem("build2-theme",id)}catch{}}paintTheme();render()},
    export:()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`newberry-build-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded.")},
@@ -4293,6 +4293,44 @@ function weekGoalsText(){
   w.next.slice(0,10).forEach(t=>L.push("- "+t.title+" ("+dshort(t.due)+")"+(wkWho(t)?", "+wkWho(t):"")));
   if(w.next.length>10)L.push("and "+(w.next.length-10)+" more");
   return L.join("\n");
+}
+/* share the weekly report as a read-only link (live or snapshot) or as text */
+async function shareApi(body){
+  const r=await fetch(SB_URL+"/functions/v1/build3-share",{method:"POST",headers:{"Content-Type":"text/plain"},body:JSON.stringify({...body,code:sm.code,key:sm.key})});
+  const j=await r.json().catch(()=>({}));if(!r.ok)throw new Error(j.error||"failed");return j;
+}
+const shareUrl=t=>location.origin+location.pathname.replace(/[^/]*$/,"")+"week-view.html?t="+t;
+function shareWeekSheet(){
+  const linked=!!sm.code&&!sm.off;let kind=linked?"live":"text",days=30;
+  const opts=[["live","Live link","Always shows the current week. Updates by itself. Read only."],["snap","Snapshot link","Frozen as it is today. Never changes. Read only."],["text","Text only","The WhatsApp summary, no link."]].filter(o=>linked||o[0]==="text");
+  sheet("Share this week",`<div id="so"></div><div id="sd"><div class="eyebrow" style="margin:12px 0 6px">Link ends</div><div class="chips" role="group" aria-label="Link ends">${[[7,"In 7 days"],[30,"In 30 days"],[0,"Never"]].map(([d,l])=>`<button type="button" class="chip" data-d="${d}" aria-pressed="${d===days}">${l}</button>`).join("")}</div></div>
+   <p class="hint" id="sst" role="status">${linked?"People with the link see only the weekly report: no money and no names of workers. You can turn a link off below.":"Join the team to share links. The text summary works anywhere."}</p>
+   <div class="foot"><button type="button" class="btn primary block" id="ssend">${ic("share")}Send on WhatsApp</button><button type="button" class="btn block" id="scopy" style="margin-top:8px">${ic("link")}Copy link</button></div>
+   <div id="sl"></div>`,(sh,close)=>{
+    const say=m=>sh.querySelector("#sst").textContent=m;
+    const draw=()=>{
+      sh.querySelector("#so").innerHTML=opts.map(([k,t,d])=>`<button type="button" class="topt" data-k="${k}" aria-pressed="${k===kind}"><b>${t}</b><span>${d}</span></button>`).join("");
+      sh.querySelector("#sd").hidden=kind==="text";sh.querySelector("#scopy").hidden=kind==="text";
+      sh.querySelectorAll("#so .topt").forEach(b=>b.onclick=()=>{kind=b.dataset.k;draw()});
+      sh.querySelectorAll("#sd [data-d]").forEach(b=>{b.setAttribute("aria-pressed",+b.dataset.d===days);b.onclick=()=>{days=+b.dataset.d;draw()}});
+    };
+    const make=async()=>{say("Making your link…");try{const j=await shareApi({action:"create",kind,days});say("");loadList();return shareUrl(j.token)}catch(e){say(/access/.test(e.message)?"You need report access to share links. Ask the Project Lead.":"Could not make the link. Check your connection and try again.");return null}};
+    sh.querySelector("#ssend").onclick=async()=>{
+      if(kind==="text"){close();shareText(weekGoalsText());return}
+      const b=sh.querySelector("#ssend");b.disabled=true;const u=await make();b.disabled=false;if(!u)return;
+      shareText(`${S.settings.name||"Site"}: weekly progress${kind==="live"?" (live view)":""}, read only.\n${u}`);
+    };
+    sh.querySelector("#scopy").onclick=async()=>{const u=await make();if(!u)return;try{await navigator.clipboard.writeText(u);toast("Link copied.")}catch{say(u)}};
+    const loadList=async()=>{
+      if(!linked)return;const box=sh.querySelector("#sl");
+      try{const{shares}=await shareApi({action:"list"});
+        box.innerHTML=shares.length?`<div class="eyebrow" style="margin:16px 0 4px">Links I've shared</div><ul class="list">${shares.map(s=>`<li><div class="grow"><div class="lt">${s.kind==="live"?"Live link":"Snapshot link"}</div><div class="ls">${dshort(s.created_at.slice(0,10))} · ${s.views} view${s.views===1?"":"s"} · ${s.expires_at?"ends "+dshort(s.expires_at.slice(0,10)):"no end"}</div></div><button type="button" class="btn small" data-c="${s.token}">Copy</button><button type="button" class="btn small danger" data-r="${s.token}">Turn off</button></li>`).join("")}</ul>`:"";
+        box.querySelectorAll("[data-c]").forEach(b=>b.onclick=async()=>{try{await navigator.clipboard.writeText(shareUrl(b.dataset.c));toast("Link copied.")}catch{say(shareUrl(b.dataset.c))}});
+        box.querySelectorAll("[data-r]").forEach(b=>b.onclick=async()=>{b.disabled=true;try{await shareApi({action:"revoke",token:b.dataset.r});toast("Link turned off.");loadList()}catch{b.disabled=false;say("Could not turn it off. Try again.")}});
+      }catch{}
+    };
+    draw();loadList();
+  });
 }
 /* a before and after slider inside the weekly report: the phase that moved most this week comes first */
 async function wkBA(){

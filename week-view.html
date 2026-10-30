@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Weekly progress · Newberry Build</title>
+<link rel="icon" href="icons/build-192.png">
+<style>
+:root{--paper:#fbf6ec;--sheet:#fff;--ink:#2a251d;--muted:#7a6f5d;--line:#e6dcc6;--accent:#c97b1a;--green:#2f8f5b;--red:#c0392b;--amber:#c97b1a;--hero:#e4f3ea;--bar:#e4f3ea}
+@media (prefers-color-scheme:dark){:root{--paper:#14110d;--sheet:#1f1b15;--ink:#f3ece0;--muted:#a99d86;--line:#3a3328;--accent:#f0a64c;--green:#4fd1a1;--red:#ff8a7a;--amber:#f0a64c;--hero:#14392d;--bar:#0f3d2e}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--paper);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;padding:0 16px calc(32px + env(safe-area-inset-bottom))}
+main{max-width:640px;margin:0 auto}
+.bar{position:sticky;top:0;z-index:5;display:flex;align-items:center;gap:8px;background:var(--bar);color:var(--ink);border-radius:0 0 12px 12px;padding:10px 14px;font-size:.85rem;margin:0 -16px 14px;padding-left:max(16px,env(safe-area-inset-left))}
+.dot{width:9px;height:9px;border-radius:50%;background:var(--green);flex:none}
+h1{font-size:1.1rem;margin:4px 0 12px}
+.card{background:var(--sheet);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px}
+.hero{background:var(--hero);border-color:transparent;padding:18px}
+.eyebrow{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);font-weight:600;margin:0 0 8px}
+.big{font-size:2rem;font-weight:700;line-height:1.1}
+.lead{margin:2px 0 0;color:var(--muted)}
+.meter{height:10px;border-radius:99px;background:rgba(127,127,127,.25);overflow:hidden;margin:12px 0 0}.meter i{display:block;height:100%;background:var(--green);border-radius:99px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:16px}.stats b{display:block;font-size:1.2rem}.stats span{font-size:.68rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.row{padding:10px 0;border-top:1px solid var(--line);display:flex;gap:10px;align-items:center}.row:first-of-type{border-top:0}
+.row .g{flex:1;min-width:0}.row .t{font-weight:600}.row .s{font-size:.85rem;color:var(--muted)}.row .d{font-size:.85rem;font-weight:600;color:var(--red);white-space:nowrap}
+.day{font-size:.72rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:14px 0 2px}.day:first-of-type{margin-top:0}
+.cmp{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:14px;touch-action:pan-y;cursor:ew-resize;background:#000;user-select:none;-webkit-user-select:none}
+.cmp img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.cmp .h{position:absolute;top:0;bottom:0;left:50%;width:3px;margin-left:-1.5px;background:#fff;box-shadow:0 0 8px rgba(0,0,0,.5)}
+.cmp .h i{position:absolute;top:50%;left:50%;width:36px;height:36px;margin:-18px 0 0 -18px;border-radius:50%;background:#fff;color:#222;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:.8rem}
+.cmp .l{position:absolute;bottom:8px;background:rgba(0,0,0,.6);color:#fff;border-radius:8px;padding:3px 9px;font-size:.75rem;font-weight:600}.cmp .l.a{left:8px}.cmp .l.b{right:8px}
+.muted{color:var(--muted)}
+.msg{text-align:center;padding:60px 10px}
+.foot{text-align:center;font-size:.75rem;color:var(--muted);margin-top:18px}
+</style>
+</head>
+<body>
+<main id="app"><div class="msg muted">Loading the weekly report…</div></main>
+<script>
+const FN="https://oikwudpqmbnssttatlhc.supabase.co/functions/v1/build3-share";
+const $=document.getElementById("app");
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const dshort=d=>d?new Date(d+"T12:00").toLocaleDateString("en-ZA",{day:"numeric",month:"short"}):"";
+const dday=d=>new Date(d+"T12:00").toLocaleDateString("en-ZA",{weekday:"short",day:"numeric",month:"short"});
+const fail=(t,s)=>{$.innerHTML=`<div class="msg"><h1>${esc(t)}</h1><p class="muted">${esc(s)}</p></div>`};
+async function load(){
+  const t=new URLSearchParams(location.search).get("t")||"";
+  if(!/^[a-f0-9]{32}$/.test(t))return fail("This link is not complete","Ask the person who sent it for a new link.");
+  let r;try{r=await fetch(FN+"?t="+t,{cache:"no-store"})}catch{return fail("No connection","Check your internet and open the link again.")}
+  if(r.status===410||r.status===404)return fail("This link is switched off","It has ended or was turned off. Ask for a new link.");
+  if(!r.ok)return fail("Could not load the report","Try again in a moment.");
+  draw(await r.json());
+}
+function draw(d){
+  const h=d.hero,n=h.targets,p=n?Math.round(h.reached/n*100):0,live=d.kind==="live";
+  const when=new Date(live?d.updated:d.created).toLocaleString("en-ZA",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+  const rows=(a,dd)=>a.map(x=>`<div class="row"><div class="g"><div class="t">${esc(x.title)}</div><div class="s">${esc(x.phase)}</div></div>${dd&&x.due?`<div class="d">${esc(dshort(x.due))}</div>`:""}</div>`).join("");
+  const days=[...new Set(d.next.map(x=>x.due))];
+  $.innerHTML=`<div class="bar"><span class="dot"></span>${live?"Live view · updated "+esc(when):"Snapshot · "+esc(when)} · read only</div>
+  <h1>${esc(d.name)}</h1>
+  <section class="card hero"><p class="eyebrow">${esc(dshort(d.from))} to ${esc(dshort(d.to))}</p>
+   ${n?`<div class="big">${h.reached} of ${n}</div><p class="lead">weekly targets reached${h.extra?`, plus ${h.extra} extra task${h.extra===1?"":"s"} finished`:""}.</p><div class="meter"><i style="width:${p}%"></i></div>`
+   :`<div class="big">${h.done}</div><p class="lead">task${h.done===1?"":"s"} finished this week.</p>`}
+   <div class="stats"><div><b>${h.done}</b><span>Done</span></div><div><b>${h.carried}</b><span>Carried over</span></div><div><b>${h.next}</b><span>Next week</span></div></div></section>
+  <section class="card"><p class="eyebrow">Reached this week</p>${d.reached.length?rows(d.reached):`<p class="muted" style="margin:0">Nothing was finished this week.</p>`}</section>
+  ${d.ba?`<section class="card"><p class="eyebrow">Before and after · ${esc(d.ba.phase)}</p><div class="cmp" id="cmp"><img src="${esc(d.ba.after.url)}" alt="After"><img id="top" src="${esc(d.ba.before.url)}" alt="Before"><div class="h" id="hd"><i>◀ ▶</i></div><span class="l a">Before${d.ba.before.date?" · "+esc(dshort(d.ba.before.date)):""}</span><span class="l b">After${d.ba.after.date?" · "+esc(dshort(d.ba.after.date)):""}</span></div></section>`:""}
+  ${d.carried.length||h.late?`<section class="card"><p class="eyebrow">Carried over</p>${rows(d.carried,true)}${h.late?`<p class="muted" style="margin:10px 0 0;font-size:.85rem">${h.late} more task${h.late===1?" is":"s are"} overdue from before this week.</p>`:""}</section>`:""}
+  <section class="card"><p class="eyebrow">Next week's targets</p>${d.next.length?days.map(x=>`<div class="day">${esc(dday(x))}</div>${rows(d.next.filter(t=>t.due===x))}`).join(""):`<p class="muted" style="margin:0">No tasks have a due date next week yet.</p>`}</section>
+  <p class="foot">Newberry Build · read-only view</p>`;
+  const bx=document.getElementById("cmp");
+  if(bx){const top=document.getElementById("top"),hd=document.getElementById("hd");
+    const set=x=>{x=Math.max(0,Math.min(1,x));top.style.clipPath=`inset(0 ${(1-x)*100}% 0 0)`;hd.style.left=x*100+"%"};set(.5);
+    let drag=false;const at=e=>{const r=bx.getBoundingClientRect();set((e.clientX-r.left)/r.width)};
+    bx.addEventListener("pointerdown",e=>{drag=true;bx.setPointerCapture(e.pointerId);at(e)});bx.addEventListener("pointermove",e=>{if(drag)at(e)});["pointerup","pointercancel"].forEach(n=>bx.addEventListener(n,()=>{drag=false}))}
+}
+load();
+if(!document.hidden)setInterval(()=>{if(!document.hidden&&!document.querySelector("#cmp:active"))load()},300000);
+</script>
+</body>
+</html>
