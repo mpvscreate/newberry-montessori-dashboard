@@ -519,6 +519,7 @@ body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!importan
 .tipc{padding:14px}.tipc .tipt{display:block;font:700 1.05rem var(--display)}
 .topt{display:block;width:100%;text-align:left;padding:12px 14px;margin-bottom:8px;border-radius:14px;border:1px solid var(--line);background:var(--sheet);color:var(--ink);font:inherit;cursor:pointer}.topt b{display:block;font-weight:600}.topt span{display:block;margin-top:2px;font-size:.88rem;color:var(--muted);line-height:1.35}.topt small{display:block;margin-top:4px;font-size:.75rem;color:var(--muted)}.topt[aria-pressed="true"]{border:2px solid var(--accent);padding:11px 13px;background:var(--accent-soft)}
 .tprev{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--paper)}.tprev img{width:30px;height:30px;border-radius:8px;flex:none}.tprev div{min-width:0;flex:1}.tprev b{display:block;font-size:.9rem}.tprev span{display:block;font-size:.84rem;color:var(--muted);line-height:1.35}.tprev small{flex:none;font-size:.72rem;color:var(--muted)}
+.wkba .cmp-b{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:14px;touch-action:pan-y;cursor:ew-resize;background:#000;user-select:none;-webkit-user-select:none}.wkba .cmp-b img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}.wkba .cmp-h{position:absolute;top:0;bottom:0;left:50%;width:3px;margin-left:-1.5px;background:#fff;box-shadow:0 0 8px rgba(0,0,0,.5)}.wkba .cmp-h i{position:absolute;top:50%;left:50%;width:36px;height:36px;margin:-18px 0 0 -18px;border-radius:50%;background:#fff;color:#222;display:flex;align-items:center;justify-content:center}.wkba .cmp-l{position:absolute;bottom:8px;background:rgba(0,0,0,.6);color:#fff;border-radius:8px;padding:3px 9px;font-size:.75rem;font-weight:600}.wkba .cmp-l.l{left:8px}.wkba .cmp-l.r{right:8px}
 .wkday{font-size:.75rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:14px 0 2px}.wkday:first-of-type{margin-top:0}.wkmore{margin-top:6px}.rhero .meter i{transition:width .4s}
 .qa.one{gap:8px;margin:2px 0 10px}.qa.one button{flex-direction:row;gap:7px;min-height:46px;padding:6px 8px;border-radius:15px;font-size:.92rem}.qa.one button .i{width:20px;height:20px;flex:none}
 .card.today{padding:8px 14px 6px;margin:0 0 10px;border-radius:16px}.card.today .eyebrow{font-size:.66rem}.card.today .list li{padding:6px 0;gap:10px}.card.today .list li .st{width:30px;height:30px}.card.today .list li .st .i{width:16px;height:16px}.card.today .lt,.card.today .ls{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card.today .lt{font-size:.88rem}.card.today .ls{font-size:.74rem}.card.today .grow{min-width:0}.card.today .row-ic{width:30px;height:30px}.card.today .linkbtn{min-height:28px!important;font-size:.8rem}
@@ -1122,7 +1123,7 @@ function render(){
   v.querySelectorAll("details.gd").forEach(d=>d.addEventListener("toggle",()=>{if(openPh===null)openPh=new Set(curPhases());d.open?openPh.add(d.dataset.ph):openPh.delete(d.dataset.ph)}));
   v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;if(k==="plan"){planSel=val;PV.plan="";PV.had=false}if(k==="doc")docF=val;if(k==="mseg")moneySeg=val;if(k==="tf")taskF=val;if(k==="df")diaryF=val;if(k==="pf")photoF=val;if(k==="sm")slipM=val;if(k==="sg")snagF=val;if(k==="sc")slipC=val;if(k==="pt")phTab=val;if(k==="mph")matPh=val;if(k==="bm"){bmode=val;lsSet("build-bmode",val)}if(k==="fr")fRoom=val;if(k==="fv")fView=val;render()}));
   v.querySelectorAll("li.tap").forEach(el=>{el.setAttribute("role","button");el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click()}})});
-  hydrate(v);hydrateBg(v);countUp(v);if(tab==="plans")initPlanView();
+  hydrate(v);hydrateBg(v);countUp(v);if(tab==="plans")initPlanView();if(tab==="week")wkBA();
   v.querySelectorAll("svg.chart").forEach(wireChart);if(lvl("tasks")>=2)v.querySelectorAll("ul.reord").forEach(ul=>holdDrag(ul,curPh));
   if(lvl("tasks")>=2){v.querySelectorAll(".ptile").forEach(tl=>longPress(tl,()=>tileMenu(tl)));v.querySelectorAll(".list li").forEach(li=>{const bs=[...li.querySelectorAll('[data-act="cyc"],[data-act="cycboth"]')];if(bs.length){const q=li.querySelector('[data-act="opentask"],[data-act="edittask"]');swipeRow(li,()=>cycMany(bs.flatMap(b=>(b.dataset.ids||b.dataset.id).split(","))),q?()=>taskQuick(q.dataset.id):null)}})}
   setSync(syncState);
@@ -4296,6 +4297,32 @@ function weekGoalsText(){
   if(w.mats.length)L.push("","To order: "+w.mats.slice(0,5).map(m=>m.name+" by "+dshort(m.due)).join(", ")+".");
   return L.join("\n");
 }
+/* a before and after slider inside the weekly report: the phase that moved most this week comes first */
+async function wkBA(){
+  const box=document.getElementById("wkba");if(!box||box._on)return;box._on=1;
+  const w=weekData(),gr=photoGroups().filter(([k,a])=>k&&k!=="_diary"&&phase(k)&&a.length>=2);
+  if(!gr.length){box.remove();return}
+  const score=([k,a])=>a.filter(p=>p.date>=w.wk).length*100+w.doneWk.filter(t=>t.phase===k).length*10+Math.min(a.length,9);
+  gr.sort((a,b)=>score(b)-score(a));const keys=gr.slice(0,4).map(g=>g[0]);let cur=keys[0];
+  box.innerHTML=`<div class="eyebrow">Before and after</div>${keys.length>1?`<div class="chips scroll" role="group" aria-label="Phase" style="margin-bottom:10px">${keys.map(k=>`<button type="button" class="chip" data-k="${esc(k)}" aria-pressed="false">${esc(photoName(k))}</button>`).join("")}</div>`:""}<div id="wkbs"></div>`;
+  const draw=async k=>{
+    cur=k;box.querySelectorAll("[data-k]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.k===k));
+    const host=box.querySelector("#wkbs");host.innerHTML=`<div class="skel" style="height:200px;border-radius:14px"></div>`;
+    const all=allPhotos().filter(p=>p.ph===k).sort((a,b)=>a.date.localeCompare(b.date)),ph=[];
+    for(const p of all){const u=await mUrl(p.m);if(u&&!isVid(p.m))ph.push({...p,u})}
+    if(cur!==k||!box.isConnected)return;
+    if(ph.length<2){host.innerHTML=`<p class="muted small" style="margin:0">The photos are still loading. Open this page again in a moment.</p>`;return}
+    const sv=(S.settings.pba||{})[k]||{},A=ph.find(p=>p.m===sv.b)||ph[0],B=ph.find(p=>p.m===sv.a)||ph[ph.length-1];
+    host.innerHTML=`<div class="cmp-b" role="group" aria-label="Before and after, ${esc(photoName(k))}"><img src="${B.u}" alt="After"><img class="cmp-a" src="${A.u}" alt="Before"><div class="cmp-h"><i>${ic("left","sm")}${ic("right","sm")}</i></div><span class="cmp-l l">Before${A.date?" · "+dshort(A.date):""}</span><span class="cmp-l r">After${B.date?" · "+dshort(B.date):""}</span></div><button type="button" class="linkbtn" id="wkbf" style="padding:0;min-height:40px;margin-top:6px">Open full screen</button>`;
+    const bx=host.querySelector(".cmp-b"),top=host.querySelector(".cmp-a"),h=host.querySelector(".cmp-h");
+    const set=x=>{x=Math.max(0,Math.min(1,x));top.style.clipPath=`inset(0 ${(1-x)*100}% 0 0)`;h.style.left=x*100+"%"};set(.5);
+    let drag=false;const at=e=>{const r=bx.getBoundingClientRect();set((e.clientX-r.left)/r.width)};
+    bx.addEventListener("pointerdown",e=>{drag=true;bx.setPointerCapture(e.pointerId);at(e)});bx.addEventListener("pointermove",e=>{if(drag)at(e)});["pointerup","pointercancel"].forEach(n=>bx.addEventListener(n,()=>{drag=false}));
+    host.querySelector("#wkbf").onclick=()=>compareView(k);
+  };
+  box.querySelectorAll("[data-k]").forEach(b=>b.onclick=()=>draw(b.dataset.k));
+  draw(cur);
+}
 function weekV(){
   const w=weekData(),n=w.targets.length,r=w.reached.length,p=n?Math.round(r/n*100):0;
   const vc=!n?"var(--sky)":p>=80?"var(--green)":p>=50?"var(--accent)":"var(--red)";
@@ -4310,6 +4337,7 @@ function weekV(){
    :`<div class="rbig">${w.doneWk.length}</div><p class="rlead">task${w.doneWk.length===1?"":"s"} finished this week. No tasks had a due date in this week, so there was no target to measure.</p>`}
    <div class="rstats"><div><span class="eyebrow">Done</span><b>${w.doneWk.length}</b></div><div><span class="eyebrow">Carried over</span><b>${w.carried.length}</b></div><div><span class="eyebrow">Next week</span><b>${w.next.length}</b></div></div></section>
   <div class="card rc"><div class="eyebrow">Reached this week</div>${w.doneWk.length?`<div class="rlist">${more(w.doneWk,row,6)}</div>`:`<p class="muted" style="margin:0">Nothing was finished this week.</p>`}</div>
+  ${lvl("log")>=1||lvl("tasks")>=1?`<div class="card rc wkba" id="wkba"><div class="eyebrow">Before and after</div><div class="skel" style="height:200px;border-radius:14px"></div></div>`:""}
   ${w.carried.length||w.late.length?`<div class="card rc"><div class="eyebrow">Carried over</div>${w.carried.length?`<div class="rlist">${more(w.carried,t=>rowD(t,"red"),5)}</div>`:""}${w.late.length?`<p class="muted small" style="margin:10px 0 0">${w.late.length} more task${w.late.length===1?" is":"s are"} overdue from before this week. <button type="button" class="linkbtn" data-act="gotasks" data-id="all" style="padding:0;min-height:32px">See tasks</button></p>`:""}</div>`:""}
   <div class="card rc"><div class="eyebrow">Next week's targets</div>${w.next.length?days.map(d=>`<div class="wkday">${esc(wkDay(d))}</div><div class="rlist">${w.next.filter(t=>t.due===d).map(row).join("")}</div>`).join(""):`<p class="muted" style="margin:0 0 10px">No tasks have a due date next week yet. Give tasks a due date and they appear here as targets.</p><button type="button" class="btn" data-act="gotasks" data-id="all">${ic("clip")}Open tasks</button>`}
    ${w.mats.length?`<div class="wkday">To order</div><div class="rlist">${w.mats.map(m=>`<div class="rrow"><div class="grow"><div class="rt">${esc(m.name)}</div><div class="rs">Needed by ${esc(wkDay(m.due))}</div></div></div>`).join("")}</div>`:""}</div>`;
