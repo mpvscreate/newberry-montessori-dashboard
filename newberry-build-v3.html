@@ -496,7 +496,6 @@ body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!importan
 .card.ovs{padding:12px 14px;margin:0 0 10px;border-radius:18px}.ovbs{display:grid;gap:10px;margin-top:12px}.ovb{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;border:0;background:none;padding:0;color:inherit;font:inherit;text-align:left;cursor:pointer}.ovb .ovl{font-size:.85rem;color:var(--muted)}.ovb b{font:700 1rem var(--display)}.ovb .meter{grid-column:1/-1;margin:0}
 .ovd{margin:0 0 10px}.ovd>summary{list-style:none;display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 14px;border-radius:14px;border:1px solid var(--line);background:var(--sheet);cursor:pointer;font:500 .88rem var(--body)}.ovd>summary::-webkit-details-marker{display:none}.ovd>summary span{flex:1}.ovd[open]>summary{margin-bottom:10px}.ovd[open]>summary>.i:last-child{transform:rotate(90deg)}
 .mrows{padding:4px 14px}.mrow{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:12px 0;color:inherit;font:inherit;cursor:pointer}.mrow:first-child{border-top:0}.mrow .lt{font-weight:600}.mrow b{font:700 1rem var(--display)}.mrow .meter{margin:6px 0 4px}
-.nrep [data-go="report"],.nrep .qa.one [data-go="report"]{display:none!important}.nrep .qa.one{grid-template-columns:1fr 1fr}
 .nrep [data-act="report"],.nrep [data-act="goexport"],.nrep [data-act="weekshare"],.nrep [data-act="wkgoals"],.nrep [data-act="diaryshare"],.nrep [data-act="diaryprint"],.nrep [data-act="slipexport"],.nrep [data-act="snagexport"]{display:none!important}
 @media (max-width:899px){body header.top{margin-bottom:6px;padding-bottom:6px}body header.top img{width:36px;height:36px;border-radius:10px}body header.top h1{font-size:1.2rem;line-height:1.2}body header.top #today,body header.top .sep{display:none}body.sync-ok header.top .small{display:none}body header.top .sync{min-height:22px;padding:0;font-size:.74rem}body header.top .iconbtn{width:40px;height:40px}}
 .msec{list-style:none;font:700 .68rem var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding:12px 4px 2px}.moreV .msec:first-child{padding-top:4px}
@@ -865,7 +864,7 @@ const writesBuild=()=>perm.areas.tasks>=2||perm.areas.log>=2||perm.areas.mats>=2
 const deriveRole=()=>!writesBuild()&&perm.money!=="edit"?"funder":perm.money==="none"?"builder":"owner";
 let role=deriveRole();
 const canMoney=()=>perm.money!=="none",canMoneyEdit=()=>perm.money==="edit",canSend=()=>!!perm.send;
-/* making and sharing a report, an export or a printout is for the Project Lead and the people the lead chose (People and access, Reports). Adding tasks and updates is separate */
+/* everyone can read the Report pages; making and sharing a report, an export or a printout is for the Project Lead and the people the lead chose (People and access, Reports). Adding tasks and updates is separate */
 const canReport=()=>!!perm.manage||!!(typeof S==="object"&&S&&S.settings&&(S.settings.rep||[]).includes(sm.pid));
 const REPORT_ACTS=["report","goexport","wkgoals","weekshare","diaryshare","diaryprint","slipexport","snagexport"];
 const lvl=a=>(perm.areas&&perm.areas[a]!=null)?perm.areas[a]:1;
@@ -1040,7 +1039,7 @@ addEventListener("keydown",e=>{if(e.key==="Escape"){if(closeSheet)closeSheet();e
 const reduced=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
 const buzz=n=>{try{navigator.vibrate?.(n)}catch{}};
 const scrollMem={};
-function go(t){closePop();if(t===tab&&t!=="phase"){scrollTo({top:0,behavior:"smooth"});return}scrollMem[tab==="phase"?"phase:"+curPh:tab]=scrollY;if(fullPlan){fullPlan=false;document.body.classList.remove("lock")}if(t==="people"&&!perm.manage)t="build";if(t==="report"&&!canReport())t="home";if(!canMoney()&&(t==="money"||t==="extra"))t="build";if((t==="money"||t==="extra")&&!moneyOK){moneyGate(()=>go(t));return}const doIt=()=>{tab=t;countAnim=true;const v=$("#view");v.classList.add("enter");setTimeout(()=>v.classList.remove("enter"),700);render();scrollTo(0,scrollMem[t==="phase"?"phase:"+curPh:t]||0);$("#view").focus({preventScroll:true})};if(document.startViewTransition&&!reduced())document.startViewTransition(doIt);else doIt()}
+function go(t){closePop();if(t===tab&&t!=="phase"){scrollTo({top:0,behavior:"smooth"});return}scrollMem[tab==="phase"?"phase:"+curPh:tab]=scrollY;if(fullPlan){fullPlan=false;document.body.classList.remove("lock")}if(t==="people"&&!perm.manage)t="build";if(!canMoney()&&(t==="money"||t==="extra"))t="build";if((t==="money"||t==="extra")&&!moneyOK){moneyGate(()=>go(t));return}const doIt=()=>{tab=t;countAnim=true;const v=$("#view");v.classList.add("enter");setTimeout(()=>v.classList.remove("enter"),700);render();scrollTo(0,scrollMem[t==="phase"?"phase:"+curPh:t]||0);$("#view").focus({preventScroll:true})};if(document.startViewTransition&&!reduced())document.startViewTransition(doIt);else doIt()}
 addEventListener("scroll",()=>$("header.top")?.classList.toggle("scrolled",scrollY>8),{passive:true});
 let countAnim=false;
 function countUp(root){if(reduced()||!countAnim)return;countAnim=false;root.querySelectorAll("[data-count]").forEach(el=>{const to=+el.dataset.count;if(!to)return;const t0=performance.now();const f=now=>{const k=Math.min(1,(now-t0)/700),e=1-Math.pow(1-k,3);el.textContent=Math.round(to*e)+"%";if(k<1)requestAnimationFrame(f)};requestAnimationFrame(f)})}
@@ -1115,7 +1114,7 @@ function render(){
   $("#pname").textContent=S.settings.name||"Newberry Build";
   document.title=`${({build:"Build",home:"Overview",money:"Money",more:"More",phase:"Phase",plans:"Plans",docs:"Documents",mats:"Materials",site:"Site log",inbox:"Updates",people:"People",tasks:"Tasks",diary:"Site diary",garden:"Garden",extra:"Extra labour",report:"Report",week:"Report",weather:"Weather",photos:"Photos",snags:"Snags"})[tab]} · Newberry Build 3`;
   $("#tdot").hidden=!S.tasks.some(t=>t.status==="stuck");
-  if(tab!=="docs")docSel=null;paintBell();document.body.classList.toggle("nrep",!canReport());if((tab==="report"||tab==="week")&&!canReport()){tab="home"}const v=$("#view");v.innerHTML=({build:buildV,home,phase:phaseV,plans:plansV,docs:docsV,money:moneyV,mats:matsV,site:siteV,more,inbox:inboxV,people:peopleV,tasks:tasksV,diary:diaryV,garden:gardenV,extra:extraV,report:reportV,week:weekV,weather:weatherV,photos:photosV,snags:snagsV})[tab]();
+  if(tab!=="docs")docSel=null;paintBell();document.body.classList.toggle("nrep",!canReport());const v=$("#view");v.innerHTML=({build:buildV,home,phase:phaseV,plans:plansV,docs:docsV,money:moneyV,mats:matsV,site:siteV,more,inbox:inboxV,people:peopleV,tasks:tasksV,diary:diaryV,garden:gardenV,extra:extraV,report:reportV,week:weekV,weather:weatherV,photos:photosV,snags:snagsV})[tab]();
   compactRows(v);
   v.querySelectorAll("[data-act]").forEach(el=>el.addEventListener("click",()=>act(el.dataset.act,el.dataset.id,el)));
   v.querySelectorAll("[data-go]").forEach(el=>el.addEventListener("click",()=>{if(el._lp){el._lp=false;return}const[t,f]=el.dataset.go.split(":");if(t==="phase"&&f)curPh=f;if(t==="site"&&f)logSub=f;if(t==="mats"&&f)matF=f;go(t)}));
@@ -4329,7 +4328,7 @@ function weekV(){
   const more=(list,fn,k)=>list.length<=k?list.map(fn).join(""):list.slice(0,k).map(fn).join("")+`<details class="ovd wkmore"><summary><span>${list.length-k} more</span>${ic("chev","sm")}</summary>${list.slice(k).map(fn).join("")}</details>`;
   const days=[...new Set(w.next.map(t=>t.due))];
   return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn("home")}<h2>Report</h2></div><button class="btn" data-act="wkgoals" aria-label="Share the weekly progress">${ic("share")}Share</button></div>
-  <div class="segc" role="group" aria-label="Report type"><button type="button" data-go="report" aria-pressed="false">Full report</button><button type="button" data-go="week" aria-pressed="true">This week</button></div>
+  <div class="segc" role="group" aria-label="Report type"><button type="button" data-go="report" aria-pressed="false">Full report</button><button type="button" data-go="week" aria-pressed="true">This week</button></div>${canReport()?"":`<p class="muted small" style="margin:-4px 0 12px">View only. The Project Lead can give you report access to share.</p>`}
   <section class="card rhero" style="--vc:${vc}"><div class="eyebrow" style="margin:0 0 6px">${esc(dshort(w.wk))} to ${esc(dshort(w.td))}</div>
    ${n?`<div class="rbig">${r} of ${n}</div><p class="rlead">weekly targets reached${w.extra?`, plus ${w.extra} extra task${w.extra===1?"":"s"} finished`:""}.</p><div class="meter" style="margin-top:12px"><i style="width:${p}%;background:${vc}"></i></div>`
    :`<div class="rbig">${w.doneWk.length}</div><p class="rlead">task${w.doneWk.length===1?"":"s"} finished this week. No tasks had a due date in this week, so there was no target to measure.</p>`}
@@ -4394,7 +4393,7 @@ function reportV(){
   }
   const dst=lvl("diary")>=1&&S.diary.length?diaryStats():null;
   return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn("home")}<h2>Report</h2></div><button class="btn" data-act="report" aria-label="Share a progress update">${ic("share")}Share</button></div>
-  <div class="segc" role="group" aria-label="Report type"><button type="button" data-go="report" aria-pressed="true">Full report</button><button type="button" data-go="week" aria-pressed="false">This week</button></div>
+  <div class="segc" role="group" aria-label="Report type"><button type="button" data-go="report" aria-pressed="true">Full report</button><button type="button" data-go="week" aria-pressed="false">This week</button></div>${canReport()?"":`<p class="muted small" style="margin:-4px 0 12px">View only. The Project Lead can give you report access to share.</p>`}
   <section class="card rhero" style="--vc:${vc}"><div class="row between" style="align-items:flex-start;gap:10px"><div class="grow"><div class="rbig">${esc(head)}</div><p class="rlead">${esc(line)}${esc(fcTxt)}</p></div><span class="rico">${ic(ico,"xl")}</span></div>
    <div class="rstats"><div><span class="eyebrow">Work done</span><b>${p}%</b></div><div><span class="eyebrow">Days to go</span><b>${left===null?"–":left>=0?left:"-"+(-left)}</b></div><div><span class="eyebrow">Snags to fix</span><b>${issues.length}</b></div></div></section>
   <div class="card rc"><div class="eyebrow">Phases · now and next</div><div class="rphs">${phc}</div></div>
