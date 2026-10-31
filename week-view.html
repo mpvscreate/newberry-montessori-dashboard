@@ -30,6 +30,9 @@ h1{font-size:1.1rem;margin:4px 0 12px}
 .cmp .h{position:absolute;top:0;bottom:0;left:50%;width:3px;margin-left:-1.5px;background:#fff;box-shadow:0 0 8px rgba(0,0,0,.5)}
 .cmp .h i{position:absolute;top:50%;left:50%;width:36px;height:36px;margin:-18px 0 0 -18px;border-radius:50%;background:#fff;color:#222;display:flex;align-items:center;justify-content:center;font-style:normal;font-size:.8rem}
 .cmp .l{position:absolute;bottom:8px;background:rgba(0,0,0,.6);color:#fff;border-radius:8px;padding:3px 9px;font-size:.75rem;font-weight:600}.cmp .l.a{left:8px}.cmp .l.b{right:8px}
+.sl{position:relative;overflow:hidden;border-radius:16px;background:#000;touch-action:pan-y}.sl-t{display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1)}.sl-s{flex:0 0 100%;aspect-ratio:4/3}.sl-s img{width:100%;height:100%;object-fit:cover;display:block}.sl-d{position:absolute;left:0;right:0;bottom:8px;display:flex;justify-content:center;gap:6px}.sl-d button{width:8px;height:8px;border-radius:99px;border:0;padding:0;background:rgba(255,255,255,.55);transition:width .3s}.sl-d button[aria-current=true]{background:#fff;width:20px}
+@media (prefers-reduced-motion:reduce){.sl-t,.sl-d button{transition:none}}
+.msgc{white-space:pre-wrap;overflow-wrap:anywhere;font-size:1.02rem;line-height:1.45}
 .muted{color:var(--muted)}
 .msg{text-align:center;padding:60px 10px}
 .foot{text-align:center;font-size:.75rem;color:var(--muted);margin-top:18px}
@@ -52,7 +55,18 @@ async function load(){
   if(!r.ok)return fail("Could not load the report","Try again in a moment.");
   draw(await r.json());
 }
+function drawPhotos(d){
+  const when=new Date(d.created).toLocaleString("en-ZA",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
+  $.innerHTML=`<div class="bar"><span class="dot"></span>Photo update · ${esc(when)} · read only</div><h1>${esc(d.name)}</h1>${d.msg?`<section class="card msgc">${esc(d.msg)}</section>`:""}<div class="sl" role="region" aria-roledescription="carousel" aria-label="Photo update"><div class="sl-t">${d.photos.map((p,i)=>`<div class="sl-s" role="group" aria-label="Photo ${i+1} of ${d.photos.length}"><img src="${esc(p.url)}" alt="Site photo ${i+1}"></div>`).join("")}</div>${d.photos.length>1?`<div class="sl-d">${d.photos.map((_,i)=>`<button type="button" aria-label="Show photo ${i+1}" data-i="${i}"></button>`).join("")}</div>`:""}</div><p class="foot">Newberry Build · read-only view</p>`;
+  const root=document.querySelector(".sl"),t=root.querySelector(".sl-t"),dots=[...root.querySelectorAll(".sl-d button")],n=d.photos.length;let i=0,paused=false;
+  const to=k=>{i=(k+n)%n;t.style.transform=`translateX(${-i*100}%)`;dots.forEach((x,j)=>x.setAttribute("aria-current",j===i))};
+  dots.forEach(x=>x.onclick=()=>{to(+x.dataset.i);paused=true});
+  if(n>1&&!matchMedia("(prefers-reduced-motion:reduce)").matches)setInterval(()=>{if(!paused&&!document.hidden)to(i+1)},3500);
+  let x0=null;root.addEventListener("touchstart",e=>{x0=e.touches[0].clientX;paused=true},{passive:true});root.addEventListener("touchend",e=>{if(x0===null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)>40)to(i+(dx<0?1:-1))});
+  root.addEventListener("pointerdown",()=>{paused=true});to(0);
+}
 function draw(d){
+  if(d.type==="photos")return drawPhotos(d);
   const h=d.hero,n=h.targets,p=n?Math.round(h.reached/n*100):0,live=d.kind==="live";
   const when=new Date(live?d.updated:d.created).toLocaleString("en-ZA",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"});
   const rows=(a,dd)=>a.map(x=>`<div class="row"><div class="g"><div class="t">${esc(x.title)}</div><div class="s">${esc(x.phase)}</div></div>${dd&&x.due?`<div class="d">${esc(dshort(x.due))}</div>`:""}</div>`).join("");
