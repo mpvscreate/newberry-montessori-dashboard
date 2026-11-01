@@ -64,7 +64,7 @@ header.top h1{font-size:1.6rem}
 .today{position:relative;overflow:hidden;border-radius:28px;padding:22px 20px 18px;color:#fff;background:linear-gradient(135deg,var(--em),var(--em2));box-shadow:0 2px 6px rgba(29,107,51,.2),0 12px 32px rgba(29,107,51,.25)}
 .today::after{content:"";position:absolute;right:-50px;top:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.2),transparent 70%);pointer-events:none}
 .today .eyebrow{color:rgba(255,255,255,.82)}
-.today h2{font-size:1.65rem;margin:10px 0 6px}
+.today h2{font-size:1.5rem;margin:8px 0 4px}
 .today p{margin:0;color:rgba(255,255,255,.88);max-width:30ch}
 .today .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px}
 .today .stats div{background:rgba(255,255,255,.14);border-radius:16px;padding:10px 12px}
@@ -99,8 +99,8 @@ header.top h1{font-size:1.6rem}
 .vb{position:absolute;left:6px;bottom:6px;display:inline-flex;align-items:center;gap:4px;padding:3px 8px 3px 6px;border-radius:999px;background:rgba(0,0,0,.6);color:#fff;font:600 .72rem var(--body);pointer-events:none}
 .vb .i{width:.9em;height:.9em}
 .badge{display:inline-flex;align-items:center;gap:5px;font:600 .8rem var(--body);color:var(--muted)}
-.empty{text-align:center;padding:36px 16px;color:var(--muted)}
-.empty img{width:112px;height:112px;border-radius:30px;margin-bottom:16px;box-shadow:0 2px 6px var(--glow-soft),0 14px 34px var(--glow-soft)}
+.empty{text-align:center;padding:28px 16px 12px;color:var(--muted)}
+.empty img{width:84px;height:84px;border-radius:24px;margin-bottom:14px;box-shadow:0 2px 6px var(--glow-soft),0 14px 34px var(--glow-soft)}
 .empty h2{color:var(--ink);font-size:1.5rem;margin-bottom:6px}
 .empty p{max-width:28ch;margin:0 auto 20px}
 
@@ -240,8 +240,9 @@ async function render(){
   const today=todayISO(),done=R.some(r=>r.date===today);
   const photos=R.reduce((n,r)=>n+r.ph.length,0);
   $("#sub").textContent=greet();
-  $("#hero").innerHTML=`<div class="today"><div class="eyebrow">${esc(dlong(today))}</div><h2>${done?"Today's report is in":"How are the girls today?"}</h2><p>${done?"Lovely. Add another moment any time.":"A photo, a 5 second clip and a few words is all it takes."}</p><div class="stats"><div><b>${streak()}</b><span>day streak</span></div><div><b>${R.length}</b><span>reports</span></div><div><b>${photos}</b><span>snaps</span></div></div></div>`;
-  if(!R.length){$("#list").innerHTML=`<div class="empty"><img src="icons/flock-192.png" alt=""><h2>The diary is empty</h2><p>Add up to 5 photos or 5 second videos of the hens and a note about their day.</p><button class="btn primary" id="first">${ic("plus")}Add the first report</button></div>`;$("#first").onclick=()=>editor();return}
+  $("#hero").innerHTML=`<div class="today"><div class="eyebrow">${esc(dlong(today))}</div><h2>${done?"Today's report is in":"How are the girls today?"}</h2><p>${done?"Lovely. Add another moment any time.":"A photo, a short clip and a few words."}</p>${R.length?`<div class="stats"><div><b>${streak()}</b><span>day streak</span></div><div><b>${R.length}</b><span>reports</span></div><div><b>${photos}</b><span>snaps</span></div></div>`:""}</div>`;
+  $("#new").hidden=!R.length;
+  if(!R.length){$("#list").innerHTML=`<div class="empty"><img src="icons/flock-192.png" alt=""><h2>No reports yet</h2><p>Photos, 5 second clips and notes about the hens, all in one place.</p><button class="btn primary" id="first">${ic("plus")}Add the first report</button></div>`;$("#first").onclick=()=>editor();return}
   let h="",last="";
   for(const r of R){
     if(r.date!==last){h+=`<div class="eyebrow day">${r.date===today?"Today, ":""}${esc(dlong(r.date))}</div>`;last=r.date}
