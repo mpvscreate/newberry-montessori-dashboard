@@ -519,7 +519,7 @@ body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!importan
 .topt{display:block;width:100%;text-align:left;padding:12px 14px;margin-bottom:8px;border-radius:14px;border:1px solid var(--line);background:var(--sheet);color:var(--ink);font:inherit;cursor:pointer}.topt b{display:block;font-weight:600}.topt span{display:block;margin-top:2px;font-size:.88rem;color:var(--muted);line-height:1.35}.topt small{display:block;margin-top:4px;font-size:.75rem;color:var(--muted)}.topt[aria-pressed="true"]{border:2px solid var(--accent);padding:11px 13px;background:var(--accent-soft)}
 .tprev{display:flex;gap:10px;align-items:flex-start;padding:10px 12px;border-radius:14px;border:1px solid var(--line);background:var(--paper)}.tprev img{width:30px;height:30px;border-radius:8px;flex:none}.tprev div{min-width:0;flex:1}.tprev b{display:block;font-size:.9rem}.tprev span{display:block;font-size:.84rem;color:var(--muted);line-height:1.35}.tprev small{flex:none;font-size:.72rem;color:var(--muted)}
 .wkba .cmp-b{position:relative;width:100%;aspect-ratio:4/3;overflow:hidden;border-radius:14px;touch-action:pan-y;cursor:ew-resize;background:#000;user-select:none;-webkit-user-select:none}.wkba .cmp-b img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}.wkba .cmp-h{position:absolute;top:0;bottom:0;left:50%;width:3px;margin-left:-1.5px;background:#fff;box-shadow:0 0 8px rgba(0,0,0,.5)}.wkba .cmp-h i{position:absolute;top:50%;left:50%;width:36px;height:36px;margin:-18px 0 0 -18px;border-radius:50%;background:#fff;color:#222;display:flex;align-items:center;justify-content:center}.wkba .cmp-l{position:absolute;bottom:8px;background:rgba(0,0,0,.6);color:#fff;border-radius:8px;padding:3px 9px;font-size:.75rem;font-weight:600}.wkba .cmp-l.l{left:8px}.wkba .cmp-l.r{right:8px}
-#pumic.on{background:var(--accent);color:#fff;border-color:var(--accent)}
+.pu-mic{transform:none;width:46px;height:46px;box-shadow:none}.pu-mic .i{width:22px;height:22px}.pu-stick{position:sticky;bottom:calc(88px + env(safe-area-inset-bottom));z-index:5;margin-top:12px;padding:8px 0;background:linear-gradient(to top,var(--bg,var(--paper,transparent)) 60%,transparent)}.pu-stick .btn{box-shadow:0 8px 24px rgba(0,0,0,.35)}@media (min-width:900px){.pu-stick{bottom:16px}}
 .sl{position:relative;overflow:hidden;border-radius:16px;background:#000;touch-action:pan-y}.sl-t{display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1)}.sl-s{flex:0 0 100%;aspect-ratio:4/3}.sl-s img{width:100%;height:100%;object-fit:cover;display:block}.sl-d{position:absolute;left:0;right:0;bottom:8px;display:flex;justify-content:center;gap:6px}.sl-d button{width:8px;height:8px;border-radius:99px;border:0;padding:0;background:rgba(255,255,255,.55);transition:width .3s}.sl-d button[aria-current=true]{background:#fff;width:20px}
 @media (prefers-reduced-motion:reduce){.sl-t,.sl-d button{transition:none}}
 .sl-lg{position:absolute;top:10px;left:10px;width:17%;max-width:96px;height:auto;z-index:2;pointer-events:none;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))}
@@ -4481,9 +4481,10 @@ function pupdV(){
   const have=new Set(allPhotos().map(p=>p.m));PU.ids=PU.ids.filter(m=>have.has(m)||PU.own.includes(m)).slice(0,5);
   return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn("home")}<h2>Report</h2></div><button class="btn" data-act="pusend" aria-label="Share this photo update">${ic("share")}Share</button></div>
   ${repSeg("pupd")}
-  <div class="card rc"><div class="eyebrow">Your message</div><textarea id="pum" class="t" rows="4" maxlength="600" aria-label="Your message" placeholder="Write a personal update. For example: Good news, the roof is on and the walls are next.">${esc(PU.msg)}</textarea><div class="row between" style="margin-top:8px;gap:10px;align-items:center"><p class="hint" id="puc" style="margin:0">${PU.msg.length} of 600</p>${SPEECH?`<button type="button" class="btn small" id="pumic" aria-label="Speak your message">${ic("mic","sm")}<span>Speak</span></button>`:""}</div>${SPEECH?"":`<p class="hint" style="margin:8px 0 0">To speak your message, use the microphone on your keyboard.</p>`}</div>
+  <div class="card rc"><div class="eyebrow">Your message</div><textarea id="pum" class="t" rows="4" maxlength="600" aria-label="Your message" placeholder="Write a personal update. For example: Good news, the roof is on and the walls are next.">${esc(PU.msg)}</textarea><div class="row between" style="margin-top:8px;gap:10px;align-items:center"><p class="hint" id="puc" style="margin:0">${PU.msg.length} of 600</p>${SPEECH?`<button type="button" class="micfab pu-mic" id="pumic" aria-label="Speak your message" aria-pressed="false">${ic("mic")}<span>Speak</span></button>`:""}</div>${SPEECH?"":`<p class="hint" style="margin:8px 0 0">To speak your message, use the microphone on your keyboard.</p>`}</div>
   <div class="card rc"><div class="eyebrow">Photos · ${PU.ids.length} of 5</div><div id="pup"></div><button type="button" class="btn block" id="puwk" style="margin-bottom:8px">${ic("calendar")}Use this week's photos</button>${PU.ids.length>=5?`<p class="hint" style="margin:0">Five photos is the most. Remove one to add another.</p>`:`<div class="pu-add"><button type="button" class="btn" data-act="pupick">${ic("grid")}<span>Project</span></button><button type="button" class="btn" id="pugal">${ic("image")}<span>Camera roll</span></button><button type="button" class="btn" id="pucam">${ic("camera")}<span>Camera</span></button></div>`}<input type="file" id="pugf" accept="image/*" multiple hidden><input type="file" id="pucf" accept="image/*" capture="environment" hidden></div>
-  <div class="card rc"><div class="row between" style="align-items:center;margin-bottom:10px"><div class="eyebrow" style="margin:0">Preview</div><button type="button" class="chip" id="pulg" aria-pressed="${PU.logo}">${ic("check","sm")}Logo on photos</button></div><div id="pupv"></div></div>`;
+  <div class="card rc"><div class="row between" style="align-items:center;margin-bottom:10px"><div class="eyebrow" style="margin:0">Preview</div><button type="button" class="chip" id="pulg" aria-pressed="${PU.logo}">${ic("check","sm")}Logo on photos</button></div><div id="pupv"></div></div>
+  <div class="pu-stick"><button type="button" class="btn primary block" data-act="pusend" aria-label="Share this photo update">${ic("share")}Share update${PU.ids.length?" · "+PU.ids.length+" photo"+(PU.ids.length===1?"":"s"):""}</button></div>`;
 }
 async function pupdInit(){
   const ta=document.getElementById("pum");if(!ta)return;
@@ -4511,7 +4512,7 @@ async function pupdInit(){
   const mic=document.getElementById("pumic");
   if(mic&&SPEECH){
     const lab=mic.querySelector("span");let rec=null,want=false,t0=0,fast=0;
-    const off=()=>{want=false;rec=null;mic.classList.remove("on");lab.textContent="Speak"};
+    const off=()=>{want=false;rec=null;mic.classList.remove("on");mic.setAttribute("aria-pressed","false");lab.textContent="Speak"};
     const begin=()=>{
       try{
         t0=Date.now();rec=new SPEECH();rec.lang="en-ZA";rec.continuous=true;rec.interimResults=false;
@@ -4525,7 +4526,7 @@ async function pupdInit(){
         rec.start();
       }catch{off()}
     };
-    mic.onclick=()=>{if(want){want=false;try{rec&&rec.stop()}catch{}return}want=true;fast=0;mic.classList.add("on");lab.textContent="Listening… tap to stop";buzz(10);begin()};
+    mic.onclick=()=>{if(want){want=false;try{rec&&rec.stop()}catch{}return}want=true;fast=0;mic.classList.add("on");mic.setAttribute("aria-pressed","true");lab.textContent="Listening… tap to stop";buzz(10);begin()};
   }
   document.querySelectorAll("[data-pm]").forEach(b=>b.onclick=()=>{const[m,d]=b.dataset.pm.split("|"),i=PU.ids.indexOf(m),j=i+(+d);if(i<0||j<0||j>=PU.ids.length)return;[PU.ids[i],PU.ids[j]]=[PU.ids[j],PU.ids[i]];puSave();render()});
   const wkb=document.getElementById("puwk");
