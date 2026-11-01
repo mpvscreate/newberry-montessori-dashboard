@@ -3324,41 +3324,39 @@ function moneyCharts(){
     return `<g class="mb" data-act="mbar" data-id="${i}" tabindex="0" role="button" aria-label="${mLab(r.ym,1)}: paid ${money0(r.b+r.t+r.o)}, planned ${money0(r.p)}"><rect x="${cx(i)-iw/ms.length/2}" y="${pt}" width="${iw/ms.length}" height="${ih+pb-6}" fill="transparent"/>${g}${pl2}${now}</g>`}).join("");
   const step=ms.length>8?2:1,xs=ms.map((r,i)=>i%step===0?`<text x="${cx(i)}" y="${H-8}" text-anchor="middle">${mLab(r.ym)}</text>`:"").join("");
   const sumB=sum(ms,r=>r.b),sumT=sum(ms,r=>r.t),sumO=sum(ms,r=>r.o),sumP=sum(ms,r=>r.p);
-  /* where each rand sits: the builder, every trade and other costs, paid and still to pay */
-  const parties=[];
-  const ct=contractAmt(),paidB=paidTotal();if(ct>0)parties.push({n:"Builder",v:ct,p:Math.min(ct,paidB)});
-  tGroups().forEach(g=>{const live=g.items.filter(t=>t.status==="accepted"),v=sum(live,tVal);if(v>0)parties.push({n:g.name,v,p:Math.min(v,sum(live,tPaid))})});
-  const oth=S.costs.filter(c=>!c.pay),ov=sum(oth,c=>c.amount);if(ov>0)parties.push({n:"Other expenses",v:ov,p:sum(oth.filter(c=>c.paid),c=>c.amount)});
-  parties.sort((a,b)=>b.v-a.v);const top=parties.slice(0,8),rest=parties.slice(8);if(rest.length)top.push({n:"Other trades ("+rest.length+")",v:sum(rest,x=>x.v),p:sum(rest,x=>x.p)});
-  const pmax=Math.max(...top.map(x=>x.v),1);
-  const hb=top.length?`<div class="card"><h2>Where each rand sits</h2>
-   <div class="lg"><span><i class="ln" style="background:var(--green)"></i>Paid</span><span><i class="ln" style="background:var(--accent-soft);border:1px solid var(--muted)"></i>Still to pay</span></div>
-   <ul class="hbars">${top.map(x=>`<li><div class="row between"><span class="lt">${esc(x.n)}</span><span class="ls"><b>${money0(x.v)}</b></span></div><div class="hb" role="img" aria-label="${esc(x.n)}: ${money0(x.v)} in total, ${money0(x.p)} paid, ${money0(x.v-x.p)} still to pay" style="width:${Math.max(3,x.v/pmax*100)}%"><i style="width:${x.v?x.p/x.v*100:0}%"></i></div><div class="ls">Paid ${money0(x.p)} · to pay ${money0(x.v-x.p)}</div></li>`).join("")}</ul>
-   <details class="tv"><summary>View as table</summary><table class="dt"><thead><tr><th>Who</th><th>Total</th><th>Paid</th><th>To pay</th></tr></thead><tbody>${top.map(x=>`<tr><td>${esc(x.n)}</td><td>${money0(x.v)}</td><td>${money0(x.p)}</td><td>${money0(x.v-x.p)}</td></tr>`).join("")}</tbody></table></details></div>`:"";
   return `<div class="card"><h2>Payments by month</h2>
    <div class="lg"><span><i class="ln" style="background:var(--green)"></i>Builder</span>${sumT?`<span><i class="ln" style="background:var(--sky)"></i>Trades</span>`:""}${sumO?`<span><i class="ln" style="background:var(--accent)"></i>Other</span>`:""}${sumP?`<span><i class="ln" style="background:var(--accent-soft);border:1px solid var(--muted)"></i>Planned</span>`:""}</div>
    <svg class="chart" viewBox="0 0 ${W} ${H}" role="group" aria-label="Money paid and planned, month by month">${grid}<line class="base" x1="${pl}" x2="${W-pr}" y1="${Y(0)}" y2="${Y(0)}"/>${bars}${xs}</svg>
    <p class="chart-read" id="mbread" aria-live="polite">Paid so far <b>${money0(sumB+sumT+sumO)}</b>${sumP?`, planned <b>${money0(sumP)}</b>`:""}. Touch a month to read it.</p>
    ${undated?`<p class="hint">${undated} payment${undated===1?" has":"s have"} no due date yet, so ${undated===1?"it is":"they are"} not shown.</p>`:""}
-   <details class="tv"><summary>View as table</summary><table class="dt"><thead><tr><th>Month</th><th>Builder</th><th>Trades</th><th>Other</th><th>Planned</th></tr></thead><tbody>${ms.map(r=>`<tr><td>${mLab(r.ym)}</td><td>${money0(r.b)}</td><td>${money0(r.t)}</td><td>${money0(r.o)}</td><td>${money0(r.p)}</td></tr>`).join("")}</tbody></table></details></div>${hb}`;
+   <details class="tv"><summary>View as table</summary><table class="dt"><thead><tr><th>Month</th><th>Builder</th><th>Trades</th><th>Other</th><th>Planned</th></tr></thead><tbody>${ms.map(r=>`<tr><td>${mLab(r.ym)}</td><td>${money0(r.b)}</td><td>${money0(r.t)}</td><td>${money0(r.o)}</td><td>${money0(r.p)}</td></tr>`).join("")}</tbody></table></details></div>`;
 }
 function overallV(){
-  const ct=contractAmt(),est=+S.settings.estimate||0,paidB=paidTotal(),bLeft=Math.max(0,ct-paidB),tc=tCommit(),tp=tPaidAll(),tLeft=Math.max(0,tc-tp),wait=tWait(),up=tUpcoming();
+  const ct=contractAmt(),est=+S.settings.estimate||0,paidB=paidTotal(),bLeft=Math.max(0,ct-paidB),tc=tCommit(),tp=tPaidAll(),tLeft=Math.max(0,tc-tp),wait=tWait();
   const oth=S.costs.filter(c=>!c.pay),othAll=sum(oth,c=>c.amount),othPaid=sum(oth.filter(c=>c.paid),c=>c.amount),othDue=othAll-othPaid;
   const committed=ct+tc+othAll,paid=paidB+tp+othPaid,left=bLeft+tLeft+othDue,free=est-committed;
-  const bar=(v,t,cls)=>`<div class="meter ${cls||""}" role="img" aria-label="${money0(v)} of ${money0(t)}"><i style="width:${t>0?Math.min(100,v/t*100):0}%"></i></div>`;
-  const live=tLive().slice().sort((x,y)=>tVal(y)-tVal(x));
-  return `<section class="tile hero est" style="margin-bottom:10px"><div class="lbl">${ic("cash")}Whole project estimate</div>
-   <div class="big">${est?money0(est):"Not set"}</div>
-   <div class="sub">${est?`${money0(committed)} committed, ${pct(committed,est)}% of the estimate`:"Set the estimate on the Build tab"}</div>${est?estBreak(est,committed,paid,free):""}</section>
-  <div class="card ov mrows">
-  <button type="button" class="mrow" data-sub="mseg:build"><div class="row between"><span class="lt">Builder's quote</span><b>${ct?money0(ct):"Not set"}</b></div>${ct?bar(paidB,ct):""}<div class="ls">Paid ${money0(paidB)} · to pay ${money0(bLeft)}</div></button>
-  <button type="button" class="mrow" data-sub="mseg:trades"><div class="row between"><span class="lt">Other quotes</span><b>${live.length?money0(tc):"None yet"}</b></div>${live.length?bar(tp,tc):""}<div class="ls">${live.length?`Paid ${money0(tp)} · to pay ${money0(tLeft)}`:"Add quotes from your tiler, electrician and other trades."}${wait?` · ${money0(wait)} waiting for a decision`:""}</div></button>
-  ${othAll?`<button type="button" class="mrow" data-sub="mseg:build"><div class="row between"><span class="lt">Other expenses</span><b>${money0(othAll)}</b></div>${bar(othPaid,othAll)}<div class="ls">Paid ${money0(othPaid)} · to pay ${money0(othDue)}</div></button>`:""}
-  </div>
-  ${moneyCharts()}
-  ${up.length?`<div class="card"><h2>Coming up</h2><ul class="list">${up.map(({t,s})=>{const od=s.due&&s.due<today();return `<li class="tap" tabindex="0" data-act="opentrade" data-id="${t.id}"><span class="row-ic ${od?"red":"sky"}">${ic("calendar")}</span><div class="grow"><div class="lt">${esc(s.label||"Payment")}</div><div class="ls ${od?"bad":""}">${esc(t.trade)} · ${esc(tName(t))}${s.due?` · ${od?"overdue, ":"due "}${dshort(s.due)}`:""}</div></div><span class="amt">${money(s.amount)}</span></li>`}).join("")}</ul></div>`:""}
-  <p class="hint">Each payment comes off that quote's balance. Trades are quoted and paid separately from the builder.</p>`;
+  const bar=(v,t)=>'<div class="meter" role="img" aria-label="'+money0(v)+' of '+money0(t)+'"><i style="width:'+(t>0?Math.min(100,v/t*100):0)+'%"></i></div>';
+  /* the one answer: what is left in the estimate, or how far over */
+  const state=!est?"":free<0?"Over the estimate":committed/est>=.9?"Close to the estimate":"Within the estimate";
+  const hero=est?'<section class="tile hero est" style="margin-bottom:10px"><div class="lbl">'+ic("cash")+(free<0?"Over the estimate":"Left in the estimate")+'</div><div class="big">'+money0(Math.abs(free))+'</div><div class="sub">'+pct(committed,est)+'% committed · '+state.toLowerCase()+'</div>'+estBreak(est,committed,paid,free)+'</section>'
+    :'<section class="tile hero est" style="margin-bottom:10px"><div class="lbl">'+ic("cash")+'Committed so far</div><div class="big">'+money0(committed)+'</div><div class="sub">Set the estimate on the Build tab to see what is left</div></section>';
+  /* next payments: the builder's stages and every trade's stages, soonest first, overdue marked */
+  const td=today(),nx=[];
+  S.pays.filter(x=>!x.paid).forEach(x=>nx.push({who:"Builder",label:x.title,due:x.due||"",amt:+x.amount||0,attr:'data-sub="mseg:build"'}));
+  tLive().forEach(t=>(t.stages||[]).forEach(st=>{if(!st.paid)nx.push({who:t.trade||"Trade",sup:supName(t.sup),label:st.label,due:st.due||"",amt:+st.amount||0,attr:'data-act="opentrade" data-id="'+t.id+'"'})}));
+  nx.sort((x,y)=>(x.due||"9999").localeCompare(y.due||"9999"));
+  const nxShow=nx.slice(0,4);
+  const nextCard=nxShow.length?'<div class="card"><h2>Next payments</h2><ul class="list">'+nxShow.map(x=>{const od=x.due&&x.due<td,lab=x.label&&x.label!=="Payment"?x.label:"",meta=[x.sup,lab,x.due?(od?"overdue ":"due ")+dshort(x.due):"no date yet"].filter(Boolean).join(" · ");
+    return '<li class="tap" tabindex="0" '+x.attr+'><span class="row-ic '+(od?"red":"sky")+'">'+ic("calendar")+'</span><div class="grow"><div class="lt">'+esc(x.who)+'</div><div class="ls '+(od?"bad":"")+'">'+esc(meta)+'</div></div><span class="amt">'+money0(x.amt)+'</span></li>'}).join("")+'</ul>'+(nx.length>nxShow.length?'<p class="hint" style="margin:8px 0 0">'+(nx.length-nxShow.length)+' more planned. Open Build or Trades to see them all.</p>':"")+'</div>':"";
+  /* who gets what: one list for the builder, each trade and other expenses */
+  const parties=[];
+  if(ct>0)parties.push({n:"Builder",v:ct,p:Math.min(ct,paidB),attr:'data-sub="mseg:build"'});
+  tGroups().forEach(g=>{const lv=g.items.filter(t=>t.status==="accepted"),v=sum(lv,tVal);if(v>0)parties.push({n:g.name,v,p:Math.min(v,sum(lv,tPaid)),attr:lv.length===1?'data-act="opentrade" data-id="'+lv[0].id+'"':'data-sub="mseg:trades"'})});
+  if(othAll>0)parties.push({n:"Other expenses",v:othAll,p:othPaid,attr:'data-sub="mseg:build"'});
+  parties.sort((x,y)=>y.v-x.v);
+  const top=parties.slice(0,7),rest=parties.slice(7);if(rest.length)top.push({n:"Other trades ("+rest.length+")",v:sum(rest,x=>x.v),p:sum(rest,x=>x.p),attr:'data-sub="mseg:trades"'});
+  const whoCard=top.length?'<div class="card ov mrows"><h2 style="margin:10px 0 0">Who gets what</h2>'+top.map(x=>'<button type="button" class="mrow" '+x.attr+'><div class="row between"><span class="lt">'+esc(x.n)+'</span><b>'+money0(x.v)+'</b></div>'+bar(x.p,x.v)+'<div class="ls">Paid '+money0(x.p)+' · to pay '+money0(x.v-x.p)+'</div></button>').join("")+(wait?'<div class="ls" style="padding:10px 0 4px;border-top:1px solid var(--line)">'+money0(wait)+' in quotes waiting for a decision</div>':"")+'</div>':(wait?'<p class="hint">'+money0(wait)+' in quotes waiting for a decision.</p>':'<div class="card"><p class="muted" style="margin:0">Add the builder\'s contract and quotes from your trades to see who gets what.</p></div>');
+  return hero+nextCard+whoCard+moneyCharts()+'<p class="hint">Each payment comes off that quote\'s balance. Trades are quoted and paid separately from the builder.</p>';
 }
 function tradesV(){
   if(!S.trades.length)return empty("hammer","No contractor quotes yet","Add quotes from your tiler, electrician and other trades. They are paid separately from the builder and counted in the whole project.",`<button class="btn primary" data-act="addtrade">${ic("plus")}Add the first quote</button>`);
