@@ -495,7 +495,7 @@ body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!importan
 .iconbtn.sm{width:36px;height:36px}
 .card.ovs{padding:12px 14px;margin:0 0 10px;border-radius:18px}.ovbs{display:grid;gap:10px;margin-top:12px}.ovb{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;border:0;background:none;padding:0;color:inherit;font:inherit;text-align:left;cursor:pointer}.ovb .ovl{font-size:.85rem;color:var(--muted)}.ovb b{font:700 1rem var(--display)}.ovb .meter{grid-column:1/-1;margin:0}
 .ovd{margin:0 0 10px}.ovd>summary{list-style:none;display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 14px;border-radius:14px;border:1px solid var(--line);background:var(--sheet);cursor:pointer;font:500 .88rem var(--body)}.ovd>summary::-webkit-details-marker{display:none}.ovd>summary span{flex:1}.ovd[open]>summary{margin-bottom:10px}.ovd[open]>summary>.i:last-child{transform:rotate(90deg)}
-.addm{display:grid;gap:8px;margin:8px 0 4px}.addm .topt{display:flex;align-items:center;gap:12px;text-align:left}.addm .topt>span{display:grid;gap:2px}.addm .topt .i{width:22px;height:22px;flex:none;color:var(--accent)}.tile.hero.ok{background:linear-gradient(150deg,#0f7a56 0%,#0b6a4a 55%,#085a3e 100%);box-shadow:0 12px 36px rgba(16,145,106,.32)}.tile.hero.over{background:linear-gradient(150deg,#b3261e 0%,#9a1f19 55%,#7d1713 100%);box-shadow:0 12px 36px rgba(217,72,59,.35)}.msticky{position:sticky;top:var(--hdrh,64px);z-index:14;background:var(--paper);margin:0 -16px 10px;padding:6px 16px 8px}.msticky .segc{margin:0}.nxpay{flex:none;width:40px;height:40px;border-radius:50%;padding:0;display:grid;place-items:center;margin-left:4px}.mrows{padding:4px 14px}.mrow{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:12px 0;color:inherit;font:inherit;cursor:pointer}.mrow:first-child{border-top:0}.mrow .lt{font-weight:600}.mrow b{font:700 1rem var(--display)}.mrow .meter{margin:6px 0 4px}
+.addm{display:grid;gap:8px;margin:8px 0 4px}.addm .topt{display:flex;align-items:center;gap:12px;text-align:left}.addm .topt>span{display:grid;gap:2px}.addm .topt .i{width:22px;height:22px;flex:none;color:var(--accent)}.tile.hero.ok{background:linear-gradient(150deg,#0f7a56 0%,#0b6a4a 55%,#085a3e 100%);box-shadow:0 12px 36px rgba(16,145,106,.32)}.tile.hero.over{background:linear-gradient(150deg,#b3261e 0%,#9a1f19 55%,#7d1713 100%);box-shadow:0 12px 36px rgba(217,72,59,.35)}.msticky{position:sticky;top:var(--hdrh,64px);z-index:14;background:var(--paper);margin:0 -16px 10px;padding:6px 16px 8px}.msticky .segc{margin:0}.nxpay{flex:none;width:40px;height:40px;border-radius:50%;padding:0;display:grid;place-items:center;margin-left:4px}.listen{display:grid;justify-items:center;gap:10px;padding:14px 0 8px}.listen-mic{width:72px;height:72px;border-radius:50%;background:var(--accent-soft);display:grid;place-items:center;color:var(--accent)}.listen-mic .i{width:32px;height:32px}.listen-mic.on{background:var(--accent);color:#1b1300;animation:micpulse 1.1s ease-in-out infinite}.listen-t{margin:0;font-size:1.15rem;font-weight:600;text-align:center;min-height:1.6em}.mrows{padding:4px 14px}.mrow{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:12px 0;color:inherit;font:inherit;cursor:pointer}.mrow:first-child{border-top:0}.mrow .lt{font-weight:600}.mrow b{font:700 1rem var(--display)}.mrow .meter{margin:6px 0 4px}
 .nrep [data-act="report"],.nrep [data-act="goexport"],.nrep [data-act="weekshare"],.nrep [data-act="wkgoals"],.nrep [data-act="pusend"],.nrep [data-act="pupick"],.nrep [data-go="pupd"],.nrep [data-act="diaryshare"],.nrep [data-act="diaryprint"],.nrep [data-act="slipexport"],.nrep [data-act="snagexport"]{display:none!important}
 @media (max-width:899px){body header.top{margin-bottom:6px;padding-bottom:6px}body header.top img{width:36px;height:36px;border-radius:10px}body header.top h1{font-size:1.2rem;line-height:1.2}body header.top #today,body header.top .sep{display:none}body.sync-ok header.top .small{display:none}body header.top .sync{min-height:22px;padding:0;font-size:.74rem}body header.top .iconbtn{width:40px;height:40px}}
 .msec{list-style:none;font:700 .68rem var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding:12px 4px 2px}.moreV .msec:first-child{padding-top:4px}
@@ -1644,7 +1644,7 @@ function more(){
     <div class="card"><ul class="list">
    ${row("home","Project details",esc([s.name,s.site].filter(Boolean).join(" · ")||"Name, site and dates"),"project")}
    ${row("cash","Budget",moneyOK?(s.budget?money0(s.budget)+" in total":"Not set"):"Locked","budget")}
-   ${moneyOK?row("lock","Lock money now","Asks for the password again","lockmoney"):""}
+   ${moneyOK?row("lock","Lock money now","Asks for the password again. It also locks itself after 2 minutes.","lockmoney"):""}
    ${row("user","Your name",esc(me||"Shown on photos and notes you add")+(sm.code&&!perm.manage?" · set by the Project Lead":""),"whoami")}
    ${perm.manage?row("cloud","Back up to Google Drive","Save all documents, photos and project data at once","gbackup"):""}
    ${row("cloud","Refresh the app","Pulling down on any screen does the same","refresh")}
@@ -1777,10 +1777,10 @@ function taskSheet(key,roomId){
       save();close();render();toast("Task saved.",()=>ups.forEach(u=>u()));[...new Set(nt)].forEach(pid=>notifySend([pid],"New task for you",title.trim().slice(0,100),"tasks"))};
   });
 }
-function costSheet(id,pre){
-  const c=id?S.costs.find(x=>x.id===id):null,P=c?null:pre||null,st={cat:c?.cat||P?.cat||"materials",room:c?.room||"both",paid:c?c.paid:true,sup:c?.sup||""};
-  sheet(c?"Edit expense":P?"Check the slip":"Add expense",`<form id="f" novalidate>${slipBlock(c,P)}<label class="f" for="am">Amount</label><div class="amtin"><b>R</b><input id="am" inputmode="decimal" autocomplete="off" placeholder="0,00" value="${c?String(c.amount).replace(".",","):P?.amount?(+P.amount).toFixed(2).replace(".",","):""}"></div>
-  <label class="f" for="ti">What was it for?</label><input id="ti" class="t" maxlength="100" value="${esc(c?.title||P?.title||"")}" placeholder="For example: 2000 bricks">
+function costSheet(id,pre,say){
+  const c=id?S.costs.find(x=>x.id===id):null,P=c?null:pre||null,st={cat:c?.cat||P?.cat||say?.cat||"materials",room:c?.room||"both",paid:c?c.paid:(say&&say.paid===false?false:true),sup:c?.sup||say?.sup||""};
+  sheet(c?"Edit expense":P?"Check the slip":say?"Check what I heard":"Add expense",`<form id="f" novalidate>${slipBlock(c,P)}<label class="f" for="am">Amount</label><div class="amtin"><b>R</b><input id="am" inputmode="decimal" autocomplete="off" placeholder="0,00" value="${c?String(c.amount).replace(".",","):P?.amount?(+P.amount).toFixed(2).replace(".",","):say?.amount?String(say.amount).replace(".",","):""}"></div>
+  <label class="f" for="ti">What was it for?</label><input id="ti" class="t" maxlength="100" value="${esc(c?.title||P?.title||say?.title||"")}" placeholder="For example: 2000 bricks">
   <label class="f">Type</label>${chipRow("cat",CATS.map(x=>[x[0],x[1]]),st.cat)}
   <details class="more"><summary>More details: classroom</summary><label class="f">Which classroom?</label>${chipRow("room",[["both","Both classrooms"],...rooms().map(r=>[r.id,r.name])],st.room)}
   <p class="hint">A cost for both classrooms is split equally between them.</p></details>
@@ -2484,6 +2484,10 @@ function layoutFab(open){
 let moneyOK=false,hiddenAt=0;const MONEY_PW="0027";
 function lockMoney(){moneyOK=false;if(tab==="money")tab="build";render()}
 document.addEventListener("visibilitychange",()=>{if(document.hidden)hiddenAt=Date.now();else if(moneyOK&&hiddenAt&&Date.now()-hiddenAt>12e4)lockMoney()});
+/* Money also locks itself after two minutes without a touch, unless a form is open */
+let lastTouch=Date.now();
+["pointerdown","keydown","touchstart","scroll"].forEach(n=>addEventListener(n,()=>{lastTouch=Date.now()},{passive:true,capture:true}));
+setInterval(()=>{if(moneyOK&&!document.hidden&&Date.now()-lastTouch>12e4&&!document.querySelector("#layer .sheet")){lockMoney();toast("Money locked after 2 minutes. Open Money to unlock.")}},10000);
 function moneyGate(then,what){
   let d="";
   sheet(what?"Locked":"Money is locked",`<p class="muted" style="margin:6px 0 0">Enter the password to ${what?"open this "+what:"see money"}.</p><div class="lk-dots" id="md" role="img"></div><p class="lk-s" id="ms" role="status" style="text-align:center"></p>
@@ -3295,10 +3299,45 @@ function snagExportSheet(){
       close();printNode(area)});
   });
 }
+/* say an expense: "spent 450 on cement at Builders" becomes a filled-in form to check */
+function parseSpoken(text){
+  let t=" "+String(text||"").toLowerCase().replace(/\s+/g," ").trim()+" ";
+  const m=t.match(/\d{1,3}(?:[ ,]\d{3})+(?:[.,]\d{1,2})?|\d+(?:[.,]\d{1,2})?/);
+  const amount=m?parseAmt(m[0].replace(/[ ,](?=\d{3}\b)/g,"")):NaN;
+  if(m)t=t.replace(m[0]," ");
+  const paid=!/\b(not paid|unpaid|owe|owing|on account|still to pay|pay later)\b/.test(t);
+  t=t.replace(/\b(not paid|unpaid|owe|owing|on account|still to pay|pay later)\b/g," ").replace(/\b(rands?|spent|paid|bought|buy|pay|just|i)\b|(^|\s)r(?=\s)/g," ").replace(/\s+/g," ");
+  let sup="",title=t.trim();
+  const at=t.match(/\b(?:at|from|to)\s+(.+?)\s*$/);
+  if(at){const w=at[1].trim(),hit=S.sups.find(x=>{const n=x.name.toLowerCase();return n.includes(w)||w.includes(n)});if(hit){sup=hit.id;title=t.slice(0,at.index).trim()}}
+  title=title.replace(/^(on|for)\s+/,"").trim();title=title.charAt(0).toUpperCase()+title.slice(1);
+  const hay=" "+(title+" "+t).toLowerCase()+" ";
+  const cat=/\b(labou?r|wages?|worker|workers|plumber|electrician|painter)\b/.test(hay)?"labour":/\b(transport|fuel|petrol|diesel|delivery|truck|bakkie)\b/.test(hay)?"transport":/\b(hire|rental|skip|scaffold\w*|mixer)\b/.test(hay)?"hire":/\b(permit|fees?|plans|council|inspection|licen[cs]e)\b/.test(hay)?"fees":"materials";
+  return{amount:amount>0?amount:0,title,cat,paid,sup};
+}
+function voiceExpense(){
+  if(!SPEECH){toast("Voice is not available on this phone. Use the microphone on your keyboard.");return}
+  sheet("Say the expense",`<div class="listen"><div class="listen-mic" aria-hidden="true">${ic("mic")}</div><p class="listen-t" id="say" role="status" aria-live="polite">Listening…</p><p class="hint" style="text-align:center;margin:0">For example: spent 450 on cement at Builders</p></div><div class="foot"><button type="button" class="btn block" id="again" hidden>Try again</button></div>`,(sh,close)=>{
+    const say=sh.querySelector("#say"),again=sh.querySelector("#again"),mic=sh.querySelector(".listen-mic");let rec=null,heard="",dead=false;
+    const go=()=>{
+      heard="";again.hidden=true;mic.classList.add("on");say.textContent="Listening…";
+      try{rec=new SPEECH();rec.lang="en-ZA";rec.continuous=false;rec.interimResults=true;
+        rec.onresult=ev=>{heard=Array.from(ev.results).map(r=>r[0].transcript).join(" ").trim();say.textContent=heard||"Listening…"};
+        rec.onerror=er=>{if(er&&(er.error==="not-allowed"||er.error==="service-not-allowed")){dead=true;say.textContent="Allow the microphone to use voice."}};
+        rec.onend=()=>{rec=null;mic.classList.remove("on");if(dead||!sh.isConnected)return;
+          if(!heard){say.textContent="I did not catch that.";again.hidden=false;return}
+          const p=parseSpoken(heard);close();setTimeout(()=>costSheet(null,null,p),80)};
+        rec.start();buzz(10);
+      }catch{say.textContent="Voice did not start.";again.hidden=false}
+    };
+    again.onclick=go;go();
+    new MutationObserver((_,o)=>{if(!sh.isConnected){try{rec&&rec.abort()}catch{}o.disconnect()}}).observe(document.body,{childList:true,subtree:true});
+  });
+}
 function addMenu(){
-  const opts=[["exp","cash","Expense","Something you bought or paid for"],["slip","camera","Scan a slip","Take a photo of a receipt"],["pay","check","Builder payment","Record or plan a stage payment"],["quote","hammer","Trade quote","From a tiler, electrician and others"]];
+  const opts=[...(SPEECH?[["say","mic","Say an expense","For example: spent 450 on cement at Builders"]]:[]),["exp","cash","Expense","Something you bought or paid for"],["slip","camera","Scan a slip","Take a photo of a receipt"],["pay","check","Builder payment","Record or plan a stage payment"],["quote","hammer","Trade quote","From a tiler, electrician and others"]];
   sheet("Add",`<div class="addm">${opts.map(([k,i,t,d])=>`<button type="button" class="topt" data-m="${k}">${ic(i)}<span><b>${t}</b><span>${d}</span></span></button>`).join("")}</div>`,(sh,close)=>{
-    sh.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{close();const fn={exp:costSheet,slip:scanSlip,pay:recPaySheet,quote:tradeSheet}[b.dataset.m];setTimeout(fn,80)});
+    sh.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{close();const fn={say:voiceExpense,exp:costSheet,slip:scanSlip,pay:recPaySheet,quote:tradeSheet}[b.dataset.m];setTimeout(fn,80)});
   });
 }
 function moneyV(){
