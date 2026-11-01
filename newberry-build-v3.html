@@ -525,6 +525,7 @@ body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!importan
 .sl-lg{position:absolute;top:10px;left:10px;width:17%;max-width:96px;height:auto;z-index:2;pointer-events:none;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))}
 .pu-m{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--accent-soft);border-radius:14px;padding:12px 14px;margin-bottom:10px;font-size:.98rem;line-height:1.4}.pu-add{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.pu-add .btn{flex-direction:column;gap:2px;min-height:58px;padding:8px 4px;font-size:.82rem;text-align:center}.pu-mv{position:absolute;bottom:2px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;display:grid;place-items:center;padding:0}.pu-mv.l{left:2px}.pu-mv.r{right:2px}.pu-mv:disabled{opacity:.3}.pu-n{position:absolute;bottom:3px;left:3px;min-width:22px;height:22px;border-radius:11px;background:var(--accent);color:#fff;font:700 .7rem/20px var(--display);text-align:center;padding:0 5px}
 .pu-rows{display:grid;gap:10px;margin-bottom:12px}.pu-r{display:grid;grid-template-columns:92px 1fr auto;gap:10px;align-items:start}.pu-cw{position:relative;min-width:0}.pu-ci{display:block;width:100%;min-height:44px;padding:11px 12px 0;font-size:.95rem;line-height:1.3;resize:none;overflow:hidden;transition:height .18s ease}.pu-ci:focus{overflow:auto}.pu-cc{display:none;position:absolute;right:10px;bottom:6px;font-size:.7rem;color:var(--muted);pointer-events:none}.pu-ci:focus+.pu-cc{display:block}.pu-mvs{display:grid;gap:6px}.pu-mvs .pu-mv{position:static;width:38px;height:38px;border-radius:12px;background:var(--accent-soft);color:var(--ink,inherit);border:1px solid var(--line,transparent)}@media (prefers-reduced-motion:reduce){.pu-ci{transition:none}}
+.pu-add{grid-template-columns:repeat(4,1fr)!important;gap:6px!important}.pu-add .btn{font-size:.74rem!important;padding-left:2px!important;padding-right:2px!important;line-height:1.1}.psy-p video.psy-i{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover;background:#000}.pu-t video{width:100%;height:100%;object-fit:cover;display:block}.pk .pu-vb.lg{background:rgba(180,90,0,.8)}.pu-vb{position:absolute;left:50%;top:50%;width:26px;height:26px;margin:-13px 0 0 -13px;border-radius:50%;background:rgba(0,0,0,.55);pointer-events:none;z-index:1}.pu-vb:after{content:"";position:absolute;left:10px;top:7px;border-left:9px solid #fff;border-top:6px solid transparent;border-bottom:6px solid transparent}.rec-v{position:relative;border-radius:14px;overflow:hidden;background:#000;aspect-ratio:4/3;margin-top:8px}.rec-v video{width:100%;height:100%;object-fit:cover;display:block}
 .psy{margin:0 0 14px}.psy-p{position:relative;border-radius:14px;overflow:hidden;background:#000}.psy-p img.psy-i{display:block;width:100%;height:auto;aspect-ratio:4/3;object-fit:cover}.psy-n{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.55);color:#fff;border-radius:99px;padding:2px 9px;font-size:.72rem;font-weight:600}.psy-p .sl-lg{top:auto;left:auto;right:8px;bottom:8px;width:15%;max-width:70px}.psy-c{margin:6px 4px 0;font-size:.92rem;line-height:1.4}
 .pu-t{position:relative;width:92px;height:92px;border-radius:12px;overflow:hidden}.pu-t img{width:100%;height:100%;object-fit:cover;display:block}.pu-x{position:absolute;top:3px;right:3px;width:28px;height:28px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;display:grid;place-items:center;padding:0}
 .mtile .pk-n{position:absolute;top:4px;right:4px;z-index:2;min-width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font:700 .75rem/22px var(--display);text-align:center;font-style:normal}.mtile .pk-n:empty{display:none}.mtile.pk.on{outline:3px solid var(--accent);outline-offset:-3px}
@@ -4515,7 +4516,7 @@ async function stampPhoto(blob){
   }catch{return blob}finally{URL.revokeObjectURL(u)}
 }
 function slideHTML(urls,logo){return `<div class="sl" role="region" aria-roledescription="carousel" aria-label="Photo update"><div class="sl-t">${urls.map((u,i)=>`<div class="sl-s" role="group" aria-label="Photo ${i+1} of ${urls.length}"><img src="${u}" alt="Site photo ${i+1}"></div>`).join("")}</div>${logo?`<img class="sl-lg" src="newberry-logo-stamp.png" alt="">`:""}${urls.length>1?`<div class="sl-d">${urls.map((_,i)=>`<button type="button" aria-label="Show photo ${i+1}" data-i="${i}"></button>`).join("")}</div>`:""}</div>`}
-function storyHTML(urls,caps,logo){const n=urls.length;return urls.map((u,i)=>`<figure class="psy"><div class="psy-p"><img class="psy-i" src="${u}" alt="${esc(caps[i]||"Site photo "+(i+1))}">${n>1?`<span class="psy-n">${i+1} of ${n}</span>`:""}${logo?`<img class="sl-lg" src="newberry-logo-stamp.png" alt="">`:""}</div>${caps[i]?`<figcaption class="psy-c">${esc(caps[i])}</figcaption>`:""}</figure>`).join("")}
+function storyHTML(urls,caps,logo,vids){const n=urls.length;return urls.map((u,i)=>`<figure class="psy"><div class="psy-p">${vids&&vids[i]?`<video class="psy-i" src="${u}" muted playsinline loop preload="auto" ${reduced()?"controls":"autoplay"} aria-label="${esc(caps[i]||"Site video "+(i+1))}"></video>`:`<img class="psy-i" src="${u}" alt="${esc(caps[i]||"Site photo "+(i+1))}">`}${n>1?`<span class="psy-n">${i+1} of ${n}</span>`:""}${logo?`<img class="sl-lg" src="newberry-logo-stamp.png" alt="">`:""}</div>${caps[i]?`<figcaption class="psy-c">${esc(caps[i])}</figcaption>`:""}</figure>`).join("")}
 function slideWire(root,n){
   const t=root.querySelector(".sl-t"),dots=[...root.querySelectorAll(".sl-d button")];if(!t)return;
   let i=0,paused=false;
@@ -4527,12 +4528,92 @@ function slideWire(root,n){
   root.addEventListener("pointerdown",()=>{paused=true});
   to(0);
 }
+/* how long a video is, in seconds (0 when the phone cannot tell) */
+function vDur(blob){return new Promise(res=>{const u=URL.createObjectURL(blob),v=document.createElement("video");v.preload="metadata";v.muted=true;let fin=false;const done=d=>{if(fin)return;fin=true;URL.revokeObjectURL(u);res(d)};v.onloadedmetadata=()=>{if(isFinite(v.duration))done(v.duration);else{v.ondurationchange=()=>{if(isFinite(v.duration))done(v.duration)};try{v.currentTime=1e7}catch{done(0)}}};v.onerror=()=>done(0);setTimeout(()=>done(0),5000);v.src=u})}
+/* a clip that is too long: choose which 5 seconds to keep, then it is re-recorded as a short clip */
+const TRIM_MIMES=["video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"];
+function trimRender(url,start,say){
+  return new Promise((res,rej)=>{
+    const v=document.createElement("video");v.muted=true;v.playsInline=true;v.preload="auto";v.src=url;v.onerror=()=>rej(new Error("video"));
+    v.onloadeddata=()=>{
+      const k=Math.min(1,720/Math.max(v.videoWidth||720,v.videoHeight||720)),w=Math.max(2,Math.round((v.videoWidth||640)*k/2)*2),h=Math.max(2,Math.round((v.videoHeight||360)*k/2)*2);
+      const cv=document.createElement("canvas");cv.width=w;cv.height=h;const x=cv.getContext("2d");
+      v.onseeked=()=>{
+        v.onseeked=null;
+        const mime=TRIM_MIMES.find(m=>{try{return MediaRecorder.isTypeSupported(m)}catch{return false}})||"";let rec,iv=0;
+        try{rec=new MediaRecorder(cv.captureStream(30),mime?{mimeType:mime,videoBitsPerSecond:2500000}:{videoBitsPerSecond:2500000})}catch(e){rej(e);return}
+        const ch=[];rec.ondataavailable=e=>{if(e.data&&e.data.size)ch.push(e.data)};
+        rec.onstop=()=>{clearInterval(iv);res(new Blob(ch,{type:(rec.mimeType||mime||"video/webm").split(";")[0]}))};
+        const t0=performance.now();x.drawImage(v,0,0,w,h);rec.start();v.play().catch(rej);
+        iv=setInterval(()=>{x.drawImage(v,0,0,w,h);const el=(performance.now()-t0)/1000;if(say)say("Trimming… "+Math.max(0,Math.ceil(5-el))+" s");if(el>=5||v.currentTime>=start+5||v.ended){clearInterval(iv);v.pause();try{rec.state!=="inactive"&&rec.stop()}catch{}}},33);
+      };
+      v.currentTime=start>0?start:.01;
+    };
+  });
+}
+function puTrim(blob,dur){
+  if(!HTMLCanvasElement.prototype.captureStream||!window.MediaRecorder){toast("This phone cannot trim here. Choose a clip of up to 5 seconds.");return}
+  if(PU.ids.length>=5){toast("Five items at most. Remove one first.");return}
+  const url=URL.createObjectURL(blob),max=Math.max(0,Math.round((dur-5)*10)/10);
+  sheet("Trim to 5 seconds",`<p class="muted" style="margin:6px 0 8px">This clip is ${Math.round(dur)} seconds. Slide to choose which 5 seconds to keep.</p><div class="rec-v"><video id="tv" muted playsinline preload="auto"></video></div><p class="hint" id="tl" role="status" style="margin:10px 0 4px"></p><input type="range" id="ts" min="0" max="${max}" step="0.1" value="0" aria-label="Where the 5 seconds start" style="width:100%"><div class="foot"><button type="button" class="btn block" id="tp">Play these 5 seconds</button><button type="button" class="btn primary block" id="tu" style="margin-top:8px">Use these 5 seconds</button></div>`,(sh,close)=>{
+    const v=sh.querySelector("#tv"),sl=sh.querySelector("#ts"),lab=sh.querySelector("#tl"),use=sh.querySelector("#tu"),pl=sh.querySelector("#tp");
+    let start=0,busy=false;
+    const paint=m=>{lab.textContent=m||`Keeping ${start.toFixed(1)} s to ${(start+5).toFixed(1)} s of ${dur.toFixed(1)} s. The sound is left out.`};
+    v.src=url;v.onloadeddata=()=>{try{v.currentTime=0.01}catch{}};
+    sl.oninput=()=>{start=+sl.value;v.pause();v.ontimeupdate=null;try{v.currentTime=start}catch{}paint()};
+    pl.onclick=()=>{try{v.currentTime=start;v.play();const end=start+5;v.ontimeupdate=()=>{if(v.currentTime>=end){v.pause();v.ontimeupdate=null}}}catch{}};
+    use.onclick=async()=>{
+      if(busy)return;busy=true;use.disabled=pl.disabled=sl.disabled=true;v.pause();
+      try{
+        const out=await trimRender(url,start,paint);
+        if(!sh.isConnected)return;
+        if(out.size<1500)throw new Error("empty");
+        close();const mid=uid();await mPut(mid,out);queueMedia(mid);PU.own.push(mid);PU.ids.push(mid);puSave();render();toast("Clip trimmed and added.");
+      }catch{paint("Could not trim this clip. Try a different one.");use.disabled=pl.disabled=sl.disabled=false;busy=false}
+    };
+    paint();
+    const watch=setInterval(()=>{if(!sh.isConnected){clearInterval(watch);URL.revokeObjectURL(url)}},500);
+  });
+}
+const PU_MAXV=5.6;
+const vExt=t=>/mp4/.test(t)?".mp4":/webm/.test(t)?".webm":/quicktime/.test(t)?".mov":".mp4";
+/* record a clip of exactly 5 seconds inside the app */
+async function puRecord(){
+  if(PU.ids.length>=5){toast("Five items at most. Remove one first.");return}
+  if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){document.getElementById("pucvf")?.click();return}
+  sheet("Record 5 seconds",`<div class="rec-v"><video id="rcv" muted playsinline autoplay></video></div><p class="hint" id="rcs" role="status">Point the camera, then tap Record. It stops by itself after 5 seconds.</p><div class="foot"><button type="button" class="btn primary block" id="rcg">Record 5 seconds</button></div>`,async(sh,close)=>{
+    let stream=null,rec=null;const say=m=>{const e=sh.querySelector("#rcs");if(e)e.textContent=m};
+    const stop=()=>{try{stream&&stream.getTracks().forEach(x=>x.stop())}catch{}stream=null};
+    const watch=setInterval(()=>{if(!sh.isConnected){clearInterval(watch);stop();try{rec&&rec.state!=="inactive"&&rec.stop()}catch{}}},400);
+    try{stream=await navigator.mediaDevices.getUserMedia({video:{facingMode:{ideal:"environment"},width:{ideal:1280},height:{ideal:720}},audio:false})}
+    catch{say("Allow the camera to record. Or use Camera roll to pick a clip.");return}
+    sh.querySelector("#rcv").srcObject=stream;
+    const mime=["video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"].find(m=>{try{return MediaRecorder.isTypeSupported(m)}catch{return false}})||"";
+    const btn=sh.querySelector("#rcg");
+    btn.onclick=()=>{
+      const chunks=[];btn.disabled=true;
+      try{rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:2500000}:{videoBitsPerSecond:2500000})}catch{say("This phone cannot record here. Use Camera roll.");btn.disabled=false;return}
+      rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+      rec.onstop=async()=>{
+        clearInterval(cd);stop();clearInterval(watch);
+        const type=(rec.mimeType||mime||"video/webm").split(";")[0],bl=new Blob(chunks,{type});
+        if(!sh.isConnected)return;
+        close();
+        if(bl.size<2000){toast("Nothing was recorded. Try again.");return}
+        if(bl.size>15*1048576){toast("That clip is too big. Try again.");return}
+        const mid=uid();await mPut(mid,bl);queueMedia(mid);PU.own.push(mid);PU.ids.push(mid);puSave();render();toast("Clip added.");
+      };
+      let left=5;btn.textContent="Recording… "+left;const cd=setInterval(()=>{left--;if(left>0)btn.textContent="Recording… "+left},1000);
+      rec.start();setTimeout(()=>{try{rec.state!=="inactive"&&rec.stop()}catch{}},5000);
+    };
+  });
+}
 function pupdV(){
   const have=new Set(allPhotos().map(p=>p.m));PU.ids=PU.ids.filter(m=>have.has(m)||PU.own.includes(m)).slice(0,5);
   return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn("home")}<h2>Report</h2></div><button class="btn" data-act="pusend" aria-label="Share this photo update">${ic("share")}Share</button></div>
   ${repSeg("pupd")}
   <div class="card rc"><div class="eyebrow">Your message</div><textarea id="pum" class="t" rows="4" maxlength="600" aria-label="Your message" placeholder="Write a personal update. For example: Good news, the roof is on and the walls are next.">${esc(PU.msg)}</textarea><div class="row between" style="margin-top:8px;gap:10px;align-items:center"><p class="hint" id="puc" style="margin:0">${PU.msg.length} of 600</p>${SPEECH?`<button type="button" class="micfab pu-mic" id="pumic" aria-label="Speak your message" aria-pressed="false">${ic("mic")}<span>Speak</span></button>`:""}</div>${SPEECH?"":`<p class="hint" style="margin:8px 0 0">To speak your message, use the microphone on your keyboard.</p>`}</div>
-  <div class="card rc"><div class="eyebrow">Photos · ${PU.ids.length} of 5</div><div id="pup"></div><button type="button" class="btn block" id="puwk" style="margin-bottom:8px">${ic("calendar")}Use this week's photos</button>${PU.ids.length>=5?`<p class="hint" style="margin:0">Five photos is the most. Remove one to add another.</p>`:`<div class="pu-add"><button type="button" class="btn" data-act="pupick">${ic("grid")}<span>Project</span></button><button type="button" class="btn" id="pugal">${ic("image")}<span>Camera roll</span></button><button type="button" class="btn" id="pucam">${ic("camera")}<span>Camera</span></button></div>`}<input type="file" id="pugf" accept="image/*" multiple hidden><input type="file" id="pucf" accept="image/*" capture="environment" hidden></div>
+  <div class="card rc"><div class="eyebrow">Photos and clips · ${PU.ids.length} of 5</div><div id="pup"></div><button type="button" class="btn block" id="puwk" style="margin-bottom:8px">${ic("calendar")}Use this week's photos</button>${PU.ids.length>=5?`<p class="hint" style="margin:0">Five items is the most. Remove one to add another.</p>`:`<div class="pu-add"><button type="button" class="btn" data-act="pupick">${ic("grid")}<span>Project</span></button><button type="button" class="btn" id="pugal">${ic("image")}<span>Camera roll</span></button><button type="button" class="btn" id="pucam">${ic("camera")}<span>Photo</span></button><button type="button" class="btn" id="puvid">${ic("clock")}<span>Video 5 s</span></button></div>`}<input type="file" id="pugf" accept="image/*,video/*" multiple hidden><input type="file" id="pucf" accept="image/*" capture="environment" hidden><input type="file" id="pucvf" accept="video/*" capture="environment" hidden></div>
   <div class="card rc"><div class="row between" style="align-items:center;margin-bottom:10px"><div class="eyebrow" style="margin:0">Preview</div><button type="button" class="chip" id="pulg" aria-pressed="${PU.logo}">${ic("check","sm")}Logo on photos</button></div><div id="pupv"></div></div>
   <div class="pu-stick"><button type="button" class="btn primary block" data-act="pusend" aria-label="Share this photo update">${ic("share")}Share update${PU.ids.length?" · "+PU.ids.length+" photo"+(PU.ids.length===1?"":"s"):""}</button></div>`;
 }
@@ -4540,24 +4621,40 @@ async function pupdInit(){
   const ta=document.getElementById("pum");if(!ta)return;
   const urls=[];for(const m of PU.ids){const u=await mUrl(m);if(u)urls.push([m,u])}
   if(!ta.isConnected)return;
-  document.getElementById("pup").innerHTML=PU.ids.length?`<div class="pu-rows">${urls.map(([m,u],i)=>`<div class="pu-r"><div class="pu-t"><img src="${u}" alt="Photo ${i+1}"><span class="pu-n">${i+1}</span><button type="button" class="pu-x" data-pr="${m}" aria-label="Remove photo ${i+1}">${ic("x","sm")}</button></div><div class="pu-cw"><textarea class="t pu-ci" rows="1" maxlength="140" data-cap="${m}" placeholder="Add a caption" aria-label="Caption for photo ${i+1}">${esc(PU.caps[m]||"")}</textarea><span class="pu-cc" aria-hidden="true"></span></div>${urls.length>1?`<div class="pu-mvs"><button type="button" class="pu-mv" data-pm="${m}|-1" aria-label="Move photo ${i+1} earlier" ${i===0?"disabled":""}>${ic("up","sm")}</button><button type="button" class="pu-mv" data-pm="${m}|1" aria-label="Move photo ${i+1} later" ${i===urls.length-1?"disabled":""}>${ic("down","sm")}</button></div>`:""}</div>`).join("")}</div>`:`<p class="muted small" style="margin:0 0 10px">No photos yet. Choose up to 5.</p>`;
+  document.getElementById("pup").innerHTML=PU.ids.length?`<div class="pu-rows">${urls.map(([m,u],i)=>`<div class="pu-r"><div class="pu-t">${isVid(m)?`<video src="${u}#t=0.1" muted playsinline preload="metadata"></video><span class="pu-vb" aria-hidden="true"></span>`:`<img src="${u}" alt="Photo ${i+1}">`}<span class="pu-n">${i+1}</span><button type="button" class="pu-x" data-pr="${m}" aria-label="Remove photo ${i+1}">${ic("x","sm")}</button></div><div class="pu-cw"><textarea class="t pu-ci" rows="1" maxlength="140" data-cap="${m}" placeholder="Add a caption" aria-label="Caption for photo ${i+1}">${esc(PU.caps[m]||"")}</textarea><span class="pu-cc" aria-hidden="true"></span></div>${urls.length>1?`<div class="pu-mvs"><button type="button" class="pu-mv" data-pm="${m}|-1" aria-label="Move photo ${i+1} earlier" ${i===0?"disabled":""}>${ic("up","sm")}</button><button type="button" class="pu-mv" data-pm="${m}|1" aria-label="Move photo ${i+1} later" ${i===urls.length-1?"disabled":""}>${ic("down","sm")}</button></div>`:""}</div>`).join("")}</div>`:`<p class="muted small" style="margin:0 0 10px">No photos or clips yet. Choose up to 5.</p>`;
   const pv=document.getElementById("pupv");
-  pv.innerHTML=`<div class="pu-m" id="pumsg"></div>${urls.length?`<div id="pust">${storyHTML(urls.map(x=>x[1]),urls.map(x=>PU.caps[x[0]]||""),PU.logo)}</div>`:`<p class="muted small" style="margin:0">Your photos show here, one under the other.</p>`}`;
+  pv.innerHTML=`<div class="pu-m" id="pumsg"></div>${urls.length?`<div id="pust">${storyHTML(urls.map(x=>x[1]),urls.map(x=>PU.caps[x[0]]||""),PU.logo,urls.map(x=>isVid(x[0])))}</div>`:`<p class="muted small" style="margin:0">Your photos show here, one under the other.</p>`}`;
   const pm=pv.querySelector("#pumsg"),sync=()=>{pm.textContent=ta.value.trim();pm.hidden=!ta.value.trim()};sync();
   const grow=()=>{ta.style.height="auto";ta.style.height=Math.min(ta.scrollHeight+2,340)+"px"};grow();
   ta.oninput=()=>{grow();PU.msg=ta.value;puSave();document.getElementById("puc").textContent=ta.value.length+" of 600";sync()};
   document.querySelectorAll("[data-cap]").forEach(inp=>{const cc=inp.parentNode.querySelector(".pu-cc"),cnt=()=>{cc.textContent=inp.value.length+" of 140"},fit=()=>{inp.style.height="44px";const h=inp.scrollHeight;inp.style.height=(h>46?52:44)+"px"};fit();inp.onfocus=()=>{cnt();inp.style.height="92px"};inp.onblur=fit;inp.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();inp.blur()}};inp.addEventListener("input",()=>{inp.value=inp.value.split(String.fromCharCode(10)).join(" ");cnt()})});
   document.querySelectorAll("[data-cap]").forEach(inp=>inp.oninput=()=>{PU.caps[inp.dataset.cap]=inp.value;puSave();const st=document.getElementById("pust");if(!st)return;const i=urls.findIndex(x=>x[0]===inp.dataset.cap),fg=st.querySelectorAll("figure")[i];if(!fg)return;let c=fg.querySelector("figcaption");const v=inp.value.trim();if(!v){if(c)c.remove();return}if(!c){c=document.createElement("figcaption");c.className="psy-c";fg.appendChild(c)}c.textContent=v});
   const addFiles=async fl=>{
-    const room=5-PU.ids.length,files=[...fl].filter(f=>/^image\//.test(f.type)||/\.(jpe?g|png|heic|heif|webp)$/i.test(f.name));
-    if(!files.length)return;if(room<=0){toast("Five photos at most. Remove one first.");return}
-    const take=files.slice(0,room);toast("Adding "+take.length+" photo"+(take.length===1?"":"s")+"…");
-    let n=0;for(const f of take){try{const bl=await prepPhoto(f,PSIZES[psize][1]),mid=uid();await mPut(mid,bl);queueMedia(mid);PU.own.push(mid);PU.ids.push(mid);n++}catch{}}
-    puSave();render();toast(n?(n+" photo"+(n===1?"":"s")+" added."+(files.length>take.length?" Only 5 fit.":"")):"Could not read that photo.");
+    const room=5-PU.ids.length,files=[...fl].filter(f=>/^(image|video)\//.test(f.type)||/\.(jpe?g|png|heic|heif|webp|mp4|mov|webm)$/i.test(f.name));
+    if(!files.length)return;if(room<=0){toast("Five items at most. Remove one first.");return}
+    const take=files.slice(0,room);toast("Adding "+take.length+" item"+(take.length===1?"":"s")+"…");
+    let n=0,skipped="",long=null;
+    for(const f of take){
+      try{
+        const vid=/^video\//.test(f.type)||/\.(mp4|mov|webm)$/i.test(f.name);let bl;
+        if(vid){
+          const d=await vDur(f);
+          if(d>PU_MAXV){if(f.size>150*1048576){skipped="That clip is too big to trim. Choose a shorter one.";continue}if(long){skipped="Only one clip can be trimmed at a time.";continue}long={f,d};continue}
+          if(f.size>15*1048576){skipped="That clip is over 15 MB. Choose a shorter one.";continue}
+          bl=f;
+        }else bl=await prepPhoto(f,PSIZES[psize][1]);
+        const mid=uid();await mPut(mid,bl);queueMedia(mid);PU.own.push(mid);PU.ids.push(mid);n++;
+      }catch{}
+    }
+    puSave();render();
+    if(long){setTimeout(()=>puTrim(long.f,long.d),250);if(!n&&!skipped)return}
+    toast(skipped&&!n?skipped:n?(n+" item"+(n===1?"":"s")+" added."+(skipped?" "+skipped:files.length>take.length?" Only 5 fit.":"")):"Could not read that file.");
   };
   const gf=document.getElementById("pugf"),cf=document.getElementById("pucf");
-  if(gf){document.getElementById("pugal").onclick=()=>{if(PU.ids.length>=5){toast("Five photos at most. Remove one first.");return}gf.click()};gf.onchange=()=>{addFiles(gf.files);gf.value=""}}
-  if(cf){document.getElementById("pucam").onclick=()=>{if(PU.ids.length>=5){toast("Five photos at most. Remove one first.");return}cf.click()};cf.onchange=()=>{addFiles(cf.files);cf.value=""}}
+  if(gf){document.getElementById("pugal").onclick=()=>{if(PU.ids.length>=5){toast("Five items at most. Remove one first.");return}gf.click()};gf.onchange=()=>{addFiles(gf.files);gf.value=""}}
+  if(cf){document.getElementById("pucam").onclick=()=>{if(PU.ids.length>=5){toast("Five items at most. Remove one first.");return}cf.click()};cf.onchange=()=>{addFiles(cf.files);cf.value=""}}
+  const vf=document.getElementById("pucvf");if(vf)vf.onchange=()=>{addFiles(vf.files);vf.value=""};
+  const vb=document.getElementById("puvid");if(vb)vb.onclick=()=>puRecord();
   const lgb=document.getElementById("pulg");if(lgb)lgb.onclick=()=>{PU.logo=!PU.logo;lsSet("b3-pu-logo",PU.logo?"1":"0");render()};
   const mic=document.getElementById("pumic");
   if(mic&&SPEECH){
@@ -4598,13 +4695,13 @@ async function pupdInit(){
 }
 async function puPick(){
   const pics=allPhotos().filter(p=>p.ph!=="_diary").sort((a,b)=>b.date.localeCompare(a.date)).slice(0,90),ok=[];
-  for(const p of pics){const u=await mUrl(p.m);if(u&&!isVid(p.m))ok.push(p)}
-  if(!ok.length){toast("No photos to choose from yet.");return}
+  for(const p of pics){const u=await mUrl(p.m);if(!u)continue;if(isVid(p.m)){const bl=await mGet(p.m).catch(()=>null),d=bl?await vDur(bl):0;if(d>0&&d<=PU_MAXV){p.dur=d;ok.push(p)}else if(d>PU_MAXV&&d<=180){p.dur=d;p.long=true;ok.push(p)}}else ok.push(p)}
+  if(!ok.length){toast("No photos or short clips to choose from yet.");return}
   let sel=PU.ids.slice();
-  sheet("Choose up to 5 photos",`<p class="muted" id="pk5" style="margin:6px 0 10px"></p><div class="ptg">${ok.map(p=>`<button type="button" class="mtile pk" data-m2="${p.m}" aria-pressed="false" aria-label="Photo${p.date?", "+dshort(p.date):""}"><span data-m="${p.m}" style="position:absolute;inset:0"></span><i class="pk-n"></i>${p.date?`<small class="pdt">${dshort(p.date)}</small>`:""}</button>`).join("")}</div><div class="foot"><button type="button" class="btn primary block" id="pkd">Use these photos</button></div>`,(sh,close)=>{
+  sheet("Choose up to 5 photos or clips",`<p class="muted" id="pk5" style="margin:6px 0 4px"></p><p class="hint" style="margin:0 0 10px">Clips up to 5 seconds show a play mark. Longer clips can be trimmed.</p><div class="ptg">${ok.map(p=>`<button type="button" class="mtile pk" data-m2="${p.m}" aria-pressed="false" aria-label="Photo${p.date?", "+dshort(p.date):""}"><span data-m="${p.m}" style="position:absolute;inset:0"></span><i class="pk-n"></i>${p.dur?`<span class="pu-vb" aria-hidden="true"></span>`:""}${p.date?`<small class="pdt">${dshort(p.date)}</small>`:""}${p.dur?`<small class="pdt" style="left:auto;right:4px">${Math.round(p.dur)} s${p.long?" · trim":""}</small>`:""}</button>`).join("")}</div><div class="foot"><button type="button" class="btn primary block" id="pkd">Use these photos</button></div>`,(sh,close)=>{
     hydrate(sh);
     const paint=()=>{sh.querySelector("#pk5").textContent=sel.length+" of 5 chosen. The first one plays first.";sh.querySelectorAll("[data-m2]").forEach(b=>{const i=sel.indexOf(b.dataset.m2);b.setAttribute("aria-pressed",i>=0);b.classList.toggle("on",i>=0);b.querySelector(".pk-n").textContent=i>=0?i+1:""})};
-    sh.querySelectorAll("[data-m2]").forEach(b=>b.onclick=()=>{const m=b.dataset.m2,i=sel.indexOf(m);if(i>=0)sel.splice(i,1);else if(sel.length<5)sel.push(m);else toast("Five photos at most.");paint()});
+    sh.querySelectorAll("[data-m2]").forEach(b=>b.onclick=()=>{const m=b.dataset.m2,pp=ok.find(x=>x.m===m);if(pp&&pp.long){close();mGet(m).then(bl=>bl&&puTrim(bl,pp.dur));return}const i=sel.indexOf(m);if(i>=0)sel.splice(i,1);else if(sel.length<5)sel.push(m);else toast("Five items at most.");paint()});
     sh.querySelector("#pkd").onclick=()=>{PU.ids=sel;puSave();close();render()};
     paint();
   });
@@ -4612,7 +4709,7 @@ async function puPick(){
 function puShareSheet(){
   if(!PU.ids.length){toast("Choose at least one photo first.");return}
   const linked=!!sm.code&&!sm.off;let kind="files",days=30;
-  const opts=[["files","Send the photos","The photos and your message go straight to WhatsApp or any app."],...(linked?[["link","Share a link","A page with your message and the photos one under the other, with captions. Read only."]]:[])];
+  const opts=[["files","Send the photos and clips","They go straight to WhatsApp or any app, with your message."],...(linked?[["link","Share a link","A page with your message, the photos and short clips one under the other, with captions. Read only."]]:[])];
   sheet("Share this update",`<div id="so"></div><div id="sd"><div class="eyebrow" style="margin:12px 0 6px">Link ends</div><div class="chips" role="group" aria-label="Link ends">${[[7,"In 7 days"],[30,"In 30 days"],[0,"Never"]].map(([d,l])=>`<button type="button" class="chip" data-d="${d}" aria-pressed="${d===days}">${l}</button>`).join("")}</div></div>
    <p class="hint" id="sst" role="status"></p>
    <div class="foot"><button type="button" class="btn primary block" id="ssend">${ic("share")}Send</button><button type="button" class="btn block" id="scopy" style="margin-top:8px">${ic("link")}Copy link</button></div>`,(sh,close)=>{
@@ -4629,7 +4726,7 @@ function puShareSheet(){
       try{
         if(kind==="link"){const u=await make();if(u)shareText((PU.msg.trim()||"Photo update")+"\n\n"+u);return}
         say("Getting your photos ready…");const files=[];
-        for(const[i,m]of PU.ids.entries()){const bl=await mGet(m);if(bl){const out=PU.logo?await stampPhoto(bl):bl;files.push(new File([out],"site-photo-"+(i+1)+".jpg",{type:out.type||"image/jpeg"}))}}
+        for(const[i,m]of PU.ids.entries()){const bl=await mGet(m);if(!bl)continue;if(/^video\//.test(bl.type)){files.push(new File([bl],"site-clip-"+(i+1)+vExt(bl.type),{type:bl.type}))}else{const out=PU.logo?await stampPhoto(bl):bl;files.push(new File([out],"site-photo-"+(i+1)+".jpg",{type:out.type||"image/jpeg"}))}}
         if(files.length&&navigator.canShare&&navigator.canShare({files})){try{await navigator.share({files,text:PU.msg.trim()});say("");close()}catch(e){if(e?.name==="AbortError")say("");else say("Could not send the photos. Try Share a link.")}}
         else{say("This phone cannot send photos from here. Use Share a link, or send the message only.");if(PU.msg.trim())shareText(PU.msg.trim())}
       }finally{b.disabled=false}
