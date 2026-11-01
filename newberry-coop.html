@@ -1,0 +1,286 @@
+<!doctype html>
+<html lang="en-ZA">
+<head>
+<meta charset="utf-8">
+<script>try{var t=localStorage.getItem("coop-theme");if(t==="dark"||t==="light")document.documentElement.setAttribute("data-theme",t)}catch(e){}</script>
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="light dark">
+<title>Newberry Coop Diary</title>
+<link rel="icon" type="image/png" sizes="32x32" href="icons/coop-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/coop-apple-180.png">
+<link rel="manifest" href="manifest-coop.webmanifest">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Coop Diary">
+<meta name="theme-color" content="#fbf6ec" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#14110c" media="(prefers-color-scheme: dark)">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400..700&display=swap">
+<style>
+:root{
+  --paper:#fbf6ec; --sheet:#ffffff; --ink:#221c11; --muted:#6c6250; --line:#ece3cf; --field:#8f846c;
+  --accent:#a65608; --accent-ink:#fff; --accent-soft:#fbe8cc;
+  --green:#276b36; --green-soft:#e2f1e3; --red:#b3261e; --red-soft:#fbe5e2;
+  --glow:rgba(166,86,8,.36); --glow-soft:rgba(166,86,8,.16);
+  --shadow:0 1px 2px rgba(70,45,10,.05),0 10px 30px rgba(70,45,10,.07);
+  --display:"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif;
+  --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#14110c; --sheet:#1e1a13; --ink:#f4ecdc; --muted:#b1a68e; --line:#342e22; --field:#7d7258;
+  --accent:#f2a54f; --accent-ink:#1d1203; --accent-soft:#3b2a12;
+  --green:#8fd29a; --green-soft:#1f3322; --red:#f4a99d; --red-soft:#3d201c;
+  --glow:rgba(242,165,79,.4); --glow-soft:rgba(242,165,79,.2); --shadow:none; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#14110c; --sheet:#1e1a13; --ink:#f4ecdc; --muted:#b1a68e; --line:#342e22; --field:#7d7258;
+  --accent:#f2a54f; --accent-ink:#1d1203; --accent-soft:#3b2a12;
+  --green:#8fd29a; --green-soft:#1f3322; --red:#f4a99d; --red-soft:#3d201c;
+  --glow:rgba(242,165,79,.4); --glow-soft:rgba(242,165,79,.2); --shadow:none; color-scheme:dark}
+:root[data-theme="light"]{color-scheme:light}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+body{margin:0;background:var(--paper);color:var(--ink);font:400 1.0625rem/1.5 var(--body);-webkit-font-smoothing:antialiased}
+body.lock{overflow:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+h1,h2,h3{font-family:var(--display);font-variation-settings:"opsz" 48;letter-spacing:-.025em;line-height:1.08;margin:0;font-weight:700;text-wrap:balance}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:10px;box-shadow:0 0 0 6px var(--glow-soft)}
+.i{width:1.25em;height:1.25em;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-.22em}
+.i.lg{width:1.6em;height:1.6em}.i.xl{width:2.5em;height:2.5em;stroke-width:1.5}
+.muted{color:var(--muted)}.small{font-size:.875rem}
+.eyebrow{font:600 .72rem/1 var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.wrap{max-width:720px;margin:0 auto;padding:16px 16px 130px}
+.row{display:flex;align-items:center;gap:12px}.grow{flex:1;min-width:0}.between{justify-content:space-between}
+
+header.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
+header.top .logo{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
+header.top h1{font-size:1.45rem}
+.iconbtn{width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:var(--sheet);display:grid;place-items:center;cursor:pointer;color:var(--ink)}
+
+.hero{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:16px}
+.tile{border:1px solid var(--line);background:var(--sheet);border-radius:22px;padding:16px;box-shadow:var(--shadow)}
+.tile b{display:block;font:700 2rem/1 var(--display);margin-top:8px}
+.tile.green{background:var(--green-soft);border-color:transparent;color:var(--green)}
+.tile.green .eyebrow{color:inherit}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:16px;border:1px solid var(--line);background:var(--sheet);font-weight:700;cursor:pointer}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 2px 6px var(--glow-soft),0 6px 22px var(--glow)}
+.btn.danger{color:var(--red)}
+.btn.block{width:100%}
+.btn:active{transform:scale(.98)}
+
+.day{margin:22px 0 8px}
+.card{border:1px solid var(--line);background:var(--sheet);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px;cursor:pointer;text-align:left;width:100%;padding:0;display:block}
+.card .body{padding:14px 16px 16px}
+.card h3{font-size:1.2rem;margin-bottom:4px}
+.card p{margin:0;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
+.strip{display:grid;gap:3px;grid-template-columns:repeat(5,1fr);aspect-ratio:5/1}
+.strip.n1{grid-template-columns:1fr;aspect-ratio:16/9}
+.strip.n2{grid-template-columns:1fr 1fr;aspect-ratio:2/1}
+.strip.n3{grid-template-columns:2fr 1fr 1fr;aspect-ratio:2.4/1}
+.strip.n4{grid-template-columns:repeat(4,1fr);aspect-ratio:4/1}
+.strip img,.strip video,.grid img,.grid video,.thumb video{width:100%;height:100%;object-fit:cover;display:block;background:var(--line)}
+.m{position:relative;overflow:hidden;min-width:0}
+.vb{position:absolute;left:6px;bottom:6px;display:inline-flex;align-items:center;gap:4px;padding:3px 8px 3px 6px;border-radius:999px;background:rgba(0,0,0,.6);color:#fff;font:600 .72rem var(--body);pointer-events:none}
+.vb .i{width:.9em;height:.9em}
+.badge{display:inline-flex;align-items:center;gap:5px;font:600 .8rem var(--body);color:var(--muted)}
+.empty{text-align:center;padding:48px 16px;color:var(--muted)}
+.empty .i{color:var(--accent);margin-bottom:10px}
+
+.fab{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(20px + env(safe-area-inset-bottom));height:60px;padding:0 24px 0 20px;border-radius:30px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:700;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:0 2px 6px var(--glow-soft),0 8px 28px var(--glow);z-index:20}
+.fab:active{transform:scale(.97)}
+
+/* bottom sheets */
+.scrim{position:fixed;inset:0;background:rgba(20,14,5,.5);z-index:40;display:flex;align-items:flex-end;justify-content:center;animation:fade .2s}
+.sheet{background:var(--sheet);width:100%;max-width:640px;max-height:92vh;overflow:auto;border-radius:28px 28px 0 0;padding:20px 18px calc(20px + env(safe-area-inset-bottom));animation:up .25s cubic-bezier(.2,.8,.2,1)}
+@media (min-width:700px){.scrim{align-items:center}.sheet{border-radius:28px}}
+@keyframes up{from{transform:translateY(40px);opacity:0}}@keyframes fade{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){.sheet,.scrim{animation:none}}
+.sheet h2{font-size:1.5rem;margin-bottom:14px}
+label.f{display:block;font-weight:600;margin:14px 0 6px}
+input[type=text],input[type=date],textarea{width:100%;border:1.5px solid var(--field);border-radius:14px;padding:12px 14px;background:var(--paper);min-height:48px}
+textarea{min-height:120px;resize:vertical}
+.thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.thumb{position:relative;aspect-ratio:1;border-radius:16px;overflow:hidden;background:var(--line)}
+.thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.thumb button{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center;cursor:pointer}
+.addph{aspect-ratio:1;border-radius:16px;border:2px dashed var(--field);background:none;color:var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-weight:600;font-size:.85rem;cursor:pointer}
+.sheet .actions{display:grid;gap:10px;margin-top:20px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
+.grid img,.grid video{border-radius:16px;aspect-ratio:1}
+.grid img{cursor:zoom-in}
+.grid>:first-child:nth-last-child(odd){grid-column:1/-1;aspect-ratio:4/3}
+.lb{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:60;display:grid;place-items:center;padding:16px}
+.lb img{max-width:100%;max-height:100%;border-radius:8px}
+.lb button{position:absolute;top:max(14px,env(safe-area-inset-top));right:14px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(96px + env(safe-area-inset-bottom));background:var(--ink);color:var(--paper);padding:12px 18px;border-radius:14px;z-index:70;font-weight:600;max-width:90vw}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-hen" viewBox="0 0 24 24"><path d="M5 9c0-2 1.5-3.5 3.500-3.500S12 7 12 9v1h5c2 0 3.500 1.500 3.500 3.500 0 3.500-3 6-7 6H11c-3.500 0-6-2.500-6-6z"/><path d="M8.500 5.500V4M7 5.500 6.500 4M10 5.500l.500-1.500M3 10l2 .5"/><path d="M8 19.500V22M12 19.500V22"/></symbol>
+<symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l1.500-2h7L17 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.500"/></symbol>
+<symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10.500 5-3v9l-5-3z"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
+<symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
+<symbol id="i-share" viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></symbol>
+<symbol id="i-trash" viewBox="0 0 24 24"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-12M9 7V4h6v3"/></symbol>
+<symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.500 6.500 4 4"/></symbol>
+<symbol id="i-image" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.500"/><path d="m21 16-5-5-9 9"/></symbol>
+<symbol id="i-moon" viewBox="0 0 24 24"><path d="M20 14.500A8 8 0 0 1 9.500 4 8 8 0 1 0 20 14.500z"/></symbol>
+<symbol id="i-cal" viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></symbol>
+</svg>
+
+<main class="wrap" id="main" tabindex="-1">
+  <header class="top">
+    <div class="logo"><svg class="i lg"><use href="#i-hen"/></svg></div>
+    <div class="grow"><h1>Coop Diary</h1><div class="muted small">Daily snaps of the hens</div></div>
+    <button class="iconbtn" id="theme" aria-label="Switch light or dark"><svg class="i"><use href="#i-moon"/></svg></button>
+  </header>
+  <div class="hero" id="hero"></div>
+  <div id="list"></div>
+</main>
+<button class="fab" id="new"><svg class="i lg"><use href="#i-plus"/></svg>New report</button>
+
+<script>
+const $=s=>document.querySelector(s);
+const ic=(n,c="")=>`<svg class="i ${c}" aria-hidden="true"><use href="#i-${n}"/></svg>`;
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,7);
+const MAXPH=5, KEY="coop-reports";
+const todayISO=()=>{const d=new Date();return new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,10)};
+const dlong=iso=>new Date(iso+"T12:00").toLocaleDateString("en-ZA",{weekday:"long",day:"numeric",month:"long"});
+const dshort=iso=>new Date(iso+"T12:00").toLocaleDateString("en-ZA",{day:"numeric",month:"short",year:"numeric"});
+
+/* reports in localStorage, photos in IndexedDB */
+let R=[];try{R=JSON.parse(localStorage.getItem(KEY))||[]}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(R))}catch(e){toast("Could not save, storage is full")}};
+let _db;const db=()=>_db||(_db=new Promise((res,rej)=>{const q=indexedDB.open("coop-diary",1);q.onupgradeneeded=()=>q.result.createObjectStore("p");q.onsuccess=()=>res(q.result);q.onerror=()=>rej(q.error)}));
+const tx=async(m,f)=>{const d=await db();return new Promise((res,rej)=>{const t=d.transaction("p",m);const r=f(t.objectStore("p"));t.oncomplete=()=>res(r&&r.result);t.onerror=()=>rej(t.error)})};
+const putP=(id,b)=>tx("readwrite",s=>s.put(b,id));
+const getP=id=>tx("readonly",s=>s.get(id));
+const delP=id=>tx("readwrite",s=>s.delete(id));
+const urls=new Map();
+async function url(id){if(urls.has(id))return urls.get(id);const b=await getP(id);if(!b)return"";const u=URL.createObjectURL(b);urls.set(id,u);return u}
+function prep(file,max=1400){return new Promise((res,rej)=>{const im=new Image(),u=URL.createObjectURL(file);im.onload=()=>{const k=Math.min(1,max/Math.max(im.width,im.height));const c=document.createElement("canvas");c.width=Math.round(im.width*k);c.height=Math.round(im.height*k);c.getContext("2d").drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);c.toBlob(b=>b?res(b):rej(),"image/jpeg",.82)};im.onerror=()=>{URL.revokeObjectURL(u);rej()};im.src=u})}
+
+const isV=(r,id)=>(r.v||[]).includes(id);
+const MAXVID=5.5, MAXVIDMB=40;
+function vidLen(f){return new Promise((res,rej)=>{const v=document.createElement("video"),u=URL.createObjectURL(f);v.preload="metadata";v.onloadedmetadata=()=>{URL.revokeObjectURL(u);res(v.duration)};v.onerror=()=>{URL.revokeObjectURL(u);rej()};v.src=u})}
+const vtag=(u,ctl)=>`<video src="${u}${ctl?"":"#t=0.1"}" muted playsinline preload="metadata"${ctl?" controls":""}></video>`;
+const ext=b=>b.type==="video/quicktime"?"mov":b.type==="video/webm"?"webm":b.type.startsWith("video/")?"mp4":"jpg";
+function toast(t){const e=document.createElement("div");e.className="toast";e.textContent=t;e.setAttribute("role","status");document.body.appendChild(e);setTimeout(()=>e.remove(),2600)}
+
+/* sheets */
+function sheet(html){
+  const sc=document.createElement("div");sc.className="scrim";sc.innerHTML=`<div class="sheet" role="dialog" aria-modal="true">${html}</div>`;
+  document.body.appendChild(sc);document.body.classList.add("lock");
+  const close=()=>{sc.remove();if(!document.querySelector(".scrim"))document.body.classList.remove("lock")};
+  sc.addEventListener("click",e=>{if(e.target===sc)close()});
+  return{el:sc.firstChild,close};
+}
+function lightbox(u){const l=document.createElement("div");l.className="lb";l.innerHTML=`<img src="${u}" alt="Coop photo"><button class="iconbtn" aria-label="Close">${ic("x")}</button>`;l.onclick=()=>l.remove();document.body.appendChild(l)}
+
+/* home */
+async function render(){
+  R.sort((a,b)=>b.date.localeCompare(a.date)||b.t-a.t);
+  const today=todayISO(),done=R.some(r=>r.date===today);
+  const photos=R.reduce((n,r)=>n+r.ph.length,0);
+  $("#hero").innerHTML=`<div class="tile ${done?"green":""}"><div class="eyebrow">Today</div><b>${done?"Done":"Not yet"}</b></div><div class="tile"><div class="eyebrow">${R.length} ${R.length===1?"report":"reports"}</div><b>${photos} <span class="small muted" style="font:500 .9rem var(--body)">snaps</span></b></div>`;
+  if(!R.length){$("#list").innerHTML=`<div class="empty">${ic("hen","xl")}<h2 style="color:var(--ink);margin-bottom:6px">No reports yet</h2><p>Add up to 5 photos or 5 second videos of the hens and add a note about their day.</p></div>`;return}
+  let h="",last="";
+  for(const r of R){
+    if(r.date!==last){h+=`<div class="eyebrow day">${r.date===today?"Today, ":""}${esc(dlong(r.date))}</div>`;last=r.date}
+    const us=await Promise.all(r.ph.map(url));
+    h+=`<button class="card" data-id="${r.id}">${us.length?`<div class="strip n${us.length}">${us.map((u,i)=>isV(r,r.ph[i])?`<div class="m">${vtag(u)}<span class="vb">${ic("video")}5s</span></div>`:`<div class="m"><img src="${u}" alt="" loading="lazy"></div>`).join("")}</div>`:""}<div class="body"><h3>${esc(r.title||"Coop report")}</h3>${r.note?`<p>${esc(r.note)}</p>`:""}</div></button>`;
+  }
+  $("#list").innerHTML=h;
+  document.querySelectorAll(".card").forEach(c=>c.onclick=()=>detail(c.dataset.id));
+}
+
+/* new / edit report */
+function editor(r){
+  const isNew=!r;r=r||{id:uid(),t:Date.now(),date:todayISO(),title:"",note:"",ph:[]};
+  const keep=[...r.ph], fresh=new Map(), vset=new Set(r.v||[]); /* fresh: id -> blob */
+  const s=sheet(`<h2>${isNew?"New report":"Edit report"}</h2>
+    <label class="f" for="d">Date</label><input type="date" id="d" value="${r.date}" max="${todayISO()}">
+    <label class="f" for="ti">Title</label><input type="text" id="ti" maxlength="60" placeholder="e.g. Sunbathing day" value="${esc(r.title)}">
+    <label class="f" for="no">What did the hens get up to?</label><textarea id="no" placeholder="Eggs, moods, visitors, funny moments">${esc(r.note)}</textarea>
+    <label class="f">Photos and 5 second videos <span class="muted small" id="cnt"></span></label><div class="thumbs" id="th"></div>
+    <input type="file" id="fi" accept="image/*,video/*" multiple hidden>
+    <div class="actions"><button class="btn primary block" id="sv">Save report</button><button class="btn block" id="cx">Cancel</button></div>`);
+  const th=s.el.querySelector("#th"),fi=s.el.querySelector("#fi");
+  const total=()=>keep.length;
+  async function paint(){
+    const items=await Promise.all(keep.map(async id=>[id,fresh.has(id)?(urls.get(id)||(urls.set(id,URL.createObjectURL(fresh.get(id))),urls.get(id))):await url(id)]));
+    th.innerHTML=items.map(([id,u])=>`<div class="thumb">${vset.has(id)?vtag(u)+`<span class="vb">${ic("video")}Video</span>`:`<img src="${u}" alt="Photo">`}<button data-rm="${id}" aria-label="Remove">${ic("x","sm")}</button></div>`).join("")+(total()<MAXPH?`<button type="button" class="addph" id="ad">${ic("camera","lg")}Photo or video</button>`:"");
+    s.el.querySelector("#cnt").textContent=`${total()} of ${MAXPH}`;
+    th.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{const i=keep.indexOf(b.dataset.rm);if(i>=0)keep.splice(i,1);paint()});
+    const ad=th.querySelector("#ad");if(ad)ad.onclick=()=>fi.click();
+  }
+  fi.onchange=async()=>{
+    const files=[...fi.files];fi.value="";
+    if(total()+files.length>MAXPH)toast(`Only ${MAXPH} items per report`);
+    for(const f of files.slice(0,MAXPH-total())){try{
+      const id=uid();
+      if(f.type.startsWith("video/")){
+        if(f.size>MAXVIDMB*1048576){toast(`Video is too big, keep it under ${MAXVIDMB} MB`);continue}
+        const d=await vidLen(f);
+        if(!(d<=MAXVID)){toast("Videos can be 5 seconds at most");continue}
+        fresh.set(id,f);vset.add(id);
+      }else fresh.set(id,await prep(f));
+      keep.push(id);
+    }catch(e){toast("That file could not be read")}}
+    paint();
+  };
+  s.el.querySelector("#cx").onclick=s.close;
+  s.el.querySelector("#sv").onclick=async()=>{
+    const date=s.el.querySelector("#d").value||todayISO(),title=s.el.querySelector("#ti").value.trim(),note=s.el.querySelector("#no").value.trim();
+    if(!title&&!note&&!keep.length){toast("Add a title, a note or a photo");return}
+    for(const id of keep)if(fresh.has(id))await putP(id,fresh.get(id));
+    for(const id of r.ph)if(!keep.includes(id)){await delP(id);urls.delete(id)}
+    Object.assign(r,{date,title,note,ph:keep.slice(),v:keep.filter(i=>vset.has(i))});
+    if(isNew)R.push(r);save();s.close();render();toast("Report saved");
+  };
+  paint();
+}
+
+/* detail + share */
+async function detail(id){
+  const r=R.find(x=>x.id===id);if(!r)return;
+  const us=await Promise.all(r.ph.map(url));
+  const s=sheet(`<div class="eyebrow">${esc(dlong(r.date))}</div><h2 style="margin-top:6px">${esc(r.title||"Coop report")}</h2>
+    ${us.length?`<div class="grid">${us.map((u,i)=>isV(r,r.ph[i])?vtag(u,true):`<img src="${u}" alt="Coop photo">`).join("")}</div>`:""}
+    ${r.note?`<p style="white-space:pre-line;margin:8px 0 0">${esc(r.note)}</p>`:""}
+    <div class="actions"><button class="btn primary block" id="sh">${ic("share")}Share on WhatsApp</button>
+    <div class="row"><button class="btn grow" id="ed">${ic("edit")}Edit</button><button class="btn danger grow" id="dl">${ic("trash")}Delete</button></div>
+    <button class="btn block" id="cl">Close</button></div>`);
+  s.el.querySelectorAll(".grid img").forEach(i=>i.onclick=()=>lightbox(i.src));
+  s.el.querySelector("#cl").onclick=s.close;
+  s.el.querySelector("#ed").onclick=()=>{s.close();editor(r)};
+  s.el.querySelector("#dl").onclick=async function(){
+    if(this.dataset.sure!=="1"){this.dataset.sure="1";this.lastChild.textContent="Tap again to delete";return}
+    for(const p of r.ph){await delP(p);urls.delete(p)}
+    R=R.filter(x=>x.id!==r.id);save();s.close();render();toast("Report deleted");
+  };
+  s.el.querySelector("#sh").onclick=()=>share(r);
+}
+const textOf=r=>`*Coop Diary, ${dshort(r.date)}*${r.title?`\n${r.title}`:""}${r.note?`\n\n${r.note}`:""}`;
+async function share(r){
+  const text=textOf(r);
+  try{
+    const files=[];
+    for(let i=0;i<r.ph.length;i++){const b=await getP(r.ph[i]);if(b)files.push(new File([b],`coop-${r.date}-${i+1}.${ext(b)}`,{type:b.type||"image/jpeg"}))}
+    if(files.length&&navigator.canShare&&navigator.canShare({files})){await navigator.share({files,text});return}
+    if(navigator.share&&!files.length){await navigator.share({text});return}
+  }catch(e){if(e&&e.name==="AbortError")return}
+  window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank","noopener");
+  if(r.ph.length)toast("This browser cannot attach photos or videos, text only was sent");
+}
+
+$("#new").onclick=()=>editor();
+$("#theme").onclick=()=>{const dark=document.documentElement.getAttribute("data-theme")==="dark"||(!document.documentElement.getAttribute("data-theme")&&matchMedia("(prefers-color-scheme:dark)").matches);const n=dark?"light":"dark";document.documentElement.setAttribute("data-theme",n);try{localStorage.setItem("coop-theme",n)}catch(e){}};
+render();
+if("serviceWorker"in navigator&&location.protocol.startsWith("http"))navigator.serviceWorker.register("sw-coop.js").catch(()=>{});
+</script>
+</body>
+</html>
