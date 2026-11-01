@@ -6,8 +6,8 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="color-scheme" content="light dark">
 <title>Newberry Coop Diary</title>
-<link rel="icon" type="image/png" sizes="32x32" href="icons/coop-32.png">
-<link rel="apple-touch-icon" sizes="180x180" href="icons/coop-apple-180.png">
+<link rel="icon" type="image/png" sizes="32x32" href="icons/flock-32.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icons/flock-apple-180.png">
 <link rel="manifest" href="manifest-coop.webmanifest">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -24,6 +24,7 @@
   --green:#276b36; --green-soft:#e2f1e3; --red:#b3261e; --red-soft:#fbe5e2;
   --glow:rgba(166,86,8,.36); --glow-soft:rgba(166,86,8,.16);
   --shadow:0 1px 2px rgba(70,45,10,.05),0 10px 30px rgba(70,45,10,.07);
+  --em:#1d6b33; --em2:#2f8a47;
   --display:"Bricolage Grotesque","Instrument Sans",system-ui,sans-serif;
   --body:"Instrument Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
 }
@@ -31,12 +32,12 @@
   --paper:#14110c; --sheet:#1e1a13; --ink:#f4ecdc; --muted:#b1a68e; --line:#342e22; --field:#7d7258;
   --accent:#f2a54f; --accent-ink:#1d1203; --accent-soft:#3b2a12;
   --green:#8fd29a; --green-soft:#1f3322; --red:#f4a99d; --red-soft:#3d201c;
-  --glow:rgba(242,165,79,.4); --glow-soft:rgba(242,165,79,.2); --shadow:none; color-scheme:dark}}
+  --glow:rgba(242,165,79,.4); --glow-soft:rgba(242,165,79,.2); --shadow:none; --em:#1f4a2a; --em2:#2c6a3b; color-scheme:dark}}
 :root[data-theme="dark"]{
   --paper:#14110c; --sheet:#1e1a13; --ink:#f4ecdc; --muted:#b1a68e; --line:#342e22; --field:#7d7258;
   --accent:#f2a54f; --accent-ink:#1d1203; --accent-soft:#3b2a12;
   --green:#8fd29a; --green-soft:#1f3322; --red:#f4a99d; --red-soft:#3d201c;
-  --glow:rgba(242,165,79,.4); --glow-soft:rgba(242,165,79,.2); --shadow:none; color-scheme:dark}
+  --glow:rgba(242,165,79,.4); --glow-soft:rgba(242,165,79,.2); --shadow:none; --em:#1f4a2a; --em2:#2c6a3b; color-scheme:dark}
 :root[data-theme="light"]{color-scheme:light}
 *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 [hidden]{display:none!important}
@@ -53,28 +54,39 @@ h1,h2,h3{font-family:var(--display);font-variation-settings:"opsz" 48;letter-spa
 .row{display:flex;align-items:center;gap:12px}.grow{flex:1;min-width:0}.between{justify-content:space-between}
 
 header.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}
-header.top .logo{width:44px;height:44px;border-radius:12px;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center}
-header.top h1{font-size:1.45rem}
+header.top{padding-top:env(safe-area-inset-top)}
+header.top img{width:52px;height:52px;border-radius:15px;box-shadow:0 2px 6px var(--glow-soft),0 6px 18px var(--glow-soft);flex:none}
+header.top h1{font-size:1.6rem}
 .iconbtn{width:44px;height:44px;border-radius:14px;border:1px solid var(--line);background:var(--sheet);display:grid;place-items:center;cursor:pointer;color:var(--ink)}
 
-.hero{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-bottom:16px}
-.tile{border:1px solid var(--line);background:var(--sheet);border-radius:22px;padding:16px;box-shadow:var(--shadow)}
-.tile b{display:block;font:700 2rem/1 var(--display);margin-top:8px}
-.tile.green{background:var(--green-soft);border-color:transparent;color:var(--green)}
-.tile.green .eyebrow{color:inherit}
+.hero{margin-bottom:6px}
+.today{position:relative;overflow:hidden;border-radius:28px;padding:22px 20px 18px;color:#fff;background:linear-gradient(135deg,var(--em),var(--em2));box-shadow:0 2px 6px rgba(29,107,51,.2),0 12px 32px rgba(29,107,51,.25)}
+.today::after{content:"";position:absolute;right:-50px;top:-60px;width:200px;height:200px;border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.2),transparent 70%);pointer-events:none}
+.today .eyebrow{color:rgba(255,255,255,.82)}
+.today h2{font-size:1.65rem;margin:10px 0 6px}
+.today p{margin:0;color:rgba(255,255,255,.88);max-width:30ch}
+.today .stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:18px}
+.today .stats div{background:rgba(255,255,255,.14);border-radius:16px;padding:10px 12px}
+.today .stats b{display:block;font:700 1.5rem/1 var(--display)}
+.today .stats span{font-size:.78rem;color:rgba(255,255,255,.85)}
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:48px;padding:0 20px;border-radius:16px;border:1px solid var(--line);background:var(--sheet);font-weight:700;cursor:pointer}
 .btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 2px 6px var(--glow-soft),0 6px 22px var(--glow)}
 .btn.danger{color:var(--red)}
 .btn.block{width:100%}
 .btn:active{transform:scale(.98)}
 
-.day{margin:22px 0 8px}
-.card{border:1px solid var(--line);background:var(--sheet);border-radius:22px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px;cursor:pointer;text-align:left;width:100%;padding:0;display:block}
-.card .body{padding:14px 16px 16px}
+.day{position:sticky;top:0;z-index:5;margin:14px -16px 6px;padding:10px 16px;background:color-mix(in srgb,var(--paper) 90%,transparent);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.card{border:1px solid var(--line);background:var(--sheet);border-radius:24px;animation:rise .4s both;transition:transform .15s,box-shadow .25s;box-shadow:var(--shadow);overflow:hidden;margin-bottom:12px;cursor:pointer;text-align:left;width:100%;padding:0;display:block}
+.card:active{transform:scale(.985)}
+@media (hover:hover){.card:hover{transform:translateY(-2px);box-shadow:0 4px 10px var(--glow-soft),0 16px 36px var(--glow-soft)}}
+@keyframes rise{from{opacity:0;transform:translateY(12px)}}
+@media (prefers-reduced-motion:reduce){.card{animation:none}}
+.card .body{padding:14px 18px 18px}
+.card .meta{display:flex;align-items:center;gap:6px;font:600 .78rem var(--body);color:var(--muted);margin-bottom:6px}
 .card h3{font-size:1.2rem;margin-bottom:4px}
 .card p{margin:0;color:var(--muted);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;white-space:pre-line}
 .strip{display:grid;gap:3px;grid-template-columns:repeat(5,1fr);aspect-ratio:5/1}
-.strip.n1{grid-template-columns:1fr;aspect-ratio:16/9}
+.strip.n1{grid-template-columns:1fr;aspect-ratio:16/10}
 .strip.n2{grid-template-columns:1fr 1fr;aspect-ratio:2/1}
 .strip.n3{grid-template-columns:2fr 1fr 1fr;aspect-ratio:2.4/1}
 .strip.n4{grid-template-columns:repeat(4,1fr);aspect-ratio:4/1}
@@ -83,8 +95,10 @@ header.top h1{font-size:1.45rem}
 .vb{position:absolute;left:6px;bottom:6px;display:inline-flex;align-items:center;gap:4px;padding:3px 8px 3px 6px;border-radius:999px;background:rgba(0,0,0,.6);color:#fff;font:600 .72rem var(--body);pointer-events:none}
 .vb .i{width:.9em;height:.9em}
 .badge{display:inline-flex;align-items:center;gap:5px;font:600 .8rem var(--body);color:var(--muted)}
-.empty{text-align:center;padding:48px 16px;color:var(--muted)}
-.empty .i{color:var(--accent);margin-bottom:10px}
+.empty{text-align:center;padding:36px 16px;color:var(--muted)}
+.empty img{width:112px;height:112px;border-radius:30px;margin-bottom:16px;box-shadow:0 2px 6px var(--glow-soft),0 14px 34px var(--glow-soft)}
+.empty h2{color:var(--ink);font-size:1.5rem;margin-bottom:6px}
+.empty p{max-width:28ch;margin:0 auto 20px}
 
 .fab{position:fixed;right:max(16px,env(safe-area-inset-right));bottom:calc(20px + env(safe-area-inset-bottom));height:60px;padding:0 24px 0 20px;border-radius:30px;border:0;background:var(--accent);color:var(--accent-ink);font-weight:700;display:flex;align-items:center;gap:10px;cursor:pointer;box-shadow:0 2px 6px var(--glow-soft),0 8px 28px var(--glow);z-index:20}
 .fab:active{transform:scale(.97)}
@@ -95,15 +109,20 @@ header.top h1{font-size:1.45rem}
 @media (min-width:700px){.scrim{align-items:center}.sheet{border-radius:28px}}
 @keyframes up{from{transform:translateY(40px);opacity:0}}@keyframes fade{from{opacity:0}}
 @media (prefers-reduced-motion:reduce){.sheet,.scrim{animation:none}}
+.grab{width:42px;height:5px;border-radius:3px;background:var(--line);margin:-8px auto 14px}
 .sheet h2{font-size:1.5rem;margin-bottom:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.chip{min-height:36px;padding:0 14px;border-radius:999px;border:1px solid var(--line);background:var(--paper);font:600 .85rem var(--body);cursor:pointer}
+.chip[aria-pressed=true]{background:var(--green-soft);border-color:var(--green);color:var(--green)}
 label.f{display:block;font-weight:600;margin:14px 0 6px}
-input[type=text],input[type=date],textarea{width:100%;border:1.5px solid var(--field);border-radius:14px;padding:12px 14px;background:var(--paper);min-height:48px}
+input[type=text],input[type=date],textarea{width:100%;border:1.5px solid var(--line);transition:border-color .15s,box-shadow .15s;border-radius:14px;padding:12px 14px;background:var(--paper);min-height:48px}
 textarea{min-height:120px;resize:vertical}
+input[type=text]:focus,input[type=date]:focus,textarea:focus{border-color:var(--accent);outline:0;box-shadow:0 0 0 4px var(--glow-soft)}
 .thumbs{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .thumb{position:relative;aspect-ratio:1;border-radius:16px;overflow:hidden;background:var(--line)}
 .thumb img{width:100%;height:100%;object-fit:cover;display:block}
 .thumb button{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center;cursor:pointer}
-.addph{aspect-ratio:1;border-radius:16px;border:2px dashed var(--field);background:none;color:var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-weight:600;font-size:.85rem;cursor:pointer}
+.addph{aspect-ratio:1;border-radius:16px;border:2px dashed var(--accent);background:var(--accent-soft);color:var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-weight:600;font-size:.85rem;cursor:pointer}
 .sheet .actions{display:grid;gap:10px;margin-top:20px}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
 .grid img,.grid video{border-radius:16px;aspect-ratio:1}
@@ -132,11 +151,11 @@ textarea{min-height:120px;resize:vertical}
 
 <main class="wrap" id="main" tabindex="-1">
   <header class="top">
-    <div class="logo"><svg class="i lg"><use href="#i-hen"/></svg></div>
-    <div class="grow"><h1>Coop Diary</h1><div class="muted small">Daily snaps of the hens</div></div>
+    <img src="icons/flock-192.png" alt="" width="52" height="52">
+    <div class="grow"><h1>Coop Diary</h1><div class="muted small" id="sub">Daily snaps of the hens</div></div>
     <button class="iconbtn" id="theme" aria-label="Switch light or dark"><svg class="i"><use href="#i-moon"/></svg></button>
   </header>
-  <div class="hero" id="hero"></div>
+  <section class="hero" id="hero" aria-live="polite"></section>
   <div id="list"></div>
 </main>
 <button class="fab" id="new"><svg class="i lg"><use href="#i-plus"/></svg>New report</button>
@@ -172,7 +191,7 @@ function toast(t){const e=document.createElement("div");e.className="toast";e.te
 
 /* sheets */
 function sheet(html){
-  const sc=document.createElement("div");sc.className="scrim";sc.innerHTML=`<div class="sheet" role="dialog" aria-modal="true">${html}</div>`;
+  const sc=document.createElement("div");sc.className="scrim";sc.innerHTML=`<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div>`;
   document.body.appendChild(sc);document.body.classList.add("lock");
   const close=()=>{sc.remove();if(!document.querySelector(".scrim"))document.body.classList.remove("lock")};
   sc.addEventListener("click",e=>{if(e.target===sc)close()});
@@ -180,18 +199,23 @@ function sheet(html){
 }
 function lightbox(u){const l=document.createElement("div");l.className="lb";l.innerHTML=`<img src="${u}" alt="Coop photo"><button class="iconbtn" aria-label="Close">${ic("x")}</button>`;l.onclick=()=>l.remove();document.body.appendChild(l)}
 
+const greet=()=>{const h=new Date().getHours();return h<12?"Good morning":h<18?"Good afternoon":"Good evening"};
+const isoOf=x=>new Date(x-x.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+function streak(){const ds=new Set(R.map(r=>r.date));const d=new Date();let n=0;if(!ds.has(isoOf(d)))d.setDate(d.getDate()-1);while(ds.has(isoOf(d))){n++;d.setDate(d.getDate()-1)}return n}
+const CHIPS=["Sunbathing","Egg haul","Dust bath","Free ranging","Rainy day","New arrival","Treat time"];
 /* home */
 async function render(){
   R.sort((a,b)=>b.date.localeCompare(a.date)||b.t-a.t);
   const today=todayISO(),done=R.some(r=>r.date===today);
   const photos=R.reduce((n,r)=>n+r.ph.length,0);
-  $("#hero").innerHTML=`<div class="tile ${done?"green":""}"><div class="eyebrow">Today</div><b>${done?"Done":"Not yet"}</b></div><div class="tile"><div class="eyebrow">${R.length} ${R.length===1?"report":"reports"}</div><b>${photos} <span class="small muted" style="font:500 .9rem var(--body)">snaps</span></b></div>`;
-  if(!R.length){$("#list").innerHTML=`<div class="empty">${ic("hen","xl")}<h2 style="color:var(--ink);margin-bottom:6px">No reports yet</h2><p>Add up to 5 photos or 5 second videos of the hens and add a note about their day.</p></div>`;return}
+  $("#sub").textContent=greet();
+  $("#hero").innerHTML=`<div class="today"><div class="eyebrow">${esc(dlong(today))}</div><h2>${done?"Today's report is in":"How are the girls today?"}</h2><p>${done?"Lovely. Add another moment any time.":"A photo, a 5 second clip and a few words is all it takes."}</p><div class="stats"><div><b>${streak()}</b><span>day streak</span></div><div><b>${R.length}</b><span>reports</span></div><div><b>${photos}</b><span>snaps</span></div></div></div>`;
+  if(!R.length){$("#list").innerHTML=`<div class="empty"><img src="icons/flock-192.png" alt=""><h2>The diary is empty</h2><p>Add up to 5 photos or 5 second videos of the hens and a note about their day.</p><button class="btn primary" id="first">${ic("plus")}Add the first report</button></div>`;$("#first").onclick=()=>editor();return}
   let h="",last="";
   for(const r of R){
     if(r.date!==last){h+=`<div class="eyebrow day">${r.date===today?"Today, ":""}${esc(dlong(r.date))}</div>`;last=r.date}
     const us=await Promise.all(r.ph.map(url));
-    h+=`<button class="card" data-id="${r.id}">${us.length?`<div class="strip n${us.length}">${us.map((u,i)=>isV(r,r.ph[i])?`<div class="m">${vtag(u)}<span class="vb">${ic("video")}5s</span></div>`:`<div class="m"><img src="${u}" alt="" loading="lazy"></div>`).join("")}</div>`:""}<div class="body"><h3>${esc(r.title||"Coop report")}</h3>${r.note?`<p>${esc(r.note)}</p>`:""}</div></button>`;
+    h+=`<button class="card" data-id="${r.id}">${us.length?`<div class="strip n${us.length}">${us.map((u,i)=>isV(r,r.ph[i])?`<div class="m">${vtag(u)}<span class="vb">${ic("video")}5s</span></div>`:`<div class="m"><img src="${u}" alt="" loading="lazy"></div>`).join("")}</div>`:""}<div class="body"><div class="meta">${new Date(r.t).toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"})}${r.v&&r.v.length?` · ${ic("video","sm")} ${r.v.length} clip${r.v.length>1?"s":""}`:""}</div><h3>${esc(r.title||"Coop report")}</h3>${r.note?`<p>${esc(r.note)}</p>`:""}</div></button>`;
   }
   $("#list").innerHTML=h;
   document.querySelectorAll(".card").forEach(c=>c.onclick=()=>detail(c.dataset.id));
@@ -203,7 +227,7 @@ function editor(r){
   const keep=[...r.ph], fresh=new Map(), vset=new Set(r.v||[]); /* fresh: id -> blob */
   const s=sheet(`<h2>${isNew?"New report":"Edit report"}</h2>
     <label class="f" for="d">Date</label><input type="date" id="d" value="${r.date}" max="${todayISO()}">
-    <label class="f" for="ti">Title</label><input type="text" id="ti" maxlength="60" placeholder="e.g. Sunbathing day" value="${esc(r.title)}">
+    <label class="f" for="ti">Title</label><input type="text" id="ti" maxlength="60" placeholder="e.g. Sunbathing day" value="${esc(r.title)}"><div class="chips" id="chips">${CHIPS.map(c=>`<button type="button" class="chip" aria-pressed="${c===r.title}">${c}</button>`).join("")}</div>
     <label class="f" for="no">What did the hens get up to?</label><textarea id="no" placeholder="Eggs, moods, visitors, funny moments">${esc(r.note)}</textarea>
     <label class="f">Photos and 5 second videos <span class="muted small" id="cnt"></span></label><div class="thumbs" id="th"></div>
     <input type="file" id="fi" accept="image/*,video/*" multiple hidden>
@@ -232,6 +256,9 @@ function editor(r){
     }catch(e){toast("That file could not be read")}}
     paint();
   };
+  const ti=s.el.querySelector("#ti");
+  s.el.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{ti.value=c.textContent;s.el.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===c))});
+  ti.oninput=()=>s.el.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x.textContent===ti.value));
   s.el.querySelector("#cx").onclick=s.close;
   s.el.querySelector("#sv").onclick=async()=>{
     const date=s.el.querySelector("#d").value||todayISO(),title=s.el.querySelector("#ti").value.trim(),note=s.el.querySelector("#no").value.trim();

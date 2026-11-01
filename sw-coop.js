@@ -1,6 +1,6 @@
 ﻿// Newberry Coop Diary service worker: keeps the app available offline.
-const SHELL = "coop-shell-v1";
-const FILES = ["newberry-coop.html", "manifest-coop.webmanifest", "icons/coop-192.png", "icons/coop-512.png"];
+const SHELL = "coop-shell-v2";
+const FILES = ["newberry-coop.html", "manifest-coop.webmanifest", "icons/flock-192.png", "icons/flock-512.png"];
 self.addEventListener("install", e => {
   e.waitUntil(caches.open(SHELL).then(c => c.addAll(FILES)).then(() => self.skipWaiting()));
 });
