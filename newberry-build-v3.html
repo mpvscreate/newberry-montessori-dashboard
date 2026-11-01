@@ -522,6 +522,7 @@ body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!importan
 #pumic.on{background:var(--accent);color:#fff;border-color:var(--accent)}
 .sl{position:relative;overflow:hidden;border-radius:16px;background:#000;touch-action:pan-y}.sl-t{display:flex;transition:transform .6s cubic-bezier(.4,0,.2,1)}.sl-s{flex:0 0 100%;aspect-ratio:4/3}.sl-s img{width:100%;height:100%;object-fit:cover;display:block}.sl-d{position:absolute;left:0;right:0;bottom:8px;display:flex;justify-content:center;gap:6px}.sl-d button{width:8px;height:8px;border-radius:99px;border:0;padding:0;background:rgba(255,255,255,.55);transition:width .3s}.sl-d button[aria-current=true]{background:#fff;width:20px}
 @media (prefers-reduced-motion:reduce){.sl-t,.sl-d button{transition:none}}
+.sl-lg{position:absolute;top:10px;left:10px;width:17%;max-width:96px;height:auto;z-index:2;pointer-events:none;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6))}
 .pu-m{white-space:pre-wrap;overflow-wrap:anywhere;background:var(--accent-soft);border-radius:14px;padding:12px 14px;margin-bottom:10px;font-size:.98rem;line-height:1.4}.pu-add{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.pu-add .btn{flex-direction:column;gap:2px;min-height:58px;padding:8px 4px;font-size:.82rem;text-align:center}.pu-mv{position:absolute;bottom:2px;width:24px;height:24px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;display:grid;place-items:center;padding:0}.pu-mv.l{left:2px}.pu-mv.r{right:2px}.pu-mv:disabled{opacity:.3}.pu-n{position:absolute;top:2px;left:2px;min-width:20px;height:20px;border-radius:10px;background:var(--accent);color:#fff;font:700 .7rem/20px var(--display);text-align:center;padding:0 5px}
 .pu-th{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:10px}.pu-t{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden}.pu-t img{width:100%;height:100%;object-fit:cover;display:block}.pu-x{position:absolute;top:2px;right:2px;width:26px;height:26px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;display:grid;place-items:center;padding:0}
 .mtile .pk-n{position:absolute;top:4px;right:4px;z-index:2;min-width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font:700 .75rem/22px var(--display);text-align:center;font-style:normal}.mtile .pk-n:empty{display:none}.mtile.pk.on{outline:3px solid var(--accent);outline-offset:-3px}
@@ -4442,10 +4443,25 @@ async function wkBA(){
 }
 /* ---------- photo update: a short message on top and up to 5 photos that slide past ---------- */
 const PU={msg:lsGet("b3-pu-msg"),ids:(()=>{try{return JSON.parse(lsGet("b3-pu-ids")||"[]")}catch{return[]}})()};
+PU.logo=lsGet("b3-pu-logo")!=="0";
 PU.own=(()=>{try{return JSON.parse(lsGet("b3-pu-own")||"[]")}catch{return[]}})();
 const puSave=()=>{lsSet("b3-pu-msg",PU.msg);lsSet("b3-pu-ids",JSON.stringify(PU.ids));lsSet("b3-pu-own",JSON.stringify(PU.own.filter(m=>PU.ids.includes(m))))};
 const repSeg=cur=>`<div class="segc" role="group" aria-label="Report type">${[["report","Full report"],["week","This week"],["pupd","Photos"]].map(([k,l])=>`<button type="button" data-go="${k}" aria-pressed="${k===cur}">${l}</button>`).join("")}</div>${canReport()?"":`<p class="muted small" style="margin:-4px 0 12px">View only. The Project Lead can give you report access to share.</p>`}`;
-function slideHTML(urls){return `<div class="sl" role="region" aria-roledescription="carousel" aria-label="Photo update"><div class="sl-t">${urls.map((u,i)=>`<div class="sl-s" role="group" aria-label="Photo ${i+1} of ${urls.length}"><img src="${u}" alt="Site photo ${i+1}"></div>`).join("")}</div>${urls.length>1?`<div class="sl-d">${urls.map((_,i)=>`<button type="button" aria-label="Show photo ${i+1}" data-i="${i}"></button>`).join("")}</div>`:""}</div>`}
+/* the logo, floating at the top left of a photo; baked into the copies that are sent */
+async function stampPhoto(blob){
+  const load=src=>new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=src});
+  const u=URL.createObjectURL(blob);
+  try{
+    const [im,lg]=await Promise.all([load(u),load("newberry-logo-stamp.png")]);
+    const w=im.naturalWidth,h=im.naturalHeight,cv=document.createElement("canvas");cv.width=w;cv.height=h;const x=cv.getContext("2d");
+    x.drawImage(im,0,0,w,h);
+    const sz=Math.round(Math.min(w,h*1.3)*.17),m=Math.round(sz*.22);
+    x.shadowColor="rgba(0,0,0,.55)";x.shadowBlur=Math.round(sz*.08);x.shadowOffsetY=Math.round(sz*.02);
+    x.drawImage(lg,m,m,sz,sz);
+    return await new Promise(r=>cv.toBlob(b=>r(b||blob),"image/jpeg",.9));
+  }catch{return blob}finally{URL.revokeObjectURL(u)}
+}
+function slideHTML(urls,logo){return `<div class="sl" role="region" aria-roledescription="carousel" aria-label="Photo update"><div class="sl-t">${urls.map((u,i)=>`<div class="sl-s" role="group" aria-label="Photo ${i+1} of ${urls.length}"><img src="${u}" alt="Site photo ${i+1}"></div>`).join("")}</div>${logo?`<img class="sl-lg" src="newberry-logo-stamp.png" alt="">`:""}${urls.length>1?`<div class="sl-d">${urls.map((_,i)=>`<button type="button" aria-label="Show photo ${i+1}" data-i="${i}"></button>`).join("")}</div>`:""}</div>`}
 function slideWire(root,n){
   const t=root.querySelector(".sl-t"),dots=[...root.querySelectorAll(".sl-d button")];if(!t)return;
   let i=0,paused=false;
@@ -4463,7 +4479,7 @@ function pupdV(){
   ${repSeg("pupd")}
   <div class="card rc"><div class="eyebrow">Your message</div><textarea id="pum" class="t" rows="4" maxlength="600" aria-label="Your message" placeholder="Write a personal update. For example: Good news, the roof is on and the walls are next.">${esc(PU.msg)}</textarea><div class="row between" style="margin-top:8px;gap:10px;align-items:center"><p class="hint" id="puc" style="margin:0">${PU.msg.length} of 600</p>${SPEECH?`<button type="button" class="btn small" id="pumic" aria-label="Speak your message">${ic("mic","sm")}<span>Speak</span></button>`:""}</div>${SPEECH?"":`<p class="hint" style="margin:8px 0 0">To speak your message, use the microphone on your keyboard.</p>`}</div>
   <div class="card rc"><div class="eyebrow">Photos · ${PU.ids.length} of 5</div><div id="pup"></div><button type="button" class="btn block" id="puwk" style="margin-bottom:8px">${ic("calendar")}Use this week's photos</button><div class="pu-add"><button type="button" class="btn" data-act="pupick">${ic("grid")}<span>Project</span></button><button type="button" class="btn" id="pugal">${ic("image")}<span>Camera roll</span></button><button type="button" class="btn" id="pucam">${ic("camera")}<span>Camera</span></button></div><input type="file" id="pugf" accept="image/*" multiple hidden><input type="file" id="pucf" accept="image/*" capture="environment" hidden></div>
-  <div class="card rc"><div class="eyebrow">Preview</div><div id="pupv"></div></div>`;
+  <div class="card rc"><div class="row between" style="align-items:center;margin-bottom:10px"><div class="eyebrow" style="margin:0">Preview</div><button type="button" class="chip" id="pulg" aria-pressed="${PU.logo}">${ic("check","sm")}Logo on photos</button></div><div id="pupv"></div></div>`;
 }
 async function pupdInit(){
   const ta=document.getElementById("pum");if(!ta)return;
@@ -4471,7 +4487,7 @@ async function pupdInit(){
   if(!ta.isConnected)return;
   document.getElementById("pup").innerHTML=PU.ids.length?`<div class="pu-th">${urls.map(([m,u],i)=>`<div class="pu-t"><img src="${u}" alt="Photo ${i+1}"><button type="button" class="pu-x" data-pr="${m}" aria-label="Remove photo ${i+1}">${ic("x","sm")}</button>${urls.length>1?`<button type="button" class="pu-mv l" data-pm="${m}|-1" aria-label="Move photo ${i+1} earlier" ${i===0?"disabled":""}>${ic("left","sm")}</button><button type="button" class="pu-mv r" data-pm="${m}|1" aria-label="Move photo ${i+1} later" ${i===urls.length-1?"disabled":""}>${ic("right","sm")}</button>`:""}<span class="pu-n">${i+1}</span></div>`).join("")}</div>${urls.length>1?`<p class="hint" style="margin:-4px 0 10px">The photos play in this order. Use the arrows to move one.</p>`:""}`:`<p class="muted small" style="margin:0 0 10px">No photos yet. Choose up to 5.</p>`;
   const pv=document.getElementById("pupv");
-  pv.innerHTML=`<div class="pu-m" id="pumsg"></div>${urls.length?slideHTML(urls.map(x=>x[1])):`<p class="muted small" style="margin:0">Your photos play here as a slideshow.</p>`}`;
+  pv.innerHTML=`<div class="pu-m" id="pumsg"></div>${urls.length?slideHTML(urls.map(x=>x[1]),PU.logo):`<p class="muted small" style="margin:0">Your photos play here as a slideshow.</p>`}`;
   const pm=pv.querySelector("#pumsg"),sync=()=>{pm.textContent=ta.value.trim();pm.hidden=!ta.value.trim()};sync();
   ta.oninput=()=>{PU.msg=ta.value;puSave();document.getElementById("puc").textContent=ta.value.length+" of 600";sync()};
   slideWire(pv,urls.length);
@@ -4485,6 +4501,7 @@ async function pupdInit(){
   const gf=document.getElementById("pugf"),cf=document.getElementById("pucf");
   if(gf){document.getElementById("pugal").onclick=()=>{if(PU.ids.length>=5){toast("Five photos at most. Remove one first.");return}gf.click()};gf.onchange=()=>{addFiles(gf.files);gf.value=""}}
   if(cf){document.getElementById("pucam").onclick=()=>{if(PU.ids.length>=5){toast("Five photos at most. Remove one first.");return}cf.click()};cf.onchange=()=>{addFiles(cf.files);cf.value=""}}
+  const lgb=document.getElementById("pulg");if(lgb)lgb.onclick=()=>{PU.logo=!PU.logo;lsSet("b3-pu-logo",PU.logo?"1":"0");render()};
   const mic=document.getElementById("pumic");
   if(mic&&SPEECH){
     const lab=mic.querySelector("span");let rec=null,want=false,t0=0,fast=0;
@@ -4549,13 +4566,13 @@ function puShareSheet(){
       sh.querySelectorAll("#so .topt").forEach(b=>b.onclick=()=>{kind=b.dataset.k;draw()});
       sh.querySelectorAll("#sd [data-d]").forEach(b=>{b.setAttribute("aria-pressed",+b.dataset.d===days);b.onclick=()=>{days=+b.dataset.d;draw()}});
     };
-    const make=async()=>{say("Making your link…");try{const j=await shareApi({action:"create",kind:"photos",days,msg:PU.msg.trim(),media:PU.ids});say("");return shareUrl(j.token)}catch(e){say(/photos/.test(e.message)?"Your photos are still uploading to the team. Try again in a minute.":/access/.test(e.message)?"You need report access to share. Ask the Project Lead.":"Could not make the link. Check your connection and try again.");return null}};
+    const make=async()=>{say("Making your link…");try{const j=await shareApi({action:"create",kind:"photos",days,msg:PU.msg.trim(),media:PU.ids,logo:PU.logo});say("");return shareUrl(j.token)}catch(e){say(/photos/.test(e.message)?"Your photos are still uploading to the team. Try again in a minute.":/access/.test(e.message)?"You need report access to share. Ask the Project Lead.":"Could not make the link. Check your connection and try again.");return null}};
     sh.querySelector("#ssend").onclick=async()=>{
       const b=sh.querySelector("#ssend");b.disabled=true;
       try{
         if(kind==="link"){const u=await make();if(u)shareText((PU.msg.trim()||"Photo update")+"\n\n"+u);return}
         say("Getting your photos ready…");const files=[];
-        for(const[i,m]of PU.ids.entries()){const bl=await mGet(m);if(bl)files.push(new File([bl],"site-photo-"+(i+1)+".jpg",{type:bl.type||"image/jpeg"}))}
+        for(const[i,m]of PU.ids.entries()){const bl=await mGet(m);if(bl){const out=PU.logo?await stampPhoto(bl):bl;files.push(new File([out],"site-photo-"+(i+1)+".jpg",{type:out.type||"image/jpeg"}))}}
         if(files.length&&navigator.canShare&&navigator.canShare({files})){try{await navigator.share({files,text:PU.msg.trim()});say("");close()}catch(e){if(e?.name==="AbortError")say("");else say("Could not send the photos. Try Share a link.")}}
         else{say("This phone cannot send photos from here. Use Share a link, or send the message only.");if(PU.msg.trim())shareText(PU.msg.trim())}
       }finally{b.disabled=false}
