@@ -48,6 +48,7 @@ h1,h2,h3{font-family:var(--display);font-variation-settings:"opsz" 48;letter-spa
 :focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:10px;box-shadow:0 0 0 6px var(--glow-soft)}
 .i{width:1.25em;height:1.25em;stroke:currentColor;fill:none;stroke-width:1.75;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-.22em}
 .i.lg{width:1.6em;height:1.6em}.i.xl{width:2.5em;height:2.5em;stroke-width:1.5}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 .muted{color:var(--muted)}.small{font-size:.875rem}
 .eyebrow{font:600 .72rem/1 var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
 .wrap{max-width:720px;margin:0 auto;padding:16px 16px 130px}
@@ -93,7 +94,7 @@ header.top h1{font-size:1.6rem}
 .strip.n2{grid-template-columns:1fr 1fr;aspect-ratio:2/1}
 .strip.n3{grid-template-columns:2fr 1fr 1fr;aspect-ratio:2.4/1}
 .strip.n4{grid-template-columns:repeat(4,1fr);aspect-ratio:4/1}
-.strip img,.strip video,.grid img,.grid video,.thumb video{width:100%;height:100%;object-fit:cover;display:block;background:var(--line)}
+.strip img,.strip video,.thumb video{width:100%;height:100%;object-fit:cover;display:block;background:var(--line)}
 .m{position:relative;overflow:hidden;min-width:0}
 .vb{position:absolute;left:6px;bottom:6px;display:inline-flex;align-items:center;gap:4px;padding:3px 8px 3px 6px;border-radius:999px;background:rgba(0,0,0,.6);color:#fff;font:600 .72rem var(--body);pointer-events:none}
 .vb .i{width:.9em;height:.9em}
@@ -127,10 +128,33 @@ input[type=text]:focus,input[type=date]:focus,textarea:focus{border-color:var(--
 .thumb button{position:absolute;top:6px;right:6px;width:30px;height:30px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center;cursor:pointer}
 .addph{aspect-ratio:1;border-radius:16px;border:2px dashed var(--accent);background:var(--accent-soft);color:var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font-weight:600;font-size:.85rem;cursor:pointer}
 .sheet .actions{display:grid;gap:10px;margin-top:20px}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}
-.grid img,.grid video{border-radius:16px;aspect-ratio:1}
-.grid img{cursor:zoom-in}
-.grid>:first-child:nth-last-child(odd){grid-column:1/-1;aspect-ratio:4/3}
+.figs{display:grid;gap:16px;margin:14px 0}
+.figs figure{margin:0}
+.figs img,.figs video{width:100%;max-height:62vh;object-fit:cover;display:block;border-radius:18px;background:var(--line)}
+.figs img{cursor:zoom-in}
+.figs figcaption{padding:8px 4px 0;font-size:.95rem;color:var(--muted)}
+.vnote{display:flex;align-items:center;gap:10px;margin:6px 0 4px;padding:10px 12px;border-radius:18px;background:var(--green-soft);color:var(--green)}
+.vnote audio{flex:1;min-width:0;height:36px}
+.fm{position:relative}
+.fm input,.fm textarea{padding-right:56px}
+.mic{position:absolute;right:6px;top:6px;width:44px;height:44px;border-radius:14px;border:0;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;cursor:pointer}
+.mic.on{background:var(--red);color:#fff;animation:pulse 1.2s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(179,38,30,.5)}100%{box-shadow:0 0 0 14px rgba(179,38,30,0)}}
+@media (prefers-reduced-motion:reduce){.mic.on{animation:none}}
+.hint{margin:6px 2px 0}
+.mlist{display:grid;gap:12px}
+.mrow{display:grid;grid-template-columns:92px 1fr;gap:12px;align-items:start}
+.mrow .thumb{width:92px;height:92px;aspect-ratio:auto}
+.mrow .fm input{min-height:92px;height:92px;padding-top:12px;vertical-align:top}
+.mrow .fm .mic{top:auto;bottom:6px}
+.addph{width:100%;aspect-ratio:auto!important;min-height:76px;flex-direction:row!important;font-size:1rem!important;gap:10px!important}
+.vrec,.vplay{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:18px;background:var(--paper);border:1.5px solid var(--line)}
+.vrec{border-color:var(--red)}
+.vrec b{font:700 1.3rem var(--display);font-variant-numeric:tabular-nums}
+.vrec .btn{margin-left:auto}
+.dotrec{width:12px;height:12px;border-radius:50%;background:var(--red);animation:pulse 1.2s infinite}
+.vplay audio{flex:1;min-width:0;height:38px}
+.stick{position:sticky;bottom:-20px;background:var(--sheet);padding:12px 0 calc(4px + env(safe-area-inset-bottom));z-index:3}
 .lb{position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:60;display:grid;place-items:center;padding:16px}
 .lb img{max-width:100%;max-height:100%;border-radius:8px}
 .lb button{position:absolute;top:max(14px,env(safe-area-inset-top));right:14px}
@@ -144,6 +168,8 @@ input[type=text]:focus,input[type=date]:focus,textarea:focus{border-color:var(--
 <symbol id="i-video" viewBox="0 0 24 24"><rect x="3" y="6" width="13" height="12" rx="2"/><path d="m16 10.500 5-3v9l-5-3z"/></symbol>
 <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></symbol>
 <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 20l1.200-4A8 8 0 1 1 8 18.800z"/><path d="M9 9.500c0 3 2.500 5.500 5.500 5.500l1-1.500-2-1-.8.800c-1-.4-1.800-1.200-2.200-2.200l.8-.8-1-2z"/></symbol>
+<symbol id="i-mic" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></symbol>
+<symbol id="i-stop" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></symbol>
 <symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18"/></symbol>
 <symbol id="i-share" viewBox="0 0 24 24"><path d="M12 15V4M8 8l4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></symbol>
@@ -191,15 +217,15 @@ const isV=(r,id)=>(r.v||[]).includes(id);
 const MAXVID=5.5, MAXVIDMB=40;
 function vidLen(f){return new Promise((res,rej)=>{const v=document.createElement("video"),u=URL.createObjectURL(f);v.preload="metadata";v.onloadedmetadata=()=>{URL.revokeObjectURL(u);res(v.duration)};v.onerror=()=>{URL.revokeObjectURL(u);rej()};v.src=u})}
 const vtag=(u,ctl)=>`<video src="${u}${ctl?"":"#t=0.1"}" muted playsinline preload="metadata"${ctl?" controls":""}></video>`;
-const ext=b=>b.type==="video/quicktime"?"mov":b.type==="video/webm"?"webm":b.type.startsWith("video/")?"mp4":"jpg";
+const ext=b=>b.type.startsWith("audio/")?(b.type.includes("mp4")?"m4a":"webm"):b.type==="video/quicktime"?"mov":b.type==="video/webm"?"webm":b.type.startsWith("video/")?"mp4":"jpg";
 function toast(t){const e=document.createElement("div");e.className="toast";e.textContent=t;e.setAttribute("role","status");document.body.appendChild(e);setTimeout(()=>e.remove(),2600)}
 
 /* sheets */
-function sheet(html){
+function sheet(html,o={}){
   const sc=document.createElement("div");sc.className="scrim";sc.innerHTML=`<div class="sheet" role="dialog" aria-modal="true"><div class="grab"></div>${html}</div>`;
   document.body.appendChild(sc);document.body.classList.add("lock");
-  const close=()=>{sc.remove();if(!document.querySelector(".scrim"))document.body.classList.remove("lock")};
-  sc.addEventListener("click",e=>{if(e.target===sc)close()});
+  const close=()=>{if(o.onClose)o.onClose();sc.remove();if(!document.querySelector(".scrim"))document.body.classList.remove("lock")};
+  sc.addEventListener("click",e=>{if(e.target===sc&&!o.lock)close()});
   return{el:sc.firstChild,close};
 }
 function lightbox(u){const l=document.createElement("div");l.className="lb";l.innerHTML=`<img src="${u}" alt="Coop photo"><button class="iconbtn" aria-label="Close">${ic("x")}</button>`;l.onclick=()=>l.remove();document.body.appendChild(l)}
@@ -220,29 +246,78 @@ async function render(){
   for(const r of R){
     if(r.date!==last){h+=`<div class="eyebrow day">${r.date===today?"Today, ":""}${esc(dlong(r.date))}</div>`;last=r.date}
     const us=await Promise.all(r.ph.map(url));
-    h+=`<div class="cw"><button class="card" data-id="${r.id}">${us.length?`<div class="strip n${us.length}">${us.map((u,i)=>isV(r,r.ph[i])?`<div class="m">${vtag(u)}<span class="vb">${ic("video")}5s</span></div>`:`<div class="m"><img src="${u}" alt="" loading="lazy"></div>`).join("")}</div>`:""}<div class="body"><div class="meta">${new Date(r.t).toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"})}${r.v&&r.v.length?` · ${ic("video","sm")} ${r.v.length} clip${r.v.length>1?"s":""}`:""}</div><h3>${esc(r.title||"Coop report")}</h3>${r.note?`<p>${esc(r.note)}</p>`:""}</div></button><button class="sbtn" data-share="${r.id}" aria-label="Share this report">${ic("share")}</button></div>`;
+    h+=`<div class="cw"><button class="card" data-id="${r.id}">${us.length?`<div class="strip n${us.length}">${us.map((u,i)=>isV(r,r.ph[i])?`<div class="m">${vtag(u)}<span class="vb">${ic("video")}5s</span></div>`:`<div class="m"><img src="${u}" alt="" loading="lazy"></div>`).join("")}</div>`:""}<div class="body"><div class="meta">${new Date(r.t).toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"})}${r.v&&r.v.length?` · ${ic("video","sm")} ${r.v.length} clip${r.v.length>1?"s":""}`:""}${r.aud?` · ${ic("mic","sm")} Voice note`:""}</div><h3>${esc(r.title||"Coop report")}</h3>${r.note?`<p>${esc(r.note)}</p>`:""}</div></button><button class="sbtn" data-share="${r.id}" aria-label="Share this report">${ic("share")}</button></div>`;
   }
   $("#list").innerHTML=h;
   document.querySelectorAll(".card").forEach(c=>c.onclick=()=>detail(c.dataset.id));
   document.querySelectorAll(".sbtn").forEach(b=>b.onclick=()=>{const r=R.find(x=>x.id===b.dataset.share);if(r)share(r)});
 }
 
+/* dictation (speech to text) */
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let stopDict=null;
+function stopDictation(){if(stopDict)stopDict()}
+function dictate(btn,field){
+  if(!SR){toast("Dictation is not supported in this browser. Try Chrome or Safari");return}
+  if(btn.classList.contains("on")){stopDictation();return}
+  stopDictation();
+  let stopped=false,rec=null;
+  const done=()=>{btn.classList.remove("on");btn.setAttribute("aria-pressed","false");if(stopDict===stop)stopDict=null};
+  const stop=()=>{stopped=true;try{rec&&rec.stop()}catch(e){}done()};
+  const run=()=>{
+    const base=field.value,sp=base&&!/\s$/.test(base)?" ":"";let fin="";
+    rec=new SR();rec.lang="en-ZA";rec.interimResults=true;rec.continuous=false;
+    rec.onresult=e=>{let tmp="";for(let i=e.resultIndex;i<e.results.length;i++){const t=e.results[i][0].transcript;if(e.results[i].isFinal)fin+=t;else tmp+=t}field.value=base+sp+(fin+tmp).trimStart();field.dispatchEvent(new Event("input",{bubbles:true}))};
+    rec.onerror=e=>{stopped=true;toast(e.error==="not-allowed"||e.error==="service-not-allowed"?"Allow the microphone to dictate":e.error==="no-speech"?"Did not hear anything":"Dictation stopped")};
+    rec.onend=()=>{if(stopped)done();else run()};
+    try{rec.start()}catch(e){done()}
+  };
+  btn.classList.add("on");btn.setAttribute("aria-pressed","true");stopDict=stop;run();
+}
+const fmtT=sec=>Math.floor(sec/60)+":"+String(sec%60).padStart(2,"0");
+
 /* new / edit report */
 function editor(r){
   const isNew=!r;r=r||{id:uid(),t:Date.now(),date:todayISO(),title:"",note:"",ph:[]};
-  const keep=[...r.ph], fresh=new Map(), vset=new Set(r.v||[]); /* fresh: id -> blob */
+  const keep=[...r.ph], fresh=new Map(), vset=new Set(r.v||[]), caps={...(r.cap||{})}; /* fresh: id -> blob */
+  let audId=r.aud||null, audFresh=null, audUrl="", mr=null, mstream=null, tmr=null, t0=0;
+  const micBtn=(k,label)=>`<button type="button" class="mic" data-mic="${k}" aria-pressed="false" aria-label="${label}">${ic("mic","lg")}</button>`;
   const s=sheet(`<h2>${isNew?"New report":"Edit report"}</h2>
     <label class="f" for="d">Date</label><input type="date" id="d" value="${r.date}" max="${todayISO()}">
     <label class="f" for="ti">Title</label><input type="text" id="ti" maxlength="60" placeholder="e.g. Sunbathing day" value="${esc(r.title)}"><div class="chips" id="chips">${CHIPS.map(c=>`<button type="button" class="chip" aria-pressed="${c===r.title}">${c}</button>`).join("")}</div>
-    <label class="f" for="no">What did the hens get up to?</label><textarea id="no" placeholder="Eggs, moods, visitors, funny moments">${esc(r.note)}</textarea>
-    <label class="f">Photos and 5 second videos <span class="muted small" id="cnt"></span></label><div class="thumbs" id="th"></div>
+    <label class="f" for="no">What did the hens get up to?</label><div class="fm"><textarea id="no" placeholder="Type, or tap the mic and talk">${esc(r.note)}</textarea>${micBtn("no","Dictate the note")}</div>
+    <label class="f">Voice note</label><div id="vn"></div>
+    <label class="f">Photos and 5 second videos <span class="muted small" id="cnt"></span></label><div class="mlist" id="th"></div>
     <input type="file" id="fi" accept="image/*,video/*" multiple hidden>
-    <div class="actions"><button class="btn primary block" id="sv">Save report</button><button class="btn block" id="cx">Cancel</button></div>`);
-  const th=s.el.querySelector("#th"),fi=s.el.querySelector("#fi");
+    <div class="actions stick"><button class="btn primary block" id="sv">Save report</button><button class="btn block" id="cx">Cancel</button></div>`,{lock:true,onClose:()=>{stopDictation();killRec()}});
+  const th=s.el.querySelector("#th"),fi=s.el.querySelector("#fi"),vn=s.el.querySelector("#vn");
   const total=()=>keep.length;
+
+  /* voice note */
+  function paintAud(mode){
+    if(mode==="rec"){vn.innerHTML=`<div class="vrec"><span class="dotrec"></span><b id="tm">0:00</b><span class="muted small">of 1:00</span><button type="button" class="btn" id="stp">${ic("stop")}Stop</button></div>`;vn.querySelector("#stp").onclick=()=>{if(mr&&mr.state!=="inactive")mr.stop()};return}
+    if(audId){vn.innerHTML=`<div class="vplay"><audio controls src="${audUrl}"></audio><button type="button" class="iconbtn" id="vdel" aria-label="Delete voice note">${ic("trash")}</button></div>`;vn.querySelector("#vdel").onclick=()=>{audId=null;audFresh=null;audUrl="";paintAud()};return}
+    vn.innerHTML=`<button type="button" class="btn block" id="rc">${ic("mic")}Record a voice note</button><div class="hint small muted">Up to 1 minute. Handy for the cluck report.</div>`;vn.querySelector("#rc").onclick=startRec;
+  }
+  async function startRec(){
+    if(!navigator.mediaDevices||!window.MediaRecorder){toast("Recording is not supported in this browser");return}
+    stopDictation();
+    try{mstream=await navigator.mediaDevices.getUserMedia({audio:true})}catch(e){toast("Allow the microphone to record");return}
+    const mt=["audio/mp4","audio/webm;codecs=opus","audio/webm"].find(t=>MediaRecorder.isTypeSupported(t))||"";
+    const ch=[];mr=new MediaRecorder(mstream,mt?{mimeType:mt}:undefined);
+    mr.ondataavailable=e=>{if(e.data.size)ch.push(e.data)};
+    mr.onstop=()=>{clearInterval(tmr);mstream.getTracks().forEach(t=>t.stop());const b=new Blob(ch,{type:(mr&&mr.mimeType)||mt||"audio/webm"});mr=null;if(b.size>0){audId=uid();audFresh=b;audUrl=URL.createObjectURL(b)}paintAud()};
+    t0=Date.now();mr.start();paintAud("rec");
+    tmr=setInterval(()=>{const sec=Math.floor((Date.now()-t0)/1000),el=vn.querySelector("#tm");if(el)el.textContent=fmtT(sec);if(sec>=60&&mr&&mr.state!=="inactive")mr.stop()},250);
+  }
+  function killRec(){clearInterval(tmr);if(mr&&mr.state!=="inactive"){mr.onstop=()=>{if(mstream)mstream.getTracks().forEach(t=>t.stop())};mr.stop()}}
+  (async()=>{if(audId)audUrl=await url(audId);paintAud()})();
+
+  /* photos, videos and captions */
   async function paint(){
+    stopDictation();
     const items=await Promise.all(keep.map(async id=>[id,fresh.has(id)?(urls.get(id)||(urls.set(id,URL.createObjectURL(fresh.get(id))),urls.get(id))):await url(id)]));
-    th.innerHTML=items.map(([id,u])=>`<div class="thumb">${vset.has(id)?vtag(u)+`<span class="vb">${ic("video")}Video</span>`:`<img src="${u}" alt="Photo">`}<button data-rm="${id}" aria-label="Remove">${ic("x","sm")}</button></div>`).join("")+(total()<MAXPH?`<button type="button" class="addph" id="ad">${ic("camera","lg")}Photo or video</button>`:"");
+    th.innerHTML=items.map(([id,u])=>`<div class="mrow"><div class="thumb">${vset.has(id)?vtag(u)+`<span class="vb">${ic("video")}Video</span>`:`<img src="${u}" alt="">`}<button type="button" data-rm="${id}" aria-label="Remove">${ic("x","sm")}</button></div><div class="fm"><label class="sr" for="c-${id}">Caption</label><input type="text" id="c-${id}" data-cap="${id}" maxlength="140" placeholder="Add a caption" value="${esc(caps[id]||"")}">${micBtn(id,"Dictate the caption")}</div></div>`).join("")+(total()<MAXPH?`<button type="button" class="addph" id="ad">${ic("camera","lg")}Add photo or video</button>`:"");
     s.el.querySelector("#cnt").textContent=`${total()} of ${MAXPH}`;
     th.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{const i=keep.indexOf(b.dataset.rm);if(i>=0)keep.splice(i,1);paint()});
     const ad=th.querySelector("#ad");if(ad)ad.onclick=()=>fi.click();
@@ -262,16 +337,30 @@ function editor(r){
     }catch(e){toast("That file could not be read")}}
     paint();
   };
+
+  /* dictation + caption typing, by delegation */
+  s.el.addEventListener("click",e=>{const b=e.target.closest("[data-mic]");if(!b)return;dictate(b,s.el.querySelector(b.dataset.mic==="no"?"#no":"#c-"+b.dataset.mic))});
+  s.el.addEventListener("input",e=>{const t=e.target;if(t.dataset&&t.dataset.cap!==undefined)caps[t.dataset.cap]=t.value});
   const ti=s.el.querySelector("#ti");
   s.el.querySelectorAll(".chip").forEach(c=>c.onclick=()=>{ti.value=c.textContent;s.el.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x===c))});
   ti.oninput=()=>s.el.querySelectorAll(".chip").forEach(x=>x.setAttribute("aria-pressed",x.textContent===ti.value));
-  s.el.querySelector("#cx").onclick=s.close;
+  s.el.querySelector("#cx").onclick=()=>{
+    const dirty=ti.value.trim()||s.el.querySelector("#no").value.trim()||keep.length||audId;
+    const orig=r.ph.length||r.title||r.note||r.aud;
+    if(dirty&&!orig&&s.el.querySelector("#cx").dataset.sure!=="1"){const c=s.el.querySelector("#cx");c.dataset.sure="1";c.textContent="Tap again to discard";return}
+    s.close();
+  };
   s.el.querySelector("#sv").onclick=async()=>{
-    const date=s.el.querySelector("#d").value||todayISO(),title=s.el.querySelector("#ti").value.trim(),note=s.el.querySelector("#no").value.trim();
-    if(!title&&!note&&!keep.length){toast("Add a title, a note or a photo");return}
+    if(mr&&mr.state!=="inactive"){toast("Stop the recording first");return}
+    stopDictation();
+    const date=s.el.querySelector("#d").value||todayISO(),title=ti.value.trim(),note=s.el.querySelector("#no").value.trim();
+    if(!title&&!note&&!keep.length&&!audId){toast("Add a title, a note, a voice note or a photo");return}
     for(const id of keep)if(fresh.has(id))await putP(id,fresh.get(id));
     for(const id of r.ph)if(!keep.includes(id)){await delP(id);urls.delete(id)}
-    Object.assign(r,{date,title,note,ph:keep.slice(),v:keep.filter(i=>vset.has(i))});
+    if(audFresh)await putP(audId,audFresh);
+    if(r.aud&&r.aud!==audId){await delP(r.aud);urls.delete(r.aud)}
+    const cap={};keep.forEach(i=>{const t=(caps[i]||"").trim();if(t)cap[i]=t});
+    Object.assign(r,{date,title,note,ph:keep.slice(),v:keep.filter(i=>vset.has(i)),cap,aud:audId||undefined});
     if(isNew)R.push(r);save();s.close();render();toast("Report saved");
   };
   paint();
@@ -281,34 +370,43 @@ function editor(r){
 async function detail(id){
   const r=R.find(x=>x.id===id);if(!r)return;
   const us=await Promise.all(r.ph.map(url));
+  const au=r.aud?await url(r.aud):"";
   const s=sheet(`<div class="eyebrow">${esc(dlong(r.date))}</div><h2 style="margin-top:6px">${esc(r.title||"Coop report")}</h2>
-    ${us.length?`<div class="grid">${us.map((u,i)=>isV(r,r.ph[i])?vtag(u,true):`<img src="${u}" alt="Coop photo">`).join("")}</div>`:""}
-    ${r.note?`<p style="white-space:pre-line;margin:8px 0 0">${esc(r.note)}</p>`:""}
-    <div class="actions"><button class="btn primary block" id="sh">${ic("share")}Share</button>
+    ${r.note?`<p style="white-space:pre-line;margin:10px 0 0">${esc(r.note)}</p>`:""}
+    ${au?`<div class="vnote">${ic("mic","lg")}<audio controls src="${au}"></audio></div>`:""}
+    ${us.length?`<div class="figs">${us.map((u,i)=>{const id=r.ph[i],c=r.cap&&r.cap[id];return `<figure>${isV(r,id)?vtag(u,true):`<img src="${u}" alt="${esc(c||"Coop photo")}">`}${c?`<figcaption>${esc(c)}</figcaption>`:""}</figure>`}).join("")}</div>`:""}
+    <div class="actions stick"><button class="btn primary block" id="sh">${ic("share")}Share</button>
     <div class="row"><button class="btn grow" id="wa">${ic("chat")}WhatsApp</button><button class="btn grow" id="cp">${ic("copy")}Copy text</button></div>
     <div class="row"><button class="btn grow" id="ed">${ic("edit")}Edit</button><button class="btn danger grow" id="dl">${ic("trash")}Delete</button></div>
     <button class="btn block" id="cl">Close</button></div>`);
-  s.el.querySelectorAll(".grid img").forEach(i=>i.onclick=()=>lightbox(i.src));
+  s.el.querySelectorAll(".figs img").forEach(i=>i.onclick=()=>lightbox(i.src));
   s.el.querySelector("#cl").onclick=s.close;
   s.el.querySelector("#ed").onclick=()=>{s.close();editor(r)};
   s.el.querySelector("#dl").onclick=async function(){
     if(this.dataset.sure!=="1"){this.dataset.sure="1";this.lastChild.textContent="Tap again to delete";return}
-    for(const p of r.ph){await delP(p);urls.delete(p)}
+    for(const p of [...r.ph,r.aud].filter(Boolean)){await delP(p);urls.delete(p)}
     R=R.filter(x=>x.id!==r.id);save();s.close();render();toast("Report deleted");
   };
   s.el.querySelector("#sh").onclick=()=>share(r);
   s.el.querySelector("#wa").onclick=()=>shareWA(r);
   s.el.querySelector("#cp").onclick=()=>copyText(r);
 }
-const textOf=r=>`*Coop Diary, ${dshort(r.date)}*${r.title?`\n${r.title}`:""}${r.note?`\n\n${r.note}`:""}`;
-function shareWA(r){window.open("https://wa.me/?text="+encodeURIComponent(textOf(r)),"_blank","noopener");if(r.ph.length)toast("WhatsApp link opened with text only. Use Share to send photos and videos")}
+const textOf=r=>{
+  const caps=r.ph.map((id,i)=>r.cap&&r.cap[id]?`${isV(r,id)?"Video":"Photo"} ${i+1}: ${r.cap[id]}`:"").filter(Boolean);
+  return `*Coop Diary, ${dshort(r.date)}*${r.title?`\n${r.title}`:""}${r.note?`\n\n${r.note}`:""}${caps.length?`\n\n${caps.join("\n")}`:""}`;
+};
+function shareWA(r){window.open("https://wa.me/?text="+encodeURIComponent(textOf(r)),"_blank","noopener");if(r.ph.length||r.aud)toast("WhatsApp opened with text only. Use Share to send photos, videos and voice notes")}
 async function copyText(r){try{await navigator.clipboard.writeText(textOf(r));toast("Text copied")}catch(e){toast("Could not copy")}}
 async function share(r){
   const text=textOf(r);
   try{
     const files=[];
     for(let i=0;i<r.ph.length;i++){const b=await getP(r.ph[i]);if(b)files.push(new File([b],`coop-${r.date}-${i+1}.${ext(b)}`,{type:b.type||"image/jpeg"}))}
-    if(files.length&&navigator.canShare&&navigator.canShare({files})){await navigator.share({files,text});return}
+    const media=files.slice();
+    if(r.aud){const b=await getP(r.aud);if(b)files.push(new File([b],`coop-${r.date}-voice.${ext(b)}`,{type:b.type||"audio/webm"}))}
+    for(const set of [files,media]){
+      if(set.length&&navigator.canShare&&navigator.canShare({files:set})){await navigator.share({files:set,text});return}
+    }
     if(navigator.share&&!files.length){await navigator.share({text});return}
   }catch(e){if(e&&e.name==="AbortError")return}
   shareWA(r);
