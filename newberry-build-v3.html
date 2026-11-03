@@ -3458,12 +3458,25 @@ function overallV(){
   const whoCard=top.length?'<div class="card ov mrows"><h2 style="margin:10px 0 0">Who gets what</h2>'+top.map(x=>'<button type="button" class="mrow" '+x.attr+'><div class="row between"><span class="lt">'+esc(x.n)+'</span><b>'+money0(x.v)+'</b></div>'+bar(x.p,x.v)+'<div class="ls">Paid '+money0(x.p)+' · to pay '+money0(x.v-x.p)+'</div></button>').join("")+(wait?'<div class="ls" style="padding:10px 0 4px;border-top:1px solid var(--line)">'+money0(wait)+' in quotes waiting for a decision</div>':"")+'</div>':(wait?'<p class="hint">'+money0(wait)+' in quotes waiting for a decision.</p>':'<div class="card"><p class="muted" style="margin:0">Add the builder\'s contract and quotes from your trades to see who gets what.</p></div>');
   return hero+nextCard+whoCard+moneyCharts()+'<p class="hint">Each payment comes off that quote\'s balance. Trades are quoted and paid separately from the builder.</p>';
 }
-/* a short guide: how to view and compare a quote */
+/* a short guide: how to compare quotes and how to view a document */
+const HOW_DOC=[["Find the document","From a quote: tap its card, then Open the quote document at the bottom. In All quotes, quote documents that are not on a card yet are listed at the bottom: tap one. Every document is also under Build, then More, then Documents."],["Unlock it if asked","Quotes, contracts and invoices are locked. If it asks, type the money password. Tap the lock at the top of Money to unlock first."],["Open it","Tap Open. A PDF opens in the Plans viewer, where you pinch to zoom. A photo opens full screen. Other files open in a new tab."],["Send or save it","In the same sheet: Share sends the file on WhatsApp, Print makes a printout, and Save puts it in Google Drive or on this phone."],["Link it to a quote","On a quote, tap Edit details and choose the quote document. Then it opens straight from the quote card."]];
+let howTab="quote";
 function quoteHowSheet(){
   const can=S.trades.length>1;
   const steps=[["Open the quotes","Go to Money, then Trades. Every quote is a card with the contractor, the total and its status. Switch to All quotes to see every quote one by one, newest first."],["View a quote","Tap its card. You see the amount, the extras, the payment plan and its document. Tap Open next to the document to read the quote itself."],["Start a comparison","Tap Compare two quotes at the top, or Compare beside a trade name such as Tiling."],["Choose A and B","Pick the two quotes from the lists. The lower figures show in green."],["Read the notes","Under the table: the price difference in rand and percent, extras, the deposit asked, how old each quote is and any missing documents."],["Decide","Tap Accept quote A or B. The other quotes for that trade are marked declined. You can undo it."]];
-  sheet("How to compare quotes",`<ol class="how">${steps.map(([t,d])=>`<li><div><b>${t}</b><span class="muted">${d}</span></div></li>`).join("")}</ol><p class="hint" style="margin-top:14px">A lower total is only fair if both quotes cover the same work. Open both documents and check what is included before you decide.</p><div class="foot">${can?`<button type="button" class="btn primary block" id="hw">${ic("trend")}Compare two quotes now</button>`:`<p class="muted small" style="margin:0">You need two quotes to compare. Add the second one from the Add menu.</p>`}</div>`,(sh,close)=>{
-    const b=sh.querySelector("#hw");if(b)b.onclick=()=>{close();setTimeout(()=>tradeCmp(),80)};
+  const body=()=>howTab==="doc"
+   ?`<ol class="how">${HOW_DOC.map(([t,d])=>`<li><div><b>${t}</b><span class="muted">${d}</span></div></li>`).join("")}</ol><p class="hint" style="margin-top:14px">Quote documents are kept so you can check what each quote includes. Open the document before you accept a quote.</p>`
+   :`<ol class="how">${steps.map(([t,d])=>`<li><div><b>${t}</b><span class="muted">${d}</span></div></li>`).join("")}</ol><p class="hint" style="margin-top:14px">A lower total is only fair if both quotes cover the same work. Open both documents and check what is included before you decide.</p>`;
+  const foot=()=>howTab==="doc"
+   ?`<button type="button" class="btn primary block" id="hd">${ic("clip")}Open Documents now</button>`
+   :can?`<button type="button" class="btn primary block" id="hw">${ic("trend")}Compare two quotes now</button>`:`<p class="muted small" style="margin:0">You need two quotes to compare. Add the second one from the Add menu.</p>`;
+  sheet("How to",`<div class="segc" role="group" aria-label="Topic" style="margin:8px 0 14px"><button type="button" data-ht="quote" aria-pressed="${howTab==="quote"}">Compare quotes</button><button type="button" data-ht="doc" aria-pressed="${howTab==="doc"}">View a document</button></div><div id="hb">${body()}</div><div class="foot" id="hf">${foot()}</div>`,(sh,close)=>{
+    const wire=()=>{
+      sh.querySelectorAll("[data-ht]").forEach(x=>x.onclick=()=>{howTab=x.dataset.ht;sh.querySelectorAll("[data-ht]").forEach(y=>y.setAttribute("aria-pressed",y.dataset.ht===howTab));sh.querySelector("#hb").innerHTML=body();sh.querySelector("#hf").innerHTML=foot();wire()});
+      const w=sh.querySelector("#hw");if(w)w.onclick=()=>{close();setTimeout(()=>tradeCmp(),80)};
+      const d=sh.querySelector("#hd");if(d)d.onclick=()=>{close();setTimeout(()=>go("docs"),80)};
+    };
+    wire();
   });
 }
 let trVw=lsGet("b3-trv")==="all"?"all":"trade",trF="all";
