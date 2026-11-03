@@ -2273,11 +2273,32 @@ function shareSheet(){
   }
   if(!sm.code){
     sheet("Not connected to the team",`<p class="muted" style="margin:6px 0 10px"><b>Are you part of the team?</b> Then this phone is not connected yet. Paste the personal link the Project Lead sent you and you will see the shared project.</p>
+    <div class="eyebrow" style="margin:12px 0 4px">Sign in with your PIN</div>
+    <label class="f" for="sn">Your name</label><input id="sn" class="t" maxlength="40" autocomplete="given-name" value="${esc(lsGet("build-who"))}">
+    <label class="f" for="sp">PIN (6 digits)</label><input id="sp" class="t" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off">
+    <div class="tasks" style="margin-top:8px"><button class="btn primary block" id="sb">${ic("key")}Sign in</button></div><p class="hint" id="se" role="status">No PIN yet? Ask the Project Lead to set one for you, or use your link below.</p>
+    <div class="eyebrow" style="margin:18px 0 0">Or use your link</div>
     <label class="f" for="jl">Your personal link</label><input id="jl" class="t" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="Paste your link here">
     <div class="tasks" style="margin-top:8px"><button class="btn primary block" id="jb">${ic("link")}Join with this link</button></div>
     <p class="hint">Added the app to your Home Screen after opening your link in the browser? Then paste the link here, because the Home Screen app keeps its own copy.</p>
     <details class="more" style="margin-top:14px"><summary>I am the Project Lead and want to start a new project</summary><p class="muted" style="margin:8px 0 12px">Create the project, then add your team. Each person gets their own link and sees only what you allow. Works offline and catches up when there is signal.</p>
     <button class="btn block" id="on">${ic("share")}Create the project and add my team</button></details>`,(sh,close)=>{
+      const sb2=sh.querySelector("#sb"),sn=sh.querySelector("#sn"),sp=sh.querySelector("#sp"),se=sh.querySelector("#se");
+      sp.addEventListener("input",()=>{sp.value=sp.value.replace(/\D/g,"").slice(0,6);se.textContent=""});
+      sb2.onclick=async()=>{
+        const nm=sn.value.trim(),pn=sp.value;
+        if(!nm){se.textContent="Write your name.";sn.focus();return}
+        if(!/^\d{6}$/.test(pn)){se.textContent="Your PIN is 6 digits.";sp.focus();return}
+        sb2.disabled=true;se.textContent="Signing in…";
+        try{
+          if(!await connect()){se.textContent="Connect to the internet to sign in.";return}
+          const{data,error}=await sb.rpc("build3_pin_login",{p_name:nm,p_pin:pn});
+          if(error||!data||data.error){se.textContent=/locked/.test(error?.message||data?.error||"")?"Too many tries. Wait 15 minutes, or ask the Project Lead.":"That name and PIN do not match. After 5 wrong tries the PIN locks for 15 minutes.";return}
+          close();toast("Signing in…");await pinJoin(data);
+        }catch{se.textContent="Could not sign in. Check your connection and try again."}
+        finally{sb2.disabled=false}
+      };
+      sp.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();sb2.click()}});
       const jb=sh.querySelector("#jb"),jl=sh.querySelector("#jl");
       jb.onclick=()=>{const m=(jl.value||"").match(/join=([a-z0-9]{20,})&k=([a-f0-9]{32,})/);if(!m)return showErr(sh,jl,"That does not look like your personal link. Paste the whole link.");close();location.hash="join="+m[1]+"&k="+m[2]};
       jl.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();jb.click()}});
@@ -2292,6 +2313,28 @@ function shareSheet(){
     sh.querySelector("#pp").onclick=()=>{close();go("people")};
     sh.querySelector("#now").onclick=async()=>{close();toast("Syncing…");await syncNow();toast(syncState==="ok"?"Everything is up to date.":"Could not finish syncing. It will try again.")};
     sh.querySelector("#out").onclick=()=>{close();confirmSheet("Stop sharing here?","Your data stays on this phone, but it stops syncing with your team. People keep their links.","Stop sharing",()=>leaveShare())};
+  });
+}
+/* sign in with a name and a 6-digit PIN that the Project Lead set */
+async function pinJoin(w){
+  me=w.name;try{localStorage.setItem("build-who",me)}catch{}
+  S=DEF();sm={meta:{},lastPull:null,pendingMedia:[],code:w.code,key:w.key,pid:w.pid,pname:w.name,prole:w.role,joinedAt:Date.now(),mig:1};setPerm(w.perm);try{await mClear()}catch{}urls.clear();persistSync();try{navigator.storage?.persist?.()}catch{}
+  await pull();if(!S.tasks.length&&lvl("tasks")>=2){S.tasks=seedTasks()}save();scan();await push();render();toast("You are in. Welcome, "+w.name+"!");
+}
+const pinTrivial=p=>/^(\d)\1{5}$/.test(p)||["123456","654321","012345","123123","121212"].includes(p);
+async function pinSheet(pid){
+  const p=personOf(pid);if(!p)return;
+  let has=null;try{if(!sb&&!await connect())throw 0;const{data,error}=await sb.rpc("build3_pin_status",{p_code:sm.code,p_key:sm.key});if(error)throw error;has=(data||[]).includes(pid)}catch{}
+  sheet("Sign-in PIN for "+p.name,`<p class="muted" style="margin:6px 0 8px" id="pnst">${has===null?"Connect to the internet to set a PIN, or the PIN feature is not switched on yet.":has?"A PIN is set. Choose a new one to change it.":"No PIN yet."}</p><p class="hint" style="margin:0 0 10px">With a 6-digit PIN, ${esc(p.name)} can sign in on any phone by typing their name and PIN, instead of opening a link. After 5 wrong tries it locks for 15 minutes. The PIN has the same access as their link, so keep it private.</p><label class="f" for="pnv">New PIN (6 digits)</label><input id="pnv" class="t" inputmode="numeric" pattern="[0-9]*" maxlength="6" autocomplete="off" placeholder="6 digits" ${has===null?"disabled":""}><p class="hint" id="pne" role="status"></p><div class="foot"><button type="button" class="btn primary block" id="pns" ${has===null?"disabled":""}>Save PIN</button>${has?`<button type="button" class="btn block danger" id="pnr" style="margin-top:8px">Remove the PIN</button>`:""}</div>`,(sh,close)=>{
+    const say=m=>sh.querySelector("#pne").textContent=m,inp=sh.querySelector("#pnv");
+    inp.addEventListener("input",()=>{inp.value=inp.value.replace(/\D/g,"").slice(0,6);say("")});
+    const call=async v=>{try{const{error}=await sb.rpc("build3_pin_set",{p_code:sm.code,p_key:sm.key,p_pid:pid,p_pin:v});if(error)throw error;return true}catch(e){say(/format/.test(e?.message||"")?"Use exactly 6 digits.":/denied/.test(e?.message||"")?"Only the Project Lead can set a PIN.":"Could not save. Check your connection and try again.");return false}};
+    sh.querySelector("#pns").onclick=async()=>{
+      const v=inp.value;if(!/^\d{6}$/.test(v)){say("Use exactly 6 digits.");return}if(pinTrivial(v)){say("That PIN is too easy to guess. Choose another.");return}
+      const b=sh.querySelector("#pns");b.disabled=true;say("Saving…");
+      if(await call(v)){logAct("Set a sign-in PIN for "+p.name,1);close();toast("PIN saved. "+p.name+" can sign in with their name and PIN.")}else b.disabled=false;
+    };
+    sh.querySelector("#pnr")?.addEventListener("click",async()=>{if(await call("")){logAct("Removed the sign-in PIN for "+p.name,1);close();toast("PIN removed.")}});
   });
 }
 async function joinFromHash(){
@@ -2958,10 +3001,10 @@ function personSheet(pid,draft){
   const st=draft?{role:draft.role,areas:{...draft.areas},rep:draft.rep}:{role:(p&&ROLES[p.role]&&p.role!=="lead")?p.role:"other",areas:{...orig},rep:wasRep?"1":"0"};
   const pre=()=>PRESET_AREAS[st.role]||PRESET_AREAS.other;
   sheet(p?p.name:"Add a person",`<form id="f" novalidate>
-  ${p&&!isMe?`<div class="tasks" style="margin:8px 0 16px"><button type="button" class="btn block" id="wl">${ic("chat")}Send their link on WhatsApp</button><button type="button" class="btn block" id="cl">${ic("copy")}Copy their link</button><button type="button" class="btn block" id="nl">${ic("key")}Make a new link</button><button type="button" class="btn block" id="pv">${ic("eye")}See the app as ${esc(p.name)}</button></div><p class="hint">Each link is personal. A new link stops the old one working.</p>`:""}
+  ${p&&!isMe?`<div class="tasks" style="margin:8px 0 16px"><button type="button" class="btn block" id="wl">${ic("chat")}Send their link on WhatsApp</button><button type="button" class="btn block" id="cl">${ic("copy")}Copy their link</button><button type="button" class="btn block" id="nl">${ic("key")}Make a new link</button><button type="button" class="btn block" id="pv">${ic("eye")}See the app as ${esc(p.name)}</button><button type="button" class="btn block" id="pk">${ic("lock")}Sign-in PIN</button></div><p class="hint">Each link is personal. A new link stops the old one working.</p>`:""}
   <label class="f" for="pn">Name</label><input id="pn" class="t" maxlength="40" ${p?"":"data-autofocus"} value="${esc(draft?.name??p?.name??"")}">
   <label class="f" for="pp">WhatsApp number (optional)</label><input id="pp" class="t" type="tel" inputmode="tel" value="${esc(draft?.phone??p?.phone??"")}" placeholder="For example 082 123 4567">
-  ${isMe?`<p class="muted" style="margin:12px 0 10px">You are the Project Lead. You always have full control.</p><div class="note-card">${ic("key")}<span><b>Your access link.</b> If you lose this phone, open this link on a new phone to get back in as ${esc(roleLabel(sm.prole))}. Keep it private.</span></div><div class="tasks" style="margin-top:12px"><button type="button" class="btn block" id="ml">${ic("copy")}Copy my access link</button><button type="button" class="btn block" id="md">${ic("cloud")}Save it to Google Drive</button><button type="button" class="btn block" id="mw">${ic("chat")}Send it to myself on WhatsApp</button><button type="button" class="btn block danger" id="mn">${ic("key")}Make a new access link</button></div><div class="foot"><button class="btn primary block" id="sv">Save</button></div>`:`
+  ${isMe?`<p class="muted" style="margin:12px 0 10px">You are the Project Lead. You always have full control.</p><div class="note-card">${ic("key")}<span><b>Your access link.</b> If you lose this phone, open this link on a new phone to get back in as ${esc(roleLabel(sm.prole))}. Keep it private.</span></div><div class="tasks" style="margin-top:12px"><button type="button" class="btn block" id="ml">${ic("copy")}Copy my access link</button><button type="button" class="btn block" id="md">${ic("cloud")}Save it to Google Drive</button><button type="button" class="btn block" id="mw">${ic("chat")}Send it to myself on WhatsApp</button><button type="button" class="btn block" id="pk">${ic("lock")}Sign-in PIN</button><button type="button" class="btn block danger" id="mn">${ic("key")}Make a new access link</button></div><div class="foot"><button class="btn primary block" id="sv">Save</button></div>`:`
   <label class="f">Start from a role</label>${chipRow("role",ROLE_PICK.map(r=>[r,roleLabel(r)]),st.role)}
   <div class="asum" id="asum"></div>
   <div id="ar"></div>
@@ -2971,6 +3014,7 @@ function personSheet(pid,draft){
   ${p?`<div class="adanger"><button type="button" class="btn block ${p.active?"danger":""}" id="tg">${p.active?"Switch access off":"Switch access back on"}</button><p class="hint">${p.active?"They can no longer open the project. You can switch them back on any time.":"They can open the project again with their link."}</p></div>`:""}
   <div class="foot"><button class="btn primary block" id="sv">${p?"Review and save":"Review and add"}</button></div>`}
   </form>`,(sh,close)=>{
+    sh.querySelector("#pk")?.addEventListener("click",()=>{close();setTimeout(()=>pinSheet(p.pid),80)});
     const guard=async fn=>{try{await fn()}catch(e){console.warn(e);toast(e.message==="offline"?"Connect to the internet to change people.":"Could not save that. Try again.")}};
     const nameOf=()=>sh.querySelector("#pn").value.trim(),phoneOf=()=>sh.querySelector("#pp").value.trim();
     if(!isMe){
