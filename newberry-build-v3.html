@@ -1119,8 +1119,8 @@ function showErr(sh,field,msg){sh.querySelector(".err")?.remove();field.setAttri
 const supName=id=>S.sups.find(s=>s.id===id)?.name||"";
 const waNum=p=>{let d=String(p||"").replace(/\D/g,"");if(d.startsWith("0"))d="27"+d.slice(1);return d};
 async function shareText(text){
-  if(navigator.share){try{await navigator.share({text});return}catch(e){if(e?.name==="AbortError")return}}
-  window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank","noopener");
+  if(navigator.share){try{await navigator.share({text});return true}catch(e){if(e?.name==="AbortError")return false}}
+  window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank","noopener");return true;
 }
 function delRecs(arr,pred,label){
   const gone=arr.filter(pred);if(!gone.length)return;
@@ -4723,11 +4723,17 @@ async function puRecord(){
     };
   });
 }
+/* after an update is sent, or on Start new: empty the message, the photos and the captions. Undo brings them back. */
+function puDone(msg){
+  const old={msg:PU.msg,ids:PU.ids.slice(),caps:{...PU.caps},own:PU.own.slice()};
+  PU.msg="";PU.ids=[];PU.caps={};PU.own=[];puSave();render();
+  toast(msg||"Cleared. Ready for a new update.",()=>{PU.msg=old.msg;PU.ids=old.ids;PU.caps=old.caps;PU.own=old.own;puSave();render()});
+}
 function pupdV(){
   const have=new Set(allPhotos().map(p=>p.m));PU.ids=PU.ids.filter(m=>have.has(m)||PU.own.includes(m)).slice(0,5);
   return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn("home")}<h2>Report</h2></div><button class="btn" data-act="pusend" aria-label="Share this photo update">${ic("share")}Share</button></div>
   ${repSeg("pupd")}
-  <div class="card rc"><div class="eyebrow">Your message</div><textarea id="pum" class="t" rows="4" maxlength="600" aria-label="Your message" placeholder="Write a personal update. For example: Good news, the roof is on and the walls are next.">${esc(PU.msg)}</textarea><div class="row between" style="margin-top:8px;gap:10px;align-items:center"><p class="hint" id="puc" style="margin:0">${PU.msg.length} of 600</p>${SPEECH?`<button type="button" class="micfab pu-mic" id="pumic" aria-label="Speak your message" aria-pressed="false">${ic("mic")}<span>Speak</span></button>`:""}</div>${SPEECH?"":`<p class="hint" style="margin:8px 0 0">To speak your message, use the microphone on your keyboard.</p>`}</div>
+  <div class="card rc"><div class="row between" style="align-items:center;margin-bottom:10px"><div class="eyebrow" style="margin:0">Your message</div>${PU.msg||PU.ids.length?`<button type="button" class="linkbtn" id="punew" style="padding:0;min-height:32px;font-size:.85rem">${ic("plus","sm")}Start a new update</button>`:""}</div><textarea id="pum" class="t" rows="4" maxlength="600" aria-label="Your message" placeholder="Write a personal update. For example: Good news, the roof is on and the walls are next.">${esc(PU.msg)}</textarea><div class="row between" style="margin-top:8px;gap:10px;align-items:center"><p class="hint" id="puc" style="margin:0">${PU.msg.length} of 600</p>${SPEECH?`<button type="button" class="micfab pu-mic" id="pumic" aria-label="Speak your message" aria-pressed="false">${ic("mic")}<span>Speak</span></button>`:""}</div>${SPEECH?"":`<p class="hint" style="margin:8px 0 0">To speak your message, use the microphone on your keyboard.</p>`}</div>
   <div class="card rc"><div class="eyebrow">Photos and clips · ${PU.ids.length} of 5</div><div id="pup"></div><button type="button" class="btn block" id="puwk" style="margin-bottom:8px">${ic("calendar")}Use this week's photos</button>${PU.ids.length>=5?`<p class="hint" style="margin:0">Five items is the most. Remove one to add another.</p>`:`<div class="pu-add"><button type="button" class="btn" data-act="pupick">${ic("grid")}<span>Project</span></button><button type="button" class="btn" id="pugal">${ic("image")}<span>Camera roll</span></button><button type="button" class="btn" id="pucam">${ic("camera")}<span>Photo</span></button><button type="button" class="btn" id="puvid">${ic("clock")}<span>Video 5 s</span></button></div>`}<input type="file" id="pugf" accept="image/*,video/*" multiple hidden><input type="file" id="pucf" accept="image/*" capture="environment" hidden><input type="file" id="pucvf" accept="video/*" capture="environment" hidden></div>
   <div class="card rc"><div class="row between" style="align-items:center;margin-bottom:10px"><div class="eyebrow" style="margin:0">Preview</div><button type="button" class="chip" id="pulg" aria-pressed="${PU.logo}">${ic("check","sm")}Logo on photos</button></div><div id="pupv"></div></div>
   <div class="pu-stick"><button type="button" class="btn primary block" data-act="pusend" aria-label="Share this photo update">${ic("share")}Share update${PU.ids.length?" · "+PU.ids.length+" photo"+(PU.ids.length===1?"":"s"):""}</button></div>`;
@@ -4770,6 +4776,7 @@ async function pupdInit(){
   if(cf){document.getElementById("pucam").onclick=()=>{if(PU.ids.length>=5){toast("Five items at most. Remove one first.");return}cf.click()};cf.onchange=()=>{addFiles(cf.files);cf.value=""}}
   const vf=document.getElementById("pucvf");if(vf)vf.onchange=()=>{addFiles(vf.files);vf.value=""};
   const vb=document.getElementById("puvid");if(vb)vb.onclick=()=>puRecord();
+  const nb=document.getElementById("punew");if(nb)nb.onclick=()=>puDone();
   const lgb=document.getElementById("pulg");if(lgb)lgb.onclick=()=>{PU.logo=!PU.logo;lsSet("b3-pu-logo",PU.logo?"1":"0");render()};
   const mic=document.getElementById("pumic");
   if(mic&&SPEECH){
@@ -4839,10 +4846,10 @@ function puShareSheet(){
     sh.querySelector("#ssend").onclick=async()=>{
       const b=sh.querySelector("#ssend");b.disabled=true;
       try{
-        if(kind==="link"){const u=await make();if(u)shareText((PU.msg.trim()||"Photo update")+"\n\n"+u);return}
+        if(kind==="link"){const u=await make();if(u){const ok=await shareText((PU.msg.trim()||"Photo update")+"\n\n"+u);if(ok){close();puDone("Sent. Ready for a new update.")}}return}
         say("Getting your photos ready…");const files=[];
         for(const[i,m]of PU.ids.entries()){const bl=await mGet(m);if(!bl)continue;if(/^video\//.test(bl.type)){files.push(new File([bl],"site-clip-"+(i+1)+vExt(bl.type),{type:bl.type}))}else{const out=PU.logo?await stampPhoto(bl):bl;files.push(new File([out],"site-photo-"+(i+1)+".jpg",{type:out.type||"image/jpeg"}))}}
-        if(files.length&&navigator.canShare&&navigator.canShare({files})){try{await navigator.share({files,text:PU.msg.trim()});say("");close()}catch(e){if(e?.name==="AbortError")say("");else say("Could not send the photos. Try Share a link.")}}
+        if(files.length&&navigator.canShare&&navigator.canShare({files})){try{await navigator.share({files,text:PU.msg.trim()});say("");close();puDone("Sent. Ready for a new update.")}catch(e){if(e?.name==="AbortError")say("");else say("Could not send the photos. Try Share a link.")}}
         else{say("This phone cannot send photos from here. Use Share a link, or send the message only.");if(PU.msg.trim())shareText(PU.msg.trim())}
       }finally{b.disabled=false}
     };
