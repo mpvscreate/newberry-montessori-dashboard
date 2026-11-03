@@ -978,7 +978,7 @@ const TABS=[["build","Build","grid"],["home","Overview","home"],["add","Add","pl
 const navTab=t=>({phase:"build",mats:"build",site:"build",plans:"build",docs:"build",inbox:"more",people:"more",tasks:"build",diary:"build",garden:"build",extra:"more",report:"home",week:"home",pupd:"home",weather:"build",photos:"build",snags:"build"})[t]||t;
 $("nav.tabs").innerHTML=TABS.map(([k,l,i])=>k==="add"?`<button type="button" class="cap" id="fab" aria-label="Add something" aria-expanded="false" aria-controls="fab-menu">${ic(i)}</button>`:`<button data-tab="${k}">${ic(i)}<span>${l}</span>${k==="build"?'<i class="dot" id="tdot" hidden></i>':""}</button>`).join("");
 $("#today").textContent=new Date().toLocaleDateString("en-ZA",sm.code?{weekday:"short",day:"numeric",month:"short"}:{weekday:"long",day:"numeric",month:"long"});
-$("#fab-menu").innerHTML=[["site","On site",[["photo","camera","Photo"],["issue","alert","Snag"]]],["build","Build",[["task","clip","Task"],["mat","truck","Material"]]],["money","Money",[["cost","cash","Expense"],["pay","users","Record payment"]]],["team","Team",[["msg","chat","Update everyone"],["diary","book","Site diary"]]]].map(([g,t,it])=>`<div class="fab-grp" data-g="${g}"><h4>${t}</h4><div class="fab-row">${it.map(([k,i,l])=>`<button class="fab-item" data-fab="${k}"><span class="fi">${ic(i)}</span><span class="fl">${l}</span></button>`).join("")}</div></div>`).join("")+`<p class="fab-hint">Hold the plus button to take a photo straight away.</p>`;
+$("#fab-menu").innerHTML=[["site","On site",[["photo","camera","Photo"],["issue","alert","Snag"]]],["build","Build",[["task","clip","Task"],["mat","truck","Material"]]],["money","Money",[["cost","cash","Expense"],["pay","users","Record payment"]]],["team","Team",[["msg","chat","Update everyone"],["site","note","Site log"]]]].map(([g,t,it])=>`<div class="fab-grp" data-g="${g}"><h4>${t}</h4><div class="fab-row">${it.map(([k,i,l])=>`<button class="fab-item" data-fab="${k}"><span class="fi">${ic(i)}</span><span class="fl">${l}</span></button>`).join("")}</div></div>`).join("")+`<p class="fab-hint">Hold the plus button to take a photo straight away.</p>`;
 
 let toastT;
 function toast(msg,undo){
@@ -1064,7 +1064,7 @@ $("#fab").onclick=()=>setFab($("#fab").getAttribute("aria-expanded")!=="true");
   m.addEventListener("pointermove",e=>{if(y0!==null&&e.clientY-y0>60){y0=null;setFab(false)}});
   ["pointerup","pointercancel"].forEach(n=>m.addEventListener(n,()=>{y0=null}));
 })();
-document.querySelectorAll("[data-fab]").forEach(b=>b.onclick=()=>{setFab(false);buzz(10);if(!fabOK(b.dataset.fab))return;({photo:()=>quickPhoto(tab==="phase"?curPh:undefined),cost:()=>costSheet(),pay:()=>recPaySheet(),msg:()=>newMsgSheet(true),diary:()=>diarySheet(),task:()=>addTaskSheet(tab==="phase"?curPh:undefined),mat:()=>matSheet(),issue:()=>logSheet(null,"issue")})[b.dataset.fab]()});
+document.querySelectorAll("[data-fab]").forEach(b=>b.onclick=()=>{setFab(false);buzz(10);if(!fabOK(b.dataset.fab))return;({photo:()=>quickPhoto(tab==="phase"?curPh:undefined),cost:()=>costSheet(),pay:()=>recPaySheet(),msg:()=>newMsgSheet(true),site:()=>logSheet(null,"update",tab==="phase"?curPh:undefined),task:()=>addTaskSheet(tab==="phase"?curPh:undefined),mat:()=>matSheet(),issue:()=>logSheet(null,"issue")})[b.dataset.fab]()});
 addEventListener("keydown",e=>{if(e.key==="Escape"){if(closeSheet)closeSheet();else if($("#fab").getAttribute("aria-expanded")==="true"){setFab(false);$("#fab").focus()}}});
 const reduced=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
 const buzz=n=>{try{navigator.vibrate?.(n)}catch{}};
@@ -2867,7 +2867,7 @@ const ago=t=>{const s=Math.max(0,(Date.now()-new Date(t).getTime())/1000);return
 const personLink=p=>location.origin+location.pathname+"#join="+sm.code+"&k="+p.key;
 const waUrl=(phone,text)=>{let d=String(phone||"").replace(/\D/g,"");if(d.startsWith("0"))d="27"+d.slice(1);return "https://wa.me/"+d+"?text="+encodeURIComponent(text)};
 function fabOK(k){
-  const ar={photo:"log",issue:"log",task:"tasks",mat:"mats",cost:"money",pay:"money",msg:"upd",diary:"diary"}[k];if(k==="msg"&&!sm.code){shareSheet();return false}
+  const ar={photo:"log",issue:"log",task:"tasks",mat:"mats",cost:"money",pay:"money",msg:"upd",site:"log"}[k];if(k==="msg"&&!sm.code){shareSheet();return false}
   if(lvl(ar)>=2)return true;toast(AREA_MSG(ar));return false;
 }
 const whoLine=()=>sm.code&&!perm.manage?`<p class="muted small" style="margin:0 2px 12px">You are <b>${esc(sm.pname||me||"signed in")}</b>, ${esc(roleLabel(sm.prole))}. ${esc(accessText(perm))}</p>`:"";
