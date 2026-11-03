@@ -1141,7 +1141,7 @@ function render(){
   v.querySelectorAll("[data-go]").forEach(el=>el.addEventListener("click",()=>{if(el._lp){el._lp=false;return}const[t,f]=el.dataset.go.split(":");if(t==="phase"&&f)curPh=f;if(t==="site"&&f)logSub=f;if(t==="mats"&&f)matF=f;go(t)}));
   v.querySelectorAll("[data-rf]").forEach(el=>el.addEventListener("click",()=>{roomF=el.dataset.rf;render()}));
   v.querySelectorAll("details.gd").forEach(d=>d.addEventListener("toggle",()=>{if(openPh===null)openPh=new Set(curPhases());d.open?openPh.add(d.dataset.ph):openPh.delete(d.dataset.ph)}));
-  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;if(k==="plan"){planSel=val;PV.plan="";PV.had=false}if(k==="doc")docF=val;if(k==="mseg")moneySeg=val;if(k==="tf")taskF=val;if(k==="df")diaryF=val;if(k==="pf")photoF=val;if(k==="sm")slipM=val;if(k==="sg")snagF=val;if(k==="sc")slipC=val;if(k==="pt")phTab=val;if(k==="mph")matPh=val;if(k==="bm"){bmode=val;lsSet("build-bmode",val)}if(k==="fr")fRoom=val;if(k==="fv")fView=val;render()}));
+  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;if(k==="plan"){planSel=val;PV.plan="";PV.had=false}if(k==="doc")docF=val;if(k==="mseg")moneySeg=val;if(k==="tf")taskF=val;if(k==="df")diaryF=val;if(k==="pf")photoF=val;if(k==="trv"){trVw=val;lsSet("b3-trv",val)}if(k==="trf")trF=val;if(k==="sm")slipM=val;if(k==="sg")snagF=val;if(k==="sc")slipC=val;if(k==="pt")phTab=val;if(k==="mph")matPh=val;if(k==="bm"){bmode=val;lsSet("build-bmode",val)}if(k==="fr")fRoom=val;if(k==="fv")fView=val;render()}));
   v.querySelectorAll("li.tap").forEach(el=>{el.setAttribute("role","button");el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click()}})});
   hydrate(v);hydrateBg(v);countUp(v);document.documentElement.style.setProperty("--hdrh",(document.querySelector("header.top")?.offsetHeight||64)+"px");if(tab==="plans")initPlanView();if(tab==="week")wkBA();if(tab==="pupd")pupdInit();
   v.querySelectorAll("svg.chart").forEach(wireChart);if(lvl("tasks")>=2)v.querySelectorAll("ul.reord").forEach(ul=>holdDrag(ul,curPh));
@@ -3459,18 +3459,19 @@ function overallV(){
 /* a short guide: how to view and compare a quote */
 function quoteHowSheet(){
   const can=S.trades.length>1;
-  const steps=[["Open the quotes","Go to Money, then Other quotes. Every quote is a card with the contractor, the total and its status."],["View a quote","Tap its card. You see the amount, the extras, the payment plan and its document. Tap Open next to the document to read the quote itself."],["Start a comparison","Tap Compare two quotes at the top, or Compare beside a trade name such as Tiling."],["Choose A and B","Pick the two quotes from the lists. The lower figures show in green."],["Read the notes","Under the table: the price difference in rand and percent, extras, the deposit asked, how old each quote is and any missing documents."],["Decide","Tap Accept quote A or B. The other quotes for that trade are marked declined. You can undo it."]];
+  const steps=[["Open the quotes","Go to Money, then Trades. Every quote is a card with the contractor, the total and its status. Switch to All quotes to see every quote one by one, newest first."],["View a quote","Tap its card. You see the amount, the extras, the payment plan and its document. Tap Open next to the document to read the quote itself."],["Start a comparison","Tap Compare two quotes at the top, or Compare beside a trade name such as Tiling."],["Choose A and B","Pick the two quotes from the lists. The lower figures show in green."],["Read the notes","Under the table: the price difference in rand and percent, extras, the deposit asked, how old each quote is and any missing documents."],["Decide","Tap Accept quote A or B. The other quotes for that trade are marked declined. You can undo it."]];
   sheet("How to compare quotes",`<ol class="how">${steps.map(([t,d])=>`<li><div><b>${t}</b><span class="muted">${d}</span></div></li>`).join("")}</ol><p class="hint" style="margin-top:14px">A lower total is only fair if both quotes cover the same work. Open both documents and check what is included before you decide.</p><div class="foot">${can?`<button type="button" class="btn primary block" id="hw">${ic("trend")}Compare two quotes now</button>`:`<p class="muted small" style="margin:0">You need two quotes to compare. Add the second one from the Add menu.</p>`}</div>`,(sh,close)=>{
     const b=sh.querySelector("#hw");if(b)b.onclick=()=>{close();setTimeout(()=>tradeCmp(),80)};
   });
 }
+let trVw=lsGet("b3-trv")==="all"?"all":"trade",trF="all";
 function tradesV(){
   if(!S.trades.length)return empty("hammer","No contractor quotes yet","Add quotes from your tiler, electrician and other trades. They are paid separately from the builder and counted in the whole project.",`<button class="btn primary" data-act="addtrade">${ic("plus")}Add the first quote</button>`);
   const c=tCommit(),p=tPaidAll(),w=tWait();
-  const card=(t,low,multi)=>{
+  const card=(t,low,multi,flat)=>{
     const val=tVal(t),paid=tPaid(t),left=val-paid,acc=t.status==="accepted",nx=acc?tNext(t):null;
     const cheapest=multi&&t.status!=="declined"&&low>0&&val===low,diff=multi&&t.status!=="declined"&&low>0&&val>low?`+${money0(val-low)} more than the lowest`:"";
-    const who=supName(t.sup),meta=[who?"":"No contractor chosen yet",roomName(t.room),t.phase&&PSHORT[t.phase]?PSHORT[t.phase]:"",t.date?"Quote of "+dshort(t.date):""].filter(Boolean).join(" · ");
+    const who=supName(t.sup),meta=[flat?(t.trade||"Other"):"",who?"":"No contractor chosen yet",roomName(t.room),t.phase&&PSHORT[t.phase]?PSHORT[t.phase]:"",t.date?"Quote of "+dshort(t.date):""].filter(Boolean).join(" · ");
     return `<li class="card trcard ${t.status==="declined"?"dim":""}" tabindex="0" data-act="opentrade" data-id="${t.id}" style="list-style:none;margin:0 0 10px">
      <div class="row between" style="align-items:flex-start;gap:8px"><div class="grow"><div class="lt ${who?"":"muted"}">${esc(who||"Quote")}</div><div class="ls">${esc(meta)}</div></div><div style="text-align:right"><div class="amt">${money0(val)}</div><span class="pill ${tPill(t.status)}">${tStatLabel(t.status)}</span></div></div>
      ${cheapest?`<div style="margin-top:8px"><span class="pill">${ic("check","sm")}Lowest quote</span></div>`:diff?`<div class="ls" style="margin-top:6px">${diff}</div>`:""}
@@ -3485,10 +3486,24 @@ function tradesV(){
   </div>
   <div class="row" style="gap:8px;margin:0 0 10px">${S.trades.length>1?`<button type="button" class="btn grow" data-act="tradecmp">${ic("trend")}Compare two quotes</button>`:""}<button type="button" class="btn ${S.trades.length>1?"":"grow"}" data-act="quotehow" aria-label="How to view and compare quotes">${ic("book")}How to</button></div>
   ${w?`<div class="note-card">${ic("clock")}<span><b>${money0(w)}</b> in quotes waiting for a decision.</span></div>`:""}
-  ${tGroups().map(g=>{const items=g.items.slice().sort((a,b)=>tOrder[a.status]-tOrder[b.status]||tVal(a)-tVal(b));
+  <div class="segc" role="group" aria-label="How to list the quotes" style="margin-bottom:10px"><button type="button" data-sub="trv:trade" aria-pressed="${trVw==="trade"}">By trade</button><button type="button" data-sub="trv:all" aria-pressed="${trVw==="all"}">All quotes · ${S.trades.length}</button></div>
+  ${trVw==="all"?allQuotes(card):tGroups().map(g=>{const items=g.items.slice().sort((a,b)=>tOrder[a.status]-tOrder[b.status]||tVal(a)-tVal(b));
     const cand=items.filter(t=>t.status!=="declined"&&tVal(t)>0),multi=cand.length>1,low=cand.length?Math.min(...cand.map(tVal)):0;
     return `<div class="tgroup"><div class="row between" style="margin:18px 2px 8px;align-items:center"><div class="eyebrow" style="margin:0">${esc(g.name)}${items.length>1?` · ${items.length} quotes`:""}</div>${cand.length>1?`<button type="button" class="linkbtn" data-act="tradecmp" data-id="${esc(tKey(items[0]))}" style="padding:0;min-height:32px;font-size:.85rem">Compare</button>`:""}</div><ul style="padding:0;margin:0">${items.map(t=>card(t,low,multi)).join("")}</ul></div>`}).join("")}
   <p class="hint">Trades are paid separately and do not change the builder's contract.</p>`;
+}
+/* every quote on its own card, newest first: contractor quotes, the builder's quote and quote documents that are not on a card yet */
+function allQuotes(card){
+  const all=S.trades.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||"")||tOrder[a.status]-tOrder[b.status]);
+  const wait=t=>t.status==="received"||t.status==="asked";
+  const F=[["all","All",all.length],["wait","Waiting",all.filter(wait).length],["acc","Accepted",all.filter(t=>t.status==="accepted").length],["dec","Declined",all.filter(t=>t.status==="declined").length]];
+  const list=trF==="wait"?all.filter(wait):trF==="acc"?all.filter(t=>t.status==="accepted"):trF==="dec"?all.filter(t=>t.status==="declined"):all;
+  const ct=contractAmt(),docs=S.docs.filter(d=>d.type==="quote"&&docVisible(d)&&!S.trades.some(t=>t.doc===d.id)).sort((a,b)=>(b.date||"").localeCompare(a.date||""));
+  const showExtra=trF==="all";
+  return `<div class="chips scroll" role="group" aria-label="Show quotes" style="margin:0 0 12px">${F.map(([k,l,n])=>`<button type="button" class="chip" data-sub="trf:${k}" aria-pressed="${trF===k}">${l} · ${n}</button>`).join("")}</div>
+  ${list.length?`<ul style="padding:0;margin:0">${list.map(t=>card(t,0,false,true)).join("")}</ul>`:`<p class="muted" style="margin:6px 2px 12px">No quotes in this list.</p>`}
+  ${showExtra&&ct>0?`<div class="eyebrow" style="margin:18px 2px 8px">Builder's quote</div><div class="card trcard" tabindex="0" role="button" data-sub="mseg:build" style="margin:0 0 10px"><div class="row between" style="align-items:center;gap:8px"><div class="grow"><div class="lt">Main contract</div><div class="ls">Tap to open the builder's payments</div></div><div class="amt">${money0(ct)}</div></div></div>`:""}
+  ${showExtra&&docs.length?`<div class="eyebrow" style="margin:18px 2px 8px">Quote documents · not on a card yet</div><ul class="list">${docs.map(d=>`<li class="tap" tabindex="0" data-act="opendoc" data-id="${d.id}"><span class="row-ic">${ic("clip")}</span><div class="grow"><div class="lt">${esc(d.name||"Quote")}</div><div class="ls">${d.date?dshort(d.date):"No date"} · Tap to read it</div></div>${ic("chev","sm")}</li>`).join("")}</ul>`:""}`;
 }
 
 /* compare two contractor quotes side by side and show what is different */
