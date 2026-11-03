@@ -3561,6 +3561,32 @@ function tradeSheet(id){
     };
   });
 }
+/* send a quote to Finance: an update to the people with the Finance role, or a WhatsApp message */
+function quoteFinText(t){
+  const val=tVal(t),ex=tExtras(t),st=(t.stages||[]).slice().sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999")),doc=t.doc&&S.docs.some(d=>d.id===t.doc);
+  const L=[(S.settings.name||"Project")+": quote for Finance",t.trade+" · "+tName(t),"Status: "+tStatLabel(t.status),"Total "+money(val)+" (quote "+money(t.amount)+(ex?", extras "+money(ex):"")+")"];
+  if(t.date)L.push("Quote date: "+dshort(t.date));
+  if(st.length)L.push("Payments: "+st.map(x=>(x.label||"Payment")+" "+money(x.amount)+(x.paid?" (paid)":x.due?" due "+dshort(x.due):"")).join("; "));
+  else if(t.status==="accepted")L.push("No payments planned yet.");
+  if(doc)L.push("The quote document is in Documents.");
+  return L.join("\n");
+}
+function finSheet(id){
+  const t=S.trades.find(x=>x.id===id);if(!t)return;
+  const fin=sm.code?peopleList().filter(p=>p.active&&p.role==="finance"&&p.pid!==sm.pid):[],can=!!sm.code&&canSend()&&fin.length>0;
+  const who=!sm.code?"Join the team to send this in the app. You can still share it on WhatsApp.":!canSend()?"Your access is to receive updates. You can still share it on WhatsApp.":fin.length?"To: <b>"+fin.map(p=>esc(p.name)).join(", ")+"</b>":"Nobody has the Finance role yet. Set it under People and access, or share it on WhatsApp.";
+  sheet("Send to Finance",`<p class="muted" style="margin:6px 0 10px">${who}</p><label class="f" for="fm">Message</label><textarea id="fm" class="t grow-ta" rows="7" maxlength="600">${esc(quoteFinText(t))}</textarea><p class="hint">You can change the words before you send. It goes to Finance only.</p><div class="foot"><button type="button" class="btn primary block" id="fs" ${can?"":"disabled"}>${ic("cash")}Send to Finance</button><button type="button" class="btn block" id="fw" style="margin-top:8px">${ic("chat")}Share on WhatsApp</button></div>`,(sh,close)=>{
+    const ta=sh.querySelector("#fm");
+    sh.querySelector("#fs").onclick=()=>{
+      const tx=ta.value.trim();if(!tx){showErr(sh,ta,"Write a message first.");return}
+      const to=fin.map(p=>p.pid),m={id:uid(),from:sm.pid,t:Date.now(),to,text:tx,media:[]};
+      S.msgs.push(m);notifySend(to,"Quote for Finance: "+t.trade,tx.split("\n").slice(1,4).join(". ").slice(0,100),"inbox");
+      logAct("Sent the "+t.trade+" quote from "+tName(t)+" to Finance",1);save();close();render();
+      toast("Sent to "+fin.map(p=>p.name).join(", ")+".",()=>{const i=S.msgs.indexOf(m);if(i>=0)S.msgs.splice(i,1)});syncNow();
+    };
+    sh.querySelector("#fw").onclick=()=>{const tx=ta.value.trim();if(!tx){showErr(sh,ta,"Write a message first.");return}const one=fin.length===1?fin[0]:null;window.open(one&&one.phone?waUrl(one.phone,tx):"https://wa.me/?text="+encodeURIComponent(tx),"_blank")};
+  });
+}
 function tradeView(id){
   const t=S.trades.find(x=>x.id===id);if(!t)return;
   const ro=!canMoneyEdit(),val=tVal(t),paid=tPaid(t),left=val-paid,acc=t.status==="accepted";
@@ -3572,6 +3598,7 @@ function tradeView(id){
   <div class="row" style="gap:6px;margin:12px 0;align-items:stretch">${[["Quote",t.amount],["Extras",sum(vars,v=>+v.amount||0)],["Total",val]].map(([l,v],i)=>`<div class="card" style="flex:1;min-width:0;padding:10px 12px;margin:0${i===2?";border-color:var(--accent)":""}"><div class="muted small">${l}</div><div class="amt" style="font-size:1.02rem">${money0(v)}</div></div>`).join("")}</div>
   ${acc?`<div class="meter" style="margin:6px 0"><i style="width:${val?Math.min(100,paid/val*100):0}%"></i></div><p class="muted" style="margin:0 0 12px">${money(paid)} paid · ${money(left)} left</p>`:""}
   ${ro?"":`<label class="f">Status</label>${chipRow("st",TSTAT,t.status)}`}
+  <button type="button" class="btn block" id="sf" style="margin-top:10px">${ic("cash")}Send to Finance</button>
   ${warn}
   <div class="row between" style="margin:14px 0 6px"><h2 style="margin:0">Payments</h2>${ro?"":`<button type="button" class="btn small" id="ap">${ic("plus","sm")}Add</button>`}</div>
   ${stages.length?`<ul class="list">${stages.map(s=>`<li>${ro||!acc?`<span class="row-ic ${s.paid?"green":""}">${ic(s.paid?"check":"calendar")}</span>`:`<button type="button" class="st ${s.paid?"done":""}" data-sg="${s.id}" aria-label="${esc(s.label||"Payment")}: ${s.paid?"paid":"not paid"}. Tap to change.">${s.paid?ic("check"):ic("check")}</button>`}<div class="grow"><div class="lt ${s.paid?"dn":""}">${esc(s.label||"Payment")}</div><div class="ls">${s.paid?"Paid "+dshort(s.paidOn):s.due?`Due ${dshort(s.due)}`:"No due date"}</div></div><span class="amt">${money(s.amount)}</span>${ro?"":`<button type="button" class="btn small icon" data-se="${s.id}" aria-label="Edit payment">${ic("pencil")}</button>`}</li>`).join("")}</ul>`:`<p class="muted" style="margin:0 0 6px">${acc?"No payments planned yet. Add them one by one, or split the total in a few taps.":"Payments can be planned once the quote is accepted."}</p>`}
@@ -3587,6 +3614,7 @@ function tradeView(id){
     sh.querySelector("#ap")?.addEventListener("click",()=>{close();stageSheet(id)});
     sh.querySelector("#pl")?.addEventListener("click",()=>{close();planSheet(id)});
     sh.querySelector("#av")?.addEventListener("click",()=>{close();varSheet(id)});
+    sh.querySelector("#sf")?.addEventListener("click",()=>{close();finSheet(id)});
     sh.querySelector("#od")?.addEventListener("click",()=>{close();docView(t.doc)});
     sh.querySelector("#ed")?.addEventListener("click",()=>{close();tradeSheet(id)});
     sh.querySelector("#dx")?.addEventListener("click",()=>{close();delRecs(S.trades,x=>x.id===id,"Quote")});
