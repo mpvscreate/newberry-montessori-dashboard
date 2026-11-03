@@ -1238,6 +1238,7 @@ function actsSheet(){sheet("Activity",`<ul class="list">${actList(50).map(actRow
 /* ---------- site-day speed ---------- */
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
 function quickPhoto(ph,kind,gallery){
+  if(gallery===undefined){sheet("Add a photo",`<div class="photo-add" style="margin-top:8px"><button type="button" class="btn primary" id="qc">${ic("camera")}Take photo</button><button type="button" class="btn" id="qg">${ic("image")}Choose from gallery</button></div><p class="hint">You can pick several photos from the gallery at once.</p>`,(sh,close)=>{sh.querySelector("#qc").onclick=()=>{close();quickPhoto(ph,kind,false)};sh.querySelector("#qg").onclick=()=>{close();quickPhoto(ph,kind,true)}});return}
   const i=document.createElement("input");i.type="file";i.accept="image/*";i.multiple=true;if(!gallery)i.setAttribute("capture","environment");i.style.display="none";document.body.append(i);
   i.addEventListener("change",()=>{const f=[...i.files];i.remove();if(f.length)logSheet(null,kind||"update",ph,f)});
   i.addEventListener("cancel",()=>i.remove());i.click();
