@@ -447,7 +447,7 @@ body.previewing{padding-top:calc(48px + env(safe-area-inset-top,0px))}
 .bhero{padding:10px 14px 12px!important;border-radius:20px!important;margin-bottom:10px!important}
 .bhero .bh1{display:flex;align-items:center;gap:14px}.bhero .bh2{min-width:0;display:grid;gap:5px}.bhero .bh1>div:first-child{flex:none}
 .bhero .eyebrow{font-size:.64rem;letter-spacing:.08em}.bhero .big{font-size:2rem!important;margin-top:1px!important}.bhero .sub{font-size:.8rem!important;margin-top:0!important}
-.bhero .chip-d{padding:2px 8px;font-size:.7rem}.bhero .meter.hm{margin-top:8px!important;height:6px}.bhero .sub.fc{font-size:.74rem!important;margin-top:6px!important}
+.bhero .chip-d{padding:2px 8px;font-size:.7rem}.bhero .meter.hm{margin-top:8px!important;height:6px}.bhero .sub.fc{font-size:.74rem!important;margin-top:6px!important}.bhero .sub.fc.ch{font-size:.814rem!important;font-weight:700;margin-top:4px!important}
 .wxc{padding:8px 14px!important;gap:10px!important;margin:0 0 10px!important;border-radius:18px}.wxc .grow{min-width:0}.wxt{font-size:1.3rem!important}.wxl{font-size:.95rem}
 .wxc .rs{display:block;font-size:.76rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .attn{margin:0 0 10px!important;padding:8px 12px 8px!important;border-radius:18px}.attn h2{font-size:.82rem!important;letter-spacing:.04em}.attn .pill{font-size:.7rem;padding:1px 8px}
@@ -1179,10 +1179,13 @@ function forecast(){
   return{date:fin,late:Math.round((D(fin)-b)/864e5),perWeek:rate*7};
 }
 /* one warm line under the progress bar: this week's wins, or a milestone when the week was quiet */
+const CHEERS=["Great work, team!","Keep it up, you are building something special.","Brick by brick, it is coming together.","Well done, everyone. Proud of this team.","Look at that progress. Fantastic effort!","Every task brings the finish line closer.","You make it look easy. Thank you, team!","Strong week. Let us keep the momentum going.","One step at a time, and look how far you have come.","Brilliant teamwork on site.","Home is getting closer every day."];
+/* the phrase changes each Friday and stays the same until the next one, for everyone */
+const cheerPick=()=>{const d=new Date(today()+"T12:00"),fri=Math.floor((d-new Date("2024-01-05T12:00"))/864e5/7);return ((fri%CHEERS.length)+CHEERS.length)%CHEERS.length};
 function cheerLine(all,p){
   const wk=addDays(today(),-6),n=all.filter(t=>t.status==="done"&&t.doneOn&&t.doneOn>=wk).length;
-  const txt=p>=100?"The build is complete. Congratulations, team!":n>0?n+(n===1?" task":" tasks")+" finished in the last 7 days. Great work, team!":p>=90?"Nearly home. Look how far you have come.":p>=50?"Past halfway. The home is taking shape.":p>=25?"The foundations are in. Every task brings it closer.":"Every great home starts with the first steps.";
-  return `<div class="sub fc" style="margin-top:8px">${ic("trend","sm")} ${txt}</div>`;
+  const txt=p>=100?"The build is complete. Congratulations, team!":n>0?n+(n===1?" task":" tasks")+" finished in the last 7 days.":p>=90?"Nearly home. Look how far you have come.":p>=50?"Past halfway. The home is taking shape.":p>=25?"The foundations are in. Every task brings it closer.":"Every great home starts with the first steps.";
+  return `<div class="sub fc" style="margin-top:8px">${ic("trend","sm")} ${txt}</div><div class="sub fc ch">${CHEERS[p>=100?0:cheerPick()]}</div>`;
 }
 function fcLine(){
   const f=forecast();if(!f)return"";
