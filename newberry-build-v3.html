@@ -530,6 +530,7 @@ body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!importan
 .pu-t{position:relative;width:92px;height:92px;border-radius:12px;overflow:hidden}.pu-t img{width:100%;height:100%;object-fit:cover;display:block}.pu-x{position:absolute;top:3px;right:3px;width:28px;height:28px;border-radius:50%;border:0;background:rgba(0,0,0,.65);color:#fff;display:grid;place-items:center;padding:0}
 .mtile .pk-n{position:absolute;top:4px;right:4px;z-index:2;min-width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font:700 .75rem/22px var(--display);text-align:center;font-style:normal}.mtile .pk-n:empty{display:none}.mtile.pk.on{outline:3px solid var(--accent);outline-offset:-3px}
 .how{list-style:none;counter-reset:h;margin:8px 0 0;padding:0;display:grid;gap:14px}.how li{counter-increment:h;display:flex;gap:12px;align-items:flex-start;line-height:1.4}.how li:before{content:counter(h);flex:none;width:28px;height:28px;border-radius:50%;background:var(--accent);color:#fff;font:700 .85rem/28px var(--display);text-align:center}.how b{display:block}.how span{display:block;font-size:.92rem}
+.paidb{display:flex;gap:12px;align-items:center;border-radius:14px;padding:11px 14px;margin:0 0 12px}.paidb .i{width:24px;height:24px;flex:none}.paidb b{display:block;font-size:1rem}.paidb span{display:block;font-size:.88rem;opacity:.9}.paidb.full{background:var(--green-soft);color:var(--green)}.paidb.part{background:var(--amber-soft);color:var(--accent)}.paidb.none{background:var(--accent-soft);color:var(--muted)}
 .cmpt{width:100%;border-collapse:collapse;font-size:.88rem;table-layout:fixed}.cmpt th,.cmpt td{padding:8px 6px;border-top:1px solid var(--line);vertical-align:top;text-align:left;overflow-wrap:anywhere}.cmpt th{font-weight:500;color:var(--muted);width:27%}.cmpt thead th{border-top:0;color:var(--ink);font-weight:700;line-height:1.25}.cmpt td.win{color:var(--green);font-weight:700}.cmpt tr.tot th,.cmpt tr.tot td{font-weight:700;border-top:2px solid var(--line)}.cins{margin:14px 0 0;padding:0;list-style:none;display:grid;gap:10px}.cins li{display:flex;gap:10px;font-size:.9rem;line-height:1.35}.cins .i{flex:none;color:var(--accent);margin-top:1px}
 .wkday{font-size:.75rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);margin:14px 0 2px}.wkday:first-of-type{margin-top:0}.wkmore{margin-top:6px}.rhero .meter i{transition:width .4s}
 .qa.one{gap:8px;margin:2px 0 10px}.qa.one button{flex-direction:row;gap:7px;min-height:46px;padding:6px 8px;border-radius:15px;font-size:.92rem}.qa.one button .i{width:20px;height:20px;flex:none}
@@ -3089,6 +3090,7 @@ const tCommit=()=>sum(tLive(),tVal),tPaidAll=()=>sum(tLive(),tPaid);
 const tWait=()=>sum(S.trades.filter(t=>t.status==="received"),tVal);
 const tKey=t=>(t.trade||"Other").trim().toLowerCase();
 const tName=t=>supName(t.sup)||"Contractor not chosen";
+const tFull=t=>t.status==="accepted"&&tVal(t)>0&&tPaid(t)>=tVal(t)-.5,tLabel=t=>tFull(t)?"Paid in full":tStatLabel(t.status);
 const tPill=s=>({accepted:"",received:"sky",asked:"watch",declined:"gone"}[s]||"");
 const tStatLabel=s=>TSTAT.find(x=>x[0]===s)?.[1]||"";
 const tNext=t=>(t.stages||[]).filter(s=>!s.paid).sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999"))[0];
@@ -3473,7 +3475,7 @@ function tradesV(){
     const cheapest=multi&&t.status!=="declined"&&low>0&&val===low,diff=multi&&t.status!=="declined"&&low>0&&val>low?`+${money0(val-low)} more than the lowest`:"";
     const who=supName(t.sup),meta=[flat?(t.trade||"Other"):"",who?"":"No contractor chosen yet",roomName(t.room),t.phase&&PSHORT[t.phase]?PSHORT[t.phase]:"",t.date?"Quote of "+dshort(t.date):""].filter(Boolean).join(" · ");
     return `<li class="card trcard ${t.status==="declined"?"dim":""}" tabindex="0" data-act="opentrade" data-id="${t.id}" style="list-style:none;margin:0 0 10px">
-     <div class="row between" style="align-items:flex-start;gap:8px"><div class="grow"><div class="lt ${who?"":"muted"}">${esc(who||"Quote")}</div><div class="ls">${esc(meta)}</div></div><div style="text-align:right"><div class="amt">${money0(val)}</div><span class="pill ${tPill(t.status)}">${tStatLabel(t.status)}</span></div></div>
+     <div class="row between" style="align-items:flex-start;gap:8px"><div class="grow"><div class="lt ${who?"":"muted"}">${esc(who||"Quote")}</div><div class="ls">${esc(meta)}</div></div><div style="text-align:right"><div class="amt">${money0(val)}</div><span class="pill ${tPill(t.status)}">${tLabel(t)}</span></div></div>
      ${cheapest?`<div style="margin-top:8px"><span class="pill">${ic("check","sm")}Lowest quote</span></div>`:diff?`<div class="ls" style="margin-top:6px">${diff}</div>`:""}
      ${acc?`<div class="meter" style="margin:10px 0 6px"><i style="width:${val?Math.min(100,paid/val*100):0}%"></i></div><div class="ls">${money0(paid)} paid · ${money0(left)} left</div>
        ${nx?`<div class="row between" style="margin-top:8px;gap:8px"><div class="ls grow ${nx.due&&nx.due<today()?"bad":""}">Next: ${esc(nx.label||"Payment")} ${money0(nx.amount)}${nx.due?` · ${nx.due<today()?"overdue":"due"} ${dshort(nx.due)}`:""}</div><button type="button" class="btn small good" data-act="paystage" data-id="${t.id}|${nx.id}">${ic("check","sm")}Mark paid</button></div>`:(t.stages||[]).length?"":`<div class="ls" style="margin-top:6px">No payments planned yet. Tap to plan them.</div>`}`
@@ -3652,10 +3654,13 @@ function tradeView(id){
   const stages=(t.stages||[]).slice().sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999")),planned=sum(stages,s=>+s.amount||0);
   const vars=t.vars||[],doc=t.doc&&S.docs.find(d=>d.id===t.doc&&docVisible(d));
   const warn=acc&&planned>val+.5?`<p class="warn">${ic("alert")}<span>The payments planned (${money(planned)}) are more than the quote total (${money(val)}).</span></p>`:acc&&val>planned+.5&&stages.length?`<p class="hint">${money(val-planned)} of this quote is not planned for payment yet.</p>`:"";
-  sheet(t.trade,`<div class="row wr" style="gap:8px;margin:8px 0 12px"><span class="pill ${tPill(t.status)}">${tStatLabel(t.status)}</span><span class="pill sky">${esc(roomName(t.room))}</span>${t.phase&&PSHORT[t.phase]?`<span class="pill type">${esc(PSHORT[t.phase])}</span>`:""}</div>
+  const lastPaid=stages.filter(x=>x.paid&&x.paidOn).map(x=>x.paidOn).sort().pop();
+  const pb=!acc||val<=0?"":paid>=val-.5?`<div class="paidb full">${ic("check")}<div><b>Paid in full</b><span>${money(paid)} paid${lastPaid?" · last payment "+dshort(lastPaid):""}</span></div></div>`:paid>0?`<div class="paidb part">${ic("clock")}<div><b>Part paid · ${Math.round(paid/val*100)}%</b><span>${money(paid)} of ${money(val)} paid · ${money(left)} left</span></div></div>`:`<div class="paidb none">${ic("cash")}<div><b>Nothing paid yet</b><span>${money(val)} to pay</span></div></div>`;
+  sheet(t.trade,`<div class="row wr" style="gap:8px;margin:8px 0 12px"><span class="pill ${tPill(t.status)}">${tLabel(t)}</span><span class="pill sky">${esc(roomName(t.room))}</span>${t.phase&&PSHORT[t.phase]?`<span class="pill type">${esc(PSHORT[t.phase])}</span>`:""}</div>
+  ${pb}
   <p style="margin:0 0 4px"><b>${esc(tName(t))}</b></p>${t.note?`<p class="muted" style="margin:0 0 8px">${esc(t.note)}</p>`:""}
   <div class="row" style="gap:6px;margin:12px 0;align-items:stretch">${[["Quote",t.amount],["Extras",sum(vars,v=>+v.amount||0)],["Total",val]].map(([l,v],i)=>`<div class="card" style="flex:1;min-width:0;padding:10px 12px;margin:0${i===2?";border-color:var(--accent)":""}"><div class="muted small">${l}</div><div class="amt" style="font-size:1.02rem">${money0(v)}</div></div>`).join("")}</div>
-  ${acc?`<div class="meter" style="margin:6px 0"><i style="width:${val?Math.min(100,paid/val*100):0}%"></i></div><p class="muted" style="margin:0 0 12px">${money(paid)} paid · ${money(left)} left</p>`:""}
+  ${acc?`<div class="meter" style="margin:6px 0 14px"><i style="width:${val?Math.min(100,paid/val*100):0}%"></i></div>`:""}
   ${ro?"":`<label class="f">Status</label>${chipRow("st",TSTAT,t.status)}`}
   <button type="button" class="btn block" id="sf" style="margin-top:10px">${ic("cash")}Send to Finance</button>
   ${warn}
