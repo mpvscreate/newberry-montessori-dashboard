@@ -266,7 +266,7 @@ html{overscroll-behavior-y:contain}
 .eadd{aspect-ratio:1;border:2px dashed var(--field);border-radius:14px;background:var(--paper);color:var(--accent);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;font:600 .8rem var(--body);cursor:pointer;padding:6px;text-align:center}
 .egrid.empty .eadd{aspect-ratio:auto;padding:26px 14px;font-size:1.05rem}
 #lbx{position:fixed;inset:0;z-index:95;background:rgba(8,6,3,.96);display:grid;place-items:center}
-#lbx .lb-body{display:grid;place-items:center;width:100%;max-height:78vh}#lbx img,#lbx video{max-width:100vw;max-height:78vh;object-fit:contain;display:block}
+#lbx .lb-body{display:grid;place-items:center;width:100%;max-height:78vh}#lbx img,#lbx video{max-width:100vw;max-height:78vh;object-fit:contain;display:block}#lbx img{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none}
 #lbx .lb-b{position:absolute;width:48px;height:48px;border-radius:50%;border:2px solid rgba(255,255,255,.9);background:rgba(0,0,0,.62);color:#fff;display:grid;place-items:center;cursor:pointer;box-shadow:0 2px 10px rgba(0,0,0,.5)}#lbx .lb-n{width:54px;height:54px}#lbx .lb-n svg{width:28px;height:28px}
 #lbx .lb-x{top:calc(env(safe-area-inset-top,0px) + 12px);right:12px}#lbx .lb-g{top:calc(env(safe-area-inset-top,0px) + 12px);right:72px}#lbx .lb-n{top:50%;margin-top:-24px}#lbx .prev{left:8px}#lbx .next{right:8px}
 #lbx .lb-cap{position:absolute;left:16px;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 16px);color:#fff;text-align:center;font-size:.95rem}
@@ -2134,7 +2134,33 @@ function backupSheet(){
 function lightbox(ids,start){
   let i=start;const el=document.createElement("div");el.id="lbx";el.setAttribute("role","dialog");el.setAttribute("aria-modal","true");el.setAttribute("aria-label","Photo viewer");
   const draw=async()=>{const u=await mUrl(ids[i]);el.innerHTML=`<div class="lb-body">${u?(isVid(ids[i])?`<video src="${u}" controls playsinline autoplay></video>`:`<img src="${u}" alt="Site photo ${i+1} of ${ids.length}">`):`<div class="mmiss" style="color:#fff">${ic("cloud","xl")}<span>Photo is still loading</span></div>`}</div><button class="lb-b lb-x" aria-label="Close photo">${ic("x")}</button><button class="lb-b lb-g" aria-label="Save this photo to Google Drive">${ic("cloud")}</button>${ids.length>1?`<button class="lb-b lb-n prev" aria-label="Previous photo">${ic("left")}</button><button class="lb-b lb-n next" aria-label="Next photo">${ic("chev")}</button><div class="lb-cap">${i+1} of ${ids.length}</div>`:""}`;
-    el.querySelector(".lb-x").onclick=close;el.querySelector(".lb-g").onclick=()=>driveSave([{media:ids[i],name:"Site photo "+ids[i].slice(-6)+(isVid(ids[i])?(mtype.get(ids[i])==="video/quicktime"?".mov":".mp4"):".jpg")}]);el.querySelector(".prev")?.addEventListener("click",()=>{i=(i-1+ids.length)%ids.length;draw()});el.querySelector(".next")?.addEventListener("click",()=>{i=(i+1)%ids.length;draw()});el.querySelector(".lb-x").focus()};
+    el.querySelector(".lb-x").onclick=close;el.querySelector(".lb-g").onclick=()=>driveSave([{media:ids[i],name:"Site photo "+ids[i].slice(-6)+(isVid(ids[i])?(mtype.get(ids[i])==="video/quicktime"?".mov":".mp4"):".jpg")}]);el.querySelector(".prev")?.addEventListener("click",()=>{i=(i-1+ids.length)%ids.length;draw()});el.querySelector(".next")?.addEventListener("click",()=>{i=(i+1)%ids.length;draw()});const im=el.querySelector("img");if(im)gest(im);el.querySelector(".lb-x").focus()};
+  /* pinch or double-tap to zoom, drag when zoomed, swipe sideways for the next photo, swipe down to close */
+  function gest(img){
+    let sc=1,tx=0,ty=0,d0=0,sc0=1,sx=0,sy=0,lx=0,ly=0,t0=0,moved=0,multi=false,lastTap=0;const Pm=new Map();
+    const lim=()=>{const mx=(sc-1)*img.clientWidth/2,my=(sc-1)*img.clientHeight/2;tx=Math.max(-mx,Math.min(mx,tx));ty=Math.max(-my,Math.min(my,ty))};
+    const ap=()=>{lim();img.style.transform=sc===1&&!tx&&!ty?"":"translate("+tx+"px,"+ty+"px) scale("+sc+")"};
+    const anim=()=>{img.style.transition="transform .2s";setTimeout(()=>img.style.transition="",230)};
+    const rst=()=>{sc=1;tx=ty=0;anim();ap()};
+    img.addEventListener("pointerdown",e=>{try{img.setPointerCapture(e.pointerId)}catch{}Pm.set(e.pointerId,{x:e.clientX,y:e.clientY});if(Pm.size===2){multi=true;const[a,b]=[...Pm.values()];d0=Math.hypot(a.x-b.x,a.y-b.y)||1;sc0=sc}else{sx=lx=e.clientX;sy=ly=e.clientY;moved=0;t0=Date.now()}});
+    img.addEventListener("pointermove",e=>{
+      if(!Pm.has(e.pointerId))return;Pm.set(e.pointerId,{x:e.clientX,y:e.clientY});
+      if(Pm.size>=2){const[a,b]=[...Pm.values()];sc=Math.max(1,Math.min(5,sc0*Math.hypot(a.x-b.x,a.y-b.y)/d0));ap();return}
+      const dx=e.clientX-lx,dy=e.clientY-ly;lx=e.clientX;ly=e.clientY;moved+=Math.abs(dx)+Math.abs(dy);
+      if(sc>1){tx+=dx;ty+=dy;ap()}
+    });
+    const end=e=>{
+      if(!Pm.has(e.pointerId))return;Pm.delete(e.pointerId);
+      if(Pm.size>0)return;
+      if(multi){multi=false;if(sc<1.05)rst();return}
+      const dx=e.clientX-sx,dy=e.clientY-sy,now=Date.now();
+      if(sc>1.02){if(moved<10&&now-t0<300){if(now-lastTap<300){rst();lastTap=0}else lastTap=now}return}
+      if(Math.abs(dx)>60&&Math.abs(dx)>Math.abs(dy)*1.5){el.querySelector(dx<0?".next":".prev")?.click();return}
+      if(dy>90&&dy>Math.abs(dx)*1.5){close();return}
+      if(moved<10&&now-t0<300){if(now-lastTap<300){const r=img.getBoundingClientRect(),px=e.clientX-(r.left+r.width/2),py=e.clientY-(r.top+r.height/2);sc=2.5;tx=px*(1-sc);ty=py*(1-sc);anim();ap();lastTap=0}else lastTap=now}
+    };
+    img.addEventListener("pointerup",end);img.addEventListener("pointercancel",e=>{Pm.delete(e.pointerId);if(!Pm.size){multi=false}});
+  }
   const key=e=>{if(e.key==="Escape"){e.stopPropagation();close()}else if(e.key==="ArrowLeft")el.querySelector(".prev")?.click();else if(e.key==="ArrowRight")el.querySelector(".next")?.click()};
   function close(){document.removeEventListener("keydown",key,true);el.remove();if(!closeSheet){document.body.classList.remove("lock");[$("#app"),$("nav.tabs")].forEach(x=>x.inert=false)}}
   document.addEventListener("keydown",key,true);document.body.append(el);document.body.classList.add("lock");[$("#app"),$("nav.tabs")].forEach(x=>x.inert=true);draw();
