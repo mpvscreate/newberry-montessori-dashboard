@@ -355,7 +355,7 @@ nav.tabs .dot{position:absolute;top:6px;left:50%;margin-left:8px;width:9px;heigh
 .rpx{font-size:.95rem;font-weight:600;line-height:1.25;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}.rp.nt .rpx{-webkit-line-clamp:5;font-weight:500}
 .rpt small{color:rgba(255,255,255,.85);font-size:.78rem}
 .rpn{position:absolute;top:10px;right:10px;z-index:1;display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:999px;background:rgba(0,0,0,.55);color:#fff;font:700 .78rem var(--body)}
-.ctr .ctel{display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:5px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:.95rem;text-decoration:none;white-space:nowrap}.ctr .btn.small{flex:none}
+.ctr .ctel{display:inline-flex;align-items:center;gap:6px;margin-top:4px;padding:5px 10px;border-radius:999px;background:var(--accent-soft);color:var(--accent);font-weight:700;font-size:.95rem;text-decoration:none;white-space:nowrap}.ctr .btn.small{flex:none}.ctr .cph{display:flex;align-items:center;gap:8px;margin-top:4px}.ctr .cph .ctel{margin-top:0}.ctr .cph .btn.small{min-width:0;padding:5px 9px}
 .rph{display:flex;align-items:center;justify-content:space-between;margin:20px 2px 10px}.rph .eyebrow{margin:0}
 .scs{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:6px}
 .sc{display:flex;align-items:center;gap:10px;min-height:56px;padding:0 14px;border:1px solid var(--line);border-radius:18px;background:var(--sheet);box-shadow:var(--shadow);color:var(--ink);font:700 .9rem var(--body);cursor:pointer;text-align:left}.sc .i{color:var(--accent)}.sc span{flex:1;min-width:0}
@@ -1580,7 +1580,7 @@ function buildMain(){
 function contractorsSheet(){
   const L=S.sups.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")),can=!!perm.manage;
   const row=c=>{const tr=c.trade&&c.trade.trim().toLowerCase()!==(c.name||"").trim().toLowerCase()?c.trade:"";
-    return `<li class="ctr"><span class="avatar">${esc((c.name||"?")[0].toUpperCase())}</span><div class="grow"><div class="lt">${esc(c.name)}</div>${tr?`<div class="ls">${esc(tr)}</div>`:""}${c.phone?`<a class="ctel" href="tel:${esc(c.phone.replace(/[^\d+]/g,""))}" aria-label="Call ${esc(c.name)}">${ic("phone","sm")}${esc(c.phone)}</a>`:`<div class="ls">No number saved</div>`}</div>${c.phone?`<a class="btn small icon" href="https://wa.me/${waNum(c.phone)}" target="_blank" rel="noopener" aria-label="WhatsApp ${esc(c.name)}">${ic("chat")}</a>`:""}${can?`<button type="button" class="btn small" data-e="${c.id}" aria-label="Edit ${esc(c.name)}">Edit</button>`:""}</li>`};
+    return `<li class="ctr"><span class="avatar">${esc((c.name||"?")[0].toUpperCase())}</span><div class="grow"><div class="lt">${esc(c.name)}</div>${tr?`<div class="ls">${esc(tr)}</div>`:""}${(c.phone||c.phone2)?[c.phone,c.phone2].filter(Boolean).map(n=>`<div class="cph"><a class="ctel" href="tel:${esc(n.replace(/[^\d+]/g,""))}" aria-label="Call ${esc(c.name)} on ${esc(n)}">${ic("phone","sm")}${esc(n)}</a><a class="btn small icon" href="https://wa.me/${waNum(n)}" target="_blank" rel="noopener" aria-label="WhatsApp ${esc(n)}">${ic("chat")}</a></div>`).join(""):`<div class="ls">No number saved</div>`}</div>${can?`<button type="button" class="btn small" data-e="${c.id}" aria-label="Edit ${esc(c.name)}">Edit</button>`:""}</li>`};
   sheet("Contractors",`<p class="muted" style="margin:6px 0 10px">${L.length?L.length+(L.length===1?" contact":" contacts")+". Tap a number to call.":"No contractors yet."}</p>
   ${L.length?`<ul class="list" style="margin:0">${L.map(row).join("")}</ul>`:""}
   ${can?`<div class="foot"><button type="button" class="btn primary block" id="ca">${ic("plus")}Add a contractor or supplier</button></div>`:""}`,(sh,close)=>{
@@ -1668,7 +1668,7 @@ function matsV(){
   :inSec.length?`<div class="empty">${ic("check","xl")}<h3>Nothing here</h3><p>No items in this list.</p></div>`:`<div class="empty">${ic(SECS.find(x=>x[0]===sec)[2],"xl")}<h3>No items yet</h3><p>Add what you need and keep track of it.</p><button class="btn primary" data-act="addmat">${ic("plus")}Add item</button></div>`}
   ${S.mats.some(needsOrder)?`<button class="btn block" data-act="shareorder" data-id="${matPh==="none"?"all":matPh}" style="margin-top:12px">${ic("chat")}Send order list on WhatsApp</button>`:""}</div>
   <div class="card"><div class="row between"><h2 style="margin:0">Suppliers and contractors</h2><button class="btn small" data-act="addsup">${ic("plus")}Add</button></div>
-  ${S.sups.length?`<ul class="list">${S.sups.map(s=>`<li><span class="avatar">${esc((s.name||"?")[0].toUpperCase())}</span><div class="grow"><div class="lt">${esc(s.name)}</div><div class="ls">${esc([s.trade,s.phone].filter(Boolean).join(" · "))}</div></div>${s.phone?`<a class="btn small icon" href="tel:${esc(s.phone.replace(/[^\d+]/g,""))}" aria-label="Call ${esc(s.name)}">${ic("phone")}</a>`:""}${rowBtns("sup",s.name,s.id)}</li>`).join("")}</ul>`:`<p class="muted" style="margin:10px 0 0">Add your brick yard, hardware shop and builders so their numbers are one tap away.</p>`}</div>`;
+  ${S.sups.length?`<ul class="list">${S.sups.map(s=>`<li><span class="avatar">${esc((s.name||"?")[0].toUpperCase())}</span><div class="grow"><div class="lt">${esc(s.name)}</div><div class="ls">${esc([s.trade,s.phone,s.phone2].filter(Boolean).join(" · "))}</div></div>${s.phone?`<a class="btn small icon" href="tel:${esc(s.phone.replace(/[^\d+]/g,""))}" aria-label="Call ${esc(s.name)}">${ic("phone")}</a>`:""}${rowBtns("sup",s.name,s.id)}</li>`).join("")}</ul>`:`<p class="muted" style="margin:10px 0 0">Add your brick yard, hardware shop and builders so their numbers are one tap away.</p>`}</div>`;
 }
 function siteV(){
   const logs=S.logs.filter(l=>l.kind!=="issue").sort((a,b)=>(b.date||"").localeCompare(a.date||"")||b.id.localeCompare(a.id));
@@ -2004,10 +2004,11 @@ function supSheet(id){
   sheet(s?"Edit contact":"Add supplier or contractor",`<form id="f" novalidate><label class="f" for="nm">Name</label><input id="nm" data-autofocus class="t" maxlength="80" value="${esc(s?.name||"")}" placeholder="For example: Boksburg Brick Yard">
   <label class="f" for="tr">What do they do?</label><input id="tr" class="t" maxlength="60" value="${esc(s?.trade||"")}" placeholder="Bricks, builder, electrician">
   <label class="f" for="ph">Phone number</label><input id="ph" class="t" type="tel" inputmode="tel" value="${esc(s?.phone||"")}" placeholder="082 123 4567">
-  ${s?.phone?`<a class="btn block" style="margin-top:12px" href="https://wa.me/${waNum(s.phone)}" target="_blank" rel="noopener">${ic("chat")}Open WhatsApp chat</a>`:""}
+  <label class="f" for="p2">Second number (optional)</label><input id="p2" class="t" type="tel" inputmode="tel" value="${esc(s?.phone2||"")}" placeholder="083 987 6543">
+  ${s?.phone?`<a class="btn block" style="margin-top:12px" href="https://wa.me/${waNum(s.phone)}" target="_blank" rel="noopener">${ic("chat")}WhatsApp ${esc(s.phone)}</a>`:""}${s?.phone2?`<a class="btn block" style="margin-top:8px" href="https://wa.me/${waNum(s.phone2)}" target="_blank" rel="noopener">${ic("chat")}WhatsApp ${esc(s.phone2)}</a>`:""}
   <div class="foot"><button class="btn primary block">${s?"Save changes":"Add contact"}</button></div></form>`,(sh,close)=>{
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const nm=sh.querySelector("#nm");if(!nm.value.trim())return showErr(sh,nm,"Write a name.");
-      const vals={name:nm.value.trim(),trade:sh.querySelector("#tr").value.trim(),phone:sh.querySelector("#ph").value.trim()};
+      const vals={name:nm.value.trim(),trade:sh.querySelector("#tr").value.trim(),phone:sh.querySelector("#ph").value.trim(),phone2:sh.querySelector("#p2").value.trim()};
       if(s){const u=undoEdit(s,vals);save();close();render();toast("Contact saved.",u)}else{const n={id:uid(),...vals};S.sups.push(n);save();close();render();toast("Contact added.",()=>S.sups.splice(S.sups.indexOf(n),1))}};
   });
 }
