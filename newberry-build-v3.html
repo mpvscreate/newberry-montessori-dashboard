@@ -747,6 +747,12 @@ header.top .sync,.sync{font-size:.8rem!important}
 .ls,.list li .ls,.card.today .list li .ls{font-size:.8rem}
 @media (max-width:400px){.sc{padding:0 10px;gap:8px}.sc .scl>span{font-size:.84rem}}
 .attline .grow{display:grid;gap:2px;white-space:normal;overflow:visible}.attline .attl{font-size:.82rem;line-height:1.3;overflow-wrap:anywhere}
+.list li.mrow{align-items:flex-start}.mtks{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:4px}
+.mtk{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 4px 0 0;border:0;background:none;color:var(--ink);font:600 .92rem var(--body);cursor:pointer}
+.mtc{width:28px;height:28px;border-radius:50%;border:2px solid var(--field);display:grid;place-items:center;flex:none;color:#fff}
+.mtk[aria-pressed=true] .mtc{background:var(--green);border-color:var(--green)}
+.ro .mtk,.ro-mats .mtk{pointer-events:none}
+.segc{gap:2px}@media (max-width:430px){.segc button{font-size:.84rem;padding:6px 2px}}
 </style>
 </head>
 <body>
@@ -891,7 +897,7 @@ const mst=m=>secOf(m)==="fit"||secOf(m)==="elec"?MSTAT4:MSTAT;
 const mIn=m=>sum((m.moves||[]).filter(x=>x.t==="in"),x=>+x.qty||0);
 const mOut=m=>sum((m.moves||[]).filter(x=>x.t==="out"),x=>+x.qty||0);
 const mLeft=m=>mIn(m)-mOut(m);
-const mEff=m=>{if(secOf(m)==="stock"&&(m.moves||[]).length){if(+m.min>0&&mLeft(m)<=+m.min)return"low";if(m.qty>0&&mIn(m)>=m.qty)return"got";return"part"}return m.status};
+const mEff=m=>{if(secOf(m)==="stock"&&(m.moves||[]).length){if(+m.min>0&&mLeft(m)<=+m.min)return"low";if(m.rcv===true)return"got";if(m.rcv===false)return m.status==="need"?"need":"ordered";if(m.qty>0&&mIn(m)>=m.qty)return"got";return"part"}return m.status};
 const needsOrder=m=>["need","low"].includes(mEff(m));
 const MATPH={s_fill:"found",s_stone:"found",s_steel:"found",s_mesh:"found",s_cement:"found",s_sand:"found",s_dpc:"found",s_brick:"walls",s_bforce:"walls",s_ties:"walls",f_w2:"walls",f_w3:"walls",f_w5:"walls",f_w6:"walls",f_d1:"walls",f_d2:"walls",f_d3:"walls",f_d5:"walls",f_truss:"roof",f_sheet:"roof",f_wcb:"svc",f_wcg:"svc",f_wcd:"svc",f_geyser:"svc",f_fan:"svc",e_cond:"svc",e_cab25:"svc",e_cab15:"svc",e_db:"svc",e_brk:"svc",e_led:"svc",e_plug:"svc",e_sw:"svc",e_cat6:"svc",e_netpt:"svc",e_ap:"svc",e_patch:"svc",s_plsand:"fin",f_tiles:"fin",f_iso:"fin",f_gyp:"fin",f_board:"fin",u_pin:"fin",u_pout:"fin",u_primer:"fin",u_screw:"fin",u_nail:"fin",u_sil:"fin",u_adh:"fin",u_grout:"fin",u_sand:"fin",u_tape:"fin"};
 const seedMats=()=>{
@@ -1693,19 +1699,18 @@ function moneyBuild(){
    ${list.length?`<ul class="list">${list.map(c=>{const ct=cat(c.cat);return `<li><span class="row-ic ${c.paid?"green":""}">${ic(ct[2])}</span><div class="grow"><div class="lt">${esc(c.title||ct[1])}</div><div class="ls">${dshort(c.date)} · ${esc(roomName(c.room))}${c.sup?" · "+esc(supName(c.sup)):""}${c.pay?" · from Builder payments":""}${c.extra?" · Extra labour"+(c.phase?", "+esc(PSHORT[c.phase]||""):"")+(c.appr?", approved by "+esc(c.appr):""):""}</div><div style="margin-top:4px"><span class="pill ${c.paid?"":"watch"}">${c.paid?"Paid":"Not paid"}</span>${c.paid?"":` <button class="btn small good" data-act="paycost" data-id="${c.id}" style="margin-left:6px">${ic("check","sm")}Mark paid</button>`}</div></div><span class="amt">${rand(c.amount)}</span>${c.pay?"":rowBtns("cost",c.title||ct[1],c.id)}</li>`}).join("")}</ul>`:`<div class="empty">${ic("cash","xl")}<h3>No expenses yet</h3><p>Add what you buy or pay for, and the totals fill in here.</p><button class="btn primary" data-act="addcost">${ic("plus")}Add expense</button></div>`}
   </div>${sharedSp&&S.costs.some(c=>c.room!=="both")?`<p class="hint">Costs for both classrooms (${money0(sharedSp)}) are split equally between them.</p>`:""}`;
 }
-function stockRow(m){
-  const inn=mIn(m),out=mOut(m),left=mLeft(m),e=mEff(m),pc=m.qty>0?Math.min(100,inn/m.qty*100):0;
-  const pill=e==="low"?`<span class="pill unwell">${ic("alert","sm")}${left<=0?"Out of stock":"Running low"}</span>`:e==="got"?`<span class="pill">${ic("check","sm")}All delivered</span>`:e==="part"?`<span class="pill sky">Part delivered</span>`:e==="ordered"?`<span class="pill sky">Ordered</span>`:`<span class="pill watch">To order</span>`;
-  return `<li style="align-items:flex-start"><span class="row-ic ${e==="low"?"red":e==="got"?"green":""}">${ic("layers")}</span><div class="grow"><div class="lt">${esc(m.name)}</div>
-   <div class="ls ${e==="low"?"bad":""}">${m.qty>0?`Needed ${num(m.qty,2)}`:"Set how much you need"} ${esc(m.unit)}${m.sup?" · "+esc(supName(m.sup)):""}${mphTag(m)}</div>
-   ${inn||out?`<div class="row" style="gap:14px;margin:6px 0 2px;flex-wrap:wrap"><span><b class="amt">${num(left,2)}</b> <span class="small muted">${esc(m.unit)} left</span></span><span class="small muted">in ${num(inn,2)} · used ${num(out,2)}</span></div>`:""}
-   ${m.qty>0&&inn?`<div class="meter ${e==="low"?"low":""}" style="margin:4px 0 6px"><i style="width:${pc}%"></i></div>`:""}
-   <div style="margin-top:6px">${pill}</div><div class="row" style="gap:8px;margin-top:8px"><button class="btn small grow" data-act="movein" data-id="${m.id}">${ic("truck","sm")}Delivery</button><button class="btn small grow" data-act="moveout" data-id="${m.id}">${ic("minus","sm")}Used</button></div></div>${rowBtns("mat",m.name,m.id)}</li>`;
-}
-function itemRow(m){
-  const L=mst(m),i=Math.max(0,L.findIndex(x=>x[0]===m.status)),done=m.status==="inst"||(L.length===3&&m.status==="got");
-  const cls=done?"done":m.status==="got"||m.status==="ordered"?"doing":"";
-  return `<li><button class="st ${cls}" data-act="cycmat" data-id="${m.id}" aria-label="${esc(m.name)}: ${L[i][1]}. Tap to change.">${m.status==="inst"||done?ic("check"):m.status==="got"?ic("check"):m.status==="ordered"?ic("truck"):""}</button><div class="grow"><div class="lt ${done?"dn":""}">${esc(m.name)}</div><div class="ls ${m.due&&m.due<today()&&!done&&m.status!=="got"?"bad":""}">${m.qty>0?num(m.qty,2)+" "+esc(m.unit):"Set how many"} · ${L[i][1]}${m.room!=="both"?" · "+esc(roomName(m.room)):""}${m.sup?" · "+esc(supName(m.sup)):""}${mphTag(m)}${m.due?" · need by "+dshort(m.due):""}</div></div>${rowBtns("mat",m.name,m.id)}</li>`;
+/* a material is two ticks: ordered and received. Stock with recorded deliveries works it out from them until someone ticks by hand (m.rcv) */
+const hasMoves=m=>secOf(m)==="stock"&&(m.moves||[]).length>0;
+const matTicks=m=>{
+  if(!hasMoves(m)){const rec=m.status==="got"||m.status==="inst";return{rec,ord:rec||m.status==="ordered"}}
+  const rec=m.rcv===true||(m.rcv!==false&&m.qty>0&&mIn(m)>=m.qty);
+  return{rec,ord:rec||(m.rcv===false?m.status!=="need":true)};
+};
+function matRow(m){
+  const{ord,rec}=matTicks(m),low=mEff(m)==="low",left=mLeft(m);
+  const meta=[m.qty>0?num(m.qty,2)+" "+esc(m.unit):secOf(m)==="stock"?"Set how much you need":"Set how many",m.room&&m.room!=="both"?esc(roomName(m.room)):"",m.sup?esc(supName(m.sup)):"",m.due&&!rec?"need by "+dshort(m.due):"",hasMoves(m)?num(left,2)+" left":""].filter(Boolean).join(" · ")+mphTag(m);
+  const tk=(k,on,l)=>`<button type="button" class="mtk" data-act="mattick" data-id="${m.id}|${k}" aria-pressed="${on}" aria-label="${esc(m.name)}: ${l}${on?", ticked":", not ticked"}"><span class="mtc">${on?ic("check","sm"):""}</span>${l}</button>`;
+  return `<li class="mrow"><div class="grow"><div class="lt">${esc(m.name)}</div><div class="ls ${low?"bad":""}">${low?(left<=0?"Out of stock · ":"Running low · "):""}${meta}</div><div class="mtks">${tk("o",ord,"Ordered")}${tk("r",rec,"Received")}</div></div>${rowBtns("mat",m.name,m.id)}</li>`;
 }
 function elecCard(){
   const e=S.settings.elec||{},c=e.coc||"todo",sp=S.sups.find(x=>x.id===e.sup),lab={todo:["Certificate not booked","watch"],booked:["Certificate booked","sky"],issued:["Certificate issued",""]}[c];
@@ -1723,7 +1728,7 @@ function matsV(){
   ${sec==="elec"?elecCard():""}
   ${sec==="stock"?(lowN?`<div class="warn">${ic("alert")}<span>${lowN} item${lowN===1?" is":"s are"} running low or out of stock.</span></div>`:""):`<div class="chips scroll" role="group" aria-label="Filter">${[...L.map(([k,l])=>[k,`${l} · ${cnt(k)}`]),["all","All"]].map(([k,l])=>`<button type="button" class="chip" data-sub="mat:${k}" aria-pressed="${matF===k}">${esc(l)}</button>`).join("")}</div>`}
   <div class="card" style="margin-top:12px">
-  ${list.length?`<ul class="list">${list.map(m=>sec==="stock"?stockRow(m):itemRow(m)).join("")}</ul>`
+  ${list.length?`<ul class="list">${list.map(matRow).join("")}</ul>`
   :inSec.length?`<div class="empty">${ic("check","xl")}<h3>Nothing here</h3><p>No items in this list.</p></div>`:`<div class="empty">${ic(SECS.find(x=>x[0]===sec)[2],"xl")}<h3>No items yet</h3><p>Add what you need and keep track of it.</p><button class="btn primary" data-act="addmat">${ic("plus")}Add item</button></div>`}
   ${S.mats.some(needsOrder)?`<button class="btn block" data-act="shareorder" data-id="${matPh==="none"?"all":matPh}" style="margin-top:12px">${ic("chat")}Send order list on WhatsApp</button>`:""}</div>
   <div class="card"><div class="row between"><h2 style="margin:0">Suppliers and contractors</h2><button class="btn small" data-act="addsup">${ic("plus")}Add</button></div>
@@ -1785,7 +1790,7 @@ function act(a,id,el){
    paypay:()=>{const x=S.pays.find(q=>q.id===id);if(!x)return;confirmSheet("Record this payment?",`${money(x.amount)} paid to the builder today.`,"Yes, record payment",()=>{const u=undoEdit(x,{paid:true,paidOn:today()});payCost(x);logAct(`Builder payment of ${money(x.amount)} recorded`,1);save();render();toast(`${rand(x.amount)} paid to the builder.`,()=>{u();payCost(x)})},true)},
    delpay:()=>{const x=S.pays.find(q=>q.id===id),lc=S.costs.find(c=>c.id==="pay_"+id);S.pays.splice(S.pays.indexOf(x),1);if(lc)S.costs.splice(S.costs.indexOf(lc),1);save();render();toast("Stage deleted.",()=>{S.pays.push(x);if(lc)S.costs.push(lc)})},
    paycost:()=>{const c=S.costs.find(x=>x.id===id),u=undoEdit(c,{paid:true});save();render();toast(`${rand(c.amount)} marked as paid.`,u)},budget:()=>moneyOK?budgetSheet():moneyGate(budgetSheet),lockmoney:()=>{lockMoney();toast("Money is locked.")},addmat:()=>matSheet(undefined,id&&phase(id)?id:undefined),editmat:()=>matSheet(id),delmat:()=>delRecs(S.mats,m=>m.id===id,"Material"),
-   cycmat:()=>{const m=S.mats.find(x=>x.id===id),L=mst(m),order=L.map(x=>x[0]),nx=order[(order.indexOf(m.status)+1)%order.length];const u=undoEdit(m,{status:nx});save();render();toast(`${m.name}: ${L.find(x=>x[0]===nx)[1].toLowerCase()}.`,u)},
+   mattick:()=>{const[mid,k]=id.split("|"),m=S.mats.find(x=>x.id===mid);if(!m)return;const t=matTicks(m),ord=k==="o"?!t.ord:(t.rec?t.ord:true),rec=k==="r"?!t.rec:(t.ord?t.rec&&ord:false);const u=undoEdit(m,{status:rec?"got":ord?"ordered":"need",...(hasMoves(m)?{rcv:rec}:{})});save();render();toast(`${m.name}: ${rec?"received":ord?"ordered":"not ordered"}.`,u)},cycmat:()=>{const m=S.mats.find(x=>x.id===id),L=mst(m),order=L.map(x=>x[0]),nx=order[(order.indexOf(m.status)+1)%order.length];const u=undoEdit(m,{status:nx});save();render();toast(`${m.name}: ${L.find(x=>x[0]===nx)[1].toLowerCase()}.`,u)},
    movein:()=>moveSheet(id,"in"),moveout:()=>moveSheet(id,"out"),editelec:()=>elecSheet(),
    shareorder:()=>shareOrder(id&&(id==="all"||phase(id))?id:(matPh!=="all"&&matPh!=="none"?matPh:"")),addsup:()=>supSheet(),editsup:()=>supSheet(id),delsup:()=>delRecs(S.sups,s=>s.id===id,"Contact"),
    addphoto:()=>quickPhoto(id&&phase(id)?id:undefined),addissue:()=>logSheet(null,"issue"),editlog:()=>logSheet(id),dellog:()=>delRecs(S.logs,l=>l.id===id,"Entry"),
@@ -2002,18 +2007,19 @@ function matSheet(id,defPhase){
   <label class="f" for="mph">Which phase is it for?</label><select id="mph" class="t sel"><option value="">Not assigned</option>${PH.map(p=>`<option value="${p[0]}" ${p[0]===st.phase?"selected":""}>${esc(p[1])}</option>`).join("")}</select>
   <label class="f">Section</label>${chipRow("sec",SECS.map(x=>[x[0],x[1]]),st.sec)}
   <div id="bd">${body()}</div>
-  <div class="foot">${m?"":`<button type="button" class="chip" id="again" aria-pressed="${matAgain}" style="margin-bottom:8px">${ic("check","sm")}Add another of this product</button>`}<button class="btn primary block">${m?"Save changes":"Add item"}</button></div></form>`,(sh,close)=>{
+  ${m&&st.sec==="stock"?`<details class="more"><summary>Record a delivery or stock used</summary><div class="row" style="gap:8px;margin-top:8px"><button type="button" class="btn small grow" id="mvi">${ic("truck","sm")}Delivery</button><button type="button" class="btn small grow" id="mvo">${ic("minus","sm")}Used</button></div></details>`:""}<div class="foot">${m?"":`<button type="button" class="chip" id="again" aria-pressed="${matAgain}" style="margin-bottom:8px">${ic("check","sm")}Add another of this product</button>`}<button class="btn primary block">${m?"Save changes":"Add item"}</button></div></form>`,(sh,close)=>{
     const wire=()=>{wireDc(sh);["unit","room","status"].forEach(n=>wireChips(sh,st,n));const q=sh.querySelector("#q");
       sh.querySelectorAll("[data-step]").forEach(b=>b.onclick=()=>{q.value=Math.max(0,(parseAmt(q.value)||0)+ +b.dataset.step)});
       sh.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{q.value=(parseAmt(q.value)||0)+ +b.dataset.add});
       sh.querySelectorAll("[data-note]").forEach(b=>b.onclick=()=>lightbox([b.dataset.note],0));sh.querySelectorAll("[data-docv]").forEach(b=>b.onclick=()=>{const dd=S.docs.find(x=>x.id===b.dataset.docv);if(dd)lightbox([dd.media],0)});sh.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{moves=moves.filter(x=>x.id!==b.dataset.rm);keepq();sh.querySelector("#bd").innerHTML=body();wire()})};
     const keepq=()=>{};
+    [["#mvi","in"],["#mvo","out"]].forEach(([q,t])=>sh.querySelector(q)?.addEventListener("click",()=>{close();setTimeout(()=>moveSheet(m.id,t),80)}));
     wireChips(sh,st,"sec",()=>{const nm=sh.querySelector("#nm").value,keep=["#q","#mn","#du","#su"].map(k=>[k,sh.querySelector(k)?.value]);sh.querySelector("#bd").innerHTML=body();wire();sh.querySelector("#nm").value=nm;keep.forEach(([k,v])=>{const e=sh.querySelector(k);if(e&&v!==undefined)e.value=v})});
     wire();
     const ag=sh.querySelector("#again");if(ag)ag.onclick=()=>{matAgain=ag.getAttribute("aria-pressed")!=="true";ag.setAttribute("aria-pressed",matAgain)};
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const nm=sh.querySelector("#nm");if(!nm.value.trim())return showErr(sh,nm,"Write what you need.");
       const q=sh.querySelector("#q"),qty=parseAmt(q.value);if(!(qty>=0))return showErr(sh,q,"Enter how many.");
-      const vals={name:nm.value.trim(),qty,unit:st.unit,sec:st.sec,room:st.sec==="stock"?"both":st.room,status:st.status,sup:sh.querySelector("#su")?.value||"",due:sh.querySelector("#du").value||"",min:st.sec==="stock"?(parseAmt(sh.querySelector("#mn")?.value)||0):0,phase:sh.querySelector("#mph").value,moves};
+      const vals={name:nm.value.trim(),qty,unit:st.unit,sec:st.sec,room:st.sec==="stock"?"both":st.room,status:st.status,sup:sh.querySelector("#su")?.value||"",due:sh.querySelector("#du").value||"",min:st.sec==="stock"?(parseAmt(sh.querySelector("#mn")?.value)||0):0,phase:sh.querySelector("#mph").value,moves,rcv:m&&st.status===m.status?m.rcv:undefined};
       if(m){const u=undoEdit(m,vals);save();close();render();toast("Item saved.",u)}else{const n={id:uid(),...vals,moves:[]};S.mats.push(n);matSec=n.sec;save();const un=()=>S.mats.splice(S.mats.indexOf(n),1);if(matAgain){render();toast("Item added. Add the next one.",un);q.value="1";nm.focus();nm.select()}else{close();render();toast("Item added.",un)}}};
   });
 }
@@ -2035,7 +2041,7 @@ function moveSheet(id,t){
       const entry={id:uid(),t,qty:v,date:sh.querySelector("#dt").value||today(),note:sh.querySelector("#nt").value.trim(),who:me};
       if(dn){const mid="dc"+uid(),blob=await prepPhoto(dn,PSIZES[psize][1]),did=uid();await mPut(mid,blob);queueMedia(mid);
         S.docs.push({id:did,name:"Delivery note: "+m.name+" "+num(v,2)+" "+m.unit,type:"delivery",date:entry.date,phase:"",sup:m.sup||"",note:entry.note,media:mid,fn:"delivery-note.jpg",mime:"image/jpeg",size:blob.size,who:me});entry.doc=did}
-      const u0=undoEdit(m,{moves:[...(m.moves||[]),entry]}),u=()=>{u0();if(entry.doc){const i=S.docs.findIndex(x=>x.id===entry.doc);if(i>=0)S.docs.splice(i,1)}};logAct(inn?`Delivery: ${num(v,2)} ${m.unit} of ${m.name}`:`Used ${num(v,2)} ${m.unit} of ${m.name}`);save();close();render();
+      const u0=undoEdit(m,{moves:[...(m.moves||[]),entry],rcv:undefined}),u=()=>{u0();if(entry.doc){const i=S.docs.findIndex(x=>x.id===entry.doc);if(i>=0)S.docs.splice(i,1)}};logAct(inn?`Delivery: ${num(v,2)} ${m.unit} of ${m.name}`:`Used ${num(v,2)} ${m.unit} of ${m.name}`);save();close();render();
       toast(inn?`Delivery of ${num(v,2)} ${m.unit} recorded.`:`${num(v,2)} ${m.unit} used.`,u)};
   });
 }
@@ -3105,7 +3111,7 @@ const AREAS=[
   ["furn","Furniture and decor","What we build for the classrooms",0,["No access","See only","Update"]],
   ["money","Money","Costs, trades and payments",0,["No access","See only","Record"]],
   ["upd","Updates","Messages to and from the team",1,["Receive","Send"]]];
-const ACT_AREA={pedit:"tasks",padd:"tasks",pren:"tasks",pdel:"tasks",pmv:"tasks",gedit:"tasks",gadd:"tasks",gren:"tasks",gdel:"tasks",estimate:"money",scanslip:"money",snagedit:"log",snagreopen:"log",phcover:"tasks",contract:"money",addextra:"money",editextra:"money",cyc:"tasks",cycboth:"tasks",edittask:"tasks",deltask:"tasks",addtask:"tasks",reorder:"tasks",mvup:"tasks",mvdn:"tasks",phphoto:"log",addphoto:"log",addissue:"log",editlog:"log",dellog:"log",fix:"log",addmat:"mats",editmat:"mats",delmat:"mats",cycmat:"mats",movein:"mats",moveout:"mats",editelec:"mats",addsup:"mats",editsup:"mats",delsup:"mats",adddoc:"docs",addplan:"docs",adddiary:"diary",editdiary:"diary",addfurn:"furn",editfurn:"furn",delfurn:"furn",furnstarter:"furn"};
+const ACT_AREA={pedit:"tasks",padd:"tasks",pren:"tasks",pdel:"tasks",pmv:"tasks",gedit:"tasks",gadd:"tasks",gren:"tasks",gdel:"tasks",estimate:"money",scanslip:"money",snagedit:"log",snagreopen:"log",phcover:"tasks",contract:"money",addextra:"money",editextra:"money",cyc:"tasks",cycboth:"tasks",edittask:"tasks",deltask:"tasks",addtask:"tasks",reorder:"tasks",mvup:"tasks",mvdn:"tasks",phphoto:"log",addphoto:"log",addissue:"log",editlog:"log",dellog:"log",fix:"log",addmat:"mats",editmat:"mats",delmat:"mats",mattick:"mats",cycmat:"mats",movein:"mats",moveout:"mats",editelec:"mats",addsup:"mats",editsup:"mats",delsup:"mats",adddoc:"docs",addplan:"docs",adddiary:"diary",editdiary:"diary",addfurn:"furn",editfurn:"furn",delfurn:"furn",furnstarter:"furn"};
 const AREA_MSG=ar=>lvl(ar)===0?"You do not have access to this area.":"You can look at this area but not change it.";
 const areaLabel=(k,v)=>{const a=AREAS.find(x=>x[0]===k);return a?a[4][Math.max(0,v-a[3])]||"":""};
 function areaRows(st,pre){
@@ -4559,7 +4565,7 @@ function phaseMats(id){
   const chips=[["all","All · "+list.length],["need","To order · "+toOrder(list).length],["ordered","Ordered · "+list.filter(m=>["ordered","part"].includes(mEff(m))).length],["got","Delivered · "+list.filter(m=>mEff(m)==="got").length]];
   return `<div class="row between wr" style="margin:0 2px 10px;gap:8px"><span class="muted">${list.length} item${list.length===1?"":"s"} · ${ord.length} to order</span>${ord.length?`<button class="btn small" data-act="shareorder" data-id="${id}">${ic("chat","sm")}Send order list</button>`:""}</div>
   <div class="chips scroll" role="group" aria-label="Filter" style="margin-bottom:10px">${chips.map(([k,l])=>`<button type="button" class="chip" data-sub="mat:${k}" aria-pressed="${matF===k}">${esc(l)}</button>`).join("")}</div>
-  ${SECS.map(([k,l])=>{const g=shown.filter(m=>secOf(m)===k).sort((a,b)=>a.name.localeCompare(b.name));return g.length?`<div class="eyebrow" style="margin:14px 2px 8px">${esc(l)} · ${g.length}</div><div class="card"><ul class="list">${g.map(m=>k==="stock"?stockRow(m):itemRow(m)).join("")}</ul></div>`:""}).join("")||`<div class="card"><p class="muted" style="margin:0">Nothing in this list.</p></div>`}`;
+  ${SECS.map(([k,l])=>{const g=shown.filter(m=>secOf(m)===k).sort((a,b)=>a.name.localeCompare(b.name));return g.length?`<div class="eyebrow" style="margin:14px 2px 8px">${esc(l)} · ${g.length}</div><div class="card"><ul class="list">${g.map(matRow).join("")}</ul></div>`:""}).join("")||`<div class="card"><p class="muted" style="margin:0">Nothing in this list.</p></div>`}`;
 }
 function phaseV(){
   const id=curPh,p=phase(id);if(!p){tab="build";return buildV()}
