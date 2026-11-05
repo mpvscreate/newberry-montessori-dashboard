@@ -728,6 +728,24 @@ a.btn{color:inherit;text-decoration:none}.btn{white-space:nowrap}
 .gantt{--gl:122px}.gl{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.1;font-size:.76rem}
 .card .big small{white-space:nowrap}
 .sc .scl small.hot{color:var(--accent);font-weight:700}
+/* UI review: nothing under 12px, even chips and pills, a stronger green card */
+.eyebrow,.bhero .eyebrow{font-size:.78rem}
+.pq{font-size:.8rem}
+.msec{font-size:.78rem}
+.estleg li{font-size:.8rem}
+.sync{font-size:.8rem}
+.bhero .chip-d,.bhero .wxchip{font-size:.8rem;min-height:30px;display:inline-flex;align-items:center;padding:0 10px}
+.bhero .sub.fc{font-size:.8rem!important}.bhero .sub.fc.ch,.bhero .chb.ch{font-size:.88rem!important}
+.sc .scl small{font-size:.8rem}
+.scs .sc{min-height:60px}
+.bhero .big{font-size:2.8rem!important;margin-top:2px!important}
+.bhero .bh1{justify-content:space-between}.bhero .bh2{margin-left:auto;justify-items:end}.bhero .bh2 .row{justify-content:flex-end}
+.rpc{font-size:.78rem}
+header.top .sync,.sync{font-size:.8rem!important}
+.gtoday b{font-size:.78rem}
+.card.today .eyebrow{font-size:.78rem}
+.ls,.list li .ls,.card.today .list li .ls{font-size:.8rem}
+@media (max-width:400px){.sc{padding:0 10px;gap:8px}.sc .scl>span{font-size:.84rem}}
 </style>
 </head>
 <body>
@@ -1588,14 +1606,14 @@ function buildMain(){
     return pEdit?`<div class="gtw">${tile}<div class="gtb"><button type="button" class="btn small" data-act="pmv" data-id="${id}|-1" aria-label="Move ${esc(name)} earlier" ${i===0?"disabled":""}>${ic("left")}</button><button type="button" class="btn small" data-act="pmv" data-id="${id}|1" aria-label="Move ${esc(name)} later" ${i===PHS.length-1?"disabled":""}>${ic("right")}</button><button type="button" class="btn small" data-act="pren" data-id="${id}">Rename</button><button type="button" class="btn small danger" data-act="pdel" data-id="${id}">Remove</button></div></div>`:tile}).join("")+(pEdit?`<div class="gtw"><button type="button" class="ptile gadd" data-act="padd" aria-label="Add a phase"><span class="pi"><span class="pring"><span class="pav">${ic("plus")}</span></span><b>Add phase</b></span></button></div>`:"");
   const rec=logsNewest().filter(l=>l.kind!=="issue").slice(0,6);
   const toOrder=S.mats.filter(m=>needsOrder(m)&&(m.qty>0||secOf(m)!=="stock")).length,issues=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length;
-  const mineN=sm.code?uk(S.tasks.filter(t=>asgHas(t,sm.pid)&&t.status!=="done")):0,photoN=allPhotos().length;
-  const pl=(attr,icon,label,sub,hot,full)=>`<button type="button" class="sc" ${attr}${full?' style="grid-column:1/-1"':""}>${ic(icon)}<span class="scl"><span>${label}</span>${sub?`<small class="${hot?"hot":""}">${sub}</small>`:""}</span></button>`;
-  const scs=`<div class="scs">${pl('data-go="tasks"',"check","Tasks",mineN?mineN+" for you":"",1)}${pl('data-go="mats"',"truck","Materials",toOrder?toOrder+" to order":"",1)}${pl('data-go="photos"',"image","Photos",photoN?photoN+(photoN===1?" photo":" photos"):"")}${pl('data-go="plans"',"map","Plans","")}${pl('data-act="contractors"',"users","Contractors",S.sups.length?S.sups.length+(S.sups.length===1?" contact":" contacts"):"","",1)}${pl('data-act="bmore"',"dots","More: snags, site log, diary, documents, garden","","",1)}</div>`;
+  const mineN=sm.code?uk(S.tasks.filter(t=>asgHas(t,sm.pid)&&t.status!=="done")):0,openN=uk(S.tasks.filter(t=>t.status!=="done")),photoN=allPhotos().length;
+  const pl=(attr,icon,label,sub,hot)=>`<button type="button" class="sc" ${attr}>${ic(icon)}<span class="scl"><span>${label}</span><small class="${hot?"hot":""}">${sub}</small></span></button>`;
+  const scs=`<div class="scs">${pl('data-go="tasks"',"check","Tasks",mineN?mineN+" for you":openN+" open",mineN)}${pl('data-go="mats"',"truck","Materials",toOrder?toOrder+" to order":"Nothing to order",toOrder)}${pl('data-go="photos"',"image","Photos",photoN?photoN+(photoN===1?" photo":" photos"):"No photos yet")}${pl('data-go="plans"',"map","Plans","Drawings")}${pl('data-act="contractors"',"users","Contractors",S.sups.length?S.sups.length+(S.sups.length===1?" contact":" contacts"):"No contacts yet")}${pl('data-act="bmore"',"dots","More","Snags, log, diary")}</div>`;
   return `<section class="bhero"><div class="bh1"><div><div class="eyebrow">${left===null?"Whole build":left>=0?"Days left":"Days over"}</div><div class="big" ${left===null?`data-count="${p}"`:""}>${left===null?p+"%":Math.abs(left)}</div></div><div class="bh2"><div class="row between" style="gap:8px;align-items:center">${wxChip()}</div>
    <div class="row wr" style="gap:6px">${sched.chip}</div></div></div><div class="meter hm"><i style="width:${p}%"></i></div>${cheerLine(all,p)}</section>
   ${whoLine()}${attentionV()}${[connectPrompt(),iosPrompt(),pushPrompt(),linkPrompt(),backupDue()].find(Boolean)||""}${scs}${can?`<div class="row between" style="margin:14px 2px 10px"><div class="eyebrow" style="margin:0">Phases</div>${pEdit?`<button type="button" class="btn small primary" data-act="pedit">Done</button>`:`<button type="button" class="iconbtn sm" data-act="pedit" aria-label="Edit phases">${ic("dots")}</button>`}</div>${pEdit?`<p class="hint" style="margin:0 2px 10px">Rename, move or remove a phase, or add a new one.</p>`:""}`:""}<div class="ptiles" role="list">${tiles}</div>
   <div class="rph"><div class="eyebrow">Recently posted</div><button type="button" class="linkbtn" data-go="site">See all</button></div>
-  ${rec.length?`<div class="rps">${rec.map(l=>{const n=l.media?.length||0,c=PCOL[l.phase]||"var(--accent)",ph=l.phase&&PSHORT[l.phase]?PSHORT[l.phase]:"Site",tx=l.text?esc(l.text.slice(0,120)):"",first=n&&isVid(l.media[0]);return `<button type="button" class="rp ${n?"ph":"nt"}" data-act="rpopen" data-id="${l.id}" aria-label="${esc(ph)}, ${n?n+(n===1?" photo":" photos"):"note"}, ${dlabel(l.date)}. Open"><span class="rpi">${n?`<span data-m="${l.media[0]}" style="position:absolute;inset:0"></span>`:""}</span>${n>1?`<span class="rpn">${ic("image","sm")}${n}</span>`:first?`<span class="rpn">${ic("play","sm")}</span>`:""}<span class="rpt"><span class="rpc" style="color:${n?"#fff":c}">${esc(ph)}</span><span class="rpx">${tx||(n?(first?"Added a clip":n===1?"Added a photo":"Added "+n+" photos"):"Update")}</span><small>${dlabel(l.date)}</small></span></button>`}).join("")}</div>`:`<p class="muted small" style="margin:0 2px">Photos and notes you add will show up here.</p>`}`;
+  ${rec.length?`<div class="rps">${rec.map(l=>{const n=l.media?.length||0,c=PCOL[l.phase]||"var(--accent)",ph=l.phase&&PSHORT[l.phase]?PSHORT[l.phase]:"Site",tx=l.text?esc(l.text.slice(0,120)):"",first=n&&isVid(l.media[0]);return `<button type="button" class="rp ${n?"ph":"nt"}" data-act="rpopen" data-id="${l.id}" aria-label="${esc(ph)}, ${n?n+(n===1?" photo":" photos"):"note"}, ${dlabel(l.date)}. Open"><span class="rpi">${n?`<span data-m="${l.media[0]}" style="position:absolute;inset:0"></span>`:""}</span>${n>1?`<span class="rpn">${ic("image","sm")}${n}</span>`:first?`<span class="rpn">${ic("play","sm")}</span>`:""}<span class="rpt"><span class="rpc" style="color:${n?"#fff":"color-mix(in srgb,"+c+" 55%,var(--ink))"}">${esc(ph)}</span><span class="rpx">${tx||(n?(first?"Added a clip":n===1?"Added a photo":"Added "+n+" photos"):"Update")}</span><small>${dlabel(l.date)}</small></span></button>`}).join("")}</div>`:`<p class="muted small" style="margin:0 2px">Photos and notes you add will show up here.</p>`}`;
 }
 /* everyone the project works with, from the suppliers and contractors list */
 function contractorsSheet(){
