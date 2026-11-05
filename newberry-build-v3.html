@@ -828,6 +828,25 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const iso=d=>{d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
 const today=()=>iso();
+/* working days: no Saturdays, Sundays or South African public holidays (a holiday on a Sunday moves to the Monday) */
+const SA_HOL={};
+function saHolidays(y){
+  if(SA_HOL[y])return SA_HOL[y];
+  const set=new Set(),P=n=>String(n).padStart(2,"0"),put=(m,d)=>{const dt=new Date(Date.UTC(y,m-1,d,12));set.add(y+"-"+P(m)+"-"+P(d));if(dt.getUTCDay()===0){const n=new Date(Date.UTC(y,m-1,d+1,12));set.add(n.getUTCFullYear()+"-"+P(n.getUTCMonth()+1)+"-"+P(n.getUTCDate()))}};
+  [[1,1],[3,21],[4,27],[5,1],[6,16],[8,9],[9,24],[12,16],[12,25],[12,26]].forEach(([m,d])=>put(m,d));
+  /* Easter (Good Friday and Family Day) */
+  const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;
+  [-2,1].forEach(o=>{const dt=new Date(Date.UTC(y,mo-1,da+o,12));set.add(dt.getUTCFullYear()+"-"+P(dt.getUTCMonth()+1)+"-"+P(dt.getUTCDate()))});
+  return SA_HOL[y]=set;
+}
+const isWorkDay=dt=>{const w=dt.getUTCDay();if(w===0||w===6)return false;const s=dt.getUTCFullYear()+"-"+String(dt.getUTCMonth()+1).padStart(2,"0")+"-"+String(dt.getUTCDate()).padStart(2,"0");return !saHolidays(dt.getUTCFullYear()).has(s)};
+/* working days after a, up to and including b; negative when b is before a */
+function workDays(a,b){
+  if(!a||!b||a===b)return 0;
+  const fwd=b>a,from=fwd?a:b,to=fwd?b:a,dt=new Date(from+"T12:00:00Z"),end=new Date(to+"T12:00:00Z");let n=0;
+  for(let i=0;i<4000&&dt<end;i++){dt.setUTCDate(dt.getUTCDate()+1);if(isWorkDay(dt))n++}
+  return fwd?n:-n;
+}
 const addDays=(s,n)=>{const d=new Date(s+"T12:00");d.setDate(d.getDate()+n);return iso(d)};
 const FMT=new Intl.NumberFormat("en-ZA",{style:"currency",currency:"ZAR",minimumFractionDigits:2});
 const money=n=>FMT.format(n||0);
@@ -1442,7 +1461,7 @@ function nextCard(nu,R){
 }
 function home(){
   const all=G(BT()),d=doneN(all),p=pct(d,all.length),R=rooms();
-  const left=S.settings.target?Math.ceil((new Date(S.settings.target+"T12:00")-new Date(today()+"T12:00"))/864e5):null;
+  const left=S.settings.target?workDays(today(),S.settings.target):null;
   const bud=+S.settings.budget||0,sp=spentAll(),bp=bud?sp/bud:0;
   const issues=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length;
   const toOrder=S.mats.filter(m=>needsOrder(m)&&(m.qty>0||secOf(m)!=="stock")).length;
@@ -1453,7 +1472,7 @@ function home(){
   ${todayCard()}
   ${tipCard()}
   ${(()=>{const f=S.furn.length&&lvl("furn")>=1?fStats(S.furn):null,bar=(go,l,v)=>`<button type="button" class="ovb" ${go}><span class="ovl">${l}</span><b>${v}%</b><span class="meter"><i style="width:${v}%"></i></span></button>`;
-   return `<section class="card ovs"><div class="row between" style="gap:10px;align-items:flex-start"><div><div class="eyebrow" style="margin:0">Schedule</div><div class="big" style="font-size:1.7rem;line-height:1.1">${left===null?"–":left>=0?left:-left}<small style="font-size:.9rem;font-weight:500"> ${left===null?"":left>=0?"days to go":"days past target"}</small></div><div class="muted small">${S.settings.start?dshort(S.settings.start):"?"} to ${S.settings.target?dshort(S.settings.target):"?"}</div></div><div class="row wr" style="gap:6px;justify-content:flex-end">${sched.chip}</div></div>
+   return `<section class="card ovs"><div class="row between" style="gap:10px;align-items:flex-start"><div><div class="eyebrow" style="margin:0">Schedule</div><div class="big" style="font-size:1.7rem;line-height:1.1">${left===null?"–":left>=0?left:-left}<small style="font-size:.9rem;font-weight:500"> ${left===null?"":left>=0?"working days to go":"working days past target"}</small></div><div class="muted small">${S.settings.start?dshort(S.settings.start):"?"} to ${S.settings.target?dshort(S.settings.target):"?"}</div></div><div class="row wr" style="gap:6px;justify-content:flex-end">${sched.chip}</div></div>
    <div class="ovbs">${bar('data-go="build"',R.length>1?"Classrooms":esc(R[0].name),p)}${f?bar('data-act="gofurn"',"Furniture",f.p):""}</div>
    <div class="row wr" style="gap:8px;margin-top:12px">${issues?`<button type="button" class="chip tone-bad" data-go="snags" aria-pressed="false">${ic("alert","sm")}${issues} snag${issues===1?"":"s"} to fix</button>`:""}${toOrder?`<button type="button" class="chip tone-info" data-go="mats:all" aria-pressed="false">${ic("truck","sm")}${toOrder} to order</button>`:""}${issues||toOrder?"":`<span class="small muted">${ic("check","sm")} No open snags and nothing to order.</span>`}</div></section>`})()}
   ${nextCard(nu,R)}
@@ -1505,9 +1524,9 @@ function weekText(){
   const soon=[],s2=new Set();S.tasks.filter(t=>t.status!=="done"&&t.due&&t.due>td&&t.due<=nx).sort((a,b)=>a.due.localeCompare(b.due)).forEach(t=>{if(s2.has(t.key))return;s2.add(t.key);soon.push(t.title+" ("+dshort(t.due)+")")});
   const open=S.tasks.filter(t=>t.status!=="done"),od=uk(open.filter(t=>t.due&&t.due<td)),stuck=uk(open.filter(t=>t.status==="stuck")),iss=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length;
   const ph=allPhotos().filter(x=>x.date>=wk).length;
-  const left=S.settings.target?Math.ceil((new Date(S.settings.target+"T12:00")-new Date(td+"T12:00"))/864e5):null;
+  const left=S.settings.target?workDays(td,S.settings.target):null;
   const L=["*"+(S.settings.name||"Site")+": week to "+dshort(td)+"*",""];
-  L.push("Whole build: "+p+"% done"+(left===null?"":left>=0?", "+left+" day"+(left===1?"":"s")+" to go":", "+(-left)+" day"+(left===-1?"":"s")+" past the target")+".");
+  L.push("Whole build: "+p+"% done"+(left===null?"":left>=0?", "+left+" working day"+(left===1?"":"s")+" to go":", "+(-left)+" working day"+(left===-1?"":"s")+" past the target")+".");
   L.push(done.length?"Done this week ("+done.length+"): "+done.slice(0,8).join(", ")+(done.length>8?" and "+(done.length-8)+" more":"")+".":"No tasks were finished this week.");
   if(soon.length)L.push("Coming up next week: "+soon.slice(0,6).join(", ")+(soon.length>6?" and "+(soon.length-6)+" more":"")+".");
   const flags=[od?od+" overdue":"",stuck?stuck+" stuck":"",iss?iss+" open issue"+(iss===1?"":"s"):""].filter(Boolean);
@@ -1598,7 +1617,7 @@ function backupDue(){
 }
 function buildMain(){
   const all=G(BT()),d=doneN(all),p=pct(d,all.length),cur=curPhases()[0],sched=schedule();
-  const left=S.settings.target?Math.ceil((new Date(S.settings.target+"T12:00")-new Date(today()+"T12:00"))/864e5):null;
+  const left=S.settings.target?workDays(today(),S.settings.target):null;
   const can=perm.manage&&lvl("tasks")>=2;if(!can)pEdit=false;
   const tiles=PHS.map(([id,name,icon],i)=>{
     const ts=G(S.tasks.filter(t=>t.phase===id)),dn=doneN(ts),st=ts.filter(t=>t.status==="stuck").length,ph=phasePhoto(id),full=ts.length>0&&dn===ts.length,rs=st>0?"stuck":full?"full":(dn>0||ts.some(t=>t.status==="doing"||t.status==="check"))?"doing":"none";
@@ -1609,7 +1628,7 @@ function buildMain(){
   const mineN=sm.code?uk(S.tasks.filter(t=>asgHas(t,sm.pid)&&t.status!=="done")):0,openN=uk(S.tasks.filter(t=>t.status!=="done")),photoN=allPhotos().length;
   const pl=(attr,icon,label,sub,hot)=>`<button type="button" class="sc" ${attr}>${ic(icon)}<span class="scl"><span>${label}</span><small class="${hot?"hot":""}">${sub}</small></span></button>`;
   const scs=`<div class="scs">${pl('data-go="tasks"',"check","Tasks",mineN?mineN+" for you":openN+" open",mineN)}${pl('data-go="mats"',"truck","Materials",toOrder?toOrder+" to order":"Nothing to order",toOrder)}${pl('data-go="photos"',"image","Photos",photoN?photoN+(photoN===1?" photo":" photos"):"No photos yet")}${pl('data-go="plans"',"map","Plans","Drawings")}${pl('data-act="contractors"',"users","Contractors",S.sups.length?S.sups.length+(S.sups.length===1?" contact":" contacts"):"No contacts yet")}${pl('data-act="bmore"',"dots","More","Snags, log, diary")}</div>`;
-  return `<section class="bhero"><div class="bh1"><div><div class="eyebrow">${left===null?"Whole build":left>=0?"Days left":"Days over"}</div><div class="big" ${left===null?`data-count="${p}"`:""}>${left===null?p+"%":Math.abs(left)}</div></div><div class="bh2"><div class="row between" style="gap:8px;align-items:center">${wxChip()}</div>
+  return `<section class="bhero"><div class="bh1"><div><div class="eyebrow">${left===null?"Whole build":left>=0?"Work days left":"Work days over"}</div><div class="big" ${left===null?`data-count="${p}"`:""}>${left===null?p+"%":Math.abs(left)}</div></div><div class="bh2"><div class="row between" style="gap:8px;align-items:center">${wxChip()}</div>
    <div class="row wr" style="gap:6px">${sched.chip}</div></div></div><div class="meter hm"><i style="width:${p}%"></i></div>${cheerLine(all,p)}</section>
   ${whoLine()}${attentionV()}${[connectPrompt(),iosPrompt(),pushPrompt(),linkPrompt(),backupDue()].find(Boolean)||""}${scs}${can?`<div class="row between" style="margin:14px 2px 10px"><div class="eyebrow" style="margin:0">Phases</div>${pEdit?`<button type="button" class="btn small primary" data-act="pedit">Done</button>`:`<button type="button" class="iconbtn sm" data-act="pedit" aria-label="Edit phases">${ic("dots")}</button>`}</div>${pEdit?`<p class="hint" style="margin:0 2px 10px">Rename, move or remove a phase, or add a new one.</p>`:""}`:""}<div class="ptiles" role="list">${tiles}</div>
   <div class="rph"><div class="eyebrow">Recently posted</div><button type="button" class="linkbtn" data-go="site">See all</button></div>
@@ -4993,7 +5012,7 @@ function weekV(){
 }
 function reportV(){
   const all=G(BT()),d=doneN(all),p=pct(d,all.length),td=today(),D=x=>new Date(x+"T12:00").getTime(),st=S.settings.start,en=S.settings.target;
-  const left=en?Math.ceil((D(en)-D(td))/864e5):null,f=forecast(),canM=lvl("money")>=1;
+  const left=en?workDays(td,en):null,f=forecast(),canM=lvl("money")>=1;
   /* the headline */
   let head="Set your dates",vc="var(--sky)",ico="calendar",line=`${d} of ${all.length} tasks done (${p}%).`;
   if(st&&en&&all.length){
@@ -5001,7 +5020,7 @@ function reportV(){
     if(t<a){const n=Math.round((a-t)/864e5);head="Not started yet";vc="var(--sky)";ico="clock";line=`Work starts in ${n} day${n===1?"":"s"}.`}
     else{const plan=Math.min(1,(t-a)/Math.max(1,b-a)),gap=Math.round((plan-d/all.length)*100);
       if(gap<=5){head="On track";vc="var(--green)";ico="check"}else if(gap<=15){head=gap+"% behind plan";vc="var(--accent)";ico="alert"}else{head=gap+"% behind plan";vc="var(--red)";ico="alert"}
-      line=`${d} of ${all.length} tasks done (${p}%). ${left>=0?left+" day"+(left===1?"":"s")+" to the target.":-left+" day"+(left===-1?"":"s")+" past the target."}`}
+      line=`${d} of ${all.length} tasks done (${p}%). ${left>=0?left+" working day"+(left===1?"":"s")+" to the target.":-left+" working day"+(left===-1?"":"s")+" past the target."}`}
   }
   const fcTxt=f&&!f.none?(f.late>3?` At this pace it finishes about ${dlong(f.date)}, ${f.late} days late.`:f.late<-3?` At this pace it finishes about ${dlong(f.date)}, ${-f.late} days early.`:` At this pace it finishes around ${dlong(f.date)}, on time.`):"";
   const open=S.tasks.filter(t=>t.status!=="done"),issues=S.logs.filter(l=>l.kind==="issue"&&!l.fixed);
