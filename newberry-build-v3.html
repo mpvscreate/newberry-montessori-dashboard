@@ -1578,7 +1578,7 @@ function buildMain(){
 }
 /* everyone the project works with, from the suppliers and contractors list */
 function contractorsSheet(){
-  const L=S.sups.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")),can=lvl("mats")>=2;
+  const L=S.sups.slice().sort((a,b)=>(a.name||"").localeCompare(b.name||"")),can=!!perm.manage;
   const row=c=>{const tr=c.trade&&c.trade.trim().toLowerCase()!==(c.name||"").trim().toLowerCase()?c.trade:"";
     return `<li class="ctr"><span class="avatar">${esc((c.name||"?")[0].toUpperCase())}</span><div class="grow"><div class="lt">${esc(c.name)}</div>${tr?`<div class="ls">${esc(tr)}</div>`:""}${c.phone?`<a class="ctel" href="tel:${esc(c.phone.replace(/[^\d+]/g,""))}" aria-label="Call ${esc(c.name)}">${ic("phone","sm")}${esc(c.phone)}</a>`:`<div class="ls">No number saved</div>`}</div>${c.phone?`<a class="btn small icon" href="https://wa.me/${waNum(c.phone)}" target="_blank" rel="noopener" aria-label="WhatsApp ${esc(c.name)}">${ic("chat")}</a>`:""}${can?`<button type="button" class="btn small" data-e="${c.id}" aria-label="Edit ${esc(c.name)}">Edit</button>`:""}</li>`};
   sheet("Contractors",`<p class="muted" style="margin:6px 0 10px">${L.length?L.length+(L.length===1?" contact":" contacts")+". Tap a number to call.":"No contractors yet."}</p>
