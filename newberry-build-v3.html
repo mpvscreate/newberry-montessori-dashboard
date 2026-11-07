@@ -754,6 +754,7 @@ header.top .sync,.sync{font-size:.8rem!important}
 .ro .mtk,.ro-mats .mtk{pointer-events:none}
 .segc{gap:2px}@media (max-width:430px){.segc button{font-size:.84rem;padding:6px 2px}}
 .ro [data-act="matagain"],.ro-mats [data-act="matagain"]{display:none}.mtks{align-items:center}
+.pu-x{width:34px;height:34px}.pu-x::after{content:"";position:absolute;inset:-6px}
 </style>
 </head>
 <body>
@@ -4887,6 +4888,10 @@ async function pupdInit(){
   const urls=[];for(const m of PU.ids){const u=await mUrl(m);if(u)urls.push([m,u])}
   if(!ta.isConnected)return;
   document.getElementById("pup").innerHTML=PU.ids.length?`<div class="pu-rows">${urls.map(([m,u],i)=>`<div class="pu-r"><div class="pu-t">${isVid(m)?`<video src="${u}#t=0.1" muted playsinline preload="metadata"></video><span class="pu-vb" aria-hidden="true"></span>`:`<img src="${u}" alt="Photo ${i+1}">`}<span class="pu-n">${i+1}</span><button type="button" class="pu-x" data-pr="${m}" aria-label="Remove photo ${i+1}">${ic("x","sm")}</button></div><div class="pu-cw"><textarea class="t pu-ci" rows="1" maxlength="140" data-cap="${m}" placeholder="Add a caption" aria-label="Caption for photo ${i+1}">${esc(PU.caps[m]||"")}</textarea><span class="pu-cc" aria-hidden="true"></span></div>${urls.length>1?`<div class="pu-mvs"><button type="button" class="pu-mv" data-pm="${m}|-1" aria-label="Move photo ${i+1} earlier" ${i===0?"disabled":""}>${ic("up","sm")}</button><button type="button" class="pu-mv" data-pm="${m}|1" aria-label="Move photo ${i+1} later" ${i===urls.length-1?"disabled":""}>${ic("down","sm")}</button></div>`:""}</div>`).join("")}</div>`:`<p class="muted small" style="margin:0 0 10px">No photos or clips yet. Choose up to 5.</p>`;
+  const pup=document.getElementById("pup");
+  pup.onclick=e=>{const x=e.target.closest("[data-pr]");if(x){PU.ids=PU.ids.filter(m=>m!==x.dataset.pr);puSave();render();return}const b=e.target.closest("[data-pm]");if(b){const[m,d]=b.dataset.pm.split("|"),i=PU.ids.indexOf(m),j=i+(+d);if(i<0||j<0||j>=PU.ids.length)return;[PU.ids[i],PU.ids[j]]=[PU.ids[j],PU.ids[i]];puSave();render()}};
+  {const nb=document.getElementById("punew");if(nb)nb.onclick=()=>puDone()}
+  try{
   const pv=document.getElementById("pupv");
   pv.innerHTML=`<div class="pu-m" id="pumsg"></div>${urls.length?`<div id="pust">${storyHTML(urls.map(x=>x[1]),urls.map(x=>PU.caps[x[0]]||""),PU.logo,urls.map(x=>isVid(x[0])))}</div>`:`<p class="muted small" style="margin:0">Your photos show here, one under the other.</p>`}`;
   const pm=pv.querySelector("#pumsg"),sync=()=>{pm.textContent=ta.value.trim();pm.hidden=!ta.value.trim()};sync();
@@ -4920,7 +4925,6 @@ async function pupdInit(){
   if(cf){document.getElementById("pucam").onclick=()=>{if(PU.ids.length>=5){toast("Five items at most. Remove one first.");return}cf.click()};cf.onchange=()=>{addFiles(cf.files);cf.value=""}}
   const vf=document.getElementById("pucvf");if(vf)vf.onchange=()=>{addFiles(vf.files);vf.value=""};
   const vb=document.getElementById("puvid");if(vb)vb.onclick=()=>puRecord();
-  const nb=document.getElementById("punew");if(nb)nb.onclick=()=>puDone();
   const lgb=document.getElementById("pulg");if(lgb)lgb.onclick=()=>{PU.logo=!PU.logo;lsSet("b3-pu-logo",PU.logo?"1":"0");render()};
   const mic=document.getElementById("pumic");
   if(mic&&SPEECH){
@@ -4941,7 +4945,6 @@ async function pupdInit(){
     };
     mic.onclick=()=>{if(want){want=false;try{rec&&rec.stop()}catch{}return}want=true;fast=0;mic.classList.add("on");mic.setAttribute("aria-pressed","true");lab.textContent="Listening… tap to stop";buzz(10);begin()};
   }
-  document.querySelectorAll("[data-pm]").forEach(b=>b.onclick=()=>{const[m,d]=b.dataset.pm.split("|"),i=PU.ids.indexOf(m),j=i+(+d);if(i<0||j<0||j>=PU.ids.length)return;[PU.ids[i],PU.ids[j]]=[PU.ids[j],PU.ids[i]];puSave();render()});
   const wkb=document.getElementById("puwk");
   if(wkb)wkb.onclick=async()=>{
     wkb.disabled=true;
@@ -4957,7 +4960,7 @@ async function pupdInit(){
       toast(pick.length+" photo"+(pick.length===1?"":"s")+" from this week.",()=>{PU.ids=old;puSave();render()});
     }finally{wkb.disabled=false}
   };
-  document.querySelectorAll("[data-pr]").forEach(b=>b.onclick=()=>{PU.ids=PU.ids.filter(x=>x!==b.dataset.pr);puSave();render()});
+  }catch(e){console.warn("photo update",e)}
 }
 async function puPick(){
   const pics=allPhotos().filter(p=>p.ph!=="_diary").sort((a,b)=>b.date.localeCompare(a.date)).slice(0,90),ok=[];
@@ -4986,14 +4989,15 @@ function puShareSheet(){
       sh.querySelectorAll("#so .topt").forEach(b=>b.onclick=()=>{kind=b.dataset.k;draw()});
       sh.querySelectorAll("#sd [data-d]").forEach(b=>{b.setAttribute("aria-pressed",+b.dataset.d===days);b.onclick=()=>{days=+b.dataset.d;draw()}});
     };
+    const ask=()=>{const st=sh.querySelector("#sst");st.innerHTML=`<span style="display:block;margin-bottom:8px">Did it send?</span><span class="row" style="gap:8px"><button type="button" class="btn small primary grow" id="ssy">Yes, clear it</button><button type="button" class="btn small grow" id="ssn">Not yet</button></span>`;st.querySelector("#ssy").onclick=()=>{close();puDone("Cleared. Ready for a new update.")};st.querySelector("#ssn").onclick=()=>say("")};
     const make=async()=>{say("Making your link…");try{const j=await shareApi({action:"create",kind:"photos",days,msg:PU.msg.trim(),media:PU.ids,caps:PU.ids.map(m=>(PU.caps[m]||"").trim()),logo:PU.logo});say("");return shareUrl(j.token)}catch(e){say(/photos/.test(e.message)?"Your photos are still uploading to the team. Try again in a minute.":/access/.test(e.message)?"You need report access to share. Ask the Project Lead.":"Could not make the link. Check your connection and try again.");return null}};
     sh.querySelector("#ssend").onclick=async()=>{
       const b=sh.querySelector("#ssend");b.disabled=true;
       try{
-        if(kind==="link"){const u=await make();if(u){const ok=await shareText((PU.msg.trim()||"Photo update")+"\n\n"+u);if(ok){close();puDone("Sent. Ready for a new update.")}}return}
+        if(kind==="link"){const u=await make();if(u){const ok=await shareText((PU.msg.trim()||"Photo update")+"\n\n"+u);if(ok){close();puDone("Sent. Ready for a new update.")}else ask()}return}
         say("Getting your photos ready…");const files=[];
         for(const[i,m]of PU.ids.entries()){const bl=await mGet(m);if(!bl)continue;if(/^video\//.test(bl.type)){files.push(new File([bl],"site-clip-"+(i+1)+vExt(bl.type),{type:bl.type}))}else{const out=PU.logo?await stampPhoto(bl):bl;files.push(new File([out],"site-photo-"+(i+1)+".jpg",{type:out.type||"image/jpeg"}))}}
-        if(files.length&&navigator.canShare&&navigator.canShare({files})){try{await navigator.share({files,text:PU.msg.trim()});say("");close();puDone("Sent. Ready for a new update.")}catch(e){if(e?.name==="AbortError")say("");else say("Could not send the photos. Try Share a link.")}}
+        if(files.length&&navigator.canShare&&navigator.canShare({files})){try{await navigator.share({files,text:PU.msg.trim()});say("");close();puDone("Sent. Ready for a new update.")}catch(e){if(e?.name==="AbortError")ask();else say("Could not send the photos. Try Share a link.")}}
         else{say("This phone cannot send photos from here. Use Share a link, or send the message only.");if(PU.msg.trim())shareText(PU.msg.trim())}
       }finally{b.disabled=false}
     };
