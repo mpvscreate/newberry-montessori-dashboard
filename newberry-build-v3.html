@@ -757,6 +757,10 @@ header.top .sync,.sync{font-size:.8rem!important}
 .pu-x{width:34px;height:34px}.pu-x::after{content:"";position:absolute;inset:-6px}
 .card.mywork{padding:10px 14px 6px;margin-bottom:10px;border-radius:18px}.card.mywork .list li{padding:6px 0}.card.mywork .linkbtn{min-height:44px}
 .ogrp .row{flex-wrap:wrap}.ogrp .row .btn{min-width:min(100%,9rem)}.ogrp{border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:12px;background:var(--paper)}.ogrp h3{font-size:1rem}.ogrp .list li{padding:6px 0}
+.dnl{align-items:center}.dnl .mtk{min-height:44px;min-width:44px;justify-content:center;padding:0}.dnq{width:4.6rem;min-height:44px;padding:6px 8px;text-align:right;flex:none}.dnu{flex:none;min-width:2.2rem}
+.dnim{display:flex;align-items:center;gap:10px;margin-top:10px}.dnim img{width:64px;height:64px;object-fit:cover;border-radius:12px}.dnim span{display:inline-flex;gap:6px;align-items:center;color:var(--green);font-weight:600}
+.dng{margin-top:12px}.dng h3{margin:0;font-size:1rem}.dng .list li{padding:6px 0}
+.ro [data-act="dnote"],.ro-mats [data-act="dnote"],.ro [data-fab="dnote"],.ro-mats [data-fab="dnote"],.na-mats [data-fab="dnote"],.na-mats [data-act="dnote"],.na-mats [data-act="dnotes"]{display:none!important}
 </style>
 </head>
 <body>
@@ -1042,7 +1046,7 @@ const TABS=[["build","Build","grid"],["home","Overview","home"],["add","Add","pl
 const navTab=t=>({phase:"build",mats:"build",site:"build",plans:"build",docs:"build",inbox:"more",people:"more",tasks:"build",diary:"build",garden:"build",extra:"more",report:"home",week:"home",pupd:"home",weather:"build",photos:"build",snags:"build"})[t]||t;
 $("nav.tabs").innerHTML=TABS.map(([k,l,i])=>k==="add"?`<button type="button" class="cap" id="fab" aria-label="Add something" aria-expanded="false" aria-controls="fab-menu">${ic(i)}</button>`:`<button data-tab="${k}">${ic(i)}<span>${l}</span>${k==="build"?'<i class="dot" id="tdot" hidden></i>':""}</button>`).join("");
 $("#today").textContent=new Date().toLocaleDateString("en-ZA",sm.code?{weekday:"short",day:"numeric",month:"short"}:{weekday:"long",day:"numeric",month:"long"});
-$("#fab-menu").innerHTML=[["site","On site",[["photo","camera","Photo"],["issue","alert","Snag"]]],["build","Build",[["task","clip","Task"],["mat","truck","Material"]]],["money","Money",[["cost","cash","Expense"],["pay","users","Record payment"]]],["team","Team",[["msg","chat","Update everyone"],["site","note","Site log"]]]].map(([g,t,it])=>`<div class="fab-grp" data-g="${g}"><h4>${t}</h4><div class="fab-row">${it.map(([k,i,l])=>`<button class="fab-item" data-fab="${k}"><span class="fi">${ic(i)}</span><span class="fl">${l}</span></button>`).join("")}</div></div>`).join("")+`<p class="fab-hint">Hold the plus button to take a photo straight away.</p>`;
+$("#fab-menu").innerHTML=[["site","On site",[["photo","camera","Photo"],["issue","alert","Snag"]]],["build","Build",[["task","clip","Task"],["mat","truck","Material"]]],["money","Money",[["cost","cash","Expense"],["pay","users","Record payment"]]],["team","Team",[["msg","chat","Update everyone"],["site","note","Site log"],["dnote","truck","Delivery note"]]]].map(([g,t,it])=>`<div class="fab-grp" data-g="${g}"><h4>${t}</h4><div class="fab-row">${it.map(([k,i,l])=>`<button class="fab-item" data-fab="${k}"><span class="fi">${ic(i)}</span><span class="fl">${l}</span></button>`).join("")}</div></div>`).join("")+`<p class="fab-hint">Hold the plus button to take a photo straight away.</p>`;
 
 let toastT;
 let lastActRec=null;
@@ -1130,7 +1134,7 @@ $("#fab").onclick=()=>setFab($("#fab").getAttribute("aria-expanded")!=="true");
   m.addEventListener("pointermove",e=>{if(y0!==null&&e.clientY-y0>60){y0=null;setFab(false)}});
   ["pointerup","pointercancel"].forEach(n=>m.addEventListener(n,()=>{y0=null}));
 })();
-document.querySelectorAll("[data-fab]").forEach(b=>b.onclick=()=>{setFab(false);buzz(10);if(!fabOK(b.dataset.fab))return;({photo:()=>quickPhoto(tab==="phase"?curPh:undefined),cost:()=>costSheet(),pay:()=>recPaySheet(),msg:()=>newMsgSheet(true),site:()=>logSheet(null,"update",tab==="phase"?curPh:undefined),task:()=>addTaskSheet(tab==="phase"?curPh:undefined),mat:()=>matSheet(),issue:()=>logSheet(null,"issue")})[b.dataset.fab]()});
+document.querySelectorAll("[data-fab]").forEach(b=>b.onclick=()=>{setFab(false);buzz(10);if(!fabOK(b.dataset.fab))return;({photo:()=>quickPhoto(tab==="phase"?curPh:undefined),cost:()=>costSheet(),pay:()=>recPaySheet(),msg:()=>newMsgSheet(true),site:()=>logSheet(null,"update",tab==="phase"?curPh:undefined),dnote:()=>dnoteSheet(),task:()=>addTaskSheet(tab==="phase"?curPh:undefined),mat:()=>matSheet(),issue:()=>logSheet(null,"issue")})[b.dataset.fab]()});
 addEventListener("keydown",e=>{if(e.key==="Escape"){if(closeSheet)closeSheet();else if($("#fab").getAttribute("aria-expanded")==="true"){setFab(false);$("#fab").focus()}}});
 const reduced=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
 const buzz=n=>{try{navigator.vibrate?.(n)}catch{}};
@@ -1659,9 +1663,9 @@ function contractorsSheet(){
 }
 /* the less used places, one tap away */
 function bmoreSheet(){
-  const rows=[["site","camera","Site log","Photos and notes as the work goes up",""],["diary","book","Site diary","Weather, people on site and hours lost",""],["docs","note","Documents","Quotes, certificates, invoices and delivery notes",S.docs.filter(docListed).length||""],["snags","alert","Snags","Things to fix, with an owner and a check",(()=>{const n=S.logs.filter(l=>l.kind==="issue"&&!l.closed).length;return n||""})()],["garden","leaf","Garden","Areas, tasks and materials",(()=>{const g=S.tasks.filter(t=>isG(t.phase)&&t.status!=="done");return g.length?uk(g):""})()]];
+  const rows=[["site","camera","Site log","Photos and notes as the work goes up",""],["diary","book","Site diary","Weather, people on site and hours lost",""],["docs","note","Documents","Quotes, certificates, invoices and delivery notes",S.docs.filter(docListed).length||""],["dnotes","truck","Delivery notes","Scan a note and see every delivery",S.docs.filter(d=>d.type==="delivery").length||""],["snags","alert","Snags","Things to fix, with an owner and a check",(()=>{const n=S.logs.filter(l=>l.kind==="issue"&&!l.closed).length;return n||""})()],["garden","leaf","Garden","Areas, tasks and materials",(()=>{const g=S.tasks.filter(t=>isG(t.phase)&&t.status!=="done");return g.length?uk(g):""})()]];
   sheet("More places",`<ul class="list moreV" style="margin-top:6px">${rows.map(([t,i,n,sub,c])=>`<li class="tap" tabindex="0" data-go="${t}"><span class="row-ic">${ic(i)}</span><div class="grow"><div class="lt">${n}</div><div class="ls">${sub}</div></div>${c?`<span class="muted small">${c}</span>`:""}${ic("chev","sm")}</li>`).join("")}</ul>`,(sh,close)=>{
-    sh.querySelectorAll("li[data-go]").forEach(li=>li.addEventListener("click",()=>{const t=li.dataset.go;close();go(t)}));
+    sh.querySelectorAll("li[data-go]").forEach(li=>li.addEventListener("click",()=>{const t=li.dataset.go;close();if(t==="dnotes")setTimeout(deliveriesSheet,80);else go(t)}));
     sh.querySelectorAll("li.tap").forEach(li=>li.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();li.click()}}));
   });
 }
@@ -1730,6 +1734,7 @@ function matsV(){
   return `<div class="page-h"><div class="row" style="gap:10px">${backBtn()}<h2>Materials</h2></div><button class="btn primary" data-act="addmat">${ic("plus")}Add</button></div>
   <div class="segc" role="group" aria-label="Section">${SECS.map(([k,l])=>`<button type="button" data-sub="sec:${k}" aria-pressed="${sec===k}">${l}</button>`).join("")}</div>
   <div class="chips scroll" role="group" aria-label="Filter by phase" style="margin:0 0 10px">${[["all","All phases · "+S.mats.length],...PH.map(p=>[p[0],PSHORT[p[0]]+" · "+S.mats.filter(m=>m.phase===p[0]).length]),["none","No phase · "+S.mats.filter(m=>!m.phase).length]].map(([k,l])=>`<button type="button" class="chip" data-sub="mph:${k}" aria-pressed="${matPh===k}">${esc(l)}</button>`).join("")}</div>
+  <div class="row" style="gap:8px;margin:0 0 10px"><button type="button" class="btn small grow" data-act="dnote">${ic("camera","sm")}Scan delivery note</button><button type="button" class="btn small grow" data-act="dnotes">${ic("truck","sm")}Delivery notes</button></div>
   ${sec==="elec"?elecCard():""}
   ${sec==="stock"?(lowN?`<div class="warn">${ic("alert")}<span>${lowN} item${lowN===1?" is":"s are"} running low or out of stock.</span></div>`:""):`<div class="chips scroll" role="group" aria-label="Filter">${[...L.map(([k,l])=>[k,`${l} · ${cnt(k)}`]),["all","All"]].map(([k,l])=>`<button type="button" class="chip" data-sub="mat:${k}" aria-pressed="${matF===k}">${esc(l)}</button>`).join("")}</div>`}
   <div class="card" style="margin-top:12px">
@@ -1795,7 +1800,7 @@ function act(a,id,el){
    paypay:()=>{const x=S.pays.find(q=>q.id===id);if(!x)return;confirmSheet("Record this payment?",`${money(x.amount)} paid to the builder today.`,"Yes, record payment",()=>{const u=undoEdit(x,{paid:true,paidOn:today()});payCost(x);logAct(`Builder payment of ${money(x.amount)} recorded`,1);save();render();toast(`${rand(x.amount)} paid to the builder.`,()=>{u();payCost(x)})},true)},
    delpay:()=>{const x=S.pays.find(q=>q.id===id),lc=S.costs.find(c=>c.id==="pay_"+id);S.pays.splice(S.pays.indexOf(x),1);if(lc)S.costs.splice(S.costs.indexOf(lc),1);save();render();toast("Stage deleted.",()=>{S.pays.push(x);if(lc)S.costs.push(lc)})},
    paycost:()=>{const c=S.costs.find(x=>x.id===id),u=undoEdit(c,{paid:true});save();render();toast(`${rand(c.amount)} marked as paid.`,u)},budget:()=>moneyOK?budgetSheet():moneyGate(budgetSheet),lockmoney:()=>{lockMoney();toast("Money is locked.")},addmat:()=>matSheet(undefined,id&&phase(id)?id:undefined),editmat:()=>matSheet(id),delmat:()=>delRecs(S.mats,m=>m.id===id,"Material"),
-   mattick:()=>{const[mid,k]=id.split("|"),m=S.mats.find(x=>x.id===mid);if(!m)return;const t=matTicks(m),ord=k==="o"?!t.ord:(t.rec?t.ord:true),rec=k==="r"?!t.rec:(t.ord?t.rec&&ord:false);const u=undoEdit(m,{status:rec?"got":ord?"ordered":"need",ordOn:ord?(t.ord&&m.ordOn||today()):"",recOn:rec?(t.rec&&m.recOn||today()):"",...(hasMoves(m)?{rcv:rec}:{})});save();render();toast(`${m.name}: ${rec?"received":ord?"ordered":"not ordered"}.`,u)},matagain:()=>{const m=S.mats.find(x=>x.id===id);if(!m)return;const u=undoEdit(m,{orders:[...(m.orders||[]),{ordOn:m.ordOn||"",recOn:m.recOn||"",qty:m.qty||0,unit:m.unit||""}],status:"need",ordOn:"",recOn:"",...(hasMoves(m)?{rcv:false}:{})});save();render();toast(`${m.name}: back on the order list.`,u)},cycmat:()=>{const m=S.mats.find(x=>x.id===id),L=mst(m),order=L.map(x=>x[0]),nx=order[(order.indexOf(m.status)+1)%order.length];const u=undoEdit(m,{status:nx});save();render();toast(`${m.name}: ${L.find(x=>x[0]===nx)[1].toLowerCase()}.`,u)},
+   dnote:()=>dnoteSheet(),dnotes:()=>deliveriesSheet(),mattick:()=>{const[mid,k]=id.split("|"),m=S.mats.find(x=>x.id===mid);if(!m)return;const t=matTicks(m),ord=k==="o"?!t.ord:(t.rec?t.ord:true),rec=k==="r"?!t.rec:(t.ord?t.rec&&ord:false);const u=undoEdit(m,{status:rec?"got":ord?"ordered":"need",ordOn:ord?(t.ord&&m.ordOn||today()):"",recOn:rec?(t.rec&&m.recOn||today()):"",...(hasMoves(m)?{rcv:rec}:{})});save();render();toast(`${m.name}: ${rec?"received":ord?"ordered":"not ordered"}.`,u)},matagain:()=>{const m=S.mats.find(x=>x.id===id);if(!m)return;const u=undoEdit(m,{orders:[...(m.orders||[]),{ordOn:m.ordOn||"",recOn:m.recOn||"",qty:m.qty||0,unit:m.unit||""}],status:"need",ordOn:"",recOn:"",...(hasMoves(m)?{rcv:false}:{})});save();render();toast(`${m.name}: back on the order list.`,u)},cycmat:()=>{const m=S.mats.find(x=>x.id===id),L=mst(m),order=L.map(x=>x[0]),nx=order[(order.indexOf(m.status)+1)%order.length];const u=undoEdit(m,{status:nx});save();render();toast(`${m.name}: ${L.find(x=>x[0]===nx)[1].toLowerCase()}.`,u)},
    movein:()=>moveSheet(id,"in"),moveout:()=>moveSheet(id,"out"),editelec:()=>elecSheet(),
    shareorder:()=>orderSheet(id&&(id==="all"||phase(id))?id:(matPh!=="all"&&matPh!=="none"?matPh:"")),addsup:()=>supSheet(),editsup:()=>supSheet(id),delsup:()=>delRecs(S.sups,s=>s.id===id,"Contact"),
    addphoto:()=>quickPhoto(id&&phase(id)?id:undefined),addissue:()=>logSheet(null,"issue"),editlog:()=>logSheet(id),dellog:()=>delRecs(S.logs,l=>l.id===id,"Entry"),
@@ -2958,7 +2963,7 @@ const ROLE_PICK=["site","builder","owner","decor","finance","other"];
 const roleLabel=r=>(ROLES[r]||ROLES.other).label;
 const DEFAULT_PEOPLE=[["Albert","site"],["Jonathan","builder"],["Newberry","owner"],["Talana","decor"],["Audrey","finance"]];
 const READ_ACTS0=["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock","plprev","plnext","phdrive","gbackup"].concat(["goinbox","gopeople","newmsg","msglb","sharesheet"]);
-const READ_ACTS=READ_ACTS0.concat(["rpopen","contractors","gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp","mbar","slipexport","slipview","thread","msgdec","snagexport","msgdel","msgclear","gosnags","attsheet","bmore","tipgo","tipx","tipsheet","wkgoals","pusend","pupick","tradecmp","quotehow"]);
+const READ_ACTS=READ_ACTS0.concat(["rpopen","contractors","dnotes","gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp","mbar","slipexport","slipview","thread","msgdec","snagexport","msgdel","msgclear","gosnags","attsheet","bmore","tipgo","tipx","tipsheet","wkgoals","pusend","pupick","tradecmp","quotehow"]);
 const MONEY_ACTS=["addcost","editcost","delcost","budget","addpay","editpay","delpay","recpay","paypay","paycost","contract","typicalpay","weekly","resetpays","payall","report"];
 MONEY_ACTS.push("addtrade","edittrade","deltrade","opentrade","tradeaccept","paystage");
 const NOTE_ACTS=["addphoto","phphoto","adddoc"];
@@ -2978,7 +2983,7 @@ const ago=t=>{const s=Math.max(0,(Date.now()-new Date(t).getTime())/1000);return
 const personLink=p=>location.origin+location.pathname+"#join="+sm.code+"&k="+p.key;
 const waUrl=(phone,text)=>{let d=String(phone||"").replace(/\D/g,"");if(d.startsWith("0"))d="27"+d.slice(1);return "https://wa.me/"+d+"?text="+encodeURIComponent(text)};
 function fabOK(k){
-  const ar={photo:"log",issue:"log",task:"tasks",mat:"mats",cost:"money",pay:"money",msg:"upd",site:"log"}[k];if(k==="msg"&&!sm.code){shareSheet();return false}
+  const ar={photo:"log",issue:"log",task:"tasks",mat:"mats",cost:"money",pay:"money",msg:"upd",site:"log",dnote:"mats"}[k];if(k==="msg"&&!sm.code){shareSheet();return false}
   if(lvl(ar)>=2)return true;toast(AREA_MSG(ar));return false;
 }
 const whoLine=()=>sm.code&&!perm.manage?`<p class="muted small" style="margin:0 2px 12px">You are <b>${esc(sm.pname||me||"signed in")}</b>, ${esc(roleLabel(sm.prole))}. ${esc(accessText(perm))}</p>`:"";
@@ -3116,7 +3121,7 @@ const AREAS=[
   ["furn","Furniture and decor","What we build for the classrooms",0,["No access","See only","Update"]],
   ["money","Money","Costs, trades and payments",0,["No access","See only","Record"]],
   ["upd","Updates","Messages to and from the team",1,["Receive","Send"]]];
-const ACT_AREA={pedit:"tasks",padd:"tasks",pren:"tasks",pdel:"tasks",pmv:"tasks",gedit:"tasks",gadd:"tasks",gren:"tasks",gdel:"tasks",estimate:"money",scanslip:"money",snagedit:"log",snagreopen:"log",phcover:"tasks",contract:"money",addextra:"money",editextra:"money",cyc:"tasks",cycboth:"tasks",edittask:"tasks",deltask:"tasks",addtask:"tasks",reorder:"tasks",mvup:"tasks",mvdn:"tasks",phphoto:"log",addphoto:"log",addissue:"log",editlog:"log",dellog:"log",fix:"log",addmat:"mats",editmat:"mats",delmat:"mats",mattick:"mats",matagain:"mats",cycmat:"mats",movein:"mats",moveout:"mats",editelec:"mats",addsup:"mats",editsup:"mats",delsup:"mats",adddoc:"docs",addplan:"docs",adddiary:"diary",editdiary:"diary",addfurn:"furn",editfurn:"furn",delfurn:"furn",furnstarter:"furn"};
+const ACT_AREA={pedit:"tasks",padd:"tasks",pren:"tasks",pdel:"tasks",pmv:"tasks",gedit:"tasks",gadd:"tasks",gren:"tasks",gdel:"tasks",estimate:"money",scanslip:"money",snagedit:"log",snagreopen:"log",phcover:"tasks",contract:"money",addextra:"money",editextra:"money",cyc:"tasks",cycboth:"tasks",edittask:"tasks",deltask:"tasks",addtask:"tasks",reorder:"tasks",mvup:"tasks",mvdn:"tasks",phphoto:"log",addphoto:"log",addissue:"log",editlog:"log",dellog:"log",fix:"log",addmat:"mats",editmat:"mats",delmat:"mats",mattick:"mats",matagain:"mats",dnote:"mats",cycmat:"mats",movein:"mats",moveout:"mats",editelec:"mats",addsup:"mats",editsup:"mats",delsup:"mats",adddoc:"docs",addplan:"docs",adddiary:"diary",editdiary:"diary",addfurn:"furn",editfurn:"furn",delfurn:"furn",furnstarter:"furn"};
 const AREA_MSG=ar=>lvl(ar)===0?"You do not have access to this area.":"You can look at this area but not change it.";
 const areaLabel=(k,v)=>{const a=AREAS.find(x=>x[0]===k);return a?a[4][Math.max(0,v-a[3])]||"":""};
 function areaRows(st,pre){
@@ -4588,6 +4593,104 @@ function phaseV(){
   ${ts.length&&d===ts.length?completeCard(ts):""}
   ${tabs}
   ${pt==="mats"?phaseMats(id):taskPart}`;
+}
+/* delivery note: a photo, the supplier, then tick what arrived. Ticked materials get Received and the note is filed under Documents */
+function dnoteSheet(){
+  if(lvl("mats")<2){toast(AREA_MSG("mats"));return}
+  let file=null,sup="";const sel=new Map(),extra=[];
+  const onOrder=()=>S.mats.filter(m=>{const t=matTicks(m);return t.ord&&!t.rec});
+  const shown=()=>{const c=onOrder().filter(m=>!sup||m.sup===sup||!m.sup),ids=new Set(c.map(m=>m.id));sel.forEach((q,id)=>{if(!ids.has(id)){const m=S.mats.find(x=>x.id===id);if(m){c.push(m);ids.add(id)}}});return c.sort((a,b)=>((b.sup===sup&&!!sup)-(a.sup===sup&&!!sup))||a.name.localeCompare(b.name))};
+  const qv=v=>v===""||v==null?"":String(v);
+  const draw=sh=>{
+    const L=shown(),ids=new Set(L.map(m=>m.id)),rest=S.mats.filter(m=>!ids.has(m.id)).sort((a,b)=>a.name.localeCompare(b.name));
+    sh.querySelector("#dnl").innerHTML=(L.length?`<ul class="list">${L.map(m=>{const on=sel.has(m.id);return `<li class="dnl"><button type="button" class="mtk" data-pick="${m.id}" aria-pressed="${on}" aria-label="${esc(m.name)}${on?", ticked":""}"><span class="mtc">${on?ic("check","sm"):""}</span></button><div class="grow"><div class="lt">${esc(m.name)}</div><div class="ls">${esc([m.sup?supName(m.sup):"",m.qty>0?"ordered "+num(m.qty,2)+" "+m.unit:""].filter(Boolean).join(" · ")||"On order")}</div></div>${on?`<input class="t dnq" inputmode="decimal" data-q="${m.id}" value="${esc(qv(sel.get(m.id)))}" placeholder="0" aria-label="How many ${esc(m.name)} arrived"><span class="small muted dnu">${esc(m.unit)}</span>`:""}</li>`}).join("")}</ul>`:`<p class="muted small" style="margin:6px 0">Nothing is marked as ordered${sup?" from this supplier":""}. Add the materials below.</p>`)
+     +(extra.length?`<ul class="list">${extra.map((x,i)=>`<li class="dnl"><span class="row-ic">${ic("note","sm")}</span><div class="grow"><div class="lt">${esc(x.name)}</div><div class="ls">Not on the materials list</div></div><input class="t dnq" inputmode="decimal" data-xq="${i}" value="${esc(qv(x.qty))}" placeholder="0" aria-label="How many ${esc(x.name)} arrived"><button type="button" class="btn small icon" data-xr="${i}" aria-label="Remove ${esc(x.name)}">${ic("x","sm")}</button></li>`).join("")}</ul>`:"")
+     +`<label class="f" for="dadd">Add another material</label><select id="dadd" class="t sel"><option value="">Choose a material</option>${rest.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join("")}</select>
+     <label class="f" for="dx">Something not on the list</label><div class="row" style="gap:8px"><input id="dx" class="t grow" maxlength="80" placeholder="For example: Steel mesh"><button type="button" class="btn" id="dxa">Add</button></div>`;
+    sh.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{const id=b.dataset.pick;if(sel.has(id))sel.delete(id);else{const m=S.mats.find(x=>x.id===id);sel.set(id,m&&m.qty>0?m.qty:"")}draw(sh)});
+    sh.querySelectorAll("[data-q]").forEach(i=>i.oninput=()=>sel.set(i.dataset.q,i.value));
+    sh.querySelectorAll("[data-xq]").forEach(i=>i.oninput=()=>{extra[+i.dataset.xq].qty=i.value});
+    sh.querySelectorAll("[data-xr]").forEach(b=>b.onclick=()=>{extra.splice(+b.dataset.xr,1);draw(sh)});
+    sh.querySelector("#dadd").onchange=e=>{const id=e.target.value;if(!id)return;const m=S.mats.find(x=>x.id===id);sel.set(id,m&&m.qty>0?m.qty:"");draw(sh)};
+    const dx=sh.querySelector("#dx"),addX=()=>{const v=dx.value.trim();if(!v)return;extra.push({name:v,qty:""});draw(sh)};
+    sh.querySelector("#dxa").onclick=addX;dx.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();addX()}};
+    const n=sel.size+extra.length;sh.querySelector("#dsv").textContent=n?`Save · ${n} item${n===1?"":"s"} received`:"Save delivery note";
+  };
+  sheet("Delivery note",`<form id="f" novalidate><p class="muted" style="margin:6px 0 0">Take a photo of the note, then tick what arrived.</p>
+  <div class="photo-add" style="margin-top:10px"><button type="button" class="btn primary" id="dnc">${ic("camera")}Take photo</button><button type="button" class="btn" id="dnp">${ic("image")}Choose photo</button></div>
+  <input type="file" id="dnci" accept="image/*" capture="environment" hidden><input type="file" id="dnpi" accept="image/*" hidden><div id="dnim"></div>
+  <label class="f" for="dsu">Supplier</label><select id="dsu" class="t sel"><option value="">Not sure</option>${S.sups.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("")}</select>
+  <label class="f" for="dno">Note number (optional)</label><input id="dno" class="t" maxlength="40" inputmode="text" placeholder="On the top of the note">
+  ${dateField("dt",today(),"Delivered on")}
+  <div class="eyebrow" style="margin:16px 0 4px">What arrived</div><div id="dnl"></div>
+  <div class="foot"><button class="btn primary block" id="dsv">Save delivery note</button></div></form>`,(sh,close)=>{
+    wireDc(sh);
+    const got=e=>{const f=e.target.files[0];if(!f)return;file=f;const u=URL.createObjectURL(f);sh.querySelector("#dnim").innerHTML=`<div class="dnim"><img src="${u}" alt="Delivery note photo"><span>${ic("check","sm")}Photo added</span></div>`;sh.querySelector("#dnc").classList.remove("primary")};
+    sh.querySelector("#dnci").onchange=got;sh.querySelector("#dnpi").onchange=got;
+    sh.querySelector("#dnc").onclick=()=>sh.querySelector("#dnci").click();sh.querySelector("#dnp").onclick=()=>sh.querySelector("#dnpi").click();
+    sh.querySelector("#dsu").onchange=e=>{sup=e.target.value;draw(sh)};
+    draw(sh);
+    sh.querySelector("#f").onsubmit=async e=>{
+      e.preventDefault();
+      if(!file){toast("Take a photo of the delivery note first.");return}
+      if(!sel.size&&!extra.length){toast("Tick at least one thing that arrived.");return}
+      const b=sh.querySelector("#dsv");b.disabled=true;
+      try{
+        const date=sh.querySelector("#dt").value||today(),no=sh.querySelector("#dno").value.trim();
+        const lines=[...[...sel].map(([id,q])=>{const m=S.mats.find(x=>x.id===id);return m?{mat:id,name:m.name,qty:parseAmt(q)||0,unit:m.unit}:null}).filter(Boolean),...extra.map(x=>({name:x.name,qty:parseAmt(x.qty)||0,unit:""}))];
+        const blob=await prepPhoto(file,PSIZES[psize][1]),mid="dc"+uid(),did=uid();await mPut(mid,blob);queueMedia(mid);
+        const d={id:did,name:"Delivery note"+(no?" "+no:"")+(sup?" · "+supName(sup):""),type:"delivery",date,phase:"",sup,note:lines.map(l=>dnQty(l)+l.name).join(", "),media:mid,fn:"delivery-note.jpg",mime:"image/jpeg",size:blob.size,who:me,lines,dno:no};
+        S.docs.push(d);
+        const us=lines.filter(l=>l.mat).map(l=>{const m=S.mats.find(x=>x.id===l.mat);return hasMoves(m)?undoEdit(m,{moves:[...(m.moves||[]),{id:uid(),t:"in",qty:l.qty,date,note:no,who:me,doc:did}],rcv:undefined}):undoEdit(m,{status:"got",ordOn:m.ordOn||date,recOn:date})});
+        const rc=lines.filter(l=>l.mat&&matTicks(S.mats.find(x=>x.id===l.mat)).rec).length,part=us.length-rc;logAct(`Delivery note${no?" "+no:""}${sup?" from "+supName(sup):""}: ${lines.length} item${lines.length===1?"":"s"}`);
+        save();close();render();
+        toast(`Delivery note saved.${rc?` ${rc} material${rc===1?"":"s"} marked received.`:""}${part?` ${part} part deliver${part===1?"y":"ies"} recorded.`:""}`,()=>{us.forEach(u=>u());const i=S.docs.indexOf(d);if(i>=0)S.docs.splice(i,1)});
+      }catch(err){console.warn(err);toast("Could not save the note. Try again.")}finally{b.disabled=false}
+    };
+  });
+}
+/* every delivery note, sorted by supplier, material or week, and easy to share */
+const dnLines=d=>d.lines||S.mats.flatMap(m=>(m.moves||[]).filter(x=>x.doc===d.id).map(x=>({mat:m.id,name:m.name,qty:x.qty,unit:m.unit})));
+const dnQty=l=>l.qty?(num(l.qty,2)+" "+(l.unit||"")).trim()+" ":"";
+const dnLine=l=>`- ${dnQty(l)}${l.name}`;
+const dnText=d=>`*Delivery note${d.dno?" "+d.dno:""}*\n${[d.sup?supName(d.sup):"",dshort(d.date)].filter(Boolean).join(" · ")}\n\n`+(dnLines(d).map(dnLine).join("\n")||"(see the photo)");
+const dnMon=iso=>{const t=new Date(iso+"T12:00");t.setDate(t.getDate()-((t.getDay()+6)%7));return iso_(t)};
+const iso_=t=>t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0");
+async function dnShare(docs,text){
+  const files=[];
+  for(const d of docs.slice(0,10)){try{const bl=d.media&&await mGet(d.media);if(bl)files.push(new File([bl],"delivery-note-"+(d.dno||d.date)+".jpg",{type:bl.type||"image/jpeg"}))}catch{}}
+  if(files.length&&navigator.canShare&&navigator.canShare({files})){try{await navigator.share({files,text});return}catch(e){if(e?.name==="AbortError")return}}
+  shareText(text);
+}
+function deliveriesSheet(by){
+  by=by||lsGet("b3-dnby")||"sup";
+  const docs=S.docs.filter(d=>d.type==="delivery"&&docVisible(d)).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id>a.id?1:-1));
+  const row=d=>{const L=dnLines(d);return `<li class="tap" tabindex="0" data-doc="${d.id}"><span class="row-ic">${ic("truck")}</span><div class="grow"><div class="lt">${esc([dshort(d.date),d.sup?supName(d.sup):"",d.dno?"No. "+d.dno:""].filter(Boolean).join(" · "))}</div><div class="ls">${esc(L.length?L.map(l=>dnQty(l)+l.name).join(", "):"Photo only")}</div></div><button type="button" class="btn small icon" data-sh="${d.id}" aria-label="Share this delivery note">${ic("share")}</button></li>`};
+  let body="";
+  if(!docs.length)body=`<p class="muted" style="margin:10px 0">No delivery notes yet. Tap Scan a delivery note when the next truck arrives.</p>`;
+  else if(by==="mat"){
+    const tot=new Map();docs.forEach(d=>dnLines(d).forEach(l=>{const k=l.name+"|"+(l.unit||"");const t=tot.get(k)||{name:l.name,unit:l.unit||"",qty:0,n:0,docs:[]};t.qty+=+l.qty||0;t.n++;t.docs.push(d);tot.set(k,t)}));
+    body=[...tot.values()].sort((a,b)=>a.name.localeCompare(b.name)).map(t=>`<div class="dng"><div class="row between" style="gap:8px;align-items:baseline"><h3>${esc(t.name)}</h3><span class="small muted">${t.qty?num(t.qty,2)+" "+esc(t.unit)+" · ":""}${t.n} note${t.n===1?"":"s"}</span></div><ul class="list">${[...new Set(t.docs)].map(row).join("")}</ul></div>`).join("")||`<p class="muted small">These notes have no materials ticked.</p>`;
+  }else{
+    const g=new Map();docs.forEach(d=>{const k=by==="week"?dnMon(d.date||today()):(d.sup?supName(d.sup):"");(g.get(k)||g.set(k,[]).get(k)).push(d)});
+    const keys=[...g.keys()].sort((a,b)=>by==="week"?b.localeCompare(a):(a?0:1)-(b?0:1)||a.localeCompare(b));
+    body=keys.map(k=>`<div class="dng"><div class="row between" style="gap:8px;align-items:baseline"><h3>${by==="week"?"Week of "+dshort(k):esc(k||"No supplier")}</h3><span class="small muted">${g.get(k).length} note${g.get(k).length===1?"":"s"}</span></div><ul class="list">${g.get(k).map(row).join("")}</ul></div>`).join("");
+  }
+  sheet("Delivery notes",`<div class="segc" role="group" aria-label="Sort by" style="margin:8px 0 10px">${[["sup","Supplier"],["mat","Material"],["week","Week"]].map(([k,l])=>`<button type="button" data-by="${k}" aria-pressed="${by===k}">${l}</button>`).join("")}</div>
+  ${body}
+  <div class="foot">${lvl("mats")>=2?`<button type="button" class="btn primary block" id="dnew">${ic("camera")}Scan a delivery note</button>`:""}${docs.length?`<button type="button" class="btn block" id="dwk" style="margin-top:8px">${ic("share")}Share this week's deliveries</button>`:""}</div>`,(sh,close)=>{
+    sh.querySelectorAll("[data-by]").forEach(b=>b.onclick=()=>{lsSet("b3-dnby",b.dataset.by);close();setTimeout(()=>deliveriesSheet(b.dataset.by),80)});
+    sh.querySelectorAll("li[data-doc]").forEach(li=>li.addEventListener("click",e=>{if(e.target.closest("[data-sh]"))return;const id=li.dataset.doc;close();setTimeout(()=>docView(id),80)}));
+    sh.querySelectorAll("[data-sh]").forEach(b=>b.onclick=()=>{const d=S.docs.find(x=>x.id===b.dataset.sh);if(d)dnShare([d],dnText(d))});
+    sh.querySelector("#dnew")?.addEventListener("click",()=>{close();setTimeout(dnoteSheet,80)});
+    sh.querySelector("#dwk")?.addEventListener("click",()=>{
+      const from=addDays(today(),-6),wk=docs.filter(d=>(d.date||"")>=from);
+      if(!wk.length){toast("No delivery notes in the last 7 days.");return}
+      const tot=new Map();wk.forEach(d=>dnLines(d).forEach(l=>{const k=l.name+"|"+(l.unit||"");const t=tot.get(k)||{name:l.name,unit:l.unit||"",qty:0};t.qty+=+l.qty||0;tot.set(k,t)}));
+      const tx=`*${S.settings.name||"Classrooms"}: deliveries ${dshort(from)} to ${dshort(today())}*\n${wk.length} delivery note${wk.length===1?"":"s"}\n\n*Totals*\n`+([...tot.values()].map(dnLine).join("\n")||"-")+"\n\n*Notes*\n"+wk.map(d=>`${dshort(d.date)}${d.sup?" · "+supName(d.sup):""}${d.dno?" · No. "+d.dno:""}`).join("\n");
+      dnShare(wk,tx);
+    });
+  });
 }
 /* Build home: the next tasks given to me, ticked off in one tap */
 function myWorkCard(){
