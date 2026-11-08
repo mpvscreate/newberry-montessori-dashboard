@@ -1490,7 +1490,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: when a newer version is on the server the app refreshes itself (clearing old cached copies), unless someone is in the middle of something; then it offers a one-tap refresh */
-const APP_VER="6.22.1";
+const APP_VER="6.22.2";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function applyUpdate(){try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}
@@ -1948,8 +1948,7 @@ function wrapTab(p){
     <div class="bk-line"><span class="small muted">Funds or stock handed over</span><b>${esc(H.funds||"Not noted")}</b></div><div class="bk-line"><span class="small muted">Handed over by</span><b>${esc(H.by||"-")}${H.byOn?" · "+dLong(H.byOn):""}</b></div><div class="bk-line"><span class="small muted">Received by</span><b>${esc(H.to||"-")}${H.toOn?" · "+dLong(H.toOn):""}</b></div><button class="btn small" data-ba="hand:edit">${ic("pencil")}Hand over sign-off</button>`;
   return acc(p,"rev","flag","End of term review",R.completed||p.txt.achieved?"In progress":"Look back on the term",stp(!!p.txt.achieved&&!!p.txt.compare,p.txt.achieved&&p.txt.compare?"Done":"To do"),rev)+
     acc(p,"refl","user","Individual reflections",`${refl.filter(r=>r.done).length} of ${p.members.length} written`,stp(refl.length>0&&refl.every(r=>r.done),refl.length?`${refl.filter(r=>r.done).length}/${refl.length}`:"No members"),rf)+
-    studentsCard(p)+
-    nextTermCard(p);
+    studentsCard(p);
 }
 
 /* ---------- wiring ---------- */
