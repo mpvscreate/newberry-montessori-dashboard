@@ -816,6 +816,14 @@ select.sel{width:auto;min-height:44px;padding:0 12px;border-radius:14px}
 .wk-main .wk-b{padding-right:0;min-width:0}.wk-main .wk-b b{display:block;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .wkcard>.x{position:static;flex:none}
 .lv-st{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:2px 0 8px}.lv-dot{width:10px;height:10px;border-radius:50%;background:var(--muted);flex:none}.lv-dot.on{background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+/* v6.24.0: one term and week, shorter new-post sheet, name once, theme labels, tidier Plan */
+.namerow{margin-top:10px}
+.plp-c{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.plp-ch{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:transparent;color:var(--ink);border-radius:99px;padding:7px 14px;min-height:40px;font:600 .88rem var(--body);cursor:pointer}
+.plp-ch.ok{background:var(--green-soft);border-color:transparent;color:var(--green)}
+.plp-ch.nx{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.segc[aria-label="Theme"] button{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px}
+.segc[aria-label="Theme"] button span{display:inline!important}
 </style>
 </head>
 <body>
@@ -1131,6 +1139,9 @@ function bulkTagSheet(){
     };
   });
 }
+const twDefault=p=>{const tl=twLast(p.id);return(tl.term||tl.wk)?tl:(p.cur&&(p.cur.term||p.cur.wk)?p.cur:tl)};
+const nameRow=id=>!myName()?`<div class="namerow"><label class="sr" for="${id}">Your name</label><input class="t" id="${id}" type="text" maxlength="30" autocomplete="name" placeholder="Your name, shown on your posts"></div>`:"";
+const takeName=id=>{const e=document.getElementById(id);if(e&&e.value.trim()){try{localStorage.setItem(NAMEK,e.value.trim().slice(0,30))}catch{}}};
 const twSelects=(idT,idW,v)=>`<div class="twsel"><label class="sr" for="${idT}">Term</label><select class="t sel" id="${idT}" aria-label="Term"><option value="0">Term</option>${TERMS.map(n=>`<option value="${n}"${v.term===n?" selected":""}>Term ${n}</option>`).join("")}</select><label class="sr" for="${idW}">Week</label><select class="t sel" id="${idW}" aria-label="Week"><option value="0">Week</option>${WEEKS.map(n=>`<option value="${n}"${v.wk===n?" selected":""}>Week ${n}</option>`).join("")}</select></div>`;
 const twRead=(idT,idW)=>({term:+(document.getElementById(idT)||{}).value||0,wk:+(document.getElementById(idW)||{}).value||0});
 const PROMPTS=["What was the hardest part today?","Show us something you made.","What did you learn this week?","Who helped you today, and how?","What are you proud of?","What went wrong, and how did you fix it?","What will you do next?","Describe your work in three words.","What surprised you?","What would you tell a new team member?","Show us your workspace.","What did your team decide today?"];
@@ -1159,7 +1170,7 @@ async function makePost(p,text,files,tw,share){
 function attHTML(list,rm){return list.map((x,i)=>`<div class="attc">${x.vid?`<video src="${x.url}" muted playsinline></video><span class="vb">${ic("play","sm")}</span>`:`<img src="${x.url}" alt="">`}<button type="button" class="attx" data-rm="${i}" aria-label="Remove ${x.vid?"video":"photo"} ${i+1}">${ic("x","sm")}</button></div>`).join("")}
 function storyTab(p){
   if(storyF.pid!==p.id){storyF={pid:p.id,...tfLoad(p.id)};clearPend();composeOpen=false}
-  const hasTW=p.log.some(l=>l.term||l.wk),filt=!!(storyF.term||storyF.wk),tp=filt?{term:storyF.term,wk:storyF.wk}:twLast(p.id);
+  const hasTW=p.log.some(l=>l.term||l.wk),filt=!!(storyF.term||storyF.wk),tp=filt?{term:storyF.term,wk:storyF.wk}:twDefault(p);
   const items=storyItems(p),pics=mediaOf(p).filter(m=>m.type!=="video");
   const vis=items;
   const pinned=vis.filter(x=>x.k==="post"&&x.l.pin),rest=vis.filter(x=>!(x.k==="post"&&x.l.pin));
@@ -1172,7 +1183,7 @@ function storyTab(p){
   const mini=`<div class="card composer mini"><button class="cmini" id="sc-open" type="button" aria-label="${dr?"Continue your draft":"Write a post"}"><span class="pavs" aria-hidden="true">${esc(initials(who()||"me"))}</span><span class="cmt${dr?" dr":""}">${dr?"Draft: "+esc(dr.slice(0,60)):"What happened today?"}</span></button><button class="x cam" id="sc-cam" type="button" aria-label="Take a photo">${ic("camera")}</button><button class="x cam" id="sc-lib" type="button" aria-label="Choose photos or videos from the library">${ic("image")}</button><input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"><input type="file" id="pc" accept="image/*" capture="environment" class="sr" aria-label="Take a photo" tabindex="-1"></div>`;
   const full=`<div class="card composer"><div class="row" style="align-items:flex-start"><textarea class="t ta" rows="3" id="sc-t" placeholder="What happened today?" aria-label="Write a post">${esc(draftGet(p.id))}</textarea>${micBtn()}</div>${ideaChip()}
     <div class="att" id="sc-att"></div>${shareSw(p,"sc-pub")}${offLine()}
-    ${twSelects("sc-tm","sc-wk",tp)}<div class="row between wr" style="margin-top:10px"><span class="row"><button class="btn small" id="sc-cam2" type="button">${ic("camera")}Camera</button><button class="btn small" id="sc-add" type="button">${ic("image")}Library</button></span><span class="row"><button class="btn small" id="sc-min" type="button">Cancel</button><button class="btn primary" id="sc-post" type="button">${ic("send")}Save</button></span></div>
+    ${twSelects("sc-tm","sc-wk",tp)}${nameRow("sc-name")}<div class="row between wr" style="margin-top:10px"><span class="row"><button class="btn small" id="sc-cam2" type="button">${ic("camera")}Camera</button><button class="btn small" id="sc-add" type="button">${ic("image")}Library</button></span><span class="row"><button class="btn small" id="sc-min" type="button">Cancel</button><button class="btn primary" id="sc-post" type="button">${ic("send")}Save</button></span></div>
     <input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"><input type="file" id="pc" accept="image/*" capture="environment" class="sr" aria-label="Take a photo" tabindex="-1"></div>`;
   return (isOpen2?full:mini)+
   bar+
@@ -1253,7 +1264,7 @@ function wireStory(p){
   const onPick=e=>{[...e.target.files].forEach(f=>{if(pendFiles.length<12)pendFiles.push({file:f,url:URL.createObjectURL(f),vid:f.type.startsWith("video/")})});e.target.value="";if(!att){composeOpen=true;render();return}drawAtt()};
   $("#pf").onchange=onPick;{const pc=$("#pc");if(pc)pc.onchange=onPick}
   const post=async()=>{const t=$("#sc-t").value.trim();if(!t&&!pendFiles.length){$("#sc-t").focus();return}if(listening)listening.stop();
-    const b=$("#sc-post");b.disabled=true;const files=pendFiles.map(x=>x.file),chv=twRead("sc-tm","sc-wk");
+    const b=$("#sc-post");b.disabled=true;takeName("sc-name");const files=pendFiles.map(x=>x.file),chv=twRead("sc-tm","sc-wk");
     const l=await makePost(p,t,files,chv,pubOn("sc-pub"));clearPend();composeOpen=false;if(l){draftSet(p.id,"");fb("add");toast(postedToast())}render()};
   if($("#sc-post")){$("#sc-post").onclick=post;
   $("#sc-t").onkeydown=e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();post()}}}
@@ -1404,15 +1415,15 @@ function captureSheet(){
     const remember=()=>{try{localStorage.setItem(LASTK,pid)}catch{}};
     const draw=()=>{
       const p=P0();
-      root.innerHTML=`${prods().length>1?`<div class="sub-l">Which production?</div><div class="chips cp-chips" role="group" aria-label="Production">${prods().map(q=>`<button class="chip" data-pp="${q.id}" aria-pressed="${q.id===pid}">${esc(q.name)}</button>`).join("")}</div>`:""}
+      root.innerHTML=`${prods().length>1?`<label class="f" for="cp-prod" style="margin-top:0">Posting to</label><select class="t sel" id="cp-prod" aria-label="Posting to">${prods().map(q=>`<option value="${q.id}"${q.id===pid?" selected":""}>${esc(q.name)}</option>`).join("")}</select>`:""}
       <div class="qk" role="group" aria-label="Add a photo or video"><button class="qkb" data-a="img" type="button">${ic("camera")}<span>Photo</span></button><button class="qkb" data-a="vid" type="button">${ic("film")}<span>Video</span></button><button class="qkb" data-a="lib" type="button">${ic("image")}<span>Choose</span></button></div>
       <div class="row" style="align-items:flex-start;margin-top:10px"><textarea class="t ta" rows="3" id="cp-t" placeholder="What happened today?" aria-label="Write a post">${esc(draftGet(pid))}</textarea>${micBtn()}</div>${ideaChip()}
       <div class="att" id="cp-att"></div>
       ${shareSw(p,"cp-pub")}${offLine()}
-      ${twSelects("cp-tm","cp-wk",twLast(pid))}
+      ${twSelects("cp-tm","cp-wk",twDefault(P0()||{id:pid}))}${nameRow("cp-name")}
       <button class="btn primary block" id="cp-go" type="button" style="margin-top:14px">${ic("send")}Save to ${esc(p?p.name:"")}</button>`;
       wireMics(root);root.querySelectorAll(".ta").forEach(autosize);
-      root.querySelectorAll("[data-pp]").forEach(b=>b.onclick=()=>{const t=$("#cp-t").value;draftSet(pid,"");pid=b.dataset.pp;remember();draftSet(pid,t);draw();$("#cp-t").value=t});
+      {const sel=root.querySelector("#cp-prod");if(sel)sel.onchange=()=>{const t=$("#cp-t").value;draftSet(pid,"");pid=sel.value;remember();draftSet(pid,t);draw();$("#cp-t").value=t}}
       const att=root.querySelector("#cp-att"),drawAtt=()=>{att.innerHTML=attHTML(files);att.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{const x=files.splice(+b.dataset.rm,1)[0];try{URL.revokeObjectURL(x.url)}catch{}drawAtt()})};
       drawAtt();
       $("#cp-t").addEventListener("input",()=>draftSet(pid,$("#cp-t").value));
@@ -1422,7 +1433,7 @@ function captureSheet(){
       root.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>$("#cp-"+b.dataset.a).click());
       ["cp-lib","cp-img","cp-vid"].forEach(id=>{$("#"+id).onchange=e=>{[...e.target.files].forEach(f=>{if(files.length<12)files.push({file:f,url:URL.createObjectURL(f),vid:f.type.startsWith("video/")})});e.target.value="";drawAtt()}});
       $("#cp-go").onclick=async()=>{const t=$("#cp-t").value.trim();if(!t&&!files.length){$("#cp-t").focus();return}if(listening)listening.stop();
-        const b=$("#cp-go");b.disabled=true;const chv=twRead("cp-tm","cp-wk");
+        const b=$("#cp-go");b.disabled=true;takeName("cp-name");const chv=twRead("cp-tm","cp-wk");
         const l=await makePost(P0(),t,files.map(x=>x.file),chv,pubOn("cp-pub"));files.forEach(x=>{try{URL.revokeObjectURL(x.url)}catch{}});files=[];
         if(l){draftSet(pid,"");fb("add");remember();close();render();toast(postedToast(P0().name))}else{b.disabled=false}};
     };
@@ -1507,7 +1518,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: when a newer version is on the server the app refreshes itself (clearing old cached copies), unless someone is in the middle of something; then it offers a one-tap refresh */
-const APP_VER="6.23.0";
+const APP_VER="6.24.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function applyUpdate(){try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}
@@ -1562,7 +1573,7 @@ function tourSheet(){
 function planProgress(p){
   const pr=p.prop||{},steps=[["team","Team and roles",p.members.length>0&&p.roles.length>0],["prop","Project proposal",!!pr.title],["safety","Safety",!!(p.risks.length||(p.txt&&p.txt.perms))]];
   const n=steps.filter(x=>x[2]).length,nx=steps.find(x=>!x[2]);
-  return `<section class="card plp" aria-label="Plan progress"><div class="row between"><b>${n===3?"Plan complete":"Plan: "+n+" of 3 steps done"}</b>${n===3?`<span class="plp-ok">${ic("check","sm")}Well done</span>`:""}</div><div class="plp-s">${steps.map(([k,l,d])=>`<button type="button" class="plp-i${d?" ok":""}" data-plstep="${k}"><span class="plp-d">${d?ic("check","sm"):""}</span><span>${l}</span></button>`).join("")}</div>${nx?`<button class="btn small primary" data-plstep="${nx[0]}" type="button">Next: ${nx[1]}</button>`:""}</section>`;
+  return `<section class="card plp" aria-label="Plan progress"><div class="row between"><b>${n===3?"Plan complete":"Plan: "+n+" of 3 steps done"}</b>${n===3?`<span class="plp-ok">${ic("check","sm")}Well done</span>`:""}</div><div class="plp-c">${steps.map(([k,l,d])=>{const nxt=nx&&nx[0]===k;return `<button type="button" class="plp-ch${d?" ok":""}${nxt?" nx":""}" data-plstep="${k}">${ic(d?"check":"chev","sm")}${l}</button>`}).join("")}</div></section>`;
 }
 /* ---------- accordion sections ---------- */
 const openAcc=new Set();
@@ -1659,6 +1670,7 @@ function setupCard(p){
   return `<div class="card setup"><div class="row between small"><span class="muted">Term: <b>${esc(p.info.term||"not set")}</b> · Mentor: <b>${esc(p.info.mentor||"not set")}</b></span><button class="linkbtn" data-ba="info:edit" style="min-height:32px;padding:0 4px">Edit</button></div></div>`;
 }
 function planTab(p){
+  /* the term and mentor line moved into Edit production */
   const pr=p.prop,statusLbl={"":"Draft",draft:"Draft",submitted:"Waiting for educator",approved:"Approved"}[pr.status||""];
   const team=`<div class="chips" style="margin-bottom:12px">${p.members.map((m,i)=>`<button class="chip static mem" data-ba="member:${i}">${ic("user","sm")}${esc(m)}</button>`).join("")}${addBtn("member:new","Member")}</div>
     ${p.members.some(m=>(p.minfo[m]||{}).strength||(p.minfo[m]||{}).skill)?`<div class="bk-list">${p.members.filter(m=>(p.minfo[m]||{}).strength||(p.minfo[m]||{}).skill).map(m=>`<div class="bk-line"><b>${esc(m)}</b><span class="small muted">${esc((p.minfo[m]||{}).strength||"")}${(p.minfo[m]||{}).skill?" · practising: "+esc(p.minfo[m].skill):""}</span></div>`).join("")}</div>`:""}
@@ -1669,7 +1681,7 @@ function planTab(p){
     ${pr.feedback||pr.changes?`<div class="hintcard">${pr.feedback?`<p><b>Educator feedback</b><br>${esc(pr.feedback)}</p>`:""}${pr.changes?`<p><b>Agreed changes</b><br>${esc(pr.changes)}</p>`:""}</div>`:""}`;
   const safety=`<div class="bk-list">${p.risks.map(r=>bkRow("risk:"+r.id,esc(r.risk),"",esc(r.manage||""))).join("")}</div>${addBtn("risk:new","Risk")}
     ${txtCard(p,"perms","Permissions, training or supervision needed before starting","For example: training on how to use a jigsaw")}`;
-  return planProgress(p)+setupCard(p)+carryCard(p)+
+  return planProgress(p)+carryCard(p)+
     acc(p,"team","users","Team and roles",`${p.members.length} member${p.members.length===1?"":"s"} · ${p.roles.length} role${p.roles.length===1?"":"s"}`,stp(p.members.length>0&&p.roles.length>0,p.members.length>0&&p.roles.length>0?"Done":"To do"),team)+
     acc(p,"prop","book","Project proposal",pr.title?esc(pr.title):"Not written yet",stp(pr.status==="approved",statusLbl),prop)+
     acc(p,"safety","shield","Safety",`${p.risks.length} risk${p.risks.length===1?"":"s"} noted`,stp(!!(p.risks.length||p.txt.perms),p.risks.length||p.txt.perms?"Started":"To do"),safety);
@@ -2486,6 +2498,8 @@ function prodSheet(p){
   sheet(isNew?"New production":"Edit production",`
   <label class="f" for="pn">Name</label><input class="t" id="pn" type="text" value="${esc(p.name)}" maxlength="40">
   <label class="f" for="pdsc">What is it about?</label><div class="row"><textarea class="t" id="pdsc">${esc(p.desc)}</textarea>${micBtn()}</div>
+  <label class="f">Current term and week</label>${twSelects("pc-tm","pc-wk",p.cur||{term:0,wk:0})}<p class="small muted" style="margin:4px 0 0">New posts start on this term and week.</p>
+  <label class="f" for="pmn">Educator or mentor</label><div class="row"><input class="t" id="pmn" type="text" maxlength="60" value="${esc((p.info&&p.info.mentor)||"")}">${micBtn()}</div>
   <label class="f">Icon</label><div class="iconpick">${PICONS.map(e=>`<button type="button" data-e="${e}" aria-pressed="${e===icn}" aria-label="${e}">${ic(e)}</button>`).join("")}</div>
   <div class="row between" style="margin-top:18px"><div><b>This team handles money</b><div class="small muted">Adds a Money tab for budget, spending and income.</div></div><button type="button" role="switch" class="sw" id="pm" aria-label="This team handles money" aria-checked="${!!p.useMoney}"><i></i></button></div>
   <label class="f">Colour</label><div class="swatches">${COLORS.map(c=>`<button type="button" data-c="${c}" style="background:${c}" aria-pressed="${c===co}" aria-label="Colour ${c}"></button>`).join("")}</div>
@@ -2496,8 +2510,13 @@ function prodSheet(p){
     if(!isNew)$("#del").onclick=()=>{p.del=true;p.delAt=Date.now();save(p);close();nav("home");toast("Production deleted. Find it under Settings, Recently deleted.",()=>{p.del=false;save(p);render()})};
     $("#pm").onclick=e=>{um=!um;e.currentTarget.setAttribute("aria-checked",String(um))};
     $("#ok").onclick=()=>{const n=$("#pn").value.trim();if(!n){$("#pn").focus();return}
+      const oldCur=JSON.stringify(p.cur||null),cur=twRead("pc-tm","pc-wk");
       Object.assign(p,{name:n,icon:icn,color:co,desc:$("#pdsc").value.trim(),useMoney:um});
       if(isNew){Object.assign(p,{id:uid(),members:[],goals:[],log:[],chapters:[],del:false});S.prods.push(p)}
+      p.info=p.info||{};p.info.mentor=$("#pmn").value.trim();
+      if(cur.term||cur.wk)p.cur=cur;else delete p.cur;
+      if(cur.term)p.info.term="Term "+cur.term+" "+new Date().getFullYear();
+      if(JSON.stringify(p.cur||null)!==oldCur&&p.cur)twSave(p.id,p.cur);
       save(p);close();render()};
   });
 }
@@ -2557,7 +2576,7 @@ function prodView(p){
   const pl=n=>n===1?"":"s";
   return `<div class="pv"><div class="pv-side"><div class="phero${cov?" hascover":""}" style="--pc:${p.color}">${cov?`<img class="ph-cover" data-mid="${cov.id}" alt=""${covVars(p)}>`:""}
     <div class="ph-top"><button class="x glass" id="back" aria-label="Back to productions">${ic("left")}</button><span class="grow"></span>${photos.length?`<button class="x glass" id="plv" aria-label="Play slideshow">${ic("play")}</button>`:""}<button class="x glass" id="shr" aria-label="Share">${ic("share")}</button><button class="x glass" id="pmore" aria-label="More options">${ic("more")}</button></div>
-    <div class="ph-main"><div class="grow"><h2 class="ptitle"><span class="ph-ic" aria-hidden="true">${ic(p.icon)}</span><span>${esc(p.name)}</span></h2>${p.desc?`<p class="ph-d">${esc(p.desc)}</p>`:""}<p class="ph-meta">${p.log.length} post${pl(p.log.length)} · ${photos.length} photo${pl(photos.length)} · ${agoLabel(last)}</p></div></div>
+    <div class="ph-main"><div class="grow"><h2 class="ptitle"><span class="ph-ic" aria-hidden="true">${ic(p.icon)}</span><span>${esc(p.name)}</span></h2>${p.desc?`<p class="ph-d">${esc(p.desc)}</p>`:""}<p class="ph-meta">${p.cur&&(p.cur.term||p.cur.wk)?`${esc(twLabel(p.cur))} · `:""}${p.log.length} post${pl(p.log.length)} · ${photos.length} photo${pl(photos.length)} · ${agoLabel(last)}</p></div></div>
   </div>
   <div class="segwrap"><div class="segc" role="group" aria-label="Sections">${TB.map(([k,l,i])=>`<button data-tab="${k}" aria-label="${l}" aria-pressed="${tab===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div></div>
   <div class="tabbody">${{story:storyTab,plan:planTab,money:moneyTab,wrap:wrapTab,media:mediaTab}[tab](p)}</div></div>`;
