@@ -755,6 +755,8 @@ header.top .sync,.sync{font-size:.8rem!important}
 .segc{gap:2px}@media (max-width:430px){.segc button{font-size:.84rem;padding:6px 2px}}
 .ro [data-act="matagain"],.ro-mats [data-act="matagain"]{display:none}.mtks{align-items:center}
 .pu-x{width:34px;height:34px}.pu-x::after{content:"";position:absolute;inset:-6px}
+.card.mywork{padding:10px 14px 6px;margin-bottom:10px;border-radius:18px}.card.mywork .list li{padding:6px 0}.card.mywork .linkbtn{min-height:44px}
+.ogrp .row{flex-wrap:wrap}.ogrp .row .btn{min-width:min(100%,9rem)}.ogrp{border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:12px;background:var(--paper)}.ogrp h3{font-size:1rem}.ogrp .list li{padding:6px 0}
 </style>
 </head>
 <body>
@@ -1639,7 +1641,7 @@ function buildMain(){
   const scs=`<div class="scs">${pl('data-go="tasks"',"check","Tasks",mineN?mineN+" for you":openN+" open",mineN)}${pl('data-go="mats"',"truck","Materials",toOrder?toOrder+" to order":"Nothing to order",toOrder)}${pl('data-go="photos"',"image","Photos",photoN?photoN+(photoN===1?" photo":" photos"):"No photos yet")}${pl('data-go="plans"',"map","Plans","Drawings")}${pl('data-act="contractors"',"users","Contractors",S.sups.length?S.sups.length+(S.sups.length===1?" contact":" contacts"):"No contacts yet")}${pl('data-act="bmore"',"dots","More","Snags, log, diary")}</div>`;
   return `<section class="bhero"><div class="bh1"><div><div class="eyebrow">${left===null?"Whole build":left>=0?"Work days left":"Work days over"}</div><div class="big" ${left===null?`data-count="${p}"`:""}>${left===null?p+"%":Math.abs(left)}</div></div><div class="bh2"><div class="row between" style="gap:8px;align-items:center">${wxChip()}</div>
    <div class="row wr" style="gap:6px">${sched.chip}</div></div></div><div class="meter hm"><i style="width:${p}%"></i></div>${cheerLine(all,p)}</section>
-  ${whoLine()}${attentionV()}${[connectPrompt(),iosPrompt(),pushPrompt(),linkPrompt(),backupDue()].find(Boolean)||""}${can?`<div class="row between" style="margin:0 2px 10px"><div class="eyebrow" style="margin:0">Phases</div>${pEdit?`<button type="button" class="btn small primary" data-act="pedit">Done</button>`:`<button type="button" class="iconbtn sm" data-act="pedit" aria-label="Edit phases">${ic("dots")}</button>`}</div>${pEdit?`<p class="hint" style="margin:0 2px 10px">Rename, move or remove a phase, or add a new one.</p>`:""}`:""}<div class="ptiles" role="list">${tiles}</div>
+  ${whoLine()}${attentionV()}${myWorkCard()}${[connectPrompt(),iosPrompt(),pushPrompt(),linkPrompt(),backupDue()].find(Boolean)||""}${can?`<div class="row between" style="margin:0 2px 10px"><div class="eyebrow" style="margin:0">Phases</div>${pEdit?`<button type="button" class="btn small primary" data-act="pedit">Done</button>`:`<button type="button" class="iconbtn sm" data-act="pedit" aria-label="Edit phases">${ic("dots")}</button>`}</div>${pEdit?`<p class="hint" style="margin:0 2px 10px">Rename, move or remove a phase, or add a new one.</p>`:""}`:""}<div class="ptiles" role="list">${tiles}</div>
   <div class="rph"><div class="eyebrow">Recently posted</div><button type="button" class="linkbtn" data-go="site">See all</button></div>
   ${rec.length?`<div class="rps">${rec.map(l=>{const n=l.media?.length||0,c=PCOL[l.phase]||"var(--accent)",ph=l.phase&&PSHORT[l.phase]?PSHORT[l.phase]:"Site",tx=l.text?esc(l.text.slice(0,120)):"",first=n&&isVid(l.media[0]);return `<button type="button" class="rp ${n?"ph":"nt"}" data-act="rpopen" data-id="${l.id}" aria-label="${esc(ph)}, ${n?n+(n===1?" photo":" photos"):"note"}, ${dlabel(l.date)}. Open"><span class="rpi">${n?`<span data-m="${l.media[0]}" style="position:absolute;inset:0"></span>`:""}</span>${n>1?`<span class="rpn">${ic("image","sm")}${n}</span>`:first?`<span class="rpn">${ic("play","sm")}</span>`:""}<span class="rpt"><span class="rpc" style="color:${n?"#fff":"color-mix(in srgb,"+c+" 55%,var(--ink))"}">${esc(ph)}</span><span class="rpx">${tx||(n?(first?"Added a clip":n===1?"Added a photo":"Added "+n+" photos"):"Update")}</span><small>${dlabel(l.date)}</small></span></button>`}).join("")}</div>`:`<p class="muted small" style="margin:0 2px">Photos and notes you add will show up here.</p>`}${scs}`;
 }
@@ -1733,7 +1735,7 @@ function matsV(){
   <div class="card" style="margin-top:12px">
   ${list.length?`<ul class="list">${list.map(matRow).join("")}</ul>`
   :inSec.length?`<div class="empty">${ic("check","xl")}<h3>Nothing here</h3><p>No items in this list.</p></div>`:`<div class="empty">${ic(SECS.find(x=>x[0]===sec)[2],"xl")}<h3>No items yet</h3><p>Add what you need and keep track of it.</p><button class="btn primary" data-act="addmat">${ic("plus")}Add item</button></div>`}
-  ${S.mats.some(needsOrder)?`<button class="btn block" data-act="shareorder" data-id="${matPh==="none"?"all":matPh}" style="margin-top:12px">${ic("chat")}Send order list on WhatsApp</button>`:""}</div>
+  ${S.mats.some(needsOrder)?`<button class="btn block" data-act="shareorder" data-id="${matPh==="none"?"all":matPh}" style="margin-top:12px">${ic("chat")}To order by supplier</button>`:""}</div>
   <div class="card"><div class="row between"><h2 style="margin:0">Suppliers and contractors</h2><button class="btn small" data-act="addsup">${ic("plus")}Add</button></div>
   ${S.sups.length?`<ul class="list">${S.sups.map(s=>`<li><span class="avatar">${esc((s.name||"?")[0].toUpperCase())}</span><div class="grow"><div class="lt">${esc(s.name)}</div><div class="ls">${esc([s.trade,s.phone,s.phone2].filter(Boolean).join(" · "))}</div></div>${s.phone?`<a class="btn small icon" href="tel:${esc(s.phone.replace(/[^\d+]/g,""))}" aria-label="Call ${esc(s.name)}">${ic("phone")}</a>`:""}${rowBtns("sup",s.name,s.id)}</li>`).join("")}</ul>`:`<p class="muted" style="margin:10px 0 0">Add your brick yard, hardware shop and builders so their numbers are one tap away.</p>`}</div>`;
 }
@@ -1795,7 +1797,7 @@ function act(a,id,el){
    paycost:()=>{const c=S.costs.find(x=>x.id===id),u=undoEdit(c,{paid:true});save();render();toast(`${rand(c.amount)} marked as paid.`,u)},budget:()=>moneyOK?budgetSheet():moneyGate(budgetSheet),lockmoney:()=>{lockMoney();toast("Money is locked.")},addmat:()=>matSheet(undefined,id&&phase(id)?id:undefined),editmat:()=>matSheet(id),delmat:()=>delRecs(S.mats,m=>m.id===id,"Material"),
    mattick:()=>{const[mid,k]=id.split("|"),m=S.mats.find(x=>x.id===mid);if(!m)return;const t=matTicks(m),ord=k==="o"?!t.ord:(t.rec?t.ord:true),rec=k==="r"?!t.rec:(t.ord?t.rec&&ord:false);const u=undoEdit(m,{status:rec?"got":ord?"ordered":"need",ordOn:ord?(t.ord&&m.ordOn||today()):"",recOn:rec?(t.rec&&m.recOn||today()):"",...(hasMoves(m)?{rcv:rec}:{})});save();render();toast(`${m.name}: ${rec?"received":ord?"ordered":"not ordered"}.`,u)},matagain:()=>{const m=S.mats.find(x=>x.id===id);if(!m)return;const u=undoEdit(m,{orders:[...(m.orders||[]),{ordOn:m.ordOn||"",recOn:m.recOn||"",qty:m.qty||0,unit:m.unit||""}],status:"need",ordOn:"",recOn:"",...(hasMoves(m)?{rcv:false}:{})});save();render();toast(`${m.name}: back on the order list.`,u)},cycmat:()=>{const m=S.mats.find(x=>x.id===id),L=mst(m),order=L.map(x=>x[0]),nx=order[(order.indexOf(m.status)+1)%order.length];const u=undoEdit(m,{status:nx});save();render();toast(`${m.name}: ${L.find(x=>x[0]===nx)[1].toLowerCase()}.`,u)},
    movein:()=>moveSheet(id,"in"),moveout:()=>moveSheet(id,"out"),editelec:()=>elecSheet(),
-   shareorder:()=>shareOrder(id&&(id==="all"||phase(id))?id:(matPh!=="all"&&matPh!=="none"?matPh:"")),addsup:()=>supSheet(),editsup:()=>supSheet(id),delsup:()=>delRecs(S.sups,s=>s.id===id,"Contact"),
+   shareorder:()=>orderSheet(id&&(id==="all"||phase(id))?id:(matPh!=="all"&&matPh!=="none"?matPh:"")),addsup:()=>supSheet(),editsup:()=>supSheet(id),delsup:()=>delRecs(S.sups,s=>s.id===id,"Contact"),
    addphoto:()=>quickPhoto(id&&phase(id)?id:undefined),addissue:()=>logSheet(null,"issue"),editlog:()=>logSheet(id),dellog:()=>delRecs(S.logs,l=>l.id===id,"Entry"),
    fix:()=>{const l=S.logs.find(x=>x.id===id),u=undoEdit(l,{fixed:true});logAct("Marked an issue as fixed");save();render();toast("Issue marked fixed.",u)},
    phtlb:()=>lightbox(photoList().map(p=>p.m),+id),phcmp:()=>compareView(id||""),scanslip:()=>scanSlip(),addmenu:()=>addMenu(),attsheet:()=>attSheet(),bmore:()=>bmoreSheet(),msgdel:()=>msgRemove(id),msgclear:()=>msgClearOld(),thread:()=>threadSheet(id),msgdec:()=>{const[a,b]=id.split("|");msgDecide(a,b)},snagedit:()=>snagSheet(id),snagexport:()=>snagExportSheet(),snagclose:()=>{if(!perm.manage)return;const l=S.logs.find(x=>x.id===id);if(!l)return;const u=undoEdit(l,{closed:true,closedOn:today()});logAct("Closed a snag");save();render();toast("Snag closed.",u)},snagreopen:()=>{const l=S.logs.find(x=>x.id===id);if(!l)return;const u=undoEdit(l,{fixed:false,closed:false,closedOn:""});save();render();toast("Snag reopened.",u)},slipexport:()=>slipExportSheet(),slipview:()=>{const[cid,i]=id.split("|"),c=S.costs.find(x=>x.id===cid);if(c)lightbox(c.media||[],+i)},mbar:()=>{const r=MCH.months[+id],el=$("#mbread");if(!r||!el)return;const p=r.b+r.t+r.o;el.innerHTML=`${mLab(r.ym,1)}: paid <b>${money0(p)}</b>${p?` (builder ${money0(r.b)}${r.t?", trades "+money0(r.t):""}${r.o?", other "+money0(r.o):""})`:""}${r.p?`, planned <b>${money0(r.p)}</b>`:""}.`},weekshare:()=>shareText(weekText()),wkgoals:()=>shareWeekSheet(),pusend:()=>puShareSheet(),pupick:()=>puPick(),lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
@@ -4566,7 +4568,7 @@ function phaseMats(id){
   if(!list.length)return `<div class="card">${empty("truck","No materials for this phase yet",`Add what you need for ${esc(PSHORT[id])}. Each phase keeps its own stock and order list, and the Materials page shows all of them together.`,canAdd?`<button class="btn primary" data-act="addmat" data-id="${id}" style="background:var(--green);color:#fff">${ic("plus")}Add material</button>`:"")}</div>`;
   const shown=list.filter(matFilterOk);
   const chips=[["all","All · "+list.length],["need","To order · "+toOrder(list).length],["ordered","Ordered · "+list.filter(m=>["ordered","part"].includes(mEff(m))).length],["got","Delivered · "+list.filter(m=>mEff(m)==="got").length]];
-  return `<div class="row between wr" style="margin:0 2px 10px;gap:8px"><span class="muted">${list.length} item${list.length===1?"":"s"} · ${ord.length} to order</span>${ord.length?`<button class="btn small" data-act="shareorder" data-id="${id}">${ic("chat","sm")}Send order list</button>`:""}</div>
+  return `<div class="row between wr" style="margin:0 2px 10px;gap:8px"><span class="muted">${list.length} item${list.length===1?"":"s"} · ${ord.length} to order</span>${ord.length?`<button class="btn small" data-act="shareorder" data-id="${id}">${ic("chat","sm")}Order by supplier</button>`:""}</div>
   <div class="chips scroll" role="group" aria-label="Filter" style="margin-bottom:10px">${chips.map(([k,l])=>`<button type="button" class="chip" data-sub="mat:${k}" aria-pressed="${matF===k}">${esc(l)}</button>`).join("")}</div>
   ${SECS.map(([k,l])=>{const g=shown.filter(m=>secOf(m)===k).sort((a,b)=>a.name.localeCompare(b.name));return g.length?`<div class="eyebrow" style="margin:14px 2px 8px">${esc(l)} · ${g.length}</div><div class="card"><ul class="list">${g.map(matRow).join("")}</ul></div>`:""}).join("")||`<div class="card"><p class="muted" style="margin:0">Nothing in this list.</p></div>`}`;
 }
@@ -4586,6 +4588,39 @@ function phaseV(){
   ${ts.length&&d===ts.length?completeCard(ts):""}
   ${tabs}
   ${pt==="mats"?phaseMats(id):taskPart}`;
+}
+/* Build home: the next tasks given to me, ticked off in one tap */
+function myWorkCard(){
+  if(!sm.code||lvl("tasks")<1)return "";
+  const td=today(),mine=S.tasks.filter(t=>t.status!=="done"&&asgHas(t,sm.pid));if(!mine.length)return "";
+  const sorted=mine.slice().sort((a,b)=>((a.due&&a.due<td?0:1)-(b.due&&b.due<td?0:1))||(a.status==="doing"?0:1)-(b.status==="doing"?0:1)||(a.due||"9999").localeCompare(b.due||"9999")||(a.order??0)-(b.order??0));
+  const seen=new Set(),rows=[];
+  sorted.forEach(t=>{const sib=S.tasks.filter(x=>x.key===t.key),merged=sib.length>1&&sib.every(x=>x.status===t.status&&(x.assignee||"")===(t.assignee||"")&&x.due===t.due);if(merged){if(seen.has(t.key))return;seen.add(t.key)}rows.push({t,merged,sib})});
+  const row=({t,merged,sib})=>{const od=t.due&&t.due<td,meta=[merged||t.room==="shared"?"":roomName(t.room),PSHORT[t.phase]||"",t.due?(t.due===td?"Today":(od?"Overdue ":"Due ")+dshort(t.due)):"",t.status==="check"?"Waiting for a check":""].filter(Boolean).join(" · ");
+    const tick=merged?`<button class="st ${t.status}" data-act="cycboth" data-id="${t.id}" data-ids="${sib.map(x=>x.id).join(",")}" aria-label="${esc(t.title)}, both classrooms: ${stLabel(t.status)}. Tap to tick done or undo.">${stIcon(t.status)||ic("check")}</button>`:`<button class="st ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${esc(t.title)}: ${stLabel(t.status)}. Tap to tick done or undo.">${stIcon(t.status)||ic("check")}</button>`;
+    return `<li>${tick}<div class="grow tap" tabindex="0" data-act="opentask" data-id="${t.key}|${t.room}"><div class="lt">${esc(t.title)}</div>${meta?`<div class="ls ${od||t.status==="stuck"?"bad":""}">${esc(meta)}</div>`:""}</div></li>`};
+  return `<section class="card mywork" aria-label="Your work"><div class="row between" style="align-items:center"><div class="eyebrow" style="margin:0">Your work</div><button type="button" class="linkbtn" data-act="gotasks" data-id="me">${rows.length>3?"See all "+rows.length:"See all"}</button></div><ul class="list">${rows.slice(0,3).map(row).join("")}</ul></section>`;
+}
+/* materials to order, one group per supplier, each sent to that supplier on WhatsApp */
+function orderSheet(ph){
+  ph=ph&&ph!=="all"&&ph!=="none"&&phase(ph)?ph:"";
+  const items=toOrder(S.mats).filter(m=>!ph||m.phase===ph);
+  if(!items.length){toast("Nothing to order right now.");return}
+  const can=lvl("mats")>=2,by=new Map();
+  items.forEach(m=>{const k=m.sup&&S.sups.some(s=>s.id===m.sup)?m.sup:"";(by.get(k)||by.set(k,[]).get(k)).push(m)});
+  const groups=[...by.entries()].sort((a,b)=>(a[0]?0:1)-(b[0]?0:1)||supName(a[0]).localeCompare(supName(b[0])));
+  const line=m=>`- ${m.qty>0?num(m.qty,2)+" "+m.unit+" ":""}${m.name}${m.due?` (by ${dshort(m.due)})`:""}`;
+  const msg=(sp,ms)=>`*${S.settings.name||"Classrooms"}: order${sp?" for "+sp.name:""}*\n\n`+ms.map(line).join("\n")+"\n\nPlease confirm the price and delivery date. Thank you.";
+  sheet("To order by supplier",`<p class="muted" style="margin:6px 0 4px">${items.length} item${items.length===1?"":"s"}${ph?" for "+esc(PSHORT[ph]):""}. Send each supplier their own list, then mark it ordered.</p>
+  ${groups.map(([k,ms],gi)=>{const sp=S.sups.find(s=>s.id===k);return `<div class="ogrp"><div class="row between" style="align-items:baseline;gap:8px"><h3 style="margin:0">${sp?esc(sp.name):"No supplier chosen"}</h3><span class="small muted">${ms.length} item${ms.length===1?"":"s"}</span></div>${sp?`<p class="small muted" style="margin:2px 0 0">${esc([sp.trade,sp.phone].filter(Boolean).join(" · ")||"No number saved")}</p>`:`<p class="small muted" style="margin:2px 0 0">Tap an item to choose its supplier.</p>`}
+   <ul class="list">${ms.map(m=>`<li class="tap" tabindex="0" data-mi="${m.id}"><div class="grow"><div class="lt">${esc(m.name)}</div><div class="ls">${m.qty>0?num(m.qty,2)+" "+esc(m.unit):"Set how many"}${m.due?" · need by "+dshort(m.due):""}</div></div>${ic("chev","sm")}</li>`).join("")}</ul>
+   <div class="row" style="gap:8px;margin-top:8px"><button type="button" class="btn small primary grow" data-send="${gi}">${ic("chat","sm")}${sp?.phone?"Send to "+esc(sp.name.split(" ")[0]):"Share list"}</button>${can?`<button type="button" class="btn small grow" data-ord="${gi}">${ic("check","sm")}Mark ordered</button>`:""}</div></div>`}).join("")}
+  <div class="foot"><button type="button" class="btn block" id="oall">${ic("share")}Share the whole list</button></div>`,(sh,close)=>{
+    sh.querySelectorAll("[data-mi]").forEach(li=>li.addEventListener("click",()=>{const id=li.dataset.mi;close();setTimeout(()=>matSheet(id),80)}));
+    sh.querySelectorAll("[data-send]").forEach(b=>b.onclick=()=>{const[k,ms]=groups[+b.dataset.send],sp=S.sups.find(s=>s.id===k),tx=msg(sp,ms);if(sp?.phone)window.open(waUrl(sp.phone,tx),"_blank","noopener");else shareText(tx)});
+    sh.querySelectorAll("[data-ord]").forEach(b=>b.onclick=()=>{const[k,ms]=groups[+b.dataset.ord],us=ms.map(m=>undoEdit(m,{status:"ordered",ordOn:m.ordOn||today(),recOn:"",...(hasMoves(m)?{rcv:false}:{})}));save();close();render();toast(`${ms.length} item${ms.length===1?"":"s"} marked ordered${k?" from "+supName(k):""}.`,()=>us.forEach(u=>u()))});
+    sh.querySelector("#oall").onclick=()=>shareOrder(ph||"all");
+  });
 }
 function shareOrder(ph){
   ph=ph==="all"?"":ph;
