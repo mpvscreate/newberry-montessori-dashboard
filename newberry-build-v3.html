@@ -761,6 +761,7 @@ header.top .sync,.sync{font-size:.8rem!important}
 .dnim{display:flex;align-items:center;gap:10px;margin-top:10px}.dnim img{width:64px;height:64px;object-fit:cover;border-radius:12px}.dnim span{display:inline-flex;gap:6px;align-items:center;color:var(--green);font-weight:600}
 .dng{margin-top:12px}.dng h3{margin:0;font-size:1rem}.dng .list li{padding:6px 0}
 .ro [data-act="dnote"],.ro-mats [data-act="dnote"],.ro [data-fab="dnote"],.ro-mats [data-fab="dnote"],.na-mats [data-fab="dnote"],.na-mats [data-act="dnote"],.na-mats [data-act="dnotes"]{display:none!important}
+.dnbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 10px}.dnbar .btn{min-height:44px;min-width:0;white-space:normal;line-height:1.2;text-align:center;justify-content:center}
 </style>
 </head>
 <body>
@@ -1734,7 +1735,7 @@ function matsV(){
   return `<div class="page-h"><div class="row" style="gap:10px">${backBtn()}<h2>Materials</h2></div><button class="btn primary" data-act="addmat">${ic("plus")}Add</button></div>
   <div class="segc" role="group" aria-label="Section">${SECS.map(([k,l])=>`<button type="button" data-sub="sec:${k}" aria-pressed="${sec===k}">${l}</button>`).join("")}</div>
   <div class="chips scroll" role="group" aria-label="Filter by phase" style="margin:0 0 10px">${[["all","All phases · "+S.mats.length],...PH.map(p=>[p[0],PSHORT[p[0]]+" · "+S.mats.filter(m=>m.phase===p[0]).length]),["none","No phase · "+S.mats.filter(m=>!m.phase).length]].map(([k,l])=>`<button type="button" class="chip" data-sub="mph:${k}" aria-pressed="${matPh===k}">${esc(l)}</button>`).join("")}</div>
-  <div class="row" style="gap:8px;margin:0 0 10px"><button type="button" class="btn small grow" data-act="dnote">${ic("camera","sm")}Scan delivery note</button><button type="button" class="btn small grow" data-act="dnotes">${ic("truck","sm")}Delivery notes</button></div>
+  <div class="dnbar"><button type="button" class="btn small" data-act="dnote">${ic("camera","sm")}Scan a note</button><button type="button" class="btn small" data-act="dnotes">${ic("truck","sm")}Delivery notes</button></div>
   ${sec==="elec"?elecCard():""}
   ${sec==="stock"?(lowN?`<div class="warn">${ic("alert")}<span>${lowN} item${lowN===1?" is":"s are"} running low or out of stock.</span></div>`:""):`<div class="chips scroll" role="group" aria-label="Filter">${[...L.map(([k,l])=>[k,`${l} · ${cnt(k)}`]),["all","All"]].map(([k,l])=>`<button type="button" class="chip" data-sub="mat:${k}" aria-pressed="${matF===k}">${esc(l)}</button>`).join("")}</div>`}
   <div class="card" style="margin-top:12px">
