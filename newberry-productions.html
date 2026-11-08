@@ -824,6 +824,10 @@ select.sel{width:auto;min-height:44px;padding:0 12px;border-radius:14px}
 .plp-ch.nx{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
 .segc[aria-label="Theme"] button{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px}
 .segc[aria-label="Theme"] button span{display:inline!important}
+/* v6.25.0: the name beside the logo */
+header.top h1.wm{margin:0;min-width:0;flex:0 1 auto;font:700 clamp(.98rem,4.4vw,1.25rem)/1.1 var(--display);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:420px){header.top{gap:8px}header.top .grow{flex:1 1 0;min-width:0}}
+@media (max-width:340px){header.top h1.wm{white-space:normal;font-size:.95rem;line-height:1.05;overflow:visible}}
 </style>
 </head>
 <body>
@@ -1518,7 +1522,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: when a newer version is on the server the app refreshes itself (clearing old cached copies), unless someone is in the middle of something; then it offers a one-tap refresh */
-const APP_VER="6.24.0";
+const APP_VER="6.25.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function applyUpdate(){try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}
@@ -2392,7 +2396,7 @@ function render(){
   const m=route.match(/^p\/(.+)/),p=m&&P(m[1]);
   const cur=p?"home":route;
   document.documentElement.style.setProperty("--ptint",p?p.color:"transparent");
-  $("#app").innerHTML=`<div class="wrap${!p&&route==="home"?" fit":""}${p?" prodwide":""}${fresh?" enter":""}"><header class="top"><img class="brand" src="icons/productions-96.png" alt="" width="44" height="51"><h1 class="sr">MS Productions</h1><span class="grow"></span><button type="button" class="sync" id="sync" aria-live="polite"></button><button class="x" id="srch" aria-label="Search" title="Search (/)">${ic("search")}</button><button class="x" id="thm" aria-label="${isDark()?"Switch to light mode":"Switch to dark mode"}" title="${isDark()?"Light mode":"Dark mode"}">${ic(isDark()?"sun":"moon")}</button></header>
+  $("#app").innerHTML=`<div class="wrap${!p&&route==="home"?" fit":""}${p?" prodwide":""}${fresh?" enter":""}"><header class="top"><img class="brand" src="icons/productions-96.png" alt="" width="44" height="51"><h1 class="wm">MS Productions</h1><span class="grow"></span><button type="button" class="sync" id="sync" aria-live="polite"></button><button class="x" id="srch" aria-label="Search" title="Search (/)">${ic("search")}</button><button class="x" id="thm" aria-label="${isDark()?"Switch to light mode":"Switch to dark mode"}" title="${isDark()?"Light mode":"Dark mode"}">${ic(isDark()?"sun":"moon")}</button></header>
   <main id="main" tabindex="-1">${p?prodView(p):{home:homePage,overview:overviewPage,more:morePage}[route]?.()||homePage()}</main></div>
   <nav class="tabs" aria-label="Main">${NAV.slice(0,2).map(navBtn(cur)).join("")}<button class="cap btn primary" id="cap" aria-label="Capture: photo, note, goal, target or voice">${ic("plus")}</button>${NAV.slice(2).map(navBtn(cur)).join("")}</nav>`;
   setSyncUi(syncState||"Sign in to sync");
