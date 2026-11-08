@@ -16,7 +16,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400..700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@500..800&family=Instrument+Sans:wght@400..700&display=swap">
 <style>
 :root{
   --paper:#fbf6ec; --sheet:#ffffff; --ink:#221c11; --muted:#6c6250; --line:#ece3cf; --field:#8f846c;
@@ -828,6 +828,24 @@ select.sel{width:auto;min-height:44px;padding:0 12px;border-radius:14px}
 header.top h1.wm{margin:0;min-width:0;flex:0 1 auto;font:700 clamp(.98rem,4.4vw,1.25rem)/1.1 var(--display);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:420px){header.top{gap:8px}header.top .grow{flex:1 1 0;min-width:0}}
 @media (max-width:340px){header.top h1.wm{white-space:normal;font-size:.95rem;line-height:1.05;overflow:visible}}
+/* v6.26.0: Home as a bento */
+:root{--geist:"Geist","Instrument Sans",system-ui,sans-serif}
+.bhero{display:block;width:100%;text-align:left;border:0;border-radius:22px;padding:16px 18px;background:#0b7a55;color:#fff;margin-bottom:8px;cursor:pointer;font-family:var(--geist);box-shadow:none}
+.bh-k{display:block;font-size:.78rem;font-weight:500;opacity:.85}.bh-n{display:block;font:700 2.5rem/1.05 var(--geist);letter-spacing:-.02em}.bh-n small{font-size:1rem;font-weight:600;margin-left:7px;opacity:.9;letter-spacing:0}.bh-s{display:block;font-size:.8rem;opacity:.9;margin-top:3px}
+.bpair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.bcard{display:flex;flex-direction:column;gap:2px;justify-content:center;min-height:64px;text-align:left;padding:12px 14px;border-radius:16px;background:var(--sheet);border:1px solid var(--line);color:var(--ink);cursor:pointer;font-family:var(--geist);box-shadow:none}
+div.bcard{cursor:default}.bc-k{font-size:.74rem;color:var(--muted)}.bc-t{font:700 1.02rem/1.2 var(--geist)}.bcard.qt .bc-t{color:var(--amber)}
+.bento{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:96px;grid-auto-flow:dense;gap:8px}
+@media (min-width:640px){.bento{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (min-width:1000px){.bento{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.bt{position:relative;display:block;border:0;border-radius:18px;overflow:hidden;text-align:left;padding:0;cursor:pointer;color:#fff;background:color-mix(in srgb,var(--pc) 82%,#000);font-family:var(--geist);box-shadow:none}
+.bt.tall{grid-row:span 2}.bt:active{transform:scale(.985)}
+.bt-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.bt.ph::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(transparent 38%,rgba(0,0,0,.78))}
+.bt-wm{position:absolute;right:-10px;top:-8px;z-index:0;opacity:.16;color:#fff}.bt-wm svg{width:84px;height:84px}
+.bt-ic{position:absolute;top:9px;left:9px;z-index:2;width:28px;height:28px;border-radius:9px;background:rgba(255,255,255,.2);display:grid;place-items:center;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}.bt-ic svg{width:16px;height:16px}
+.bt-q{position:absolute;top:10px;right:9px;z-index:2;background:rgba(0,0,0,.5);border-radius:99px;padding:2px 8px;font-size:.66rem;font-weight:700}
+.bt-t{position:absolute;left:11px;right:10px;bottom:9px;z-index:2;display:flex;flex-direction:column;gap:1px}.bt-t b{font:700 .98rem/1.12 var(--geist);overflow-wrap:anywhere}.bt-t span{font-size:.72rem;opacity:.9}
+.bt.add{display:grid;place-items:center;align-content:center;gap:4px;background:transparent;border:1.5px dashed var(--line);color:var(--muted)}.bt-addi{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--green-soft);color:var(--green)}.bt.add b{font-size:.86rem}
 </style>
 </head>
 <body>
@@ -1522,7 +1540,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: when a newer version is on the server the app refreshes itself (clearing old cached copies), unless someone is in the middle of something; then it offers a one-tap refresh */
-const APP_VER="6.25.0";
+const APP_VER="6.26.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function applyUpdate(){try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}
@@ -2435,9 +2453,16 @@ function recentStrip(){
   return `<h3 class="st-h" style="margin:18px 2px 8px">Recently posted</h3><div class="rps">${it.map(({p,l})=>{const m=postMedia(l)[0];return `<button class="rp" style="--pc:${p.color}" data-open="${p.id}" type="button" aria-label="${esc(p.name)}: ${esc((l.text||"Photo post").slice(0,80))}">${m?`<img data-mid="${m.id}" alt="" loading="lazy">`:`<span class="rp-i">${ic(p.icon)}</span>`}<span class="rp-b"><b>${esc(p.name)}</b><span class="rp-t">${esc(l.text||"Added a photo")}</span><span class="small muted">${agoShort(l.t)}</span></span></button>`}).join("")}</div>`;
 }
 function homePage(){
-  const ps=prods(),wk=weekCard();
+  const ps=prods(),now=Date.now(),wk=now-7*864e5,pl=n=>n===1?"":"s";
+  const rows=ps.map(p=>({p,last:lastActivity(p),posts7:p.log.filter(l=>l.t>=wk).length,cov:coverOf(p)})).map(r=>({...r,quiet:!!r.last&&now-r.last>7*864e5}));
+  const posts=rows.reduce((x,r)=>x+r.posts7,0),active=rows.filter(r=>r.last&&now-r.last<=7*864e5).length,wl=weekMediaList(),q=todayData().quiet.length;
+  const order=rows.map((r,i)=>({...r,i})).sort((x,y)=>(y.last||0)-(x.last||0)||x.i-y.i);
+  const tile=(r,ix)=>{const{p,last,cov,quiet}=r,n=p.log.length,ago=agoShort(last).toLowerCase(),sub=n?`${n} post${pl(n)} · ${ago}`:(last?ago:"No posts yet");
+    return `<button class="bt${ix%5===0?" tall":""}${cov?" ph":""}" style="--pc:${p.color}" data-open="${p.id}" aria-label="${esc(p.name)}, ${esc(sub)}${quiet?", quiet for a while":""}">${cov?`<img class="bt-img" data-mid="${cov.id}" alt="" loading="lazy"${covVars(p)}>`:`<span class="bt-wm" aria-hidden="true">${ic(p.icon)}</span>`}<span class="bt-ic" aria-hidden="true">${ic(p.icon,"sm")}</span>${quiet?'<span class="bt-q">Quiet</span>':""}<span class="bt-t"><b>${esc(p.name)}</b><span>${esc(sub)}</span></span></button>`};
   return `<h2 class="sr">Productions</h2>
-  ${wk}${todayStrip()}<div class="ptiles" style="--st:${(todayData().any?56:0)+(wk?92:0)}px">${ps.map((p,ix)=>{const last=lastActivity(p),quiet=!!last&&Date.now()-last>7*864e5,cov=coverOf(p);return`<button class="ptile${cov?" hascov":""}" style="--pc:${p.color};--i:${ix}" data-open="${p.id}" aria-label="${esc(p.name)}, ${agoLabel(last).toLowerCase()}${quiet?", quiet for a while":""}">${cov?`<img class="tcov" data-mid="${cov.id}" alt="" loading="lazy"${covVars(p)}>`:""}${quiet?`<span class="pbadge q" aria-hidden="true"></span>`:""}<span class="pi"><span class="pav">${ic(p.icon)}</span><b>${esc(p.name)}</b><span class="pq">${agoShort(last)}</span></span></button>`}).join("")}<button class="ptile padd" id="addp" aria-label="New production"><span class="pi"><span class="pav">${ic("plus")}</span><b>Add new</b></span></button></div>${recentStrip()}`;
+  <button class="bhero" id="b-hero" type="button" aria-label="This week: ${posts} post${pl(posts)} from ${active} of ${ps.length} teams. Open the overview"><span class="bh-k">This week</span><span class="bh-n">${posts}<small>post${pl(posts)}</small></span><span class="bh-s">${active} of ${ps.length} teams active${wl.length?" · "+wl.length+" photo"+pl(wl.length)+" and videos":""}</span></button>
+  <div class="bpair">${q?`<button class="bcard qt" id="b-quiet" type="button"><span class="bc-k">${q} quiet</span><b class="bc-t">Check in</b></button>`:`<div class="bcard"><span class="bc-k">Teams</span><b class="bc-t">All active</b></div>`}<button class="bcard" id="b-play" type="button"><span class="bc-k">Week in review</span><b class="bc-t">${wl.length?"Play":"Add a photo"}</b></button></div>
+  <div class="bento">${order.map((r,ix)=>tile(r,ix)).join("")}<button class="bt add" id="addp" type="button" aria-label="New production"><span class="bt-addi">${ic("plus")}</span><b>Add new</b></button></div>`;
 }
 /* second tab: the detail */
 let ovMore=false;
@@ -2464,6 +2489,7 @@ const feedItems=()=>prods().flatMap(p=>{const ids=new Set(p.log.map(l=>l.id));re
 const actRow=f=>{const m=f.m||(f.l&&postMedia(f.l)[0]);return `<li><div class="avatar" style="color:${f.p.color}">${ic(f.p.icon)}</div><div class="grow"><b>${esc(f.p.name)}</b> <span class="pill type">${f.k}</span><div>${esc(f.txt)}</div><div class="small muted">${fmt(f.t)}</div></div>${m?`<img class="athumb" data-mid="${m.id}" alt="">`:""}</li>`};
 const fab=()=>`<div class="fab-wrap"><button class="fab" id="addp" aria-label="New production">${ic("plus")}<span>New production</span></button></div>`;
 function wireHome(){
+  {const h=$("#b-hero");if(h)h.onclick=()=>{fb("tap");nav("overview")};const qb=$("#b-quiet");if(qb)qb.onclick=todaySheet;const pb=$("#b-play");if(pb)pb.onclick=()=>{const l=weekMediaList();if(l.length)openViewer(l,0,true);else captureSheet()}}
   {const a=$("#wk-play");if(a)a.onclick=()=>openViewer(weekMediaList(),0,true);const b=$("#wk-sh");if(b)b.onclick=()=>shareMenu(null);const x=$("#wk-x");if(x)x.onclick=()=>{try{localStorage.setItem(RECAPK,String(Date.now()))}catch{}render()}}
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{tab="plan";nav("p/"+b.dataset.open)});
   $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#shr-btn")&&($("#shr-btn").onclick=()=>shareMenu(null));$("#ov-late")&&($("#ov-late").onclick=todaySheet);$("#ov-more")&&($("#ov-more").onclick=()=>{ovMore=!ovMore;render()});$("#today")&&($("#today").onclick=todaySheet);
