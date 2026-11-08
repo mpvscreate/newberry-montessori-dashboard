@@ -800,6 +800,22 @@ select.sel{width:auto;min-height:44px;padding:0 12px;border-radius:14px}
 .ph-ic{flex:none;width:30px;height:30px;border-radius:10px;background:rgba(255,255,255,.22);display:inline-grid;place-items:center}.ph-ic .i{width:18px;height:18px}
 .ph-meta{margin:4px 0 0;font-size:.82rem;opacity:.92;text-shadow:0 1px 6px rgba(0,0,0,.4)}
 .phero .ph-d{margin-top:2px;-webkit-line-clamp:1}
+/* v6.23.0: continuous story grid, readable tiles, compact week card, live sync status */
+.pdt{display:none}
+.story .post:not(.open) .pdt{display:inline-block;position:absolute;left:6px;top:6px;z-index:3;background:rgba(0,0,0,.58);color:#fff;border-radius:99px;padding:2px 8px;font-size:.68rem;font-weight:700;line-height:1.4}
+.story .post:not(.open) .phd{justify-content:flex-end}
+.story .post:not(.open) .pinic{margin-left:auto}
+.story .post:not(.open)::after{background:linear-gradient(transparent 28%,rgba(0,0,0,.86))}
+.story .post:not(.open) .ptext{left:9px;right:9px;bottom:8px;font-size:.86rem;line-height:1.25;-webkit-line-clamp:3;text-shadow:0 1px 5px rgba(0,0,0,.75)}
+.story .post.nophoto:not(.open) .ptext{top:40px;-webkit-line-clamp:5;font-size:.88rem}
+.story .post:not(.open) .pcnt~.ptext{right:46px}
+.wkcard{display:flex;align-items:center;gap:6px;padding:8px 10px 8px 8px;min-height:0;margin-bottom:10px}
+.wk-main{flex:1;min-width:0;display:flex;align-items:center;gap:12px;border:0;background:none;text-align:left;color:inherit;cursor:pointer;padding:0;font:inherit;box-shadow:none}
+.wk-pv{position:relative;flex:none;width:68px;height:68px;border-radius:16px;overflow:hidden;background:var(--line)}.wk-pv img{width:100%;height:100%;object-fit:cover;display:block}
+.wk-pl{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.3);color:#fff}
+.wk-main .wk-b{padding-right:0;min-width:0}.wk-main .wk-b b{display:block;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wkcard>.x{position:static;flex:none}
+.lv-st{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:2px 0 8px}.lv-dot{width:10px;height:10px;border-radius:50%;background:var(--muted);flex:none}.lv-dot.on{background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
 </style>
 </head>
 <body>
@@ -1132,7 +1148,7 @@ const postedToast=name=>navigator.onLine===false?"Saved on this device. It sends
 function postCard(p,l){
   const ms=postMedia(l),tw=twLabel(l);
   const grid=ms.length?`<div class="pm pm${Math.min(ms.length,4)}">${ms.slice(0,4).map((m,i)=>`<button type="button" class="pmi" data-pm="${l.id}:${i}" aria-label="Open ${m.type==="video"?"video":"photo"} ${i+1} of ${ms.length}">${m.type==="video"?`<img data-mid="${m.id}" alt="" loading="lazy"><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${m.id}" alt="" loading="lazy">`}${i===3&&ms.length>4?`<span class="pmore">+${ms.length-4}</span>`:""}</button>`).join("")}</div>`:"";
-  return `<article class="post${l.pin?" pinned":""}${postOpen.has(l.id)?" open":""}${ms.length?"":" nophoto"}" tabindex="0" data-post="${l.id}" data-tm="${l.term||0}" data-wk="${l.wk||0}">${ms.length>1?`<span class="pcnt" aria-hidden="true">${ic("image","sm")}${ms.length}</span>`:""}<header class="phd"><span class="pavs" aria-hidden="true">${esc(initials(l.by||"me"))}</span><div class="grow"><b>${esc(l.by||"")}</b><span class="small muted" style="display:block">${tmOf(l.t)}${l.ed?" · edited":""}</span></div>${l.pin?`<span class="pinic" title="Pinned" aria-label="Pinned">${ic("pin","sm")}</span>`:""}<button class="x sm ptog" data-pt="${l.id}" aria-expanded="${postOpen.has(l.id)}" aria-label="${postOpen.has(l.id)?"Show less":"Show more"}">${ic("chev","sm")}</button><button class="x sm" data-po="${l.id}" aria-label="Post options">${ic("more")}</button></header>${tw?`<span class="chtag">${esc(tw)}</span>`:""}${l.text?`<p class="ptext">${nl2br(l.text)}</p>`:""}${grid}${l.note&&l.note.text?`<div class="pnote"><span class="small muted">${esc(l.note.by||"Teacher")} left a note</span><p>${nl2br(l.note.text)}</p></div>`:""}<footer class="pfoot"><button type="button" class="rxb" data-rx="${l.id}" aria-pressed="${(l.rx||[]).includes(who()||"me")}" aria-label="${(l.rx||[]).includes(who()||"me")?"Remove your heart":"Send a heart"}${(l.rx||[]).length?", "+(l.rx||[]).length+" so far":""}">${ic("heart","sm")}<span>${(l.rx||[]).length||""}</span></button><button type="button" class="linkbtn" data-nt="${l.id}">${ic("chat","sm")}${l.note&&l.note.text?"Edit note":"Add a note"}</button>${ms.some(m=>m.consent==="ok")?`<span class="pubtag">${ic("globe","sm")}Public</span>`:""}</footer></article>`;
+  return `<article class="post${l.pin?" pinned":""}${postOpen.has(l.id)?" open":""}${ms.length?"":" nophoto"}" tabindex="0" data-post="${l.id}" data-tm="${l.term||0}" data-wk="${l.wk||0}"><span class="pdt" aria-hidden="true">${esc(pdLabel(l.t))}</span>${ms.length>1?`<span class="pcnt" aria-hidden="true">${ic("image","sm")}${ms.length}</span>`:""}<header class="phd"><span class="pavs" aria-hidden="true">${esc(initials(l.by||"me"))}</span><div class="grow"><b>${esc(l.by||"")}</b><span class="small muted" style="display:block">${tmOf(l.t)}${l.ed?" · edited":""}</span></div>${l.pin?`<span class="pinic" title="Pinned" aria-label="Pinned">${ic("pin","sm")}</span>`:""}<button class="x sm ptog" data-pt="${l.id}" aria-expanded="${postOpen.has(l.id)}" aria-label="${postOpen.has(l.id)?"Show less":"Show more"}">${ic("chev","sm")}</button><button class="x sm" data-po="${l.id}" aria-label="Post options">${ic("more")}</button></header>${tw?`<span class="chtag">${esc(tw)}</span>`:""}${l.text?`<p class="ptext">${nl2br(l.text)}</p>`:""}${grid}${l.note&&l.note.text?`<div class="pnote"><span class="small muted">${esc(l.note.by||"Teacher")} left a note</span><p>${nl2br(l.note.text)}</p></div>`:""}<footer class="pfoot"><button type="button" class="rxb" data-rx="${l.id}" aria-pressed="${(l.rx||[]).includes(who()||"me")}" aria-label="${(l.rx||[]).includes(who()||"me")?"Remove your heart":"Send a heart"}${(l.rx||[]).length?", "+(l.rx||[]).length+" so far":""}">${ic("heart","sm")}<span>${(l.rx||[]).length||""}</span></button><button type="button" class="linkbtn" data-nt="${l.id}">${ic("chat","sm")}${l.note&&l.note.text?"Edit note":"Add a note"}</button>${ms.some(m=>m.consent==="ok")?`<span class="pubtag">${ic("globe","sm")}Public</span>`:""}</footer></article>`;
 }
 async function makePost(p,text,files,tw,share){
   const id=uid(),ids=files.length?await addFilesIds(p.id,files,""):[];
@@ -1149,7 +1165,8 @@ function storyTab(p){
   const pinned=vis.filter(x=>x.k==="post"&&x.l.pin),rest=vis.filter(x=>!(x.k==="post"&&x.l.pin));
   let html="",day="";
   if(pinned.length)html+=`<h3 class="sday" style="margin-top:6px">Pinned</h3>`+pinned.map(x=>postCard(p,x.l)).join("");
-  rest.forEach(x=>{const l=dayLabel(x.t);if(l!==day){html+=`<h3 class="sday">${esc(l)}</h3>`;day=l}html+=x.k==="post"?postCard(p,x.l):storyCard(x)});
+  const bucket=t=>{const n=new Date(),ws=weekStart(n.getTime());if(t>=ws)return"This week";if(t>=ws-7*864e5)return"Last week";const d=new Date(t);return d.toLocaleDateString(undefined,d.getFullYear()===n.getFullYear()?{month:"long"}:{month:"long",year:"numeric"})};
+  rest.forEach(x=>{const l=bucket(x.t);if(l!==day){html+=`<h3 class="sday">${esc(l)}</h3>`;day=l}html+=x.k==="post"?postCard(p,x.l):storyCard(x)});
   const bar=(hasTW||items.length||filt)?`<div class="twbar" role="group" aria-label="Filter the story"><select class="t sel" id="tf-t" aria-label="Show term"><option value="0">Term</option>${TERMS.map(n=>`<option value="${n}"${storyF.term===n?" selected":""}>Term ${n}</option>`).join("")}</select><select class="t sel" id="tf-w" aria-label="Show week"><option value="0">Week</option>${WEEKS.map(n=>`<option value="${n}"${storyF.wk===n?" selected":""}>Week ${n}</option>`).join("")}</select>${mediaOf(p).length?`<button type="button" class="chip add" id="sc-gal" aria-label="Photos and videos, ${mediaOf(p).length}">${ic("image","sm")}Media (${mediaOf(p).length})</button>`:""}</div>`:"";
     const isOpen2=composeOpen||pendFiles.length>0,dr=draftGet(p.id);
   const mini=`<div class="card composer mini"><button class="cmini" id="sc-open" type="button" aria-label="${dr?"Continue your draft":"Write a post"}"><span class="pavs" aria-hidden="true">${esc(initials(who()||"me"))}</span><span class="cmt${dr?" dr":""}">${dr?"Draft: "+esc(dr.slice(0,60)):"What happened today?"}</span></button><button class="x cam" id="sc-cam" type="button" aria-label="Take a photo">${ic("camera")}</button><button class="x cam" id="sc-lib" type="button" aria-label="Choose photos or videos from the library">${ic("image")}</button><input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"><input type="file" id="pc" accept="image/*" capture="environment" class="sr" aria-label="Take a photo" tabindex="-1"></div>`;
@@ -1490,7 +1507,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: when a newer version is on the server the app refreshes itself (clearing old cached copies), unless someone is in the middle of something; then it offers a one-tap refresh */
-const APP_VER="6.22.2";
+const APP_VER="6.23.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function applyUpdate(){try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}
@@ -1531,6 +1548,7 @@ const bud=p=>{const planned=p.bud.items.reduce((a,i)=>a+toNum(i.qty)*toNum(i.uni
 const TOURK="ms-prod-tour";
 const tourSeen=()=>{try{return !!localStorage.getItem(TOURK)}catch{return true}};
 let tourShown=false;const postOpen=new Set();
+const pdLabel=t=>{const d=dayLabel(t);return d==="Today"||d==="Yesterday"?d:new Date(t).toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"})};
 function tourSheet(){
   const SL=[["camera","Tell your story","Tap the bar that says What happened today. Write a post, add photos or videos, and pin your best one to the top."],["book","Sort it by term and week","Pick the term and week for each post. The two filters above the story show just one term or one week."],["share","Share it","Play a slideshow, send photos to WhatsApp, print a story book, or turn on a public page for families."]];
   let i=0;try{localStorage.setItem(TOURK,"1")}catch{}
@@ -2328,12 +2346,12 @@ function choiceSheet(r){
 }
 const lastTxt=()=>{if(!LV.at)return"Waiting for the first sync";const m=Math.round((Date.now()-LV.at)/60000);return"Last synced "+(m<1?"just now":m<60?m+" min ago":new Date(LV.at).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}))};
 function liveCard(){
-  return LV.on?`<div class="card"><h2>Live sync</h2><p class="muted small" style="margin-top:0">This device is connected. Changes show up on every other connected device within seconds. If you are offline, your work is kept and syncs when you are back.</p><p class="small muted" id="lv-last" aria-live="polite">${lastTxt()}</p><div class="row wr"><button class="btn" id="lv-now">${ic("cloud")}Sync now</button><button class="btn danger" id="lv-off">Disconnect this device</button></div></div>`
-    :`<div class="card"><h2>Live sync</h2><p class="muted small" style="margin-top:0">Connect every phone and laptop with your school code so the whole team shares the same productions, live.</p><button class="btn primary" id="lv-on">${ic("cloud")}Connect with school code</button></div>`;
+  return LV.on?`<div class="card"><h2>Live sync</h2><div class="lv-st"><span class="lv-dot on" aria-hidden="true"></span><b>Live</b><span class="muted small" id="lv-last" aria-live="polite">${lastTxt()}</span></div><p class="muted small" style="margin:0 0 12px">Everyone using this app shares the same productions, photos and posts. If you are offline your work is kept and sent when you are back.</p><div class="row wr"><button class="btn" id="lv-now">${ic("cloud")}Sync now</button><button class="btn danger" id="lv-off">Disconnect this phone</button></div></div>`
+    :`<div class="card"><h2>Live sync</h2><div class="lv-st"><span class="lv-dot" aria-hidden="true"></span><b>Not connected</b></div><p class="muted small" style="margin:0 0 12px">This phone is only saving here. Connect it to share with the team.</p><button class="btn primary" id="lv-on">${ic("cloud")}Connect</button></div>`;
 }
 function wireLive(){
   const on=$("#lv-on"),now=$("#lv-now"),off=$("#lv-off");
-  if(on)on.onclick=connectSheet;
+  if(on)on.onclick=()=>{if(typeof window.__joinShared==="function"){toast("Connecting…");window.__joinShared()}else connectSheet()};
   if(now)now.onclick=()=>{syncNow();toast("Syncing…")};
   if(off)off.onclick=()=>{if(!confirm("Disconnect this device? Your data stays here, but it stops syncing."))return;liveStop();render();toast("Disconnected.")};
 }
@@ -2393,7 +2411,8 @@ function weekCard(){
   if(Date.now()-recapSeen()<3*864e5)return"";
   const l=weekMediaList();if(l.length<2)return"";
   const teams=new Set(l.map(x=>x.p.id)).size,th=l.slice(-3);
-  return `<section class="wkcard" aria-label="Week in review"><div class="wk-th">${th.map(x=>`<img data-mid="${x.m.id}" alt="" loading="lazy">`).join("")}</div><div class="wk-b"><b>Your week in review</b><span class="small muted">${l.length} photo${l.length===1?"":"s"} and video${l.length===1?"":"s"} from ${teams} team${teams===1?"":"s"}</span><div class="row wr" style="margin-top:8px"><button class="btn small primary" id="wk-play" type="button">${ic("play","sm")}Play</button><button class="btn small" id="wk-sh" type="button">${ic("share","sm")}Share</button></div></div><button class="x sm" id="wk-x" type="button" aria-label="Hide for now">${ic("x","sm")}</button></section>`;
+  const nl=th[th.length-1];
+  return `<section class="wkcard" aria-label="Week in review"><button class="wk-main" id="wk-play" type="button" aria-label="Play your week in review"><span class="wk-pv"><img data-mid="${nl.m.id}" alt="" loading="lazy"><span class="wk-pl">${ic("play")}</span></span><span class="wk-b"><b>Week in review</b><span class="small muted">${l.length} photo${l.length===1?"":"s"} &amp; video${l.length===1?"":"s"} · ${teams} team${teams===1?"":"s"}</span></span></button><button class="x" id="wk-sh" type="button" aria-label="Share your week in review">${ic("share")}</button><button class="x" id="wk-x" type="button" aria-label="Hide for now">${ic("x","sm")}</button></section>`;
 }
 function recentStrip(){
   const it=prods().flatMap(p=>p.log.map(l=>({p,l}))).sort((a,b)=>b.l.t-a.l.t).slice(0,6);if(!it.length)return"";
@@ -2402,7 +2421,7 @@ function recentStrip(){
 function homePage(){
   const ps=prods(),wk=weekCard();
   return `<h2 class="sr">Productions</h2>
-  ${wk}${todayStrip()}<div class="ptiles" style="--st:${(todayData().any?56:0)+(wk?132:0)}px">${ps.map((p,ix)=>{const last=lastActivity(p),quiet=!!last&&Date.now()-last>7*864e5,cov=coverOf(p);return`<button class="ptile${cov?" hascov":""}" style="--pc:${p.color};--i:${ix}" data-open="${p.id}" aria-label="${esc(p.name)}, ${agoLabel(last).toLowerCase()}${quiet?", quiet for a while":""}">${cov?`<img class="tcov" data-mid="${cov.id}" alt="" loading="lazy"${covVars(p)}>`:""}${quiet?`<span class="pbadge q" aria-hidden="true"></span>`:""}<span class="pi"><span class="pav">${ic(p.icon)}</span><b>${esc(p.name)}</b><span class="pq">${agoShort(last)}</span></span></button>`}).join("")}<button class="ptile padd" id="addp" aria-label="New production"><span class="pi"><span class="pav">${ic("plus")}</span><b>Add new</b></span></button></div>${recentStrip()}`;
+  ${wk}${todayStrip()}<div class="ptiles" style="--st:${(todayData().any?56:0)+(wk?92:0)}px">${ps.map((p,ix)=>{const last=lastActivity(p),quiet=!!last&&Date.now()-last>7*864e5,cov=coverOf(p);return`<button class="ptile${cov?" hascov":""}" style="--pc:${p.color};--i:${ix}" data-open="${p.id}" aria-label="${esc(p.name)}, ${agoLabel(last).toLowerCase()}${quiet?", quiet for a while":""}">${cov?`<img class="tcov" data-mid="${cov.id}" alt="" loading="lazy"${covVars(p)}>`:""}${quiet?`<span class="pbadge q" aria-hidden="true"></span>`:""}<span class="pi"><span class="pav">${ic(p.icon)}</span><b>${esc(p.name)}</b><span class="pq">${agoShort(last)}</span></span></button>`}).join("")}<button class="ptile padd" id="addp" aria-label="New production"><span class="pi"><span class="pav">${ic("plus")}</span><b>Add new</b></span></button></div>${recentStrip()}`;
 }
 /* second tab: the detail */
 let ovMore=false;
