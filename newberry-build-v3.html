@@ -763,6 +763,7 @@ header.top .sync,.sync{font-size:.8rem!important}
 .ro [data-act="dnote"],.ro-mats [data-act="dnote"],.ro [data-fab="dnote"],.ro-mats [data-fab="dnote"],.na-mats [data-fab="dnote"],.na-mats [data-act="dnote"],.na-mats [data-act="dnotes"]{display:none!important}
 .dnbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 10px}.dnbar .btn{min-height:44px;min-width:0;white-space:normal;line-height:1.2;text-align:center;justify-content:center}
 @media (min-width:900px){.msticky{top:0;padding-top:12px}}.msticky{box-shadow:0 10px 14px -12px rgba(0,0,0,.45)}
+.sync.retry{color:var(--amber,#d9a441)}
 </style>
 </head>
 <body>
@@ -2325,13 +2326,23 @@ function scan(){
   for(const key of Object.keys(sm.meta)){if(cur.has(key))continue;const m=sm.meta[key];if(m.s===undefined){delete sm.meta[key];continue}if(m.s!=="x"&&!m.del){m.del=true;m.u=Date.now()}}
 }
 const isDirty=(key,m,cur)=>m.del?m.s!=="x":(cur.has(key)&&m.h!==undefined&&m.s!==m.h);
+/* a failed sync: a dropped connection retries by itself in a few seconds; only repeated or real server errors show Sync problem */
+var syncFails=0,syncRetryT=0;
+const netErr=e=>/failed to fetch|load failed|networkerror|network error|network connection|timed? ?out|aborted|offline|fetch failed/i.test((e&&e.message)||String(e||""));
+function syncFail(e,where){
+  lastErr=e?.message||String(e);console.warn(where,e);
+  if(/denied/.test(lastErr)){sm.off=true;persistSync();setSync("error");return}
+  if(!navigator.onLine){setSync("offline");return}
+  syncFails++;const net=netErr(e);setSync(net&&syncFails<5?"retry":"error");
+  clearTimeout(syncRetryT);syncRetryT=setTimeout(()=>{if(!document.hidden)syncNow()},[4000,10000,20000,30000][Math.min(syncFails-1,3)]);
+}
 function setSync(s){
   syncState=s;if(s==="ok")syncedAt=Date.now();
   const e=$("#sync");if(!e)return;
-  const L={off:"Not shared yet",syncing:"Syncing…",ok:"Shared",offline:"Offline, saved here",error:"Sync problem",unavailable:"Sharing unavailable"};
+  const L={off:"Not shared yet",syncing:"Syncing…",ok:"Shared",offline:"Offline, saved here",retry:"Reconnecting…",error:"Sync problem",unavailable:"Sharing unavailable"};
   document.body.classList.toggle("sync-ok",s==="ok"||s==="syncing");e.className="sync "+(s==="off"?"":s);e.innerHTML=ic(s==="ok"||s==="syncing"?"cloud":"cloudoff")+L[s];
 }
-$("#sync").onclick=()=>shareSheet();
+$("#sync").onclick=async()=>{if(sm.code&&!sm.off&&["error","retry","offline"].includes(syncState)){toast("Trying again…");syncFails=0;await syncNow();toast(syncState==="ok"?"Synced. Everything is shared.":syncState==="offline"?"No internet. Your changes are saved on this phone.":"Still cannot sync"+(lastErr?": "+String(lastErr).slice(0,80):".")+" Your changes are saved on this phone.");return}shareSheet()};
 async function push(){
   if(!sm.code||!sb||pushing)return;pushing=true;setSync("syncing");
   try{
@@ -2352,7 +2363,7 @@ async function push(){
       if(sm.mfail)delete sm.mfail[mid];
       const{error}=await sb.rpc("build3_upsert",{p_code:sm.code,p_key:sm.key,p_rows:[{kind:"media",id:mid,data:{p:path,t:b.type||"",n:b.size,...(isMoneyMedia(mid)?{m:1}:{})},deleted:false,u:Date.now()}]});if(error)throw error;sm.pendingMedia=sm.pendingMedia.filter(x=>x!==mid)}
     persistSync();setSync("ok");
-  }catch(e){lastErr=e?.message||String(e);if(/denied/.test(lastErr)){sm.off=true;persistSync()}console.warn("sync push",e);setSync(navigator.onLine?"error":"offline")}
+  }catch(e){syncFail(e,"sync push")}
   finally{pushing=false;persistSync()}
 }
 const queueMedia=id=>{if(!sm.pendingMedia.includes(id))sm.pendingMedia.push(id);persistSync()};
@@ -2395,16 +2406,16 @@ async function pull(){
     if(changed){try{localStorage.setItem(KEY,JSON.stringify(S))}catch{}}
     if(changed||gotMedia){if(!closeSheet)render()}
     if(syncState!=="syncing")setSync("ok");
-  }catch(e){lastErr=e?.message||String(e);if(/denied/.test(lastErr)){sm.off=true;persistSync()}console.warn("sync pull",e);setSync(navigator.onLine?"error":"offline")}
+  }catch(e){syncFail(e,"sync pull")}
   finally{pulling=false}
 }
-const syncNow=async()=>{if(!sm.code||sm.off)return;if(!sb&&!await connect())return;await push();await pull()};
+const syncNow=async()=>{if(!sm.code||sm.off)return;if(!sb&&!await connect())return;await push();if(["retry","error","offline"].includes(syncState))return;await pull();if(syncState==="ok"){syncFails=0;clearTimeout(syncRetryT)}};
 function loadSupabase(){return new Promise(res=>{if(window.supabase)return res();const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";s.onload=()=>res();s.onerror=()=>res();document.head.append(s)})}
 async function connect(){if(sb)return true;await loadSupabase();if(!window.supabase){setSync(navigator.onLine?"unavailable":"offline");return false}sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:false}});return true}
 const newCode=()=>[...crypto.getRandomValues(new Uint8Array(24))].map(b=>"abcdefghjkmnpqrstuvwxyz23456789"[b%31]).join("");
 const shareLink=r=>location.origin+location.pathname+"#join="+sm.code+"&role="+(r||"partner");
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)syncNow()});
-addEventListener("online",syncNow);addEventListener("offline",()=>{if(sm.code)setSync("offline")});
+addEventListener("online",syncNow);document.addEventListener("visibilitychange",()=>{if(!document.hidden&&sm.code)syncNow()});addEventListener("offline",()=>{if(sm.code)setSync("offline")});
 setInterval(()=>{if(!document.hidden)syncNow()},20000);
 async function startSharing(){
   if(!await connect()){toast("Connect to the internet to start sharing.");return false}
