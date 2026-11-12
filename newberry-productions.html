@@ -1556,7 +1556,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: when a newer version is on the server the app refreshes itself (clearing old cached copies), unless someone is in the middle of something; then it offers a one-tap refresh */
-const APP_VER="6.27.3";
+const APP_VER="6.27.4";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function applyUpdate(){try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}
@@ -2401,7 +2401,7 @@ function liveCard(){
 }
 function wireLive(){
   const on=$("#lv-on"),now=$("#lv-now"),off=$("#lv-off");
-  if(on)on.onclick=()=>{if(typeof window.__joinShared==="function"){toast("Connecting…");window.__joinShared()}else connectSheet()};
+  if(on)on.onclick=()=>{if(typeof window.__joinShared==="function"){toast("Connecting…");window.__joinShared();setTimeout(()=>{if(!LV.on)toast("Could not reach the sync server. Check your internet and try again.")},9000)}else connectSheet()};
   if(now)now.onclick=()=>{syncNow();toast("Syncing…")};
   if(off)off.onclick=()=>{if(!confirm("Disconnect this device? Your data stays here, but it stops syncing."))return;liveStop();render();toast("Disconnected.")};
 }
