@@ -3964,7 +3964,8 @@ function attentionItems(){
 }
 /* what needs attention is one quiet line; tap it to see the list */
 function attentionV(){
-  const it=attentionItems();if(!it.length)return "";
+  /* the Your work card already lists my tasks, so the banner leaves that line out */
+  const it=attentionItems().filter(x=>!(x[3]==="gotasks"&&x[4]==="me"&&lvl("tasks")>=1));if(!it.length)return "";
   const red=it.some(x=>x[1]==="red");
   return `<button type="button" class="attline ${red?"red":""}" data-act="attsheet" aria-label="${it.length} thing${it.length===1?"":"s"} need${it.length===1?"s":""} attention: ${esc(it.slice(0,2).map(x=>x[2]).join(". "))}. Open the list.">${ic("alert","sm")}<span class="grow"><b>${it.length} thing${it.length===1?"":"s"} need${it.length===1?"s":""} you</b>${it.slice(0,2).map(x=>`<span class="muted attl">${esc(x[2])}</span>`).join("")}${it.length>2?`<span class="muted attl">and ${it.length-2} more</span>`:""}</span>${ic("chev","sm")}</button>`;
 }
