@@ -846,6 +846,18 @@ div.bcard{cursor:default}.bc-k{font-size:.74rem;color:var(--muted)}.bc-t{font:70
 .bt-q{position:absolute;top:10px;right:9px;z-index:2;background:rgba(0,0,0,.5);border-radius:99px;padding:2px 8px;font-size:.66rem;font-weight:700}
 .bt-t{position:absolute;left:11px;right:10px;bottom:9px;z-index:2;display:flex;flex-direction:column;gap:1px}.bt-t b{font:700 .98rem/1.12 var(--geist);overflow-wrap:anywhere}.bt-t span{font-size:.72rem;opacity:.9}
 .bt.add{display:grid;place-items:center;align-content:center;gap:4px;background:transparent;border:1.5px dashed var(--line);color:var(--muted)}.bt-addi{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--green-soft);color:var(--green)}.bt.add b{font-size:.86rem}
+/* v6.27.0: choose and order the photos in a review */
+.re-g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 14px}
+.re-t{position:relative;aspect-ratio:1;border-radius:14px;overflow:hidden;background:var(--line);padding:0;border:0}
+.re-t img{width:100%;height:100%;object-fit:cover;display:block}
+.re-n{position:absolute;left:6px;top:6px;background:rgba(0,0,0,.6);color:#fff;border-radius:99px;padding:1px 8px;font:700 .72rem var(--body)}
+.re-v{position:absolute;left:6px;bottom:6px;color:#fff;background:rgba(0,0,0,.55);border-radius:99px;display:grid;place-items:center;width:22px;height:22px}
+.re-x{position:absolute;right:4px;top:4px;width:34px;height:34px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center;cursor:pointer}
+.re-mv{position:absolute;left:4px;right:4px;bottom:4px;display:flex;justify-content:space-between;pointer-events:none}
+.re-mv button{pointer-events:auto;width:40px;height:40px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center;cursor:pointer}
+.re-mv button:first-child svg{transform:rotate(180deg)}.re-mv button:disabled{opacity:.3}
+.re-c{position:absolute;right:6px;top:6px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:none;place-items:center}
+.re-a[aria-pressed="true"]{outline:3px solid var(--accent);outline-offset:-3px}.re-a[aria-pressed="true"] .re-c{display:grid}
 </style>
 </head>
 <body>
@@ -1085,9 +1097,9 @@ function prodMenu(p){
 }
 function playStory(p){
   const on=tab==="story"&&storyF.pid===p.id&&(storyF.term||storyF.wk),f=on?{term:storyF.term,wk:storyF.wk}:{};
-  const list=storyMediaList(p,f);
+  const list=on?storyMediaList(p,f):reelList(p.id,storyMediaList(p,f));
   if(!list.length){toast(on?"No photos or videos for this term and week.":"No photos or videos yet.");return}
-  openViewer(list,0,true);
+  openViewer(list,0,true,on?undefined:{key:p.id,base:()=>storyMediaList(p),get:()=>reelList(p.id,storyMediaList(p)),title:p.name+" slideshow"});
 }
 function openMediaSheet(m){
   sheet(m.type==="video"?"Video":"Photo",`${m.type==="video"?`<video data-mid="${m.id}" controls playsinline style="width:100%;border-radius:16px;margin-top:8px;background:#000"></video>`:`<img data-mid="${m.id}" alt="" style="width:100%;border-radius:16px;margin-top:8px">`}<label class="f" for="mc">Caption</label><div class="row"><textarea class="t ta" rows="1" id="mc">${esc(m.cap)}</textarea>${micBtn()}</div>
@@ -1540,7 +1552,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: when a newer version is on the server the app refreshes itself (clearing old cached copies), unless someone is in the middle of something; then it offers a one-tap refresh */
-const APP_VER="6.26.0";
+const APP_VER="6.27.1";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function applyUpdate(){try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}
@@ -2490,7 +2502,7 @@ const actRow=f=>{const m=f.m||(f.l&&postMedia(f.l)[0]);return `<li><div class="a
 const fab=()=>`<div class="fab-wrap"><button class="fab" id="addp" aria-label="New production">${ic("plus")}<span>New production</span></button></div>`;
 function wireHome(){
   {const h=$("#b-hero");if(h)h.onclick=()=>{fb("tap");nav("overview")};const qb=$("#b-quiet");if(qb)qb.onclick=todaySheet;const pb=$("#b-play");if(pb)pb.onclick=()=>{const l=weekMediaList();if(l.length)openViewer(l,0,true);else captureSheet()}}
-  {const a=$("#wk-play");if(a)a.onclick=()=>openViewer(weekMediaList(),0,true);const b=$("#wk-sh");if(b)b.onclick=()=>shareMenu(null);const x=$("#wk-x");if(x)x.onclick=()=>{try{localStorage.setItem(RECAPK,String(Date.now()))}catch{}render()}}
+  {const a=$("#wk-play");if(a)a.onclick=()=>openViewer(weekMediaList(),0,true,weekReel());const b=$("#wk-sh");if(b)b.onclick=()=>shareMenu(null);const x=$("#wk-x");if(x)x.onclick=()=>{try{localStorage.setItem(RECAPK,String(Date.now()))}catch{}render()}}
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{tab="plan";nav("p/"+b.dataset.open)});
   $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#shr-btn")&&($("#shr-btn").onclick=()=>shareMenu(null));$("#ov-late")&&($("#ov-late").onclick=todaySheet);$("#ov-more")&&($("#ov-more").onclick=()=>{ovMore=!ovMore;render()});$("#today")&&($("#today").onclick=todaySheet);
 }
@@ -2882,17 +2894,56 @@ function digestSheet(){
   });
 }
 /* ---------- one Share menu ---------- */
-const weekMediaList=()=>prods().flatMap(p=>storyMediaList(p).filter(x=>x.t>=Date.now()-7*864e5)).sort((a,b)=>a.t-b.t);
+const weekBase=()=>prods().flatMap(p=>storyMediaList(p).filter(x=>x.t>=Date.now()-7*864e5)).sort((a,b)=>a.t-b.t);
+/* a chosen set and order of photos, kept per week or per production */
+const REELK="ms-prod-reel";let REEL={};try{REEL=JSON.parse(localStorage.getItem(REELK)||"{}")||{}}catch{}
+const reelSave=()=>{try{localStorage.setItem(REELK,JSON.stringify(REEL))}catch{}};
+const wkKey=()=>"wk"+weekStart(Date.now());
+const reelPool=base=>{const m=new Map();prods().forEach(p=>storyMediaList(p).forEach(x=>m.set(x.m.id,x)));base.forEach(x=>m.set(x.m.id,x));return m};
+const reelList=(key,base)=>{const o=REEL[key];if(!o)return base;const m=reelPool(base);return o.map(id=>m.get(id)).filter(Boolean)};
+const weekMediaList=()=>reelList(wkKey(),weekBase());
+const weekReel=()=>({key:wkKey(),base:weekBase,get:weekMediaList,title:"Week in review"});
+function reelEdit(key,base,title,after){
+  let ids=(REEL[key]||base.map(x=>x.m.id)).slice(),adding=false;const pick=new Set();
+  const pool=reelPool(base);
+  const commit=()=>{REEL[key]=ids.slice();reelSave()};
+  const vb=x=>x.m.type==="video"?`<span class="re-v">${ic("play","sm")}</span>`:"";
+  sheet(title,'<div id="re"></div>',(d,close)=>{
+    const root=d.querySelector("#re");
+    const draw=()=>{
+      if(adding){
+        const rest=[...pool.values()].filter(x=>!ids.includes(x.m.id)).sort((a,b)=>b.t-a.t).slice(0,90);
+        root.innerHTML=`<p class="small muted" style="margin:0">Tap the photos to add them to the end.</p>${rest.length?`<div class="re-g">${rest.map(x=>`<button type="button" class="re-t re-a" data-a="${x.m.id}" aria-pressed="${pick.has(x.m.id)}" aria-label="Add ${x.m.type==="video"?"video":"photo"}"><img data-mid="${x.m.id}" alt="" loading="lazy">${vb(x)}<span class="re-c">${ic("check","sm")}</span></button>`).join("")}</div>`:'<p class="muted">Every photo is already in.</p>'}<div class="row" style="gap:8px"><button class="btn" id="re-bk" type="button">Back</button><button class="btn primary grow" id="re-ad" type="button"${pick.size?"":" disabled"}>Add ${pick.size||""} to the review</button></div>`;
+        root.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const k=b.dataset.a;pick.has(k)?pick.delete(k):pick.add(k);draw()});
+        root.querySelector("#re-bk").onclick=()=>{adding=false;pick.clear();draw()};
+        root.querySelector("#re-ad").onclick=()=>{pick.forEach(k=>ids.push(k));pick.clear();adding=false;commit();draw()};
+      }else{
+        const items=ids.map(id=>pool.get(id)).filter(Boolean);ids=items.map(x=>x.m.id);
+        root.innerHTML=`<p class="small muted" style="margin:0">${items.length} in the review. Use the arrows to move a photo and the cross to take it out.</p>${items.length?`<div class="re-g">${items.map((x,i)=>`<div class="re-t"><img data-mid="${x.m.id}" alt="" loading="lazy">${vb(x)}<span class="re-n">${i+1}</span><button type="button" class="re-x" data-rm="${i}" aria-label="Take photo ${i+1} out">${ic("x","sm")}</button><div class="re-mv"><button type="button" data-mv="${i}" data-d="-1" aria-label="Move photo ${i+1} earlier"${i?"":" disabled"}>${ic("chev","sm")}</button><button type="button" data-mv="${i}" data-d="1" aria-label="Move photo ${i+1} later"${i<items.length-1?"":" disabled"}>${ic("chev","sm")}</button></div></div>`).join("")}</div>`:'<p class="muted">Nothing here yet. Add some photos.</p>'}<div class="row wr" style="gap:8px"><button class="btn" id="re-add" type="button">${ic("plus")}Add photos</button><button class="btn" id="re-rs" type="button">Start again</button><button class="btn primary grow" id="re-ok" type="button">Done</button></div>`;
+        root.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{ids.splice(+b.dataset.rm,1);commit();draw()});
+        root.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{const i=+b.dataset.mv,j=i+ +b.dataset.d;if(j<0||j>=ids.length)return;[ids[i],ids[j]]=[ids[j],ids[i]];commit();draw()});
+        root.querySelector("#re-add").onclick=()=>{adding=true;draw()};
+        root.querySelector("#re-rs").onclick=()=>{delete REEL[key];reelSave();ids=base.map(x=>x.m.id);draw();toast("Back to all photos, in date order.")};
+        root.querySelector("#re-ok").onclick=()=>{close();if(after)setTimeout(after,120)};
+      }
+      hydrate(root);
+    };
+    draw();
+  });
+}
 function shareMenu(p){
   const rows=[];
   if(!p){
-    rows.push(["play","This week's slideshow","Photos and videos from every team in the last 7 days",()=>openViewer(weekMediaList(),0,true)]);
+    rows.push(["play","This week's slideshow","Photos and videos from every team in the last 7 days",()=>openViewer(weekMediaList(),0,true,weekReel())]);
+    rows.push(["image","Choose and order photos","Add, take out or move photos in the week in review",()=>reelEdit(wkKey(),weekBase(),"Week in review",()=>render())]);
+    if(canRecord())rows.push(["download","Save week as a video","A video file to send or play on any screen",()=>slideshowVideo(weekMediaList())]);
     rows.push(["chat","Weekly digest","A short summary to send on WhatsApp",digestSheet]);
   }else{
     rows.push(["play","Play slideshow","Photos and videos from "+p.name+", with captions",()=>playStory(p)]);
+    rows.push(["image","Choose and order photos","Add, take out or move photos in the slideshow",()=>reelEdit(p.id,storyMediaList(p),p.name+" slideshow")]);
     rows.push(["cloud","Save to Google Drive","All photos and videos from "+p.name+", up to 30 files",()=>saveToDrive(mediaOf(p).slice().reverse().map(m=>m.id),p)]);
-    rows.push(["image","Send photos to WhatsApp","Up to 20 photos from the story, sent as pictures",()=>sharePhotos(storyMediaList(p),p.name)]);
-    if(canRecord())rows.push(["download","Save slideshow as a video","A video file to send or play on any screen",()=>slideshowVideo(storyMediaList(p))]);
+    rows.push(["image","Send photos to WhatsApp","Up to 20 photos from the story, sent as pictures",()=>sharePhotos(reelList(p.id,storyMediaList(p)),p.name)]);
+    if(canRecord())rows.push(["download","Save slideshow as a video","A video file to send or play on any screen",()=>slideshowVideo(reelList(p.id,storyMediaList(p)))]);
     rows.push(["share","Showcase page","A public page for families and the community",()=>showcaseSheet(p)]);
     if(p.showcase&&p.showcase.on)rows.push(["printer","Print poster","A page with a QR code to this showcase",()=>posterProd(p)]);
     rows.push(["book","Story book (PDF)","Your whole story laid out to print or save",()=>exportStory(p)]);
@@ -2911,14 +2962,14 @@ function storyMediaList(p,opts){
 const canRecord=()=>!!(window.MediaRecorder&&HTMLCanvasElement.prototype.captureStream);
 let VW=null;
 function closeViewer(){if(!VW)return;const v=VW;VW=null;clearTimeout(v.timer);document.removeEventListener("keydown",v.key);document.removeEventListener("visibilitychange",v.vis);try{ovPop("viewer")}catch{}v.root.remove();if(!document.querySelector(".scrim,.ed"))document.body.classList.remove("noscroll")}
-function openViewer(list,start,auto){
+function openViewer(list,start,auto,reel){
   if(!list.length){toast("No photos or videos yet.");return}
   closeViewer();
   let i=Math.max(0,Math.min(start||0,list.length-1)),playing=!!auto;
   const root=document.createElement("div");root.className="vw";root.setAttribute("role","dialog");root.setAttribute("aria-modal","true");root.setAttribute("aria-label","Photos and videos");
   const seg=list.length<=20;
   root.innerHTML=`<div class="vw-bars ${seg?"":"one"}" aria-hidden="true">${seg?list.map(()=>`<i><b></b></i>`).join(""):`<i><b id="vw-one"></b></i>`}</div>
-    <div class="vw-top"><span class="vw-t grow" id="vw-t"></span><button class="x glass" id="vw-pl" type="button"></button>${canRecord()?`<button class="x glass" id="vw-vid" type="button" aria-label="Save slideshow as a video">${ic("download")}</button>`:""}<button class="x glass" id="vw-edit" type="button" aria-label="Edit">${ic("wand")}</button><button class="x glass" id="vw-ed" type="button" aria-label="Details and sharing consent">${ic("pencil")}</button><button class="x glass" id="vw-x" type="button" aria-label="Close">${ic("x")}</button></div>
+    <div class="vw-top"><span class="vw-t grow" id="vw-t"></span><button class="x glass" id="vw-pl" type="button"></button>${canRecord()?`<button class="x glass" id="vw-vid" type="button" aria-label="Save slideshow as a video">${ic("download")}</button>`:""}${reel?`<button class="x glass" id="vw-re" type="button" aria-label="Choose and order photos">${ic("image")}</button>`:""}<button class="x glass" id="vw-edit" type="button" aria-label="Edit">${ic("wand")}</button><button class="x glass" id="vw-ed" type="button" aria-label="Details and sharing consent">${ic("pencil")}</button><button class="x glass" id="vw-x" type="button" aria-label="Close">${ic("x")}</button></div>
     <div class="vw-stage" id="vw-st"></div><button class="vw-nav prev" id="vw-p" type="button" aria-label="Previous"></button><button class="vw-nav next" id="vw-n" type="button" aria-label="Next"></button>
     <div class="vw-cap" id="vw-c"></div>`;
   document.body.append(root);document.body.classList.add("noscroll");
@@ -2957,6 +3008,7 @@ function openViewer(list,start,auto){
   q("#vw-x").onclick=closeViewer;q("#vw-p").onclick=prev;q("#vw-n").onclick=()=>{if(i<list.length-1){i++;show()}};
   q("#vw-ed").onclick=()=>{const m=list[i].m;closeViewer();openMediaSheet(m)};
   q("#vw-edit").onclick=()=>{const m=list[i].m,pp=P(m.pid);closeViewer();setTimeout(()=>m.type==="video"?videoEditSheet(pp,m):editSheet(pp,m),200)};
+  {const rb=q("#vw-re");if(rb)rb.onclick=()=>{playing=false;clearTimeout(v.timer);closeViewer();setTimeout(()=>reelEdit(reel.key,reel.base(),reel.title,()=>openViewer(reel.get(),0,false,reel)),200)}}
   const vb=q("#vw-vid");if(vb)vb.onclick=()=>{const items=list;playing=false;clearTimeout(v.timer);closeViewer();slideshowVideo(items)};
   let sx=0,pd=0,ps=1,pan=null,moved=false,lastTap=0;const stg=q("#vw-st");
   const imgEl=()=>{const e=q("#vw-st .vw-img");return e&&e.tagName==="IMG"?e:null},applyZ=()=>{const e=imgEl();if(e){e.style.transform=z.s>1?`translate(${z.x}px,${z.y}px) scale(${z.s})`:"";root.classList.toggle("zoomed",z.s>1)}};
