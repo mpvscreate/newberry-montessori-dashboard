@@ -858,6 +858,10 @@ div.bcard{cursor:default}.bc-k{font-size:.74rem;color:var(--muted)}.bc-t{font:70
 .re-mv button:first-child svg{transform:rotate(180deg)}.re-mv button:disabled{opacity:.3}
 .re-c{position:absolute;right:6px;top:6px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:none;place-items:center}
 .re-a[aria-pressed="true"]{outline:3px solid var(--accent);outline-offset:-3px}.re-a[aria-pressed="true"] .re-c{display:grid}
+/* v6.27.2: edit button on the Home week-in-review card */
+.bcard.wkb{flex-direction:row;align-items:stretch;padding:0;gap:0}
+.wkb-m{flex:1;min-width:0;text-align:left;background:none;border:0;color:inherit;padding:12px 4px 12px 14px;font:inherit;display:flex;flex-direction:column;gap:2px;justify-content:center;cursor:pointer}
+.wkb-e{flex:none;width:52px;border:0;background:none;color:var(--muted);display:grid;place-items:center;cursor:pointer}
 </style>
 </head>
 <body>
@@ -1552,7 +1556,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: when a newer version is on the server the app refreshes itself (clearing old cached copies), unless someone is in the middle of something; then it offers a one-tap refresh */
-const APP_VER="6.27.1";
+const APP_VER="6.27.2";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function applyUpdate(){try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}
@@ -2473,7 +2477,7 @@ function homePage(){
     return `<button class="bt${ix%5===0?" tall":""}${cov?" ph":""}" style="--pc:${p.color}" data-open="${p.id}" aria-label="${esc(p.name)}, ${esc(sub)}${quiet?", quiet for a while":""}">${cov?`<img class="bt-img" data-mid="${cov.id}" alt="" loading="lazy"${covVars(p)}>`:`<span class="bt-wm" aria-hidden="true">${ic(p.icon)}</span>`}<span class="bt-ic" aria-hidden="true">${ic(p.icon,"sm")}</span>${quiet?'<span class="bt-q">Quiet</span>':""}<span class="bt-t"><b>${esc(p.name)}</b><span>${esc(sub)}</span></span></button>`};
   return `<h2 class="sr">Productions</h2>
   <button class="bhero" id="b-hero" type="button" aria-label="This week: ${posts} post${pl(posts)} from ${active} of ${ps.length} teams. Open the overview"><span class="bh-k">This week</span><span class="bh-n">${posts}<small>post${pl(posts)}</small></span><span class="bh-s">${active} of ${ps.length} teams active${wl.length?" · "+wl.length+" photo"+pl(wl.length)+" and videos":""}</span></button>
-  <div class="bpair">${q?`<button class="bcard qt" id="b-quiet" type="button"><span class="bc-k">${q} quiet</span><b class="bc-t">Check in</b></button>`:`<div class="bcard"><span class="bc-k">Teams</span><b class="bc-t">All active</b></div>`}<button class="bcard" id="b-play" type="button"><span class="bc-k">Week in review</span><b class="bc-t">${wl.length?"Play":"Add a photo"}</b></button></div>
+  <div class="bpair">${q?`<button class="bcard qt" id="b-quiet" type="button"><span class="bc-k">${q} quiet</span><b class="bc-t">Check in</b></button>`:`<div class="bcard"><span class="bc-k">Teams</span><b class="bc-t">All active</b></div>`}<div class="bcard wkb"><button class="wkb-m" id="b-play" type="button"><span class="bc-k">Week in review</span><b class="bc-t">${wl.length?"Play":"Add a photo"}</b></button>${wl.length?`<button class="wkb-e" id="b-edit" type="button" aria-label="Choose and order photos in the week in review">${ic("image")}</button>`:""}</div></div>
   <div class="bento">${order.map((r,ix)=>tile(r,ix)).join("")}<button class="bt add" id="addp" type="button" aria-label="New production"><span class="bt-addi">${ic("plus")}</span><b>Add new</b></button></div>`;
 }
 /* second tab: the detail */
@@ -2501,7 +2505,7 @@ const feedItems=()=>prods().flatMap(p=>{const ids=new Set(p.log.map(l=>l.id));re
 const actRow=f=>{const m=f.m||(f.l&&postMedia(f.l)[0]);return `<li><div class="avatar" style="color:${f.p.color}">${ic(f.p.icon)}</div><div class="grow"><b>${esc(f.p.name)}</b> <span class="pill type">${f.k}</span><div>${esc(f.txt)}</div><div class="small muted">${fmt(f.t)}</div></div>${m?`<img class="athumb" data-mid="${m.id}" alt="">`:""}</li>`};
 const fab=()=>`<div class="fab-wrap"><button class="fab" id="addp" aria-label="New production">${ic("plus")}<span>New production</span></button></div>`;
 function wireHome(){
-  {const h=$("#b-hero");if(h)h.onclick=()=>{fb("tap");nav("overview")};const qb=$("#b-quiet");if(qb)qb.onclick=todaySheet;const pb=$("#b-play");if(pb)pb.onclick=()=>{const l=weekMediaList();if(l.length)openViewer(l,0,true);else captureSheet()}}
+  {const h=$("#b-hero");if(h)h.onclick=()=>{fb("tap");nav("overview")};const qb=$("#b-quiet");if(qb)qb.onclick=todaySheet;const pb=$("#b-play");if(pb)pb.onclick=()=>{const l=weekMediaList();if(l.length)openViewer(l,0,true,weekReel());else captureSheet()};const eb=$("#b-edit");if(eb)eb.onclick=()=>reelEdit(wkKey(),weekBase(),"Week in review",()=>render())}
   {const a=$("#wk-play");if(a)a.onclick=()=>openViewer(weekMediaList(),0,true,weekReel());const b=$("#wk-sh");if(b)b.onclick=()=>shareMenu(null);const x=$("#wk-x");if(x)x.onclick=()=>{try{localStorage.setItem(RECAPK,String(Date.now()))}catch{}render()}}
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{tab="plan";nav("p/"+b.dataset.open)});
   $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#shr-btn")&&($("#shr-btn").onclick=()=>shareMenu(null));$("#ov-late")&&($("#ov-late").onclick=todaySheet);$("#ov-more")&&($("#ov-more").onclick=()=>{ovMore=!ovMore;render()});$("#today")&&($("#today").onclick=todaySheet);
