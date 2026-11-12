@@ -713,6 +713,57 @@ a.btn{color:inherit;text-decoration:none}.btn{white-space:nowrap}
 .row-ic{width:46px;height:46px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;flex:none}
 .row-ic.sky{background:var(--sky-soft);color:var(--sky)}.row-ic.green{background:var(--green-soft);color:var(--green)}.row-ic.red{background:var(--red-soft);color:var(--red)}
 .sc-lbl{display:flex;justify-content:space-between;gap:10px;font-size:.88rem;margin-bottom:4px}
+
+/* UX review: tap targets of 44px, no mid-word splits, controls easy to hit */
+.segc button{overflow-wrap:normal;word-break:normal}
+@media (max-width:380px){.segc button{font-size:.84rem;padding:6px 2px}}
+.list li .st{width:44px;height:44px}.list li .btn.icon{width:44px;min-height:44px}.list li .btn.small{min-height:44px}.card.today .list li .st{width:44px;height:44px}
+.iconbtn.sm{width:44px;height:44px}
+.segc.bmode button{min-height:44px}
+.note-card.slim .linkbtn,.card.ov .linkbtn{min-height:44px!important}.note-card.slim .linkbtn.nx{width:44px!important}
+.wxchip,.sync{position:relative}.wxchip::after,.sync::after{content:"";position:absolute;inset:-7px -4px}
+.gr{min-height:44px}
+.sc .scl{display:grid;gap:0;min-width:0;text-align:left;flex:1}.sc .scl small{font-size:.74rem;color:var(--muted);font-weight:500;line-height:1.2}
+.list li.nxrow{flex-wrap:wrap}.list li.nxrow .grow{flex:1 1 calc(100% - 50px)}.list li.nxrow .amt{margin-left:46px;margin-right:auto}
+.gantt{--gl:122px}.gl{white-space:normal;overflow:visible;text-overflow:clip;line-height:1.1;font-size:.76rem}
+.card .big small{white-space:nowrap}
+.sc .scl small.hot{color:var(--accent);font-weight:700}
+/* UI review: nothing under 12px, even chips and pills, a stronger green card */
+.eyebrow,.bhero .eyebrow{font-size:.78rem}
+.pq{font-size:.8rem}
+.msec{font-size:.78rem}
+.estleg li{font-size:.8rem}
+.sync{font-size:.8rem}
+.bhero .chip-d,.bhero .wxchip{font-size:.8rem;min-height:30px;display:inline-flex;align-items:center;padding:0 10px}
+.bhero .sub.fc{font-size:.8rem!important}.bhero .sub.fc.ch,.bhero .chb.ch{font-size:.88rem!important}
+.sc .scl small{font-size:.8rem}
+.scs{margin-top:16px}.scs .sc{min-height:60px}
+.bhero .big{font-size:2.8rem!important;margin-top:2px!important}
+.bhero .bh1{justify-content:space-between}.bhero .bh2{margin-left:auto;justify-items:end}.bhero .bh2 .row{justify-content:flex-end}
+.rpc{font-size:.78rem}
+header.top .sync,.sync{font-size:.8rem!important}
+.gtoday b{font-size:.78rem}
+.card.today .eyebrow{font-size:.78rem}
+.ls,.list li .ls,.card.today .list li .ls{font-size:.8rem}
+@media (max-width:400px){.sc{padding:0 10px;gap:8px}.sc .scl>span{font-size:.84rem}}
+.attline .grow{display:grid;gap:2px;white-space:normal;overflow:visible}.attline .attl{font-size:.82rem;line-height:1.3;overflow-wrap:anywhere}
+.list li.mrow{align-items:flex-start}.mtks{display:flex;flex-wrap:wrap;gap:6px 18px;margin-top:4px}
+.mtk{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:0 4px 0 0;border:0;background:none;color:var(--ink);font:600 .92rem var(--body);cursor:pointer}
+.mtc{width:28px;height:28px;border-radius:50%;border:2px solid var(--field);display:grid;place-items:center;flex:none;color:#fff}
+.mtk[aria-pressed=true] .mtc{background:var(--green);border-color:var(--green)}
+.ro .mtk,.ro-mats .mtk{pointer-events:none}
+.segc{gap:2px}@media (max-width:430px){.segc button{font-size:.84rem;padding:6px 2px}}
+.ro [data-act="matagain"],.ro-mats [data-act="matagain"]{display:none}.mtks{align-items:center}
+.pu-x{width:34px;height:34px}.pu-x::after{content:"";position:absolute;inset:-6px}
+.card.mywork{padding:10px 14px 6px;margin-bottom:10px;border-radius:18px}.card.mywork .list li{padding:6px 0}.card.mywork .linkbtn{min-height:44px}
+.ogrp .row{flex-wrap:wrap}.ogrp .row .btn{min-width:min(100%,9rem)}.ogrp{border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:12px;background:var(--paper)}.ogrp h3{font-size:1rem}.ogrp .list li{padding:6px 0}
+.dnl{align-items:center}.dnl .mtk{min-height:44px;min-width:44px;justify-content:center;padding:0}.dnq{width:4.6rem;min-height:44px;padding:6px 8px;text-align:right;flex:none}.dnu{flex:none;min-width:2.2rem}
+.dnim{display:flex;align-items:center;gap:10px;margin-top:10px}.dnim img{width:64px;height:64px;object-fit:cover;border-radius:12px}.dnim span{display:inline-flex;gap:6px;align-items:center;color:var(--green);font-weight:600}
+.dng{margin-top:12px}.dng h3{margin:0;font-size:1rem}.dng .list li{padding:6px 0}
+.ro [data-act="dnote"],.ro-mats [data-act="dnote"],.ro [data-fab="dnote"],.ro-mats [data-fab="dnote"],.na-mats [data-fab="dnote"],.na-mats [data-act="dnote"],.na-mats [data-act="dnotes"]{display:none!important}
+.dnbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 10px}.dnbar .btn{min-height:44px;min-width:0;white-space:normal;line-height:1.2;text-align:center;justify-content:center}
+@media (min-width:900px){.msticky{top:0;padding-top:12px}}.msticky{box-shadow:0 10px 14px -12px rgba(0,0,0,.45)}
+.sync.retry{color:var(--amber,#d9a441)}
 </style>
 </head>
 <body>
@@ -795,10 +846,29 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const iso=d=>{d=d||new Date();return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
 const today=()=>iso();
+/* working days: no Saturdays, Sundays or South African public holidays (a holiday on a Sunday moves to the Monday) */
+const SA_HOL={};
+function saHolidays(y){
+  if(SA_HOL[y])return SA_HOL[y];
+  const set=new Set(),P=n=>String(n).padStart(2,"0"),put=(m,d)=>{const dt=new Date(Date.UTC(y,m-1,d,12));set.add(y+"-"+P(m)+"-"+P(d));if(dt.getUTCDay()===0){const n=new Date(Date.UTC(y,m-1,d+1,12));set.add(n.getUTCFullYear()+"-"+P(n.getUTCMonth()+1)+"-"+P(n.getUTCDate()))}};
+  [[1,1],[3,21],[4,27],[5,1],[6,16],[8,9],[9,24],[12,16],[12,25],[12,26]].forEach(([m,d])=>put(m,d));
+  /* Easter (Good Friday and Family Day) */
+  const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),h=(19*a+b-d-g+15)%30,i=Math.floor(c/4),k=c%4,l=(32+2*e+2*i-h-k)%7,m=Math.floor((a+11*h+22*l)/451),mo=Math.floor((h+l-7*m+114)/31),da=((h+l-7*m+114)%31)+1;
+  [-2,1].forEach(o=>{const dt=new Date(Date.UTC(y,mo-1,da+o,12));set.add(dt.getUTCFullYear()+"-"+P(dt.getUTCMonth()+1)+"-"+P(dt.getUTCDate()))});
+  return SA_HOL[y]=set;
+}
+const isWorkDay=dt=>{const w=dt.getUTCDay();if(w===0||w===6)return false;const s=dt.getUTCFullYear()+"-"+String(dt.getUTCMonth()+1).padStart(2,"0")+"-"+String(dt.getUTCDate()).padStart(2,"0");return !saHolidays(dt.getUTCFullYear()).has(s)};
+/* working days after a, up to and including b; negative when b is before a */
+function workDays(a,b){
+  if(!a||!b||a===b)return 0;
+  const fwd=b>a,from=fwd?a:b,to=fwd?b:a,dt=new Date(from+"T12:00:00Z"),end=new Date(to+"T12:00:00Z");let n=0;
+  for(let i=0;i<4000&&dt<end;i++){dt.setUTCDate(dt.getUTCDate()+1);if(isWorkDay(dt))n++}
+  return fwd?n:-n;
+}
 const addDays=(s,n)=>{const d=new Date(s+"T12:00");d.setDate(d.getDate()+n);return iso(d)};
 const FMT=new Intl.NumberFormat("en-ZA",{style:"currency",currency:"ZAR",minimumFractionDigits:2});
-const money=n=>FMT.format(n||0).replace(/ /g," ");
-const money0=n=>"R "+new Intl.NumberFormat("en-ZA",{maximumFractionDigits:0}).format(Math.round(n||0)).replace(/ /g," ");
+const money=n=>FMT.format(n||0);
+const money0=n=>"R"+String.fromCharCode(160)+new Intl.NumberFormat("en-ZA",{maximumFractionDigits:0}).format(Math.round(n||0));
 const num=(n,d=0)=>new Intl.NumberFormat("en-ZA",{maximumFractionDigits:d}).format(n||0).replace(/ /g," ");
 const dshort=d=>d?new Date(d+"T12:00").toLocaleDateString("en-ZA",{day:"numeric",month:"short"}):"";
 const dlabel=d=>{const t=today();return d===t?"Today":d===addDays(t,-1)?"Yesterday":new Date(d+"T12:00").toLocaleDateString("en-ZA",{weekday:"short",day:"numeric",month:"short"})};
@@ -838,7 +908,7 @@ const mst=m=>secOf(m)==="fit"||secOf(m)==="elec"?MSTAT4:MSTAT;
 const mIn=m=>sum((m.moves||[]).filter(x=>x.t==="in"),x=>+x.qty||0);
 const mOut=m=>sum((m.moves||[]).filter(x=>x.t==="out"),x=>+x.qty||0);
 const mLeft=m=>mIn(m)-mOut(m);
-const mEff=m=>{if(secOf(m)==="stock"&&(m.moves||[]).length){if(+m.min>0&&mLeft(m)<=+m.min)return"low";if(m.qty>0&&mIn(m)>=m.qty)return"got";return"part"}return m.status};
+const mEff=m=>{if(secOf(m)==="stock"&&(m.moves||[]).length){if(+m.min>0&&mLeft(m)<=+m.min)return"low";if(m.rcv===true)return"got";if(m.rcv===false)return m.status==="need"?"need":"ordered";if(m.qty>0&&mIn(m)>=m.qty)return"got";return"part"}return m.status};
 const needsOrder=m=>["need","low"].includes(mEff(m));
 const MATPH={s_fill:"found",s_stone:"found",s_steel:"found",s_mesh:"found",s_cement:"found",s_sand:"found",s_dpc:"found",s_brick:"walls",s_bforce:"walls",s_ties:"walls",f_w2:"walls",f_w3:"walls",f_w5:"walls",f_w6:"walls",f_d1:"walls",f_d2:"walls",f_d3:"walls",f_d5:"walls",f_truss:"roof",f_sheet:"roof",f_wcb:"svc",f_wcg:"svc",f_wcd:"svc",f_geyser:"svc",f_fan:"svc",e_cond:"svc",e_cab25:"svc",e_cab15:"svc",e_db:"svc",e_brk:"svc",e_led:"svc",e_plug:"svc",e_sw:"svc",e_cat6:"svc",e_netpt:"svc",e_ap:"svc",e_patch:"svc",s_plsand:"fin",f_tiles:"fin",f_iso:"fin",f_gyp:"fin",f_board:"fin",u_pin:"fin",u_pout:"fin",u_primer:"fin",u_screw:"fin",u_nail:"fin",u_sil:"fin",u_adh:"fin",u_grout:"fin",u_sand:"fin",u_tape:"fin"};
 const seedMats=()=>{
@@ -979,14 +1049,16 @@ const TABS=[["build","Build","grid"],["home","Overview","home"],["add","Add","pl
 const navTab=t=>({phase:"build",mats:"build",site:"build",plans:"build",docs:"build",inbox:"more",people:"more",tasks:"build",diary:"build",garden:"build",extra:"more",report:"home",week:"home",pupd:"home",weather:"build",photos:"build",snags:"build"})[t]||t;
 $("nav.tabs").innerHTML=TABS.map(([k,l,i])=>k==="add"?`<button type="button" class="cap" id="fab" aria-label="Add something" aria-expanded="false" aria-controls="fab-menu">${ic(i)}</button>`:`<button data-tab="${k}">${ic(i)}<span>${l}</span>${k==="build"?'<i class="dot" id="tdot" hidden></i>':""}</button>`).join("");
 $("#today").textContent=new Date().toLocaleDateString("en-ZA",sm.code?{weekday:"short",day:"numeric",month:"short"}:{weekday:"long",day:"numeric",month:"long"});
-$("#fab-menu").innerHTML=[["site","On site",[["photo","camera","Photo"],["issue","alert","Snag"]]],["build","Build",[["task","clip","Task"],["mat","truck","Material"]]],["money","Money",[["cost","cash","Expense"],["pay","users","Record payment"]]],["team","Team",[["msg","chat","Update everyone"],["site","note","Site log"]]]].map(([g,t,it])=>`<div class="fab-grp" data-g="${g}"><h4>${t}</h4><div class="fab-row">${it.map(([k,i,l])=>`<button class="fab-item" data-fab="${k}"><span class="fi">${ic(i)}</span><span class="fl">${l}</span></button>`).join("")}</div></div>`).join("")+`<p class="fab-hint">Hold the plus button to take a photo straight away.</p>`;
+$("#fab-menu").innerHTML=[["site","On site",[["photo","camera","Photo"],["issue","alert","Snag"]]],["build","Build",[["task","clip","Task"],["mat","truck","Material"]]],["money","Money",[["cost","cash","Expense"],["pay","users","Record payment"]]],["team","Team",[["msg","chat","Update everyone"],["site","note","Site log"],["dnote","truck","Delivery note"]]]].map(([g,t,it])=>`<div class="fab-grp" data-g="${g}"><h4>${t}</h4><div class="fab-row">${it.map(([k,i,l])=>`<button class="fab-item" data-fab="${k}"><span class="fi">${ic(i)}</span><span class="fl">${l}</span></button>`).join("")}</div></div>`).join("")+`<p class="fab-hint">Hold the plus button to take a photo straight away.</p>`;
 
 let toastT;
+let lastActRec=null;
 function toast(msg,undo){
   clearTimeout(toastT);const t=document.createElement("div");t.className="toast";
   t.innerHTML=`<span>${esc(msg)}</span>${undo?"<button>Undo</button>":""}`;
-  if(undo)t.querySelector("button").onclick=()=>{undo();t.remove();save();render()};
-  $("#toasts").replaceChildren(t);toastT=setTimeout(()=>t.remove(),undo?3000:4500);
+  const la=undo&&lastActRec&&Date.now()-lastActRec.t<2000?lastActRec:null;
+  if(undo)t.querySelector("button").onclick=()=>{undo();if(la){const i=S.acts.indexOf(la);if(i>=0)S.acts.splice(i,1)}t.remove();save();render()};
+  $("#toasts").replaceChildren(t);toastT=setTimeout(()=>t.remove(),undo?8000:4500);
 }
 const undoEdit=(rec,vals)=>{const old={...rec};Object.assign(rec,vals);return()=>{Object.keys(rec).forEach(k=>delete rec[k]);Object.assign(rec,old)}};
 let closeSheet=null,lastFocus=null,backIgnore=0,popClosing=false,navPushed=false;
@@ -1053,7 +1125,7 @@ function compactRows(root){
   });
 }
 const rowBtns=(e,d,id)=>`<button class="btn small" data-act="edit${e}" data-id="${esc(id)}" aria-label="Edit ${esc(d)}">Edit</button><button class="btn small danger" data-act="del${e}" data-id="${esc(id)}" aria-label="Delete ${esc(d)}">Delete</button>`;
-function confirmSheet(title,msg,ok,fn){sheet(title,`<p class="muted" style="margin:6px 0 18px">${esc(msg)}</p><div class="row"><button class="btn grow" id="no" type="button">Cancel</button><button class="btn grow" id="yes" type="button" style="background:var(--red);border-color:var(--red);color:#fff">${esc(ok)}</button></div>`,(sh,close)=>{sh.querySelector("#no").onclick=close;sh.querySelector("#yes").onclick=()=>{close();fn()};sh.querySelector("#no").focus()})}
+function confirmSheet(title,msg,ok,fn,good){sheet(title,`<p class="muted" style="margin:6px 0 18px">${esc(msg)}</p><div class="row"><button class="btn grow" id="no" type="button">Cancel</button><button class="btn grow" id="yes" type="button" style="${good?"background:var(--accent);border-color:var(--accent);color:var(--accent-ink)":"background:var(--red);border-color:var(--red);color:#fff"}">${esc(ok)}</button></div>`,(sh,close)=>{sh.querySelector("#no").onclick=close;sh.querySelector("#yes").onclick=()=>{close();fn()};sh.querySelector("#no").focus()})}
 function setFab(o){$("#fab").setAttribute("aria-expanded",o);$("#fab-menu").hidden=!o;$("#fab-wrap").classList.toggle("open",false);document.querySelector(".fab-scrim")?.remove();if(o){layoutFab(false);void $("#fab-menu").offsetWidth;requestAnimationFrame(()=>{$("#fab-wrap").classList.add("open");layoutFab(true)})}if(o){const s=document.createElement("div");s.className="fab-scrim";s.onclick=()=>setFab(false);document.body.append(s)}}
 $("#fab").onclick=()=>setFab($("#fab").getAttribute("aria-expanded")!=="true");
 (()=>{const f=$("#fab");let tm=0,fired=false;const clr=()=>{clearTimeout(tm);tm=0};
@@ -1065,7 +1137,7 @@ $("#fab").onclick=()=>setFab($("#fab").getAttribute("aria-expanded")!=="true");
   m.addEventListener("pointermove",e=>{if(y0!==null&&e.clientY-y0>60){y0=null;setFab(false)}});
   ["pointerup","pointercancel"].forEach(n=>m.addEventListener(n,()=>{y0=null}));
 })();
-document.querySelectorAll("[data-fab]").forEach(b=>b.onclick=()=>{setFab(false);buzz(10);if(!fabOK(b.dataset.fab))return;({photo:()=>quickPhoto(tab==="phase"?curPh:undefined),cost:()=>costSheet(),pay:()=>recPaySheet(),msg:()=>newMsgSheet(true),site:()=>logSheet(null,"update",tab==="phase"?curPh:undefined),task:()=>addTaskSheet(tab==="phase"?curPh:undefined),mat:()=>matSheet(),issue:()=>logSheet(null,"issue")})[b.dataset.fab]()});
+document.querySelectorAll("[data-fab]").forEach(b=>b.onclick=()=>{setFab(false);buzz(10);if(!fabOK(b.dataset.fab))return;({photo:()=>quickPhoto(tab==="phase"?curPh:undefined),cost:()=>costSheet(),pay:()=>recPaySheet(),msg:()=>newMsgSheet(true),site:()=>logSheet(null,"update",tab==="phase"?curPh:undefined),dnote:()=>dnoteSheet(),task:()=>addTaskSheet(tab==="phase"?curPh:undefined),mat:()=>matSheet(),issue:()=>logSheet(null,"issue")})[b.dataset.fab]()});
 addEventListener("keydown",e=>{if(e.key==="Escape"){if(closeSheet)closeSheet();else if($("#fab").getAttribute("aria-expanded")==="true"){setFab(false);$("#fab").focus()}}});
 const reduced=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
 const buzz=n=>{try{navigator.vibrate?.(n)}catch{}};
@@ -1130,8 +1202,10 @@ async function shareText(text){
   if(navigator.share){try{await navigator.share({text});return true}catch(e){if(e?.name==="AbortError")return false}}
   window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank","noopener");return true;
 }
-function delRecs(arr,pred,label){
+function delRecs(arr,pred,label,sure){
   const gone=arr.filter(pred);if(!gone.length)return;
+  const risky=!sure&&gone.some(r=>(r.media&&r.media.length)||r.amount||r.stages);
+  if(risky){confirmSheet("Delete this "+label.toLowerCase()+"?","It is removed for everyone. You will have a few seconds to undo it.","Delete",()=>delRecs(arr,pred,label,true));return}
   gone.forEach(r=>arr.splice(arr.indexOf(r),1));save();render();
   toast(label+" deleted.",()=>{gone.forEach(r=>arr.push(r))});
 }
@@ -1223,7 +1297,7 @@ function pvb(ct,paid){
   <p class="hint">Work done counts finished tasks out of all ${S.tasks.length}. Every task counts the same.</p></div>`;
 }
 function logAct(text,money){
-  S.acts.push({id:uid(),t:Date.now(),who:me||"Someone",text,...(money?{m:1}:{})});
+  lastActRec={id:uid(),t:Date.now(),who:me||"Someone",text,...(money?{m:1}:{})};S.acts.push(lastActRec);
   if(S.acts.length>160){S.acts.sort((a,b)=>a.t-b.t);S.acts.splice(0,S.acts.length-150)}
 }
 const rel=t=>{const m=Math.round((Date.now()-t)/6e4);if(m<1)return"Just now";if(m<60)return m+" min ago";const d=new Date(t),td=today(),dd=iso(d),hh=d.toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"});return dd===td?"Today "+hh:dd===addDays(td,-1)?"Yesterday "+hh:dshort(dd)+" "+hh};
@@ -1405,7 +1479,7 @@ function nextCard(nu,R){
 }
 function home(){
   const all=G(BT()),d=doneN(all),p=pct(d,all.length),R=rooms();
-  const left=S.settings.target?Math.ceil((new Date(S.settings.target+"T12:00")-new Date(today()+"T12:00"))/864e5):null;
+  const left=S.settings.target?workDays(today(),S.settings.target):null;
   const bud=+S.settings.budget||0,sp=spentAll(),bp=bud?sp/bud:0;
   const issues=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length;
   const toOrder=S.mats.filter(m=>needsOrder(m)&&(m.qty>0||secOf(m)!=="stock")).length;
@@ -1416,9 +1490,9 @@ function home(){
   ${todayCard()}
   ${tipCard()}
   ${(()=>{const f=S.furn.length&&lvl("furn")>=1?fStats(S.furn):null,bar=(go,l,v)=>`<button type="button" class="ovb" ${go}><span class="ovl">${l}</span><b>${v}%</b><span class="meter"><i style="width:${v}%"></i></span></button>`;
-   return `<section class="card ovs"><div class="row between" style="gap:10px;align-items:flex-start"><div><div class="eyebrow" style="margin:0">Schedule</div><div class="big" style="font-size:1.7rem;line-height:1.1">${left===null?"–":left>=0?left:-left}<small style="font-size:.9rem;font-weight:500"> ${left===null?"":left>=0?"days to go":"days past target"}</small></div><div class="muted small">${S.settings.start?dshort(S.settings.start):"?"} to ${S.settings.target?dshort(S.settings.target):"?"}</div></div><div class="row wr" style="gap:6px;justify-content:flex-end">${sched.chip}</div></div>
+   return `<section class="card ovs"><div class="row between" style="gap:10px;align-items:flex-start"><div><div class="eyebrow" style="margin:0">Schedule</div><div class="big" style="font-size:1.7rem;line-height:1.1">${left===null?"–":left>=0?left:-left}<small style="font-size:.9rem;font-weight:500"> ${left===null?"":left>=0?"working days to go":"working days past target"}</small></div><div class="muted small">${S.settings.start?dshort(S.settings.start):"?"} to ${S.settings.target?dshort(S.settings.target):"?"}</div></div><div class="row wr" style="gap:6px;justify-content:flex-end">${sched.chip}</div></div>
    <div class="ovbs">${bar('data-go="build"',R.length>1?"Classrooms":esc(R[0].name),p)}${f?bar('data-act="gofurn"',"Furniture",f.p):""}</div>
-   <div class="row wr" style="gap:8px;margin-top:12px"><button type="button" class="chip ${issues?"tone-bad":""}" data-go="snags" aria-pressed="false">${ic("alert","sm")}${issues} snag${issues===1?"":"s"} to fix</button><button type="button" class="chip tone-info" data-go="mats:all" aria-pressed="false">${ic("truck","sm")}${toOrder} to order</button></div></section>`})()}
+   <div class="row wr" style="gap:8px;margin-top:12px">${issues?`<button type="button" class="chip tone-bad" data-go="snags" aria-pressed="false">${ic("alert","sm")}${issues} snag${issues===1?"":"s"} to fix</button>`:""}${toOrder?`<button type="button" class="chip tone-info" data-go="mats:all" aria-pressed="false">${ic("truck","sm")}${toOrder} to order</button>`:""}${issues||toOrder?"":`<span class="small muted">${ic("check","sm")} No open snags and nothing to order.</span>`}</div></section>`})()}
   ${nextCard(nu,R)}
   <details class="ovd"><summary>${ic("trend","sm")}<span>Timeline, progress curve and activity</span>${ic("chev","sm")}</summary>${timelineCard()}${curveCard("progress")}${actCard()}</details>`;
 }
@@ -1468,9 +1542,9 @@ function weekText(){
   const soon=[],s2=new Set();S.tasks.filter(t=>t.status!=="done"&&t.due&&t.due>td&&t.due<=nx).sort((a,b)=>a.due.localeCompare(b.due)).forEach(t=>{if(s2.has(t.key))return;s2.add(t.key);soon.push(t.title+" ("+dshort(t.due)+")")});
   const open=S.tasks.filter(t=>t.status!=="done"),od=uk(open.filter(t=>t.due&&t.due<td)),stuck=uk(open.filter(t=>t.status==="stuck")),iss=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length;
   const ph=allPhotos().filter(x=>x.date>=wk).length;
-  const left=S.settings.target?Math.ceil((new Date(S.settings.target+"T12:00")-new Date(td+"T12:00"))/864e5):null;
+  const left=S.settings.target?workDays(td,S.settings.target):null;
   const L=["*"+(S.settings.name||"Site")+": week to "+dshort(td)+"*",""];
-  L.push("Whole build: "+p+"% done"+(left===null?"":left>=0?", "+left+" day"+(left===1?"":"s")+" to go":", "+(-left)+" day"+(left===-1?"":"s")+" past the target")+".");
+  L.push("Whole build: "+p+"% done"+(left===null?"":left>=0?", "+left+" working day"+(left===1?"":"s")+" to go":", "+(-left)+" working day"+(left===-1?"":"s")+" past the target")+".");
   L.push(done.length?"Done this week ("+done.length+"): "+done.slice(0,8).join(", ")+(done.length>8?" and "+(done.length-8)+" more":"")+".":"No tasks were finished this week.");
   if(soon.length)L.push("Coming up next week: "+soon.slice(0,6).join(", ")+(soon.length>6?" and "+(soon.length-6)+" more":"")+".");
   const flags=[od?od+" overdue":"",stuck?stuck+" stuck":"",iss?iss+" open issue"+(iss===1?"":"s"):""].filter(Boolean);
@@ -1561,7 +1635,7 @@ function backupDue(){
 }
 function buildMain(){
   const all=G(BT()),d=doneN(all),p=pct(d,all.length),cur=curPhases()[0],sched=schedule();
-  const left=S.settings.target?Math.ceil((new Date(S.settings.target+"T12:00")-new Date(today()+"T12:00"))/864e5):null;
+  const left=S.settings.target?workDays(today(),S.settings.target):null;
   const can=perm.manage&&lvl("tasks")>=2;if(!can)pEdit=false;
   const tiles=PHS.map(([id,name,icon],i)=>{
     const ts=G(S.tasks.filter(t=>t.phase===id)),dn=doneN(ts),st=ts.filter(t=>t.status==="stuck").length,ph=phasePhoto(id),full=ts.length>0&&dn===ts.length,rs=st>0?"stuck":full?"full":(dn>0||ts.some(t=>t.status==="doing"||t.status==="check"))?"doing":"none";
@@ -1569,12 +1643,14 @@ function buildMain(){
     return pEdit?`<div class="gtw">${tile}<div class="gtb"><button type="button" class="btn small" data-act="pmv" data-id="${id}|-1" aria-label="Move ${esc(name)} earlier" ${i===0?"disabled":""}>${ic("left")}</button><button type="button" class="btn small" data-act="pmv" data-id="${id}|1" aria-label="Move ${esc(name)} later" ${i===PHS.length-1?"disabled":""}>${ic("right")}</button><button type="button" class="btn small" data-act="pren" data-id="${id}">Rename</button><button type="button" class="btn small danger" data-act="pdel" data-id="${id}">Remove</button></div></div>`:tile}).join("")+(pEdit?`<div class="gtw"><button type="button" class="ptile gadd" data-act="padd" aria-label="Add a phase"><span class="pi"><span class="pring"><span class="pav">${ic("plus")}</span></span><b>Add phase</b></span></button></div>`:"");
   const rec=logsNewest().filter(l=>l.kind!=="issue").slice(0,6);
   const toOrder=S.mats.filter(m=>needsOrder(m)&&(m.qty>0||secOf(m)!=="stock")).length,issues=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length;
-  return `<section class="bhero"><div class="bh1"><div><div class="eyebrow">${left===null?"Whole build":left>=0?"Days left":"Days over"}</div><div class="big" ${left===null?`data-count="${p}"`:""}>${left===null?p+"%":Math.abs(left)}</div></div><div class="bh2"><div class="row between" style="gap:8px;align-items:center">${wxChip()}</div>
+  const mineN=sm.code?uk(S.tasks.filter(t=>asgHas(t,sm.pid)&&t.status!=="done")):0,openN=uk(S.tasks.filter(t=>t.status!=="done")),photoN=allPhotos().length;
+  const pl=(attr,icon,label,sub,hot)=>`<button type="button" class="sc" ${attr}>${ic(icon)}<span class="scl"><span>${label}</span><small class="${hot?"hot":""}">${sub}</small></span></button>`;
+  const scs=`<div class="scs">${pl('data-go="tasks"',"check","Tasks",mineN?mineN+" for you":openN+" open",mineN)}${pl('data-go="mats"',"truck","Materials",toOrder?toOrder+" to order":"Nothing to order",toOrder)}${pl('data-go="photos"',"image","Photos",photoN?photoN+(photoN===1?" photo":" photos"):"No photos yet")}${pl('data-go="plans"',"map","Plans","Drawings")}${pl('data-act="contractors"',"users","Contractors",S.sups.length?S.sups.length+(S.sups.length===1?" contact":" contacts"):"No contacts yet")}${pl('data-act="bmore"',"dots","More","Snags, log, diary")}</div>`;
+  return `<section class="bhero"><div class="bh1"><div><div class="eyebrow">${left===null?"Whole build":left>=0?"Work days left":"Work days over"}</div><div class="big" ${left===null?`data-count="${p}"`:""}>${left===null?p+"%":Math.abs(left)}</div></div><div class="bh2"><div class="row between" style="gap:8px;align-items:center">${wxChip()}</div>
    <div class="row wr" style="gap:6px">${sched.chip}</div></div></div><div class="meter hm"><i style="width:${p}%"></i></div>${cheerLine(all,p)}</section>
-  ${whoLine()}${attentionV()}${[connectPrompt(),iosPrompt(),pushPrompt(),linkPrompt(),backupDue()].find(Boolean)||""}${can?`<div class="row between" style="margin:0 2px 10px"><div class="eyebrow" style="margin:0">Phases</div>${pEdit?`<button type="button" class="btn small primary" data-act="pedit">Done</button>`:`<button type="button" class="iconbtn sm" data-act="pedit" aria-label="Edit phases">${ic("dots")}</button>`}</div>${pEdit?`<p class="hint" style="margin:0 2px 10px">Rename, move or remove a phase, or add a new one.</p>`:""}`:""}<div class="ptiles" role="list">${tiles}</div>
+  ${whoLine()}${attentionV()}${myWorkCard()}${[connectPrompt(),iosPrompt(),pushPrompt(),linkPrompt(),backupDue()].find(Boolean)||""}${can?`<div class="row between" style="margin:0 2px 10px"><div class="eyebrow" style="margin:0">Phases</div>${pEdit?`<button type="button" class="btn small primary" data-act="pedit">Done</button>`:`<button type="button" class="iconbtn sm" data-act="pedit" aria-label="Edit phases">${ic("dots")}</button>`}</div>${pEdit?`<p class="hint" style="margin:0 2px 10px">Rename, move or remove a phase, or add a new one.</p>`:""}`:""}<div class="ptiles" role="list">${tiles}</div>
   <div class="rph"><div class="eyebrow">Recently posted</div><button type="button" class="linkbtn" data-go="site">See all</button></div>
-  ${rec.length?`<div class="rps">${rec.map(l=>{const n=l.media?.length||0,c=PCOL[l.phase]||"var(--accent)",ph=l.phase&&PSHORT[l.phase]?PSHORT[l.phase]:"Site",tx=l.text?esc(l.text.slice(0,120)):"",first=n&&isVid(l.media[0]);return `<button type="button" class="rp ${n?"ph":"nt"}" data-act="rpopen" data-id="${l.id}" aria-label="${esc(ph)}, ${n?n+(n===1?" photo":" photos"):"note"}, ${dlabel(l.date)}. Open"><span class="rpi">${n?`<span data-m="${l.media[0]}" style="position:absolute;inset:0"></span>`:""}</span>${n>1?`<span class="rpn">${ic("image","sm")}${n}</span>`:first?`<span class="rpn">${ic("play","sm")}</span>`:""}<span class="rpt"><span class="rpc" style="color:${n?"#fff":c}">${esc(ph)}</span><span class="rpx">${tx||(n?(first?"Added a clip":n===1?"Added a photo":"Added "+n+" photos"):"Update")}</span><small>${dlabel(l.date)}</small></span></button>`}).join("")}</div>`:`<p class="muted small" style="margin:0 2px">Photos and notes you add will show up here.</p>`}
-  <div class="scs"><button type="button" class="sc" data-go="tasks">${ic("check")}<span>Tasks</span>${sm.code&&S.tasks.some(t=>asgHas(t,sm.pid)&&t.status!=="done")?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${uk(S.tasks.filter(t=>asgHas(t,sm.pid)&&t.status!=="done"))}</i>`:""}</button><button type="button" class="sc" data-go="mats">${ic("truck")}<span>Materials</span>${toOrder?`<i class="pbadge ok" style="position:static;background:var(--accent);color:var(--accent-ink)">${toOrder}</i>`:""}</button><button type="button" class="sc" data-go="photos">${ic("image")}<span>Photos</span>${(()=>{const n=allPhotos().length;return n?`<small class="muted">${n}</small>`:""})()}</button><button type="button" class="sc" data-go="plans">${ic("map")}<span>Plans</span></button><button type="button" class="sc" data-act="contractors" style="grid-column:1/-1">${ic("users")}<span>Contractors</span>${S.sups.length?`<small class="muted">${S.sups.length}</small>`:""}</button><button type="button" class="sc" data-act="bmore" style="grid-column:1/-1">${ic("dots")}<span>More: snags, site log, diary, documents, garden</span></button></div>`;
+  ${rec.length?`<div class="rps">${rec.map(l=>{const n=l.media?.length||0,c=PCOL[l.phase]||"var(--accent)",ph=l.phase&&PSHORT[l.phase]?PSHORT[l.phase]:"Site",tx=l.text?esc(l.text.slice(0,120)):"",first=n&&isVid(l.media[0]);return `<button type="button" class="rp ${n?"ph":"nt"}" data-act="rpopen" data-id="${l.id}" aria-label="${esc(ph)}, ${n?n+(n===1?" photo":" photos"):"note"}, ${dlabel(l.date)}. Open"><span class="rpi">${n?`<span data-m="${l.media[0]}" style="position:absolute;inset:0"></span>`:""}</span>${n>1?`<span class="rpn">${ic("image","sm")}${n}</span>`:first?`<span class="rpn">${ic("play","sm")}</span>`:""}<span class="rpt"><span class="rpc" style="color:${n?"#fff":"color-mix(in srgb,"+c+" 55%,var(--ink))"}">${esc(ph)}</span><span class="rpx">${tx||(n?(first?"Added a clip":n===1?"Added a photo":"Added "+n+" photos"):"Update")}</span><small>${dlabel(l.date)}</small></span></button>`}).join("")}</div>`:`<p class="muted small" style="margin:0 2px">Photos and notes you add will show up here.</p>`}${scs}`;
 }
 /* everyone the project works with, from the suppliers and contractors list */
 function contractorsSheet(){
@@ -1590,9 +1666,9 @@ function contractorsSheet(){
 }
 /* the less used places, one tap away */
 function bmoreSheet(){
-  const rows=[["site","camera","Site log","Photos and notes as the work goes up",""],["diary","book","Site diary","Weather, people on site and hours lost",""],["docs","note","Documents","Quotes, certificates, invoices and delivery notes",S.docs.filter(docListed).length||""],["snags","alert","Snags","Things to fix, with an owner and a check",(()=>{const n=S.logs.filter(l=>l.kind==="issue"&&!l.closed).length;return n||""})()],["garden","leaf","Garden","Areas, tasks and materials",(()=>{const g=S.tasks.filter(t=>isG(t.phase)&&t.status!=="done");return g.length?uk(g):""})()]];
+  const rows=[["site","camera","Site log","Photos and notes as the work goes up",""],["diary","book","Site diary","Weather, people on site and hours lost",""],["docs","note","Documents","Quotes, certificates, invoices and delivery notes",S.docs.filter(docListed).length||""],["dnotes","truck","Delivery notes","Scan a note and see every delivery",S.docs.filter(d=>d.type==="delivery").length||""],["snags","alert","Snags","Things to fix, with an owner and a check",(()=>{const n=S.logs.filter(l=>l.kind==="issue"&&!l.closed).length;return n||""})()],["garden","leaf","Garden","Areas, tasks and materials",(()=>{const g=S.tasks.filter(t=>isG(t.phase)&&t.status!=="done");return g.length?uk(g):""})()]];
   sheet("More places",`<ul class="list moreV" style="margin-top:6px">${rows.map(([t,i,n,sub,c])=>`<li class="tap" tabindex="0" data-go="${t}"><span class="row-ic">${ic(i)}</span><div class="grow"><div class="lt">${n}</div><div class="ls">${sub}</div></div>${c?`<span class="muted small">${c}</span>`:""}${ic("chev","sm")}</li>`).join("")}</ul>`,(sh,close)=>{
-    sh.querySelectorAll("li[data-go]").forEach(li=>li.addEventListener("click",()=>{const t=li.dataset.go;close();go(t)}));
+    sh.querySelectorAll("li[data-go]").forEach(li=>li.addEventListener("click",()=>{const t=li.dataset.go;close();if(t==="dnotes")setTimeout(deliveriesSheet,80);else go(t)}));
     sh.querySelectorAll("li.tap").forEach(li=>li.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();li.click()}}));
   });
 }
@@ -1634,19 +1710,19 @@ function moneyBuild(){
    ${list.length?`<ul class="list">${list.map(c=>{const ct=cat(c.cat);return `<li><span class="row-ic ${c.paid?"green":""}">${ic(ct[2])}</span><div class="grow"><div class="lt">${esc(c.title||ct[1])}</div><div class="ls">${dshort(c.date)} · ${esc(roomName(c.room))}${c.sup?" · "+esc(supName(c.sup)):""}${c.pay?" · from Builder payments":""}${c.extra?" · Extra labour"+(c.phase?", "+esc(PSHORT[c.phase]||""):"")+(c.appr?", approved by "+esc(c.appr):""):""}</div><div style="margin-top:4px"><span class="pill ${c.paid?"":"watch"}">${c.paid?"Paid":"Not paid"}</span>${c.paid?"":` <button class="btn small good" data-act="paycost" data-id="${c.id}" style="margin-left:6px">${ic("check","sm")}Mark paid</button>`}</div></div><span class="amt">${rand(c.amount)}</span>${c.pay?"":rowBtns("cost",c.title||ct[1],c.id)}</li>`}).join("")}</ul>`:`<div class="empty">${ic("cash","xl")}<h3>No expenses yet</h3><p>Add what you buy or pay for, and the totals fill in here.</p><button class="btn primary" data-act="addcost">${ic("plus")}Add expense</button></div>`}
   </div>${sharedSp&&S.costs.some(c=>c.room!=="both")?`<p class="hint">Costs for both classrooms (${money0(sharedSp)}) are split equally between them.</p>`:""}`;
 }
-function stockRow(m){
-  const inn=mIn(m),out=mOut(m),left=mLeft(m),e=mEff(m),pc=m.qty>0?Math.min(100,inn/m.qty*100):0;
-  const pill=e==="low"?`<span class="pill unwell">${ic("alert","sm")}${left<=0?"Out of stock":"Running low"}</span>`:e==="got"?`<span class="pill">${ic("check","sm")}All delivered</span>`:e==="part"?`<span class="pill sky">Part delivered</span>`:e==="ordered"?`<span class="pill sky">Ordered</span>`:`<span class="pill watch">To order</span>`;
-  return `<li style="align-items:flex-start"><span class="row-ic ${e==="low"?"red":e==="got"?"green":""}">${ic("layers")}</span><div class="grow"><div class="lt">${esc(m.name)}</div>
-   <div class="ls ${e==="low"?"bad":""}">${m.qty>0?`Needed ${num(m.qty,2)}`:"Set how much you need"} ${esc(m.unit)}${m.sup?" · "+esc(supName(m.sup)):""}${mphTag(m)}</div>
-   ${inn||out?`<div class="row" style="gap:14px;margin:6px 0 2px;flex-wrap:wrap"><span><b class="amt">${num(left,2)}</b> <span class="small muted">${esc(m.unit)} left</span></span><span class="small muted">in ${num(inn,2)} · used ${num(out,2)}</span></div>`:""}
-   ${m.qty>0&&inn?`<div class="meter ${e==="low"?"low":""}" style="margin:4px 0 6px"><i style="width:${pc}%"></i></div>`:""}
-   <div style="margin-top:6px">${pill}</div><div class="row" style="gap:8px;margin-top:8px"><button class="btn small grow" data-act="movein" data-id="${m.id}">${ic("truck","sm")}Delivery</button><button class="btn small grow" data-act="moveout" data-id="${m.id}">${ic("minus","sm")}Used</button></div></div>${rowBtns("mat",m.name,m.id)}</li>`;
-}
-function itemRow(m){
-  const L=mst(m),i=Math.max(0,L.findIndex(x=>x[0]===m.status)),done=m.status==="inst"||(L.length===3&&m.status==="got");
-  const cls=done?"done":m.status==="got"||m.status==="ordered"?"doing":"";
-  return `<li><button class="st ${cls}" data-act="cycmat" data-id="${m.id}" aria-label="${esc(m.name)}: ${L[i][1]}. Tap to change.">${m.status==="inst"||done?ic("check"):m.status==="got"?ic("check"):m.status==="ordered"?ic("truck"):""}</button><div class="grow"><div class="lt ${done?"dn":""}">${esc(m.name)}</div><div class="ls ${m.due&&m.due<today()&&!done&&m.status!=="got"?"bad":""}">${m.qty>0?num(m.qty,2)+" "+esc(m.unit):"Set how many"} · ${L[i][1]}${m.room!=="both"?" · "+esc(roomName(m.room)):""}${m.sup?" · "+esc(supName(m.sup)):""}${mphTag(m)}${m.due?" · need by "+dshort(m.due):""}</div></div>${rowBtns("mat",m.name,m.id)}</li>`;
+/* a material is two ticks: ordered and received. Stock with recorded deliveries works it out from them until someone ticks by hand (m.rcv) */
+const hasMoves=m=>secOf(m)==="stock"&&(m.moves||[]).length>0;
+const matTicks=m=>{
+  if(!hasMoves(m)){const rec=m.status==="got"||m.status==="inst";return{rec,ord:rec||m.status==="ordered"}}
+  const rec=m.rcv===true||(m.rcv!==false&&m.qty>0&&mIn(m)>=m.qty);
+  return{rec,ord:rec||(m.rcv===false?m.status!=="need":true)};
+};
+function matRow(m){
+  const{ord,rec}=matTicks(m),low=mEff(m)==="low",left=mLeft(m),past=m.orders||[],times=past.length+(ord?1:0),last=m.recOn||past[past.length-1]?.recOn||"";
+  const hist=past.length?`Ordered ${times} time${times===1?"":"s"}${last?" · last received "+dshort(last):""}`:rec&&m.recOn?"Received "+dshort(m.recOn):"";
+  const meta=[m.qty>0?num(m.qty,2)+" "+esc(m.unit):secOf(m)==="stock"?"Set how much you need":"Set how many",m.room&&m.room!=="both"?esc(roomName(m.room)):"",m.sup?esc(supName(m.sup)):"",m.due&&!rec?"need by "+dshort(m.due):"",hasMoves(m)?num(left,2)+" left":""].filter(Boolean).join(" · ")+mphTag(m);
+  const tk=(k,on,l)=>`<button type="button" class="mtk" data-act="mattick" data-id="${m.id}|${k}" aria-pressed="${on}" aria-label="${esc(m.name)}: ${l}${on?", ticked":", not ticked"}"><span class="mtc">${on?ic("check","sm"):""}</span>${l}</button>`;
+  return `<li class="mrow"><div class="grow"><div class="lt">${esc(m.name)}</div><div class="ls ${low?"bad":""}">${low?(left<=0?"Out of stock · ":"Running low · "):""}${meta}</div>${hist?`<div class="ls">${hist}</div>`:""}<div class="mtks">${tk("o",ord,"Ordered")}${tk("r",rec,"Received")}${rec?`<button type="button" class="btn small" data-act="matagain" data-id="${m.id}">${ic("plus","sm")}Order again</button>`:""}</div></div>${rowBtns("mat",m.name,m.id)}</li>`;
 }
 function elecCard(){
   const e=S.settings.elec||{},c=e.coc||"todo",sp=S.sups.find(x=>x.id===e.sup),lab={todo:["Certificate not booked","watch"],booked:["Certificate booked","sky"],issued:["Certificate issued",""]}[c];
@@ -1661,12 +1737,13 @@ function matsV(){
   return `<div class="page-h"><div class="row" style="gap:10px">${backBtn()}<h2>Materials</h2></div><button class="btn primary" data-act="addmat">${ic("plus")}Add</button></div>
   <div class="segc" role="group" aria-label="Section">${SECS.map(([k,l])=>`<button type="button" data-sub="sec:${k}" aria-pressed="${sec===k}">${l}</button>`).join("")}</div>
   <div class="chips scroll" role="group" aria-label="Filter by phase" style="margin:0 0 10px">${[["all","All phases · "+S.mats.length],...PH.map(p=>[p[0],PSHORT[p[0]]+" · "+S.mats.filter(m=>m.phase===p[0]).length]),["none","No phase · "+S.mats.filter(m=>!m.phase).length]].map(([k,l])=>`<button type="button" class="chip" data-sub="mph:${k}" aria-pressed="${matPh===k}">${esc(l)}</button>`).join("")}</div>
+  <div class="dnbar"><button type="button" class="btn small" data-act="dnote">${ic("camera","sm")}Scan a note</button><button type="button" class="btn small" data-act="dnotes">${ic("truck","sm")}Delivery notes</button></div>
   ${sec==="elec"?elecCard():""}
   ${sec==="stock"?(lowN?`<div class="warn">${ic("alert")}<span>${lowN} item${lowN===1?" is":"s are"} running low or out of stock.</span></div>`:""):`<div class="chips scroll" role="group" aria-label="Filter">${[...L.map(([k,l])=>[k,`${l} · ${cnt(k)}`]),["all","All"]].map(([k,l])=>`<button type="button" class="chip" data-sub="mat:${k}" aria-pressed="${matF===k}">${esc(l)}</button>`).join("")}</div>`}
   <div class="card" style="margin-top:12px">
-  ${list.length?`<ul class="list">${list.map(m=>sec==="stock"?stockRow(m):itemRow(m)).join("")}</ul>`
+  ${list.length?`<ul class="list">${list.map(matRow).join("")}</ul>`
   :inSec.length?`<div class="empty">${ic("check","xl")}<h3>Nothing here</h3><p>No items in this list.</p></div>`:`<div class="empty">${ic(SECS.find(x=>x[0]===sec)[2],"xl")}<h3>No items yet</h3><p>Add what you need and keep track of it.</p><button class="btn primary" data-act="addmat">${ic("plus")}Add item</button></div>`}
-  ${S.mats.some(needsOrder)?`<button class="btn block" data-act="shareorder" data-id="${matPh==="none"?"all":matPh}" style="margin-top:12px">${ic("chat")}Send order list on WhatsApp</button>`:""}</div>
+  ${S.mats.some(needsOrder)?`<button class="btn block" data-act="shareorder" data-id="${matPh==="none"?"all":matPh}" style="margin-top:12px">${ic("chat")}To order by supplier</button>`:""}</div>
   <div class="card"><div class="row between"><h2 style="margin:0">Suppliers and contractors</h2><button class="btn small" data-act="addsup">${ic("plus")}Add</button></div>
   ${S.sups.length?`<ul class="list">${S.sups.map(s=>`<li><span class="avatar">${esc((s.name||"?")[0].toUpperCase())}</span><div class="grow"><div class="lt">${esc(s.name)}</div><div class="ls">${esc([s.trade,s.phone,s.phone2].filter(Boolean).join(" · "))}</div></div>${s.phone?`<a class="btn small icon" href="tel:${esc(s.phone.replace(/[^\d+]/g,""))}" aria-label="Call ${esc(s.name)}">${ic("phone")}</a>`:""}${rowBtns("sup",s.name,s.id)}</li>`).join("")}</ul>`:`<p class="muted" style="margin:10px 0 0">Add your brick yard, hardware shop and builders so their numbers are one tap away.</p>`}</div>`;
 }
@@ -1721,14 +1798,14 @@ function act(a,id,el){
   ({
    tipgo:()=>{const t=tipById(TIP.id);if(t)openTarget(t[3])},tipx:()=>{lsSet("b3-tipx",TIP.day);render()},tipsheet:()=>tipSheet(),cyc:()=>cycTask(id),opentask:()=>taskSheet(...id.split("|")),edittask:()=>taskSheet(...id.split("|")),
    deltask:()=>{const[k]=id.split("|");const f=roomF;delRecs(S.tasks,t=>t.key===k&&(f==="all"||t.room===f||t.room==="shared"),"Task")},
-   addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>{const[i,g]=id.split("|");quickPhoto(i,undefined,!!g)},gbackup:()=>backupSheet(),addfurn:()=>furnSheet(),editfurn:()=>furnSheet(id),delfurn:()=>delRecs(S.furn,x=>x.id===id,"Item"),furnstarter:()=>furnStarter(),furnlb:()=>{const[rid,i]=id.split("|"),r=S.furn.find(x=>x.id===rid);if(r)lightbox(r.media||[],+i)},gofurn:()=>{bmode="furn";lsSet("build-bmode","furn");if(id)fRoom=id;go("build");render()},adddiary:()=>diarySheet(),editdiary:()=>diarySheet(id),godiary:()=>go("diary"),goexport:()=>exportSheet(),goextra:()=>go("extra"),diaryshare:()=>{const tx=diaryText(14);if(!tx){toast("No diary entries in the last 14 days.");return}shareText(tx)},diaryprint:()=>diaryPrint(),savelink:()=>personSheet(sm.pid),linkdismiss:()=>{lsSet("build-linkdis",today());render()},cycboth:()=>cycMany(((el&&el.dataset.ids)||id).split(",")),docselect:()=>{docSel=docSel?null:new Set();render()},docall:()=>{const l=docList();docSel=docSel&&docSel.size===l.length?new Set():new Set(l.map(d=>d.id));render()},docprint:()=>printSelectedDocs(),gotasks:()=>{taskF=id||"";go("tasks")},gotrades:()=>{moneySeg="trades";go("money")},pushsheet:()=>pushSheet(),pushdismiss:()=>{lsSet("build-pushdis",today());render()},restore:()=>restoreSheet(),addtrade:()=>tradeSheet(),edittrade:()=>tradeSheet(id),opentrade:()=>tradeView(id),tradecmp:()=>tradeCmp(id),quotehow:()=>quoteHowSheet(),deltrade:()=>delRecs(S.trades,x=>x.id===id,"Quote"),tradeaccept:()=>{const t=S.trades.find(x=>x.id===id);if(!t)return;const ex=tradeStatus(t,"accepted");logAct(`Accepted the ${t.trade} quote from ${tName(t)}: ${money(tVal(t))}`,1);save();render();toast("Quote accepted."+ex.msg,ex.undo)},paystage:()=>{const[tid,sid]=id.split("|"),t=S.trades.find(x=>x.id===tid),sg=t&&(t.stages||[]).find(x=>x.id===sid);if(!sg)return;const u=undoEdit(sg,{paid:true,paidOn:today()});logAct(`Paid ${money(sg.amount)} to ${tName(t)} (${t.trade})`,1);save();render();toast(`${rand(sg.amount)} marked paid.`,u)},goinbox:()=>go("inbox"),gopeople:()=>go("people"),newmsg:()=>newMsgSheet(),addperson:()=>personSheet(),editperson:()=>personSheet(id),msglb:()=>{const[mid,i]=id.split("|");const m=S.msgs.find(x=>x.id===mid);if(m)lightbox(m.media||[],+i)},sharesheet:()=>shareSheet(),bkdismiss:()=>{lsSet("build-bkdis",today());render()},phdrive:()=>driveSave(phasePhotoIds(id).map((m,i)=>({media:m,name:(PSHORT[id]||"Phase")+" photo "+(i+1)+".jpg"}))),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),gosnags:()=>go("snags"),addcost:()=>costSheet(),editcost:()=>S.costs.find(x=>x.id===id)?.extra?extraSheet(null,id):costSheet(id),addextra:()=>extraSheet(id),editextra:()=>extraSheet(null,id),delextra:()=>delRecs(S.costs,c=>c.id===id,"Extra labour"),unlockextra:()=>moneyGate(()=>render()),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
-   payall:()=>{payAll=!payAll;render()},resetpays:()=>confirmSheet("Reset all payments?","This clears every builder payment, paid and planned, and the expenses made from them. You can undo it right after.","Reset payments",()=>{const ps=[...S.pays],cs=S.costs.filter(c=>c.pay);S.pays.length=0;cs.forEach(c=>S.costs.splice(S.costs.indexOf(c),1));payAll=false;save();render();toast("All builder payments reset to R 0.",()=>{ps.forEach(x=>S.pays.push(x));cs.forEach(c=>S.costs.push(c))})}),recpay:()=>recPaySheet(),weekly:()=>weeklySheet(),addpay:()=>paySheet(),editpay:()=>paySheet(id),contract:()=>contractSheet(),diaryone:()=>{const e=S.diary.find(x=>x.id===id);if(e)shareText(diaryEntryText(e))},diarylb:()=>{const[eid,i]=id.split("|"),d=S.diary.find(x=>x.id===eid);if(d)lightbox(d.media||[],+i)},cheerpick:()=>{if(perm.manage)cheerSheet()},contractors:()=>contractorsSheet(),rpopen:()=>{const l=S.logs.find(x=>x.id===id);if(!l)return;if(l.media?.length){lightbox(l.media,0);return}sheet(dlabel(l.date),`<p style="margin:8px 0 12px;font-size:1.05rem;line-height:1.45;white-space:pre-wrap">${esc(l.text||"")}</p><p class="muted small">${[l.who,phaseName(l.phase)].filter(Boolean).map(esc).join(" · ")}</p><div class="foot"><button type="button" class="btn block" data-go="site">Open the site log</button></div>`,(sh,close)=>{sh.querySelector("[data-go]").addEventListener("click",()=>{close();go("site")})})},attmore:()=>{lsSet("build-attall",lsGet("build-attall")==="1"?"":"1");render()},wxrefresh:()=>{toast("Updating the weather…");wxLoad(true).then(()=>{render();toast(wx&&Date.now()-wx.t<6e4?"Weather is up to date.":"Could not load the weather. Check your connection.")})},joinlink:()=>shareSheet(),iosdismiss:()=>{lsSet("build-iosdis",today());render()},ncdismiss:()=>{lsSet("build-ncdis",today());render()},gedit:()=>{gEdit=!gEdit;render()},gadd:()=>gardenNameSheet(),gren:()=>gardenNameSheet(id),gdel:()=>gardenDel(id),pedit:()=>{if(!perm.manage)return;pEdit=!pEdit;render()},padd:()=>{if(perm.manage)phaseNameSheet()},pren:()=>{if(perm.manage)phaseNameSheet(id)},pdel:()=>{if(perm.manage)phaseDel(id)},pmv:()=>{if(!perm.manage)return;const[k,d]=id.split("|");phaseMove(k,+d)},estimate:()=>estimateSheet(),typicalpay:()=>typicalPays(),
-   paypay:()=>{const x=S.pays.find(q=>q.id===id),u=undoEdit(x,{paid:true,paidOn:today()});payCost(x);logAct(`Builder payment of ${money(x.amount)} recorded`,1);save();render();toast(`${rand(x.amount)} paid to the builder.`,()=>{u();payCost(x)})},
+   addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>{const[i,g]=id.split("|");quickPhoto(i,undefined,!!g)},gbackup:()=>backupSheet(),addfurn:()=>furnSheet(),editfurn:()=>furnSheet(id),delfurn:()=>delRecs(S.furn,x=>x.id===id,"Item"),furnstarter:()=>furnStarter(),furnlb:()=>{const[rid,i]=id.split("|"),r=S.furn.find(x=>x.id===rid);if(r)lightbox(r.media||[],+i)},gofurn:()=>{bmode="furn";lsSet("build-bmode","furn");if(id)fRoom=id;go("build");render()},adddiary:()=>diarySheet(),editdiary:()=>diarySheet(id),godiary:()=>go("diary"),goexport:()=>exportSheet(),goextra:()=>go("extra"),diaryshare:()=>{const tx=diaryText(14);if(!tx){toast("No diary entries in the last 14 days.");return}shareText(tx)},diaryprint:()=>diaryPrint(),savelink:()=>personSheet(sm.pid),linkdismiss:()=>{lsSet("build-linkdis",today());render()},cycboth:()=>cycMany(((el&&el.dataset.ids)||id).split(",")),docselect:()=>{docSel=docSel?null:new Set();render()},docall:()=>{const l=docList();docSel=docSel&&docSel.size===l.length?new Set():new Set(l.map(d=>d.id));render()},docprint:()=>printSelectedDocs(),gotasks:()=>{taskF=id||"";go("tasks")},gotrades:()=>{moneySeg="trades";go("money")},pushsheet:()=>pushSheet(),pushdismiss:()=>{lsSet("build-pushdis",today());render()},restore:()=>restoreSheet(),addtrade:()=>tradeSheet(),edittrade:()=>tradeSheet(id),opentrade:()=>tradeView(id),tradecmp:()=>tradeCmp(id),quotehow:()=>quoteHowSheet(),deltrade:()=>delRecs(S.trades,x=>x.id===id,"Quote"),tradeaccept:()=>{const t=S.trades.find(x=>x.id===id);if(!t)return;confirmSheet("Accept this quote?",`${tName(t)} (${t.trade}), ${money(tVal(t))}.`,"Yes, accept",()=>{const ex=tradeStatus(t,"accepted");logAct(`Accepted the ${t.trade} quote from ${tName(t)}: ${money(tVal(t))}`,1);save();render();toast("Quote accepted."+ex.msg,ex.undo)},true)},paystage:()=>{const[tid,sid]=id.split("|"),t=S.trades.find(x=>x.id===tid),sg=t&&(t.stages||[]).find(x=>x.id===sid);if(!sg)return;confirmSheet("Mark as paid?",`${money(sg.amount)} to ${tName(t)} (${t.trade}). It is saved as paid today.`,"Yes, mark paid",()=>{const u=undoEdit(sg,{paid:true,paidOn:today()});logAct(`Paid ${money(sg.amount)} to ${tName(t)} (${t.trade})`,1);save();render();toast(`${rand(sg.amount)} marked paid.`,u)},true)},goinbox:()=>go("inbox"),gopeople:()=>go("people"),newmsg:()=>newMsgSheet(),addperson:()=>personSheet(),editperson:()=>personSheet(id),msglb:()=>{const[mid,i]=id.split("|");const m=S.msgs.find(x=>x.id===mid);if(m)lightbox(m.media||[],+i)},sharesheet:()=>shareSheet(),bkdismiss:()=>{lsSet("build-bkdis",today());render()},phdrive:()=>driveSave(phasePhotoIds(id).map((m,i)=>({media:m,name:(PSHORT[id]||"Phase")+" photo "+(i+1)+".jpg"}))),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),gosnags:()=>go("snags"),addcost:()=>costSheet(),editcost:()=>S.costs.find(x=>x.id===id)?.extra?extraSheet(null,id):costSheet(id),addextra:()=>extraSheet(id),editextra:()=>extraSheet(null,id),delextra:()=>delRecs(S.costs,c=>c.id===id,"Extra labour"),unlockextra:()=>moneyGate(()=>render()),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
+   payall:()=>{payAll=!payAll;render()},resetpays:()=>confirmSheet("Reset all payments?","This clears every builder payment, paid and planned, and the expenses made from them. You can undo it right after.","Reset payments",()=>{const ps=[...S.pays],cs=S.costs.filter(c=>c.pay);S.pays.length=0;cs.forEach(c=>S.costs.splice(S.costs.indexOf(c),1));payAll=false;save();render();toast("All builder payments reset to R 0.",()=>{ps.forEach(x=>S.pays.push(x));cs.forEach(c=>S.costs.push(c))})}),recpay:()=>recPaySheet(),weekly:()=>weeklySheet(),addpay:()=>paySheet(),editpay:()=>paySheet(id),contract:()=>contractSheet(),diaryone:()=>{const e=S.diary.find(x=>x.id===id);if(e)shareText(diaryEntryText(e))},diarylb:()=>{const[eid,i]=id.split("|"),d=S.diary.find(x=>x.id===eid);if(d)lightbox(d.media||[],+i)},cheerpick:()=>{if(perm.manage)cheerSheet()},contractors:()=>contractorsSheet(),plprint:()=>{const p=planOf(planSel);if(p)printDocs([p]);else toast("Choose a drawing first.")},rpopen:()=>{const l=S.logs.find(x=>x.id===id);if(!l)return;if(l.media?.length){lightbox(l.media,0);return}sheet(dlabel(l.date),`<p style="margin:8px 0 12px;font-size:1.05rem;line-height:1.45;white-space:pre-wrap">${esc(l.text||"")}</p><p class="muted small">${[l.who,phaseName(l.phase)].filter(Boolean).map(esc).join(" · ")}</p><div class="foot"><button type="button" class="btn block" data-go="site">Open the site log</button></div>`,(sh,close)=>{sh.querySelector("[data-go]").addEventListener("click",()=>{close();go("site")})})},attmore:()=>{lsSet("build-attall",lsGet("build-attall")==="1"?"":"1");render()},wxrefresh:()=>{toast("Updating the weather…");wxLoad(true).then(()=>{render();toast(wx&&Date.now()-wx.t<6e4?"Weather is up to date.":"Could not load the weather. Check your connection.")})},joinlink:()=>shareSheet(),iosdismiss:()=>{lsSet("build-iosdis",today());render()},ncdismiss:()=>{lsSet("build-ncdis",today());render()},gedit:()=>{gEdit=!gEdit;render()},gadd:()=>gardenNameSheet(),gren:()=>gardenNameSheet(id),gdel:()=>gardenDel(id),pedit:()=>{if(!perm.manage)return;pEdit=!pEdit;render()},padd:()=>{if(perm.manage)phaseNameSheet()},pren:()=>{if(perm.manage)phaseNameSheet(id)},pdel:()=>{if(perm.manage)phaseDel(id)},pmv:()=>{if(!perm.manage)return;const[k,d]=id.split("|");phaseMove(k,+d)},estimate:()=>estimateSheet(),typicalpay:()=>typicalPays(),
+   paypay:()=>{const x=S.pays.find(q=>q.id===id);if(!x)return;confirmSheet("Record this payment?",`${money(x.amount)} paid to the builder today.`,"Yes, record payment",()=>{const u=undoEdit(x,{paid:true,paidOn:today()});payCost(x);logAct(`Builder payment of ${money(x.amount)} recorded`,1);save();render();toast(`${rand(x.amount)} paid to the builder.`,()=>{u();payCost(x)})},true)},
    delpay:()=>{const x=S.pays.find(q=>q.id===id),lc=S.costs.find(c=>c.id==="pay_"+id);S.pays.splice(S.pays.indexOf(x),1);if(lc)S.costs.splice(S.costs.indexOf(lc),1);save();render();toast("Stage deleted.",()=>{S.pays.push(x);if(lc)S.costs.push(lc)})},
    paycost:()=>{const c=S.costs.find(x=>x.id===id),u=undoEdit(c,{paid:true});save();render();toast(`${rand(c.amount)} marked as paid.`,u)},budget:()=>moneyOK?budgetSheet():moneyGate(budgetSheet),lockmoney:()=>{lockMoney();toast("Money is locked.")},addmat:()=>matSheet(undefined,id&&phase(id)?id:undefined),editmat:()=>matSheet(id),delmat:()=>delRecs(S.mats,m=>m.id===id,"Material"),
-   cycmat:()=>{const m=S.mats.find(x=>x.id===id),L=mst(m),order=L.map(x=>x[0]),nx=order[(order.indexOf(m.status)+1)%order.length];const u=undoEdit(m,{status:nx});save();render();toast(`${m.name}: ${L.find(x=>x[0]===nx)[1].toLowerCase()}.`,u)},
+   dnote:()=>dnoteSheet(),dnotes:()=>deliveriesSheet(),mattick:()=>{const[mid,k]=id.split("|"),m=S.mats.find(x=>x.id===mid);if(!m)return;const t=matTicks(m),ord=k==="o"?!t.ord:(t.rec?t.ord:true),rec=k==="r"?!t.rec:(t.ord?t.rec&&ord:false);const u=undoEdit(m,{status:rec?"got":ord?"ordered":"need",ordOn:ord?(t.ord&&m.ordOn||today()):"",recOn:rec?(t.rec&&m.recOn||today()):"",...(hasMoves(m)?{rcv:rec}:{})});save();render();toast(`${m.name}: ${rec?"received":ord?"ordered":"not ordered"}.`,u)},matagain:()=>{const m=S.mats.find(x=>x.id===id);if(!m)return;const u=undoEdit(m,{orders:[...(m.orders||[]),{ordOn:m.ordOn||"",recOn:m.recOn||"",qty:m.qty||0,unit:m.unit||""}],status:"need",ordOn:"",recOn:"",...(hasMoves(m)?{rcv:false}:{})});save();render();toast(`${m.name}: back on the order list.`,u)},cycmat:()=>{const m=S.mats.find(x=>x.id===id),L=mst(m),order=L.map(x=>x[0]),nx=order[(order.indexOf(m.status)+1)%order.length];const u=undoEdit(m,{status:nx});save();render();toast(`${m.name}: ${L.find(x=>x[0]===nx)[1].toLowerCase()}.`,u)},
    movein:()=>moveSheet(id,"in"),moveout:()=>moveSheet(id,"out"),editelec:()=>elecSheet(),
-   shareorder:()=>shareOrder(id&&(id==="all"||phase(id))?id:(matPh!=="all"&&matPh!=="none"?matPh:"")),addsup:()=>supSheet(),editsup:()=>supSheet(id),delsup:()=>delRecs(S.sups,s=>s.id===id,"Contact"),
+   shareorder:()=>orderSheet(id&&(id==="all"||phase(id))?id:(matPh!=="all"&&matPh!=="none"?matPh:"")),addsup:()=>supSheet(),editsup:()=>supSheet(id),delsup:()=>delRecs(S.sups,s=>s.id===id,"Contact"),
    addphoto:()=>quickPhoto(id&&phase(id)?id:undefined),addissue:()=>logSheet(null,"issue"),editlog:()=>logSheet(id),dellog:()=>delRecs(S.logs,l=>l.id===id,"Entry"),
    fix:()=>{const l=S.logs.find(x=>x.id===id),u=undoEdit(l,{fixed:true});logAct("Marked an issue as fixed");save();render();toast("Issue marked fixed.",u)},
    phtlb:()=>lightbox(photoList().map(p=>p.m),+id),phcmp:()=>compareView(id||""),scanslip:()=>scanSlip(),addmenu:()=>addMenu(),attsheet:()=>attSheet(),bmore:()=>bmoreSheet(),msgdel:()=>msgRemove(id),msgclear:()=>msgClearOld(),thread:()=>threadSheet(id),msgdec:()=>{const[a,b]=id.split("|");msgDecide(a,b)},snagedit:()=>snagSheet(id),snagexport:()=>snagExportSheet(),snagclose:()=>{if(!perm.manage)return;const l=S.logs.find(x=>x.id===id);if(!l)return;const u=undoEdit(l,{closed:true,closedOn:today()});logAct("Closed a snag");save();render();toast("Snag closed.",u)},snagreopen:()=>{const l=S.logs.find(x=>x.id===id);if(!l)return;const u=undoEdit(l,{fixed:false,closed:false,closedOn:""});save();render();toast("Snag reopened.",u)},slipexport:()=>slipExportSheet(),slipview:()=>{const[cid,i]=id.split("|"),c=S.costs.find(x=>x.id===cid);if(c)lightbox(c.media||[],+i)},mbar:()=>{const r=MCH.months[+id],el=$("#mbread");if(!r||!el)return;const p=r.b+r.t+r.o;el.innerHTML=`${mLab(r.ym,1)}: paid <b>${money0(p)}</b>${p?` (builder ${money0(r.b)}${r.t?", trades "+money0(r.t):""}${r.o?", other "+money0(r.o):""})`:""}${r.p?`, planned <b>${money0(r.p)}</b>`:""}.`},weekshare:()=>shareText(weekText()),wkgoals:()=>shareWeekSheet(),pusend:()=>puShareSheet(),pupick:()=>puPick(),lb:()=>{const[lid,i]=id.split("|"),l=S.logs.find(x=>x.id===lid);lightbox(l.media,+i)},
@@ -1943,18 +2020,19 @@ function matSheet(id,defPhase){
   <label class="f" for="mph">Which phase is it for?</label><select id="mph" class="t sel"><option value="">Not assigned</option>${PH.map(p=>`<option value="${p[0]}" ${p[0]===st.phase?"selected":""}>${esc(p[1])}</option>`).join("")}</select>
   <label class="f">Section</label>${chipRow("sec",SECS.map(x=>[x[0],x[1]]),st.sec)}
   <div id="bd">${body()}</div>
-  <div class="foot">${m?"":`<button type="button" class="chip" id="again" aria-pressed="${matAgain}" style="margin-bottom:8px">${ic("check","sm")}Add another of this product</button>`}<button class="btn primary block">${m?"Save changes":"Add item"}</button></div></form>`,(sh,close)=>{
+  ${m&&m.orders?.length?`<label class="f">Order history</label><ul class="list">${m.orders.slice().reverse().map(o=>`<li><div class="grow"><div class="lt">${o.recOn?"Received "+dshort(o.recOn):o.ordOn?"Ordered "+dshort(o.ordOn):"Earlier order"}</div><div class="ls">${[o.qty?num(o.qty,2)+" "+esc(o.unit||""):"",o.recOn&&o.ordOn?"ordered "+dshort(o.ordOn):""].filter(Boolean).join(" · ")}</div></div></li>`).join("")}</ul>`:""}${m&&st.sec==="stock"?`<details class="more"><summary>Record a delivery or stock used</summary><div class="row" style="gap:8px;margin-top:8px"><button type="button" class="btn small grow" id="mvi">${ic("truck","sm")}Delivery</button><button type="button" class="btn small grow" id="mvo">${ic("minus","sm")}Used</button></div></details>`:""}<div class="foot">${m?"":`<button type="button" class="chip" id="again" aria-pressed="${matAgain}" style="margin-bottom:8px">${ic("check","sm")}Add another of this product</button>`}<button class="btn primary block">${m?"Save changes":"Add item"}</button></div></form>`,(sh,close)=>{
     const wire=()=>{wireDc(sh);["unit","room","status"].forEach(n=>wireChips(sh,st,n));const q=sh.querySelector("#q");
       sh.querySelectorAll("[data-step]").forEach(b=>b.onclick=()=>{q.value=Math.max(0,(parseAmt(q.value)||0)+ +b.dataset.step)});
       sh.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{q.value=(parseAmt(q.value)||0)+ +b.dataset.add});
       sh.querySelectorAll("[data-note]").forEach(b=>b.onclick=()=>lightbox([b.dataset.note],0));sh.querySelectorAll("[data-docv]").forEach(b=>b.onclick=()=>{const dd=S.docs.find(x=>x.id===b.dataset.docv);if(dd)lightbox([dd.media],0)});sh.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{moves=moves.filter(x=>x.id!==b.dataset.rm);keepq();sh.querySelector("#bd").innerHTML=body();wire()})};
     const keepq=()=>{};
+    [["#mvi","in"],["#mvo","out"]].forEach(([q,t])=>sh.querySelector(q)?.addEventListener("click",()=>{close();setTimeout(()=>moveSheet(m.id,t),80)}));
     wireChips(sh,st,"sec",()=>{const nm=sh.querySelector("#nm").value,keep=["#q","#mn","#du","#su"].map(k=>[k,sh.querySelector(k)?.value]);sh.querySelector("#bd").innerHTML=body();wire();sh.querySelector("#nm").value=nm;keep.forEach(([k,v])=>{const e=sh.querySelector(k);if(e&&v!==undefined)e.value=v})});
     wire();
     const ag=sh.querySelector("#again");if(ag)ag.onclick=()=>{matAgain=ag.getAttribute("aria-pressed")!=="true";ag.setAttribute("aria-pressed",matAgain)};
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const nm=sh.querySelector("#nm");if(!nm.value.trim())return showErr(sh,nm,"Write what you need.");
       const q=sh.querySelector("#q"),qty=parseAmt(q.value);if(!(qty>=0))return showErr(sh,q,"Enter how many.");
-      const vals={name:nm.value.trim(),qty,unit:st.unit,sec:st.sec,room:st.sec==="stock"?"both":st.room,status:st.status,sup:sh.querySelector("#su")?.value||"",due:sh.querySelector("#du").value||"",min:st.sec==="stock"?(parseAmt(sh.querySelector("#mn")?.value)||0):0,phase:sh.querySelector("#mph").value,moves};
+      const vals={name:nm.value.trim(),qty,unit:st.unit,sec:st.sec,room:st.sec==="stock"?"both":st.room,status:st.status,sup:sh.querySelector("#su")?.value||"",due:sh.querySelector("#du").value||"",min:st.sec==="stock"?(parseAmt(sh.querySelector("#mn")?.value)||0):0,phase:sh.querySelector("#mph").value,moves,rcv:m&&st.status===m.status?m.rcv:undefined};
       if(m){const u=undoEdit(m,vals);save();close();render();toast("Item saved.",u)}else{const n={id:uid(),...vals,moves:[]};S.mats.push(n);matSec=n.sec;save();const un=()=>S.mats.splice(S.mats.indexOf(n),1);if(matAgain){render();toast("Item added. Add the next one.",un);q.value="1";nm.focus();nm.select()}else{close();render();toast("Item added.",un)}}};
   });
 }
@@ -1976,7 +2054,7 @@ function moveSheet(id,t){
       const entry={id:uid(),t,qty:v,date:sh.querySelector("#dt").value||today(),note:sh.querySelector("#nt").value.trim(),who:me};
       if(dn){const mid="dc"+uid(),blob=await prepPhoto(dn,PSIZES[psize][1]),did=uid();await mPut(mid,blob);queueMedia(mid);
         S.docs.push({id:did,name:"Delivery note: "+m.name+" "+num(v,2)+" "+m.unit,type:"delivery",date:entry.date,phase:"",sup:m.sup||"",note:entry.note,media:mid,fn:"delivery-note.jpg",mime:"image/jpeg",size:blob.size,who:me});entry.doc=did}
-      const u0=undoEdit(m,{moves:[...(m.moves||[]),entry]}),u=()=>{u0();if(entry.doc){const i=S.docs.findIndex(x=>x.id===entry.doc);if(i>=0)S.docs.splice(i,1)}};logAct(inn?`Delivery: ${num(v,2)} ${m.unit} of ${m.name}`:`Used ${num(v,2)} ${m.unit} of ${m.name}`);save();close();render();
+      const u0=undoEdit(m,{moves:[...(m.moves||[]),entry],rcv:undefined}),u=()=>{u0();if(entry.doc){const i=S.docs.findIndex(x=>x.id===entry.doc);if(i>=0)S.docs.splice(i,1)}};logAct(inn?`Delivery: ${num(v,2)} ${m.unit} of ${m.name}`:`Used ${num(v,2)} ${m.unit} of ${m.name}`);save();close();render();
       toast(inn?`Delivery of ${num(v,2)} ${m.unit} recorded.`:`${num(v,2)} ${m.unit} used.`,u)};
   });
 }
@@ -2006,7 +2084,8 @@ function supSheet(id){
   <label class="f" for="ph">Phone number</label><input id="ph" class="t" type="tel" inputmode="tel" value="${esc(s?.phone||"")}" placeholder="082 123 4567">
   <label class="f" for="p2">Second number (optional)</label><input id="p2" class="t" type="tel" inputmode="tel" value="${esc(s?.phone2||"")}" placeholder="083 987 6543">
   ${s?.phone?`<a class="btn block" style="margin-top:12px" href="https://wa.me/${waNum(s.phone)}" target="_blank" rel="noopener">${ic("chat")}WhatsApp ${esc(s.phone)}</a>`:""}${s?.phone2?`<a class="btn block" style="margin-top:8px" href="https://wa.me/${waNum(s.phone2)}" target="_blank" rel="noopener">${ic("chat")}WhatsApp ${esc(s.phone2)}</a>`:""}
-  <div class="foot"><button class="btn primary block">${s?"Save changes":"Add contact"}</button></div></form>`,(sh,close)=>{
+  <div class="foot"><button class="btn primary block">${s?"Save changes":"Add contact"}</button>${s&&perm.manage?`<button type="button" class="btn block danger" id="rmc" style="margin-top:8px">Remove contact</button>`:""}</div></form>`,(sh,close)=>{
+    sh.querySelector("#rmc")?.addEventListener("click",()=>{close();setTimeout(()=>confirmSheet("Remove "+s.name+"?","They are removed from the contractors list. Quotes already linked to them stay.","Remove",()=>delRecs(S.sups,x=>x.id===s.id,"Contact",true)),80)});
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();const nm=sh.querySelector("#nm");if(!nm.value.trim())return showErr(sh,nm,"Write a name.");
       const vals={name:nm.value.trim(),trade:sh.querySelector("#tr").value.trim(),phone:sh.querySelector("#ph").value.trim(),phone2:sh.querySelector("#p2").value.trim()};
       if(s){const u=undoEdit(s,vals);save();close();render();toast("Contact saved.",u)}else{const n={id:uid(),...vals};S.sups.push(n);save();close();render();toast("Contact added.",()=>S.sups.splice(S.sups.indexOf(n),1))}};
@@ -2247,13 +2326,23 @@ function scan(){
   for(const key of Object.keys(sm.meta)){if(cur.has(key))continue;const m=sm.meta[key];if(m.s===undefined){delete sm.meta[key];continue}if(m.s!=="x"&&!m.del){m.del=true;m.u=Date.now()}}
 }
 const isDirty=(key,m,cur)=>m.del?m.s!=="x":(cur.has(key)&&m.h!==undefined&&m.s!==m.h);
+/* a failed sync: a dropped connection retries by itself in a few seconds; only repeated or real server errors show Sync problem */
+var syncFails=0,syncRetryT=0;
+const netErr=e=>/failed to fetch|load failed|networkerror|network error|network connection|timed? ?out|aborted|offline|fetch failed/i.test((e&&e.message)||String(e||""));
+function syncFail(e,where){
+  lastErr=e?.message||String(e);console.warn(where,e);
+  if(/denied/.test(lastErr)){sm.off=true;persistSync();setSync("error");return}
+  if(!navigator.onLine){setSync("offline");return}
+  syncFails++;const net=netErr(e);setSync(net&&syncFails<5?"retry":"error");
+  clearTimeout(syncRetryT);syncRetryT=setTimeout(()=>{if(!document.hidden)syncNow()},[4000,10000,20000,30000][Math.min(syncFails-1,3)]);
+}
 function setSync(s){
   syncState=s;if(s==="ok")syncedAt=Date.now();
   const e=$("#sync");if(!e)return;
-  const L={off:"Not shared yet",syncing:"Syncing…",ok:"Shared",offline:"Offline, saved here",error:"Sync problem",unavailable:"Sharing unavailable"};
+  const L={off:"Not shared yet",syncing:"Syncing…",ok:"Shared",offline:"Offline, saved here",retry:"Reconnecting…",error:"Sync problem",unavailable:"Sharing unavailable"};
   document.body.classList.toggle("sync-ok",s==="ok"||s==="syncing");e.className="sync "+(s==="off"?"":s);e.innerHTML=ic(s==="ok"||s==="syncing"?"cloud":"cloudoff")+L[s];
 }
-$("#sync").onclick=()=>shareSheet();
+$("#sync").onclick=async()=>{if(sm.code&&!sm.off&&["error","retry","offline"].includes(syncState)){toast("Trying again…");syncFails=0;await syncNow();toast(syncState==="ok"?"Synced. Everything is shared.":syncState==="offline"?"No internet. Your changes are saved on this phone.":"Still cannot sync"+(lastErr?": "+String(lastErr).slice(0,80):".")+" Your changes are saved on this phone.");return}shareSheet()};
 async function push(){
   if(!sm.code||!sb||pushing)return;pushing=true;setSync("syncing");
   try{
@@ -2274,7 +2363,7 @@ async function push(){
       if(sm.mfail)delete sm.mfail[mid];
       const{error}=await sb.rpc("build3_upsert",{p_code:sm.code,p_key:sm.key,p_rows:[{kind:"media",id:mid,data:{p:path,t:b.type||"",n:b.size,...(isMoneyMedia(mid)?{m:1}:{})},deleted:false,u:Date.now()}]});if(error)throw error;sm.pendingMedia=sm.pendingMedia.filter(x=>x!==mid)}
     persistSync();setSync("ok");
-  }catch(e){lastErr=e?.message||String(e);if(/denied/.test(lastErr)){sm.off=true;persistSync()}console.warn("sync push",e);setSync(navigator.onLine?"error":"offline")}
+  }catch(e){syncFail(e,"sync push")}
   finally{pushing=false;persistSync()}
 }
 const queueMedia=id=>{if(!sm.pendingMedia.includes(id))sm.pendingMedia.push(id);persistSync()};
@@ -2317,16 +2406,16 @@ async function pull(){
     if(changed){try{localStorage.setItem(KEY,JSON.stringify(S))}catch{}}
     if(changed||gotMedia){if(!closeSheet)render()}
     if(syncState!=="syncing")setSync("ok");
-  }catch(e){lastErr=e?.message||String(e);if(/denied/.test(lastErr)){sm.off=true;persistSync()}console.warn("sync pull",e);setSync(navigator.onLine?"error":"offline")}
+  }catch(e){syncFail(e,"sync pull")}
   finally{pulling=false}
 }
-const syncNow=async()=>{if(!sm.code||sm.off)return;if(!sb&&!await connect())return;await push();await pull()};
+const syncNow=async()=>{if(!sm.code||sm.off)return;if(!sb&&!await connect())return;await push();if(["retry","error","offline"].includes(syncState))return;await pull();if(syncState==="ok"){syncFails=0;clearTimeout(syncRetryT)}};
 function loadSupabase(){return new Promise(res=>{if(window.supabase)return res();const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";s.onload=()=>res();s.onerror=()=>res();document.head.append(s)})}
 async function connect(){if(sb)return true;await loadSupabase();if(!window.supabase){setSync(navigator.onLine?"unavailable":"offline");return false}sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:false}});return true}
 const newCode=()=>[...crypto.getRandomValues(new Uint8Array(24))].map(b=>"abcdefghjkmnpqrstuvwxyz23456789"[b%31]).join("");
 const shareLink=r=>location.origin+location.pathname+"#join="+sm.code+"&role="+(r||"partner");
 document.addEventListener("visibilitychange",()=>{if(!document.hidden)syncNow()});
-addEventListener("online",syncNow);addEventListener("offline",()=>{if(sm.code)setSync("offline")});
+addEventListener("online",syncNow);document.addEventListener("visibilitychange",()=>{if(!document.hidden&&sm.code)syncNow()});addEventListener("offline",()=>{if(sm.code)setSync("offline")});
 setInterval(()=>{if(!document.hidden)syncNow()},20000);
 async function startSharing(){
   if(!await connect()){toast("Connect to the internet to start sharing.");return false}
@@ -2721,7 +2810,7 @@ function plansV(){
   const list=[...drawings];if(!list.some(x=>x.id===p.id))list.push(p);
   return head+`${list.length>1?`<div class="chips scroll" role="group" aria-label="Choose a drawing" style="margin-bottom:10px">${list.map(x=>`<button type="button" class="chip" data-sub="plan:${x.id}" aria-pressed="${x.id===p.id}">${esc(x.name)}</button>`).join("")}</div>`:""}
   <div class="plw ${fullPlan?"full":""}"><div class="plv" id="plv" role="group" aria-label="${esc(p.name)}. Drag to move around. Pinch or use the buttons to zoom."><div class="plc" id="plc"><img id="plimg" alt="${esc(p.name)}" hidden></div><canvas id="plcv" hidden></canvas></div>
-  <div class="pltools"><button type="button" class="btn small icon" data-act="plzout" aria-label="Zoom out">${ic("minus")}</button><button type="button" class="btn small icon" data-act="plzin" aria-label="Zoom in">${ic("plus")}</button><button type="button" class="btn small" data-act="plfit">Fit</button><button type="button" class="btn small icon" data-act="plfull" aria-label="${fullPlan?"Exit full screen":"Full screen"}">${ic(fullPlan?"x":"expand","sm")}</button><button type="button" class="btn small icon" data-act="opendoc" data-id="${p.id}" aria-label="Document details: share, save, edit or delete">${ic("sliders","sm")}</button>
+  <div class="pltools"><button type="button" class="btn small icon" data-act="plzout" aria-label="Zoom out">${ic("minus")}</button><button type="button" class="btn small icon" data-act="plzin" aria-label="Zoom in">${ic("plus")}</button><button type="button" class="btn small" data-act="plfit">Fit</button><button type="button" class="btn small icon" data-act="plfull" aria-label="${fullPlan?"Exit full screen":"Full screen"}">${ic(fullPlan?"x":"expand","sm")}</button><button type="button" class="btn small icon" data-act="opendoc" data-id="${p.id}" aria-label="Document details: share, save, edit or delete">${ic("sliders","sm")}</button><button type="button" class="btn small" data-act="plprint" aria-label="Print this drawing">${ic("print","sm")}Print</button>
   <span class="plpg" id="plpg" hidden><button type="button" class="btn small icon" data-act="plprev" aria-label="Previous page">${ic("left","sm")}</button><b class="small" id="plpn"></b><button type="button" class="btn small icon" data-act="plnext" aria-label="Next page">${ic("chev","sm")}</button></span></div></div>
   <p class="hint">${esc(p.name)} · ${isPdfDoc(p)?"PDF, sharp at any zoom":"Picture"}${p.size?" · "+fmtMB(p.size):""}. Pinch or use + and − to zoom, drag to move around.</p>`;
 }
@@ -2887,7 +2976,7 @@ const ROLE_PICK=["site","builder","owner","decor","finance","other"];
 const roleLabel=r=>(ROLES[r]||ROLES.other).label;
 const DEFAULT_PEOPLE=[["Albert","site"],["Jonathan","builder"],["Newberry","owner"],["Talana","decor"],["Audrey","finance"]];
 const READ_ACTS0=["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock","plprev","plnext","phdrive","gbackup"].concat(["goinbox","gopeople","newmsg","msglb","sharesheet"]);
-const READ_ACTS=READ_ACTS0.concat(["rpopen","contractors","gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp","mbar","slipexport","slipview","thread","msgdec","snagexport","msgdel","msgclear","gosnags","attsheet","bmore","tipgo","tipx","tipsheet","wkgoals","pusend","pupick","tradecmp","quotehow"]);
+const READ_ACTS=READ_ACTS0.concat(["plprint","rpopen","contractors","dnotes","gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp","mbar","slipexport","slipview","thread","msgdec","snagexport","msgdel","msgclear","gosnags","attsheet","bmore","tipgo","tipx","tipsheet","wkgoals","pusend","pupick","tradecmp","quotehow"]);
 const MONEY_ACTS=["addcost","editcost","delcost","budget","addpay","editpay","delpay","recpay","paypay","paycost","contract","typicalpay","weekly","resetpays","payall","report"];
 MONEY_ACTS.push("addtrade","edittrade","deltrade","opentrade","tradeaccept","paystage");
 const NOTE_ACTS=["addphoto","phphoto","adddoc"];
@@ -2907,7 +2996,7 @@ const ago=t=>{const s=Math.max(0,(Date.now()-new Date(t).getTime())/1000);return
 const personLink=p=>location.origin+location.pathname+"#join="+sm.code+"&k="+p.key;
 const waUrl=(phone,text)=>{let d=String(phone||"").replace(/\D/g,"");if(d.startsWith("0"))d="27"+d.slice(1);return "https://wa.me/"+d+"?text="+encodeURIComponent(text)};
 function fabOK(k){
-  const ar={photo:"log",issue:"log",task:"tasks",mat:"mats",cost:"money",pay:"money",msg:"upd",site:"log"}[k];if(k==="msg"&&!sm.code){shareSheet();return false}
+  const ar={photo:"log",issue:"log",task:"tasks",mat:"mats",cost:"money",pay:"money",msg:"upd",site:"log",dnote:"mats"}[k];if(k==="msg"&&!sm.code){shareSheet();return false}
   if(lvl(ar)>=2)return true;toast(AREA_MSG(ar));return false;
 }
 const whoLine=()=>sm.code&&!perm.manage?`<p class="muted small" style="margin:0 2px 12px">You are <b>${esc(sm.pname||me||"signed in")}</b>, ${esc(roleLabel(sm.prole))}. ${esc(accessText(perm))}</p>`:"";
@@ -3045,7 +3134,7 @@ const AREAS=[
   ["furn","Furniture and decor","What we build for the classrooms",0,["No access","See only","Update"]],
   ["money","Money","Costs, trades and payments",0,["No access","See only","Record"]],
   ["upd","Updates","Messages to and from the team",1,["Receive","Send"]]];
-const ACT_AREA={pedit:"tasks",padd:"tasks",pren:"tasks",pdel:"tasks",pmv:"tasks",gedit:"tasks",gadd:"tasks",gren:"tasks",gdel:"tasks",estimate:"money",scanslip:"money",snagedit:"log",snagreopen:"log",phcover:"tasks",contract:"money",addextra:"money",editextra:"money",cyc:"tasks",cycboth:"tasks",edittask:"tasks",deltask:"tasks",addtask:"tasks",reorder:"tasks",mvup:"tasks",mvdn:"tasks",phphoto:"log",addphoto:"log",addissue:"log",editlog:"log",dellog:"log",fix:"log",addmat:"mats",editmat:"mats",delmat:"mats",cycmat:"mats",movein:"mats",moveout:"mats",editelec:"mats",addsup:"mats",editsup:"mats",delsup:"mats",adddoc:"docs",addplan:"docs",adddiary:"diary",editdiary:"diary",addfurn:"furn",editfurn:"furn",delfurn:"furn",furnstarter:"furn"};
+const ACT_AREA={pedit:"tasks",padd:"tasks",pren:"tasks",pdel:"tasks",pmv:"tasks",gedit:"tasks",gadd:"tasks",gren:"tasks",gdel:"tasks",estimate:"money",scanslip:"money",snagedit:"log",snagreopen:"log",phcover:"tasks",contract:"money",addextra:"money",editextra:"money",cyc:"tasks",cycboth:"tasks",edittask:"tasks",deltask:"tasks",addtask:"tasks",reorder:"tasks",mvup:"tasks",mvdn:"tasks",phphoto:"log",addphoto:"log",addissue:"log",editlog:"log",dellog:"log",fix:"log",addmat:"mats",editmat:"mats",delmat:"mats",mattick:"mats",matagain:"mats",dnote:"mats",cycmat:"mats",movein:"mats",moveout:"mats",editelec:"mats",addsup:"mats",editsup:"mats",delsup:"mats",adddoc:"docs",addplan:"docs",adddiary:"diary",editdiary:"diary",addfurn:"furn",editfurn:"furn",delfurn:"furn",furnstarter:"furn"};
 const AREA_MSG=ar=>lvl(ar)===0?"You do not have access to this area.":"You can look at this area but not change it.";
 const areaLabel=(k,v)=>{const a=AREAS.find(x=>x[0]===k);return a?a[4][Math.max(0,v-a[3])]||"":""};
 function areaRows(st,pre){
@@ -3524,7 +3613,7 @@ function overallV(){
   nx.sort((x,y)=>(x.due||"9999").localeCompare(y.due||"9999"));
   const nxShow=nx.slice(0,4);
   const nextCard=nxShow.length?'<div class="card"><h2>Next payments</h2><ul class="list">'+nxShow.map(x=>{const od=x.due&&x.due<td,lab=x.label&&x.label!=="Payment"?x.label:"",meta=[x.sup,lab,x.due?(od?"overdue ":"due ")+dshort(x.due):"no date yet"].filter(Boolean).join(" · ");
-    return '<li class="tap" tabindex="0" '+x.attr+'><span class="row-ic '+(od?"red":"sky")+'">'+ic("calendar")+'</span><div class="grow"><div class="lt">'+esc(x.who)+'</div><div class="ls '+(od?"bad":"")+'">'+esc(meta)+'</div></div><span class="amt">'+money0(x.amt)+'</span><button type="button" class="btn good nxpay" '+x.pay+' aria-label="Mark '+esc(x.who)+' payment of '+money0(x.amt)+' as paid">'+ic("check")+'</button></li>'}).join("")+'</ul>'+(nx.length>nxShow.length?'<p class="hint" style="margin:8px 0 0">'+(nx.length-nxShow.length)+' more planned. Open Build or Trades to see them all.</p>':"")+'</div>':"";
+    return '<li class="tap nxrow" tabindex="0" '+x.attr+'><span class="row-ic '+(od?"red":"sky")+'">'+ic("calendar")+'</span><div class="grow"><div class="lt">'+esc(x.who)+'</div><div class="ls '+(od?"bad":"")+'">'+esc(meta)+'</div></div><span class="amt">'+money0(x.amt)+'</span><button type="button" class="btn good nxpay" '+x.pay+' aria-label="Mark '+esc(x.who)+' payment of '+money0(x.amt)+' as paid">'+ic("check")+'</button></li>'}).join("")+'</ul>'+(nx.length>nxShow.length?'<p class="hint" style="margin:8px 0 0">'+(nx.length-nxShow.length)+' more planned. Open Build or Trades to see them all.</p>':"")+'</div>':"";
   /* who gets what: one list for the builder, each trade and other expenses */
   const parties=[];
   if(ct>0)parties.push({n:"Builder",v:ct,p:Math.min(ct,paidB),attr:'data-sub="mseg:build"'});
@@ -3877,7 +3966,7 @@ function attentionItems(){
 function attentionV(){
   const it=attentionItems();if(!it.length)return "";
   const red=it.some(x=>x[1]==="red");
-  return `<button type="button" class="attline ${red?"red":""}" data-act="attsheet" aria-label="${it.length} thing${it.length===1?"":"s"} need${it.length===1?"s":""} attention. Open the list.">${ic("alert","sm")}<span class="grow"><b>${it.length} thing${it.length===1?"":"s"} need${it.length===1?"s":""} you</b><span class="muted"> · ${esc(it[0][2])}</span></span>${ic("chev","sm")}</button>`;
+  return `<button type="button" class="attline ${red?"red":""}" data-act="attsheet" aria-label="${it.length} thing${it.length===1?"":"s"} need${it.length===1?"s":""} attention: ${esc(it.slice(0,2).map(x=>x[2]).join(". "))}. Open the list.">${ic("alert","sm")}<span class="grow"><b>${it.length} thing${it.length===1?"":"s"} need${it.length===1?"s":""} you</b>${it.slice(0,2).map(x=>`<span class="muted attl">${esc(x[2])}</span>`).join("")}${it.length>2?`<span class="muted attl">and ${it.length-2} more</span>`:""}</span>${ic("chev","sm")}</button>`;
 }
 function attSheet(){
   const it=attentionItems();
@@ -4090,7 +4179,7 @@ async function printDocs(list){
     if(/^image\//.test(mime)){const img=new Image(),u=URL.createObjectURL(b);urls2.push(u);img.src=u;img.className="pa-img";await img.decode().catch(()=>{});sec.append(img);pages++}
     else if(/pdf/i.test(mime)||/\.pdf$/i.test(d.fn||"")){
       try{const lib=await getPdfLib(),pdf=await lib.getDocument({data:new Uint8Array(await b.arrayBuffer())}).promise;
-        for(let i=1;i<=pdf.numPages&&pages<80;i++){const pg=await pdf.getPage(i),vp=pg.getViewport({scale:2}),c=document.createElement("canvas");c.width=vp.width;c.height=vp.height;await pg.render({canvasContext:c.getContext("2d"),viewport:vp}).promise;c.className="pa-img";const w=document.createElement("div");w.className="pa-page";w.append(c);sec.append(w);pages++}
+        for(let i=1;i<=pdf.numPages&&pages<80;i++){const pg=await pdf.getPage(i),vp=pg.getViewport({scale:2}),c=document.createElement("canvas");c.width=vp.width;c.height=vp.height;await pg.render({canvasContext:c.getContext("2d"),viewport:vp,intent:"print"}).promise;c.className="pa-img";const w=document.createElement("div");w.className="pa-page";w.append(c);sec.append(w);pages++}
       }catch(e){console.warn("print pdf",e);failed++;continue}
     }else{skipped.push(d.name);continue}
     area.append(sec);
@@ -4497,9 +4586,9 @@ function phaseMats(id){
   if(!list.length)return `<div class="card">${empty("truck","No materials for this phase yet",`Add what you need for ${esc(PSHORT[id])}. Each phase keeps its own stock and order list, and the Materials page shows all of them together.`,canAdd?`<button class="btn primary" data-act="addmat" data-id="${id}" style="background:var(--green);color:#fff">${ic("plus")}Add material</button>`:"")}</div>`;
   const shown=list.filter(matFilterOk);
   const chips=[["all","All · "+list.length],["need","To order · "+toOrder(list).length],["ordered","Ordered · "+list.filter(m=>["ordered","part"].includes(mEff(m))).length],["got","Delivered · "+list.filter(m=>mEff(m)==="got").length]];
-  return `<div class="row between wr" style="margin:0 2px 10px;gap:8px"><span class="muted">${list.length} item${list.length===1?"":"s"} · ${ord.length} to order</span>${ord.length?`<button class="btn small" data-act="shareorder" data-id="${id}">${ic("chat","sm")}Send order list</button>`:""}</div>
+  return `<div class="row between wr" style="margin:0 2px 10px;gap:8px"><span class="muted">${list.length} item${list.length===1?"":"s"} · ${ord.length} to order</span>${ord.length?`<button class="btn small" data-act="shareorder" data-id="${id}">${ic("chat","sm")}Order by supplier</button>`:""}</div>
   <div class="chips scroll" role="group" aria-label="Filter" style="margin-bottom:10px">${chips.map(([k,l])=>`<button type="button" class="chip" data-sub="mat:${k}" aria-pressed="${matF===k}">${esc(l)}</button>`).join("")}</div>
-  ${SECS.map(([k,l])=>{const g=shown.filter(m=>secOf(m)===k).sort((a,b)=>a.name.localeCompare(b.name));return g.length?`<div class="eyebrow" style="margin:14px 2px 8px">${esc(l)} · ${g.length}</div><div class="card"><ul class="list">${g.map(m=>k==="stock"?stockRow(m):itemRow(m)).join("")}</ul></div>`:""}).join("")||`<div class="card"><p class="muted" style="margin:0">Nothing in this list.</p></div>`}`;
+  ${SECS.map(([k,l])=>{const g=shown.filter(m=>secOf(m)===k).sort((a,b)=>a.name.localeCompare(b.name));return g.length?`<div class="eyebrow" style="margin:14px 2px 8px">${esc(l)} · ${g.length}</div><div class="card"><ul class="list">${g.map(matRow).join("")}</ul></div>`:""}).join("")||`<div class="card"><p class="muted" style="margin:0">Nothing in this list.</p></div>`}`;
 }
 function phaseV(){
   const id=curPh,p=phase(id);if(!p){tab="build";return buildV()}
@@ -4517,6 +4606,137 @@ function phaseV(){
   ${ts.length&&d===ts.length?completeCard(ts):""}
   ${tabs}
   ${pt==="mats"?phaseMats(id):taskPart}`;
+}
+/* delivery note: a photo, the supplier, then tick what arrived. Ticked materials get Received and the note is filed under Documents */
+function dnoteSheet(){
+  if(lvl("mats")<2){toast(AREA_MSG("mats"));return}
+  let file=null,sup="";const sel=new Map(),extra=[];
+  const onOrder=()=>S.mats.filter(m=>{const t=matTicks(m);return t.ord&&!t.rec});
+  const shown=()=>{const c=onOrder().filter(m=>!sup||m.sup===sup||!m.sup),ids=new Set(c.map(m=>m.id));sel.forEach((q,id)=>{if(!ids.has(id)){const m=S.mats.find(x=>x.id===id);if(m){c.push(m);ids.add(id)}}});return c.sort((a,b)=>((b.sup===sup&&!!sup)-(a.sup===sup&&!!sup))||a.name.localeCompare(b.name))};
+  const qv=v=>v===""||v==null?"":String(v);
+  const draw=sh=>{
+    const L=shown(),ids=new Set(L.map(m=>m.id)),rest=S.mats.filter(m=>!ids.has(m.id)).sort((a,b)=>a.name.localeCompare(b.name));
+    sh.querySelector("#dnl").innerHTML=(L.length?`<ul class="list">${L.map(m=>{const on=sel.has(m.id);return `<li class="dnl"><button type="button" class="mtk" data-pick="${m.id}" aria-pressed="${on}" aria-label="${esc(m.name)}${on?", ticked":""}"><span class="mtc">${on?ic("check","sm"):""}</span></button><div class="grow"><div class="lt">${esc(m.name)}</div><div class="ls">${esc([m.sup?supName(m.sup):"",m.qty>0?"ordered "+num(m.qty,2)+" "+m.unit:""].filter(Boolean).join(" · ")||"On order")}</div></div>${on?`<input class="t dnq" inputmode="decimal" data-q="${m.id}" value="${esc(qv(sel.get(m.id)))}" placeholder="0" aria-label="How many ${esc(m.name)} arrived"><span class="small muted dnu">${esc(m.unit)}</span>`:""}</li>`}).join("")}</ul>`:`<p class="muted small" style="margin:6px 0">Nothing is marked as ordered${sup?" from this supplier":""}. Add the materials below.</p>`)
+     +(extra.length?`<ul class="list">${extra.map((x,i)=>`<li class="dnl"><span class="row-ic">${ic("note","sm")}</span><div class="grow"><div class="lt">${esc(x.name)}</div><div class="ls">Not on the materials list</div></div><input class="t dnq" inputmode="decimal" data-xq="${i}" value="${esc(qv(x.qty))}" placeholder="0" aria-label="How many ${esc(x.name)} arrived"><button type="button" class="btn small icon" data-xr="${i}" aria-label="Remove ${esc(x.name)}">${ic("x","sm")}</button></li>`).join("")}</ul>`:"")
+     +`<label class="f" for="dadd">Add another material</label><select id="dadd" class="t sel"><option value="">Choose a material</option>${rest.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join("")}</select>
+     <label class="f" for="dx">Something not on the list</label><div class="row" style="gap:8px"><input id="dx" class="t grow" maxlength="80" placeholder="For example: Steel mesh"><button type="button" class="btn" id="dxa">Add</button></div>`;
+    sh.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{const id=b.dataset.pick;if(sel.has(id))sel.delete(id);else{const m=S.mats.find(x=>x.id===id);sel.set(id,m&&m.qty>0?m.qty:"")}draw(sh)});
+    sh.querySelectorAll("[data-q]").forEach(i=>i.oninput=()=>sel.set(i.dataset.q,i.value));
+    sh.querySelectorAll("[data-xq]").forEach(i=>i.oninput=()=>{extra[+i.dataset.xq].qty=i.value});
+    sh.querySelectorAll("[data-xr]").forEach(b=>b.onclick=()=>{extra.splice(+b.dataset.xr,1);draw(sh)});
+    sh.querySelector("#dadd").onchange=e=>{const id=e.target.value;if(!id)return;const m=S.mats.find(x=>x.id===id);sel.set(id,m&&m.qty>0?m.qty:"");draw(sh)};
+    const dx=sh.querySelector("#dx"),addX=()=>{const v=dx.value.trim();if(!v)return;extra.push({name:v,qty:""});draw(sh)};
+    sh.querySelector("#dxa").onclick=addX;dx.onkeydown=e=>{if(e.key==="Enter"){e.preventDefault();addX()}};
+    const n=sel.size+extra.length;sh.querySelector("#dsv").textContent=n?`Save · ${n} item${n===1?"":"s"} received`:"Save delivery note";
+  };
+  sheet("Delivery note",`<form id="f" novalidate><p class="muted" style="margin:6px 0 0">Take a photo of the note, then tick what arrived.</p>
+  <div class="photo-add" style="margin-top:10px"><button type="button" class="btn primary" id="dnc">${ic("camera")}Take photo</button><button type="button" class="btn" id="dnp">${ic("image")}Choose photo</button></div>
+  <input type="file" id="dnci" accept="image/*" capture="environment" hidden><input type="file" id="dnpi" accept="image/*" hidden><div id="dnim"></div>
+  <label class="f" for="dsu">Supplier</label><select id="dsu" class="t sel"><option value="">Not sure</option>${S.sups.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(s=>`<option value="${s.id}">${esc(s.name)}</option>`).join("")}</select>
+  <label class="f" for="dno">Note number (optional)</label><input id="dno" class="t" maxlength="40" inputmode="text" placeholder="On the top of the note">
+  ${dateField("dt",today(),"Delivered on")}
+  <div class="eyebrow" style="margin:16px 0 4px">What arrived</div><div id="dnl"></div>
+  <div class="foot"><button class="btn primary block" id="dsv">Save delivery note</button></div></form>`,(sh,close)=>{
+    wireDc(sh);
+    const got=e=>{const f=e.target.files[0];if(!f)return;file=f;const u=URL.createObjectURL(f);sh.querySelector("#dnim").innerHTML=`<div class="dnim"><img src="${u}" alt="Delivery note photo"><span>${ic("check","sm")}Photo added</span></div>`;sh.querySelector("#dnc").classList.remove("primary")};
+    sh.querySelector("#dnci").onchange=got;sh.querySelector("#dnpi").onchange=got;
+    sh.querySelector("#dnc").onclick=()=>sh.querySelector("#dnci").click();sh.querySelector("#dnp").onclick=()=>sh.querySelector("#dnpi").click();
+    sh.querySelector("#dsu").onchange=e=>{sup=e.target.value;draw(sh)};
+    draw(sh);
+    sh.querySelector("#f").onsubmit=async e=>{
+      e.preventDefault();
+      if(!file){toast("Take a photo of the delivery note first.");return}
+      if(!sel.size&&!extra.length){toast("Tick at least one thing that arrived.");return}
+      const b=sh.querySelector("#dsv");b.disabled=true;
+      try{
+        const date=sh.querySelector("#dt").value||today(),no=sh.querySelector("#dno").value.trim();
+        const lines=[...[...sel].map(([id,q])=>{const m=S.mats.find(x=>x.id===id);return m?{mat:id,name:m.name,qty:parseAmt(q)||0,unit:m.unit}:null}).filter(Boolean),...extra.map(x=>({name:x.name,qty:parseAmt(x.qty)||0,unit:""}))];
+        const blob=await prepPhoto(file,PSIZES[psize][1]),mid="dc"+uid(),did=uid();await mPut(mid,blob);queueMedia(mid);
+        const d={id:did,name:"Delivery note"+(no?" "+no:"")+(sup?" · "+supName(sup):""),type:"delivery",date,phase:"",sup,note:lines.map(l=>dnQty(l)+l.name).join(", "),media:mid,fn:"delivery-note.jpg",mime:"image/jpeg",size:blob.size,who:me,lines,dno:no};
+        S.docs.push(d);
+        const us=lines.filter(l=>l.mat).map(l=>{const m=S.mats.find(x=>x.id===l.mat);return hasMoves(m)?undoEdit(m,{moves:[...(m.moves||[]),{id:uid(),t:"in",qty:l.qty,date,note:no,who:me,doc:did}],rcv:undefined}):undoEdit(m,{status:"got",ordOn:m.ordOn||date,recOn:date})});
+        const rc=lines.filter(l=>l.mat&&matTicks(S.mats.find(x=>x.id===l.mat)).rec).length,part=us.length-rc;logAct(`Delivery note${no?" "+no:""}${sup?" from "+supName(sup):""}: ${lines.length} item${lines.length===1?"":"s"}`);
+        save();close();render();
+        toast(`Delivery note saved.${rc?` ${rc} material${rc===1?"":"s"} marked received.`:""}${part?` ${part} part deliver${part===1?"y":"ies"} recorded.`:""}`,()=>{us.forEach(u=>u());const i=S.docs.indexOf(d);if(i>=0)S.docs.splice(i,1)});
+      }catch(err){console.warn(err);toast("Could not save the note. Try again.")}finally{b.disabled=false}
+    };
+  });
+}
+/* every delivery note, sorted by supplier, material or week, and easy to share */
+const dnLines=d=>d.lines||S.mats.flatMap(m=>(m.moves||[]).filter(x=>x.doc===d.id).map(x=>({mat:m.id,name:m.name,qty:x.qty,unit:m.unit})));
+const dnQty=l=>l.qty?(num(l.qty,2)+" "+(l.unit||"")).trim()+" ":"";
+const dnLine=l=>`- ${dnQty(l)}${l.name}`;
+const dnText=d=>`*Delivery note${d.dno?" "+d.dno:""}*\n${[d.sup?supName(d.sup):"",dshort(d.date)].filter(Boolean).join(" · ")}\n\n`+(dnLines(d).map(dnLine).join("\n")||"(see the photo)");
+const dnMon=iso=>{const t=new Date(iso+"T12:00");t.setDate(t.getDate()-((t.getDay()+6)%7));return iso_(t)};
+const iso_=t=>t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0");
+async function dnShare(docs,text){
+  const files=[];
+  for(const d of docs.slice(0,10)){try{const bl=d.media&&await mGet(d.media);if(bl)files.push(new File([bl],"delivery-note-"+(d.dno||d.date)+".jpg",{type:bl.type||"image/jpeg"}))}catch{}}
+  if(files.length&&navigator.canShare&&navigator.canShare({files})){try{await navigator.share({files,text});return}catch(e){if(e?.name==="AbortError")return}}
+  shareText(text);
+}
+function deliveriesSheet(by){
+  by=by||lsGet("b3-dnby")||"sup";
+  const docs=S.docs.filter(d=>d.type==="delivery"&&docVisible(d)).sort((a,b)=>(b.date||"").localeCompare(a.date||"")||(b.id>a.id?1:-1));
+  const row=d=>{const L=dnLines(d);return `<li class="tap" tabindex="0" data-doc="${d.id}"><span class="row-ic">${ic("truck")}</span><div class="grow"><div class="lt">${esc([dshort(d.date),d.sup?supName(d.sup):"",d.dno?"No. "+d.dno:""].filter(Boolean).join(" · "))}</div><div class="ls">${esc(L.length?L.map(l=>dnQty(l)+l.name).join(", "):"Photo only")}</div></div><button type="button" class="btn small icon" data-sh="${d.id}" aria-label="Share this delivery note">${ic("share")}</button></li>`};
+  let body="";
+  if(!docs.length)body=`<p class="muted" style="margin:10px 0">No delivery notes yet. Tap Scan a delivery note when the next truck arrives.</p>`;
+  else if(by==="mat"){
+    const tot=new Map();docs.forEach(d=>dnLines(d).forEach(l=>{const k=l.name+"|"+(l.unit||"");const t=tot.get(k)||{name:l.name,unit:l.unit||"",qty:0,n:0,docs:[]};t.qty+=+l.qty||0;t.n++;t.docs.push(d);tot.set(k,t)}));
+    body=[...tot.values()].sort((a,b)=>a.name.localeCompare(b.name)).map(t=>`<div class="dng"><div class="row between" style="gap:8px;align-items:baseline"><h3>${esc(t.name)}</h3><span class="small muted">${t.qty?num(t.qty,2)+" "+esc(t.unit)+" · ":""}${t.n} note${t.n===1?"":"s"}</span></div><ul class="list">${[...new Set(t.docs)].map(row).join("")}</ul></div>`).join("")||`<p class="muted small">These notes have no materials ticked.</p>`;
+  }else{
+    const g=new Map();docs.forEach(d=>{const k=by==="week"?dnMon(d.date||today()):(d.sup?supName(d.sup):"");(g.get(k)||g.set(k,[]).get(k)).push(d)});
+    const keys=[...g.keys()].sort((a,b)=>by==="week"?b.localeCompare(a):(a?0:1)-(b?0:1)||a.localeCompare(b));
+    body=keys.map(k=>`<div class="dng"><div class="row between" style="gap:8px;align-items:baseline"><h3>${by==="week"?"Week of "+dshort(k):esc(k||"No supplier")}</h3><span class="small muted">${g.get(k).length} note${g.get(k).length===1?"":"s"}</span></div><ul class="list">${g.get(k).map(row).join("")}</ul></div>`).join("");
+  }
+  sheet("Delivery notes",`<div class="segc" role="group" aria-label="Sort by" style="margin:8px 0 10px">${[["sup","Supplier"],["mat","Material"],["week","Week"]].map(([k,l])=>`<button type="button" data-by="${k}" aria-pressed="${by===k}">${l}</button>`).join("")}</div>
+  ${body}
+  <div class="foot">${lvl("mats")>=2?`<button type="button" class="btn primary block" id="dnew">${ic("camera")}Scan a delivery note</button>`:""}${docs.length?`<button type="button" class="btn block" id="dwk" style="margin-top:8px">${ic("share")}Share this week's deliveries</button>`:""}</div>`,(sh,close)=>{
+    sh.querySelectorAll("[data-by]").forEach(b=>b.onclick=()=>{lsSet("b3-dnby",b.dataset.by);close();setTimeout(()=>deliveriesSheet(b.dataset.by),80)});
+    sh.querySelectorAll("li[data-doc]").forEach(li=>li.addEventListener("click",e=>{if(e.target.closest("[data-sh]"))return;const id=li.dataset.doc;close();setTimeout(()=>docView(id),80)}));
+    sh.querySelectorAll("[data-sh]").forEach(b=>b.onclick=()=>{const d=S.docs.find(x=>x.id===b.dataset.sh);if(d)dnShare([d],dnText(d))});
+    sh.querySelector("#dnew")?.addEventListener("click",()=>{close();setTimeout(dnoteSheet,80)});
+    sh.querySelector("#dwk")?.addEventListener("click",()=>{
+      const from=addDays(today(),-6),wk=docs.filter(d=>(d.date||"")>=from);
+      if(!wk.length){toast("No delivery notes in the last 7 days.");return}
+      const tot=new Map();wk.forEach(d=>dnLines(d).forEach(l=>{const k=l.name+"|"+(l.unit||"");const t=tot.get(k)||{name:l.name,unit:l.unit||"",qty:0};t.qty+=+l.qty||0;tot.set(k,t)}));
+      const tx=`*${S.settings.name||"Classrooms"}: deliveries ${dshort(from)} to ${dshort(today())}*\n${wk.length} delivery note${wk.length===1?"":"s"}\n\n*Totals*\n`+([...tot.values()].map(dnLine).join("\n")||"-")+"\n\n*Notes*\n"+wk.map(d=>`${dshort(d.date)}${d.sup?" · "+supName(d.sup):""}${d.dno?" · No. "+d.dno:""}`).join("\n");
+      dnShare(wk,tx);
+    });
+  });
+}
+/* Build home: the next tasks given to me, ticked off in one tap */
+function myWorkCard(){
+  if(!sm.code||lvl("tasks")<1)return "";
+  const td=today(),mine=S.tasks.filter(t=>t.status!=="done"&&asgHas(t,sm.pid));if(!mine.length)return "";
+  const sorted=mine.slice().sort((a,b)=>((a.due&&a.due<td?0:1)-(b.due&&b.due<td?0:1))||(a.status==="doing"?0:1)-(b.status==="doing"?0:1)||(a.due||"9999").localeCompare(b.due||"9999")||(a.order??0)-(b.order??0));
+  const seen=new Set(),rows=[];
+  sorted.forEach(t=>{const sib=S.tasks.filter(x=>x.key===t.key),merged=sib.length>1&&sib.every(x=>x.status===t.status&&(x.assignee||"")===(t.assignee||"")&&x.due===t.due);if(merged){if(seen.has(t.key))return;seen.add(t.key)}rows.push({t,merged,sib})});
+  const row=({t,merged,sib})=>{const od=t.due&&t.due<td,meta=[merged||t.room==="shared"?"":roomName(t.room),PSHORT[t.phase]||"",t.due?(t.due===td?"Today":(od?"Overdue ":"Due ")+dshort(t.due)):"",t.status==="check"?"Waiting for a check":""].filter(Boolean).join(" · ");
+    const tick=merged?`<button class="st ${t.status}" data-act="cycboth" data-id="${t.id}" data-ids="${sib.map(x=>x.id).join(",")}" aria-label="${esc(t.title)}, both classrooms: ${stLabel(t.status)}. Tap to tick done or undo.">${stIcon(t.status)||ic("check")}</button>`:`<button class="st ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${esc(t.title)}: ${stLabel(t.status)}. Tap to tick done or undo.">${stIcon(t.status)||ic("check")}</button>`;
+    return `<li>${tick}<div class="grow tap" tabindex="0" data-act="opentask" data-id="${t.key}|${t.room}"><div class="lt">${esc(t.title)}</div>${meta?`<div class="ls ${od||t.status==="stuck"?"bad":""}">${esc(meta)}</div>`:""}</div></li>`};
+  return `<section class="card mywork" aria-label="Your work"><div class="row between" style="align-items:center"><div class="eyebrow" style="margin:0">Your work</div><button type="button" class="linkbtn" data-act="gotasks" data-id="me">${rows.length>3?"See all "+rows.length:"See all"}</button></div><ul class="list">${rows.slice(0,3).map(row).join("")}</ul></section>`;
+}
+/* materials to order, one group per supplier, each sent to that supplier on WhatsApp */
+function orderSheet(ph){
+  ph=ph&&ph!=="all"&&ph!=="none"&&phase(ph)?ph:"";
+  const items=toOrder(S.mats).filter(m=>!ph||m.phase===ph);
+  if(!items.length){toast("Nothing to order right now.");return}
+  const can=lvl("mats")>=2,by=new Map();
+  items.forEach(m=>{const k=m.sup&&S.sups.some(s=>s.id===m.sup)?m.sup:"";(by.get(k)||by.set(k,[]).get(k)).push(m)});
+  const groups=[...by.entries()].sort((a,b)=>(a[0]?0:1)-(b[0]?0:1)||supName(a[0]).localeCompare(supName(b[0])));
+  const line=m=>`- ${m.qty>0?num(m.qty,2)+" "+m.unit+" ":""}${m.name}${m.due?` (by ${dshort(m.due)})`:""}`;
+  const msg=(sp,ms)=>`*${S.settings.name||"Classrooms"}: order${sp?" for "+sp.name:""}*\n\n`+ms.map(line).join("\n")+"\n\nPlease confirm the price and delivery date. Thank you.";
+  sheet("To order by supplier",`<p class="muted" style="margin:6px 0 4px">${items.length} item${items.length===1?"":"s"}${ph?" for "+esc(PSHORT[ph]):""}. Send each supplier their own list, then mark it ordered.</p>
+  ${groups.map(([k,ms],gi)=>{const sp=S.sups.find(s=>s.id===k);return `<div class="ogrp"><div class="row between" style="align-items:baseline;gap:8px"><h3 style="margin:0">${sp?esc(sp.name):"No supplier chosen"}</h3><span class="small muted">${ms.length} item${ms.length===1?"":"s"}</span></div>${sp?`<p class="small muted" style="margin:2px 0 0">${esc([sp.trade,sp.phone].filter(Boolean).join(" · ")||"No number saved")}</p>`:`<p class="small muted" style="margin:2px 0 0">Tap an item to choose its supplier.</p>`}
+   <ul class="list">${ms.map(m=>`<li class="tap" tabindex="0" data-mi="${m.id}"><div class="grow"><div class="lt">${esc(m.name)}</div><div class="ls">${m.qty>0?num(m.qty,2)+" "+esc(m.unit):"Set how many"}${m.due?" · need by "+dshort(m.due):""}</div></div>${ic("chev","sm")}</li>`).join("")}</ul>
+   <div class="row" style="gap:8px;margin-top:8px"><button type="button" class="btn small primary grow" data-send="${gi}">${ic("chat","sm")}${sp?.phone?"Send to "+esc(sp.name.split(" ")[0]):"Share list"}</button>${can?`<button type="button" class="btn small grow" data-ord="${gi}">${ic("check","sm")}Mark ordered</button>`:""}</div></div>`}).join("")}
+  <div class="foot"><button type="button" class="btn block" id="oall">${ic("share")}Share the whole list</button></div>`,(sh,close)=>{
+    sh.querySelectorAll("[data-mi]").forEach(li=>li.addEventListener("click",()=>{const id=li.dataset.mi;close();setTimeout(()=>matSheet(id),80)}));
+    sh.querySelectorAll("[data-send]").forEach(b=>b.onclick=()=>{const[k,ms]=groups[+b.dataset.send],sp=S.sups.find(s=>s.id===k),tx=msg(sp,ms);if(sp?.phone)window.open(waUrl(sp.phone,tx),"_blank","noopener");else shareText(tx)});
+    sh.querySelectorAll("[data-ord]").forEach(b=>b.onclick=()=>{const[k,ms]=groups[+b.dataset.ord],us=ms.map(m=>undoEdit(m,{status:"ordered",ordOn:m.ordOn||today(),recOn:"",...(hasMoves(m)?{rcv:false}:{})}));save();close();render();toast(`${ms.length} item${ms.length===1?"":"s"} marked ordered${k?" from "+supName(k):""}.`,()=>us.forEach(u=>u()))});
+    sh.querySelector("#oall").onclick=()=>shareOrder(ph||"all");
+  });
 }
 function shareOrder(ph){
   ph=ph==="all"?"":ph;
@@ -4819,6 +5039,10 @@ async function pupdInit(){
   const urls=[];for(const m of PU.ids){const u=await mUrl(m);if(u)urls.push([m,u])}
   if(!ta.isConnected)return;
   document.getElementById("pup").innerHTML=PU.ids.length?`<div class="pu-rows">${urls.map(([m,u],i)=>`<div class="pu-r"><div class="pu-t">${isVid(m)?`<video src="${u}#t=0.1" muted playsinline preload="metadata"></video><span class="pu-vb" aria-hidden="true"></span>`:`<img src="${u}" alt="Photo ${i+1}">`}<span class="pu-n">${i+1}</span><button type="button" class="pu-x" data-pr="${m}" aria-label="Remove photo ${i+1}">${ic("x","sm")}</button></div><div class="pu-cw"><textarea class="t pu-ci" rows="1" maxlength="140" data-cap="${m}" placeholder="Add a caption" aria-label="Caption for photo ${i+1}">${esc(PU.caps[m]||"")}</textarea><span class="pu-cc" aria-hidden="true"></span></div>${urls.length>1?`<div class="pu-mvs"><button type="button" class="pu-mv" data-pm="${m}|-1" aria-label="Move photo ${i+1} earlier" ${i===0?"disabled":""}>${ic("up","sm")}</button><button type="button" class="pu-mv" data-pm="${m}|1" aria-label="Move photo ${i+1} later" ${i===urls.length-1?"disabled":""}>${ic("down","sm")}</button></div>`:""}</div>`).join("")}</div>`:`<p class="muted small" style="margin:0 0 10px">No photos or clips yet. Choose up to 5.</p>`;
+  const pup=document.getElementById("pup");
+  pup.onclick=e=>{const x=e.target.closest("[data-pr]");if(x){PU.ids=PU.ids.filter(m=>m!==x.dataset.pr);puSave();render();return}const b=e.target.closest("[data-pm]");if(b){const[m,d]=b.dataset.pm.split("|"),i=PU.ids.indexOf(m),j=i+(+d);if(i<0||j<0||j>=PU.ids.length)return;[PU.ids[i],PU.ids[j]]=[PU.ids[j],PU.ids[i]];puSave();render()}};
+  {const nb=document.getElementById("punew");if(nb)nb.onclick=()=>puDone()}
+  try{
   const pv=document.getElementById("pupv");
   pv.innerHTML=`<div class="pu-m" id="pumsg"></div>${urls.length?`<div id="pust">${storyHTML(urls.map(x=>x[1]),urls.map(x=>PU.caps[x[0]]||""),PU.logo,urls.map(x=>isVid(x[0])))}</div>`:`<p class="muted small" style="margin:0">Your photos show here, one under the other.</p>`}`;
   const pm=pv.querySelector("#pumsg"),sync=()=>{pm.textContent=ta.value.trim();pm.hidden=!ta.value.trim()};sync();
@@ -4852,7 +5076,6 @@ async function pupdInit(){
   if(cf){document.getElementById("pucam").onclick=()=>{if(PU.ids.length>=5){toast("Five items at most. Remove one first.");return}cf.click()};cf.onchange=()=>{addFiles(cf.files);cf.value=""}}
   const vf=document.getElementById("pucvf");if(vf)vf.onchange=()=>{addFiles(vf.files);vf.value=""};
   const vb=document.getElementById("puvid");if(vb)vb.onclick=()=>puRecord();
-  const nb=document.getElementById("punew");if(nb)nb.onclick=()=>puDone();
   const lgb=document.getElementById("pulg");if(lgb)lgb.onclick=()=>{PU.logo=!PU.logo;lsSet("b3-pu-logo",PU.logo?"1":"0");render()};
   const mic=document.getElementById("pumic");
   if(mic&&SPEECH){
@@ -4873,7 +5096,6 @@ async function pupdInit(){
     };
     mic.onclick=()=>{if(want){want=false;try{rec&&rec.stop()}catch{}return}want=true;fast=0;mic.classList.add("on");mic.setAttribute("aria-pressed","true");lab.textContent="Listening… tap to stop";buzz(10);begin()};
   }
-  document.querySelectorAll("[data-pm]").forEach(b=>b.onclick=()=>{const[m,d]=b.dataset.pm.split("|"),i=PU.ids.indexOf(m),j=i+(+d);if(i<0||j<0||j>=PU.ids.length)return;[PU.ids[i],PU.ids[j]]=[PU.ids[j],PU.ids[i]];puSave();render()});
   const wkb=document.getElementById("puwk");
   if(wkb)wkb.onclick=async()=>{
     wkb.disabled=true;
@@ -4889,7 +5111,7 @@ async function pupdInit(){
       toast(pick.length+" photo"+(pick.length===1?"":"s")+" from this week.",()=>{PU.ids=old;puSave();render()});
     }finally{wkb.disabled=false}
   };
-  document.querySelectorAll("[data-pr]").forEach(b=>b.onclick=()=>{PU.ids=PU.ids.filter(x=>x!==b.dataset.pr);puSave();render()});
+  }catch(e){console.warn("photo update",e)}
 }
 async function puPick(){
   const pics=allPhotos().filter(p=>p.ph!=="_diary").sort((a,b)=>b.date.localeCompare(a.date)).slice(0,90),ok=[];
@@ -4918,14 +5140,15 @@ function puShareSheet(){
       sh.querySelectorAll("#so .topt").forEach(b=>b.onclick=()=>{kind=b.dataset.k;draw()});
       sh.querySelectorAll("#sd [data-d]").forEach(b=>{b.setAttribute("aria-pressed",+b.dataset.d===days);b.onclick=()=>{days=+b.dataset.d;draw()}});
     };
+    const ask=()=>{const st=sh.querySelector("#sst");st.innerHTML=`<span style="display:block;margin-bottom:8px">Did it send?</span><span class="row" style="gap:8px"><button type="button" class="btn small primary grow" id="ssy">Yes, clear it</button><button type="button" class="btn small grow" id="ssn">Not yet</button></span>`;st.querySelector("#ssy").onclick=()=>{close();puDone("Cleared. Ready for a new update.")};st.querySelector("#ssn").onclick=()=>say("")};
     const make=async()=>{say("Making your link…");try{const j=await shareApi({action:"create",kind:"photos",days,msg:PU.msg.trim(),media:PU.ids,caps:PU.ids.map(m=>(PU.caps[m]||"").trim()),logo:PU.logo});say("");return shareUrl(j.token)}catch(e){say(/photos/.test(e.message)?"Your photos are still uploading to the team. Try again in a minute.":/access/.test(e.message)?"You need report access to share. Ask the Project Lead.":"Could not make the link. Check your connection and try again.");return null}};
     sh.querySelector("#ssend").onclick=async()=>{
       const b=sh.querySelector("#ssend");b.disabled=true;
       try{
-        if(kind==="link"){const u=await make();if(u){const ok=await shareText((PU.msg.trim()||"Photo update")+"\n\n"+u);if(ok){close();puDone("Sent. Ready for a new update.")}}return}
+        if(kind==="link"){const u=await make();if(u){const ok=await shareText((PU.msg.trim()||"Photo update")+"\n\n"+u);if(ok){close();puDone("Sent. Ready for a new update.")}else ask()}return}
         say("Getting your photos ready…");const files=[];
         for(const[i,m]of PU.ids.entries()){const bl=await mGet(m);if(!bl)continue;if(/^video\//.test(bl.type)){files.push(new File([bl],"site-clip-"+(i+1)+vExt(bl.type),{type:bl.type}))}else{const out=PU.logo?await stampPhoto(bl):bl;files.push(new File([out],"site-photo-"+(i+1)+".jpg",{type:out.type||"image/jpeg"}))}}
-        if(files.length&&navigator.canShare&&navigator.canShare({files})){try{await navigator.share({files,text:PU.msg.trim()});say("");close();puDone("Sent. Ready for a new update.")}catch(e){if(e?.name==="AbortError")say("");else say("Could not send the photos. Try Share a link.")}}
+        if(files.length&&navigator.canShare&&navigator.canShare({files})){try{await navigator.share({files,text:PU.msg.trim()});say("");close();puDone("Sent. Ready for a new update.")}catch(e){if(e?.name==="AbortError")ask();else say("Could not send the photos. Try Share a link.")}}
         else{say("This phone cannot send photos from here. Use Share a link, or send the message only.");if(PU.msg.trim())shareText(PU.msg.trim())}
       }finally{b.disabled=false}
     };
@@ -4953,7 +5176,7 @@ function weekV(){
 }
 function reportV(){
   const all=G(BT()),d=doneN(all),p=pct(d,all.length),td=today(),D=x=>new Date(x+"T12:00").getTime(),st=S.settings.start,en=S.settings.target;
-  const left=en?Math.ceil((D(en)-D(td))/864e5):null,f=forecast(),canM=lvl("money")>=1;
+  const left=en?workDays(td,en):null,f=forecast(),canM=lvl("money")>=1;
   /* the headline */
   let head="Set your dates",vc="var(--sky)",ico="calendar",line=`${d} of ${all.length} tasks done (${p}%).`;
   if(st&&en&&all.length){
@@ -4961,7 +5184,7 @@ function reportV(){
     if(t<a){const n=Math.round((a-t)/864e5);head="Not started yet";vc="var(--sky)";ico="clock";line=`Work starts in ${n} day${n===1?"":"s"}.`}
     else{const plan=Math.min(1,(t-a)/Math.max(1,b-a)),gap=Math.round((plan-d/all.length)*100);
       if(gap<=5){head="On track";vc="var(--green)";ico="check"}else if(gap<=15){head=gap+"% behind plan";vc="var(--accent)";ico="alert"}else{head=gap+"% behind plan";vc="var(--red)";ico="alert"}
-      line=`${d} of ${all.length} tasks done (${p}%). ${left>=0?left+" day"+(left===1?"":"s")+" to the target.":-left+" day"+(left===-1?"":"s")+" past the target."}`}
+      line=`${d} of ${all.length} tasks done (${p}%). ${left>=0?left+" working day"+(left===1?"":"s")+" to the target.":-left+" working day"+(left===-1?"":"s")+" past the target."}`}
   }
   const fcTxt=f&&!f.none?(f.late>3?` At this pace it finishes about ${dlong(f.date)}, ${f.late} days late.`:f.late<-3?` At this pace it finishes about ${dlong(f.date)}, ${-f.late} days early.`:` At this pace it finishes around ${dlong(f.date)}, on time.`):"";
   const open=S.tasks.filter(t=>t.status!=="done"),issues=S.logs.filter(l=>l.kind==="issue"&&!l.fixed);
