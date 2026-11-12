@@ -1,0 +1,17 @@
+﻿{
+  "name": "Newberry Coop Diary",
+  "short_name": "Coop Diary",
+  "description": "A daily photo diary of the hens, shared on WhatsApp.",
+  "start_url": "./newberry-coop.html",
+  "id": "./newberry-coop.html",
+  "scope": "./newberry-coop.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#fbf6ec",
+  "theme_color": "#1d6b33",
+  "icons": [
+    { "src": "icons/flock-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/flock-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/flock-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
