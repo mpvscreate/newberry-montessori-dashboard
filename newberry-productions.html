@@ -1556,7 +1556,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: when a newer version is on the server the app refreshes itself (clearing old cached copies), unless someone is in the middle of something; then it offers a one-tap refresh */
-const APP_VER="6.27.2";
+const APP_VER="6.27.3";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function applyUpdate(){try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}
@@ -2968,6 +2968,7 @@ let VW=null;
 function closeViewer(){if(!VW)return;const v=VW;VW=null;clearTimeout(v.timer);document.removeEventListener("keydown",v.key);document.removeEventListener("visibilitychange",v.vis);try{ovPop("viewer")}catch{}v.root.remove();if(!document.querySelector(".scrim,.ed"))document.body.classList.remove("noscroll")}
 function openViewer(list,start,auto,reel){
   if(!list.length){toast("No photos or videos yet.");return}
+  if(!reel){const ps=new Set(list.map(x=>x.p&&x.p.id)),p0=list[0].p;reel=(ps.size===1&&p0)?{key:p0.id,base:()=>storyMediaList(p0),get:()=>reelList(p0.id,storyMediaList(p0)),title:p0.name+" slideshow"}:weekReel()}
   closeViewer();
   let i=Math.max(0,Math.min(start||0,list.length-1)),playing=!!auto;
   const root=document.createElement("div");root.className="vw";root.setAttribute("role","dialog");root.setAttribute("aria-modal","true");root.setAttribute("aria-label","Photos and videos");
