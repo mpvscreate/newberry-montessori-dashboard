@@ -3039,21 +3039,26 @@ async function slideshowVideo(items){
   const done=()=>{root.remove();if(!document.querySelector(".scrim,.ed,.vw"))document.body.classList.remove("noscroll")};
   root.querySelector("#vx-c").onclick=()=>{cancel=true};
   try{
-    const W=1280,H=720,SL=3500,FD=500,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
+    let W=1280,H=720;const SL=3500,FD=500,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
     const imgs=[];for(const it of items){const u=await stillUrl(it.m.id);const im=u&&await loadImgEl(u);if(im)imgs.push({im,cap:it.cap||""})}
     if(!imgs.length)throw new Error("none");
+    {const up=imgs.filter(x=>x.im.height>x.im.width).length;if(up>imgs.length/2){W=720;H=1280}c.width=W;c.height=H}
     const title=items[0].p?items[0].p.name:"Our story";
     const types=["video/mp4;codecs=avc1.42E01E","video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"],mime=types.find(t=>MediaRecorder.isTypeSupported(t))||"";
     const stream=c.captureStream(30),rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:3500000}:undefined),chunks=[];
     rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
     const fin=new Promise(res=>rec.onstop=res);
     const slides=[{title},...imgs,{end:true}],total=slides.length*SL;
-    const fit=(im,sc)=>{const k=Math.max(W/im.width,H/im.height)*sc,dw=im.width*k,dh=im.height*k;g.drawImage(im,(W-dw)/2,(H-dh)/2,dw,dh)};
+    const bgc=document.createElement("canvas"),bg=bgc.getContext("2d");
+    const fit=(im,sc)=>{
+      bgc.width=32;bgc.height=Math.max(2,Math.round(32*H/W));const kc=Math.max(bgc.width/im.width,bgc.height/im.height);bg.drawImage(im,(bgc.width-im.width*kc)/2,(bgc.height-im.height*kc)/2,im.width*kc,im.height*kc);
+      g.imageSmoothingEnabled=true;g.imageSmoothingQuality="high";g.drawImage(bgc,0,0,W,H);g.fillStyle="rgba(0,0,0,.38)";g.fillRect(0,0,W,H);
+      const k=Math.min(W/im.width,H/im.height)*sc,dw=im.width*k,dh=im.height*k;g.drawImage(im,(W-dw)/2,(H-dh)/2,dw,dh)};
     const wrap=(t,x,y,mw,lh)=>{const w=t.split(/\s+/);let line="",yy=y;for(const word of w){const test=line?line+" "+word:word;if(g.measureText(test).width>mw&&line){g.fillText(line,x,yy);yy+=lh;line=word}else line=test}g.fillText(line,x,yy)};
     const draw=(s,p0,alpha)=>{
       g.globalAlpha=alpha;
       if(s.title||s.end){g.fillStyle=s.end?"#0b2a22":"#a65608";g.fillRect(0,0,W,H);g.fillStyle="#fff";g.textAlign="center";g.font='700 84px "Bricolage Grotesque",system-ui,sans-serif';g.fillText(s.title||"Thank you for watching",W/2,H/2);g.font='500 36px "Instrument Sans",system-ui,sans-serif';g.globalAlpha=alpha*.85;g.fillText(s.end?"Newberry House Middle School":"Newberry House Middle School · Production teams",W/2,H/2+70);g.textAlign="left"}
-      else{g.fillStyle="#000";g.fillRect(0,0,W,H);fit(s.im,1+.07*p0);const gr=g.createLinearGradient(0,H-260,0,H);gr.addColorStop(0,"rgba(0,0,0,0)");gr.addColorStop(1,"rgba(0,0,0,.72)");g.fillStyle=gr;g.fillRect(0,H-260,W,260);
+      else{g.fillStyle="#000";g.fillRect(0,0,W,H);fit(s.im,.94+.06*p0);const gr=g.createLinearGradient(0,H-260,0,H);gr.addColorStop(0,"rgba(0,0,0,0)");gr.addColorStop(1,"rgba(0,0,0,.72)");g.fillStyle=gr;g.fillRect(0,H-260,W,260);
         if(s.cap){g.fillStyle="#fff";g.font='500 40px "Instrument Sans",system-ui,sans-serif';wrap(s.cap.slice(0,160),60,H-120,W-120,52)}}
       g.globalAlpha=1;
     };
