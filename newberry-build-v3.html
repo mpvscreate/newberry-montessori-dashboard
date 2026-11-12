@@ -772,7 +772,7 @@ header.top .sync,.sync{font-size:.8rem!important}
 <a class="skip" href="#view">Skip to content</a>
 <div class="wrap" id="app">
   <header class="top"><img src="newberry-house-logo.webp" alt="" onerror="this.style.display='none'"><div class="grow"><h1 id="pname">MS 2 Project</h1><div class="small muted"><span id="today"></span><span class="sep"> · </span><button class="sync" id="sync" type="button" aria-label="Sharing and sync status"></button></div></div>
-    <button class="iconbtn" id="bell" type="button" hidden aria-label="Updates"></button><button class="iconbtn" id="themebtn" type="button"></button></header>
+    <button class="iconbtn" id="srchbtn" type="button" aria-label="Search"><svg class="i" aria-hidden="true" focusable="false"><use href="#i-search"/></svg></button><button class="iconbtn" id="bell" type="button" hidden aria-label="Updates"></button><button class="iconbtn" id="themebtn" type="button"></button></header>
   <main id="view" tabindex="-1"></main>
 </div>
 <nav class="tabs" aria-label="Main"></nav>
@@ -813,7 +813,7 @@ share:'<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle c
 camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
 copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',
 chat:'<path d="M4 20l1.4-4.2A8 8 0 1112 20a8 8 0 01-4-1.1z"/><path d="M9 10.5c0 2.5 2 4.5 4.5 4.5l1.2-1.2-1.6-1-.8.6a3 3 0 01-1.6-1.6l.6-.8-1-1.6z"/>',
-rain:'<path d="M7 15a4.5 4.5 0 01-.6-9A6 6 0 0118 8.5 3.8 3.8 0 0117 15zM8 18l-1 3M12 18l-1 3M16 18l-1 3"/>',wind:'<path d="M3 9h11a3 3 0 10-3-3M3 14h15a3 3 0 11-3 3M3 19h7"/>',print:'<path d="M7 9V4h10v5M7 17H5v-6h14v6h-2M7 14h10v6H7z"/>',bell:'<path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15zM10 21h4"/>',cloud:'<path d="M7 18a4.5 4.5 0 01-.6-9A6 6 0 0118 10.5 3.8 3.8 0 0117.5 18z"/>',
+rain:'<path d="M7 15a4.5 4.5 0 01-.6-9A6 6 0 0118 8.5 3.8 3.8 0 0117 15zM8 18l-1 3M12 18l-1 3M16 18l-1 3"/>',wind:'<path d="M3 9h11a3 3 0 10-3-3M3 14h15a3 3 0 11-3 3M3 19h7"/>',print:'<path d="M7 9V4h10v5M7 17H5v-6h14v6h-2M7 14h10v6H7z"/>',bell:'<path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15zM10 21h4"/>',search:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',cloud:'<path d="M7 18a4.5 4.5 0 01-.6-9A6 6 0 0118 10.5 3.8 3.8 0 0117.5 18z"/>',
 cloudoff:'<path d="M3 3l18 18"/><path d="M7 18a4.5 4.5 0 01-.6-9 6 6 0 011.7-2.7M11 5.2A6 6 0 0118 10.5a3.8 3.8 0 011.8 6.2"/><path d="M10 18h7.5"/>',
 logout:'<path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/>',
 leaf:'<path d="M5 19c0-9 5-14 15-14 0 9-5 15-13 15"/><path d="M5 19l8-8"/>',
@@ -2342,6 +2342,7 @@ function setSync(s){
   const L={off:"Not shared yet",syncing:"Syncing…",ok:"Shared",offline:"Offline, saved here",retry:"Reconnecting…",error:"Sync problem",unavailable:"Sharing unavailable"};
   document.body.classList.toggle("sync-ok",s==="ok"||s==="syncing");e.className="sync "+(s==="off"?"":s);e.innerHTML=ic(s==="ok"||s==="syncing"?"cloud":"cloudoff")+L[s];
 }
+$("#srchbtn").onclick=()=>searchSheet();
 $("#sync").onclick=async()=>{if(sm.code&&!sm.off&&["error","retry","offline"].includes(syncState)){toast("Trying again…");syncFails=0;await syncNow();toast(syncState==="ok"?"Synced. Everything is shared.":syncState==="offline"?"No internet. Your changes are saved on this phone.":"Still cannot sync"+(lastErr?": "+String(lastErr).slice(0,80):".")+" Your changes are saved on this phone.");return}shareSheet()};
 async function push(){
   if(!sm.code||!sb||pushing)return;pushing=true;setSync("syncing");
@@ -4704,6 +4705,31 @@ function deliveriesSheet(by){
       const tx=`*${S.settings.name||"Classrooms"}: deliveries ${dshort(from)} to ${dshort(today())}*\n${wk.length} delivery note${wk.length===1?"":"s"}\n\n*Totals*\n`+([...tot.values()].map(dnLine).join("\n")||"-")+"\n\n*Notes*\n"+wk.map(d=>`${dshort(d.date)}${d.sup?" · "+supName(d.sup):""}${d.dno?" · No. "+d.dno:""}`).join("\n");
       dnShare(wk,tx);
     });
+  });
+}
+/* search everything this person can see: tasks, materials, contacts, quotes, documents and the site log */
+function searchSheet(){
+  const more=new Set();
+  sheet("Search",`<input id="sq" class="t" type="search" inputmode="search" enterkeyhint="search" autocomplete="off" placeholder="Tasks, materials, contacts, quotes…" aria-label="Search" data-autofocus value="${esc(lsGet("b3-sq"))}"><div id="sr" aria-live="polite"></div>`,(sh,close)=>{
+    const inp=sh.querySelector("#sq"),out=sh.querySelector("#sr"),low=x=>String(x||"").toLowerCase();let acts=[],tm=0;
+    const run=()=>{
+      const q=low(inp.value).trim();lsSet("b3-sq",inp.value);acts=[];
+      if(q.length<2){out.innerHTML=`<p class="muted small" style="margin:12px 2px">Type at least 2 letters. Try a product, a person, a supplier or a room.</p>`;return}
+      const words=q.split(/\s+/).filter(Boolean),hit=(...f)=>{const h=low(f.join(" "));return words.every(w=>h.includes(w))},G=[];
+      if(lvl("tasks")>=1){const seen=new Set(),L=[];S.tasks.forEach(t=>{if(seen.has(t.key||t.id))return;if(!hit(t.title,t.note,t.who,t.assignee?pName(t.assignee):"",PSHORT[t.phase],roomName(t.room)))return;seen.add(t.key||t.id);L.push({i:"check",t:t.title,s:[PSHORT[t.phase]||"",stLabel(t.status),t.due?(t.due<today()&&t.status!=="done"?"overdue ":"due ")+dshort(t.due):""].filter(Boolean).join(" · "),go:()=>taskSheet(t.key,t.room)})});if(L.length)G.push(["Tasks",L])}
+      if(lvl("mats")>=1){const L=S.mats.filter(m=>hit(m.name,m.unit,m.sup?supName(m.sup):"",PSHORT[m.phase])).sort((a,b)=>a.name.localeCompare(b.name)).map(m=>{const k=matTicks(m);return{i:"truck",t:m.name,s:[m.qty>0?num(m.qty,2)+" "+m.unit:"",k.rec?"Received":k.ord?"Ordered":"To order",m.sup?supName(m.sup):""].filter(Boolean).join(" · "),go:()=>{if(lvl("mats")>=2)matSheet(m.id);else{matSec=secOf(m);go("mats")}}}});if(L.length)G.push(["Materials",L])
+        const C=S.sups.filter(s=>hit(s.name,s.trade,s.phone,s.phone2)).sort((a,b)=>a.name.localeCompare(b.name)).map(s=>({i:"users",t:s.name,s:[s.trade,s.phone].filter(Boolean).join(" · "),go:()=>perm.manage?supSheet(s.id):contractorsSheet()}));if(C.length)G.push(["Contacts",C])}
+      if(canMoney()){const L=S.trades.filter(t=>hit(t.trade,tName(t),t.note)).map(t=>({i:"cash",t:tName(t),s:[t.trade,money0(tVal(t)),tStatLabel(t.status)].filter(Boolean).join(" · "),go:()=>moneyOK?tradeView(t.id):moneyGate(()=>tradeView(t.id),"quote")}));if(L.length)G.push(["Quotes",L])}
+      {const L=S.docs.filter(d=>docListed(d)&&hit(d.name,d.note,d.sup?supName(d.sup):"",dtype(d.type)[1],d.dno)).sort((a,b)=>(b.date||"").localeCompare(a.date||"")).map(d=>({i:dtype(d.type)[2],t:d.name,s:[dtype(d.type)[1],d.date?dshort(d.date):""].filter(Boolean).join(" · "),go:()=>docVisible(d)?docView(d.id):moneyGate(()=>docView(d.id),"document")}));if(L.length)G.push(["Documents",L])}
+      if(lvl("log")>=1){const L=S.logs.filter(l=>l.text&&hit(l.text,PSHORT[l.phase],l.who)).sort((a,b)=>(b.date||"").localeCompare(a.date||"")).map(l=>({i:l.kind==="issue"?"alert":"camera",t:l.text.length>70?l.text.slice(0,70)+"…":l.text,s:[l.kind==="issue"?"Snag":"Site log",dshort(l.date),PSHORT[l.phase]||""].filter(Boolean).join(" · "),go:()=>go(l.kind==="issue"?"snags":"site")}));if(L.length)G.push(["Site log and snags",L])}
+      if(!G.length){out.innerHTML=`<p class="muted" style="margin:14px 2px">Nothing found for “${esc(inp.value.trim())}”.</p>`;return}
+      out.innerHTML=G.map(([h,L])=>{const all=more.has(h),show=all?L:L.slice(0,5);return `<div class="eyebrow" style="margin:16px 2px 4px">${esc(h)} · ${L.length}</div><ul class="list">${show.map(r=>{acts.push(r.go);return `<li class="tap" tabindex="0" data-r="${acts.length-1}"><span class="row-ic">${ic(r.i)}</span><div class="grow"><div class="lt">${esc(r.t)}</div>${r.s?`<div class="ls">${esc(r.s)}</div>`:""}</div>${ic("chev","sm")}</li>`}).join("")}</ul>${L.length>5&&!all?`<button type="button" class="linkbtn" data-more="${esc(h)}" style="min-height:44px">Show all ${L.length}</button>`:""}`}).join("");
+      out.querySelectorAll("li[data-r]").forEach(li=>{const f=acts[+li.dataset.r];li.addEventListener("click",()=>{close();setTimeout(f,80)});li.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();li.click()}})});
+      out.querySelectorAll("[data-more]").forEach(b=>b.onclick=()=>{more.add(b.dataset.more);run()});
+    };
+    inp.addEventListener("input",()=>{clearTimeout(tm);tm=setTimeout(run,140)});
+    inp.addEventListener("keydown",e=>{if(e.key==="Enter"){e.preventDefault();inp.blur()}});
+    run();try{inp.focus();inp.select()}catch{}
   });
 }
 /* Build home: the next tasks given to me, ticked off in one tap */
