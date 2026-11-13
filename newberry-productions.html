@@ -1571,7 +1571,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: when a newer version is on the server the app refreshes itself (clearing old cached copies), unless someone is in the middle of something; then it offers a one-tap refresh */
-const APP_VER="6.30.0";
+const APP_VER="6.30.1";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function applyUpdate(){try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}
@@ -3154,7 +3154,7 @@ function musicPlay(ctx,out,m,dur,t0){
     const n=m.sub;for(let i=0;i<4*n;i++){const p=m.pat[i%m.pat.length],x=tri[p%3]+(p>=3?12:0);tone(mtof(m.root+12+r+x),tb+i*spb/n,spb/n*1.6,m.wave,m.arp,.01,.3,m.wave==="sine"||m.wave==="triangle"?3000:1800)}
     if(m.kick)for(let i=0;i<4;i++){const t=tb+i*spb,o=ctx.createOscillator(),g=ctx.createGain();o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(42,t+.14);g.gain.setValueAtTime(.32,t);g.gain.exponentialRampToValueAtTime(.0001,t+.22);o.connect(g);g.connect(out);o.start(t);o.stop(t+.25)}
   }
-  out.gain.cancelScheduledValues(t0);out.gain.setValueAtTime(0,t0);const lv=.9*(m.vol||1);out.gain.linearRampToValueAtTime(lv,t0+Math.min(1.5,dur/4));
+  out.gain.cancelScheduledValues(t0);out.gain.setValueAtTime(0,t0);const lv=.45*(m.vol||1);out.gain.linearRampToValueAtTime(lv,t0+Math.min(1.5,dur/4));
   if(dur>4){out.gain.setValueAtTime(lv,t0+dur-2);out.gain.linearRampToValueAtTime(0,t0+dur)}
 }
 const MUSICK="ms-prod-music";
