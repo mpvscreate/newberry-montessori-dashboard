@@ -1556,7 +1556,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: when a newer version is on the server the app refreshes itself (clearing old cached copies), unless someone is in the middle of something; then it offers a one-tap refresh */
-const APP_VER="6.27.4";
+const APP_VER="6.27.5";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function applyUpdate(){try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}
@@ -3097,15 +3097,18 @@ async function slideshowVideo(items){
   root.querySelector("#vx-c").onclick=()=>{cancel=true};
   try{
     let W=1280,H=720;const SL=3500,FD=500,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
-    const imgs=[];for(const it of items){const u=await stillUrl(it.m.id);const im=u&&await loadImgEl(u);if(im)imgs.push({im,cap:it.cap||""})}
+    const imgs=[];for(const it of items){const u=await stillUrl(it.m.id);const im=u&&await loadImgEl(u);if(im)imgs.push({im,cap:it.cap||"",team:it.p?it.p.name:""})}
     if(!imgs.length)throw new Error("none");
     {const up=imgs.filter(x=>x.im.height>x.im.width).length;if(up>imgs.length/2){W=720;H=1280}c.width=W;c.height=H}
-    const title=items[0].p?items[0].p.name:"Our story";
+    const multi=new Set(items.map(x=>x.p&&x.p.id)).size>1,fdt=t=>new Date(t).toLocaleDateString(undefined,{day:"numeric",month:"short"}),ts=items.map(x=>x.t).filter(Boolean);
+    const title=multi?"Middle School":(items[0].p?items[0].p.name:"Our story");
+    const sub=multi?"Week in review"+(ts.length?" · "+(fdt(Math.min(...ts))===fdt(Math.max(...ts))?fdt(Math.max(...ts)):fdt(Math.min(...ts))+" to "+fdt(Math.max(...ts))):""):"Newberry House Middle School · Production team";
+    const tcol=multi?"#0b7a55":(/^#[0-9a-fA-F]{6}$/.test((items[0].p&&items[0].p.color)||"")?items[0].p.color:"#a65608");
     const types=["video/mp4;codecs=avc1.42E01E","video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"],mime=types.find(t=>MediaRecorder.isTypeSupported(t))||"";
     const stream=c.captureStream(30),rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:3500000}:undefined),chunks=[];
     rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
     const fin=new Promise(res=>rec.onstop=res);
-    const slides=[{title},...imgs,{end:true}],total=slides.length*SL;
+    const slides=[{title,sub},...imgs,{end:true}],total=slides.length*SL;
     const bgc=document.createElement("canvas"),bg=bgc.getContext("2d");
     const fit=(im,sc)=>{
       bgc.width=32;bgc.height=Math.max(2,Math.round(32*H/W));const kc=Math.max(bgc.width/im.width,bgc.height/im.height);bg.drawImage(im,(bgc.width-im.width*kc)/2,(bgc.height-im.height*kc)/2,im.width*kc,im.height*kc);
@@ -3114,9 +3117,17 @@ async function slideshowVideo(items){
     const wrap=(t,x,y,mw,lh)=>{const w=t.split(/\s+/);let line="",yy=y;for(const word of w){const test=line?line+" "+word:word;if(g.measureText(test).width>mw&&line){g.fillText(line,x,yy);yy+=lh;line=word}else line=test}g.fillText(line,x,yy)};
     const draw=(s,p0,alpha)=>{
       g.globalAlpha=alpha;
-      if(s.title||s.end){g.fillStyle=s.end?"#0b2a22":"#a65608";g.fillRect(0,0,W,H);g.fillStyle="#fff";g.textAlign="center";g.font='700 84px "Bricolage Grotesque",system-ui,sans-serif';g.fillText(s.title||"Thank you for watching",W/2,H/2);g.font='500 36px "Instrument Sans",system-ui,sans-serif';g.globalAlpha=alpha*.85;g.fillText(s.end?"Newberry House Middle School":"Newberry House Middle School · Production teams",W/2,H/2+70);g.textAlign="left"}
-      else{g.fillStyle="#000";g.fillRect(0,0,W,H);fit(s.im,.94+.06*p0);const gr=g.createLinearGradient(0,H-260,0,H);gr.addColorStop(0,"rgba(0,0,0,0)");gr.addColorStop(1,"rgba(0,0,0,.72)");g.fillStyle=gr;g.fillRect(0,H-260,W,260);
-        if(s.cap){g.fillStyle="#fff";g.font='500 40px "Instrument Sans",system-ui,sans-serif';wrap(s.cap.slice(0,160),60,H-120,W-120,52)}}
+      if(s.title||s.end){
+        const bgg=g.createLinearGradient(0,0,0,H);if(s.end){bgg.addColorStop(0,"#0b2a22");bgg.addColorStop(1,"#0b2a22")}else{bgg.addColorStop(0,tcol);bgg.addColorStop(1,"#12161a")}
+        g.fillStyle=bgg;g.fillRect(0,0,W,H);g.fillStyle="#fff";g.textAlign="center";
+        const big=s.title||"Thank you for watching",mw=W-100;let px=W<H?76:84;
+        while(px>34){g.font='700 '+px+'px "Bricolage Grotesque",system-ui,sans-serif';if(g.measureText(big).width<=mw)break;px-=4}
+        const ty=H/2-(W<H?10:0);g.fillText(big,W/2,ty);
+        g.font='500 '+(W<H?34:36)+'px "Instrument Sans",system-ui,sans-serif';g.globalAlpha=alpha*.88;wrap(s.end?"Newberry House Middle School":s.sub,W/2,ty+64,mw,46);g.textAlign="left"}
+      else{g.fillStyle="#000";g.fillRect(0,0,W,H);fit(s.im,.94+.06*p0);const gh=multi?340:260,gr=g.createLinearGradient(0,H-gh,0,H);gr.addColorStop(0,"rgba(0,0,0,0)");gr.addColorStop(1,"rgba(0,0,0,.74)");g.fillStyle=gr;g.fillRect(0,H-gh,W,gh);
+        const capY=s.cap?H-(W<H?150:120):H-70;
+        if(s.cap){g.fillStyle="#fff";g.font='500 '+(W<H?38:40)+'px "Instrument Sans",system-ui,sans-serif';wrap(s.cap.slice(0,160),60,capY,W-120,50)}
+        if(multi&&s.team){g.fillStyle="#ffd9a0";g.font='700 28px "Instrument Sans",system-ui,sans-serif';g.fillText(s.team,60,capY-(s.cap?58:0)-(s.cap?0:0))}}
       g.globalAlpha=1;
     };
     rec.start(250);const t0=performance.now();
@@ -3130,7 +3141,7 @@ async function slideshowVideo(items){
       requestAnimationFrame(tick)};tick()});
     rec.stop();await fin;stream.getTracks().forEach(t=>t.stop());
     if(cancel){done();toast("Cancelled.");return}
-    const blob=new Blob(chunks,{type:mime||"video/webm"}),ext=(blob.type.includes("mp4")?"mp4":"webm"),url=URL.createObjectURL(blob),name=(title+" slideshow."+ext).replace(/\s+/g,"-");
+    const blob=new Blob(chunks,{type:mime||"video/webm"}),ext=(blob.type.includes("mp4")?"mp4":"webm"),url=URL.createObjectURL(blob),name=(title+(multi?" week in review.":" slideshow.")+ext).replace(/\s+/g,"-");
     const mp4=blob.type.includes("mp4");
     root.innerHTML=`<div class="vwx-b"><h2>Your video is ready</h2><video src="${url}" controls playsinline style="width:100%;border-radius:16px;margin:10px 0;background:#000"></video>${mp4?"":`<p class="small muted" style="margin:0 0 8px">This phone or browser made a WebM video. WhatsApp on iPhone often cannot open it. Use Send as photos instead.</p>`}<div class="row wr"><button class="btn ${mp4?"primary":""} grow" id="vx-sh" type="button">${ic("share")}Share video</button><button class="btn ${mp4?"":"primary"} grow" id="vx-ph" type="button">${ic("image")}Send as photos</button></div><div class="row wr" style="margin-top:8px"><button class="btn" id="vx-sv" type="button">${ic("download")}Save</button><button class="btn" id="vx-x" type="button">Close</button></div></div>`;
     const file=new File([blob],name,{type:blob.type});
