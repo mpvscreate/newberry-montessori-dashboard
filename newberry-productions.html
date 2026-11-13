@@ -869,6 +869,14 @@ div.bcard{cursor:default}.bc-k{font-size:.74rem;color:var(--muted)}.bc-t{font:70
 .vx-v{display:block;margin:12px auto;max-height:46vh;max-width:100%;border-radius:16px;background:#000}
 .vx-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
 .vx-close{margin-top:8px;border:0;background:none;color:var(--muted);font:600 .95rem var(--body);min-height:44px;padding:0 16px;cursor:pointer}
+/* v6.29.0: choose music for the video */
+.vx-music{text-align:left}.vx-music h2{text-align:center}.vx-music p{text-align:center}
+.mu-list{display:grid;gap:8px}
+.mu-row{display:flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:16px;padding:2px 4px 2px 2px}.mu-row.on{border-color:var(--accent);background:var(--green-soft)}
+.mu-pick{flex:1;min-width:0;display:flex;align-items:center;gap:12px;border:0;background:none;color:inherit;text-align:left;padding:8px 10px;min-height:52px;font:inherit;cursor:pointer}
+.mu-dot{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--muted)}.mu-row.on .mu-dot{border-color:var(--accent);background:radial-gradient(var(--accent) 45%,transparent 50%)}
+.mu-t{display:grid;gap:1px}.mu-t b{font-size:1rem}
+.mu-pv{flex:none;width:44px;height:44px;border-radius:50%;border:0;background:var(--line);color:inherit;display:grid;place-items:center;cursor:pointer}
 </style>
 </head>
 <body>
@@ -1563,7 +1571,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: when a newer version is on the server the app refreshes itself (clearing old cached copies), unless someone is in the middle of something; then it offers a one-tap refresh */
-const APP_VER="6.28.0";
+const APP_VER="6.29.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function applyUpdate(){try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}
@@ -3094,13 +3102,55 @@ async function sharePhotos(items,title){
   if(!files.length){toast("Couldn't read the photos.");return}
   try{if(navigator.canShare&&navigator.canShare({files}))await navigator.share({files,title});else toast("Sharing isn't available here. Open the photos and save them instead.")}catch{}
 }
+/* ---------- original music, made in the app (nothing to license) ---------- */
+const MUSIC=[
+ {id:"sunrise",name:"Sunrise",mood:"Warm and hopeful",bpm:72,root:48,prog:[[0],[7],[9,1],[5]],sub:2,pat:[0,1,2,4,2,1],wave:"triangle",pad:.05,arp:.07,bass:.1},
+ {id:"uplift",name:"Uplift",mood:"Bright and upbeat",bpm:112,root:55,prog:[[0],[7],[9,1],[5]],sub:2,pat:[0,2,4,2,5,4,2,1],wave:"triangle",pad:.035,arp:.085,bass:.11,kick:1},
+ {id:"calm",name:"Calm",mood:"Soft and gentle",bpm:60,root:53,prog:[[0],[7],[2,1],[10]],sub:1,pat:[0,2,4,5],wave:"sine",pad:.06,arp:.1,bass:.08},
+ {id:"adventure",name:"Adventure",mood:"Driving and energetic",bpm:124,root:57,prog:[[0,1],[8],[3],[10]],sub:2,pat:[0,2,1,4,2,5,1,3],wave:"sawtooth",pad:.025,arp:.045,bass:.13,kick:1},
+ {id:"celebrate",name:"Celebrate",mood:"Joyful and festive",bpm:120,root:50,prog:[[0],[7],[11,1],[5]],sub:2,pat:[0,3,2,5,4,5,2,3],wave:"square",pad:.03,arp:.04,bass:.1,kick:1}
+];
+const mtof=m=>440*Math.pow(2,(m-69)/12);
+function musicPlay(ctx,out,m,dur,t0){
+  const spb=60/m.bpm,bar=spb*4,bars=Math.ceil(dur/bar)+1;
+  const tone=(fr,t,len,type,vol,att,rel,lp)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.value=fr;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol,t+att);g.gain.exponentialRampToValueAtTime(.0001,t+len+rel);let n=o;if(lp){const f=ctx.createBiquadFilter();f.type="lowpass";f.frequency.value=lp;o.connect(f);n=f}n.connect(g);g.connect(out);o.start(t);o.stop(t+len+rel+.05)};
+  for(let b=0;b<bars;b++){
+    const pr=m.prog[b%m.prog.length],r=pr[0],tri=pr[1]?[0,3,7]:[0,4,7],tb=t0+b*bar;
+    tri.forEach(x=>tone(mtof(m.root+r+x),tb,bar-.1,"triangle",m.pad,bar*.3,.6,1400));
+    tone(mtof(m.root+r-12),tb,bar*.9,"sine",m.bass,.03,.25);
+    const n=m.sub;for(let i=0;i<4*n;i++){const p=m.pat[i%m.pat.length],x=tri[p%3]+(p>=3?12:0);tone(mtof(m.root+12+r+x),tb+i*spb/n,spb/n*1.6,m.wave,m.arp,.01,.3,m.wave==="sine"||m.wave==="triangle"?3000:1800)}
+    if(m.kick)for(let i=0;i<4;i++){const t=tb+i*spb,o=ctx.createOscillator(),g=ctx.createGain();o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(42,t+.14);g.gain.setValueAtTime(.32,t);g.gain.exponentialRampToValueAtTime(.0001,t+.22);o.connect(g);g.connect(out);o.start(t);o.stop(t+.25)}
+  }
+  out.gain.cancelScheduledValues(t0);out.gain.setValueAtTime(0,t0);out.gain.linearRampToValueAtTime(.9,t0+Math.min(1.5,dur/4));
+  if(dur>4){out.gain.setValueAtTime(.9,t0+dur-2);out.gain.linearRampToValueAtTime(0,t0+dur)}
+}
+const MUSICK="ms-prod-music";
+function musicChoose(root,A){
+  return new Promise(res=>{
+    let ctx=null,pv=null,cur="";try{cur=localStorage.getItem(MUSICK)||"sunrise"}catch{cur="sunrise"}
+    if(cur!=="none"&&!MUSIC.some(x=>x.id===cur))cur="sunrise";
+    const ac=()=>{if(!ctx)ctx=new A();if(ctx.state==="suspended")ctx.resume();return ctx};
+    const stopPv=()=>{if(pv){try{pv.gain.cancelScheduledValues(0);pv.gain.setValueAtTime(0,ctx.currentTime)}catch{}pv=null}};
+    const draw=()=>{
+      root.innerHTML=`<div class="vwx-b vx-music"><h2>Choose music</h2><p class="small muted" style="margin:0 0 10px">Original tunes made for this app. Free to share anywhere.</p><div class="mu-list" role="radiogroup" aria-label="Music">${MUSIC.map(m=>`<div class="mu-row${cur===m.id?" on":""}"><button type="button" class="mu-pick" role="radio" aria-checked="${cur===m.id}" data-m="${m.id}"><span class="mu-dot" aria-hidden="true"></span><span class="mu-t"><b>${m.name}</b><span class="small muted">${m.mood}</span></span></button><button type="button" class="mu-pv" data-pv="${m.id}" aria-label="Hear ${m.name}">${ic("play","sm")}</button></div>`).join("")}<div class="mu-row${cur==="none"?" on":""}"><button type="button" class="mu-pick" role="radio" aria-checked="${cur==="none"}" data-m="none"><span class="mu-dot" aria-hidden="true"></span><span class="mu-t"><b>No music</b><span class="small muted">Just the photos</span></span></button></div></div><button class="btn primary block" id="mu-go" type="button" style="margin-top:12px">Make my video</button><button class="vx-close" id="mu-x" type="button">Cancel</button></div>`;
+      root.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{cur=b.dataset.m;try{localStorage.setItem(MUSICK,cur)}catch{}stopPv();draw()});
+      root.querySelectorAll("[data-pv]").forEach(b=>b.onclick=()=>{const m=MUSIC.find(x=>x.id===b.dataset.pv),c=ac();stopPv();const g=c.createGain();g.connect(c.destination);pv=g;musicPlay(c,g,m,9,c.currentTime+.05);cur=m.id;try{localStorage.setItem(MUSICK,cur)}catch{}root.querySelectorAll(".mu-row").forEach(r=>r.classList.remove("on"));b.closest(".mu-row").classList.add("on");root.querySelectorAll("[data-m]").forEach(x=>x.setAttribute("aria-checked",String(x.dataset.m===cur)))});
+      root.querySelector("#mu-go").onclick=()=>{stopPv();if(cur==="none"){if(ctx&&ctx.close)ctx.close();res({ctx:null,id:null})}else res({ctx:ac(),id:cur})};
+      root.querySelector("#mu-x").onclick=()=>{stopPv();if(ctx&&ctx.close)ctx.close();res(false)};
+    };
+    draw();
+  });
+}
 async function slideshowVideo(items){
   if(!canRecord()){toast("This browser can't save videos. Try Chrome on a laptop or an Android phone.");return}
   if(!items.length){toast("No photos to put in a video.");return}
   const root=document.createElement("div");root.className="vw vwx";root.setAttribute("role","dialog");root.setAttribute("aria-modal","true");root.setAttribute("aria-label","Saving the slideshow");
-  root.innerHTML=`<div class="vwx-b"><h2>Making your video</h2><p class="muted" id="vx-s">Getting ready…</p><div class="vwx-bar"><i id="vx-i"></i></div><p class="small muted">Keep this screen open. It plays in real time.</p><button class="btn" id="vx-c" type="button">Cancel</button></div>`;
+  const makingHTML=`<div class="vwx-b"><h2>Making your video</h2><p class="muted" id="vx-s">Getting ready…</p><div class="vwx-bar"><i id="vx-i"></i></div><p class="small muted">Keep this screen open. It plays in real time.</p><button class="btn" id="vx-c" type="button">Cancel</button></div>`;
   document.body.append(root);document.body.classList.add("noscroll");let cancel=false;
   const done=()=>{root.remove();if(!document.querySelector(".scrim,.ed,.vw"))document.body.classList.remove("noscroll")};
+  let AC=null,musicId=null;const AudioCtor=window.AudioContext||window.webkitAudioContext;
+  if(AudioCtor){const r=await musicChoose(root,AudioCtor);if(r===false){done();return}AC=r.ctx;musicId=r.id}
+  root.innerHTML=makingHTML;
   root.querySelector("#vx-c").onclick=()=>{cancel=true};
   try{
     let W=1280,H=720;const SL=3500,FD=500,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
@@ -3112,8 +3162,9 @@ async function slideshowVideo(items){
     const title=multi?"Middle School":(items[0].p?items[0].p.name:"Our story");
     const sub=multi?"Week in review"+(ts.length?" · "+(fdt(Math.min(...ts))===fdt(Math.max(...ts))?fdt(Math.max(...ts)):fdt(Math.min(...ts))+" to "+fdt(Math.max(...ts))):""):"Newberry House Middle School · Production team";
     const tcol=multi?"#0b7a55":(/^#[0-9a-fA-F]{6}$/.test((items[0].p&&items[0].p.color)||"")?items[0].p.color:"#a65608");
-    const types=["video/mp4;codecs=avc1.42E01E","video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"],mime=types.find(t=>MediaRecorder.isTypeSupported(t))||"";
-    const stream=c.captureStream(30),rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:3500000}:undefined),chunks=[];
+    const types=(AC&&musicId?["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4;codecs=avc1,mp4a.40.2","video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus"]:[]).concat(["video/mp4;codecs=avc1.42E01E","video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"]),mime=types.find(t=>MediaRecorder.isTypeSupported(t))||"";
+    const stream=c.captureStream(30);let master=null;if(AC&&musicId){const dst=AC.createMediaStreamDestination();master=AC.createGain();master.connect(dst);dst.stream.getAudioTracks().forEach(t=>stream.addTrack(t))}
+    const rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:3500000}:undefined),chunks=[];
     rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
     const fin=new Promise(res=>rec.onstop=res);
     const slides=[{title,sub},...imgs,{end:true}],total=slides.length*SL;
@@ -3140,6 +3191,7 @@ async function slideshowVideo(items){
         if(multi&&s.team){g.fillStyle="#ffd9a0";g.font='700 28px "Instrument Sans",system-ui,sans-serif';g.fillText(s.team,60,capY-(s.cap?58:0)-(s.cap?0:0))}}
       g.globalAlpha=1;
     };
+    if(master){await AC.resume();musicPlay(AC,master,MUSIC.find(x=>x.id===musicId),(imgs.length+2)*SL/1000,AC.currentTime+.1)}
     rec.start(250);const t0=performance.now();
     await new Promise(res=>{const tick=()=>{
       if(cancel){res();return}
@@ -3149,7 +3201,7 @@ async function slideshowVideo(items){
       if(idx>0&&loc<FD){/* crossfade from the previous slide */const prevS=slides[idx-1];g.globalAlpha=1-loc/FD;draw(prevS,1,1-loc/FD)}
       root.querySelector("#vx-i").style.width=Math.round(t/total*100)+"%";root.querySelector("#vx-s").textContent="Slide "+(idx+1)+" of "+slides.length;
       requestAnimationFrame(tick)};tick()});
-    rec.stop();await fin;stream.getTracks().forEach(t=>t.stop());
+    rec.stop();await fin;stream.getTracks().forEach(t=>t.stop());if(AC&&AC.close)AC.close().catch(()=>{});
     if(cancel){done();toast("Cancelled.");return}
     const blob=new Blob(chunks,{type:mime||"video/webm"}),ext=(blob.type.includes("mp4")?"mp4":"webm"),url=URL.createObjectURL(blob),name=(title+(multi?" week in review.":" slideshow.")+ext).replace(/\s+/g,"-");
     const mp4=blob.type.includes("mp4");
@@ -3163,7 +3215,7 @@ async function slideshowVideo(items){
     root.querySelector("#vx-sv").onclick=()=>{const a=document.createElement("a");a.href=url;a.download=name;a.click()};
     root.querySelector("#vx-sh").onclick=async()=>{try{if(navigator.canShare&&navigator.canShare({files:[file]}))await navigator.share({files:[file],title});else toast("Sharing isn't available here. Use Save.")}catch{}};
     root.querySelector("#vx-x").onclick=done;
-  }catch(e){console.warn("video",e);done();toast("Couldn't make the video on this device.")}
+  }catch(e){console.warn("video",e);try{AC&&AC.close&&AC.close()}catch{}done();toast("Couldn't make the video on this device.")}
 }
 /* ---------- printable story book ---------- */
 function storyBookHTML(p,imgs){
