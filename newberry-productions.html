@@ -1571,7 +1571,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: when a newer version is on the server the app refreshes itself (clearing old cached copies), unless someone is in the middle of something; then it offers a one-tap refresh */
-const APP_VER="6.29.0";
+const APP_VER="6.30.0";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function applyUpdate(){try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}
@@ -3104,35 +3104,68 @@ async function sharePhotos(items,title){
 }
 /* ---------- original music, made in the app (nothing to license) ---------- */
 const MUSIC=[
- {id:"sunrise",name:"Sunrise",mood:"Warm and hopeful",bpm:72,root:48,prog:[[0],[7],[9,1],[5]],sub:2,pat:[0,1,2,4,2,1],wave:"triangle",pad:.05,arp:.07,bass:.1},
- {id:"uplift",name:"Uplift",mood:"Bright and upbeat",bpm:112,root:55,prog:[[0],[7],[9,1],[5]],sub:2,pat:[0,2,4,2,5,4,2,1],wave:"triangle",pad:.035,arp:.085,bass:.11,kick:1},
- {id:"calm",name:"Calm",mood:"Soft and gentle",bpm:60,root:53,prog:[[0],[7],[2,1],[10]],sub:1,pat:[0,2,4,5],wave:"sine",pad:.06,arp:.1,bass:.08},
- {id:"adventure",name:"Adventure",mood:"Driving and energetic",bpm:124,root:57,prog:[[0,1],[8],[3],[10]],sub:2,pat:[0,2,1,4,2,5,1,3],wave:"sawtooth",pad:.025,arp:.045,bass:.13,kick:1},
- {id:"celebrate",name:"Celebrate",mood:"Joyful and festive",bpm:120,root:50,prog:[[0],[7],[11,1],[5]],sub:2,pat:[0,3,2,5,4,5,2,3],wave:"square",pad:.03,arp:.04,bass:.1,kick:1}
+ {id:"pick",vol:0.7,name:"Acoustic fingerpicking",mood:"Gentle guitar, flowing",bpm:80,gtr:"pick",ch:[[40,47,52,55,59,64],[43,47,50,55,59,67],[45,52,57,60,64],[41,48,53,57,60,65]]},
+ {id:"camp",vol:0.6,name:"Campfire strum",mood:"Warm strummed guitar",bpm:92,gtr:"strum",ch:[[43,47,50,55,59,67],[50,57,62,66,69],[40,47,52,55,59,64],[48,52,55,60,64]]},
+ {id:"sunny",vol:0.45,name:"Sunny guitar",mood:"Bright, happy strumming",bpm:112,gtr:"strum",ch:[[48,52,55,60,64],[43,47,50,55,59,67],[45,52,57,60,64],[41,48,53,57,60,65]]},
+ {id:"sunrise",vol:3.2,name:"Sunrise",mood:"Warm and hopeful",bpm:72,root:48,prog:[[0],[7],[9,1],[5]],sub:2,pat:[0,1,2,4,2,1],wave:"triangle",pad:.05,arp:.07,bass:.1},
+ {id:"uplift",vol:2.4,name:"Uplift",mood:"Bright and upbeat",bpm:112,root:55,prog:[[0],[7],[9,1],[5]],sub:2,pat:[0,2,4,2,5,4,2,1],wave:"triangle",pad:.035,arp:.085,bass:.11,kick:1},
+ {id:"calm",vol:3,name:"Calm",mood:"Soft and gentle",bpm:60,root:53,prog:[[0],[7],[2,1],[10]],sub:1,pat:[0,2,4,5],wave:"sine",pad:.06,arp:.1,bass:.08},
+ {id:"adventure",vol:2.4,name:"Adventure",mood:"Driving and energetic",bpm:124,root:57,prog:[[0,1],[8],[3],[10]],sub:2,pat:[0,2,1,4,2,5,1,3],wave:"sawtooth",pad:.025,arp:.045,bass:.13,kick:1},
+ {id:"celebrate",vol:2.5,name:"Celebrate",mood:"Joyful and festive",bpm:120,root:50,prog:[[0],[7],[11,1],[5]],sub:2,pat:[0,3,2,5,4,5,2,3],wave:"square",pad:.03,arp:.04,bass:.1,kick:1}
 ];
 const mtof=m=>440*Math.pow(2,(m-69)/12);
+/* a plucked string (Karplus-Strong), reused for every note of the same pitch */
+const KSC=new Map();
+function ksBuf(ctx,midi,sec){
+  const sr=ctx.sampleRate,key=midi+"|"+sr+"|"+sec,hit=KSC.get(key);if(hit)return hit;
+  const fr=mtof(midi),N=Math.max(2,Math.round(sr/fr)),len=Math.floor(sr*sec),b=ctx.createBuffer(1,len,sr),d=b.getChannelData(0);
+  let lp=0;for(let i=0;i<N;i++){const x=Math.random()*2-1;lp=lp*.55+x*.45;d[i]=lp}
+  const dec=midi<50?.9993:.9988;
+  for(let i=N;i<len;i++)d[i]=.5*(d[i-N]+(i>N?d[i-N-1]:d[i-N]))*dec;
+  let pk=0;for(let i=0;i<len;i++){const a=Math.abs(d[i]);if(a>pk)pk=a}if(pk>0){const k=.7/pk;for(let i=0;i<len;i++)d[i]*=k}
+  KSC.set(key,b);return b;
+}
+function guitarNotes(ctx,out,m,dur,t0){
+  const spb=60/m.bpm,bar=spb*4,bars=Math.ceil(dur/bar)+1;
+  /* a little room around the guitar */
+  const rl=Math.floor(ctx.sampleRate*1.6),rb=ctx.createBuffer(2,rl,ctx.sampleRate);
+  for(let c=0;c<2;c++){const d=rb.getChannelData(c);for(let i=0;i<rl;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/rl,2.6)}
+  const cv=ctx.createConvolver();cv.buffer=rb;const wet=ctx.createGain();wet.gain.value=.3;cv.connect(wet);wet.connect(out);
+  const pluck=(midi,t,vel)=>{const src=ctx.createBufferSource();src.buffer=ksBuf(ctx,midi,midi<50?3.2:2.4);const g=ctx.createGain();g.gain.value=vel;src.connect(g);g.connect(out);g.connect(cv);src.start(t)};
+  for(let b=0;b<bars;b++){
+    const ch=m.ch[b%m.ch.length],tb=t0+b*bar;
+    if(m.gtr==="pick"){
+      const pat=[0,2,3,1,4,2,3,1];
+      for(let i=0;i<8;i++){const idx=pat[i]%ch.length;pluck(ch[idx]+(i%2&&idx>2?0:0),tb+i*spb/2+(Math.random()*.012),i===0?.9:(i%2?.45:.6))}
+      pluck(ch[ch.length-1]+12,tb+bar-spb/2,.25);
+    }else{
+      const ev=[[0,"d",1],[1,"d",.7],[1.5,"u",.55],[2.5,"u",.6],[3,"d",.8],[3.5,"u",.5]];
+      ev.forEach(e=>{const t=tb+e[0]*spb,notes=e[1]==="d"?ch:ch.slice(-4).slice().reverse(),st=e[1]==="d"?.024:.016;notes.forEach((nt,k)=>pluck(nt,t+k*st,e[2]*(e[1]==="d"?.55:.4)))});
+    }
+  }
+}
 function musicPlay(ctx,out,m,dur,t0){
   const spb=60/m.bpm,bar=spb*4,bars=Math.ceil(dur/bar)+1;
   const tone=(fr,t,len,type,vol,att,rel,lp)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.value=fr;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol,t+att);g.gain.exponentialRampToValueAtTime(.0001,t+len+rel);let n=o;if(lp){const f=ctx.createBiquadFilter();f.type="lowpass";f.frequency.value=lp;o.connect(f);n=f}n.connect(g);g.connect(out);o.start(t);o.stop(t+len+rel+.05)};
-  for(let b=0;b<bars;b++){
+  if(m.gtr)guitarNotes(ctx,out,m,dur,t0);else for(let b=0;b<bars;b++){
     const pr=m.prog[b%m.prog.length],r=pr[0],tri=pr[1]?[0,3,7]:[0,4,7],tb=t0+b*bar;
     tri.forEach(x=>tone(mtof(m.root+r+x),tb,bar-.1,"triangle",m.pad,bar*.3,.6,1400));
     tone(mtof(m.root+r-12),tb,bar*.9,"sine",m.bass,.03,.25);
     const n=m.sub;for(let i=0;i<4*n;i++){const p=m.pat[i%m.pat.length],x=tri[p%3]+(p>=3?12:0);tone(mtof(m.root+12+r+x),tb+i*spb/n,spb/n*1.6,m.wave,m.arp,.01,.3,m.wave==="sine"||m.wave==="triangle"?3000:1800)}
     if(m.kick)for(let i=0;i<4;i++){const t=tb+i*spb,o=ctx.createOscillator(),g=ctx.createGain();o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(42,t+.14);g.gain.setValueAtTime(.32,t);g.gain.exponentialRampToValueAtTime(.0001,t+.22);o.connect(g);g.connect(out);o.start(t);o.stop(t+.25)}
   }
-  out.gain.cancelScheduledValues(t0);out.gain.setValueAtTime(0,t0);out.gain.linearRampToValueAtTime(.9,t0+Math.min(1.5,dur/4));
-  if(dur>4){out.gain.setValueAtTime(.9,t0+dur-2);out.gain.linearRampToValueAtTime(0,t0+dur)}
+  out.gain.cancelScheduledValues(t0);out.gain.setValueAtTime(0,t0);const lv=.9*(m.vol||1);out.gain.linearRampToValueAtTime(lv,t0+Math.min(1.5,dur/4));
+  if(dur>4){out.gain.setValueAtTime(lv,t0+dur-2);out.gain.linearRampToValueAtTime(0,t0+dur)}
 }
 const MUSICK="ms-prod-music";
 function musicChoose(root,A){
   return new Promise(res=>{
     let ctx=null,pv=null,cur="";try{cur=localStorage.getItem(MUSICK)||"sunrise"}catch{cur="sunrise"}
-    if(cur!=="none"&&!MUSIC.some(x=>x.id===cur))cur="sunrise";
+    if(cur!=="none"&&!MUSIC.some(x=>x.id===cur))cur="pick";
     const ac=()=>{if(!ctx)ctx=new A();if(ctx.state==="suspended")ctx.resume();return ctx};
     const stopPv=()=>{if(pv){try{pv.gain.cancelScheduledValues(0);pv.gain.setValueAtTime(0,ctx.currentTime)}catch{}pv=null}};
     const draw=()=>{
-      root.innerHTML=`<div class="vwx-b vx-music"><h2>Choose music</h2><p class="small muted" style="margin:0 0 10px">Original tunes made for this app. Free to share anywhere.</p><div class="mu-list" role="radiogroup" aria-label="Music">${MUSIC.map(m=>`<div class="mu-row${cur===m.id?" on":""}"><button type="button" class="mu-pick" role="radio" aria-checked="${cur===m.id}" data-m="${m.id}"><span class="mu-dot" aria-hidden="true"></span><span class="mu-t"><b>${m.name}</b><span class="small muted">${m.mood}</span></span></button><button type="button" class="mu-pv" data-pv="${m.id}" aria-label="Hear ${m.name}">${ic("play","sm")}</button></div>`).join("")}<div class="mu-row${cur==="none"?" on":""}"><button type="button" class="mu-pick" role="radio" aria-checked="${cur==="none"}" data-m="none"><span class="mu-dot" aria-hidden="true"></span><span class="mu-t"><b>No music</b><span class="small muted">Just the photos</span></span></button></div></div><button class="btn primary block" id="mu-go" type="button" style="margin-top:12px">Make my video</button><button class="vx-close" id="mu-x" type="button">Cancel</button></div>`;
+      root.innerHTML=`<div class="vwx-b vx-music"><h2>Choose music</h2><p class="small muted" style="margin:0 0 10px">Guitar and other original tunes made for this app. Free to share anywhere.</p><div class="mu-list" role="radiogroup" aria-label="Music">${MUSIC.map(m=>`<div class="mu-row${cur===m.id?" on":""}"><button type="button" class="mu-pick" role="radio" aria-checked="${cur===m.id}" data-m="${m.id}"><span class="mu-dot" aria-hidden="true"></span><span class="mu-t"><b>${m.name}</b><span class="small muted">${m.mood}</span></span></button><button type="button" class="mu-pv" data-pv="${m.id}" aria-label="Hear ${m.name}">${ic("play","sm")}</button></div>`).join("")}<div class="mu-row${cur==="none"?" on":""}"><button type="button" class="mu-pick" role="radio" aria-checked="${cur==="none"}" data-m="none"><span class="mu-dot" aria-hidden="true"></span><span class="mu-t"><b>No music</b><span class="small muted">Just the photos</span></span></button></div></div><button class="btn primary block" id="mu-go" type="button" style="margin-top:12px">Make my video</button><button class="vx-close" id="mu-x" type="button">Cancel</button></div>`;
       root.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{cur=b.dataset.m;try{localStorage.setItem(MUSICK,cur)}catch{}stopPv();draw()});
       root.querySelectorAll("[data-pv]").forEach(b=>b.onclick=()=>{const m=MUSIC.find(x=>x.id===b.dataset.pv),c=ac();stopPv();const g=c.createGain();g.connect(c.destination);pv=g;musicPlay(c,g,m,9,c.currentTime+.05);cur=m.id;try{localStorage.setItem(MUSICK,cur)}catch{}root.querySelectorAll(".mu-row").forEach(r=>r.classList.remove("on"));b.closest(".mu-row").classList.add("on");root.querySelectorAll("[data-m]").forEach(x=>x.setAttribute("aria-checked",String(x.dataset.m===cur)))});
       root.querySelector("#mu-go").onclick=()=>{stopPv();if(cur==="none"){if(ctx&&ctx.close)ctx.close();res({ctx:null,id:null})}else res({ctx:ac(),id:cur})};
