@@ -1899,12 +1899,14 @@ function taskSheet(key,roomId){
     sh.querySelectorAll("#rm [data-r]").forEach(b=>b.onclick=()=>{read();cur=b.dataset.r;sh.querySelectorAll("#rm [data-r]").forEach(x=>x.setAttribute("aria-pressed",x===b));sh.querySelector("#body").innerHTML=body();wire()});
     sh.querySelector("#f").onsubmit=async e=>{e.preventDefault();read();if(!split)ts.forEach(t=>{draft[t.room]={...draft[cur]}});const ti=sh.querySelector("#ti");if(!title.trim())return showErr(sh,ti,"A task needs a name.");
       const sb2=sh.querySelector(".foot .btn");sb2.disabled=true;sb2.textContent="Saving…";
+      try{
       const mids=[...keepM],md={};keepM.forEach(m=>{if(mdate0[m])md[m]=mdate0[m]});
       for(const a of addM){const blob=a.video?a.file:await prepPhoto(a.file,PSIZES[psize][1]),mid=uid();await mPut(mid,blob);queueMedia(mid);mids.push(mid);md[mid]=today()}
       addM.forEach(a=>URL.revokeObjectURL(a.url));
       const nt=ts.flatMap(t=>asgNew(t.assignee,draft[t.room].assignee));
       const ups=ts.map(t=>{const d=draft[t.room];const stt=(!perm.manage&&t.status==="done")?"done":(!perm.manage&&d.status==="done"?"check":d.status);return undoEdit(t,{title:title.trim(),status:stt,due:d.due,who:d.who,assignee:d.assignee||"",note:d.note,doneOn:stt==="done"?(t.doneOn||today()):"",media:mids,mdate:md})});
-      save();close();render();toast("Task saved.",()=>ups.forEach(u=>u()));[...new Set(nt)].forEach(pid=>notifySend([pid],"New task for you",title.trim().slice(0,100),"tasks"))};
+      save();close();render();toast("Task saved.",()=>ups.forEach(u=>u()));[...new Set(nt)].forEach(pid=>notifySend([pid],"New task for you",title.trim().slice(0,100),"tasks"))
+      }catch(er){console.warn("task save",er);sb2.disabled=false;sb2.textContent="Save task";toast("Could not save the task: "+String(er&&er.message||er).slice(0,80))}};
   });
 }
 function costSheet(id,pre,say){
