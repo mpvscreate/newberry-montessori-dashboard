@@ -2926,7 +2926,7 @@ function docSheet(id,presetType){
   ${dateField("dt",d?.date||today())}
   <label class="f" for="ph">Phase (optional)</label><select id="ph" class="t sel"><option value="">None</option>${PH.map(p=>`<option value="${p[0]}" ${p[0]===d?.phase?"selected":""}>${esc(p[1])}</option>`).join("")}</select>
   ${S.sups.length?`<label class="f" for="su">Supplier or contractor (optional)</label><select id="su" class="t sel"><option value="">None</option>${S.sups.map(s=>`<option value="${s.id}" ${s.id===d?.sup?"selected":""}>${esc(s.name)}</option>`).join("")}</select>`:""}
-  <label class="f" for="nt">Note (optional)</label><input id="nt" class="t" maxlength="160" value="${esc(d?.note||"")}">
+  <label class="f" for="nt">Note (optional)</label><input id="nt" class="t" maxlength="160" value="${esc(d?.note||"")}">${micBtn("nt")}
   <div class="foot"><button class="btn primary block" id="go" ${d?"":"disabled"}>${d?"Save changes":"Add document"}</button></div></form>`,(sh,close)=>{
     wireDc(sh);if(!isDr){wireChips(sh,st,"type");wireChips(sh,st,"lock")}
     const take=e=>{const f=e.target.files[0];e.target.value="";if(!f)return;
@@ -3829,7 +3829,7 @@ function tradeSheet(id){
   <label class="f">Quote document (optional)</label>
   ${qdocs.length?`<select id="qd" class="t sel"><option value="">No document linked</option>${qdocs.map(d=>`<option value="${d.id}" ${d.id===t?.doc?"selected":""}>${esc(d.name)}</option>`).join("")}</select>`:""}
   <div class="photo-add"><button type="button" class="btn" id="qf">${ic("upload")}Attach file</button><button type="button" class="btn" id="qc">${ic("camera")}Take photo</button></div><input type="file" id="qi" hidden><input type="file" id="qk" accept="image/*" capture="environment" hidden><p class="hint" id="qh">PDF or picture, up to 10 MB. It is saved under Documents.</p>
-  <label class="f" for="nt">Note (optional)</label><input id="nt" class="t" maxlength="160" value="${esc(t?.note||"")}">
+  <label class="f" for="nt">Note (optional)</label><input id="nt" class="t" maxlength="160" value="${esc(t?.note||"")}">${micBtn("nt")}
   <div class="foot"><button class="btn primary block" id="sv">${t?"Save changes":"Add quote"}</button></div></form>`,(sh,close)=>{
     wireDc(sh);["status","room"].forEach(n=>wireChips(sh,st,n));
     const tr=sh.querySelector("#tr");sh.querySelectorAll("[data-tt]").forEach(b=>b.onclick=()=>{tr.value=b.dataset.tt});
@@ -3866,7 +3866,7 @@ function finSheet(id){
   const t=S.trades.find(x=>x.id===id);if(!t)return;
   const fin=sm.code?peopleList().filter(p=>p.active&&p.role==="finance"&&p.pid!==sm.pid):[],can=!!sm.code&&canSend()&&fin.length>0;
   const who=!sm.code?"Join the team to send this in the app. You can still share it on WhatsApp.":!canSend()?"Your access is to receive updates. You can still share it on WhatsApp.":fin.length?"To: <b>"+fin.map(p=>esc(p.name)).join(", ")+"</b>":"Nobody has the Finance role yet. Set it under People and access, or share it on WhatsApp.";
-  sheet("Send to Finance",`<p class="muted" style="margin:6px 0 10px">${who}</p><label class="f" for="fm">Message</label><textarea id="fm" class="t grow-ta" rows="7" maxlength="600">${esc(quoteFinText(t))}</textarea><p class="hint">You can change the words before you send. It goes to Finance only.</p><div class="foot"><button type="button" class="btn primary block" id="fs" ${can?"":"disabled"}>${ic("cash")}Send to Finance</button><button type="button" class="btn block" id="fw" style="margin-top:8px">${ic("chat")}Share on WhatsApp</button></div>`,(sh,close)=>{
+  sheet("Send to Finance",`<p class="muted" style="margin:6px 0 10px">${who}</p><label class="f" for="fm">Message</label><textarea id="fm" class="t grow-ta" rows="7" maxlength="600">${esc(quoteFinText(t))}</textarea>${micBtn("fm")}<p class="hint">You can change the words before you send. It goes to Finance only.</p><div class="foot"><button type="button" class="btn primary block" id="fs" ${can?"":"disabled"}>${ic("cash")}Send to Finance</button><button type="button" class="btn block" id="fw" style="margin-top:8px">${ic("chat")}Share on WhatsApp</button></div>`,(sh,close)=>{
     const ta=sh.querySelector("#fm");
     sh.querySelector("#fs").onclick=()=>{
       const tx=ta.value.trim();if(!tx){showErr(sh,ta,"Write a message first.");return}
@@ -4592,7 +4592,7 @@ function furnSheet(id){
   <details class="more" ${t&&(t.due||t.who||t.note||media.length)?"open":""}><summary>More details: due date, who is making it, notes, photos</summary>
   ${dueRow("du",t?.due||"")}
   ${assignBlock({assignee:st.assignee,who:t?.who||""},names)}
-  <label class="f" for="fnt">Note (optional)</label><textarea id="fnt" class="t" maxlength="300" placeholder="Size, colour, anything the maker should know">${esc(t?.note||"")}</textarea>
+  <label class="f" for="fnt">Note (optional)</label><textarea id="fnt" class="t" maxlength="300" placeholder="Size, colour, anything the maker should know">${esc(t?.note||"")}</textarea>${micBtn("fnt")}
   <div class="photo-add"><button type="button" class="btn" id="fp">${ic("camera")}Add photos or drawings</button></div><input type="file" id="fpi" accept="image/*" multiple hidden><p class="hint" id="fph">${media.length?media.length+" photo"+(media.length===1?"":"s")+" saved.":""}</p>
   </details>
   <div class="foot"><button class="btn primary block" id="sv">${t?"Save changes":"Add"}</button></div>${t?`<button type="button" class="btn block danger" id="fdel" style="margin-top:8px">${ic("trash")}Delete this item</button>`:""}</form>`,(sh,close)=>{
@@ -4671,7 +4671,7 @@ function dnoteSheet(){
     sh.querySelector("#dnl").innerHTML=(L.length?`<ul class="list">${L.map(m=>{const on=sel.has(m.id);return `<li class="dnl"><button type="button" class="mtk" data-pick="${m.id}" aria-pressed="${on}" aria-label="${esc(m.name)}${on?", ticked":""}"><span class="mtc">${on?ic("check","sm"):""}</span></button><div class="grow"><div class="lt">${esc(m.name)}</div><div class="ls">${esc([m.sup?supName(m.sup):"",m.qty>0?"ordered "+num(m.qty,2)+" "+m.unit:""].filter(Boolean).join(" · ")||"On order")}</div></div>${on?`<input class="t dnq" inputmode="decimal" data-q="${m.id}" value="${esc(qv(sel.get(m.id)))}" placeholder="0" aria-label="How many ${esc(m.name)} arrived"><span class="small muted dnu">${esc(m.unit)}</span>`:""}</li>`}).join("")}</ul>`:`<p class="muted small" style="margin:6px 0">Nothing is marked as ordered${sup?" from this supplier":""}. Add the materials below.</p>`)
      +(extra.length?`<ul class="list">${extra.map((x,i)=>`<li class="dnl"><span class="row-ic">${ic("note","sm")}</span><div class="grow"><div class="lt">${esc(x.name)}</div><div class="ls">Not on the materials list</div></div><input class="t dnq" inputmode="decimal" data-xq="${i}" value="${esc(qv(x.qty))}" placeholder="0" aria-label="How many ${esc(x.name)} arrived"><button type="button" class="btn small icon" data-xr="${i}" aria-label="Remove ${esc(x.name)}">${ic("x","sm")}</button></li>`).join("")}</ul>`:"")
      +`<label class="f" for="dadd">Add another material</label><select id="dadd" class="t sel"><option value="">Choose a material</option>${rest.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join("")}</select>
-     <label class="f" for="dx">Something not on the list</label><div class="row" style="gap:8px"><input id="dx" class="t grow" maxlength="80" placeholder="For example: Steel mesh"><button type="button" class="btn" id="dxa">Add</button></div>`;
+     <label class="f" for="dx">Something not on the list</label><div class="row" style="gap:8px"><input id="dx" class="t grow" maxlength="80" placeholder="For example: Steel mesh">${micBtn("dx")}<button type="button" class="btn" id="dxa">Add</button></div>`;
     sh.querySelectorAll("[data-pick]").forEach(b=>b.onclick=()=>{const id=b.dataset.pick;if(sel.has(id))sel.delete(id);else{const m=S.mats.find(x=>x.id===id);sel.set(id,m&&m.qty>0?m.qty:"")}draw(sh)});
     sh.querySelectorAll("[data-q]").forEach(i=>i.oninput=()=>sel.set(i.dataset.q,i.value));
     sh.querySelectorAll("[data-xq]").forEach(i=>i.oninput=()=>{extra[+i.dataset.xq].qty=i.value});
