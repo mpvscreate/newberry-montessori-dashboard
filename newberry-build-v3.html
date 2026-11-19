@@ -764,6 +764,9 @@ header.top .sync,.sync{font-size:.8rem!important}
 .dnbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 0 10px}.dnbar .btn{min-height:44px;min-width:0;white-space:normal;line-height:1.2;text-align:center;justify-content:center}
 @media (min-width:900px){.msticky{top:0;padding-top:12px}}.msticky{box-shadow:0 10px 14px -12px rgba(0,0,0,.45)}
 .sync.retry{color:var(--amber,#d9a441)}
+.vnbox{margin:10px 0 4px}.vnrec{width:100%;justify-content:center;min-height:48px}.vnrec.on{background:var(--red-strong,#d9483b);border-color:transparent;color:#fff}
+.vnprev{display:flex;align-items:center;gap:8px}.vnprev audio{flex:1;min-width:0;height:44px}
+.vnplay{margin-top:10px;min-height:48px;gap:10px}.vnplay .small{margin-left:4px}.vnplay.on{border-color:var(--accent);color:var(--accent)}
 </style>
 </head>
 <body>
@@ -813,7 +816,7 @@ share:'<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle c
 camera:'<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
 copy:'<rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/>',
 chat:'<path d="M4 20l1.4-4.2A8 8 0 1112 20a8 8 0 01-4-1.1z"/><path d="M9 10.5c0 2.5 2 4.5 4.5 4.5l1.2-1.2-1.6-1-.8.6a3 3 0 01-1.6-1.6l.6-.8-1-1.6z"/>',
-rain:'<path d="M7 15a4.5 4.5 0 01-.6-9A6 6 0 0118 8.5 3.8 3.8 0 0117 15zM8 18l-1 3M12 18l-1 3M16 18l-1 3"/>',wind:'<path d="M3 9h11a3 3 0 10-3-3M3 14h15a3 3 0 11-3 3M3 19h7"/>',print:'<path d="M7 9V4h10v5M7 17H5v-6h14v6h-2M7 14h10v6H7z"/>',bell:'<path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15zM10 21h4"/>',search:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',cloud:'<path d="M7 18a4.5 4.5 0 01-.6-9A6 6 0 0118 10.5 3.8 3.8 0 0117.5 18z"/>',
+rain:'<path d="M7 15a4.5 4.5 0 01-.6-9A6 6 0 0118 8.5 3.8 3.8 0 0117 15zM8 18l-1 3M12 18l-1 3M16 18l-1 3"/>',wind:'<path d="M3 9h11a3 3 0 10-3-3M3 14h15a3 3 0 11-3 3M3 19h7"/>',print:'<path d="M7 9V4h10v5M7 17H5v-6h14v6h-2M7 14h10v6H7z"/>',bell:'<path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15zM10 21h4"/>',search:'<circle cx="11" cy="11" r="6.5"/><path d="M20 20l-4.2-4.2"/>',play:'<path d="M8 5.5v13l10.5-6.5z"/>',pause:'<path d="M9 6v12M15 6v12"/>',cloud:'<path d="M7 18a4.5 4.5 0 01-.6-9A6 6 0 0118 10.5 3.8 3.8 0 0117.5 18z"/>',
 cloudoff:'<path d="M3 3l18 18"/><path d="M7 18a4.5 4.5 0 01-.6-9 6 6 0 011.7-2.7M11 5.2A6 6 0 0118 10.5a3.8 3.8 0 011.8 6.2"/><path d="M10 18h7.5"/>',
 logout:'<path d="M9 4H5v16h4M16 8l4 4-4 4M20 12H9"/>',
 leaf:'<path d="M5 19c0-9 5-14 15-14 0 9-5 15-13 15"/><path d="M5 19l8-8"/>',
@@ -1799,7 +1802,7 @@ function act(a,id,el){
    tipgo:()=>{const t=tipById(TIP.id);if(t)openTarget(t[3])},tipx:()=>{lsSet("b3-tipx",TIP.day);render()},tipsheet:()=>tipSheet(),cyc:()=>cycTask(id),opentask:()=>taskSheet(...id.split("|")),edittask:()=>taskSheet(...id.split("|")),
    deltask:()=>{const[k]=id.split("|");const f=roomF;delRecs(S.tasks,t=>t.key===k&&(f==="all"||t.room===f||t.room==="shared"),"Task")},
    addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>{const[i,g]=id.split("|");quickPhoto(i,undefined,!!g)},gbackup:()=>backupSheet(),addfurn:()=>furnSheet(),editfurn:()=>furnSheet(id),delfurn:()=>delRecs(S.furn,x=>x.id===id,"Item"),furnstarter:()=>furnStarter(),furnlb:()=>{const[rid,i]=id.split("|"),r=S.furn.find(x=>x.id===rid);if(r)lightbox(r.media||[],+i)},gofurn:()=>{bmode="furn";lsSet("build-bmode","furn");if(id)fRoom=id;go("build");render()},adddiary:()=>diarySheet(),editdiary:()=>diarySheet(id),godiary:()=>go("diary"),goexport:()=>exportSheet(),goextra:()=>go("extra"),diaryshare:()=>{const tx=diaryText(14);if(!tx){toast("No diary entries in the last 14 days.");return}shareText(tx)},diaryprint:()=>diaryPrint(),savelink:()=>personSheet(sm.pid),linkdismiss:()=>{lsSet("build-linkdis",today());render()},cycboth:()=>cycMany(((el&&el.dataset.ids)||id).split(",")),docselect:()=>{docSel=docSel?null:new Set();render()},docall:()=>{const l=docList();docSel=docSel&&docSel.size===l.length?new Set():new Set(l.map(d=>d.id));render()},docprint:()=>printSelectedDocs(),gotasks:()=>{taskF=id||"";go("tasks")},gotrades:()=>{moneySeg="trades";go("money")},pushsheet:()=>pushSheet(),pushdismiss:()=>{lsSet("build-pushdis",today());render()},restore:()=>restoreSheet(),addtrade:()=>tradeSheet(),edittrade:()=>tradeSheet(id),opentrade:()=>tradeView(id),tradecmp:()=>tradeCmp(id),quotehow:()=>quoteHowSheet(),deltrade:()=>delRecs(S.trades,x=>x.id===id,"Quote"),tradeaccept:()=>{const t=S.trades.find(x=>x.id===id);if(!t)return;confirmSheet("Accept this quote?",`${tName(t)} (${t.trade}), ${money(tVal(t))}.`,"Yes, accept",()=>{const ex=tradeStatus(t,"accepted");logAct(`Accepted the ${t.trade} quote from ${tName(t)}: ${money(tVal(t))}`,1);save();render();toast("Quote accepted."+ex.msg,ex.undo)},true)},paystage:()=>{const[tid,sid]=id.split("|"),t=S.trades.find(x=>x.id===tid),sg=t&&(t.stages||[]).find(x=>x.id===sid);if(!sg)return;confirmSheet("Mark as paid?",`${money(sg.amount)} to ${tName(t)} (${t.trade}). It is saved as paid today.`,"Yes, mark paid",()=>{const u=undoEdit(sg,{paid:true,paidOn:today()});logAct(`Paid ${money(sg.amount)} to ${tName(t)} (${t.trade})`,1);save();render();toast(`${rand(sg.amount)} marked paid.`,u)},true)},goinbox:()=>go("inbox"),gopeople:()=>go("people"),newmsg:()=>newMsgSheet(),addperson:()=>personSheet(),editperson:()=>personSheet(id),msglb:()=>{const[mid,i]=id.split("|");const m=S.msgs.find(x=>x.id===mid);if(m)lightbox(m.media||[],+i)},sharesheet:()=>shareSheet(),bkdismiss:()=>{lsSet("build-bkdis",today());render()},phdrive:()=>driveSave(phasePhotoIds(id).map((m,i)=>({media:m,name:(PSHORT[id]||"Phase")+" photo "+(i+1)+".jpg"}))),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),gosnags:()=>go("snags"),addcost:()=>costSheet(),editcost:()=>S.costs.find(x=>x.id===id)?.extra?extraSheet(null,id):costSheet(id),addextra:()=>extraSheet(id),editextra:()=>extraSheet(null,id),delextra:()=>delRecs(S.costs,c=>c.id===id,"Extra labour"),unlockextra:()=>moneyGate(()=>render()),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
-   payall:()=>{payAll=!payAll;render()},resetpays:()=>confirmSheet("Reset all payments?","This clears every builder payment, paid and planned, and the expenses made from them. You can undo it right after.","Reset payments",()=>{const ps=[...S.pays],cs=S.costs.filter(c=>c.pay);S.pays.length=0;cs.forEach(c=>S.costs.splice(S.costs.indexOf(c),1));payAll=false;save();render();toast("All builder payments reset to R 0.",()=>{ps.forEach(x=>S.pays.push(x));cs.forEach(c=>S.costs.push(c))})}),recpay:()=>recPaySheet(),weekly:()=>weeklySheet(),addpay:()=>paySheet(),editpay:()=>paySheet(id),contract:()=>contractSheet(),diaryone:()=>{const e=S.diary.find(x=>x.id===id);if(e)shareText(diaryEntryText(e))},diarylb:()=>{const[eid,i]=id.split("|"),d=S.diary.find(x=>x.id===eid);if(d)lightbox(d.media||[],+i)},cheerpick:()=>{if(perm.manage)cheerSheet()},contractors:()=>contractorsSheet(),plprint:()=>{const p=planOf(planSel);if(p)printDocs([p]);else toast("Choose a drawing first.")},rpopen:()=>{const l=S.logs.find(x=>x.id===id);if(!l)return;if(l.media?.length){lightbox(l.media,0);return}sheet(dlabel(l.date),`<p style="margin:8px 0 12px;font-size:1.05rem;line-height:1.45;white-space:pre-wrap">${esc(l.text||"")}</p><p class="muted small">${[l.who,phaseName(l.phase)].filter(Boolean).map(esc).join(" · ")}</p><div class="foot"><button type="button" class="btn block" data-go="site">Open the site log</button></div>`,(sh,close)=>{sh.querySelector("[data-go]").addEventListener("click",()=>{close();go("site")})})},attmore:()=>{lsSet("build-attall",lsGet("build-attall")==="1"?"":"1");render()},wxrefresh:()=>{toast("Updating the weather…");wxLoad(true).then(()=>{render();toast(wx&&Date.now()-wx.t<6e4?"Weather is up to date.":"Could not load the weather. Check your connection.")})},joinlink:()=>shareSheet(),iosdismiss:()=>{lsSet("build-iosdis",today());render()},ncdismiss:()=>{lsSet("build-ncdis",today());render()},gedit:()=>{gEdit=!gEdit;render()},gadd:()=>gardenNameSheet(),gren:()=>gardenNameSheet(id),gdel:()=>gardenDel(id),pedit:()=>{if(!perm.manage)return;pEdit=!pEdit;render()},padd:()=>{if(perm.manage)phaseNameSheet()},pren:()=>{if(perm.manage)phaseNameSheet(id)},pdel:()=>{if(perm.manage)phaseDel(id)},pmv:()=>{if(!perm.manage)return;const[k,d]=id.split("|");phaseMove(k,+d)},estimate:()=>estimateSheet(),typicalpay:()=>typicalPays(),
+   payall:()=>{payAll=!payAll;render()},resetpays:()=>confirmSheet("Reset all payments?","This clears every builder payment, paid and planned, and the expenses made from them. You can undo it right after.","Reset payments",()=>{const ps=[...S.pays],cs=S.costs.filter(c=>c.pay);S.pays.length=0;cs.forEach(c=>S.costs.splice(S.costs.indexOf(c),1));payAll=false;save();render();toast("All builder payments reset to R 0.",()=>{ps.forEach(x=>S.pays.push(x));cs.forEach(c=>S.costs.push(c))})}),recpay:()=>recPaySheet(),weekly:()=>weeklySheet(),addpay:()=>paySheet(),editpay:()=>paySheet(id),contract:()=>contractSheet(),diaryone:()=>{const e=S.diary.find(x=>x.id===id);if(e)shareText(diaryEntryText(e))},diarylb:()=>{const[eid,i]=id.split("|"),d=S.diary.find(x=>x.id===eid);if(d)lightbox(d.media||[],+i)},cheerpick:()=>{if(perm.manage)cheerSheet()},contractors:()=>contractorsSheet(),plprint:()=>{const p=planOf(planSel);if(p)printDocs([p]);else toast("Choose a drawing first.")},vnplay:()=>vnPlay(id),rpopen:()=>{const l=S.logs.find(x=>x.id===id);if(!l)return;if(l.media?.length){lightbox(l.media,0);return}sheet(dlabel(l.date),`<p style="margin:8px 0 12px;font-size:1.05rem;line-height:1.45;white-space:pre-wrap">${esc(l.text||"")}</p><p class="muted small">${[l.who,phaseName(l.phase)].filter(Boolean).map(esc).join(" · ")}</p><div class="foot"><button type="button" class="btn block" data-go="site">Open the site log</button></div>`,(sh,close)=>{sh.querySelector("[data-go]").addEventListener("click",()=>{close();go("site")})})},attmore:()=>{lsSet("build-attall",lsGet("build-attall")==="1"?"":"1");render()},wxrefresh:()=>{toast("Updating the weather…");wxLoad(true).then(()=>{render();toast(wx&&Date.now()-wx.t<6e4?"Weather is up to date.":"Could not load the weather. Check your connection.")})},joinlink:()=>shareSheet(),iosdismiss:()=>{lsSet("build-iosdis",today());render()},ncdismiss:()=>{lsSet("build-ncdis",today());render()},gedit:()=>{gEdit=!gEdit;render()},gadd:()=>gardenNameSheet(),gren:()=>gardenNameSheet(id),gdel:()=>gardenDel(id),pedit:()=>{if(!perm.manage)return;pEdit=!pEdit;render()},padd:()=>{if(perm.manage)phaseNameSheet()},pren:()=>{if(perm.manage)phaseNameSheet(id)},pdel:()=>{if(perm.manage)phaseDel(id)},pmv:()=>{if(!perm.manage)return;const[k,d]=id.split("|");phaseMove(k,+d)},estimate:()=>estimateSheet(),typicalpay:()=>typicalPays(),
    paypay:()=>{const x=S.pays.find(q=>q.id===id);if(!x)return;confirmSheet("Record this payment?",`${money(x.amount)} paid to the builder today.`,"Yes, record payment",()=>{const u=undoEdit(x,{paid:true,paidOn:today()});payCost(x);logAct(`Builder payment of ${money(x.amount)} recorded`,1);save();render();toast(`${rand(x.amount)} paid to the builder.`,()=>{u();payCost(x)})},true)},
    delpay:()=>{const x=S.pays.find(q=>q.id===id),lc=S.costs.find(c=>c.id==="pay_"+id);S.pays.splice(S.pays.indexOf(x),1);if(lc)S.costs.splice(S.costs.indexOf(lc),1);save();render();toast("Stage deleted.",()=>{S.pays.push(x);if(lc)S.costs.push(lc)})},
    paycost:()=>{const c=S.costs.find(x=>x.id===id),u=undoEdit(c,{paid:true});save();render();toast(`${rand(c.amount)} marked as paid.`,u)},budget:()=>moneyOK?budgetSheet():moneyGate(budgetSheet),lockmoney:()=>{lockMoney();toast("Money is locked.")},addmat:()=>matSheet(undefined,id&&phase(id)?id:undefined),editmat:()=>matSheet(id),delmat:()=>delRecs(S.mats,m=>m.id===id,"Material"),
@@ -2977,7 +2980,7 @@ const ROLE_PICK=["site","builder","owner","decor","finance","other"];
 const roleLabel=r=>(ROLES[r]||ROLES.other).label;
 const DEFAULT_PEOPLE=[["Albert","site"],["Jonathan","builder"],["Newberry","owner"],["Talana","decor"],["Audrey","finance"]];
 const READ_ACTS0=["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock","plprev","plnext","phdrive","gbackup"].concat(["goinbox","gopeople","newmsg","msglb","sharesheet"]);
-const READ_ACTS=READ_ACTS0.concat(["plprint","rpopen","contractors","dnotes","gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp","mbar","slipexport","slipview","thread","msgdec","snagexport","msgdel","msgclear","gosnags","attsheet","bmore","tipgo","tipx","tipsheet","wkgoals","pusend","pupick","tradecmp","quotehow"]);
+const READ_ACTS=READ_ACTS0.concat(["vnplay","plprint","rpopen","contractors","dnotes","gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp","mbar","slipexport","slipview","thread","msgdec","snagexport","msgdel","msgclear","gosnags","attsheet","bmore","tipgo","tipx","tipsheet","wkgoals","pusend","pupick","tradecmp","quotehow"]);
 const MONEY_ACTS=["addcost","editcost","delcost","budget","addpay","editpay","delpay","recpay","paypay","paycost","contract","typicalpay","weekly","resetpays","payall","report"];
 MONEY_ACTS.push("addtrade","edittrade","deltrade","opentrade","tradeaccept","paystage");
 const NOTE_ACTS=["addphoto","phphoto","adddoc"];
@@ -3070,43 +3073,90 @@ function inboxV(){
     return `<li class="card" style="list-style:none;margin-bottom:12px"><div class="row between" style="align-items:flex-start;gap:8px"><div class="lt">${mine?"You":esc(pName(m.from))}${un.has(m.id)?` <span class="pill sky" style="margin-left:6px">New</span>`:""}</div><span class="muted small">${ago(m.t)}</span></div>
     <div class="ls">To ${esc(toTxt)}</div>
     ${m.text?`<p style="margin:10px 0 0;white-space:pre-wrap">${esc(m.text)}</p>`:""}
+    ${m.voice?`<button type="button" class="btn vnplay" data-act="vnplay" data-id="${m.id}">${ic("play")}<span class="vnl">Play voice note</span><span class="small muted">${vnTime(m.voice.d||0)}</span></button>`:""}
     ${(m.media||[]).length?`<div class="pthumbs" style="margin-top:10px">${m.media.map((id,i)=>`<button type="button" class="etile" style="border:0;padding:0" data-act="msglb" data-id="${m.id}|${i}" aria-label="Open photo ${i+1}"><span data-m="${id}" style="position:absolute;inset:0"></span></button>`).join("")}</div>`:""}
     ${m.re?`<button type="button" class="linkbtn" data-act="thread" data-id="${esc(m.re)}" style="padding:0;min-height:32px">About: ${esc(refTitle(m.re))}</button>`:""}${askBlock(m)}
     ${readTxt?`<p class="muted small" style="margin:10px 0 0">${ic("check","sm")} ${readTxt}</p>`:""}<div class="row" style="justify-content:flex-end;margin-top:6px"><button type="button" class="btn small" data-act="msgdel" data-id="${m.id}" aria-label="${mine?"Delete this update for everyone":"Remove this update from this phone"}">${ic("trash","sm")}${mine?"Delete":"Remove"}</button></div></li>`;
   };
   return head+`<ul style="padding:0;margin:0">${list.map(card).join("")}</ul><div class="row" style="justify-content:center"><button type="button" class="linkbtn" data-act="msgclear" style="min-height:44px">Clear updates older than 30 days</button></div>`;
 }
+/* voice notes on updates: record up to 2 minutes, play back in the inbox.
+   Stored as a general file because the photo storage does not list audio; the real audio type travels with the message */
+const VN_MAX=120;
+const vnType=()=>{if(!window.MediaRecorder)return null;for(const t of["audio/mp4","audio/mp4;codecs=mp4a.40.2","audio/webm;codecs=opus","audio/webm","audio/ogg;codecs=opus"])try{if(MediaRecorder.isTypeSupported(t))return t}catch{}return ""};
+const vnTime=s=>Math.floor(s/60)+":"+String(Math.floor(s%60)).padStart(2,"0");
+function vnRecorder(box,onChange){
+  const can=!!(navigator.mediaDevices?.getUserMedia&&window.MediaRecorder);
+  if(!can){box.innerHTML="";return}
+  let rec=null,stream=null,chunks=[],t0=0,tick=0,note=null,url="";
+  const draw=()=>{
+    if(rec){box.innerHTML=`<button type="button" class="btn vnrec on" id="vnb">${ic("mic")}<span>Recording ${vnTime((Date.now()-t0)/1000)} · tap to stop</span></button>`}
+    else if(note){box.innerHTML=`<div class="vnprev"><audio controls src="${url}"></audio><button type="button" class="btn small" id="vnx" aria-label="Remove the voice note">${ic("trash","sm")}Remove</button></div>`}
+    else box.innerHTML=`<button type="button" class="btn vnrec" id="vnb">${ic("mic")}<span>Record a voice note</span></button>`;
+    box.querySelector("#vnb")?.addEventListener("click",()=>rec?stop():start());
+    box.querySelector("#vnx")?.addEventListener("click",()=>{URL.revokeObjectURL(url);note=null;url="";draw();onChange(null)});
+  };
+  const stop=()=>{try{rec&&rec.state!=="inactive"&&rec.stop()}catch{}};
+  const start=async()=>{
+    try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch{toast("Allow the microphone to record a voice note.");return}
+    const t=vnType();chunks=[];
+    try{rec=t?new MediaRecorder(stream,{mimeType:t}):new MediaRecorder(stream)}catch{rec=new MediaRecorder(stream)}
+    rec.ondataavailable=e=>{if(e.data&&e.data.size)chunks.push(e.data)};
+    rec.onstop=()=>{clearInterval(tick);stream.getTracks().forEach(x=>x.stop());const type=(rec.mimeType||t||"audio/mp4").split(";")[0],dur=Math.round((Date.now()-t0)/1000);rec=null;
+      if(!chunks.length||dur<1){toast("That was too short. Hold on a little longer.");draw();return}
+      const blob=new Blob(chunks,{type});note={blob,type,dur};url=URL.createObjectURL(blob);draw();onChange(note)};
+    t0=Date.now();rec.start(1000);buzz(10);draw();
+    tick=setInterval(()=>{if(!box.isConnected){stop();return}const s=(Date.now()-t0)/1000;if(s>=VN_MAX){stop();toast("Voice notes are up to 2 minutes.");return}const sp=box.querySelector("#vnb span");if(sp)sp.textContent=`Recording ${vnTime(s)} · tap to stop`},500);
+  };
+  draw();
+  return{stop};
+}
+let vnAud=null,vnMsg=null;
+async function vnPlay(mid){
+  const m=S.msgs.find(x=>x.id===mid);if(!m?.voice)return;
+  const mark=on=>document.querySelectorAll(`[data-act="vnplay"]`).forEach(b=>{const me=b.dataset.id===vnMsg&&on;b.classList.toggle("on",me);b.querySelector("svg use")?.setAttribute("href","#i-"+(me?"pause":"play"));const l=b.querySelector(".vnl");if(l)l.textContent=me?"Playing…":"Play voice note"});
+  if(vnAud&&vnMsg===mid){if(vnAud.paused){vnAud.play();mark(true)}else{vnAud.pause();mark(false)}return}
+  if(vnAud){vnAud.pause();mark(false)}
+  const b=await mGet(m.voice.id).catch(()=>null);
+  if(!b){toast("The voice note is still on its way. Try again in a moment.");return}
+  vnAud=new Audio(URL.createObjectURL(new Blob([b],{type:m.voice.t||"audio/mp4"})));vnMsg=mid;
+  vnAud.onended=()=>mark(false);
+  try{await vnAud.play();mark(true)}catch{mark(false);toast("This phone cannot play that voice note.")}
+}
 function newMsgSheet(everyone){
   if(!sm.code){shareSheet();return}
   if(!canSend()){toast("Your access is to receive updates.");return}
   const others=peopleList().filter(p=>p.active&&p.pid!==sm.pid);
   if(!others.length){toast("Add people first.");go("people");return}
-  const to=new Set(everyone?["all"]:[]);let files=[];
+  const to=new Set(everyone?["all"]:[]);let files=[],voice=null,vr=null;
   sheet("New update",`<form id="f" novalidate><label class="f">Send to</label>
   <div class="avs" role="group" aria-label="Send to" id="rc">${avBtn('data-r="all"',"Everyone",ic("users"),to.has("all"))}${others.map(p=>avBtn(`data-r="${p.pid}"`,p.name,esc(avIni(p.name)),false)).join("")}</div>
   <p class="hint" id="rt">${to.has("all")?"Everyone on the project will get this.":"Choose one person, a few people or everyone."}</p>
   <label class="f" for="mt">Message</label><textarea id="mt" data-autofocus class="t grow-ta" rows="3" maxlength="600" placeholder="What does the team need to know?"></textarea>${micBtn("mt","Speak the message")}
+  <div id="vnbox" class="vnbox"></div>
   <div class="photo-add"><button type="button" class="btn" id="mp">${ic("camera")}Add photo</button></div><input type="file" id="mf" accept="image/*" multiple hidden><p class="hint" id="mh"></p>
   <div class="foot"><button class="btn primary block" id="ms">Send update</button><button type="button" class="btn block" id="mw" style="margin-top:8px">${ic("chat")}Send and share on WhatsApp</button></div></form>`,(sh,close)=>{
     const paint=()=>{sh.querySelectorAll("[data-r]").forEach(b=>b.setAttribute("aria-pressed",to.has(b.dataset.r)));
       sh.querySelector("#rt").textContent=to.has("all")?"Everyone on the project will get this.":to.size?[...to].map(pName).join(", ")+(to.size===1?" will get this.":" will get this."):"Choose one person, a few people or everyone."};
     sh.querySelectorAll("[data-r]").forEach(b=>b.onclick=()=>{const k=b.dataset.r;if(k==="all"){if(to.has("all"))to.clear();else{to.clear();to.add("all")}}else{to.delete("all");if(to.has(k))to.delete(k);else to.add(k)}paint()});
+    vr=vnRecorder(sh.querySelector("#vnbox"),n=>{voice=n;ready()});
     sh.querySelector("#mp").onclick=()=>sh.querySelector("#mf").click();
     sh.querySelector("#mf").onchange=e=>{files=[...files,...e.target.files].slice(0,6);e.target.value="";sh.querySelector("#mh").textContent=files.length?files.length+" photo"+(files.length===1?"":"s")+" added.":""};
     const send=async wa=>{
       const tx=sh.querySelector("#mt").value.trim();
       if(!to.size){toast("Choose who to send it to.");return}
-      if(!tx&&!files.length){showErr(sh,sh.querySelector("#mt"),"Write a message or add a photo.");return}
+      if(!tx&&!files.length&&!voice){showErr(sh,sh.querySelector("#mt"),"Write a message, record a voice note or add a photo.");return}
       const target=[...to],names=to.has("all")?"":target.map(pName).join(", ");
       if(wa){const one=target.length===1&&!to.has("all")?personOf(target[0]):null;
-        const txt=`${S.settings.name}: update from ${me||sm.pname}\n${tx}${files.length?"\n(with "+files.length+" photo"+(files.length===1?"":"s")+")":""}\n\nOpen the app to see it: ${location.origin+location.pathname}`;
+        const txt=`${S.settings.name}: update from ${me||sm.pname}\n${tx}${files.length?"\n(with "+files.length+" photo"+(files.length===1?"":"s")+")":""}${voice?"\n(with a voice note)":""}\n\nOpen the app to see it: ${location.origin+location.pathname}`;
         window.open(one&&one.phone?waUrl(one.phone,txt):"https://wa.me/?text="+encodeURIComponent(txt),"_blank")}
       const b1=sh.querySelector("#ms");b1.disabled=true;b1.textContent="Sending…";
       const ids=[];try{for(const f of files){const blob=await prepPhoto(f,PSIZES[psize][1]),mid=uid();await mPut(mid,blob);queueMedia(mid);ids.push(mid)}}catch{}
-      const m={id:uid(),from:sm.pid,t:Date.now(),to:to.has("all")?["all"]:target,text:tx,media:ids};
-      S.msgs.push(m);notifySend(m.to,"Update from "+(me||sm.pname||"the team"),(tx||"Sent you a photo").slice(0,100),"inbox");save();close();render();toast("Update sent"+(names?" to "+names:" to everyone")+".",()=>{const i=S.msgs.indexOf(m);if(i>=0)S.msgs.splice(i,1)});syncNow();
+      let vo=null;if(voice){try{const vid=uid();await mPut(vid,new Blob([voice.blob],{type:"application/octet-stream"}));queueMedia(vid);vo={id:vid,t:voice.type,d:voice.dur}}catch{}}
+      const m={id:uid(),from:sm.pid,t:Date.now(),to:to.has("all")?["all"]:target,text:tx,media:ids,...(vo?{voice:vo}:{})};
+      S.msgs.push(m);notifySend(m.to,"Update from "+(me||sm.pname||"the team"),(tx||(vo?"Sent you a voice note":"Sent you a photo")).slice(0,100),"inbox");save();close();render();toast("Update sent"+(names?" to "+names:" to everyone")+".",()=>{const i=S.msgs.indexOf(m);if(i>=0)S.msgs.splice(i,1)});syncNow();
     };
-    const ready=()=>{const ok=to.size&&(sh.querySelector("#mt").value.trim()||files.length);["#ms","#mw"].forEach(i=>sh.querySelector(i).disabled=!ok)};
+    const ready=()=>{const ok=to.size&&(sh.querySelector("#mt").value.trim()||files.length||voice);["#ms","#mw"].forEach(i=>sh.querySelector(i).disabled=!ok)};
     sh.querySelector("#mt").addEventListener("input",ready);sh.querySelectorAll("[data-r]").forEach(b=>b.addEventListener("click",ready));sh.querySelector("#mf").addEventListener("change",ready);ready();
     sh.querySelector("#f").onsubmit=e=>{e.preventDefault();send(false)};
     sh.querySelector("#mw").onclick=()=>send(true);
