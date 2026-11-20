@@ -224,9 +224,9 @@ html{overscroll-behavior-y:contain}
 header.top,#view{transition:opacity .2s}body.ptr-dim header.top,body.ptr-dim #view{opacity:var(--ptrdim,.12)}
 #ptr .ptr-road{position:absolute;left:0;right:0;top:8px;height:46px;border-bottom:2px dashed color-mix(in srgb,var(--ink) 30%,transparent);-webkit-mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent);mask:linear-gradient(90deg,transparent,#000 12%,#000 88%,transparent)}#ptr .ptr-tlb svg{filter:drop-shadow(0 2px 4px rgba(0,0,0,.55))}
 #ptr .ptr-tlb{position:absolute;bottom:0;width:76px;height:44px;left:calc(var(--p,0) * (100% - 76px))}#ptr .ptr-tlb svg{display:block;width:100%;height:100%;overflow:visible}
-#ptr .wh{transform-box:fill-box;transform-origin:center;transform:rotate(calc(var(--p,0) * 540deg))}#ptr .drm{transform:translateX(calc(var(--p,0) * 28px))}#ptr.spin .drm{animation:ptrdrum .7s linear infinite}@keyframes ptrdrum{from{transform:translateX(0)}to{transform:translateX(14px)}}
+#ptr .wh{transform-box:fill-box;transform-origin:center;transform:rotate(calc(var(--p,0) * 540deg))}#ptr .drm{transform:translateX(calc(var(--p,0) * 28px))}#ptr.spin .drm{animation:ptrdrum 1s linear infinite}@keyframes ptrdrum{from{transform:translateX(0)}to{transform:translateX(14px)}}
 #ptr .ptr-tx{position:absolute;left:0;right:0;bottom:5px;text-align:center;font:600 .75rem var(--body);color:var(--ink);text-shadow:0 1px 3px var(--paper),0 0 8px var(--paper)}#ptr.ready .ptr-tx{color:var(--accent)}
-#ptr.spin{opacity:1}#ptr.spin .ptr-tlb{animation:ptrdrive 1.5s linear infinite}#ptr.spin .wh{animation:ptrwh .45s linear infinite}#ptr.spin .ptr-tlb svg{animation:ptrbob .22s ease-in-out infinite alternate}
+#ptr.spin{opacity:1}#ptr.spin .ptr-tlb{animation:ptrdrive 2.15s linear infinite}#ptr.spin .wh{animation:ptrwh .64s linear infinite}#ptr.spin .ptr-tlb svg{animation:ptrbob .22s ease-in-out infinite alternate}
 @keyframes ptrdrive{from{left:-80px}to{left:100%}}@keyframes ptrwh{from{transform:rotate(0)}to{transform:rotate(360deg)}}@keyframes ptrbob{to{transform:translateY(-1.2px)}}
 @media (prefers-reduced-motion:reduce){#ptr.spin .ptr-tlb{animation:none;left:calc(50% - 38px)}#ptr.spin .wh,#ptr.spin .ptr-tlb svg,#ptr.spin .drm{animation:none}}
 .fab-wrap{position:fixed;left:16px;bottom:calc(88px + env(safe-area-inset-bottom));z-index:30;display:flex;flex-direction:column;align-items:flex-start;gap:10px}
@@ -2689,12 +2689,12 @@ async function autoUpdate(){
 }
 let refreshing=false;
 async function refreshApp(){
-  if(refreshing)return;refreshing=true;const el=$("#ptr");el.classList.add("spin");el.style.transform="translate(-50%,10px)";document.body.classList.add("ptr-dim");document.body.style.removeProperty("--ptrdim");el.style.removeProperty("--p");el.querySelector(".ptr-tx").textContent="Refreshing…";
+  if(refreshing)return;refreshing=true;const el=$("#ptr");el.classList.add("spin");el.style.transform="translate(-50%,10px)";document.body.classList.add("ptr-dim");document.body.style.removeProperty("--ptrdim");el.style.removeProperty("--p");el.querySelector(".ptr-tx").textContent="Building Newberry";
   const t0=Date.now();
   try{await syncNow()}catch{}
   render();
   const nv=await newVersion();
-  await new Promise(r=>setTimeout(r,Math.max(0,1500-(Date.now()-t0))));
+  await new Promise(r=>setTimeout(r,Math.max(0,2150-(Date.now()-t0))));
   el.classList.remove("spin");el.style.transform="";el.style.opacity="";document.body.classList.remove("ptr-dim");document.body.style.removeProperty("--ptrdim");el.querySelector(".ptr-tx").textContent="Pull to refresh";refreshing=false;
   if(nv)updateNotice();else toast(sm.code?"Synced. Everything is up to date.":"Refreshed. You have the latest version.");
 }
