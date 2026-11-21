@@ -424,8 +424,8 @@ body.previewing{padding-top:calc(48px + env(safe-area-inset-top,0px))}
 .segc.ptabs .ptab .tn{font-weight:600;opacity:.8;font-variant-numeric:tabular-nums}
 .segc.ptabs .ptab.extra{color:var(--accent)}
 .segc.ptabs .ptab.extra[aria-pressed="true"]{background:var(--accent);color:var(--accent-ink,#fff)}
-.segc.ptabs .ptab.mats{color:var(--green);font-weight:600}
-.segc.ptabs .ptab.mats[aria-pressed="true"]{background:var(--green);color:#fff;border-color:var(--green)}
+.segc.ptabs .ptab.mats{font-weight:600}
+
 .na-mats .ptab.mats{display:none!important}
 .na-money .ptab.extra{display:none!important}
 .xsum{display:flex;gap:10px;margin:0 0 10px}.xsum>div{flex:1;background:var(--card,#fff);border:1px solid var(--line,#e6dfd2);border-radius:14px;padding:10px 12px}.xsum b{display:block;font-size:1.1rem}
@@ -798,6 +798,16 @@ div.rph{gap:6px}div.rph .eyebrow{white-space:nowrap;overflow:hidden;text-overflo
 div.rph .rpa{display:flex;align-items:center;gap:4px;margin-left:auto;flex:none}
 div.rph .rpshow{width:40px;height:40px;border-radius:50%;border:1.5px solid var(--accent);background:transparent;color:var(--accent);display:grid;place-items:center;cursor:pointer;padding:0;position:relative}div.rph .rpshow::after{content:"";position:absolute;inset:-2px}
 div.rph .rpall{display:inline-flex;align-items:center;gap:2px;min-height:44px;padding:0 0 0 6px;background:none;border:0;color:var(--accent);font:600 .9rem var(--body);white-space:nowrap;cursor:pointer}
+.phall{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:44px;margin:8px 0 0;background:none;border:0;color:var(--accent);font:600 .9rem var(--body);cursor:pointer}.phall svg{transform:rotate(90deg);transition:transform .2s}.phall.open svg{transform:rotate(-90deg)}
+.tgh{display:flex;align-items:center;justify-content:space-between;margin:16px 4px 6px;font:700 .78rem var(--body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.tgh b{font-weight:600;letter-spacing:0;color:var(--muted)}
+@media (max-width:899px){.fbar{background:color-mix(in srgb,var(--paper) 97%,transparent)}}
+.mtools{display:flex;gap:6px;align-items:center;margin:0 0 10px}.mtools .btn{flex:none;min-height:44px;padding:0 11px;gap:5px}
+.mphw{position:relative;flex:1;min-width:0;display:block}.mphw select{width:100%;min-height:44px;appearance:none;-webkit-appearance:none;border:1px solid var(--line);border-radius:99px;background:var(--sheet);color:var(--ink);font:600 .9rem var(--body);padding:0 34px 0 14px;text-overflow:ellipsis}.mphw svg{position:absolute;right:12px;top:50%;transform:translateY(-50%) rotate(90deg);pointer-events:none;color:var(--accent)}
+.sr-only{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.since{display:flex;align-items:stretch;gap:0;margin:0 0 10px;border:1px solid color-mix(in srgb,var(--accent) 45%,var(--line));border-radius:16px;background:color-mix(in srgb,var(--accent) 9%,var(--sheet));overflow:hidden}
+.since-b{flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:10px 6px 10px 12px;background:none;border:0;color:var(--ink);text-align:left;font:inherit;cursor:pointer;min-height:56px}
+.since-b .grow{display:flex;flex-direction:column;gap:2px;min-width:0}.since-b b{font-size:.92rem}.since-b .grow span{font-size:.85rem;color:var(--muted)}.since-b .row-ic{color:var(--accent)}
+.since-x{flex:none;width:44px;background:none;border:0;color:var(--muted);cursor:pointer;display:grid;place-items:center}
 </style>
 </head>
 <body>
@@ -1050,7 +1060,7 @@ const rooms=()=>S.settings.rooms;
 const FROOMS=[["ms1","MS 1"],["ms2","MS 2"],["spier","Spier"],["rooibos","Rooibos"]];
 const roomName=id=>{const f=FROOMS.find(r=>r[0]===id);return f?f[1]:roomName0(id)};
 const findT=id=>S.tasks.find(x=>x.id===id)||S.furn.find(x=>x.id===id),isFurn=id=>S.furn.some(x=>x.id===id);
-const roomName0=id=>id==="both"?"Both classrooms":id==="shared"?"Shared":rooms().find(r=>r.id===id)?.name||"Classroom";
+const roomName0=id=>id==="both"?"Both classrooms":id==="shared"?"Whole site":rooms().find(r=>r.id===id)?.name||"Classroom";
 const roomNo=id=>rooms().findIndex(r=>r.id===id)+1;
 const tasksOf=id=>S.tasks.filter(t=>!id||id==="all"||t.room===id);
 const doneN=l=>l.filter(t=>t.status==="done").length;
@@ -1254,7 +1264,7 @@ function render(){
   if((tab==="money"||tab==="extra")&&!moneyOK)tab="build";
   document.querySelectorAll("nav.tabs button").forEach(b=>b.dataset.tab===navTab(tab)?b.setAttribute("aria-current","page"):b.removeAttribute("aria-current"));
   $("#pname").textContent=S.settings.name||"Newberry Build";
-  document.title=`${({build:"Build",home:"Overview",money:"Money",more:"More",phase:"Phase",plans:"Plans",docs:"Documents",mats:"Materials",site:"Site log",inbox:"Updates",people:"People",tasks:"Tasks",diary:"Site diary",garden:"Garden",extra:"Extra labour",report:"Report",week:"Report",pupd:"Report",weather:"Weather",photos:"Photos",snags:"Snags"})[tab]} · Newberry Build 3`;
+  document.title=`${({build:"Build",home:"Overview",money:"Money",more:"More",phase:"Phase",plans:"Plans",docs:"Documents",mats:"Materials",site:"Site log",inbox:"Updates",people:"People",tasks:"Tasks",diary:"Daily diary",garden:"Garden",extra:"Extra labour",report:"Report",week:"Report",pupd:"Report",weather:"Weather",photos:"Photos",snags:"Snags"})[tab]} · Newberry Build 3`;
   $("#tdot").hidden=!S.tasks.some(t=>t.status==="stuck");
   if(tab!=="docs")docSel=null;paintBell();document.body.classList.toggle("nrep",!canReport());const v=$("#view");v.innerHTML=({build:buildV,home,phase:phaseV,plans:plansV,docs:docsV,money:moneyV,mats:matsV,site:siteV,more,inbox:inboxV,people:peopleV,tasks:tasksV,diary:diaryV,garden:gardenV,extra:extraV,report:reportV,week:weekV,pupd:pupdV,weather:weatherV,photos:photosV,snags:snagsV})[tab]();
   compactRows(v);
@@ -1262,9 +1272,9 @@ function render(){
   v.querySelectorAll("[data-go]").forEach(el=>el.addEventListener("click",()=>{if(el._lp){el._lp=false;return}const[t,f]=el.dataset.go.split(":");if(t==="phase"&&f)curPh=f;if(t==="site"&&f)logSub=f;if(t==="mats"&&f)matF=f;go(t)}));
   v.querySelectorAll("[data-rf]").forEach(el=>el.addEventListener("click",()=>{roomF=el.dataset.rf;render()}));
   v.querySelectorAll("details.gd").forEach(d=>d.addEventListener("toggle",()=>{if(openPh===null)openPh=new Set(curPhases());d.open?openPh.add(d.dataset.ph):openPh.delete(d.dataset.ph)}));
-  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;if(k==="plan"){planSel=val;PV.plan="";PV.had=false}if(k==="doc")docF=val;if(k==="mseg")moneySeg=val;if(k==="tf")taskF=val;if(k==="df")diaryF=val;if(k==="pf")photoF=val;if(k==="trv"){trVw=val;lsSet("b3-trv",val)}if(k==="trf")trF=val;if(k==="sm")slipM=val;if(k==="sg")snagF=val;if(k==="sc")slipC=val;if(k==="pt")phTab=val;if(k==="mph")matPh=val;if(k==="bm"){bmode=val;lsSet("build-bmode",val)}if(k==="fr")fRoom=val;if(k==="fv")fView=val;render()}));
+  v.querySelectorAll("[data-sub]").forEach(el=>el.addEventListener("click",()=>{const[k,val]=el.dataset.sub.split(":");if(k==="log")logSub=val;if(k==="mat")matF=val;if(k==="sec"){matSec=val;matF="all"}if(k==="cost")costF=val;if(k==="curve")curveSub=val;if(k==="plan"){planSel=val;PV.plan="";PV.had=false}if(k==="doc")docF=val;if(k==="mseg")moneySeg=val;if(k==="tf")taskF=val;if(k==="df")diaryF=val;if(k==="pf")photoF=val;if(k==="trv"){trVw=val;lsSet("b3-trv",val)}if(k==="trf")trF=val;if(k==="sm")slipM=val;if(k==="sg")snagF=val;if(k==="sc")slipC=val;if(k==="pt")phTab=val;if(k==="mph")matPh=val;if(k==="bm"){bmode=val;lsSet("build-bmode",val)}if(k==="fr")fRoom=val;if(k==="fv")fView=val;render()}));v.querySelector("#mphsel")?.addEventListener("change",e=>{matPh=e.target.value;render()});
   v.querySelectorAll("li.tap").forEach(el=>{el.setAttribute("role","button");el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();el.click()}})});
-  hydrate(v);hydrateBg(v);countUp(v);fitPhaseNames(v);document.documentElement.style.setProperty("--hdrh",(document.querySelector("header.top")?.offsetHeight||64)+"px");if(tab==="plans")initPlanView();if(tab==="week")wkBA();if(tab==="pupd")pupdInit();
+  hydrate(v);hydrateBg(v);countUp(v);fitPhaseNames(v);appBadge();document.documentElement.style.setProperty("--hdrh",(document.querySelector("header.top")?.offsetHeight||64)+"px");if(tab==="plans")initPlanView();if(tab==="week")wkBA();if(tab==="pupd")pupdInit();
   v.querySelectorAll("svg.chart").forEach(wireChart);if(lvl("tasks")>=2)v.querySelectorAll("ul.reord").forEach(ul=>holdDrag(ul,curPh));
   if(lvl("tasks")>=2){v.querySelectorAll(".ptile").forEach(tl=>longPress(tl,()=>tileMenu(tl)));v.querySelectorAll(".list li").forEach(li=>{const bs=[...li.querySelectorAll('[data-act="cyc"],[data-act="cycboth"]')];if(bs.length){const q=li.querySelector('[data-act="opentask"],[data-act="edittask"]');swipeRow(li,()=>cycMany(bs.flatMap(b=>(b.dataset.ids||b.dataset.id).split(","))),q?()=>taskQuick(q.dataset.id):null)}})}
   setSync(syncState);
@@ -1315,8 +1325,8 @@ function cheerSheet(){
 }
 function cheerLine(all,p){
   const wk=addDays(today(),-6),n=all.filter(t=>t.status==="done"&&t.doneOn&&t.doneOn>=wk).length;
-  const txt=p>=100?"The build is complete. Congratulations, team!":n>0?n+(n===1?" task":" tasks")+" finished in the last 7 days.":p>=90?"Nearly home. Look how far you have come.":p>=50?"Past halfway. The home is taking shape.":p>=25?"The foundations are in. Every task brings it closer.":"Every great home starts with the first steps.";
-  return `<div class="sub fc" style="margin-top:8px">${ic("trend","sm")} ${txt}</div>${perm.manage?`<button type="button" class="sub fc ch chb" data-act="cheerpick" aria-label="Change the saying">${esc(cheerText(p))} ${ic("edit","sm")}</button>`:`<div class="sub fc ch">${esc(cheerText(p))}</div>`}`;
+  const txt=p>=100?"The build is complete. Congratulations, team!":n>0?n+(n===1?" task":" tasks")+" finished in the last 7 days.":"";
+  return `${txt?`<div class="sub fc" style="margin-top:8px">${ic("trend","sm")} ${txt}</div>`:""}${perm.manage?`<button type="button" class="sub fc ch chb" data-act="cheerpick" aria-label="Change the saying">${esc(cheerText(p))} ${ic("edit","sm")}</button>`:`<div class="sub fc ch">${esc(cheerText(p))}</div>`}`;
 }
 function fcLine(){
   const f=forecast();if(!f)return"";
@@ -1549,7 +1559,7 @@ function home(){
   ${todayCard()}
   ${tipCard()}
   ${(()=>{const f=S.furn.length&&lvl("furn")>=1?fStats(S.furn):null,bar=(go,l,v)=>`<button type="button" class="ovb" ${go}><span class="ovl">${l}</span><b>${v}%</b><span class="meter"><i style="width:${v}%"></i></span></button>`;
-   return `<section class="card ovs"><div class="row between" style="gap:10px;align-items:flex-start"><div><div class="eyebrow" style="margin:0">Schedule</div><div class="big" style="font-size:1.7rem;line-height:1.1">${left===null?"–":left>=0?left:-left}<small style="font-size:.9rem;font-weight:500"> ${left===null?"":left>=0?"working days to go":"working days past target"}</small></div><div class="muted small">${S.settings.start?dshort(S.settings.start):"?"} to ${S.settings.target?dshort(S.settings.target):"?"}</div></div><div class="row wr" style="gap:6px;justify-content:flex-end">${sched.chip}</div></div>
+   return `<section class="card ovs"><div class="row between" style="gap:10px;align-items:flex-start"><div><div class="eyebrow" style="margin:0">Schedule</div><div class="big" style="font-size:1.7rem;line-height:1.1">${left===null?"–":left>=0?left:-left}<small style="font-size:.9rem;font-weight:500"> ${left===null?"":left>=0?"work days left":"work days over"}</small></div><div class="muted small">${S.settings.start?dshort(S.settings.start):"?"} to ${S.settings.target?dshort(S.settings.target):"?"}</div></div><div class="row wr" style="gap:6px;justify-content:flex-end">${sched.chip}</div></div>
    <div class="ovbs">${bar('data-go="build"',R.length>1?"Classrooms":esc(R[0].name),p)}${f?bar('data-act="gofurn"',"Furniture",f.p):""}</div>
    <div class="row wr" style="gap:8px;margin-top:12px">${issues?`<button type="button" class="chip tone-bad" data-go="snags" aria-pressed="false">${ic("alert","sm")}${issues} snag${issues===1?"":"s"} to fix</button>`:""}${toOrder?`<button type="button" class="chip tone-info" data-go="mats:all" aria-pressed="false">${ic("truck","sm")}${toOrder} to order</button>`:""}${issues||toOrder?"":`<span class="small muted">${ic("check","sm")} No open snags and nothing to order.</span>`}</div></section>`})()}
   ${nextCard(nu,R)}
@@ -1567,7 +1577,7 @@ function todayCard(){
   const row=({t,merged,sib})=>{const od=t.due&&t.due<td,meta=[merged||t.room==="shared"?"":roomName(t.room),PSHORT[t.phase]||"",t.due?(t.due===td?"Today":(od?"Overdue ":"")+dshort(t.due)):"",t.assignee&&!useMine?pName(t.assignee):""].filter(Boolean).join(" · ");
     const tick=merged?`<button class="st ${t.status}" data-act="cycboth" data-id="${t.id}" data-ids="${sib.map(x=>x.id).join(",")}" aria-label="${esc(t.title)}, both classrooms: ${stLabel(t.status)}. Tap to tick done or undo.">${stIcon(t.status)||ic("check")}</button>`:`<button class="st ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${esc(t.title)}: ${stLabel(t.status)}. Tap to tick done or undo.">${stIcon(t.status)||ic("check")}</button>`;
     return `<li>${tick}<div class="grow tap" tabindex="0" data-act="opentask" data-id="${t.key}|${t.room}"><div class="lt">${esc(t.title)}</div><div class="ls ${od||t.status==="stuck"?"bad":""}">${esc(meta)}</div></div></li>`};
-  const dRow=lvl("diary")>=2&&!S.diary.some(e=>e.date===td)?`<li class="tap" tabindex="0" data-act="adddiary"><span class="row-ic">${ic("book")}</span><div class="grow"><div class="lt">Fill in today's site diary</div><div class="ls">Weather, people on site and the work done</div></div>${ic("chev")}</li>`:"";
+  const dRow=lvl("diary")>=2&&!S.diary.some(e=>e.date===td)?`<li class="tap" tabindex="0" data-act="adddiary"><span class="row-ic">${ic("book")}</span><div class="grow"><div class="lt">Fill in today's daily diary</div><div class="ls">Weather, people on site and the work done</div></div>${ic("chev")}</li>`:"";
   const shown=rows.slice(0,3),more=rows.length-shown.length;
   return `<section class="card today brief" aria-label="Today">${briefHead()}<div class="row between" style="margin:12px 0 2px"><div class="eyebrow" style="margin:0">${useMine?"Your day":"Due today and overdue"}</div>${rows.length?`<span class="small muted">${rows.length} task${rows.length===1?"":"s"}</span>`:""}</div>${rows.length||dRow?`<ul class="list">${shown.map(row).join("")}${dRow}</ul>`:`<p class="muted small" style="margin:6px 0 4px">Nothing due today. All clear.</p>`}${more>0?`<button type="button" class="linkbtn" data-act="gotasks" data-id="${useMine?"me":"all"}" style="padding:0;min-height:36px">and ${more} more</button>`:""}</section>`;
 }
@@ -1580,7 +1590,7 @@ function allPhotos(){
   if(lvl("diary")>=1)S.diary.forEach(e=>(e.media||[]).forEach(m=>add(m,"_diary",(e.mdate||{})[m]||e.date)));
   return out.sort((a,b)=>b.date.localeCompare(a.date));
 }
-const photoName=k=>k==="_diary"?"Site diary":k===""?"Other":PSHORT[k]||"Other";
+const photoName=k=>k==="_diary"?"Daily diary":k===""?"Other":PSHORT[k]||"Other";
 function photoGroups(){
   const g={};allPhotos().forEach(p=>(g[p.ph]=g[p.ph]||[]).push(p));
   return[...PH.map(p=>p[0]),"","_diary"].filter(k=>g[k]).map(k=>[k,g[k]]);
@@ -1592,7 +1602,7 @@ function photosV(){
   const chips=[["all","All · "+total],...gr.map(([k,a])=>[k,photoName(k)+" · "+a.length])];
   const body=shown.map(([k,a])=>`<section class="phg"><div class="row between"><h3 style="color:${PCOL[k]||"var(--accent)"}">${esc(photoName(k))}</h3><span class="small muted">${a.length>1?`<button type="button" class="linkbtn" data-act="phcmp" data-id="${esc(k)}" style="padding:0 10px 0 0;min-height:28px;font-size:.8rem">Before and after</button>`:""}${a.length&&k&&k!=="_diary"&&phase(k)&&canPick()?`<button type="button" class="linkbtn" data-act="phcover" data-id="${esc(k)}" style="padding:0 10px 0 0;min-height:28px;font-size:.8rem">Banner</button>`:""}${a.length}</span></div><div class="ptg">${a.map(p=>`<button type="button" class="mtile" data-act="phtlb" data-id="${idx++}" aria-label="Open photo or video, ${esc(photoName(k))}${p.date?", "+dshort(p.date):""}"><span data-m="${p.m}" style="position:absolute;inset:0"></span>${p.date?`<small class="pdt">${dshort(p.date)}</small>`:""}</button>`).join("")}</div></section>`).join("");
   return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Photos</h2></div><button class="btn primary" data-act="addphoto">${ic("camera")}Add</button></div>
-  ${total?`<div class="chips scroll fbar" role="group" aria-label="Show photos of">${chips.map(([k,l])=>`<button type="button" class="chip" data-sub="pf:${k}" aria-pressed="${f===k}">${esc(l)}</button>`).join("")}</div>${body}`:empty("image","No photos yet","Photos and videos from the site log, tasks and the site diary are collected here, grouped by phase.",`<button class="btn primary" data-act="addphoto">${ic("camera")}Add the first photo</button>`)}<div class="fbar-sp"></div>`;
+  ${total?`<div class="chips scroll fbar" role="group" aria-label="Show photos of">${chips.map(([k,l])=>`<button type="button" class="chip" data-sub="pf:${k}" aria-pressed="${f===k}">${esc(l)}</button>`).join("")}</div>${body}`:empty("image","No photos yet","Photos and videos from the site log, tasks and the daily diary are collected here, grouped by phase.",`<button class="btn primary" data-act="addphoto">${ic("camera")}Add the first photo</button>`)}<div class="fbar-sp"></div>`;
 }
 /* ---------- the week, ready to send ---------- */
 function weekText(){
@@ -1609,7 +1619,7 @@ function weekText(){
   const flags=[od?od+" overdue":"",stuck?stuck+" stuck":"",iss?iss+" open issue"+(iss===1?"":"s"):""].filter(Boolean);
   L.push(flags.length?"Needs attention: "+flags.join(", ")+".":"Nothing needs attention.");
   if(lvl("diary")>=1){const w=S.diary.filter(e=>e.date>=wk),days=new Set(w.map(e=>e.date)).size,rain=new Set(w.filter(e=>e.weather==="rain").map(e=>e.date)).size,lost={};w.forEach(e=>{lost[e.date]=Math.max(lost[e.date]||0,lostHrs(e))});
-    if(days)L.push("Site diary: "+days+" day"+(days===1?"":"s")+" logged, "+rain+" rain day"+(rain===1?"":"s")+", "+hrsTxt(Object.values(lost).reduce((a,b)=>a+b,0))+" lost to delays.")}
+    if(days)L.push("Daily diary: "+days+" day"+(days===1?"":"s")+" logged, "+rain+" rain day"+(rain===1?"":"s")+", "+hrsTxt(Object.values(lost).reduce((a,b)=>a+b,0))+" lost to delays.")}
   if(ph)L.push(ph+" photo"+(ph===1?"":"s")+" or video"+(ph===1?"":"s")+" added.");
   L.push("",diaryFollow());
   return L.join("\n");
@@ -1696,18 +1706,19 @@ function buildMain(){
   const all=G(BT()),d=doneN(all),p=pct(d,all.length),cur=curPhases()[0],sched=schedule();
   const left=S.settings.target?workDays(today(),S.settings.target):null;
   const can=perm.manage&&lvl("tasks")>=2;if(!can)pEdit=false;
+  const phAll=lsGet("build-allph")==="1",ci=Math.max(0,PHS.findIndex(x=>x[0]===cur)),ph0=Math.max(0,Math.min(ci,PHS.length-3));
   const tiles=PHS.map(([id,name,icon],i)=>{
     const ts=G(S.tasks.filter(t=>t.phase===id)),dn=doneN(ts),st=ts.filter(t=>t.status==="stuck").length,ph=phasePhoto(id),full=ts.length>0&&dn===ts.length,rs=st>0?"stuck":full?"full":(dn>0||ts.some(t=>t.status==="doing"||t.status==="check"))?"doing":"none";
     const tile=`<button type="button" class="ptile ${ph?"has":""} ${id===cur?"cur":""}" data-go="phase:${id}" style="--pc:${PCOL[id]};--i:${i}" aria-label="${esc(name)}: ${dn} of ${ts.length} tasks done${st?", "+st+" stuck":""}">${ph?`<span class="tbg" data-bg="${ph}"></span>`:""}${st?`<span class="pbadge">${st}</span>`:full?`<span class="pbadge ok">${ic("check","sm")}</span>`:""}<span class="pi"><span class="pring ${full?"full":""} rs-${rs}">${ringSvg(pct(dn,ts.length))}<span class="pav">${ic(icon)}</span></span><b>${esc(PSHORT[id])}</b><span class="pq">${dn}/${ts.length}</span></span></button>`;
-    return pEdit?`<div class="gtw">${tile}<div class="gtb"><button type="button" class="btn small" data-act="pmv" data-id="${id}|-1" aria-label="Move ${esc(name)} earlier" ${i===0?"disabled":""}>${ic("left")}</button><button type="button" class="btn small" data-act="pmv" data-id="${id}|1" aria-label="Move ${esc(name)} later" ${i===PHS.length-1?"disabled":""}>${ic("right")}</button><button type="button" class="btn small" data-act="pren" data-id="${id}">Rename</button><button type="button" class="btn small danger" data-act="pdel" data-id="${id}">Remove</button></div></div>`:tile}).join("")+(pEdit?`<div class="gtw"><button type="button" class="ptile gadd" data-act="padd" aria-label="Add a phase"><span class="pi"><span class="pring"><span class="pav">${ic("plus")}</span></span><b>Add phase</b></span></button></div>`:"");
+    return pEdit?`<div class="gtw">${tile}<div class="gtb"><button type="button" class="btn small" data-act="pmv" data-id="${id}|-1" aria-label="Move ${esc(name)} earlier" ${i===0?"disabled":""}>${ic("left")}</button><button type="button" class="btn small" data-act="pmv" data-id="${id}|1" aria-label="Move ${esc(name)} later" ${i===PHS.length-1?"disabled":""}>${ic("right")}</button><button type="button" class="btn small" data-act="pren" data-id="${id}">Rename</button><button type="button" class="btn small danger" data-act="pdel" data-id="${id}">Remove</button></div></div>`:tile}).filter((x,k)=>pEdit||phAll||(k>=ph0&&k<ph0+3)).join("")+(pEdit?`<div class="gtw"><button type="button" class="ptile gadd" data-act="padd" aria-label="Add a phase"><span class="pi"><span class="pring"><span class="pav">${ic("plus")}</span></span><b>Add phase</b></span></button></div>`:"");
   const rec=logsNewest().filter(l=>l.kind!=="issue").slice(0,6);
   const toOrder=S.mats.filter(m=>needsOrder(m)&&(m.qty>0||secOf(m)!=="stock")).length,issues=S.logs.filter(l=>l.kind==="issue"&&!l.fixed).length;
   const mineN=sm.code?uk(S.tasks.filter(t=>asgHas(t,sm.pid)&&t.status!=="done")):0,openN=uk(S.tasks.filter(t=>t.status!=="done")),photoN=allPhotos().length;
   const pl=(attr,icon,label,sub,hot)=>`<button type="button" class="sc" ${attr}>${ic(icon)}<span class="scl"><span>${label}</span><small class="${hot?"hot":""}">${sub}</small></span></button>`;
-  const scs=`<div class="scs">${pl('data-go="tasks"',"check","Tasks",mineN?mineN+" for you":openN+" open",mineN)}${pl('data-go="mats"',"truck","Materials",toOrder?toOrder+" to order":"Nothing to order",toOrder)}${pl('data-go="photos"',"image","Photos",photoN?photoN+(photoN===1?" photo":" photos"):"No photos yet")}${pl('data-go="plans"',"map","Plans","Drawings")}${pl('data-act="contractors"',"users","Contractors",S.sups.length?S.sups.length+(S.sups.length===1?" contact":" contacts"):"No contacts yet")}${pl('data-act="bmore"',"dots","More","Snags, log, diary")}</div>`;
+  const scs=`<div class="scs">${pl('data-go="tasks"',"check","Tasks",mineN?mineN+" for you":openN+" open",mineN)}${pl('data-go="mats"',"truck","Materials",toOrder?toOrder+" to order":"Nothing to order",toOrder)}${pl('data-go="photos"',"image","Photos",photoN?photoN+(photoN===1?" photo":" photos"):"No photos yet")}${pl('data-go="plans"',"map","Plans","Drawings")}${pl('data-act="contractors"',"users","Contractors",S.sups.length?S.sups.length+(S.sups.length===1?" contact":" contacts"):"No contacts yet")}${pl('data-act="bmore"',"book","Site records","Snags, log, diary")}</div>`;
   return `<section class="bhero"><div class="bh1"><div><div class="eyebrow">${left===null?"Whole build":left>=0?"Work days left":"Work days over"}</div><div class="big" ${left===null?`data-count="${p}"`:""}>${left===null?p+"%":Math.abs(left)}</div></div><div class="bh2"><div class="row between" style="gap:8px;align-items:center">${wxChip()}</div>
-   <div class="row wr" style="gap:6px">${sched.chip}</div></div></div><div class="meter hm"><i style="width:${p}%"></i></div>${cheerLine(all,p)}</section>
-  ${whoLine()}${attentionV()}${myWorkCard()}${[connectPrompt(),iosPrompt(),pushPrompt(),linkPrompt(),backupDue()].find(Boolean)||""}${can?`<div class="row between" style="margin:0 2px 10px"><div class="eyebrow" style="margin:0">Phases</div>${pEdit?`<button type="button" class="btn small primary" data-act="pedit">Done</button>`:`<button type="button" class="iconbtn sm" data-act="pedit" aria-label="Edit phases">${ic("dots")}</button>`}</div>${pEdit?`<p class="hint" style="margin:0 2px 10px">Rename, move or remove a phase, or add a new one.</p>`:""}`:""}<div class="ptiles" role="list">${tiles}</div>
+   </div></div><div class="meter hm"><i style="width:${p}%"></i></div>${cheerLine(all,p)}</section>
+  ${sinceV()}${whoLine()}${attentionV()}${myWorkCard()}${[connectPrompt(),iosPrompt(),pushPrompt(),linkPrompt(),backupDue()].find(Boolean)||""}${can?`<div class="row between" style="margin:0 2px 10px"><div class="eyebrow" style="margin:0">Phases</div>${pEdit?`<button type="button" class="btn small primary" data-act="pedit">Done</button>`:`<button type="button" class="iconbtn sm" data-act="pedit" aria-label="Edit phases">${ic("dots")}</button>`}</div>${pEdit?`<p class="hint" style="margin:0 2px 10px">Rename, move or remove a phase, or add a new one.</p>`:""}`:""}<div class="ptiles" role="list">${tiles}</div>${!pEdit&&PHS.length>3?`<button type="button" class="phall ${phAll?"open":""}" data-act="phall" aria-expanded="${phAll}">${phAll?"Show fewer phases":"Show all "+PHS.length+" phases"}${ic("chev","sm")}</button>`:""}
   <div class="rph"><div class="eyebrow">Recently posted</div><span class="rpa">${rec.some(l=>l.media?.length)?`<button type="button" class="rpshow" data-act="rpshow" aria-label="Play the slideshow" title="Slideshow">${ic("play","sm")}</button>`:""}<button type="button" class="rpall" data-go="site">See all${ic("chev","sm")}</button></span></div>
   ${rec.length?`<div class="rps">${rec.map(l=>{const n=l.media?.length||0,c=PCOL[l.phase]||"var(--accent)",ph=l.phase&&PSHORT[l.phase]?PSHORT[l.phase]:"Site",tx=l.text?esc(l.text.slice(0,120)):"",first=n&&isVid(l.media[0]);return `<button type="button" class="rp ${n?"ph":"nt"}" data-act="rpopen" data-id="${l.id}" aria-label="${esc(ph)}, ${n?n+(n===1?" photo":" photos"):"note"}, ${dlabel(l.date)}. Open"><span class="rpi">${n?`<span data-m="${l.media[0]}" style="position:absolute;inset:0"></span>`:""}</span>${n>1?`<span class="rpn">${ic("image","sm")}${n}</span>`:first?`<span class="rpn">${ic("play","sm")}</span>`:""}<span class="rpt"><span class="rpc" style="color:${n?"#fff":"color-mix(in srgb,"+c+" 55%,var(--ink))"}">${esc(ph)}</span><span class="rpx">${tx||(n?(first?"Added a clip":n===1?"Added a photo":"Added "+n+" photos"):"Update")}</span><small>${dlabel(l.date)}</small></span></button>`}).join("")}</div>`:`<p class="muted small" style="margin:0 2px">Photos and notes you add will show up here.</p>`}${scs}`;
 }
@@ -1725,7 +1736,7 @@ function contractorsSheet(){
 }
 /* the less used places, one tap away */
 function bmoreSheet(){
-  const rows=[["site","camera","Site log","Photos and notes as the work goes up",""],["diary","book","Site diary","Weather, people on site and hours lost",""],["docs","note","Documents","Quotes, certificates, invoices and delivery notes",S.docs.filter(docListed).length||""],["dnotes","truck","Delivery notes","Scan a note and see every delivery",S.docs.filter(d=>d.type==="delivery").length||""],["snags","alert","Snags","Things to fix, with an owner and a check",(()=>{const n=S.logs.filter(l=>l.kind==="issue"&&!l.closed).length;return n||""})()],["garden","leaf","Garden","Areas, tasks and materials",(()=>{const g=S.tasks.filter(t=>isG(t.phase)&&t.status!=="done");return g.length?uk(g):""})()]];
+  const rows=[["site","camera","Site log","Photos and notes as the work goes up",""],["diary","book","Daily diary","Weather, people on site and hours lost",""],["docs","note","Documents","Quotes, certificates, invoices and delivery notes",S.docs.filter(docListed).length||""],["dnotes","truck","Delivery notes","Scan a note and see every delivery",S.docs.filter(d=>d.type==="delivery").length||""],["snags","alert","Snags","Things to fix, with an owner and a check",(()=>{const n=S.logs.filter(l=>l.kind==="issue"&&!l.closed).length;return n||""})()],["garden","leaf","Garden","Areas, tasks and materials",(()=>{const g=S.tasks.filter(t=>isG(t.phase)&&t.status!=="done");return g.length?uk(g):""})()]];
   sheet("More places",`<ul class="list moreV" style="margin-top:6px">${rows.map(([t,i,n,sub,c])=>`<li class="tap" tabindex="0" data-go="${t}"><span class="row-ic">${ic(i)}</span><div class="grow"><div class="lt">${n}</div><div class="ls">${sub}</div></div>${c?`<span class="muted small">${c}</span>`:""}${ic("chev","sm")}</li>`).join("")}</ul>`,(sh,close)=>{
     sh.querySelectorAll("li[data-go]").forEach(li=>li.addEventListener("click",()=>{const t=li.dataset.go;close();if(t==="dnotes")setTimeout(deliveriesSheet,80);else go(t)}));
     sh.querySelectorAll("li.tap").forEach(li=>li.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();li.click()}}));
@@ -1877,8 +1888,7 @@ function matsV(){
   const cnt=k=>inSec.filter(m=>m.status===k).length,lowN=S.mats.filter(m=>mEff(m)==="low").length;
   return `<div class="page-h"><div class="row" style="gap:10px">${backBtn()}<h2>Materials</h2></div><button class="btn primary" data-act="addmat">${ic("plus")}Add</button></div>
   <div class="segc" role="group" aria-label="Section">${SECS.map(([k,l])=>`<button type="button" data-sub="sec:${k}" aria-pressed="${sec===k}">${l}</button>`).join("")}</div>
-  <div class="chips scroll" role="group" aria-label="Filter by phase" style="margin:0 0 10px">${[["all","All phases · "+S.mats.length],...PH.map(p=>[p[0],PSHORT[p[0]]+" · "+S.mats.filter(m=>m.phase===p[0]).length]),["none","No phase · "+S.mats.filter(m=>!m.phase).length]].map(([k,l])=>`<button type="button" class="chip" data-sub="mph:${k}" aria-pressed="${matPh===k}">${esc(l)}</button>`).join("")}</div>
-  <div class="dnbar"><button type="button" class="btn small" data-act="dnote">${ic("camera","sm")}Scan a note</button><button type="button" class="btn small" data-act="dnotes">${ic("truck","sm")}Delivery notes</button></div>
+  <div class="mtools"><label class="mphw"><span class="sr-only">Phase</span><select id="mphsel" aria-label="Show materials for a phase">${[["all","All phases · "+S.mats.length],...PH.map(p=>[p[0],PSHORT[p[0]]+" · "+S.mats.filter(m=>m.phase===p[0]).length]),["none","No phase · "+S.mats.filter(m=>!m.phase).length]].map(([k,l])=>`<option value="${k}" ${matPh===k?"selected":""}>${esc(l)}</option>`).join("")}</select>${ic("chev","sm")}</label><button type="button" class="btn small" data-act="dnote" aria-label="Scan a delivery note">${ic("camera","sm")}Scan</button><button type="button" class="btn small" data-act="dnotes" aria-label="Delivery notes">${ic("truck","sm")}Notes</button></div>
   ${sec==="elec"?elecCard():""}
   ${sec==="stock"?(lowN?`<div class="warn">${ic("alert")}<span>${lowN} item${lowN===1?" is":"s are"} running low or out of stock.</span></div>`:""):`<div class="chips scroll" role="group" aria-label="Filter">${[...L.map(([k,l])=>[k,`${l} · ${cnt(k)}`]),["all","All"]].map(([k,l])=>`<button type="button" class="chip" data-sub="mat:${k}" aria-pressed="${matF===k}">${esc(l)}</button>`).join("")}</div>`}
   <div class="card" style="margin-top:12px">
@@ -1940,7 +1950,7 @@ function act(a,id,el){
    tipgo:()=>{const t=tipById(TIP.id);if(t)openTarget(t[3])},tipx:()=>{lsSet("b3-tipx",TIP.day);render()},tipsheet:()=>tipSheet(),cyc:()=>cycTask(id),opentask:()=>taskSheet(...id.split("|")),edittask:()=>taskSheet(...id.split("|")),
    deltask:()=>{const[k]=id.split("|");const f=roomF;delRecs(S.tasks,t=>t.key===k&&(f==="all"||t.room===f||t.room==="shared"),"Task")},
    addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>{const[i,g]=id.split("|");quickPhoto(i,undefined,!!g)},gbackup:()=>backupSheet(),addfurn:()=>furnSheet(),editfurn:()=>furnSheet(id),delfurn:()=>delRecs(S.furn,x=>x.id===id,"Item"),furnstarter:()=>furnStarter(),furnlb:()=>{const[rid,i]=id.split("|"),r=S.furn.find(x=>x.id===rid);if(r)lightbox(r.media||[],+i)},gofurn:()=>{bmode="furn";lsSet("build-bmode","furn");if(id)fRoom=id;go("build");render()},adddiary:()=>diarySheet(),editdiary:()=>diarySheet(id),godiary:()=>go("diary"),goexport:()=>exportSheet(),goextra:()=>go("extra"),diaryshare:()=>{const tx=diaryText(14);if(!tx){toast("No diary entries in the last 14 days.");return}shareText(tx)},diaryprint:()=>diaryPrint(),savelink:()=>personSheet(sm.pid),linkdismiss:()=>{lsSet("build-linkdis",today());render()},cycboth:()=>cycMany(((el&&el.dataset.ids)||id).split(",")),docselect:()=>{docSel=docSel?null:new Set();render()},docall:()=>{const l=docList();docSel=docSel&&docSel.size===l.length?new Set():new Set(l.map(d=>d.id));render()},docprint:()=>printSelectedDocs(),gotasks:()=>{taskF=id||"";go("tasks")},gotrades:()=>{moneySeg="trades";go("money")},pushsheet:()=>pushSheet(),pushdismiss:()=>{lsSet("build-pushdis",today());render()},restore:()=>restoreSheet(),addtrade:()=>tradeSheet(),edittrade:()=>tradeSheet(id),opentrade:()=>tradeView(id),tradecmp:()=>tradeCmp(id),quotehow:()=>quoteHowSheet(),deltrade:()=>delRecs(S.trades,x=>x.id===id,"Quote"),tradeaccept:()=>{const t=S.trades.find(x=>x.id===id);if(!t)return;confirmSheet("Accept this quote?",`${tName(t)} (${t.trade}), ${money(tVal(t))}.`,"Yes, accept",()=>{const ex=tradeStatus(t,"accepted");logAct(`Accepted the ${t.trade} quote from ${tName(t)}: ${money(tVal(t))}`,1);save();render();toast("Quote accepted."+ex.msg,ex.undo)},true)},paystage:()=>{const[tid,sid]=id.split("|"),t=S.trades.find(x=>x.id===tid),sg=t&&(t.stages||[]).find(x=>x.id===sid);if(!sg)return;confirmSheet("Mark as paid?",`${money(sg.amount)} to ${tName(t)} (${t.trade}). It is saved as paid today.`,"Yes, mark paid",()=>{const u=undoEdit(sg,{paid:true,paidOn:today()});logAct(`Paid ${money(sg.amount)} to ${tName(t)} (${t.trade})`,1);save();render();toast(`${rand(sg.amount)} marked paid.`,u)},true)},goinbox:()=>go("inbox"),gopeople:()=>go("people"),newmsg:()=>newMsgSheet(),addperson:()=>personSheet(),editperson:()=>personSheet(id),msglb:()=>{const[mid,i]=id.split("|");const m=S.msgs.find(x=>x.id===mid);if(m)lightbox(m.media||[],+i)},sharesheet:()=>shareSheet(),bkdismiss:()=>{lsSet("build-bkdis",today());render()},phdrive:()=>driveSave(phasePhotoIds(id).map((m,i)=>({media:m,name:(PSHORT[id]||"Phase")+" photo "+(i+1)+".jpg"}))),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),gosnags:()=>go("snags"),addcost:()=>costSheet(),editcost:()=>S.costs.find(x=>x.id===id)?.extra?extraSheet(null,id):costSheet(id),addextra:()=>extraSheet(id),editextra:()=>extraSheet(null,id),delextra:()=>delRecs(S.costs,c=>c.id===id,"Extra labour"),unlockextra:()=>moneyGate(()=>render()),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
-   payall:()=>{payAll=!payAll;render()},resetpays:()=>confirmSheet("Reset all payments?","This clears every builder payment, paid and planned, and the expenses made from them. You can undo it right after.","Reset payments",()=>{const ps=[...S.pays],cs=S.costs.filter(c=>c.pay);S.pays.length=0;cs.forEach(c=>S.costs.splice(S.costs.indexOf(c),1));payAll=false;save();render();toast("All builder payments reset to R 0.",()=>{ps.forEach(x=>S.pays.push(x));cs.forEach(c=>S.costs.push(c))})}),recpay:()=>recPaySheet(),weekly:()=>weeklySheet(),addpay:()=>paySheet(),editpay:()=>paySheet(id),contract:()=>contractSheet(),diaryone:()=>{const e=S.diary.find(x=>x.id===id);if(e)shareText(diaryEntryText(e))},diarylb:()=>{const[eid,i]=id.split("|"),d=S.diary.find(x=>x.id===eid);if(d)lightbox(d.media||[],+i)},cheerpick:()=>{if(perm.manage)cheerSheet()},contractors:()=>contractorsSheet(),plprint:()=>{const p=planOf(planSel);if(p)printDocs([p]);else toast("Choose a drawing first.")},vnplay:()=>vnPlay(id),odmove:()=>overdueSheet(),rpshow:()=>slidePickSheet(),rpopen:()=>{const l=S.logs.find(x=>x.id===id);if(!l)return;if(l.media?.length){lightbox(l.media.slice(),0,{caps:l.media.map(()=>rpCap(l)),owners:l.media.map(()=>l.id),show:true});return}sheet(dlabel(l.date),`<p style="margin:8px 0 12px;font-size:1.05rem;line-height:1.45;white-space:pre-wrap">${esc(l.text||"")}</p><p class="muted small">${[l.who,phaseName(l.phase)].filter(Boolean).map(esc).join(" · ")}</p><div class="foot"><button type="button" class="btn block" data-go="site">Open the site log</button></div>`,(sh,close)=>{sh.querySelector("[data-go]").addEventListener("click",()=>{close();go("site")})})},attmore:()=>{lsSet("build-attall",lsGet("build-attall")==="1"?"":"1");render()},wxrefresh:()=>{toast("Updating the weather…");wxLoad(true).then(()=>{render();toast(wx&&Date.now()-wx.t<6e4?"Weather is up to date.":"Could not load the weather. Check your connection.")})},joinlink:()=>shareSheet(),iosdismiss:()=>{lsSet("build-iosdis",today());render()},ncdismiss:()=>{lsSet("build-ncdis",today());render()},gedit:()=>{gEdit=!gEdit;render()},gadd:()=>gardenNameSheet(),gren:()=>gardenNameSheet(id),gdel:()=>gardenDel(id),pedit:()=>{if(!perm.manage)return;pEdit=!pEdit;render()},padd:()=>{if(perm.manage)phaseNameSheet()},pren:()=>{if(perm.manage)phaseNameSheet(id)},pdel:()=>{if(perm.manage)phaseDel(id)},pmv:()=>{if(!perm.manage)return;const[k,d]=id.split("|");phaseMove(k,+d)},estimate:()=>estimateSheet(),typicalpay:()=>typicalPays(),
+   payall:()=>{payAll=!payAll;render()},resetpays:()=>confirmSheet("Reset all payments?","This clears every builder payment, paid and planned, and the expenses made from them. You can undo it right after.","Reset payments",()=>{const ps=[...S.pays],cs=S.costs.filter(c=>c.pay);S.pays.length=0;cs.forEach(c=>S.costs.splice(S.costs.indexOf(c),1));payAll=false;save();render();toast("All builder payments reset to R 0.",()=>{ps.forEach(x=>S.pays.push(x));cs.forEach(c=>S.costs.push(c))})}),recpay:()=>recPaySheet(),weekly:()=>weeklySheet(),addpay:()=>paySheet(),editpay:()=>paySheet(id),contract:()=>contractSheet(),diaryone:()=>{const e=S.diary.find(x=>x.id===id);if(e)shareText(diaryEntryText(e))},diarylb:()=>{const[eid,i]=id.split("|"),d=S.diary.find(x=>x.id===eid);if(d)lightbox(d.media||[],+i)},cheerpick:()=>{if(perm.manage)cheerSheet()},contractors:()=>contractorsSheet(),plprint:()=>{const p=planOf(planSel);if(p)printDocs([p]);else toast("Choose a drawing first.")},vnplay:()=>vnPlay(id),odmove:()=>overdueSheet(),phall:()=>{lsSet("build-allph",lsGet("build-allph")==="1"?"":"1");render()},sinceopen:()=>{seenBase=Date.now();seenSave();actsSheet();render()},sincex:()=>{seenBase=Date.now();seenSave();render()},rpshow:()=>slidePickSheet(),rpopen:()=>{const l=S.logs.find(x=>x.id===id);if(!l)return;if(l.media?.length){lightbox(l.media.slice(),0,{caps:l.media.map(()=>rpCap(l)),owners:l.media.map(()=>l.id),show:true});return}sheet(dlabel(l.date),`<p style="margin:8px 0 12px;font-size:1.05rem;line-height:1.45;white-space:pre-wrap">${esc(l.text||"")}</p><p class="muted small">${[l.who,phaseName(l.phase)].filter(Boolean).map(esc).join(" · ")}</p><div class="foot"><button type="button" class="btn block" data-go="site">Open the site log</button></div>`,(sh,close)=>{sh.querySelector("[data-go]").addEventListener("click",()=>{close();go("site")})})},attmore:()=>{lsSet("build-attall",lsGet("build-attall")==="1"?"":"1");render()},wxrefresh:()=>{toast("Updating the weather…");wxLoad(true).then(()=>{render();toast(wx&&Date.now()-wx.t<6e4?"Weather is up to date.":"Could not load the weather. Check your connection.")})},joinlink:()=>shareSheet(),iosdismiss:()=>{lsSet("build-iosdis",today());render()},ncdismiss:()=>{lsSet("build-ncdis",today());render()},gedit:()=>{gEdit=!gEdit;render()},gadd:()=>gardenNameSheet(),gren:()=>gardenNameSheet(id),gdel:()=>gardenDel(id),pedit:()=>{if(!perm.manage)return;pEdit=!pEdit;render()},padd:()=>{if(perm.manage)phaseNameSheet()},pren:()=>{if(perm.manage)phaseNameSheet(id)},pdel:()=>{if(perm.manage)phaseDel(id)},pmv:()=>{if(!perm.manage)return;const[k,d]=id.split("|");phaseMove(k,+d)},estimate:()=>estimateSheet(),typicalpay:()=>typicalPays(),
    paypay:()=>{const x=S.pays.find(q=>q.id===id);if(!x)return;confirmSheet("Record this payment?",`${money(x.amount)} paid to the builder today.`,"Yes, record payment",()=>{const u=undoEdit(x,{paid:true,paidOn:today()});payCost(x);logAct(`Builder payment of ${money(x.amount)} recorded`,1);save();render();toast(`${rand(x.amount)} paid to the builder.`,()=>{u();payCost(x)})},true)},
    delpay:()=>{const x=S.pays.find(q=>q.id===id),lc=S.costs.find(c=>c.id==="pay_"+id);S.pays.splice(S.pays.indexOf(x),1);if(lc)S.costs.splice(S.costs.indexOf(lc),1);save();render();toast("Stage deleted.",()=>{S.pays.push(x);if(lc)S.costs.push(lc)})},
    paycost:()=>{const c=S.costs.find(x=>x.id===id),u=undoEdit(c,{paid:true});save();render();toast(`${rand(c.amount)} marked as paid.`,u)},budget:()=>moneyOK?budgetSheet():moneyGate(budgetSheet),lockmoney:()=>{lockMoney();toast("Money is locked.")},addmat:()=>matSheet(undefined,id&&phase(id)?id:undefined),editmat:()=>matSheet(id),delmat:()=>delRecs(S.mats,m=>m.id===id,"Material"),
@@ -2454,7 +2464,7 @@ function reportTextFull(){
   if(S.trades.length)t+=`Trades: ${money0(tPaidAll())} paid of ${money0(tCommit())} accepted\nWhole project: ${money0(spentAll()+tPaidAll())} paid of ${money0(bud+tCommit())}\n`;
   t+=`Snags to fix: ${issues}\n`;
   if(S.furn.length){const ff=fStats(S.furn);t+=`Furniture and decor: ${ff.d} of ${ff.n} items done\n`}
-  if(S.diary.length){const dd=diaryStats();t+=`Site diary: ${dd.days} days logged, ${dd.rain} rain day${dd.rain===1?"":"s"}, ${hrsTxt(dd.lost)} lost to delays\n`}
+  if(S.diary.length){const dd=diaryStats();t+=`Daily diary: ${dd.days} days logged, ${dd.rain} rain day${dd.rain===1?"":"s"}, ${hrsTxt(dd.lost)} lost to delays\n`}
   if(nu.length)t+=`\nNext up:\n`+nu.map(x=>`- ${x.title}`).join("\n");
   return t;
 }
@@ -2822,7 +2832,7 @@ function phaseStep(dir){
 const ringSvg=(pct,cls="")=>`<svg class="pr ${cls}" viewBox="0 0 64 64" aria-hidden="true"><circle class="rt" cx="32" cy="32" r="28" pathLength="100"/>${pct>0?`<circle class="rp" cx="32" cy="32" r="28" pathLength="100" stroke-dasharray="${Math.min(100,pct)} 100"/>`:""}</svg>`;
 function phaseHero(id,p,ts,d,st,pc){
   const ph=phasePhoto(id),full=ts.length>0&&d===ts.length;
-  return `<section class="phero ${ph?"has":""}" style="--pc:${PCOL[id]}">${ph?`<span class="tbg" data-bg="${ph}"></span>`:""}<div class="phi"><div class="row" style="gap:12px"><div class="grow" style="min-width:0"><div class="eyebrow" style="color:rgba(255,255,255,.88)">${isG(id)?"Garden":"Phase "+(PHS.findIndex(x=>x[0]===id)+1)+" of "+PHS.length}</div><h3 style="color:#fff;font-size:1.3rem;margin-top:6px">${esc(p[1])}</h3><div class="ph-d">${d} of ${ts.length} tasks done${st?` · ${st} stuck`:""}</div></div><div class="pbig">${ringSvg(pc,"w")}<span class="pc">${full?ic("check","lg"):pc+"%"}</span></div></div></div></section>`;
+  return `<section class="phero ${ph?"has":""}" style="--pc:${PCOL[id]}">${ph?`<span class="tbg" data-bg="${ph}"></span>`:""}<div class="phi"><div class="row" style="gap:12px"><div class="grow" style="min-width:0"><div class="eyebrow" style="color:rgba(255,255,255,.88)">${isG(id)?"Garden":"Phase "+(PHS.findIndex(x=>x[0]===id)+1)+" of "+PHS.length}</div><div class="ph-d" style="font-size:1.05rem;font-weight:600;color:#fff;margin-top:6px">${d} of ${ts.length} tasks done${st?` · ${st} stuck`:""}</div></div><div class="pbig">${ringSvg(pc,"w")}<span class="pc">${full?ic("check","lg"):pc+"%"}</span></div></div></div></section>`;
 }
 function phaseNav(id){
   if(isG(id))return "";
@@ -3123,7 +3133,7 @@ const ROLE_PICK=["site","builder","owner","decor","finance","other"];
 const roleLabel=r=>(ROLES[r]||ROLES.other).label;
 const DEFAULT_PEOPLE=[["Albert","site"],["Jonathan","builder"],["Newberry","owner"],["Talana","decor"],["Audrey","finance"]];
 const READ_ACTS0=["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock","plprev","plnext","phdrive","gbackup"].concat(["goinbox","gopeople","newmsg","msglb","sharesheet"]);
-const READ_ACTS=READ_ACTS0.concat(["rpshow","vnplay","plprint","rpopen","contractors","dnotes","gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp","mbar","slipexport","slipview","thread","msgdec","snagexport","msgdel","msgclear","gosnags","attsheet","bmore","tipgo","tipx","tipsheet","wkgoals","pusend","pupick","tradecmp","quotehow"]);
+const READ_ACTS=READ_ACTS0.concat(["sinceopen","sincex","phall","rpshow","vnplay","plprint","rpopen","contractors","dnotes","gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp","mbar","slipexport","slipview","thread","msgdec","snagexport","msgdel","msgclear","gosnags","attsheet","bmore","tipgo","tipx","tipsheet","wkgoals","pusend","pupick","tradecmp","quotehow"]);
 const MONEY_ACTS=["addcost","editcost","delcost","budget","addpay","editpay","delpay","recpay","paypay","paycost","contract","typicalpay","weekly","resetpays","payall","report"];
 MONEY_ACTS.push("addtrade","edittrade","deltrade","opentrade","tradeaccept","paystage");
 const NOTE_ACTS=["addphoto","phphoto","adddoc"];
@@ -3135,7 +3145,7 @@ const asgNew=(was,now)=>asgL(now).filter(p=>!asgL(was).includes(p)&&p!==sm.pid);
 const asgToggle=(cur,pid)=>{if(!pid)return"";const a=asgL(cur),i=a.indexOf(pid);if(i>=0)a.splice(i,1);else a.push(pid);const order=peopleList().map(p=>p.pid);return a.sort((x,y)=>order.indexOf(x)-order.indexOf(y)).join(",")};
 const accessText=p=>{
   if(p.manage)return "You have full control and decide what everyone else can do.";
-  const a=normAreas(p),nm={tasks:"tasks",log:"photos and challenges",mats:"materials",docs:"documents",diary:"the site diary",furn:"furniture and decor",money:"money"},can=[],see=[],no=[];
+  const a=normAreas(p),nm={tasks:"tasks",log:"photos and challenges",mats:"materials",docs:"documents",diary:"the daily diary",furn:"furniture and decor",money:"money"},can=[],see=[],no=[];
   ["tasks","log","mats","docs","diary","furn","money"].forEach(k=>{(a[k]>=2?can:a[k]===1?see:no).push(nm[k])});
   return [can.length?"Can change "+can.join(", ")+".":"Can look but not change anything.",no.length?"No access to "+no.join(", ")+".":"",a.upd>=2?"Can send updates.":"Receives updates."].filter(Boolean).join(" ");
 };
@@ -3324,7 +3334,7 @@ const AREAS=[
   ["log","Photos and challenges","Site log, photos and challenges",0,["No access","See only","Add"]],
   ["mats","Materials","Orders, stock and deliveries",0,["No access","See only","Update"]],
   ["docs","Documents","Plans, certificates, delivery notes",0,["No access","See only","Add"]],
-  ["diary","Site diary","Weather, people and delays",0,["No access","See only","Write"]],
+  ["diary","Daily diary","Weather, people and delays",0,["No access","See only","Write"]],
   ["furn","Furniture and decor","What we build for the classrooms",0,["No access","See only","Update"]],
   ["money","Money","Costs, trades and payments",0,["No access","See only","Record"]],
   ["upd","Updates","Messages to and from the team",1,["Receive","Send"]]];
@@ -4130,13 +4140,14 @@ function tasksV(){
   const list=open.filter(test).sort((a,b)=>((a.due&&a.due<td?0:1)-(b.due&&b.due<td?0:1))||(a.due||"9999").localeCompare(b.due||"9999")||(a.order??0)-(b.order??0));
   const seen=new Set(),rows=[];
   list.forEach(t=>{const sib=S.tasks.filter(x=>x.key===t.key),merged=sib.length>1&&sib.every(x=>x.status===t.status&&(x.assignee||"")===(t.assignee||"")&&x.due===t.due);if(merged){if(seen.has(t.key))return;seen.add(t.key)}rows.push({t,merged,sib})});
-  const row=({t,merged,sib})=>{const od=t.due&&t.due<td,meta=[merged?"Both classrooms":roomName(t.room),PSHORT[t.phase]||"",t.media?.length?t.media.length+" attached":"",t.due?`${od?"Overdue · ":"Due "}${dshort(t.due)}`:"",t.assignee?pName(t.assignee):t.who].filter(Boolean).join(" · ");
+  const grp=f!=="overdue"&&rows.length>4;
+  const row=({t,merged,sib})=>{const od=t.due&&t.due<td,meta=[merged?"Both classrooms":roomName(t.room),grp?"":PSHORT[t.phase]||"",t.media?.length?t.media.length+" attached":"",t.due?`${od?"Overdue · ":"Due "}${dshort(t.due)}`:"",t.assignee?pName(t.assignee):t.who].filter(Boolean).join(" · ");
     const tick=merged?`<button class="st ${t.status}" data-act="cycboth" data-id="${t.id}" data-ids="${sib.map(x=>x.id).join(",")}" aria-label="${esc(t.title)}, both classrooms: ${stLabel(t.status)}. Tap to tick done or undo. Hold for more options.">${stIcon(t.status)||ic("check")}</button>`:`<button class="st ${t.status}" data-act="cyc" data-id="${t.id}" aria-label="${esc(t.title)}: ${stLabel(t.status)}. Tap to tick done or undo. Hold for more options.">${stIcon(t.status)||ic("check")}</button>`;
     return `<li>${tick}<div class="grow tap" tabindex="0" data-act="opentask" data-id="${t.key}|${t.room}"><div class="lt">${esc(t.title)}</div><div class="ls ${od||t.status==="stuck"?"bad":""}">${esc(meta)}</div></div></li>`};
   return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Tasks</h2></div></div>
   <div class="chips scroll fbar" role="group" aria-label="Show tasks">${chips.map(([k,l])=>`<button type="button" class="chip" data-sub="tf:${k}" aria-pressed="${f===k}">${esc(l)}</button>`).join("")}</div>
   ${f==="overdue"&&rows.length&&lvl("tasks")>=2?`<button type="button" class="btn block" data-act="odmove" style="margin:0 0 10px">${ic("calendar")}Move overdue tasks to a new date</button>`:""}
-  <div class="card">${rows.length?`<ul class="list">${rows.map(row).join("")}</ul>`:`<div class="empty">${ic("check","xl")}<h3>All clear</h3><p>${f==="me"?"Nothing is waiting for you right now.":"Nothing waiting in this list. Nice work."}</p></div>`}</div><div class="fbar-sp"></div>`;
+  ${grp?(()=>{const order=p=>{const i=PHS.findIndex(x=>x[0]===p);return i<0?999:i},G2=new Map();rows.forEach(r=>{const k=r.t.phase||"";if(!G2.has(k))G2.set(k,[]);G2.get(k).push(r)});return [...G2.entries()].sort((a,b)=>order(a[0])-order(b[0])).map(([k,rs])=>`<div class="tgh"><span>${esc(PSHORT[k]||(k&&phase(k)?phaseName(k):"Other"))}</span><b>${rs.length}</b></div><div class="card"><ul class="list">${rs.map(row).join("")}</ul></div>`).join("")})():""}<div class="card"${grp?" hidden":""}>${rows.length?`<ul class="list">${grp?"":rows.map(row).join("")}</ul>`:`<div class="empty">${ic("check","xl")}<h3>All clear</h3><p>${f==="me"?"Nothing is waiting for you right now.":"Nothing waiting in this list. Nice work."}</p></div>`}</div><div class="fbar-sp"></div>`;
 }
 function attentionItems(){
   const open=S.tasks.filter(t=>t.status!=="done"),td=today(),out=[];
@@ -4152,12 +4163,35 @@ function attentionItems(){
     if(soon.length)out.push(["cash",ov?"red":"",`${soon.length} trade payment${soon.length===1?"":"s"} ${ov?"overdue or ":""}due this week`,"gotrades",""]);
     const w=S.trades.filter(t=>t.status==="received").length;if(w)out.push(["hammer","",`${w} quote${w===1?"":"s"} waiting for a decision`,"gotrades",""]);
   }
-  if(lvl("diary")>=2){const hr=new Date().getHours(),dw=new Date().getDay();if(hr>=14&&dw!==0&&(!S.settings.start||S.settings.start<=td)&&(!S.settings.target||td<=S.settings.target)&&!S.diary.some(e=>e.date===td))out.push(["book","","No site diary entry yet today","adddiary",""])}
+  if(lvl("diary")>=2){const hr=new Date().getHours(),dw=new Date().getDay();if(hr>=14&&dw!==0&&(!S.settings.start||S.settings.start<=td)&&(!S.settings.target||td<=S.settings.target)&&!S.diary.some(e=>e.date===td))out.push(["book","","No daily diary entry yet today","adddiary",""])}
   const un=unreadMsgs().length;if(un)out.push(["bell","",`${un} unread update${un===1?"":"s"}`,"goinbox",""]);
   const low=S.mats.filter(m=>mEff(m)==="low").length;if(low&&lvl("mats")>=1)out.push(["truck","",`${low} item${low===1?"":"s"} low or out of stock`,"gomats",""]);
   return out;
 }
 /* what needs attention is one quiet line; tap it to see the list */
+/* "Since you last looked": what other people did while you were away, from the activity log.
+   The time you last looked is saved when you leave the app; coming back after 20 minutes or more starts a new look. */
+const SEEN_K="build3-seen";let seenBase=+lsGet(SEEN_K)||0,seenHid=0;
+const seenSave=()=>lsSet(SEEN_K,String(Date.now()));
+addEventListener("visibilitychange",()=>{if(document.hidden){seenHid=Date.now();seenSave()}else if(seenHid&&Date.now()-seenHid>=20*6e4){seenBase=+lsGet(SEEN_K)||seenBase;seenHid=0;if(tab==="build")render()}});
+addEventListener("pagehide",seenSave);
+if(!seenBase)seenSave();
+function sinceData(){
+  if(!seenBase||!sm.code)return null;
+  const mine=me||"Someone",A=(S.acts||[]).filter(a=>a.t>seenBase&&a.who&&a.who!==mine&&!a.m);
+  let ph=0,dn=0,fx=0,iss=0,dl=0;
+  A.forEach(a=>{const t=a.text||"",m=t.match(/^Added (a|\d+) photos?\b/);if(m)ph+=m[1]==="a"?1:+m[1];else if(/^Added (a|\d+) (photo|photos|clip|clips)/.test(t))ph++;
+    if(/^Marked ".*" done/.test(t))dn++;if(/^Marked an issue as fixed/.test(t))fx++;if(/^Reported an issue/.test(t))iss++;if(/^Delivery note/.test(t))dl++});
+  const parts=[ph&&`${ph} new photo${ph===1?"":"s"}`,dn&&`${dn} task${dn===1?"":"s"} done`,fx&&`${fx} snag${fx===1?"":"s"} fixed`,iss&&`${iss} new snag${iss===1?"":"s"}`,dl&&`${dl} deliver${dl===1?"y":"ies"}`].filter(Boolean);
+  const who=[...new Set(A.map(a=>a.who))];
+  return parts.length?{parts,who}:null;
+}
+function sinceV(){
+  const d=sinceData();if(!d)return "";
+  return `<div class="since"><button type="button" class="since-b" data-act="sinceopen"><span class="row-ic">${ic("bell")}</span><span class="grow"><b>Since you last looked</b><span>${esc(d.parts.join(" · "))}</span></span>${ic("chev","sm")}</button><button type="button" class="since-x" data-act="sincex" aria-label="Got it, hide this">${ic("x","sm")}</button></div>`;
+}
+/* the count on the app icon: the same things as "needs you" on Build */
+function appBadge(){try{if(!("setAppBadge" in navigator))return;const n=sm.code?attentionItems().length:0;if(n)navigator.setAppBadge(n).catch(()=>{});else navigator.clearAppBadge().catch(()=>{})}catch{}}
 function attentionV(){
   /* the Your work card already lists my tasks, so the banner leaves that line out */
   const it=attentionItems().filter(x=>!(x[3]==="gotasks"&&x[4]==="me"&&lvl("tasks")>=1));if(!it.length)return "";
@@ -4288,7 +4322,7 @@ const TIPS=[
   ["slip","Scan a slip","Photograph a slip and the app reads the total and files it for the export.","money","money"],
   ["cmp","Before and after","Pick a before and an after photo for each phase, then slide to compare them.","photos",""],
   ["snag","Snags have a thread","Tap a snag to give it an owner and chat about it. Needs an OK asks the lead to sign it off.","snags",""],
-  ["speak","Hold to speak","Hold the mic in the site diary and say what happened. No typing.","diary",""],
+  ["speak","Hold to speak","Hold the mic in the daily diary and say what happened. No typing.","diary",""],
   ["week","Share the week","Send a photo summary of the week to WhatsApp in one tap.","report","manage"],
   ["wx","Weather on Today","Today shows the site weather and warns you when it is a poor day for pouring or painting.","home",""],
   ["plans","Plans in your pocket","All the plans are under Plans on the Build screen. Open them on site, no printing.","plans",""],
@@ -4511,9 +4545,9 @@ function weatherV(){
   <div class="card rc"><div class="eyebrow">Next 12 hours</div><div class="wxhr">${hrs.map(h=>`<div class="wxh1"><span class="rs">${h.t}</span>${ic(wxInfo(h.c)[1])}<b>${r0(h.T)}°</b><span class="rs">${h.p==null?"":h.p+"%"}</span></div>`).join("")}</div></div>
   <div class="card rc"><div class="eyebrow">Next 7 days</div><div class="rlist">${days.map(({t,d})=>`<div class="rrow"><div class="wxdn">${t===td?"Today":esc(dshort(t))}</div>${ic(wxInfo(d.code)[1])}<div class="grow"><div class="rt">${esc(wxInfo(d.code)[0])}</div><div class="rs">Rain ${d.pop==null?"–":d.pop+"%"}${d.rain>=1?" · "+(Math.round(d.rain*10)/10)+" mm":""} · Wind ${r0(d.wind)} km/h</div></div><div class="rv">${r0(d.hi)}° <span class="rs">${r0(d.lo)}°</span></div></div>`).join("")}</div></div>
   ${past.length?`<div class="card rc"><div class="eyebrow">Past 7 days</div><div class="rlist">${past.map(({t,d})=>`<div class="rrow"><div class="wxdn">${esc(dshort(t))}</div>${ic(wxInfo(d.code)[1])}<div class="grow"><div class="rt">${esc(wxInfo(d.code)[0])}</div><div class="rs">${d.rain>=1?(Math.round(d.rain*10)/10)+" mm of rain":"No rain"} · Wind ${r0(d.wind)} km/h</div></div><div class="rv">${r0(d.hi)}° <span class="rs">${r0(d.lo)}°</span></div></div>`).join("")}</div></div>`:""}
-  <p class="hint">Forecast by Open-Meteo for the building site. Updated ${new Date(wx.t).toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"})}. The site diary uses this weather for each day.</p>`;
+  <p class="hint">Forecast by Open-Meteo for the building site. Updated ${new Date(wx.t).toLocaleTimeString("en-ZA",{hour:"2-digit",minute:"2-digit"})}. The daily diary uses this weather for each day.</p>`;
 }
-/* ---------- site diary ---------- */
+/* ---------- daily diary ---------- */
 const WEATHER=[["sunny","Sunny"],["cloudy","Cloudy"],["rain","Rain"],["wind","Windy"]];
 const WICON={sunny:"sun",cloudy:"cloud",rain:"rain",wind:"wind"};
 const DELAYS=[["none","No delay"],["part","Slowed down"],["full","Stopped for the day"]];
@@ -4531,17 +4565,17 @@ function diaryStats(){
 const diaryWx=e=>e.wx?wxText(e.wx):weatherLabel(e.weather);
 const appUrl=()=>location.origin+location.pathname;
 const diaryFollow=()=>"Follow the daily updates by using the app: "+appUrl();
-function diaryEntryText(e){return `*${S.settings.name||"Site"}: site diary*\n${dlong(e.date)}\n\n${diaryLine(e)}${e.who?" ("+e.who+")":""}\n\n${diaryFollow()}`}
+function diaryEntryText(e){return `*${S.settings.name||"Site"}: daily diary*\n${dlong(e.date)}\n\n${diaryLine(e)}${e.who?" ("+e.who+")":""}\n\n${diaryFollow()}`}
 const diaryLine=e=>[diaryWx(e),e.people?e.people+" people on site":"",e.crews,e.delay&&e.delay!=="none"?(e.delay==="full"?"Stopped for the day":"Slowed down")+(lostHrs(e)?", "+hrsTxt(lostHrs(e))+" lost":"")+(e.reason?" ("+e.reason.toLowerCase()+")":""):"",e.work?"Work: "+e.work:"",e.note,(e.media||[]).length?(e.media.length+" photo"+(e.media.length===1?"":"s")+" or video"+(e.media.length===1?"":"s")):""].filter(Boolean).join(". ");
 function diaryText(days){
   const from=addDays(today(),-(days-1)),list=S.diary.filter(e=>e.date>=from).sort((a,b)=>b.date.localeCompare(a.date));
   if(!list.length)return "";
   const st=diaryStats();
-  return `*${S.settings.name||"Site"}: site diary*\nLast ${days} days\n\n`+list.map(e=>`${dshort(e.date)}: ${diaryLine(e)}${e.who?" ("+e.who+")":""}`).join("\n")+`\n\nWhole project: ${st.days} days logged, ${st.rain} rain day${st.rain===1?"":"s"}, ${hrsTxt(st.lost)} lost to delays.\n\n${diaryFollow()}`;
+  return `*${S.settings.name||"Site"}: daily diary*\nLast ${days} days\n\n`+list.map(e=>`${dshort(e.date)}: ${diaryLine(e)}${e.who?" ("+e.who+")":""}`).join("\n")+`\n\nWhole project: ${st.days} days logged, ${st.rain} rain day${st.rain===1?"":"s"}, ${hrsTxt(st.lost)} lost to delays.\n\n${diaryFollow()}`;
 }
 function diaryV(){
   const st=diaryStats(),canAdd=lvl("diary")>=2;
-  const head=`<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Site diary</h2></div>${canAdd?`<button class="btn primary" data-act="adddiary" aria-label="Add today's entry">${ic("plus")}Add</button>`:""}</div>`;
+  const head=`<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn()}<h2>Daily diary</h2></div>${canAdd?`<button class="btn primary" data-act="adddiary" aria-label="Add today's entry">${ic("plus")}Add</button>`:""}</div>`;
   if(!S.diary.length)return head+empty("book","No diary entries yet","One short note a day: the weather, how many people were on site, any delay and the work done. It is your record if there is ever a dispute about time.",canAdd?`<button class="btn primary" data-act="adddiary">${ic("plus")}Add today's entry</button>`:"");
   const list=S.diary.filter(e=>diaryF==="all"||(e.delay&&e.delay!=="none")).sort((a,b)=>b.date.localeCompare(a.date)||(b.t||0)-(a.t||0));
   const dates=[...new Set(list.map(e=>e.date))];
@@ -4553,7 +4587,7 @@ function diarySheet(id){
   let e=id?S.diary.find(x=>x.id===id):null;
   if(!e&&!id){e=S.diary.find(x=>x.date===today()&&x.by&&x.by===sm.pid)||null}
   const st={weather:e?.weather||"",delay:e?.delay||"none",reason:e?.reason||"",wx:e?.wx||null};let people=e?.people??0;
-  sheet(e?"Edit diary entry":"Site diary",`<form id="f" novalidate>
+  sheet(e?"Edit diary entry":"Daily diary",`<form id="f" novalidate>
   ${dateField("dt",e?.date||today(),"Date")}
   <label class="f">Weather</label><div id="wxbox" class="wxbox" aria-live="polite">Loading the weather…</div><div id="wxman" hidden><p class="hint" style="margin:8px 0 6px">The weather is not available for this day. Choose one.</p>${chipRow("weather",WEATHER,st.weather)}</div>
   <label class="f">People on site</label><div class="stepper"><button type="button" data-step="-1" aria-label="Fewer">${ic("minus")}</button><input id="pp" inputmode="numeric" value="${people}" aria-label="People on site"><button type="button" data-step="1" aria-label="More">${ic("plus")}</button></div>
@@ -4596,7 +4630,7 @@ function diarySheet(id){
       const vals={media:mids,mdate:md,date:sh.querySelector("#dt").value||today(),weather:st.weather,wx:st.wx||null,people:Math.max(0,Math.round(+pp.value||0)),crews:sh.querySelector("#cr").value.trim(),work,delay:st.delay,hrs:st.delay==="none"?0:Math.max(0,Math.min(24,Math.round((+String(hl.value).replace(",",".")||0)*10)/10)),reason:st.delay==="none"?"":st.reason,note:sh.querySelector("#nt").value.trim()};
       if(e){const u=undoEdit(e,vals);save();close();render();toast("Diary entry saved.",u);return}
       const n={id:uid(),...vals,by:sm.pid||"",who:me||sm.pname||"",t:Date.now()};
-      S.diary.push(n);logAct(`Site diary entry for ${dshort(n.date)}`);save();close();render();toast("Diary entry saved.",()=>{const i=S.diary.indexOf(n);if(i>=0)S.diary.splice(i,1)});
+      S.diary.push(n);logAct(`Daily diary entry for ${dshort(n.date)}`);save();close();render();toast("Diary entry saved.",()=>{const i=S.diary.indexOf(n);if(i>=0)S.diary.splice(i,1)});
     };
   });
 }
@@ -4610,7 +4644,7 @@ function printNode(area){
 function diaryPrint(){
   if(!S.diary.length){toast("There are no diary entries to print yet.");return}
   const st=diaryStats(),list=S.diary.slice().sort((a,b)=>a.date.localeCompare(b.date)||(a.t||0)-(b.t||0)),area=document.createElement("div");area.id="printarea";
-  area.innerHTML=`<div class="pa-h">${esc(S.settings.name||"Site")}: site diary</div><div class="pa-cap">${esc(diaryFollow())}</div><div class="pa-cap">${st.days} days logged · ${st.rain} rain day${st.rain===1?"":"s"} · ${hrsTxt(st.lost)} lost to delays · printed ${esc(dlong(today()))}</div>`+list.map(e=>`<div class="pa-row"><b>${esc(dlong(e.date))}</b> · ${esc(diaryLine(e))}${e.who?" ("+esc(e.who)+")":""}</div>`).join("");
+  area.innerHTML=`<div class="pa-h">${esc(S.settings.name||"Site")}: daily diary</div><div class="pa-cap">${esc(diaryFollow())}</div><div class="pa-cap">${st.days} days logged · ${st.rain} rain day${st.rain===1?"":"s"} · ${hrsTxt(st.lost)} lost to delays · printed ${esc(dlong(today()))}</div>`+list.map(e=>`<div class="pa-row"><b>${esc(dlong(e.date))}</b> · ${esc(diaryLine(e))}${e.who?" ("+esc(e.who)+")":""}</div>`).join("");
   printNode(area);
 }
 /* ---------- export a report: tasks with their photos and videos ---------- */
@@ -4828,7 +4862,7 @@ function phaseV(){
   ${f==="all"&&!hintSeen()&&ts.some(t=>t.room!=="shared")?`<div class="note-card slim">${ic("eye")}<span class="nt">${sm.code&&!perm.manage?"Tap the circle once when the work is done (yellow). The Project Lead gives the final tick (green) after checking.":sm.code?"Your tick is the final green tick. Work ticked yellow by the team is waiting for your check.":"Tap the circle to tick a task done in both classrooms."} Hold it for more options.</span></div>`:""}
   <div class="card">${keys.length?`<ul class="list reord">${keys.map(k=>taskRow(k,f==="all"?null:f)).join("")}</ul>`:`<div class="empty">${ic("clip","xl")}<h3>No tasks here</h3><p>Add the first task for this phase.</p><button class="btn primary" data-act="addtask" data-id="${id}">${ic("plus")}Add task</button></div>`}</div>
   <div class="card"><div class="row between"><h2 style="margin:0">Photos</h2><div class="row" style="gap:8px"><button class="btn small" data-act="phphoto" data-id="${id}|g">${ic("image")}Gallery</button><button class="btn small" data-act="phphoto" data-id="${id}">${ic("camera")}Camera</button></div></div>${ph.length?`<div class="row wr" style="gap:8px;margin-top:10px">${ph.length>=2?`<button class="btn small" data-act="phba" data-id="${id}">Before and after</button>`:""}${ph.length&&canPick()?`<button class="btn small" data-act="phcover" data-id="${id}">${ic("image","sm")}Banner photo</button>`:""}<button class="btn small" data-act="phdrive" data-id="${id}" aria-label="Save all photos of this phase to Google Drive">${ic("cloud")}Save to Drive</button></div><div class="pthumbs">${ph.slice(0,9).map((m,i)=>`<button type="button" class="etile" style="border:0;padding:0" data-act="phlb" data-id="${id}|${i}" aria-label="Open photo ${i+1}"><span data-m="${m}" style="position:absolute;inset:0"></span></button>`).join("")}</div>`:`<p class="muted small" style="margin:10px 0 0">No photos for this phase yet.</p>`}</div>`;
-  return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn(isG(id)?"garden":"")}<h2 style="overflow-wrap:anywhere">${esc(PSHORT[id])}</h2></div>${pt==="mats"?`<button class="btn primary" data-act="addmat" data-id="${id}" aria-label="Add a material" style="background:var(--green);color:#fff;flex:none">${ic("plus")}Add</button>`:`<button class="btn primary" data-act="addtask" data-id="${id}" aria-label="Add a task" style="flex:none">${ic("plus")}Add</button>`}</div>
+  return `<div class="page-h"><div class="row" style="gap:10px;min-width:0">${backBtn(isG(id)?"garden":"")}<h2 style="overflow-wrap:normal">${esc(p[1]||PSHORT[id])}</h2></div>${pt==="mats"?`<button class="btn primary" data-act="addmat" data-id="${id}" aria-label="Add a material" style="flex:none">${ic("plus")}Add</button>`:`<button class="btn primary" data-act="addtask" data-id="${id}" aria-label="Add a task" style="flex:none">${ic("plus")}Add</button>`}</div>
   ${phaseHero(id,p,ts,d,st,pc)}
   ${ts.length&&d===ts.length?completeCard(ts):""}
   ${tabs}
