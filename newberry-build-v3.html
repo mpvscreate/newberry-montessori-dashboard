@@ -808,6 +808,8 @@ div.rph .rpall{display:inline-flex;align-items:center;gap:2px;min-height:44px;pa
 .since-b{flex:1;min-width:0;display:flex;align-items:center;gap:10px;padding:10px 6px 10px 12px;background:none;border:0;color:var(--ink);text-align:left;font:inherit;cursor:pointer;min-height:56px}
 .since-b .grow{display:flex;flex-direction:column;gap:2px;min-width:0}.since-b b{font-size:.92rem}.since-b .grow span{font-size:.85rem;color:var(--muted)}.since-b .row-ic{color:var(--accent)}
 .since-x{flex:none;width:44px;background:none;border:0;color:var(--muted);cursor:pointer;display:grid;place-items:center}
+#sync{position:relative}#sync::after{content:"";position:absolute;left:-4px;right:-4px;top:50%;height:44px;transform:translateY(-50%)}.wxchip{position:relative}.wxchip::after{content:"";position:absolute;left:-2px;right:-2px;top:50%;height:44px;transform:translateY(-50%)}
+.tdel{display:flex;align-items:center;justify-content:center;gap:6px;width:100%;min-height:44px;margin-top:6px;background:none;border:0;color:var(--red);font:600 .9rem var(--body);cursor:pointer}
 </style>
 </head>
 <body>
@@ -1152,11 +1154,11 @@ const popKey=e=>{if(e.key==="Escape"){e.stopPropagation();e.preventDefault();clo
 /* every row with an Edit and a Delete button gets one ⋯ menu; the real buttons stay hidden so handlers keep working */
 function compactRows(root){
   root.querySelectorAll(".list li").forEach(li=>{
-    if(li.querySelector("[data-menu]"))return;
+    if(li.querySelector("[data-menu]")||li.dataset.cmp)return;
     const eb=li.querySelector('button[data-act^="edit"]'),db=li.querySelector('button.danger[data-act^="del"]');
-    if(!eb||!db)return;
+    if(!eb||!db)return;li.dataset.cmp="1";
     const m=document.createElement("button");m.type="button";m.className="btn small icon";m.dataset.menu="1";m.setAttribute("aria-label","More actions");m.setAttribute("aria-haspopup","menu");m.innerHTML=ic("dots");
-    eb.hidden=true;db.hidden=true;db.after(m);
+    eb.hidden=true;db.hidden=true;if(eb.dataset.act!=="edittask")db.after(m);
     li.classList.add("rowtap");li.addEventListener("click",e=>{if(li._dragged){li._dragged=false;return}if(e.target.closest("button,a,input,select,textarea,label,summary"))return;eb.click()});
     m.addEventListener("click",e=>{e.stopPropagation();closePop();
       const p=document.createElement("div");p.className="pop";p.setAttribute("role","menu");
@@ -2031,7 +2033,7 @@ function taskSheet(key,roomId){
    <div id="body">${body()}</div>
    <label class="f">Photos and videos</label><div class="photo-add"><button type="button" class="btn" id="tcam">${ic("camera")}Take photo</button><button type="button" class="btn" id="tpick">${ic("image")}From gallery</button></div><input type="file" id="tfc" accept="image/*" capture="environment" hidden><input type="file" id="tfp" accept="image/*,video/*" multiple hidden><div class="pthumbs" id="tth"></div><p class="hint">Videos can be up to 15 MB, about 20 seconds. Photos are shrunk to your chosen photo size.</p>
    ${sm.code?`<button type="button" class="btn block" id="tdisc" style="margin-top:12px">${ic("chat")}Discuss this task${threadMsgs("task|"+key).length?" · "+threadMsgs("task|"+key).length:""}</button>`:""}
-   <div class="foot"><button class="btn primary block">Save task</button></div></form>`,(sh,close)=>{
+   <div class="foot"><button class="btn primary block">Save task</button>${lvl("tasks")>=2?`<button type="button" class="tdel" data-tdel>${ic("trash","sm")}Delete this task</button>`:""}</div></form>`,(sh,close)=>{sh.querySelector("[data-tdel]")?.addEventListener("click",()=>{close();setTimeout(()=>act("deltask",key+"|"+cur),60)});
     const read=()=>{const d=draft[cur];d.due=sh.querySelector("#du")?.value||"";d.who=sh.querySelector("#wh")?.value.trim()||"";if(d.assignee&&d.who!==pName(d.assignee))d.assignee="";d.note=sh.querySelector("#nt")?.value.trim()||"";title=sh.querySelector("#ti").value};
     const wire=()=>{wireDc(sh);wireDue(sh);wireMics(sh);sh.querySelectorAll('[data-ch="status"]').forEach(b=>b.onclick=()=>{draft[cur].status=b.dataset.v;sh.querySelectorAll('[data-ch="status"]').forEach(x=>x.setAttribute("aria-pressed",x===b))});
       sh.querySelectorAll("[data-nm]").forEach(b=>b.onclick=()=>{sh.querySelector("#wh").value=b.dataset.nm});
