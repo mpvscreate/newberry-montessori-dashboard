@@ -3198,7 +3198,7 @@ function msgClearOld(){
     toast("Old updates cleared.",()=>{mine.forEach(m=>S.msgs.push(m));rec.forEach(m=>hidMsg.delete(m.id));hidSave();save();render();paintBell()})});
 }
 /* the red number on the app icon follows the unread updates (works for the app added to the Home Screen) */
-function badgeSet(n){
+function badgeSet(){let n=0;try{n=attnList().length}catch{}
   try{if(navigator.setAppBadge){if(n>0)navigator.setAppBadge(n).catch(()=>{});else navigator.clearAppBadge().catch(()=>{})}}catch{}
   try{caches.open("b3-badge").then(c=>c.put("n",new Response(String(n)))).catch(()=>{})}catch{}
 }
@@ -4190,11 +4190,12 @@ function sinceV(){
   const d=sinceData();if(!d)return "";
   return `<div class="since"><button type="button" class="since-b" data-act="sinceopen"><span class="row-ic">${ic("bell")}</span><span class="grow"><b>Since you last looked</b><span>${esc(d.parts.join(" · "))}</span></span>${ic("chev","sm")}</button><button type="button" class="since-x" data-act="sincex" aria-label="Got it, hide this">${ic("x","sm")}</button></div>`;
 }
-/* the count on the app icon: the same things as "needs you" on Build */
-function appBadge(){try{if(!("setAppBadge" in navigator))return;const n=sm.code?attentionItems().length:0;if(n)navigator.setAppBadge(n).catch(()=>{});else navigator.clearAppBadge().catch(()=>{})}catch{}}
+/* the red number on the app icon: the same count as "things need you" on Build */
+function appBadge(){badgeSet()}
+/* the things that need you, as shown on Build (the Your work card already lists my tasks, so that line is left out) */
+const attnList=()=>attentionItems().filter(x=>!(x[3]==="gotasks"&&x[4]==="me"&&lvl("tasks")>=1));
 function attentionV(){
-  /* the Your work card already lists my tasks, so the banner leaves that line out */
-  const it=attentionItems().filter(x=>!(x[3]==="gotasks"&&x[4]==="me"&&lvl("tasks")>=1));if(!it.length)return "";
+  const it=attnList();if(!it.length)return "";
   const red=it.some(x=>x[1]==="red");
   return `<button type="button" class="attline ${red?"red":""}" data-act="attsheet" aria-label="${it.length} thing${it.length===1?"":"s"} need${it.length===1?"s":""} attention: ${esc(it.slice(0,2).map(x=>x[2]).join(". "))}. Open the list.">${ic("alert","sm")}<span class="grow"><b>${it.length} thing${it.length===1?"":"s"} need${it.length===1?"s":""} you</b>${it.slice(0,2).map(x=>`<span class="muted attl">${esc(x[2])}</span>`).join("")}${it.length>2?`<span class="muted attl">and ${it.length-2} more</span>`:""}</span>${ic("chev","sm")}</button>`;
 }
@@ -4230,8 +4231,8 @@ function overdueSheet(){
   });
 }
 function attSheet(){
-  const it=attentionItems();
-  sheet("Needs attention",`<ul class="list" style="margin-top:6px">${it.map(([i,c,t,a,id],n)=>`<li class="tap" tabindex="0" data-n="${n}"><span class="row-ic ${c}">${ic(i)}</span><div class="grow"><div class="lt">${esc(t)}</div></div>${a==="gotasks"&&id==="overdue"&&lvl("tasks")>=2?`<button type="button" class="btn small" data-odmove>Move</button>`:ic("chev","sm")}</li>`).join("")||`<li class="muted">Nothing needs attention.</li>`}</ul>`,(sh,close)=>{
+  const it=attnList();
+  sheet(it.length+(it.length===1?" thing needs you":" things need you"),`<p class="hint" style="margin:4px 2px 0">The red number on the app icon counts these. It goes down as you deal with them.</p><ul class="list" style="margin-top:6px">${it.map(([i,c,t,a,id],n)=>`<li class="tap" tabindex="0" data-n="${n}"><span class="row-ic ${c}">${ic(i)}</span><div class="grow"><div class="lt">${esc(t)}</div></div>${a==="gotasks"&&id==="overdue"&&lvl("tasks")>=2?`<button type="button" class="btn small" data-odmove>Move</button>`:ic("chev","sm")}</li>`).join("")||`<li class="muted">Nothing needs attention.</li>`}</ul>`,(sh,close)=>{
     sh.querySelectorAll("li[data-n]").forEach(li=>li.addEventListener("click",e=>{const[,,,a,id]=it[+li.dataset.n];close();setTimeout(()=>e.target.closest("[data-odmove]")?overdueSheet():act(a,id),60)}));
   });
 }
