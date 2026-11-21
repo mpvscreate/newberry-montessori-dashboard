@@ -508,7 +508,7 @@ body #fab-wrap .fab-menu .fab-item .fi{width:36px!important;height:36px!importan
 .card.ovs{padding:12px 14px;margin:0 0 10px;border-radius:18px}.ovbs{display:grid;gap:10px;margin-top:12px}.ovb{display:grid;grid-template-columns:1fr auto;gap:4px 10px;align-items:center;border:0;background:none;padding:0;color:inherit;font:inherit;text-align:left;cursor:pointer}.ovb .ovl{font-size:.85rem;color:var(--muted)}.ovb b{font:700 1rem var(--display)}.ovb .meter{grid-column:1/-1;margin:0}
 .ovd{margin:0 0 10px}.ovd>summary{list-style:none;display:flex;align-items:center;gap:10px;min-height:44px;padding:8px 14px;border-radius:14px;border:1px solid var(--line);background:var(--sheet);cursor:pointer;font:500 .88rem var(--body)}.ovd>summary::-webkit-details-marker{display:none}.ovd>summary span{flex:1}.ovd[open]>summary{margin-bottom:10px}.ovd[open]>summary>.i:last-child{transform:rotate(90deg)}
 .addm{display:grid;gap:8px;margin:8px 0 4px}.addm .topt{display:flex;align-items:center;gap:12px;text-align:left}.addm .topt>span{display:grid;gap:2px}.addm .topt .i{width:22px;height:22px;flex:none;color:var(--accent)}.tile.hero.ok{background:linear-gradient(150deg,#0f7a56 0%,#0b6a4a 55%,#085a3e 100%);box-shadow:0 12px 36px rgba(16,145,106,.32)}.tile.hero.over{background:linear-gradient(150deg,#b3261e 0%,#9a1f19 55%,#7d1713 100%);box-shadow:0 12px 36px rgba(217,72,59,.35)}.msticky{position:sticky;top:var(--hdrh,64px);z-index:14;background:var(--paper);margin:0 -16px 10px;padding:6px 16px 8px}.msticky .segc{margin:0}.nxpay{flex:none;width:40px;height:40px;border-radius:50%;padding:0;display:grid;place-items:center;margin-left:4px}.listen{display:grid;justify-items:center;gap:10px;padding:14px 0 8px}.listen-mic{width:72px;height:72px;border-radius:50%;background:var(--accent-soft);display:grid;place-items:center;color:var(--accent)}.listen-mic .i{width:32px;height:32px}.listen-mic.on{background:var(--accent);color:#1b1300;animation:micpulse 1.1s ease-in-out infinite}.listen-t{margin:0;font-size:1.15rem;font-weight:600;text-align:center;min-height:1.6em}.mrows{padding:4px 14px}.mrow{display:block;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:12px 0;color:inherit;font:inherit;cursor:pointer}.mrow:first-child{border-top:0}.mrow .lt{font-weight:600}.mrow b{font:700 1rem var(--display)}.mrow .meter{margin:6px 0 4px}
-.nrep [data-act="report"],.nrep [data-act="goexport"],.nrep [data-act="weekshare"],.nrep [data-act="wkgoals"],.nrep [data-act="pusend"],.nrep [data-act="pupick"],.nrep [data-go="pupd"],.nrep [data-act="diaryshare"],.nrep [data-act="diaryprint"],.nrep [data-act="slipexport"],.nrep [data-act="snagexport"]{display:none!important}
+.nrep [data-act="mexport"],.nrep [data-act="bpexport"],.nrep [data-act="report"],.nrep [data-act="goexport"],.nrep [data-act="weekshare"],.nrep [data-act="wkgoals"],.nrep [data-act="diaryshare"],.nrep [data-act="diaryprint"],.nrep [data-act="slipexport"],.nrep [data-act="snagexport"]{display:none!important}
 @media (max-width:899px){body header.top{margin-bottom:6px;padding-bottom:6px}body header.top img{width:36px;height:36px;border-radius:10px}body header.top h1{font-size:1.2rem;line-height:1.2}body header.top #today,body header.top .sep{display:none}body.sync-ok header.top .small{display:none}body header.top .sync{min-height:22px;padding:0;font-size:.74rem}body header.top .iconbtn{width:40px;height:40px}}
 .msec{list-style:none;font:700 .68rem var(--body);letter-spacing:.09em;text-transform:uppercase;color:var(--muted);padding:12px 4px 2px}.moreV .msec:first-child{padding-top:4px}
 .card .chip-d.tone-ok{background:var(--green-soft);color:var(--green)}.card .chip-d.tone-warn{background:var(--amber-soft);color:var(--accent)}.card .chip-d.tone-bad{background:var(--red-soft);color:var(--red)}
@@ -1009,7 +1009,7 @@ let role=deriveRole();
 const canMoney=()=>perm.money!=="none",canMoneyEdit=()=>perm.money==="edit",canSend=()=>!!perm.send;
 /* everyone can read the Report pages; making and sharing a report, an export or a printout is for the Project Lead and the people the lead chose (People and access, Reports). Adding tasks and updates is separate */
 const canReport=()=>!!perm.manage||!!(typeof S==="object"&&S&&S.settings&&(S.settings.rep||[]).includes(sm.pid));
-const REPORT_ACTS=["report","goexport","wkgoals","pusend","pupick","weekshare","diaryshare","diaryprint","slipexport","snagexport"];
+const REPORT_ACTS=["mexport","bpexport","report","goexport","wkgoals","weekshare","diaryshare","diaryprint","slipexport","snagexport"];
 const lvl=a=>(perm.areas&&perm.areas[a]!=null)?perm.areas[a]:1;
 const applyRole=()=>{const b=document.body.classList;b.toggle("ro",role==="funder");b.toggle("rb",!canMoney());b.toggle("rn",false);b.toggle("rfin",false);b.toggle("nrep",!canReport());AREA_KEYS.forEach(k=>{b.toggle("na-"+k,lvl(k)===0);b.toggle("ro-"+k,lvl(k)===1)})};
 const setPerm=(p,temp)=>{perm=mkPerm(p);role=deriveRole();if(!temp)sm.perm=perm;applyRole()};
@@ -1193,7 +1193,7 @@ addEventListener("keydown",e=>{if(e.key==="Escape"){if(closeSheet)closeSheet();e
 const reduced=()=>matchMedia("(prefers-reduced-motion:reduce)").matches;
 const buzz=n=>{try{navigator.vibrate?.(n)}catch{}};
 const scrollMem={};
-function go(t){closePop();if(t===tab&&t!=="phase"){scrollTo({top:0,behavior:"smooth"});return}scrollMem[tab==="phase"?"phase:"+curPh:tab]=scrollY;if(fullPlan){fullPlan=false;document.body.classList.remove("lock")}if(t==="people"&&!perm.manage)t="build";if(t==="pupd"&&!canReport())t="home";if(!canMoney()&&(t==="money"||t==="extra"))t="build";if((t==="money"||t==="extra")&&!moneyOK){moneyGate(()=>go(t));return}const doIt=()=>{tab=t;countAnim=true;const v=$("#view");v.classList.add("enter");setTimeout(()=>v.classList.remove("enter"),700);render();scrollTo(0,scrollMem[t==="phase"?"phase:"+curPh:t]||0);$("#view").focus({preventScroll:true})};if(document.startViewTransition&&!reduced())document.startViewTransition(doIt);else doIt()}
+function go(t){closePop();if(t===tab&&t!=="phase"){scrollTo({top:0,behavior:"smooth"});return}scrollMem[tab==="phase"?"phase:"+curPh:tab]=scrollY;if(fullPlan){fullPlan=false;document.body.classList.remove("lock")}if(t==="people"&&!perm.manage)t="build";if(!canMoney()&&(t==="money"||t==="extra"))t="build";if((t==="money"||t==="extra")&&!moneyOK){moneyGate(()=>go(t));return}const doIt=()=>{tab=t;countAnim=true;const v=$("#view");v.classList.add("enter");setTimeout(()=>v.classList.remove("enter"),700);render();scrollTo(0,scrollMem[t==="phase"?"phase:"+curPh:t]||0);$("#view").focus({preventScroll:true})};if(document.startViewTransition&&!reduced())document.startViewTransition(doIt);else doIt()}
 addEventListener("scroll",()=>$("header.top")?.classList.toggle("scrolled",scrollY>8),{passive:true});
 let countAnim=false;
 function countUp(root){if(reduced()||!countAnim)return;countAnim=false;root.querySelectorAll("[data-count]").forEach(el=>{const to=+el.dataset.count;if(!to)return;const t0=performance.now();const f=now=>{const k=Math.min(1,(now-t0)/700),e=1-Math.pow(1-k,3);el.textContent=Math.round(to*e)+"%";if(k<1)requestAnimationFrame(f)};requestAnimationFrame(f)})}
@@ -1562,7 +1562,7 @@ function home(){
   const nu=nextUp();
   const sched=schedule();
   return `<h2 style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);margin:-1px">Overview</h2>
-  <div class="qa one"><button class="main" data-act="addphoto">${ic("camera")}Photo</button><button data-act="gostock">${ic("truck")}Material</button><button data-go="report">${ic("trend")}Report</button></div>
+  <div class="qa one"><button class="main" data-act="addphoto">${ic("camera")}Photo</button><button data-act="gostock">${ic("truck")}Material</button><button data-go="report">${ic("trend")}Report</button><button data-go="pupd" style="grid-column:1/-1">${ic("image")}Photo update to share</button></div>
   ${todayCard()}
   ${tipCard()}
   ${(()=>{const f=S.furn.length&&lvl("furn")>=1?fStats(S.furn):null,bar=(go,l,v)=>`<button type="button" class="ovb" ${go}><span class="ovl">${l}</span><b>${v}%</b><span class="meter"><i style="width:${v}%"></i></span></button>`;
@@ -1757,7 +1757,7 @@ function builderCard(){
   const planned=S.pays.filter(x=>!x.paid).sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999")||a.title.localeCompare(b.title)),made=S.pays.filter(x=>x.paid).sort((a,b)=>(b.paidOn||"").localeCompare(a.paidOn||""));
   const ordered=payAll||S.pays.length<=6?[...planned,...made]:[...planned.slice(0,3),...made.slice(0,4)];
   const D=x=>new Date(x+"T12:00").getTime(),first=made.length?made[made.length-1].paidOn:"",wk=first?Math.max(1,Math.ceil((D(today())-D(first)+864e5)/6048e5)):0,avg=wk?paid/wk:0,wl=S.settings.target&&D(S.settings.target)>D(today())?Math.ceil((D(S.settings.target)-D(today()))/6048e5):0,need=wl?left/wl:0;
-  return `<div class="card" id="bp"><div class="row between wr"><h2 style="margin:0">Builder payments</h2><button class="btn small primary" data-act="recpay">${ic("plus")}Record payment</button></div>
+  return `<div class="card" id="bp"><div class="row between wr"><h2 style="margin:0">Builder payments</h2><div class="row" style="gap:8px"><button class="btn small" data-act="bpexport">${ic("share","sm")}Send</button><button class="btn small primary" data-act="recpay">${ic("plus")}Record payment</button></div></div>
   <div class="row between" style="margin:10px 0 6px"><span class="muted small">Contract with ${esc(supName("jonathan")||"the builder")}</span><button class="linkbtn" data-act="contract" style="padding:0;min-height:32px">${ct?rand(ct):"Set amount"}</button></div>
   <div class="meter"><i style="width:${pp}%"></i></div>
   <div class="row between wr small" style="margin-top:8px"><span><b>${money0(paid)}</b> paid · ${Math.round(pp)}%</span><span class="muted">${money0(left)} still to pay</span></div>
@@ -1777,6 +1777,64 @@ function expensesV(){
    ${list.length?`<ul class="list">${list.map(c=>{const ct=cat(c.cat);return `<li><span class="row-ic ${c.paid?"green":""}">${ic(ct[2])}</span><div class="grow"><div class="lt">${esc(c.title||ct[1])}</div><div class="ls">${dshort(c.date)} · ${esc(roomName(c.room))}${c.sup?" · "+esc(supName(c.sup)):""}${c.pay?" · from Builder payments":""}</div><div style="margin-top:4px"><span class="pill ${c.paid?"":"watch"}">${c.paid?"Paid":"Not paid"}</span>${c.paid?"":` <button class="btn small good" data-act="paycost" data-id="${c.id}" style="margin-left:6px">${ic("check","sm")}Mark paid</button>`}</div></div><span class="amt">${rand(c.amount)}</span>${c.pay?"":rowBtns("cost",c.title||ct[1],c.id)}</li>`}).join("")}</ul>`:`<div class="empty">${ic("cash","xl")}<h3>No expenses yet</h3><p>Add what you buy or pay for, and the totals fill in here.</p><button class="btn primary" data-act="addcost">${ic("plus")}Add expense</button></div>`}
   </div>${sharedSp&&S.costs.some(c=>c.room!=="both")?`<p class="hint">Costs for both classrooms (${money0(sharedSp)}) are split equally between them.</p>`:""}
   ${slips?`<details class="ovd"><summary>${ic("camera","sm")}<span>Till slips, VAT and export · ${slips}</span>${ic("chev","sm")}</summary>${slipsV()}</details>`:""}`;
+}
+/* ---------- Send or print the builder payments and their chart ---------- */
+function builderMonths(){
+  const nowYM=mYM(today()),rows={};
+  S.pays.forEach(x=>{const ym=mYM(x.paid?(x.paidOn||x.due):x.due);if(!ym||!(+x.amount>0))return;const r=rows[ym]=rows[ym]||{ym,paid:0,planned:0};r[x.paid?"paid":"planned"]+=+x.amount});
+  const keys=Object.keys(rows).sort();if(!keys.length)return [];
+  const last=keys[keys.length-1]>nowYM?keys[keys.length-1]:nowYM,out=[];let y=+keys[0].slice(0,4),m=+keys[0].slice(5);
+  for(;;){const ym=y+"-"+String(m).padStart(2,"0");out.push(rows[ym]||{ym,paid:0,planned:0});if(ym>=last)break;if(++m>12){m=1;y++}}
+  return out.slice(-12);
+}
+function builderChartSvg(ms){
+  if(!ms.length)return "";
+  const max=mNice(Math.max(...ms.map(r=>r.paid+r.planned),1)),W=360,H=210,pl=40,pr=8,pt=12,pb=28,iw=W-pl-pr,ih=H-pt-pb,Y=v=>pt+ih-v/max*ih,bw=Math.min(30,iw/ms.length*.62),cx=i=>pl+(i+.5)*iw/ms.length;
+  const grid=[.5,1].map(q=>`<line x1="${pl}" x2="${W-pr}" y1="${Y(max*q)}" y2="${Y(max*q)}" stroke="#ccc"/><text x="${pl-6}" y="${Y(max*q)+4}" text-anchor="end" font-size="10" fill="#555">${mShort(max*q)}</text>`).join("");
+  const bars=ms.map((r,i)=>`${r.paid>0?`<rect x="${cx(i)-bw/2}" y="${Y(r.paid)}" width="${bw}" height="${Math.max(0,Y(0)-Y(r.paid))}" fill="#2f7d4f" rx="3"/>`:""}${r.planned>0?`<rect x="${cx(i)-bw/2}" y="${Y(r.paid+r.planned)}" width="${bw}" height="${Math.max(0,Y(r.paid)-Y(r.paid+r.planned))}" fill="#e6efe9" stroke="#777" stroke-width="1.5" stroke-dasharray="4 3" rx="3"/>`:""}`).join("");
+  const step=ms.length>8?2:1,xs=ms.map((r,i)=>i%step===0?`<text x="${cx(i)}" y="${H-8}" text-anchor="middle" font-size="10" fill="#555">${mLab(r.ym)}</text>`:"").join("");
+  return `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Builder payments paid and planned, month by month">${grid}<line x1="${pl}" x2="${W-pr}" y1="${Y(0)}" y2="${Y(0)}" stroke="#888"/>${bars}${xs}</svg>`;
+}
+function builderFacts(){
+  const ct=contractAmt(),paid=paidTotal(),left=Math.max(0,ct-paid),made=S.pays.filter(x=>x.paid).sort((a,b)=>(a.paidOn||"").localeCompare(b.paidOn||"")),planned=S.pays.filter(x=>!x.paid).sort((a,b)=>(a.due||"9999").localeCompare(b.due||"9999"));
+  return {ct,paid,left,made,planned,pc:ct?Math.round(Math.min(100,paid/ct*100)):0,who:supName("jonathan")||"the builder"};
+}
+function builderText(){
+  const f=builderFacts(),L=[(S.settings.name||"Project")+": builder payments, "+dlong(today()),""];
+  if(f.ct)L.push("Contract with "+f.who+": "+money0(f.ct));
+  L.push("Paid so far: "+money0(f.paid)+(f.ct?" ("+f.pc+"%)":""));if(f.ct)L.push("Still to pay: "+money0(f.left));
+  if(f.made.length){L.push("","Paid:");f.made.forEach(x=>L.push("- "+dshort(x.paidOn)+" "+x.title+": "+money0(x.amount)))}
+  if(f.planned.length){L.push("","Planned:");f.planned.forEach(x=>L.push("- "+(x.due?"due "+dshort(x.due):"no date")+" "+x.title+": "+money0(x.amount)))}
+  const ms=builderMonths().filter(r=>r.paid||r.planned);
+  if(ms.length){L.push("","By month:");ms.forEach(r=>L.push("- "+mLab(r.ym,1)+": paid "+money0(r.paid)+(r.planned?", planned "+money0(r.planned):"")))}
+  return L.join("\n");
+}
+function builderCsv(){
+  const f=builderFacts(),rows=[["Stage","Status","Date","Amount"]];
+  f.made.forEach(x=>rows.push([x.title,"Paid",x.paidOn||"",(+x.amount||0).toFixed(2)]));
+  f.planned.forEach(x=>rows.push([x.title,"Planned",x.due||"",(+x.amount||0).toFixed(2)]));
+  rows.push([]);rows.push(["Contract","","",f.ct.toFixed(2)]);rows.push(["Paid","","",f.paid.toFixed(2)]);rows.push(["Still to pay","","",f.left.toFixed(2)]);
+  const ms=builderMonths();if(ms.length){rows.push([]);rows.push(["Month","Paid","Planned",""]);ms.forEach(r=>rows.push([mLab(r.ym,1),r.paid.toFixed(2),r.planned.toFixed(2),""]))}
+  return "﻿"+rows.map(r=>r.map(csvQ).join(",")).join("\r\n");
+}
+function builderPrint(){
+  const f=builderFacts(),ms=builderMonths(),area=document.createElement("div");area.id="printarea";
+  const row=(x,paid)=>`<div class="pa-row"><b>${esc(paid?dshort(x.paidOn):x.due?"Due "+dshort(x.due):"No date")}</b> · ${esc(x.title)} · ${money(x.amount)}</div>`;
+  area.innerHTML=`<div class="pa-h">${esc(S.settings.name||"Project")}: builder payments</div><div class="pa-cap">${f.ct?"Contract with "+esc(f.who)+" "+money0(f.ct)+" · ":""}paid ${money0(f.paid)}${f.ct?" ("+f.pc+"%) · still to pay "+money0(f.left):""} · ${esc(dlong(today()))}</div>`
+    +(ms.length?`<div style="max-width:16cm;margin:10px 0">${builderChartSvg(ms)}<div class="pa-cap">Dark bars: paid. Dashed bars: planned.</div></div>`:"")
+    +(f.made.length?`<div class="pa-cap"><b>Paid</b></div>${f.made.map(x=>row(x,1)).join("")}`:"")+(f.planned.length?`<div class="pa-cap"><b>Planned</b></div>${f.planned.map(x=>row(x,0)).join("")}`:"");
+  printNode(area);
+}
+function builderExportSheet(){
+  if(!S.pays.length){toast("Record or plan a payment first.");return}
+  const f=builderFacts(),base=exSafe(S.settings.name||"Project")+" builder payments "+today();
+  sheet("Send builder payments",`<p class="muted" style="margin:6px 0 10px">${f.ct?"Paid "+money0(f.paid)+" of "+money0(f.ct)+". ":""}${S.pays.length} payment${S.pays.length===1?"":"s"}, with the month by month chart.</p>
+  <div class="tasks"><button class="btn block" id="bt">${ic("share")}Send as a message</button><button class="btn block" id="bp">${ic("print")}Print or save as PDF, with the chart</button><button class="btn block" id="bc">${ic("download")}Spreadsheet (CSV)</button></div><p class="hint" id="bs" aria-live="polite"></p>`,(sh,close)=>{
+    const bs=sh.querySelector("#bs");
+    sh.querySelector("#bt").onclick=()=>{close();shareText(builderText())};
+    sh.querySelector("#bp").onclick=()=>{close();builderPrint()};
+    sh.querySelector("#bc").onclick=async()=>{try{bs.textContent=await slipSave(new Blob([builderCsv()],{type:"text/csv"}),base+".csv")}catch(e){console.warn("builder csv",e);bs.textContent="Something went wrong. Try again."}};
+  });
 }
 function moneyBuild(){
   const R=rooms();
@@ -1960,7 +2018,7 @@ function act(a,id,el){
   ({
    tipgo:()=>{const t=tipById(TIP.id);if(t)openTarget(t[3])},tipx:()=>{lsSet("b3-tipx",TIP.day);render()},tipsheet:()=>tipSheet(),cyc:()=>cycTask(id),opentask:()=>taskSheet(...id.split("|")),edittask:()=>taskSheet(...id.split("|")),
    deltask:()=>{const[k]=id.split("|");const f=roomF;delRecs(S.tasks,t=>t.key===k&&(f==="all"||t.room===f||t.room==="shared"),"Task")},
-   addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>{const[i,g]=id.split("|");quickPhoto(i,undefined,!!g)},gbackup:()=>backupSheet(),addfurn:()=>furnSheet(),editfurn:()=>furnSheet(id),delfurn:()=>delRecs(S.furn,x=>x.id===id,"Item"),furnstarter:()=>furnStarter(),furnlb:()=>{const[rid,i]=id.split("|"),r=S.furn.find(x=>x.id===rid);if(r)lightbox(r.media||[],+i)},gofurn:()=>{bmode="furn";lsSet("build-bmode","furn");if(id)fRoom=id;go("build");render()},adddiary:()=>diarySheet(),editdiary:()=>diarySheet(id),godiary:()=>go("diary"),goexport:()=>exportSheet(),diaryshare:()=>{const tx=diaryText(14);if(!tx){toast("No diary entries in the last 14 days.");return}shareText(tx)},diaryprint:()=>diaryPrint(),savelink:()=>personSheet(sm.pid),linkdismiss:()=>{lsSet("build-linkdis",today());render()},cycboth:()=>cycMany(((el&&el.dataset.ids)||id).split(",")),docselect:()=>{docSel=docSel?null:new Set();render()},docall:()=>{const l=docList();docSel=docSel&&docSel.size===l.length?new Set():new Set(l.map(d=>d.id));render()},docprint:()=>printSelectedDocs(),gotasks:()=>{taskF=id||"";go("tasks")},gotrades:()=>{moneySeg="trades";go("money")},pushsheet:()=>pushSheet(),pushdismiss:()=>{lsSet("build-pushdis",today());render()},restore:()=>restoreSheet(),addtrade:()=>tradeSheet(),edittrade:()=>tradeSheet(id),opentrade:()=>tradeView(id),tradecmp:()=>tradeCmp(id),quotehow:()=>quoteHowSheet(),deltrade:()=>delRecs(S.trades,x=>x.id===id,"Quote"),tradeaccept:()=>{const t=S.trades.find(x=>x.id===id);if(!t)return;confirmSheet("Accept this quote?",`${tName(t)} (${t.trade}), ${money(tVal(t))}.`,"Yes, accept",()=>{const ex=tradeStatus(t,"accepted");logAct(`Accepted the ${t.trade} quote from ${tName(t)}: ${money(tVal(t))}`,1);save();render();toast("Quote accepted."+ex.msg,ex.undo)},true)},paystage:()=>{const[tid,sid]=id.split("|"),t=S.trades.find(x=>x.id===tid),sg=t&&(t.stages||[]).find(x=>x.id===sid);if(!sg)return;confirmSheet("Mark as paid?",`${money(sg.amount)} to ${tName(t)} (${t.trade}). It is saved as paid today.`,"Yes, mark paid",()=>{const u=undoEdit(sg,{paid:true,paidOn:today()});logAct(`Paid ${money(sg.amount)} to ${tName(t)} (${t.trade})`,1);save();render();toast(`${rand(sg.amount)} marked paid.`,u)},true)},goinbox:()=>go("inbox"),gopeople:()=>go("people"),newmsg:()=>newMsgSheet(),addperson:()=>personSheet(),editperson:()=>personSheet(id),msglb:()=>{const[mid,i]=id.split("|");const m=S.msgs.find(x=>x.id===mid);if(m)lightbox(m.media||[],+i)},sharesheet:()=>shareSheet(),bkdismiss:()=>{lsSet("build-bkdis",today());render()},phdrive:()=>driveSave(phasePhotoIds(id).map((m,i)=>({media:m,name:(PSHORT[id]||"Phase")+" photo "+(i+1)+".jpg"}))),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),gosnags:()=>go("snags"),addcost:()=>costSheet(),editcost:()=>costSheet(id),unlockextra:()=>moneyGate(()=>render()),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
+   addtask:()=>addTaskSheet(id&&phase(id)?id:undefined),phphoto:()=>{const[i,g]=id.split("|");quickPhoto(i,undefined,!!g)},gbackup:()=>backupSheet(),bpexport:()=>builderExportSheet(),mexport:()=>moneyExportSheet(),addfurn:()=>furnSheet(),editfurn:()=>furnSheet(id),delfurn:()=>delRecs(S.furn,x=>x.id===id,"Item"),furnstarter:()=>furnStarter(),furnlb:()=>{const[rid,i]=id.split("|"),r=S.furn.find(x=>x.id===rid);if(r)lightbox(r.media||[],+i)},gofurn:()=>{bmode="furn";lsSet("build-bmode","furn");if(id)fRoom=id;go("build");render()},adddiary:()=>diarySheet(),editdiary:()=>diarySheet(id),godiary:()=>go("diary"),goexport:()=>exportSheet(),diaryshare:()=>{const tx=diaryText(14);if(!tx){toast("No diary entries in the last 14 days.");return}shareText(tx)},diaryprint:()=>diaryPrint(),savelink:()=>personSheet(sm.pid),linkdismiss:()=>{lsSet("build-linkdis",today());render()},cycboth:()=>cycMany(((el&&el.dataset.ids)||id).split(",")),docselect:()=>{docSel=docSel?null:new Set();render()},docall:()=>{const l=docList();docSel=docSel&&docSel.size===l.length?new Set():new Set(l.map(d=>d.id));render()},docprint:()=>printSelectedDocs(),gotasks:()=>{taskF=id||"";go("tasks")},gotrades:()=>{moneySeg="trades";go("money")},pushsheet:()=>pushSheet(),pushdismiss:()=>{lsSet("build-pushdis",today());render()},restore:()=>restoreSheet(),addtrade:()=>tradeSheet(),edittrade:()=>tradeSheet(id),opentrade:()=>tradeView(id),tradecmp:()=>tradeCmp(id),quotehow:()=>quoteHowSheet(),deltrade:()=>delRecs(S.trades,x=>x.id===id,"Quote"),tradeaccept:()=>{const t=S.trades.find(x=>x.id===id);if(!t)return;confirmSheet("Accept this quote?",`${tName(t)} (${t.trade}), ${money(tVal(t))}.`,"Yes, accept",()=>{const ex=tradeStatus(t,"accepted");logAct(`Accepted the ${t.trade} quote from ${tName(t)}: ${money(tVal(t))}`,1);save();render();toast("Quote accepted."+ex.msg,ex.undo)},true)},paystage:()=>{const[tid,sid]=id.split("|"),t=S.trades.find(x=>x.id===tid),sg=t&&(t.stages||[]).find(x=>x.id===sid);if(!sg)return;confirmSheet("Mark as paid?",`${money(sg.amount)} to ${tName(t)} (${t.trade}). It is saved as paid today.`,"Yes, mark paid",()=>{const u=undoEdit(sg,{paid:true,paidOn:today()});logAct(`Paid ${money(sg.amount)} to ${tName(t)} (${t.trade})`,1);save();render();toast(`${rand(sg.amount)} marked paid.`,u)},true)},goinbox:()=>go("inbox"),gopeople:()=>go("people"),newmsg:()=>newMsgSheet(),addperson:()=>personSheet(),editperson:()=>personSheet(id),msglb:()=>{const[mid,i]=id.split("|");const m=S.msgs.find(x=>x.id===mid);if(m)lightbox(m.media||[],+i)},sharesheet:()=>shareSheet(),bkdismiss:()=>{lsSet("build-bkdis",today());render()},phdrive:()=>driveSave(phasePhotoIds(id).map((m,i)=>({media:m,name:(PSHORT[id]||"Phase")+" photo "+(i+1)+".jpg"}))),phlb:()=>{const[pid,i]=id.split("|");lightbox(phasePhotoIds(pid),+i)},gomats:()=>go("mats"),gosite:()=>go("site"),gosnags:()=>go("snags"),addcost:()=>costSheet(),editcost:()=>costSheet(id),unlockextra:()=>moneyGate(()=>render()),delcost:()=>delRecs(S.costs,c=>c.id===id,"Expense"),
    payall:()=>{payAll=!payAll;render()},resetpays:()=>confirmSheet("Reset all payments?","This clears every builder payment, paid and planned, and the expenses made from them. You can undo it right after.","Reset payments",()=>{const ps=[...S.pays],cs=S.costs.filter(c=>c.pay);S.pays.length=0;cs.forEach(c=>S.costs.splice(S.costs.indexOf(c),1));payAll=false;save();render();toast("All builder payments reset to R 0.",()=>{ps.forEach(x=>S.pays.push(x));cs.forEach(c=>S.costs.push(c))})}),recpay:()=>recPaySheet(),weekly:()=>weeklySheet(),addpay:()=>paySheet(),editpay:()=>paySheet(id),contract:()=>contractSheet(),diaryone:()=>{const e=S.diary.find(x=>x.id===id);if(e)shareText(diaryEntryText(e))},diarylb:()=>{const[eid,i]=id.split("|"),d=S.diary.find(x=>x.id===eid);if(d)lightbox(d.media||[],+i)},cheerpick:()=>{if(perm.manage)cheerSheet()},contractors:()=>contractorsSheet(),plprint:()=>planPrint(planOf(planSel)),vnplay:()=>vnPlay(id),odmove:()=>overdueSheet(),phall:()=>{lsSet("build-allph",lsGet("build-allph")==="1"?"":"1");render()},sinceopen:()=>{seenBase=Date.now();seenSave();actsSheet();render()},sincex:()=>{seenBase=Date.now();seenSave();render()},rpshow:()=>slidePickSheet(),rpopen:()=>{const l=S.logs.find(x=>x.id===id);if(!l)return;if(l.media?.length){lightbox(l.media.slice(),0,{caps:l.media.map(()=>rpCap(l)),owners:l.media.map(()=>l.id),show:true});return}sheet(dlabel(l.date),`<p style="margin:8px 0 12px;font-size:1.05rem;line-height:1.45;white-space:pre-wrap">${esc(l.text||"")}</p><p class="muted small">${[l.who,phaseName(l.phase)].filter(Boolean).map(esc).join(" · ")}</p><div class="foot"><button type="button" class="btn block" data-go="site">Open the site log</button></div>`,(sh,close)=>{sh.querySelector("[data-go]").addEventListener("click",()=>{close();go("site")})})},attmore:()=>{lsSet("build-attall",lsGet("build-attall")==="1"?"":"1");render()},wxrefresh:()=>{toast("Updating the weather…");wxLoad(true).then(()=>{render();toast(wx&&Date.now()-wx.t<6e4?"Weather is up to date.":"Could not load the weather. Check your connection.")})},joinlink:()=>shareSheet(),iosdismiss:()=>{lsSet("build-iosdis",today());render()},ncdismiss:()=>{lsSet("build-ncdis",today());render()},gedit:()=>{gEdit=!gEdit;render()},gadd:()=>gardenNameSheet(),gren:()=>gardenNameSheet(id),gdel:()=>gardenDel(id),pedit:()=>{if(!perm.manage)return;pEdit=!pEdit;render()},padd:()=>{if(perm.manage)phaseNameSheet()},pren:()=>{if(perm.manage)phaseNameSheet(id)},pdel:()=>{if(perm.manage)phaseDel(id)},pmv:()=>{if(!perm.manage)return;const[k,d]=id.split("|");phaseMove(k,+d)},estimate:()=>estimateSheet(),typicalpay:()=>typicalPays(),
    paypay:()=>{const x=S.pays.find(q=>q.id===id);if(!x)return;confirmSheet("Record this payment?",`${money(x.amount)} paid to the builder today.`,"Yes, record payment",()=>{const u=undoEdit(x,{paid:true,paidOn:today()});payCost(x);logAct(`Builder payment of ${money(x.amount)} recorded`,1);save();render();toast(`${rand(x.amount)} paid to the builder.`,()=>{u();payCost(x)})},true)},
    delpay:()=>{const x=S.pays.find(q=>q.id===id),lc=S.costs.find(c=>c.id==="pay_"+id);S.pays.splice(S.pays.indexOf(x),1);if(lc)S.costs.splice(S.costs.indexOf(lc),1);save();render();toast("Stage deleted.",()=>{S.pays.push(x);if(lc)S.costs.push(lc)})},
@@ -2061,12 +2119,14 @@ function taskSheet(key,roomId){
     sh.querySelectorAll("#rm [data-r]").forEach(b=>b.onclick=()=>{read();cur=b.dataset.r;sh.querySelectorAll("#rm [data-r]").forEach(x=>x.setAttribute("aria-pressed",x===b));sh.querySelector("#body").innerHTML=body();wire()});
     sh.querySelector("#f").onsubmit=async e=>{e.preventDefault();read();if(!split)ts.forEach(t=>{draft[t.room]={...draft[cur]}});const ti=sh.querySelector("#ti");if(!title.trim())return showErr(sh,ti,"A task needs a name.");
       const sb2=sh.querySelector(".foot .btn");sb2.disabled=true;sb2.textContent="Saving…";
+      try{
       const mids=[...keepM],md={};keepM.forEach(m=>{if(mdate0[m])md[m]=mdate0[m]});
       for(const a of addM){const blob=a.video?a.file:await prepPhoto(a.file,PSIZES[psize][1]),mid=uid();await mPut(mid,blob);queueMedia(mid);mids.push(mid);md[mid]=today()}
       addM.forEach(a=>URL.revokeObjectURL(a.url));
       const nt=ts.flatMap(t=>asgNew(t.assignee,draft[t.room].assignee));
       const ups=ts.map(t=>{const d=draft[t.room];const stt=(!perm.manage&&t.status==="done")?"done":(!perm.manage&&d.status==="done"?"check":d.status);return undoEdit(t,{title:title.trim(),status:stt,due:d.due,who:d.who,assignee:d.assignee||"",note:d.note,doneOn:stt==="done"?(t.doneOn||today()):"",media:mids,mdate:md})});
-      save();close();render();toast("Task saved.",()=>ups.forEach(u=>u()));[...new Set(nt)].forEach(pid=>notifySend([pid],"New task for you",title.trim().slice(0,100),"tasks"))};
+      save();close();render();toast("Task saved.",()=>ups.forEach(u=>u()));[...new Set(nt)].forEach(pid=>notifySend([pid],"New task for you",title.trim().slice(0,100),"tasks"))
+      }catch(er){console.warn("task save",er);sb2.disabled=false;sb2.textContent="Save task";toast("Could not save the task: "+String(er&&er.message||er).slice(0,80))}};
   });
 }
 function costSheet(id,pre,say){
@@ -3144,7 +3204,7 @@ const ROLE_PICK=["site","builder","owner","decor","finance","other"];
 const roleLabel=r=>(ROLES[r]||ROLES.other).label;
 const DEFAULT_PEOPLE=[["Albert","site"],["Jonathan","builder"],["Newberry","owner"],["Talana","decor"],["Audrey","finance"]];
 const READ_ACTS0=["report","lb","phlb","payall","gomats","gosite","acts","theme","export","phba","lockmoney","plzin","plzout","plfit","plfull","opendoc","docunlock","plprev","plnext","phdrive","gbackup"].concat(["goinbox","gopeople","newmsg","msglb","sharesheet"]);
-const READ_ACTS=READ_ACTS0.concat(["sinceopen","sincex","phall","rpshow","vnplay","plprint","rpopen","contractors","dnotes","gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp","mbar","slipexport","slipview","thread","msgdec","snagexport","msgdel","msgclear","gosnags","attsheet","bmore","tipgo","tipx","tipsheet","wkgoals","pusend","pupick","tradecmp","quotehow"]);
+const READ_ACTS=READ_ACTS0.concat(["sinceopen","sincex","phall","rpshow","vnplay","plprint","rpopen","contractors","dnotes","gotasks","gotrades","pushsheet","pushdismiss","attmore","diaryone","diarylb","iosdismiss","opentask","docselect","docall","docprint","godiary","goextra","goexport","diaryshare","diaryprint","savelink","linkdismiss","gofurn","furnlb","phtlb","weekshare","phcmp","mbar","slipexport","slipview","thread","msgdec","snagexport","msgdel","msgclear","gosnags","attsheet","bmore","tipgo","tipx","tipsheet","wkgoals","bpexport","mexport","pusend","pupick","tradecmp","quotehow"]);
 const MONEY_ACTS=["addcost","editcost","delcost","budget","addpay","editpay","delpay","recpay","paypay","paycost","contract","typicalpay","weekly","resetpays","payall","report"];
 MONEY_ACTS.push("addtrade","edittrade","deltrade","opentrade","tradeaccept","paystage");
 const NOTE_ACTS=["addphoto","phphoto","adddoc"];
@@ -3814,6 +3874,77 @@ function moneyCharts(){
    ${undated?`<p class="hint">${undated} payment${undated===1?" has":"s have"} no due date yet, so ${undated===1?"it is":"they are"} not shown.</p>`:""}
    <details class="tv"><summary>View as table</summary><table class="dt"><thead><tr><th>Month</th><th>Builder</th><th>Trades</th><th>Other</th><th>Planned</th></tr></thead><tbody>${ms.map(r=>`<tr><td>${mLab(r.ym)}</td><td>${money0(r.b)}</td><td>${money0(r.t)}</td><td>${money0(r.o)}</td><td>${money0(r.p)}</td></tr>`).join("")}</tbody></table></details></div>`;
 }
+/* ---------- Export the money overview: as a message, a picture, a spreadsheet or a printout ---------- */
+function moneyFacts(){
+  const E=estSum(),td=today(),parties=[],due=[];
+  if(E.ct>0)parties.push({n:"Builder",v:E.ct,p:Math.min(E.ct,E.paidB)});
+  tGroups().forEach(g=>{const lv=g.items.filter(t=>t.status==="accepted"),v=sum(lv,tVal);if(v>0)parties.push({n:g.name,v,p:Math.min(v,sum(lv,tPaid))})});
+  if(E.othAll>0)parties.push({n:"Expenses",v:E.othAll,p:E.othPaid});
+  parties.sort((x,y)=>y.v-x.v);
+  S.pays.filter(x=>!x.paid).forEach(x=>due.push({who:"Builder",what:x.title||"Payment",due:x.due||"",amt:+x.amount||0}));
+  tLive().forEach(t=>(t.stages||[]).forEach(st=>{if(!st.paid)due.push({who:t.trade||"Trade",what:st.label||"Payment",due:st.due||"",amt:+st.amount||0})}));
+  S.costs.filter(c=>!c.pay&&!c.paid).forEach(c=>due.push({who:"Expense",what:c.title||cat(c.cat)[1],due:c.date||"",amt:+c.amount||0}));
+  due.sort((x,y)=>(x.due||"9999").localeCompare(y.due||"9999"));
+  return {E,parties,due,td,name:S.settings.name||"Project"};
+}
+function moneyText(){
+  const {E,parties,due,td,name}=moneyFacts(),L=[`*${name}: money overview*`,dlong(td),""];
+  if(E.est)L.push("Estimate: "+money0(E.est));
+  L.push("Committed: "+money0(E.committed)+(E.est?" ("+pct(E.committed,E.est)+"%)":""),"Paid so far: "+money0(E.paid),"Still to pay: "+money0(E.left));
+  if(E.est)L.push((E.free<0?"Over the estimate by ":"Left in the estimate: ")+money0(Math.abs(E.free)));
+  if(parties.length){L.push("","*Who gets what*");parties.forEach(x=>L.push(`- ${x.n}: ${money0(x.v)} (paid ${money0(x.p)}, to pay ${money0(x.v-x.p)})`))}
+  if(due.length){L.push("","*Due next*");due.slice(0,8).forEach(x=>L.push(`- ${x.due?(x.due<td?"Overdue ":"")+dshort(x.due):"No date"}: ${x.who}, ${x.what}: ${money0(x.amt)}`));if(due.length>8)L.push(`and ${due.length-8} more`)}
+  return L.join("\n");
+}
+function moneyCsv(){
+  const {E,parties,due,td,name}=moneyFacts(),rows=[[name+": money overview",dlong(td),"",""],[]];
+  rows.push(["Summary","","",""]);if(E.est)rows.push(["Estimate",E.est.toFixed(2),"",""]);
+  rows.push(["Committed",E.committed.toFixed(2),"",""],["Paid so far",E.paid.toFixed(2),"",""],["Still to pay",E.left.toFixed(2),"",""]);
+  if(E.est)rows.push([E.free<0?"Over the estimate":"Left in the estimate",Math.abs(E.free).toFixed(2),"",""]);
+  rows.push([],["Who gets what","Total","Paid","To pay"]);parties.forEach(x=>rows.push([x.n,x.v.toFixed(2),x.p.toFixed(2),(x.v-x.p).toFixed(2)]));
+  if(due.length){rows.push([],["Due next","Date","For","Amount"]);due.forEach(x=>rows.push([x.who,x.due||"",x.what,x.amt.toFixed(2)]))}
+  const ms=MCH.months||[];if(ms.length){rows.push([],["Month","Builder","Trades","Other","Planned"]);ms.forEach(r=>rows.push([mLab(r.ym,1),r.b.toFixed(2),r.t.toFixed(2),r.o.toFixed(2),r.p.toFixed(2)]))}
+  return "﻿"+rows.map(r=>r.map(csvQ).join(",")).join("\r\n");
+}
+function moneyPrint(){
+  const {E,parties,due,td,name}=moneyFacts(),area=document.createElement("div");area.id="printarea";
+  const tr=c=>`<tr>${c.map((x,i)=>`<td style="padding:5px 6px;border-bottom:1px solid #bbb;${i?"text-align:right;":""}font:12px sans-serif">${x}</td>`).join("")}</tr>`;
+  const th=c=>`<tr>${c.map((x,i)=>`<th style="padding:5px 6px;border-bottom:2px solid #000;${i?"text-align:right;":"text-align:left;"}font:700 12px sans-serif">${x}</th>`).join("")}</tr>`;
+  area.innerHTML=`<div class="pa-h">${esc(name)}: money overview</div><div class="pa-cap">${esc(dlong(td))}</div>
+   <table style="border-collapse:collapse;width:100%;max-width:17cm;margin:8px 0 14px">${[E.est?["Estimate",money0(E.est)]:null,["Committed",money0(E.committed)+(E.est?" ("+pct(E.committed,E.est)+"%)":"")],["Paid so far",money0(E.paid)],["Still to pay",money0(E.left)],E.est?[E.free<0?"Over the estimate":"Left in the estimate",money0(Math.abs(E.free))]:null].filter(Boolean).map(tr).join("")}</table>
+   ${parties.length?`<div class="pa-cap"><b>Who gets what</b></div><table style="border-collapse:collapse;width:100%;max-width:17cm;margin:0 0 14px">${th(["","Total","Paid","To pay"])}${parties.map(x=>tr([esc(x.n),money0(x.v),money0(x.p),money0(x.v-x.p)])).join("")}</table>`:""}
+   ${due.length?`<div class="pa-cap"><b>Due next</b></div><table style="border-collapse:collapse;width:100%;max-width:17cm">${th(["","Date","","Amount"])}${due.slice(0,15).map(x=>tr([esc(x.who+": "+x.what),x.due?dshort(x.due)+(x.due<td?" (overdue)":""):"No date","",money0(x.amt)])).join("")}</table>`:""}`;
+  printNode(area);
+}
+/* a picture of the overview, for phones that cannot print from the app (iPhone): the share screen can print or save it */
+async function moneyPicture(){
+  const {E,parties,due,td,name}=moneyFacts(),W=1080,pad=64,rowH=96;
+  const nP=parties.length,nD=Math.min(due.length,6),H=pad*2+150+300+(nP?90+nP*rowH:0)+(nD?90+nD*rowH:0);
+  const cv=document.createElement("canvas");cv.width=W;cv.height=H;const x=cv.getContext("2d");
+  x.fillStyle="#fffdf8";x.fillRect(0,0,W,H);let y=pad;
+  x.fillStyle="#1b160e";x.font="700 46px system-ui,sans-serif";x.fillText(name+": money overview",pad,y+40);x.fillStyle="#6c6250";x.font="400 30px system-ui,sans-serif";x.fillText(dlong(td),pad,y+90);y+=150;
+  const big=E.est?(E.free<0?"Over the estimate":"Left in the estimate"):"Committed so far",bigV=E.est?money0(Math.abs(E.free)):money0(E.committed);
+  x.fillStyle=E.est&&E.free<0?"#c0392b":"#2f7d4f";x.beginPath();x.roundRect?x.roundRect(pad,y,W-pad*2,260,24):x.rect(pad,y,W-pad*2,260);x.fill();
+  x.fillStyle="#fff";x.font="600 30px system-ui,sans-serif";x.fillText(big,pad+36,y+60);x.font="700 72px system-ui,sans-serif";x.fillText(bigV,pad+36,y+140);
+  x.font="500 28px system-ui,sans-serif";x.fillText(`Paid ${money0(E.paid)}  ·  To pay ${money0(E.left)}${E.est?"  ·  Estimate "+money0(E.est):""}`,pad+36,y+210);y+=300;
+  const head=t=>{x.fillStyle="#1b160e";x.font="700 34px system-ui,sans-serif";x.fillText(t,pad,y+50);y+=90};
+  const line=(l,r,sub,red)=>{x.fillStyle="#1b160e";x.font="600 30px system-ui,sans-serif";let t=l;while(x.measureText(t).width>W-pad*2-300&&t.length>4)t=t.slice(0,-2);x.fillText(t===l?l:t+"…",pad,y+38);x.textAlign="right";x.fillText(r,W-pad,y+38);x.textAlign="left";x.fillStyle=red?"#c0392b":"#6c6250";x.font="400 24px system-ui,sans-serif";x.fillText(sub,pad,y+72);y+=rowH;x.fillStyle="#e7e0d2";x.fillRect(pad,y-10,W-pad*2,2)};
+  if(nP){head("Who gets what");parties.forEach(p=>line(p.n,money0(p.v),`Paid ${money0(p.p)} · to pay ${money0(p.v-p.p)}`))}
+  if(nD){head("Due next");due.slice(0,6).forEach(d=>line(d.who+": "+d.what,money0(d.amt),d.due?(d.due<td?"Overdue · ":"Due ")+dshort(d.due):"No date yet",d.due&&d.due<td))}
+  return await new Promise(r=>cv.toBlob(r,"image/png"));
+}
+function moneyExportSheet(){
+  if(!moneyOK){moneyGate(moneyExportSheet);return}
+  const base=exSafe(S.settings.name||"Project")+" money overview "+today(),ios=isIOS();
+  sheet("Export the money overview",`<p class="muted" style="margin:6px 0 10px">The estimate, what is paid and still to pay, who gets what and what is due next.</p>
+  <div class="tasks"><button class="btn block" id="mt">${ic("share")}Send as a message</button><button class="btn block" id="mi">${ic("image")}${ios?"Save or print as a picture":"Save as a picture"}</button><button class="btn block" id="mc">${ic("download")}Spreadsheet (CSV)</button>${ios?"":`<button class="btn block" id="mp">${ic("print")}Print or save as PDF</button>`}</div><p class="hint" id="ms" role="status"></p>`,(sh,close)=>{
+    const ms=sh.querySelector("#ms");
+    sh.querySelector("#mt").onclick=()=>{close();shareText(moneyText())};
+    sh.querySelector("#mi").onclick=async e=>{const b=e.currentTarget;b.disabled=true;try{const bl=await moneyPicture();ms.textContent=await slipSave(bl,base+".png")}catch(er){console.warn("money picture",er);ms.textContent="Could not make the picture. Try again."}b.disabled=false};
+    sh.querySelector("#mc").onclick=async()=>{try{ms.textContent=await slipSave(new Blob([moneyCsv()],{type:"text/csv"}),base+".csv")}catch(er){console.warn("money csv",er);ms.textContent="Could not make the spreadsheet. Try again."}};
+    sh.querySelector("#mp")?.addEventListener("click",()=>{close();moneyPrint()});
+  });
+}
 function overallV(){
   const {ct,est,paidB,bLeft,tc,tp,tLeft,othAll,othPaid,othDue,committed,paid,left,free}=estSum(),wait=tWait();
   const bar=(v,t)=>'<div class="meter" role="img" aria-label="'+money0(v)+' of '+money0(t)+'"><i style="width:'+(t>0?Math.min(100,v/t*100):0)+'%"></i></div>';
@@ -3839,7 +3970,8 @@ function overallV(){
   const top=parties.slice(0,7),rest=parties.slice(7);if(rest.length)top.push({n:"Other trades ("+rest.length+")",v:sum(rest,x=>x.v),p:sum(rest,x=>x.p),attr:'data-sub="mseg:trades"'});
   const whoCard=top.length?'<div class="card ov mrows"><h2 style="margin:10px 0 0">Who gets what</h2>'+top.map(x=>'<button type="button" class="mrow" '+x.attr+'><div class="row between"><span class="lt">'+esc(x.n)+'</span><b>'+money0(x.v)+'</b></div>'+bar(x.p,x.v)+'<div class="ls">Paid '+money0(x.p)+' · to pay '+money0(x.v-x.p)+'</div></button>').join("")+(wait?'<div class="ls" style="padding:10px 0 4px;border-top:1px solid var(--line)">'+money0(wait)+' in quotes waiting for a decision</div>':"")+'</div>':(wait?'<p class="hint">'+money0(wait)+' in quotes waiting for a decision.</p>':'<div class="card"><p class="muted" style="margin:0">Add the builder\'s contract and quotes from your trades to see who gets what.</p></div>');
   const roomTiles=S.costs.some(c=>c.room!=="both")&&rooms().length>1?'<div class="card"><h2>Each classroom</h2><div class="rstats">'+rooms().map(r=>'<div><span class="eyebrow">'+esc(r.name)+'</span><b>'+money0(spentRoom(r.id))+'</b></div>').join("")+'</div><p class="hint">Shared costs are split equally between the classrooms.</p></div>':"";
-  return hero+nextCard+whoCard+roomTiles+moneyCharts()+'<p class="hint">Each payment comes off that quote\'s balance. Trades are quoted and paid separately from the builder.</p>';
+  const exp=`<button type="button" class="btn block" data-act="mexport" style="margin:0 0 10px">${ic("share")}Export the money overview</button>`;
+  return hero+exp+nextCard+whoCard+roomTiles+moneyCharts()+'<p class="hint">Each payment comes off that quote\'s balance. Trades are quoted and paid separately from the builder.</p>';
 }
 /* a short guide: how to compare quotes and how to view a document */
 const HOW_DOC=[["Find the document","From a quote: tap its card, then Open the quote document at the bottom. In All quotes, quote documents that are not on a card yet are listed at the bottom: tap one. Every document is also under Build, then More, then Documents."],["Unlock it if asked","Quotes, contracts and invoices are locked. If it asks, type the money password. Tap the lock at the top of Money to unlock first."],["Open it","Tap Open. A PDF opens in the Plans viewer, where you pinch to zoom. A photo opens full screen. Other files open in a new tab."],["Send or save it","In the same sheet: Share sends the file on WhatsApp, Print makes a printout, and Save puts it in Google Drive or on this phone."],["Link it to a quote","On a quote, tap Edit details and choose the quote document. Then it opens straight from the quote card."]];
@@ -5192,7 +5324,7 @@ PU.logo=lsGet("b3-pu-logo")!=="0";
 PU.caps=(()=>{try{return JSON.parse(lsGet("b3-pu-caps")||"{}")}catch{return{}}})();
 PU.own=(()=>{try{return JSON.parse(lsGet("b3-pu-own")||"[]")}catch{return[]}})();
 const puSave=()=>{lsSet("b3-pu-msg",PU.msg);lsSet("b3-pu-ids",JSON.stringify(PU.ids));lsSet("b3-pu-own",JSON.stringify(PU.own.filter(m=>PU.ids.includes(m))));lsSet("b3-pu-caps",JSON.stringify(Object.fromEntries(Object.entries(PU.caps).filter(([m,c])=>PU.ids.includes(m)&&c))))};
-const repSeg=cur=>`<div class="segc" role="group" aria-label="Report type">${[["report","Full report"],["week","This week"],["pupd","Photos"]].map(([k,l])=>`<button type="button" data-go="${k}" aria-pressed="${k===cur}">${l}</button>`).join("")}</div>${canReport()?"":`<p class="muted small" style="margin:-4px 0 12px">View only. The Project Lead can give you report access to share.</p>`}`;
+const repSeg=cur=>`<div class="segc" role="group" aria-label="Report type">${[["report","Full report"],["week","This week"],["pupd","Photos"]].map(([k,l])=>`<button type="button" data-go="${k}" aria-pressed="${k===cur}">${l}</button>`).join("")}</div>${canReport()||cur==="pupd"?"":`<p class="muted small" style="margin:-4px 0 12px">View only. The Project Lead can give you report access to share.</p>`}`;
 /* the logo, floating at the bottom right of a photo; baked into the copies that are sent */
 async function stampPhoto(blob){
   const load=src=>new Promise((res,rej)=>{const im=new Image();im.onload=()=>res(im);im.onerror=rej;im.src=src});

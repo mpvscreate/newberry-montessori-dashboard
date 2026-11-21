@@ -1247,7 +1247,7 @@ html { height: 100%; }
       "coverPos": null,
       "coverZoom": null,
       "pm": [],
-      "facilities": [],
+      "checklist": [],
       "members": [
         { "id": "m1", "name": "Alex Morgan", "role": "Project Lead", "tasks": ["Strategic planning", "Stakeholder management"], "email": "alex@example.com", "phone": "+1 555 0101", "status": "active" },
         { "id": "m2", "name": "Sam Rivera", "role": "Maintenance Lead", "tasks": ["Building inspections", "Vendor coordination"], "email": "sam@example.com", "phone": "+1 555 0102", "status": "active" },
@@ -1266,7 +1266,7 @@ html { height: 100%; }
       "coverPos": null,
       "coverZoom": null,
       "pm": [],
-      "facilities": [],
+      "checklist": [],
       "members": [
         { "id": "m5", "name": "Kim Park", "role": "Curriculum Director", "tasks": ["Standards alignment", "Teacher support"], "email": "kim@example.com", "phone": "+1 555 0201", "status": "active" },
         { "id": "m6", "name": "Lisa Martinez", "role": "Lead Teacher", "tasks": ["Lesson planning", "Materials ordering"], "email": "lisa@example.com", "phone": "+1 555 0202", "status": "active" },
@@ -1284,7 +1284,7 @@ html { height: 100%; }
       "coverPos": null,
       "coverZoom": null,
       "pm": [],
-      "facilities": [],
+      "checklist": [],
       "members": [
         { "id": "m8", "name": "Nina Williams", "role": "Office Manager", "tasks": ["Enrollment", "Scheduling"], "email": "nina@example.com", "phone": "+1 555 0301", "status": "active" },
         { "id": "m9", "name": "Derek Price", "role": "Finance Lead", "tasks": ["Budget tracking", "Grant management"], "email": "derek@example.com", "phone": "+1 555 0302", "status": "busy" }
@@ -1380,8 +1380,71 @@ html { height: 100%; }
         'Inspect roof & exterior walls',
         'Test backup generator'
       ]
+    },
+    curriculum: {
+      'Planning & Standards': [
+        'Align lessons to curriculum standards',
+        'Review scope & sequence',
+        'Update long-range plans',
+        'Coordinate cross-grade planning',
+        'Schedule curriculum review meeting'
+      ],
+      'Materials & Resources': [
+        'Order classroom materials',
+        'Prepare Montessori work stations',
+        'Update reading & resource library',
+        'Audit teaching aids inventory',
+        'Prepare seasonal/thematic materials'
+      ],
+      'Assessment & Support': [
+        'Schedule student assessments',
+        'Prepare parent conference notes',
+        'Review individual learning plans',
+        'Plan teacher support & mentoring',
+        'Document student progress reports'
+      ]
+    },
+    admin: {
+      'Enrollment & Records': [
+        'Process new enrollments',
+        'Update student records',
+        'Renew family contracts',
+        'Maintain waitlist',
+        'Verify immunization records'
+      ],
+      'Finance & Budget': [
+        'Reconcile monthly budget',
+        'Process tuition payments',
+        'Track grant funding',
+        'Prepare financial report',
+        'Review vendor invoices'
+      ],
+      'HR & Compliance': [
+        'Update staff certifications',
+        'Schedule compliance training',
+        'Review licensing requirements',
+        'Maintain staff records',
+        'Conduct policy review'
+      ]
+    },
+    general: {
+      'Getting Started': [
+        'Define team goals & objectives',
+        'Assign roles & responsibilities',
+        'Set up communication channels',
+        'Schedule kickoff meeting',
+        'Document team charter'
+      ]
     }
   };
+
+  var CHECKLIST_TAB_LABELS = { facilities: 'Facilities', curriculum: 'Curriculum', admin: 'Admin', general: 'Checklist' };
+
+  function getTeamChecklistCategory(team) {
+    var n = (team.name || '').trim().toLowerCase();
+    if (TAB_PRESETS[n]) return n;
+    return 'general';
+  }
 
   var TEAM_COLORS = [
     { color: '#34C759', gradient: 'linear-gradient(135deg, #0a2e1a 0%, #1a5c32 35%, #34C759 100%)' },
@@ -1600,7 +1663,7 @@ html { height: 100%; }
       coverPos: null,
       coverZoom: null,
       pm: [],
-      facilities: [],
+      checklist: [],
       members: []
     };
     state.teams.push(team);
@@ -1627,11 +1690,13 @@ html { height: 100%; }
     card.appendChild(renderTagBar(team));
 
     // Tab bar
+    var checklistCategory = getTeamChecklistCategory(team);
+    var checklistLabel = CHECKLIST_TAB_LABELS[checklistCategory] || 'Checklist';
     var tabs = el('div', 'detail-tabs');
     var tabDefs = [
       { key: 'team', label: 'Team' },
       { key: 'pm', label: 'Project Management' },
-      { key: 'facilities', label: 'Facilities' }
+      { key: 'checklist', label: checklistLabel }
     ];
     tabDefs.forEach(function(td) {
       var tab = el('button', 'detail-tab' + (activeTab === td.key ? ' active' : ''));
@@ -1658,22 +1723,21 @@ html { height: 100%; }
 
     // PM tab content
     var pmContent = el('div', 'tab-content' + (activeTab === 'pm' ? ' active' : ''));
-    pmContent.appendChild(renderChecklist(team, 'pm'));
+    pmContent.appendChild(renderChecklist(team, 'pm', TAB_PRESETS.pm));
     card.appendChild(pmContent);
 
-    // Facilities tab content
-    var facContent = el('div', 'tab-content' + (activeTab === 'facilities' ? ' active' : ''));
-    facContent.appendChild(renderChecklist(team, 'facilities'));
-    card.appendChild(facContent);
+    // Checklist tab content (label/content adapts to the team's focus area)
+    var checklistContent = el('div', 'tab-content' + (activeTab === 'checklist' ? ' active' : ''));
+    checklistContent.appendChild(renderChecklist(team, 'checklist', TAB_PRESETS[checklistCategory] || TAB_PRESETS.general));
+    card.appendChild(checklistContent);
 
     card.appendChild(renderFooter(team));
     app.appendChild(card);
   }
 
   // --- Checklist ---
-  function ensureChecklist(team, key) {
+  function ensureChecklist(team, key, presets) {
     if (!team[key] || !team[key].length) {
-      var presets = TAB_PRESETS[key];
       team[key] = [];
       Object.keys(presets).forEach(function(section) {
         presets[section].forEach(function(label) {
@@ -1684,8 +1748,8 @@ html { height: 100%; }
     }
   }
 
-  function renderChecklist(team, key) {
-    ensureChecklist(team, key);
+  function renderChecklist(team, key, presets) {
+    ensureChecklist(team, key, presets);
     var items = team[key];
     var panel = el('div', 'checklist-panel');
 
@@ -2376,7 +2440,16 @@ html { height: 100%; }
       var stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
         var parsed = JSON.parse(stored);
-        if (parsed.teams) return parsed;
+        if (parsed.teams) {
+          // Migrate pre-fix data: the third tab used to be hardcoded to a
+          // "facilities" field/label for every team; carry any saved items
+          // over to the new generic "checklist" field so nothing is lost.
+          parsed.teams.forEach(function(t) {
+            if (t.facilities && !t.checklist) t.checklist = t.facilities;
+            delete t.facilities;
+          });
+          return parsed;
+        }
         // Migrate old single-team format
         if (parsed.project || parsed.members) {
           return { teams: [{ id: uid(), name: parsed.project ? parsed.project.name : 'My Team', description: parsed.project ? parsed.project.description : '', color: '#2d7a3a', gradient: 'linear-gradient(135deg, #1a3a2a 0%, #2d7a3a 100%)', tags: parsed.project ? (parsed.project.tags || []) : [], coverPhoto: parsed.project ? parsed.project.coverPhoto || null : null, coverPos: parsed.project ? parsed.project.coverPos || null : null, coverZoom: parsed.project ? parsed.project.coverZoom || null : null, members: parsed.members || [] }] };

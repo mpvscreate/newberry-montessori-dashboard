@@ -16,7 +16,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400..700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Geist:wght@500..800&family=Instrument+Sans:wght@400..700&display=swap">
 <style>
 :root{
   --paper:#fbf6ec; --sheet:#ffffff; --ink:#221c11; --muted:#6c6250; --line:#ece3cf; --field:#8f846c;
@@ -800,6 +800,83 @@ select.sel{width:auto;min-height:44px;padding:0 12px;border-radius:14px}
 .ph-ic{flex:none;width:30px;height:30px;border-radius:10px;background:rgba(255,255,255,.22);display:inline-grid;place-items:center}.ph-ic .i{width:18px;height:18px}
 .ph-meta{margin:4px 0 0;font-size:.82rem;opacity:.92;text-shadow:0 1px 6px rgba(0,0,0,.4)}
 .phero .ph-d{margin-top:2px;-webkit-line-clamp:1}
+/* v6.23.0: continuous story grid, readable tiles, compact week card, live sync status */
+.pdt{display:none}
+.story .post:not(.open) .pdt{display:inline-block;position:absolute;left:6px;top:6px;z-index:3;background:rgba(0,0,0,.58);color:#fff;border-radius:99px;padding:2px 8px;font-size:.68rem;font-weight:700;line-height:1.4}
+.story .post:not(.open) .phd{justify-content:flex-end}
+.story .post:not(.open) .pinic{margin-left:auto}
+.story .post:not(.open)::after{background:linear-gradient(transparent 28%,rgba(0,0,0,.86))}
+.story .post:not(.open) .ptext{left:9px;right:9px;bottom:8px;font-size:.86rem;line-height:1.25;-webkit-line-clamp:3;text-shadow:0 1px 5px rgba(0,0,0,.75)}
+.story .post.nophoto:not(.open) .ptext{top:40px;-webkit-line-clamp:5;font-size:.88rem}
+.story .post:not(.open) .pcnt~.ptext{right:46px}
+.wkcard{display:flex;align-items:center;gap:6px;padding:8px 10px 8px 8px;min-height:0;margin-bottom:10px}
+.wk-main{flex:1;min-width:0;display:flex;align-items:center;gap:12px;border:0;background:none;text-align:left;color:inherit;cursor:pointer;padding:0;font:inherit;box-shadow:none}
+.wk-pv{position:relative;flex:none;width:68px;height:68px;border-radius:16px;overflow:hidden;background:var(--line)}.wk-pv img{width:100%;height:100%;object-fit:cover;display:block}
+.wk-pl{position:absolute;inset:0;display:grid;place-items:center;background:rgba(0,0,0,.3);color:#fff}
+.wk-main .wk-b{padding-right:0;min-width:0}.wk-main .wk-b b{display:block;font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.wkcard>.x{position:static;flex:none}
+.lv-st{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:2px 0 8px}.lv-dot{width:10px;height:10px;border-radius:50%;background:var(--muted);flex:none}.lv-dot.on{background:var(--green);box-shadow:0 0 0 4px var(--green-soft)}
+/* v6.24.0: one term and week, shorter new-post sheet, name once, theme labels, tidier Plan */
+.namerow{margin-top:10px}
+.plp-c{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.plp-ch{display:inline-flex;align-items:center;gap:6px;border:1.5px solid var(--line);background:transparent;color:var(--ink);border-radius:99px;padding:7px 14px;min-height:40px;font:600 .88rem var(--body);cursor:pointer}
+.plp-ch.ok{background:var(--green-soft);border-color:transparent;color:var(--green)}
+.plp-ch.nx{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.segc[aria-label="Theme"] button{display:flex;flex-direction:row;align-items:center;justify-content:center;gap:8px}
+.segc[aria-label="Theme"] button span{display:inline!important}
+/* v6.25.0: the name beside the logo */
+header.top h1.wm{margin:0;min-width:0;flex:0 1 auto;font:700 clamp(.98rem,4.4vw,1.25rem)/1.1 var(--display);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:420px){header.top{gap:8px}header.top .grow{flex:1 1 0;min-width:0}}
+@media (max-width:340px){header.top h1.wm{white-space:normal;font-size:.95rem;line-height:1.05;overflow:visible}}
+/* v6.26.0: Home as a bento */
+:root{--geist:"Geist","Instrument Sans",system-ui,sans-serif}
+.bhero{display:block;width:100%;text-align:left;border:0;border-radius:22px;padding:16px 18px;background:#0b7a55;color:#fff;margin-bottom:8px;cursor:pointer;font-family:var(--geist);box-shadow:none}
+.bh-k{display:block;font-size:.78rem;font-weight:500;opacity:.85}.bh-n{display:block;font:700 2.5rem/1.05 var(--geist);letter-spacing:-.02em}.bh-n small{font-size:1rem;font-weight:600;margin-left:7px;opacity:.9;letter-spacing:0}.bh-s{display:block;font-size:.8rem;opacity:.9;margin-top:3px}
+.bpair{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.bcard{display:flex;flex-direction:column;gap:2px;justify-content:center;min-height:64px;text-align:left;padding:12px 14px;border-radius:16px;background:var(--sheet);border:1px solid var(--line);color:var(--ink);cursor:pointer;font-family:var(--geist);box-shadow:none}
+div.bcard{cursor:default}.bc-k{font-size:.74rem;color:var(--muted)}.bc-t{font:700 1.02rem/1.2 var(--geist)}.bcard.qt .bc-t{color:var(--amber)}
+.bento{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-auto-rows:96px;grid-auto-flow:dense;gap:8px}
+@media (min-width:640px){.bento{grid-template-columns:repeat(3,minmax(0,1fr))}}@media (min-width:1000px){.bento{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.bt{position:relative;display:block;border:0;border-radius:18px;overflow:hidden;text-align:left;padding:0;cursor:pointer;color:#fff;background:color-mix(in srgb,var(--pc) 82%,#000);font-family:var(--geist);box-shadow:none}
+.bt.tall{grid-row:span 2}.bt:active{transform:scale(.985)}
+.bt-img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0}
+.bt.ph::after{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(transparent 38%,rgba(0,0,0,.78))}
+.bt-wm{position:absolute;right:-10px;top:-8px;z-index:0;opacity:.16;color:#fff}.bt-wm svg{width:84px;height:84px}
+.bt-ic{position:absolute;top:9px;left:9px;z-index:2;width:28px;height:28px;border-radius:9px;background:rgba(255,255,255,.2);display:grid;place-items:center;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}.bt-ic svg{width:16px;height:16px}
+.bt-q{position:absolute;top:10px;right:9px;z-index:2;background:rgba(0,0,0,.5);border-radius:99px;padding:2px 8px;font-size:.66rem;font-weight:700}
+.bt-t{position:absolute;left:11px;right:10px;bottom:9px;z-index:2;display:flex;flex-direction:column;gap:1px}.bt-t b{font:700 .98rem/1.12 var(--geist);overflow-wrap:anywhere}.bt-t span{font-size:.72rem;opacity:.9}
+.bt.add{display:grid;place-items:center;align-content:center;gap:4px;background:transparent;border:1.5px dashed var(--line);color:var(--muted)}.bt-addi{display:grid;place-items:center;width:34px;height:34px;border-radius:50%;background:var(--green-soft);color:var(--green)}.bt.add b{font-size:.86rem}
+/* v6.27.0: choose and order the photos in a review */
+.re-g{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0 14px}
+.re-t{position:relative;aspect-ratio:1;border-radius:14px;overflow:hidden;background:var(--line);padding:0;border:0}
+.re-t img{width:100%;height:100%;object-fit:cover;display:block}
+.re-n{position:absolute;left:6px;top:6px;background:rgba(0,0,0,.6);color:#fff;border-radius:99px;padding:1px 8px;font:700 .72rem var(--body)}
+.re-v{position:absolute;left:6px;bottom:6px;color:#fff;background:rgba(0,0,0,.55);border-radius:99px;display:grid;place-items:center;width:22px;height:22px}
+.re-x{position:absolute;right:4px;top:4px;width:34px;height:34px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center;cursor:pointer}
+.re-mv{position:absolute;left:4px;right:4px;bottom:4px;display:flex;justify-content:space-between;pointer-events:none}
+.re-mv button{pointer-events:auto;width:40px;height:40px;border-radius:50%;border:0;background:rgba(0,0,0,.6);color:#fff;display:grid;place-items:center;cursor:pointer}
+.re-mv button:first-child svg{transform:rotate(180deg)}.re-mv button:disabled{opacity:.3}
+.re-c{position:absolute;right:6px;top:6px;width:24px;height:24px;border-radius:50%;background:var(--accent);color:var(--accent-ink);display:none;place-items:center}
+.re-a[aria-pressed="true"]{outline:3px solid var(--accent);outline-offset:-3px}.re-a[aria-pressed="true"] .re-c{display:grid}
+/* v6.27.2: edit button on the Home week-in-review card */
+.bcard.wkb{flex-direction:row;align-items:stretch;padding:0;gap:0}
+.wkb-m{flex:1;min-width:0;text-align:left;background:none;border:0;color:inherit;padding:12px 4px 12px 14px;font:inherit;display:flex;flex-direction:column;gap:2px;justify-content:center;cursor:pointer}
+.wkb-e{flex:none;width:52px;border:0;background:none;color:var(--muted);display:grid;place-items:center;cursor:pointer}
+/* v6.28.0: tidier video-ready screen with the logo */
+.vwx-b{max-height:calc(100dvh - 40px);overflow:auto}
+.vx-logo{display:block;height:46px;width:auto;margin:0 auto 6px}
+.vx-sub{margin:0 0 4px}
+.vx-v{display:block;margin:12px auto;max-height:46vh;max-width:100%;border-radius:16px;background:#000}
+.vx-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.vx-close{margin-top:8px;border:0;background:none;color:var(--muted);font:600 .95rem var(--body);min-height:44px;padding:0 16px;cursor:pointer}
+/* v6.29.0: choose music for the video */
+.vx-music{text-align:left}.vx-music h2{text-align:center}.vx-music p{text-align:center}
+.mu-list{display:grid;gap:8px}
+.mu-row{display:flex;align-items:center;gap:6px;border:1.5px solid var(--line);border-radius:16px;padding:2px 4px 2px 2px}.mu-row.on{border-color:var(--accent);background:var(--green-soft)}
+.mu-pick{flex:1;min-width:0;display:flex;align-items:center;gap:12px;border:0;background:none;color:inherit;text-align:left;padding:8px 10px;min-height:52px;font:inherit;cursor:pointer}
+.mu-dot{flex:none;width:20px;height:20px;border-radius:50%;border:2px solid var(--muted)}.mu-row.on .mu-dot{border-color:var(--accent);background:radial-gradient(var(--accent) 45%,transparent 50%)}
+.mu-t{display:grid;gap:1px}.mu-t b{font-size:1rem}
+.mu-pv{flex:none;width:44px;height:44px;border-radius:50%;border:0;background:var(--line);color:inherit;display:grid;place-items:center;cursor:pointer}
 </style>
 </head>
 <body>
@@ -1039,9 +1116,9 @@ function prodMenu(p){
 }
 function playStory(p){
   const on=tab==="story"&&storyF.pid===p.id&&(storyF.term||storyF.wk),f=on?{term:storyF.term,wk:storyF.wk}:{};
-  const list=storyMediaList(p,f);
+  const list=on?storyMediaList(p,f):reelList(p.id,storyMediaList(p,f));
   if(!list.length){toast(on?"No photos or videos for this term and week.":"No photos or videos yet.");return}
-  openViewer(list,0,true);
+  openViewer(list,0,true,on?undefined:{key:p.id,base:()=>storyMediaList(p),get:()=>reelList(p.id,storyMediaList(p)),title:p.name+" slideshow"});
 }
 function openMediaSheet(m){
   sheet(m.type==="video"?"Video":"Photo",`${m.type==="video"?`<video data-mid="${m.id}" controls playsinline style="width:100%;border-radius:16px;margin-top:8px;background:#000"></video>`:`<img data-mid="${m.id}" alt="" style="width:100%;border-radius:16px;margin-top:8px">`}<label class="f" for="mc">Caption</label><div class="row"><textarea class="t ta" rows="1" id="mc">${esc(m.cap)}</textarea>${micBtn()}</div>
@@ -1115,6 +1192,9 @@ function bulkTagSheet(){
     };
   });
 }
+const twDefault=p=>{const tl=twLast(p.id);return(tl.term||tl.wk)?tl:(p.cur&&(p.cur.term||p.cur.wk)?p.cur:tl)};
+const nameRow=id=>!myName()?`<div class="namerow"><label class="sr" for="${id}">Your name</label><input class="t" id="${id}" type="text" maxlength="30" autocomplete="name" placeholder="Your name, shown on your posts"></div>`:"";
+const takeName=id=>{const e=document.getElementById(id);if(e&&e.value.trim()){try{localStorage.setItem(NAMEK,e.value.trim().slice(0,30))}catch{}}};
 const twSelects=(idT,idW,v)=>`<div class="twsel"><label class="sr" for="${idT}">Term</label><select class="t sel" id="${idT}" aria-label="Term"><option value="0">Term</option>${TERMS.map(n=>`<option value="${n}"${v.term===n?" selected":""}>Term ${n}</option>`).join("")}</select><label class="sr" for="${idW}">Week</label><select class="t sel" id="${idW}" aria-label="Week"><option value="0">Week</option>${WEEKS.map(n=>`<option value="${n}"${v.wk===n?" selected":""}>Week ${n}</option>`).join("")}</select></div>`;
 const twRead=(idT,idW)=>({term:+(document.getElementById(idT)||{}).value||0,wk:+(document.getElementById(idW)||{}).value||0});
 const PROMPTS=["What was the hardest part today?","Show us something you made.","What did you learn this week?","Who helped you today, and how?","What are you proud of?","What went wrong, and how did you fix it?","What will you do next?","Describe your work in three words.","What surprised you?","What would you tell a new team member?","Show us your workspace.","What did your team decide today?"];
@@ -1132,7 +1212,7 @@ const postedToast=name=>navigator.onLine===false?"Saved on this device. It sends
 function postCard(p,l){
   const ms=postMedia(l),tw=twLabel(l);
   const grid=ms.length?`<div class="pm pm${Math.min(ms.length,4)}">${ms.slice(0,4).map((m,i)=>`<button type="button" class="pmi" data-pm="${l.id}:${i}" aria-label="Open ${m.type==="video"?"video":"photo"} ${i+1} of ${ms.length}">${m.type==="video"?`<img data-mid="${m.id}" alt="" loading="lazy"><span class="vb">${ic("play","sm")}</span>`:`<img data-mid="${m.id}" alt="" loading="lazy">`}${i===3&&ms.length>4?`<span class="pmore">+${ms.length-4}</span>`:""}</button>`).join("")}</div>`:"";
-  return `<article class="post${l.pin?" pinned":""}${postOpen.has(l.id)?" open":""}${ms.length?"":" nophoto"}" tabindex="0" data-post="${l.id}" data-tm="${l.term||0}" data-wk="${l.wk||0}">${ms.length>1?`<span class="pcnt" aria-hidden="true">${ic("image","sm")}${ms.length}</span>`:""}<header class="phd"><span class="pavs" aria-hidden="true">${esc(initials(l.by||"me"))}</span><div class="grow"><b>${esc(l.by||"")}</b><span class="small muted" style="display:block">${tmOf(l.t)}${l.ed?" · edited":""}</span></div>${l.pin?`<span class="pinic" title="Pinned" aria-label="Pinned">${ic("pin","sm")}</span>`:""}<button class="x sm ptog" data-pt="${l.id}" aria-expanded="${postOpen.has(l.id)}" aria-label="${postOpen.has(l.id)?"Show less":"Show more"}">${ic("chev","sm")}</button><button class="x sm" data-po="${l.id}" aria-label="Post options">${ic("more")}</button></header>${tw?`<span class="chtag">${esc(tw)}</span>`:""}${l.text?`<p class="ptext">${nl2br(l.text)}</p>`:""}${grid}${l.note&&l.note.text?`<div class="pnote"><span class="small muted">${esc(l.note.by||"Teacher")} left a note</span><p>${nl2br(l.note.text)}</p></div>`:""}<footer class="pfoot"><button type="button" class="rxb" data-rx="${l.id}" aria-pressed="${(l.rx||[]).includes(who()||"me")}" aria-label="${(l.rx||[]).includes(who()||"me")?"Remove your heart":"Send a heart"}${(l.rx||[]).length?", "+(l.rx||[]).length+" so far":""}">${ic("heart","sm")}<span>${(l.rx||[]).length||""}</span></button><button type="button" class="linkbtn" data-nt="${l.id}">${ic("chat","sm")}${l.note&&l.note.text?"Edit note":"Add a note"}</button>${ms.some(m=>m.consent==="ok")?`<span class="pubtag">${ic("globe","sm")}Public</span>`:""}</footer></article>`;
+  return `<article class="post${l.pin?" pinned":""}${postOpen.has(l.id)?" open":""}${ms.length?"":" nophoto"}" tabindex="0" data-post="${l.id}" data-tm="${l.term||0}" data-wk="${l.wk||0}"><span class="pdt" aria-hidden="true">${esc(pdLabel(l.t))}</span>${ms.length>1?`<span class="pcnt" aria-hidden="true">${ic("image","sm")}${ms.length}</span>`:""}<header class="phd"><span class="pavs" aria-hidden="true">${esc(initials(l.by||"me"))}</span><div class="grow"><b>${esc(l.by||"")}</b><span class="small muted" style="display:block">${tmOf(l.t)}${l.ed?" · edited":""}</span></div>${l.pin?`<span class="pinic" title="Pinned" aria-label="Pinned">${ic("pin","sm")}</span>`:""}<button class="x sm ptog" data-pt="${l.id}" aria-expanded="${postOpen.has(l.id)}" aria-label="${postOpen.has(l.id)?"Show less":"Show more"}">${ic("chev","sm")}</button><button class="x sm" data-po="${l.id}" aria-label="Post options">${ic("more")}</button></header>${tw?`<span class="chtag">${esc(tw)}</span>`:""}${l.text?`<p class="ptext">${nl2br(l.text)}</p>`:""}${grid}${l.note&&l.note.text?`<div class="pnote"><span class="small muted">${esc(l.note.by||"Teacher")} left a note</span><p>${nl2br(l.note.text)}</p></div>`:""}<footer class="pfoot"><button type="button" class="rxb" data-rx="${l.id}" aria-pressed="${(l.rx||[]).includes(who()||"me")}" aria-label="${(l.rx||[]).includes(who()||"me")?"Remove your heart":"Send a heart"}${(l.rx||[]).length?", "+(l.rx||[]).length+" so far":""}">${ic("heart","sm")}<span>${(l.rx||[]).length||""}</span></button><button type="button" class="linkbtn" data-nt="${l.id}">${ic("chat","sm")}${l.note&&l.note.text?"Edit note":"Add a note"}</button>${ms.some(m=>m.consent==="ok")?`<span class="pubtag">${ic("globe","sm")}Public</span>`:""}</footer></article>`;
 }
 async function makePost(p,text,files,tw,share){
   const id=uid(),ids=files.length?await addFilesIds(p.id,files,""):[];
@@ -1143,19 +1223,20 @@ async function makePost(p,text,files,tw,share){
 function attHTML(list,rm){return list.map((x,i)=>`<div class="attc">${x.vid?`<video src="${x.url}" muted playsinline></video><span class="vb">${ic("play","sm")}</span>`:`<img src="${x.url}" alt="">`}<button type="button" class="attx" data-rm="${i}" aria-label="Remove ${x.vid?"video":"photo"} ${i+1}">${ic("x","sm")}</button></div>`).join("")}
 function storyTab(p){
   if(storyF.pid!==p.id){storyF={pid:p.id,...tfLoad(p.id)};clearPend();composeOpen=false}
-  const hasTW=p.log.some(l=>l.term||l.wk),filt=!!(storyF.term||storyF.wk),tp=filt?{term:storyF.term,wk:storyF.wk}:twLast(p.id);
+  const hasTW=p.log.some(l=>l.term||l.wk),filt=!!(storyF.term||storyF.wk),tp=filt?{term:storyF.term,wk:storyF.wk}:twDefault(p);
   const items=storyItems(p),pics=mediaOf(p).filter(m=>m.type!=="video");
   const vis=items;
   const pinned=vis.filter(x=>x.k==="post"&&x.l.pin),rest=vis.filter(x=>!(x.k==="post"&&x.l.pin));
   let html="",day="";
   if(pinned.length)html+=`<h3 class="sday" style="margin-top:6px">Pinned</h3>`+pinned.map(x=>postCard(p,x.l)).join("");
-  rest.forEach(x=>{const l=dayLabel(x.t);if(l!==day){html+=`<h3 class="sday">${esc(l)}</h3>`;day=l}html+=x.k==="post"?postCard(p,x.l):storyCard(x)});
+  const bucket=t=>{const n=new Date(),ws=weekStart(n.getTime());if(t>=ws)return"This week";if(t>=ws-7*864e5)return"Last week";const d=new Date(t);return d.toLocaleDateString(undefined,d.getFullYear()===n.getFullYear()?{month:"long"}:{month:"long",year:"numeric"})};
+  rest.forEach(x=>{const l=bucket(x.t);if(l!==day){html+=`<h3 class="sday">${esc(l)}</h3>`;day=l}html+=x.k==="post"?postCard(p,x.l):storyCard(x)});
   const bar=(hasTW||items.length||filt)?`<div class="twbar" role="group" aria-label="Filter the story"><select class="t sel" id="tf-t" aria-label="Show term"><option value="0">Term</option>${TERMS.map(n=>`<option value="${n}"${storyF.term===n?" selected":""}>Term ${n}</option>`).join("")}</select><select class="t sel" id="tf-w" aria-label="Show week"><option value="0">Week</option>${WEEKS.map(n=>`<option value="${n}"${storyF.wk===n?" selected":""}>Week ${n}</option>`).join("")}</select>${mediaOf(p).length?`<button type="button" class="chip add" id="sc-gal" aria-label="Photos and videos, ${mediaOf(p).length}">${ic("image","sm")}Media (${mediaOf(p).length})</button>`:""}</div>`:"";
     const isOpen2=composeOpen||pendFiles.length>0,dr=draftGet(p.id);
   const mini=`<div class="card composer mini"><button class="cmini" id="sc-open" type="button" aria-label="${dr?"Continue your draft":"Write a post"}"><span class="pavs" aria-hidden="true">${esc(initials(who()||"me"))}</span><span class="cmt${dr?" dr":""}">${dr?"Draft: "+esc(dr.slice(0,60)):"What happened today?"}</span></button><button class="x cam" id="sc-cam" type="button" aria-label="Take a photo">${ic("camera")}</button><button class="x cam" id="sc-lib" type="button" aria-label="Choose photos or videos from the library">${ic("image")}</button><input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"><input type="file" id="pc" accept="image/*" capture="environment" class="sr" aria-label="Take a photo" tabindex="-1"></div>`;
   const full=`<div class="card composer"><div class="row" style="align-items:flex-start"><textarea class="t ta" rows="3" id="sc-t" placeholder="What happened today?" aria-label="Write a post">${esc(draftGet(p.id))}</textarea>${micBtn()}</div>${ideaChip()}
     <div class="att" id="sc-att"></div>${shareSw(p,"sc-pub")}${offLine()}
-    ${twSelects("sc-tm","sc-wk",tp)}<div class="row between wr" style="margin-top:10px"><span class="row"><button class="btn small" id="sc-cam2" type="button">${ic("camera")}Camera</button><button class="btn small" id="sc-add" type="button">${ic("image")}Library</button></span><span class="row"><button class="btn small" id="sc-min" type="button">Cancel</button><button class="btn primary" id="sc-post" type="button">${ic("send")}Save</button></span></div>
+    ${twSelects("sc-tm","sc-wk",tp)}${nameRow("sc-name")}<div class="row between wr" style="margin-top:10px"><span class="row"><button class="btn small" id="sc-cam2" type="button">${ic("camera")}Camera</button><button class="btn small" id="sc-add" type="button">${ic("image")}Library</button></span><span class="row"><button class="btn small" id="sc-min" type="button">Cancel</button><button class="btn primary" id="sc-post" type="button">${ic("send")}Save</button></span></div>
     <input type="file" id="pf" accept="image/*,video/*" multiple class="sr" aria-label="Choose photos or videos" tabindex="-1"><input type="file" id="pc" accept="image/*" capture="environment" class="sr" aria-label="Take a photo" tabindex="-1"></div>`;
   return (isOpen2?full:mini)+
   bar+
@@ -1236,7 +1317,7 @@ function wireStory(p){
   const onPick=e=>{[...e.target.files].forEach(f=>{if(pendFiles.length<12)pendFiles.push({file:f,url:URL.createObjectURL(f),vid:f.type.startsWith("video/")})});e.target.value="";if(!att){composeOpen=true;render();return}drawAtt()};
   $("#pf").onchange=onPick;{const pc=$("#pc");if(pc)pc.onchange=onPick}
   const post=async()=>{const t=$("#sc-t").value.trim();if(!t&&!pendFiles.length){$("#sc-t").focus();return}if(listening)listening.stop();
-    const b=$("#sc-post");b.disabled=true;const files=pendFiles.map(x=>x.file),chv=twRead("sc-tm","sc-wk");
+    const b=$("#sc-post");b.disabled=true;takeName("sc-name");const files=pendFiles.map(x=>x.file),chv=twRead("sc-tm","sc-wk");
     const l=await makePost(p,t,files,chv,pubOn("sc-pub"));clearPend();composeOpen=false;if(l){draftSet(p.id,"");fb("add");toast(postedToast())}render()};
   if($("#sc-post")){$("#sc-post").onclick=post;
   $("#sc-t").onkeydown=e=>{if(e.key==="Enter"&&(e.ctrlKey||e.metaKey)){e.preventDefault();post()}}}
@@ -1387,15 +1468,15 @@ function captureSheet(){
     const remember=()=>{try{localStorage.setItem(LASTK,pid)}catch{}};
     const draw=()=>{
       const p=P0();
-      root.innerHTML=`${prods().length>1?`<div class="sub-l">Which production?</div><div class="chips cp-chips" role="group" aria-label="Production">${prods().map(q=>`<button class="chip" data-pp="${q.id}" aria-pressed="${q.id===pid}">${esc(q.name)}</button>`).join("")}</div>`:""}
+      root.innerHTML=`${prods().length>1?`<label class="f" for="cp-prod" style="margin-top:0">Posting to</label><select class="t sel" id="cp-prod" aria-label="Posting to">${prods().map(q=>`<option value="${q.id}"${q.id===pid?" selected":""}>${esc(q.name)}</option>`).join("")}</select>`:""}
       <div class="qk" role="group" aria-label="Add a photo or video"><button class="qkb" data-a="img" type="button">${ic("camera")}<span>Photo</span></button><button class="qkb" data-a="vid" type="button">${ic("film")}<span>Video</span></button><button class="qkb" data-a="lib" type="button">${ic("image")}<span>Choose</span></button></div>
       <div class="row" style="align-items:flex-start;margin-top:10px"><textarea class="t ta" rows="3" id="cp-t" placeholder="What happened today?" aria-label="Write a post">${esc(draftGet(pid))}</textarea>${micBtn()}</div>${ideaChip()}
       <div class="att" id="cp-att"></div>
       ${shareSw(p,"cp-pub")}${offLine()}
-      ${twSelects("cp-tm","cp-wk",twLast(pid))}
+      ${twSelects("cp-tm","cp-wk",twDefault(P0()||{id:pid}))}${nameRow("cp-name")}
       <button class="btn primary block" id="cp-go" type="button" style="margin-top:14px">${ic("send")}Save to ${esc(p?p.name:"")}</button>`;
       wireMics(root);root.querySelectorAll(".ta").forEach(autosize);
-      root.querySelectorAll("[data-pp]").forEach(b=>b.onclick=()=>{const t=$("#cp-t").value;draftSet(pid,"");pid=b.dataset.pp;remember();draftSet(pid,t);draw();$("#cp-t").value=t});
+      {const sel=root.querySelector("#cp-prod");if(sel)sel.onchange=()=>{const t=$("#cp-t").value;draftSet(pid,"");pid=sel.value;remember();draftSet(pid,t);draw();$("#cp-t").value=t}}
       const att=root.querySelector("#cp-att"),drawAtt=()=>{att.innerHTML=attHTML(files);att.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{const x=files.splice(+b.dataset.rm,1)[0];try{URL.revokeObjectURL(x.url)}catch{}drawAtt()})};
       drawAtt();
       $("#cp-t").addEventListener("input",()=>draftSet(pid,$("#cp-t").value));
@@ -1405,7 +1486,7 @@ function captureSheet(){
       root.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>$("#cp-"+b.dataset.a).click());
       ["cp-lib","cp-img","cp-vid"].forEach(id=>{$("#"+id).onchange=e=>{[...e.target.files].forEach(f=>{if(files.length<12)files.push({file:f,url:URL.createObjectURL(f),vid:f.type.startsWith("video/")})});e.target.value="";drawAtt()}});
       $("#cp-go").onclick=async()=>{const t=$("#cp-t").value.trim();if(!t&&!files.length){$("#cp-t").focus();return}if(listening)listening.stop();
-        const b=$("#cp-go");b.disabled=true;const chv=twRead("cp-tm","cp-wk");
+        const b=$("#cp-go");b.disabled=true;takeName("cp-name");const chv=twRead("cp-tm","cp-wk");
         const l=await makePost(P0(),t,files.map(x=>x.file),chv,pubOn("cp-pub"));files.forEach(x=>{try{URL.revokeObjectURL(x.url)}catch{}});files=[];
         if(l){draftSet(pid,"");fb("add");remember();close();render();toast(postedToast(P0().name))}else{b.disabled=false}};
     };
@@ -1490,7 +1571,7 @@ function wireKiosk(){
 function startKiosk(){try{document.documentElement.requestFullscreen&&document.documentElement.requestFullscreen().catch(()=>{})}catch{}nav("display")}
 
 /* update check: when a newer version is on the server the app refreshes itself (clearing old cached copies), unless someone is in the middle of something; then it offers a one-tap refresh */
-const APP_VER="6.22.1";
+const APP_VER="6.30.2";
 function showUpdate(){if(document.getElementById("upd"))return;const b=document.createElement("div");b.id="upd";b.className="upd";b.setAttribute("role","status");b.innerHTML='<span>A new version is ready.</span><button class="btn small primary" id="upd-go" type="button">Update</button>';document.body.append(b);
   document.getElementById("upd-go").onclick=async()=>{try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}}
 async function applyUpdate(){try{const ks=await caches.keys();await Promise.all(ks.map(k=>caches.delete(k)));const rg=await navigator.serviceWorker.getRegistrations();await Promise.all(rg.map(g=>g.unregister()))}catch{}location.reload()}
@@ -1531,6 +1612,7 @@ const bud=p=>{const planned=p.bud.items.reduce((a,i)=>a+toNum(i.qty)*toNum(i.uni
 const TOURK="ms-prod-tour";
 const tourSeen=()=>{try{return !!localStorage.getItem(TOURK)}catch{return true}};
 let tourShown=false;const postOpen=new Set();
+const pdLabel=t=>{const d=dayLabel(t);return d==="Today"||d==="Yesterday"?d:new Date(t).toLocaleDateString(undefined,{weekday:"short",day:"numeric",month:"short"})};
 function tourSheet(){
   const SL=[["camera","Tell your story","Tap the bar that says What happened today. Write a post, add photos or videos, and pin your best one to the top."],["book","Sort it by term and week","Pick the term and week for each post. The two filters above the story show just one term or one week."],["share","Share it","Play a slideshow, send photos to WhatsApp, print a story book, or turn on a public page for families."]];
   let i=0;try{localStorage.setItem(TOURK,"1")}catch{}
@@ -1544,7 +1626,7 @@ function tourSheet(){
 function planProgress(p){
   const pr=p.prop||{},steps=[["team","Team and roles",p.members.length>0&&p.roles.length>0],["prop","Project proposal",!!pr.title],["safety","Safety",!!(p.risks.length||(p.txt&&p.txt.perms))]];
   const n=steps.filter(x=>x[2]).length,nx=steps.find(x=>!x[2]);
-  return `<section class="card plp" aria-label="Plan progress"><div class="row between"><b>${n===3?"Plan complete":"Plan: "+n+" of 3 steps done"}</b>${n===3?`<span class="plp-ok">${ic("check","sm")}Well done</span>`:""}</div><div class="plp-s">${steps.map(([k,l,d])=>`<button type="button" class="plp-i${d?" ok":""}" data-plstep="${k}"><span class="plp-d">${d?ic("check","sm"):""}</span><span>${l}</span></button>`).join("")}</div>${nx?`<button class="btn small primary" data-plstep="${nx[0]}" type="button">Next: ${nx[1]}</button>`:""}</section>`;
+  return `<section class="card plp" aria-label="Plan progress"><div class="row between"><b>${n===3?"Plan complete":"Plan: "+n+" of 3 steps done"}</b>${n===3?`<span class="plp-ok">${ic("check","sm")}Well done</span>`:""}</div><div class="plp-c">${steps.map(([k,l,d])=>{const nxt=nx&&nx[0]===k;return `<button type="button" class="plp-ch${d?" ok":""}${nxt?" nx":""}" data-plstep="${k}">${ic(d?"check":"chev","sm")}${l}</button>`}).join("")}</div></section>`;
 }
 /* ---------- accordion sections ---------- */
 const openAcc=new Set();
@@ -1641,6 +1723,7 @@ function setupCard(p){
   return `<div class="card setup"><div class="row between small"><span class="muted">Term: <b>${esc(p.info.term||"not set")}</b> · Mentor: <b>${esc(p.info.mentor||"not set")}</b></span><button class="linkbtn" data-ba="info:edit" style="min-height:32px;padding:0 4px">Edit</button></div></div>`;
 }
 function planTab(p){
+  /* the term and mentor line moved into Edit production */
   const pr=p.prop,statusLbl={"":"Draft",draft:"Draft",submitted:"Waiting for educator",approved:"Approved"}[pr.status||""];
   const team=`<div class="chips" style="margin-bottom:12px">${p.members.map((m,i)=>`<button class="chip static mem" data-ba="member:${i}">${ic("user","sm")}${esc(m)}</button>`).join("")}${addBtn("member:new","Member")}</div>
     ${p.members.some(m=>(p.minfo[m]||{}).strength||(p.minfo[m]||{}).skill)?`<div class="bk-list">${p.members.filter(m=>(p.minfo[m]||{}).strength||(p.minfo[m]||{}).skill).map(m=>`<div class="bk-line"><b>${esc(m)}</b><span class="small muted">${esc((p.minfo[m]||{}).strength||"")}${(p.minfo[m]||{}).skill?" · practising: "+esc(p.minfo[m].skill):""}</span></div>`).join("")}</div>`:""}
@@ -1651,7 +1734,7 @@ function planTab(p){
     ${pr.feedback||pr.changes?`<div class="hintcard">${pr.feedback?`<p><b>Educator feedback</b><br>${esc(pr.feedback)}</p>`:""}${pr.changes?`<p><b>Agreed changes</b><br>${esc(pr.changes)}</p>`:""}</div>`:""}`;
   const safety=`<div class="bk-list">${p.risks.map(r=>bkRow("risk:"+r.id,esc(r.risk),"",esc(r.manage||""))).join("")}</div>${addBtn("risk:new","Risk")}
     ${txtCard(p,"perms","Permissions, training or supervision needed before starting","For example: training on how to use a jigsaw")}`;
-  return planProgress(p)+setupCard(p)+carryCard(p)+
+  return planProgress(p)+carryCard(p)+
     acc(p,"team","users","Team and roles",`${p.members.length} member${p.members.length===1?"":"s"} · ${p.roles.length} role${p.roles.length===1?"":"s"}`,stp(p.members.length>0&&p.roles.length>0,p.members.length>0&&p.roles.length>0?"Done":"To do"),team)+
     acc(p,"prop","book","Project proposal",pr.title?esc(pr.title):"Not written yet",stp(pr.status==="approved",statusLbl),prop)+
     acc(p,"safety","shield","Safety",`${p.risks.length} risk${p.risks.length===1?"":"s"} noted`,stp(!!(p.risks.length||p.txt.perms),p.risks.length||p.txt.perms?"Started":"To do"),safety);
@@ -1948,8 +2031,7 @@ function wrapTab(p){
     <div class="bk-line"><span class="small muted">Funds or stock handed over</span><b>${esc(H.funds||"Not noted")}</b></div><div class="bk-line"><span class="small muted">Handed over by</span><b>${esc(H.by||"-")}${H.byOn?" · "+dLong(H.byOn):""}</b></div><div class="bk-line"><span class="small muted">Received by</span><b>${esc(H.to||"-")}${H.toOn?" · "+dLong(H.toOn):""}</b></div><button class="btn small" data-ba="hand:edit">${ic("pencil")}Hand over sign-off</button>`;
   return acc(p,"rev","flag","End of term review",R.completed||p.txt.achieved?"In progress":"Look back on the term",stp(!!p.txt.achieved&&!!p.txt.compare,p.txt.achieved&&p.txt.compare?"Done":"To do"),rev)+
     acc(p,"refl","user","Individual reflections",`${refl.filter(r=>r.done).length} of ${p.members.length} written`,stp(refl.length>0&&refl.every(r=>r.done),refl.length?`${refl.filter(r=>r.done).length}/${refl.length}`:"No members"),rf)+
-    studentsCard(p)+
-    nextTermCard(p);
+    studentsCard(p);
 }
 
 /* ---------- wiring ---------- */
@@ -2329,12 +2411,12 @@ function choiceSheet(r){
 }
 const lastTxt=()=>{if(!LV.at)return"Waiting for the first sync";const m=Math.round((Date.now()-LV.at)/60000);return"Last synced "+(m<1?"just now":m<60?m+" min ago":new Date(LV.at).toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}))};
 function liveCard(){
-  return LV.on?`<div class="card"><h2>Live sync</h2><p class="muted small" style="margin-top:0">This device is connected. Changes show up on every other connected device within seconds. If you are offline, your work is kept and syncs when you are back.</p><p class="small muted" id="lv-last" aria-live="polite">${lastTxt()}</p><div class="row wr"><button class="btn" id="lv-now">${ic("cloud")}Sync now</button><button class="btn danger" id="lv-off">Disconnect this device</button></div></div>`
-    :`<div class="card"><h2>Live sync</h2><p class="muted small" style="margin-top:0">Connect every phone and laptop with your school code so the whole team shares the same productions, live.</p><button class="btn primary" id="lv-on">${ic("cloud")}Connect with school code</button></div>`;
+  return LV.on?`<div class="card"><h2>Live sync</h2><div class="lv-st"><span class="lv-dot on" aria-hidden="true"></span><b>Live</b><span class="muted small" id="lv-last" aria-live="polite">${lastTxt()}</span></div><p class="muted small" style="margin:0 0 12px">Everyone using this app shares the same productions, photos and posts. If you are offline your work is kept and sent when you are back.</p><div class="row wr"><button class="btn" id="lv-now">${ic("cloud")}Sync now</button><button class="btn danger" id="lv-off">Disconnect this phone</button></div></div>`
+    :`<div class="card"><h2>Live sync</h2><div class="lv-st"><span class="lv-dot" aria-hidden="true"></span><b>Not connected</b></div><p class="muted small" style="margin:0 0 12px">This phone is only saving here. Connect it to share with the team.</p><button class="btn primary" id="lv-on">${ic("cloud")}Connect</button></div>`;
 }
 function wireLive(){
   const on=$("#lv-on"),now=$("#lv-now"),off=$("#lv-off");
-  if(on)on.onclick=connectSheet;
+  if(on)on.onclick=()=>{if(typeof window.__joinShared==="function"){toast("Connecting…");window.__joinShared();setTimeout(()=>{if(!LV.on)toast("Could not reach the sync server. Check your internet and try again.")},9000)}else connectSheet()};
   if(now)now.onclick=()=>{syncNow();toast("Syncing…")};
   if(off)off.onclick=()=>{if(!confirm("Disconnect this device? Your data stays here, but it stops syncing."))return;liveStop();render();toast("Disconnected.")};
 }
@@ -2363,7 +2445,7 @@ function render(){
   const m=route.match(/^p\/(.+)/),p=m&&P(m[1]);
   const cur=p?"home":route;
   document.documentElement.style.setProperty("--ptint",p?p.color:"transparent");
-  $("#app").innerHTML=`<div class="wrap${!p&&route==="home"?" fit":""}${p?" prodwide":""}${fresh?" enter":""}"><header class="top"><img class="brand" src="icons/productions-96.png" alt="" width="44" height="51"><h1 class="sr">MS Productions</h1><span class="grow"></span><button type="button" class="sync" id="sync" aria-live="polite"></button><button class="x" id="srch" aria-label="Search" title="Search (/)">${ic("search")}</button><button class="x" id="thm" aria-label="${isDark()?"Switch to light mode":"Switch to dark mode"}" title="${isDark()?"Light mode":"Dark mode"}">${ic(isDark()?"sun":"moon")}</button></header>
+  $("#app").innerHTML=`<div class="wrap${!p&&route==="home"?" fit":""}${p?" prodwide":""}${fresh?" enter":""}"><header class="top"><img class="brand" src="icons/productions-96.png" alt="" width="44" height="51"><h1 class="wm">MS Productions</h1><span class="grow"></span><button type="button" class="sync" id="sync" aria-live="polite"></button><button class="x" id="srch" aria-label="Search" title="Search (/)">${ic("search")}</button><button class="x" id="thm" aria-label="${isDark()?"Switch to light mode":"Switch to dark mode"}" title="${isDark()?"Light mode":"Dark mode"}">${ic(isDark()?"sun":"moon")}</button></header>
   <main id="main" tabindex="-1">${p?prodView(p):{home:homePage,overview:overviewPage,more:morePage}[route]?.()||homePage()}</main></div>
   <nav class="tabs" aria-label="Main">${NAV.slice(0,2).map(navBtn(cur)).join("")}<button class="cap btn primary" id="cap" aria-label="Capture: photo, note, goal, target or voice">${ic("plus")}</button>${NAV.slice(2).map(navBtn(cur)).join("")}</nav>`;
   setSyncUi(syncState||"Sign in to sync");
@@ -2394,16 +2476,24 @@ function weekCard(){
   if(Date.now()-recapSeen()<3*864e5)return"";
   const l=weekMediaList();if(l.length<2)return"";
   const teams=new Set(l.map(x=>x.p.id)).size,th=l.slice(-3);
-  return `<section class="wkcard" aria-label="Week in review"><div class="wk-th">${th.map(x=>`<img data-mid="${x.m.id}" alt="" loading="lazy">`).join("")}</div><div class="wk-b"><b>Your week in review</b><span class="small muted">${l.length} photo${l.length===1?"":"s"} and video${l.length===1?"":"s"} from ${teams} team${teams===1?"":"s"}</span><div class="row wr" style="margin-top:8px"><button class="btn small primary" id="wk-play" type="button">${ic("play","sm")}Play</button><button class="btn small" id="wk-sh" type="button">${ic("share","sm")}Share</button></div></div><button class="x sm" id="wk-x" type="button" aria-label="Hide for now">${ic("x","sm")}</button></section>`;
+  const nl=th[th.length-1];
+  return `<section class="wkcard" aria-label="Week in review"><button class="wk-main" id="wk-play" type="button" aria-label="Play your week in review"><span class="wk-pv"><img data-mid="${nl.m.id}" alt="" loading="lazy"><span class="wk-pl">${ic("play")}</span></span><span class="wk-b"><b>Week in review</b><span class="small muted">${l.length} photo${l.length===1?"":"s"} &amp; video${l.length===1?"":"s"} · ${teams} team${teams===1?"":"s"}</span></span></button><button class="x" id="wk-sh" type="button" aria-label="Share your week in review">${ic("share")}</button><button class="x" id="wk-x" type="button" aria-label="Hide for now">${ic("x","sm")}</button></section>`;
 }
 function recentStrip(){
   const it=prods().flatMap(p=>p.log.map(l=>({p,l}))).sort((a,b)=>b.l.t-a.l.t).slice(0,6);if(!it.length)return"";
   return `<h3 class="st-h" style="margin:18px 2px 8px">Recently posted</h3><div class="rps">${it.map(({p,l})=>{const m=postMedia(l)[0];return `<button class="rp" style="--pc:${p.color}" data-open="${p.id}" type="button" aria-label="${esc(p.name)}: ${esc((l.text||"Photo post").slice(0,80))}">${m?`<img data-mid="${m.id}" alt="" loading="lazy">`:`<span class="rp-i">${ic(p.icon)}</span>`}<span class="rp-b"><b>${esc(p.name)}</b><span class="rp-t">${esc(l.text||"Added a photo")}</span><span class="small muted">${agoShort(l.t)}</span></span></button>`}).join("")}</div>`;
 }
 function homePage(){
-  const ps=prods(),wk=weekCard();
+  const ps=prods(),now=Date.now(),wk=now-7*864e5,pl=n=>n===1?"":"s";
+  const rows=ps.map(p=>({p,last:lastActivity(p),posts7:p.log.filter(l=>l.t>=wk).length,cov:coverOf(p)})).map(r=>({...r,quiet:!!r.last&&now-r.last>7*864e5}));
+  const posts=rows.reduce((x,r)=>x+r.posts7,0),active=rows.filter(r=>r.last&&now-r.last<=7*864e5).length,wl=weekMediaList(),q=todayData().quiet.length;
+  const order=rows.map((r,i)=>({...r,i})).sort((x,y)=>(y.last||0)-(x.last||0)||x.i-y.i);
+  const tile=(r,ix)=>{const{p,last,cov,quiet}=r,n=p.log.length,ago=agoShort(last).toLowerCase(),sub=n?`${n} post${pl(n)} · ${ago}`:(last?ago:"No posts yet");
+    return `<button class="bt${ix%5===0?" tall":""}${cov?" ph":""}" style="--pc:${p.color}" data-open="${p.id}" aria-label="${esc(p.name)}, ${esc(sub)}${quiet?", quiet for a while":""}">${cov?`<img class="bt-img" data-mid="${cov.id}" alt="" loading="lazy"${covVars(p)}>`:`<span class="bt-wm" aria-hidden="true">${ic(p.icon)}</span>`}<span class="bt-ic" aria-hidden="true">${ic(p.icon,"sm")}</span>${quiet?'<span class="bt-q">Quiet</span>':""}<span class="bt-t"><b>${esc(p.name)}</b><span>${esc(sub)}</span></span></button>`};
   return `<h2 class="sr">Productions</h2>
-  ${wk}${todayStrip()}<div class="ptiles" style="--st:${(todayData().any?56:0)+(wk?132:0)}px">${ps.map((p,ix)=>{const last=lastActivity(p),quiet=!!last&&Date.now()-last>7*864e5,cov=coverOf(p);return`<button class="ptile${cov?" hascov":""}" style="--pc:${p.color};--i:${ix}" data-open="${p.id}" aria-label="${esc(p.name)}, ${agoLabel(last).toLowerCase()}${quiet?", quiet for a while":""}">${cov?`<img class="tcov" data-mid="${cov.id}" alt="" loading="lazy"${covVars(p)}>`:""}${quiet?`<span class="pbadge q" aria-hidden="true"></span>`:""}<span class="pi"><span class="pav">${ic(p.icon)}</span><b>${esc(p.name)}</b><span class="pq">${agoShort(last)}</span></span></button>`}).join("")}<button class="ptile padd" id="addp" aria-label="New production"><span class="pi"><span class="pav">${ic("plus")}</span><b>Add new</b></span></button></div>${recentStrip()}`;
+  <button class="bhero" id="b-hero" type="button" aria-label="This week: ${posts} post${pl(posts)} from ${active} of ${ps.length} teams. Open the overview"><span class="bh-k">This week</span><span class="bh-n">${posts}<small>post${pl(posts)}</small></span><span class="bh-s">${active} of ${ps.length} teams active${wl.length?" · "+wl.length+" photo"+pl(wl.length)+" and videos":""}</span></button>
+  <div class="bpair">${q?`<button class="bcard qt" id="b-quiet" type="button"><span class="bc-k">${q} quiet</span><b class="bc-t">Check in</b></button>`:`<div class="bcard"><span class="bc-k">Teams</span><b class="bc-t">All active</b></div>`}<div class="bcard wkb"><button class="wkb-m" id="b-play" type="button"><span class="bc-k">Week in review</span><b class="bc-t">${wl.length?"Play":"Add a photo"}</b></button>${wl.length?`<button class="wkb-e" id="b-edit" type="button" aria-label="Choose and order photos in the week in review">${ic("image")}</button>`:""}</div></div>
+  <div class="bento">${order.map((r,ix)=>tile(r,ix)).join("")}<button class="bt add" id="addp" type="button" aria-label="New production"><span class="bt-addi">${ic("plus")}</span><b>Add new</b></button></div>`;
 }
 /* second tab: the detail */
 let ovMore=false;
@@ -2430,7 +2520,8 @@ const feedItems=()=>prods().flatMap(p=>{const ids=new Set(p.log.map(l=>l.id));re
 const actRow=f=>{const m=f.m||(f.l&&postMedia(f.l)[0]);return `<li><div class="avatar" style="color:${f.p.color}">${ic(f.p.icon)}</div><div class="grow"><b>${esc(f.p.name)}</b> <span class="pill type">${f.k}</span><div>${esc(f.txt)}</div><div class="small muted">${fmt(f.t)}</div></div>${m?`<img class="athumb" data-mid="${m.id}" alt="">`:""}</li>`};
 const fab=()=>`<div class="fab-wrap"><button class="fab" id="addp" aria-label="New production">${ic("plus")}<span>New production</span></button></div>`;
 function wireHome(){
-  {const a=$("#wk-play");if(a)a.onclick=()=>openViewer(weekMediaList(),0,true);const b=$("#wk-sh");if(b)b.onclick=()=>shareMenu(null);const x=$("#wk-x");if(x)x.onclick=()=>{try{localStorage.setItem(RECAPK,String(Date.now()))}catch{}render()}}
+  {const h=$("#b-hero");if(h)h.onclick=()=>{fb("tap");nav("overview")};const qb=$("#b-quiet");if(qb)qb.onclick=todaySheet;const pb=$("#b-play");if(pb)pb.onclick=()=>{const l=weekMediaList();if(l.length)openViewer(l,0,true,weekReel());else captureSheet()};const eb=$("#b-edit");if(eb)eb.onclick=()=>reelEdit(wkKey(),weekBase(),"Week in review",()=>render())}
+  {const a=$("#wk-play");if(a)a.onclick=()=>openViewer(weekMediaList(),0,true,weekReel());const b=$("#wk-sh");if(b)b.onclick=()=>shareMenu(null);const x=$("#wk-x");if(x)x.onclick=()=>{try{localStorage.setItem(RECAPK,String(Date.now()))}catch{}render()}}
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>{tab="plan";nav("p/"+b.dataset.open)});
   $("#addp")&&($("#addp").onclick=()=>prodSheet());$("#shr-btn")&&($("#shr-btn").onclick=()=>shareMenu(null));$("#ov-late")&&($("#ov-late").onclick=todaySheet);$("#ov-more")&&($("#ov-more").onclick=()=>{ovMore=!ovMore;render()});$("#today")&&($("#today").onclick=todaySheet);
 }
@@ -2468,6 +2559,8 @@ function prodSheet(p){
   sheet(isNew?"New production":"Edit production",`
   <label class="f" for="pn">Name</label><input class="t" id="pn" type="text" value="${esc(p.name)}" maxlength="40">
   <label class="f" for="pdsc">What is it about?</label><div class="row"><textarea class="t" id="pdsc">${esc(p.desc)}</textarea>${micBtn()}</div>
+  <label class="f">Current term and week</label>${twSelects("pc-tm","pc-wk",p.cur||{term:0,wk:0})}<p class="small muted" style="margin:4px 0 0">New posts start on this term and week.</p>
+  <label class="f" for="pmn">Educator or mentor</label><div class="row"><input class="t" id="pmn" type="text" maxlength="60" value="${esc((p.info&&p.info.mentor)||"")}">${micBtn()}</div>
   <label class="f">Icon</label><div class="iconpick">${PICONS.map(e=>`<button type="button" data-e="${e}" aria-pressed="${e===icn}" aria-label="${e}">${ic(e)}</button>`).join("")}</div>
   <div class="row between" style="margin-top:18px"><div><b>This team handles money</b><div class="small muted">Adds a Money tab for budget, spending and income.</div></div><button type="button" role="switch" class="sw" id="pm" aria-label="This team handles money" aria-checked="${!!p.useMoney}"><i></i></button></div>
   <label class="f">Colour</label><div class="swatches">${COLORS.map(c=>`<button type="button" data-c="${c}" style="background:${c}" aria-pressed="${c===co}" aria-label="Colour ${c}"></button>`).join("")}</div>
@@ -2478,8 +2571,13 @@ function prodSheet(p){
     if(!isNew)$("#del").onclick=()=>{p.del=true;p.delAt=Date.now();save(p);close();nav("home");toast("Production deleted. Find it under Settings, Recently deleted.",()=>{p.del=false;save(p);render()})};
     $("#pm").onclick=e=>{um=!um;e.currentTarget.setAttribute("aria-checked",String(um))};
     $("#ok").onclick=()=>{const n=$("#pn").value.trim();if(!n){$("#pn").focus();return}
+      const oldCur=JSON.stringify(p.cur||null),cur=twRead("pc-tm","pc-wk");
       Object.assign(p,{name:n,icon:icn,color:co,desc:$("#pdsc").value.trim(),useMoney:um});
       if(isNew){Object.assign(p,{id:uid(),members:[],goals:[],log:[],chapters:[],del:false});S.prods.push(p)}
+      p.info=p.info||{};p.info.mentor=$("#pmn").value.trim();
+      if(cur.term||cur.wk)p.cur=cur;else delete p.cur;
+      if(cur.term)p.info.term="Term "+cur.term+" "+new Date().getFullYear();
+      if(JSON.stringify(p.cur||null)!==oldCur&&p.cur)twSave(p.id,p.cur);
       save(p);close();render()};
   });
 }
@@ -2539,7 +2637,7 @@ function prodView(p){
   const pl=n=>n===1?"":"s";
   return `<div class="pv"><div class="pv-side"><div class="phero${cov?" hascover":""}" style="--pc:${p.color}">${cov?`<img class="ph-cover" data-mid="${cov.id}" alt=""${covVars(p)}>`:""}
     <div class="ph-top"><button class="x glass" id="back" aria-label="Back to productions">${ic("left")}</button><span class="grow"></span>${photos.length?`<button class="x glass" id="plv" aria-label="Play slideshow">${ic("play")}</button>`:""}<button class="x glass" id="shr" aria-label="Share">${ic("share")}</button><button class="x glass" id="pmore" aria-label="More options">${ic("more")}</button></div>
-    <div class="ph-main"><div class="grow"><h2 class="ptitle"><span class="ph-ic" aria-hidden="true">${ic(p.icon)}</span><span>${esc(p.name)}</span></h2>${p.desc?`<p class="ph-d">${esc(p.desc)}</p>`:""}<p class="ph-meta">${p.log.length} post${pl(p.log.length)} · ${photos.length} photo${pl(photos.length)} · ${agoLabel(last)}</p></div></div>
+    <div class="ph-main"><div class="grow"><h2 class="ptitle"><span class="ph-ic" aria-hidden="true">${ic(p.icon)}</span><span>${esc(p.name)}</span></h2>${p.desc?`<p class="ph-d">${esc(p.desc)}</p>`:""}<p class="ph-meta">${p.cur&&(p.cur.term||p.cur.wk)?`${esc(twLabel(p.cur))} · `:""}${p.log.length} post${pl(p.log.length)} · ${photos.length} photo${pl(photos.length)} · ${agoLabel(last)}</p></div></div>
   </div>
   <div class="segwrap"><div class="segc" role="group" aria-label="Sections">${TB.map(([k,l,i])=>`<button data-tab="${k}" aria-label="${l}" aria-pressed="${tab===k}">${ic(i)}<span>${l}</span></button>`).join("")}</div></div></div>
   <div class="tabbody">${{story:storyTab,plan:planTab,money:moneyTab,wrap:wrapTab,media:mediaTab}[tab](p)}</div></div>`;
@@ -2815,17 +2913,56 @@ function digestSheet(){
   });
 }
 /* ---------- one Share menu ---------- */
-const weekMediaList=()=>prods().flatMap(p=>storyMediaList(p).filter(x=>x.t>=Date.now()-7*864e5)).sort((a,b)=>a.t-b.t);
+const weekBase=()=>prods().flatMap(p=>storyMediaList(p).filter(x=>x.t>=Date.now()-7*864e5)).sort((a,b)=>a.t-b.t);
+/* a chosen set and order of photos, kept per week or per production */
+const REELK="ms-prod-reel";let REEL={};try{REEL=JSON.parse(localStorage.getItem(REELK)||"{}")||{}}catch{}
+const reelSave=()=>{try{localStorage.setItem(REELK,JSON.stringify(REEL))}catch{}};
+const wkKey=()=>"wk"+weekStart(Date.now());
+const reelPool=base=>{const m=new Map();prods().forEach(p=>storyMediaList(p).forEach(x=>m.set(x.m.id,x)));base.forEach(x=>m.set(x.m.id,x));return m};
+const reelList=(key,base)=>{const o=REEL[key];if(!o)return base;const m=reelPool(base);return o.map(id=>m.get(id)).filter(Boolean)};
+const weekMediaList=()=>reelList(wkKey(),weekBase());
+const weekReel=()=>({key:wkKey(),base:weekBase,get:weekMediaList,title:"Week in review"});
+function reelEdit(key,base,title,after){
+  let ids=(REEL[key]||base.map(x=>x.m.id)).slice(),adding=false;const pick=new Set();
+  const pool=reelPool(base);
+  const commit=()=>{REEL[key]=ids.slice();reelSave()};
+  const vb=x=>x.m.type==="video"?`<span class="re-v">${ic("play","sm")}</span>`:"";
+  sheet(title,'<div id="re"></div>',(d,close)=>{
+    const root=d.querySelector("#re");
+    const draw=()=>{
+      if(adding){
+        const rest=[...pool.values()].filter(x=>!ids.includes(x.m.id)).sort((a,b)=>b.t-a.t).slice(0,90);
+        root.innerHTML=`<p class="small muted" style="margin:0">Tap the photos to add them to the end.</p>${rest.length?`<div class="re-g">${rest.map(x=>`<button type="button" class="re-t re-a" data-a="${x.m.id}" aria-pressed="${pick.has(x.m.id)}" aria-label="Add ${x.m.type==="video"?"video":"photo"}"><img data-mid="${x.m.id}" alt="" loading="lazy">${vb(x)}<span class="re-c">${ic("check","sm")}</span></button>`).join("")}</div>`:'<p class="muted">Every photo is already in.</p>'}<div class="row" style="gap:8px"><button class="btn" id="re-bk" type="button">Back</button><button class="btn primary grow" id="re-ad" type="button"${pick.size?"":" disabled"}>Add ${pick.size||""} to the review</button></div>`;
+        root.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const k=b.dataset.a;pick.has(k)?pick.delete(k):pick.add(k);draw()});
+        root.querySelector("#re-bk").onclick=()=>{adding=false;pick.clear();draw()};
+        root.querySelector("#re-ad").onclick=()=>{pick.forEach(k=>ids.push(k));pick.clear();adding=false;commit();draw()};
+      }else{
+        const items=ids.map(id=>pool.get(id)).filter(Boolean);ids=items.map(x=>x.m.id);
+        root.innerHTML=`<p class="small muted" style="margin:0">${items.length} in the review. Use the arrows to move a photo and the cross to take it out.</p>${items.length?`<div class="re-g">${items.map((x,i)=>`<div class="re-t"><img data-mid="${x.m.id}" alt="" loading="lazy">${vb(x)}<span class="re-n">${i+1}</span><button type="button" class="re-x" data-rm="${i}" aria-label="Take photo ${i+1} out">${ic("x","sm")}</button><div class="re-mv"><button type="button" data-mv="${i}" data-d="-1" aria-label="Move photo ${i+1} earlier"${i?"":" disabled"}>${ic("chev","sm")}</button><button type="button" data-mv="${i}" data-d="1" aria-label="Move photo ${i+1} later"${i<items.length-1?"":" disabled"}>${ic("chev","sm")}</button></div></div>`).join("")}</div>`:'<p class="muted">Nothing here yet. Add some photos.</p>'}<div class="row wr" style="gap:8px"><button class="btn" id="re-add" type="button">${ic("plus")}Add photos</button><button class="btn" id="re-rs" type="button">Start again</button><button class="btn primary grow" id="re-ok" type="button">Done</button></div>`;
+        root.querySelectorAll("[data-rm]").forEach(b=>b.onclick=()=>{ids.splice(+b.dataset.rm,1);commit();draw()});
+        root.querySelectorAll("[data-mv]").forEach(b=>b.onclick=()=>{const i=+b.dataset.mv,j=i+ +b.dataset.d;if(j<0||j>=ids.length)return;[ids[i],ids[j]]=[ids[j],ids[i]];commit();draw()});
+        root.querySelector("#re-add").onclick=()=>{adding=true;draw()};
+        root.querySelector("#re-rs").onclick=()=>{delete REEL[key];reelSave();ids=base.map(x=>x.m.id);draw();toast("Back to all photos, in date order.")};
+        root.querySelector("#re-ok").onclick=()=>{close();if(after)setTimeout(after,120)};
+      }
+      hydrate(root);
+    };
+    draw();
+  });
+}
 function shareMenu(p){
   const rows=[];
   if(!p){
-    rows.push(["play","This week's slideshow","Photos and videos from every team in the last 7 days",()=>openViewer(weekMediaList(),0,true)]);
+    rows.push(["play","This week's slideshow","Photos and videos from every team in the last 7 days",()=>openViewer(weekMediaList(),0,true,weekReel())]);
+    rows.push(["image","Choose and order photos","Add, take out or move photos in the week in review",()=>reelEdit(wkKey(),weekBase(),"Week in review",()=>render())]);
+    if(canRecord())rows.push(["download","Save week as a video","A video file to send or play on any screen",()=>slideshowVideo(weekMediaList())]);
     rows.push(["chat","Weekly digest","A short summary to send on WhatsApp",digestSheet]);
   }else{
     rows.push(["play","Play slideshow","Photos and videos from "+p.name+", with captions",()=>playStory(p)]);
+    rows.push(["image","Choose and order photos","Add, take out or move photos in the slideshow",()=>reelEdit(p.id,storyMediaList(p),p.name+" slideshow")]);
     rows.push(["cloud","Save to Google Drive","All photos and videos from "+p.name+", up to 30 files",()=>saveToDrive(mediaOf(p).slice().reverse().map(m=>m.id),p)]);
-    rows.push(["image","Send photos to WhatsApp","Up to 20 photos from the story, sent as pictures",()=>sharePhotos(storyMediaList(p),p.name)]);
-    if(canRecord())rows.push(["download","Save slideshow as a video","A video file to send or play on any screen",()=>slideshowVideo(storyMediaList(p))]);
+    rows.push(["image","Send photos to WhatsApp","Up to 20 photos from the story, sent as pictures",()=>sharePhotos(reelList(p.id,storyMediaList(p)),p.name)]);
+    if(canRecord())rows.push(["download","Save slideshow as a video","A video file to send or play on any screen",()=>slideshowVideo(reelList(p.id,storyMediaList(p)))]);
     rows.push(["share","Showcase page","A public page for families and the community",()=>showcaseSheet(p)]);
     if(p.showcase&&p.showcase.on)rows.push(["printer","Print poster","A page with a QR code to this showcase",()=>posterProd(p)]);
     rows.push(["book","Story book (PDF)","Your whole story laid out to print or save",()=>exportStory(p)]);
@@ -2844,14 +2981,15 @@ function storyMediaList(p,opts){
 const canRecord=()=>!!(window.MediaRecorder&&HTMLCanvasElement.prototype.captureStream);
 let VW=null;
 function closeViewer(){if(!VW)return;const v=VW;VW=null;clearTimeout(v.timer);document.removeEventListener("keydown",v.key);document.removeEventListener("visibilitychange",v.vis);try{ovPop("viewer")}catch{}v.root.remove();if(!document.querySelector(".scrim,.ed"))document.body.classList.remove("noscroll")}
-function openViewer(list,start,auto){
+function openViewer(list,start,auto,reel){
   if(!list.length){toast("No photos or videos yet.");return}
+  if(!reel){const ps=new Set(list.map(x=>x.p&&x.p.id)),p0=list[0].p;reel=(ps.size===1&&p0)?{key:p0.id,base:()=>storyMediaList(p0),get:()=>reelList(p0.id,storyMediaList(p0)),title:p0.name+" slideshow"}:weekReel()}
   closeViewer();
   let i=Math.max(0,Math.min(start||0,list.length-1)),playing=!!auto;
   const root=document.createElement("div");root.className="vw";root.setAttribute("role","dialog");root.setAttribute("aria-modal","true");root.setAttribute("aria-label","Photos and videos");
   const seg=list.length<=20;
   root.innerHTML=`<div class="vw-bars ${seg?"":"one"}" aria-hidden="true">${seg?list.map(()=>`<i><b></b></i>`).join(""):`<i><b id="vw-one"></b></i>`}</div>
-    <div class="vw-top"><span class="vw-t grow" id="vw-t"></span><button class="x glass" id="vw-pl" type="button"></button>${canRecord()?`<button class="x glass" id="vw-vid" type="button" aria-label="Save slideshow as a video">${ic("download")}</button>`:""}<button class="x glass" id="vw-edit" type="button" aria-label="Edit">${ic("wand")}</button><button class="x glass" id="vw-ed" type="button" aria-label="Details and sharing consent">${ic("pencil")}</button><button class="x glass" id="vw-x" type="button" aria-label="Close">${ic("x")}</button></div>
+    <div class="vw-top"><span class="vw-t grow" id="vw-t"></span><button class="x glass" id="vw-pl" type="button"></button>${canRecord()?`<button class="x glass" id="vw-vid" type="button" aria-label="Save slideshow as a video">${ic("download")}</button>`:""}${reel?`<button class="x glass" id="vw-re" type="button" aria-label="Choose and order photos">${ic("image")}</button>`:""}<button class="x glass" id="vw-edit" type="button" aria-label="Edit">${ic("wand")}</button><button class="x glass" id="vw-ed" type="button" aria-label="Details and sharing consent">${ic("pencil")}</button><button class="x glass" id="vw-x" type="button" aria-label="Close">${ic("x")}</button></div>
     <div class="vw-stage" id="vw-st"></div><button class="vw-nav prev" id="vw-p" type="button" aria-label="Previous"></button><button class="vw-nav next" id="vw-n" type="button" aria-label="Next"></button>
     <div class="vw-cap" id="vw-c"></div>`;
   document.body.append(root);document.body.classList.add("noscroll");
@@ -2890,6 +3028,7 @@ function openViewer(list,start,auto){
   q("#vw-x").onclick=closeViewer;q("#vw-p").onclick=prev;q("#vw-n").onclick=()=>{if(i<list.length-1){i++;show()}};
   q("#vw-ed").onclick=()=>{const m=list[i].m;closeViewer();openMediaSheet(m)};
   q("#vw-edit").onclick=()=>{const m=list[i].m,pp=P(m.pid);closeViewer();setTimeout(()=>m.type==="video"?videoEditSheet(pp,m):editSheet(pp,m),200)};
+  {const rb=q("#vw-re");if(rb)rb.onclick=()=>{playing=false;clearTimeout(v.timer);closeViewer();setTimeout(()=>reelEdit(reel.key,reel.base(),reel.title,()=>openViewer(reel.get(),0,false,reel)),200)}}
   const vb=q("#vw-vid");if(vb)vb.onclick=()=>{const items=list;playing=false;clearTimeout(v.timer);closeViewer();slideshowVideo(items)};
   let sx=0,pd=0,ps=1,pan=null,moved=false,lastTap=0;const stg=q("#vw-st");
   const imgEl=()=>{const e=q("#vw-st .vw-img");return e&&e.tagName==="IMG"?e:null},applyZ=()=>{const e=imgEl();if(e){e.style.transform=z.s>1?`translate(${z.x}px,${z.y}px) scale(${z.s})`:"";root.classList.toggle("zoomed",z.s>1)}};
@@ -2963,33 +3102,129 @@ async function sharePhotos(items,title){
   if(!files.length){toast("Couldn't read the photos.");return}
   try{if(navigator.canShare&&navigator.canShare({files}))await navigator.share({files,title});else toast("Sharing isn't available here. Open the photos and save them instead.")}catch{}
 }
+/* ---------- original music, made in the app (nothing to license) ---------- */
+const MUSIC=[
+ {id:"pick",vol:0.52,name:"Acoustic fingerpicking",mood:"Gentle guitar, flowing",bpm:72,gtr:"pick",ch:[[40,47,52,55,59,64],[43,47,50,55,59,67],[45,52,57,60,64],[41,48,53,57,60,65]]},
+ {id:"camp",vol:0.57,name:"Campfire strum",mood:"Warm strummed guitar",bpm:80,gtr:"strum",ch:[[43,47,50,55,59,67],[50,57,62,66,69],[40,47,52,55,59,64],[48,52,55,60,64]]},
+ {id:"sunny",vol:0.54,name:"Sunny guitar",mood:"Bright, happy strumming",bpm:98,gtr:"strum",ch:[[48,52,55,60,64],[43,47,50,55,59,67],[45,52,57,60,64],[41,48,53,57,60,65]]},
+ {id:"sunrise",vol:3.13,name:"Sunrise",mood:"Warm and hopeful",bpm:72,root:48,prog:[[0],[7],[9,1],[5]],sub:2,pat:[0,1,2,4,2,1],wave:"triangle",pad:.05,arp:.07,bass:.1},
+ {id:"uplift",vol:2.8,name:"Uplift",mood:"Bright and easy",bpm:98,root:55,prog:[[0],[7],[9,1],[5]],sub:2,pat:[0,2,4,2,5,4,2,1],wave:"triangle",pad:.035,arp:.085,bass:.11,kick:1},
+ {id:"calm",vol:2.51,name:"Calm",mood:"Soft and gentle",bpm:60,root:53,prog:[[0],[7],[2,1],[10]],sub:1,pat:[0,2,4,5],wave:"sine",pad:.06,arp:.1,bass:.08},
+ {id:"adventure",vol:3.22,name:"Adventure",mood:"Steady and light",bpm:100,root:57,prog:[[0,1],[8],[3],[10]],sub:2,pat:[0,2,1,4,2,5,1,3],wave:"triangle",pad:.025,arp:.045,bass:.13,kick:1},
+ {id:"celebrate",vol:3.6,name:"Celebrate",mood:"Light and cheerful",bpm:98,root:50,prog:[[0],[7],[11,1],[5]],sub:2,pat:[0,3,2,5,4,5,2,3],wave:"triangle",pad:.03,arp:.04,bass:.1,kick:1}
+];
+const mtof=m=>440*Math.pow(2,(m-69)/12);
+/* a plucked string (Karplus-Strong), reused for every note of the same pitch */
+const KSC=new Map();
+function ksBuf(ctx,midi,sec){
+  const sr=ctx.sampleRate,key=midi+"|"+sr+"|"+sec,hit=KSC.get(key);if(hit)return hit;
+  const fr=mtof(midi),N=Math.max(2,Math.round(sr/fr)),len=Math.floor(sr*sec),b=ctx.createBuffer(1,len,sr),d=b.getChannelData(0);
+  let lp=0;for(let i=0;i<N;i++){const x=Math.random()*2-1;lp=lp*.78+x*.22;d[i]=lp}
+  const dec=midi<50?.9993:.9988;
+  for(let i=N;i<len;i++)d[i]=.5*(d[i-N]+(i>N?d[i-N-1]:d[i-N]))*dec;
+  let pk=0;for(let i=0;i<len;i++){const a=Math.abs(d[i]);if(a>pk)pk=a}if(pk>0){const k=.7/pk;for(let i=0;i<len;i++)d[i]*=k}
+  KSC.set(key,b);return b;
+}
+function guitarNotes(ctx,out,m,dur,t0){
+  const spb=60/m.bpm,bar=spb*4,bars=Math.ceil(dur/bar)+1;
+  /* a little room around the guitar */
+  const rl=Math.floor(ctx.sampleRate*1.6),rb=ctx.createBuffer(2,rl,ctx.sampleRate);
+  for(let c=0;c<2;c++){const d=rb.getChannelData(c);for(let i=0;i<rl;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/rl,2.6)}
+  const cv=ctx.createConvolver();cv.buffer=rb;const wet=ctx.createGain();wet.gain.value=.3;cv.connect(wet);wet.connect(out);
+  const pluck=(midi,t,vel)=>{const src=ctx.createBufferSource();src.buffer=ksBuf(ctx,midi,midi<50?3.2:2.4);const g=ctx.createGain();g.gain.value=vel;const lpf=ctx.createBiquadFilter();lpf.type="lowpass";lpf.frequency.value=2200;src.connect(lpf);lpf.connect(g);g.connect(out);g.connect(cv);src.start(t)};
+  for(let b=0;b<bars;b++){
+    const ch=m.ch[b%m.ch.length],tb=t0+b*bar;
+    if(m.gtr==="pick"){
+      const pat=[0,2,3,1,4,2,3,1];
+      for(let i=0;i<8;i++){const idx=pat[i]%ch.length;pluck(ch[idx]+(i%2&&idx>2?0:0),tb+i*spb/2+(Math.random()*.012),i===0?.9:(i%2?.45:.6))}
+      pluck(ch[ch.length-1]+12,tb+bar-spb/2,.25);
+    }else{
+      const ev=[[0,"d",1],[1,"d",.7],[1.5,"u",.55],[2.5,"u",.6],[3,"d",.8],[3.5,"u",.5]];
+      ev.forEach(e=>{const t=tb+e[0]*spb,notes=e[1]==="d"?ch:ch.slice(-4).slice().reverse(),st=e[1]==="d"?.034:.022;notes.forEach((nt,k)=>pluck(nt,t+k*st,e[2]*(e[1]==="d"?.42:.28)))});
+    }
+  }
+}
+function musicPlay(ctx,out,m,dur,t0){
+  const spb=60/m.bpm,bar=spb*4,bars=Math.ceil(dur/bar)+1;
+  const tone=(fr,t,len,type,vol,att,rel,lp)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.value=fr;g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol,t+att);g.gain.exponentialRampToValueAtTime(.0001,t+len+rel);let n=o;if(lp){const f=ctx.createBiquadFilter();f.type="lowpass";f.frequency.value=lp;o.connect(f);n=f}n.connect(g);g.connect(out);o.start(t);o.stop(t+len+rel+.05)};
+  if(m.gtr)guitarNotes(ctx,out,m,dur,t0);else for(let b=0;b<bars;b++){
+    const pr=m.prog[b%m.prog.length],r=pr[0],tri=pr[1]?[0,3,7]:[0,4,7],tb=t0+b*bar;
+    tri.forEach(x=>tone(mtof(m.root+r+x),tb,bar-.1,"triangle",m.pad,bar*.3,.6,1400));
+    tone(mtof(m.root+r-12),tb,bar*.9,"sine",m.bass,.03,.25);
+    const n=m.sub;for(let i=0;i<4*n;i++){const p=m.pat[i%m.pat.length],x=tri[p%3]+(p>=3?12:0);tone(mtof(m.root+12+r+x),tb+i*spb/n,spb/n*1.6,m.wave,m.arp,.01,.3,1500)}
+    if(m.kick)for(let i=0;i<4;i++){const t=tb+i*spb,o=ctx.createOscillator(),g=ctx.createGain();o.frequency.setValueAtTime(130,t);o.frequency.exponentialRampToValueAtTime(42,t+.14);g.gain.setValueAtTime(.12,t);g.gain.exponentialRampToValueAtTime(.0001,t+.22);o.connect(g);g.connect(out);o.start(t);o.stop(t+.25)}
+  }
+  out.gain.cancelScheduledValues(t0);out.gain.setValueAtTime(0,t0);const lv=.225*(m.vol||1);out.gain.linearRampToValueAtTime(lv,t0+Math.min(1.5,dur/4));
+  if(dur>4){out.gain.setValueAtTime(lv,t0+dur-2);out.gain.linearRampToValueAtTime(0,t0+dur)}
+}
+const MUSICK="ms-prod-music";
+function musicChoose(root,A){
+  return new Promise(res=>{
+    let ctx=null,pv=null,cur="";try{cur=localStorage.getItem(MUSICK)||"sunrise"}catch{cur="sunrise"}
+    if(cur!=="none"&&!MUSIC.some(x=>x.id===cur))cur="pick";
+    const ac=()=>{if(!ctx)ctx=new A();if(ctx.state==="suspended")ctx.resume();return ctx};
+    const stopPv=()=>{if(pv){try{pv.gain.cancelScheduledValues(0);pv.gain.setValueAtTime(0,ctx.currentTime)}catch{}pv=null}};
+    const draw=()=>{
+      root.innerHTML=`<div class="vwx-b vx-music"><h2>Choose music</h2><p class="small muted" style="margin:0 0 10px">Guitar and other original tunes made for this app. Free to share anywhere.</p><div class="mu-list" role="radiogroup" aria-label="Music">${MUSIC.map(m=>`<div class="mu-row${cur===m.id?" on":""}"><button type="button" class="mu-pick" role="radio" aria-checked="${cur===m.id}" data-m="${m.id}"><span class="mu-dot" aria-hidden="true"></span><span class="mu-t"><b>${m.name}</b><span class="small muted">${m.mood}</span></span></button><button type="button" class="mu-pv" data-pv="${m.id}" aria-label="Hear ${m.name}">${ic("play","sm")}</button></div>`).join("")}<div class="mu-row${cur==="none"?" on":""}"><button type="button" class="mu-pick" role="radio" aria-checked="${cur==="none"}" data-m="none"><span class="mu-dot" aria-hidden="true"></span><span class="mu-t"><b>No music</b><span class="small muted">Just the photos</span></span></button></div></div><button class="btn primary block" id="mu-go" type="button" style="margin-top:12px">Make my video</button><button class="vx-close" id="mu-x" type="button">Cancel</button></div>`;
+      root.querySelectorAll("[data-m]").forEach(b=>b.onclick=()=>{cur=b.dataset.m;try{localStorage.setItem(MUSICK,cur)}catch{}stopPv();draw()});
+      root.querySelectorAll("[data-pv]").forEach(b=>b.onclick=()=>{const m=MUSIC.find(x=>x.id===b.dataset.pv),c=ac();stopPv();const g=c.createGain();g.connect(c.destination);pv=g;musicPlay(c,g,m,9,c.currentTime+.05);cur=m.id;try{localStorage.setItem(MUSICK,cur)}catch{}root.querySelectorAll(".mu-row").forEach(r=>r.classList.remove("on"));b.closest(".mu-row").classList.add("on");root.querySelectorAll("[data-m]").forEach(x=>x.setAttribute("aria-checked",String(x.dataset.m===cur)))});
+      root.querySelector("#mu-go").onclick=()=>{stopPv();if(cur==="none"){if(ctx&&ctx.close)ctx.close();res({ctx:null,id:null})}else res({ctx:ac(),id:cur})};
+      root.querySelector("#mu-x").onclick=()=>{stopPv();if(ctx&&ctx.close)ctx.close();res(false)};
+    };
+    draw();
+  });
+}
 async function slideshowVideo(items){
   if(!canRecord()){toast("This browser can't save videos. Try Chrome on a laptop or an Android phone.");return}
   if(!items.length){toast("No photos to put in a video.");return}
   const root=document.createElement("div");root.className="vw vwx";root.setAttribute("role","dialog");root.setAttribute("aria-modal","true");root.setAttribute("aria-label","Saving the slideshow");
-  root.innerHTML=`<div class="vwx-b"><h2>Making your video</h2><p class="muted" id="vx-s">Getting ready…</p><div class="vwx-bar"><i id="vx-i"></i></div><p class="small muted">Keep this screen open. It plays in real time.</p><button class="btn" id="vx-c" type="button">Cancel</button></div>`;
+  const makingHTML=`<div class="vwx-b"><h2>Making your video</h2><p class="muted" id="vx-s">Getting ready…</p><div class="vwx-bar"><i id="vx-i"></i></div><p class="small muted">Keep this screen open. It plays in real time.</p><button class="btn" id="vx-c" type="button">Cancel</button></div>`;
   document.body.append(root);document.body.classList.add("noscroll");let cancel=false;
   const done=()=>{root.remove();if(!document.querySelector(".scrim,.ed,.vw"))document.body.classList.remove("noscroll")};
+  let AC=null,musicId=null;const AudioCtor=window.AudioContext||window.webkitAudioContext;
+  if(AudioCtor){const r=await musicChoose(root,AudioCtor);if(r===false){done();return}AC=r.ctx;musicId=r.id}
+  root.innerHTML=makingHTML;
   root.querySelector("#vx-c").onclick=()=>{cancel=true};
   try{
-    const W=1280,H=720,SL=3500,FD=500,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
-    const imgs=[];for(const it of items){const u=await stillUrl(it.m.id);const im=u&&await loadImgEl(u);if(im)imgs.push({im,cap:it.cap||""})}
+    let W=1280,H=720;const SL=3500,FD=500,c=document.createElement("canvas");c.width=W;c.height=H;const g=c.getContext("2d");
+    const imgs=[];for(const it of items){const u=await stillUrl(it.m.id);const im=u&&await loadImgEl(u);if(im)imgs.push({im,cap:it.cap||"",team:it.p?it.p.name:""})}
     if(!imgs.length)throw new Error("none");
-    const title=items[0].p?items[0].p.name:"Our story";
-    const types=["video/mp4;codecs=avc1.42E01E","video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"],mime=types.find(t=>MediaRecorder.isTypeSupported(t))||"";
-    const stream=c.captureStream(30),rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:3500000}:undefined),chunks=[];
+    let lg=null;try{lg=await loadImgEl("icons/productions-192.png")}catch{}
+    {const up=imgs.filter(x=>x.im.height>x.im.width).length;if(up>imgs.length/2){W=720;H=1280}c.width=W;c.height=H}
+    const multi=new Set(items.map(x=>x.p&&x.p.id)).size>1,fdt=t=>new Date(t).toLocaleDateString(undefined,{day:"numeric",month:"short"}),ts=items.map(x=>x.t).filter(Boolean);
+    const title=multi?"Middle School":(items[0].p?items[0].p.name:"Our story");
+    const sub=multi?"Week in review"+(ts.length?" · "+(fdt(Math.min(...ts))===fdt(Math.max(...ts))?fdt(Math.max(...ts)):fdt(Math.min(...ts))+" to "+fdt(Math.max(...ts))):""):"Newberry House Middle School · Production team";
+    const tcol=multi?"#0b7a55":(/^#[0-9a-fA-F]{6}$/.test((items[0].p&&items[0].p.color)||"")?items[0].p.color:"#a65608");
+    const types=(AC&&musicId?["video/mp4;codecs=avc1.42E01E,mp4a.40.2","video/mp4;codecs=avc1,mp4a.40.2","video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus"]:[]).concat(["video/mp4;codecs=avc1.42E01E","video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm;codecs=vp8","video/webm"]),mime=types.find(t=>MediaRecorder.isTypeSupported(t))||"";
+    const stream=c.captureStream(30);let master=null;if(AC&&musicId){const dst=AC.createMediaStreamDestination();master=AC.createGain();master.connect(dst);dst.stream.getAudioTracks().forEach(t=>stream.addTrack(t))}
+    const rec=new MediaRecorder(stream,mime?{mimeType:mime,videoBitsPerSecond:3500000}:undefined),chunks=[];
     rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
     const fin=new Promise(res=>rec.onstop=res);
-    const slides=[{title},...imgs,{end:true}],total=slides.length*SL;
-    const fit=(im,sc)=>{const k=Math.max(W/im.width,H/im.height)*sc,dw=im.width*k,dh=im.height*k;g.drawImage(im,(W-dw)/2,(H-dh)/2,dw,dh)};
+    const slides=[{title,sub},...imgs,{end:true}],total=slides.length*SL;
+    const bgc=document.createElement("canvas"),bg=bgc.getContext("2d");
+    const fit=(im,sc)=>{
+      bgc.width=32;bgc.height=Math.max(2,Math.round(32*H/W));const kc=Math.max(bgc.width/im.width,bgc.height/im.height);bg.drawImage(im,(bgc.width-im.width*kc)/2,(bgc.height-im.height*kc)/2,im.width*kc,im.height*kc);
+      g.imageSmoothingEnabled=true;g.imageSmoothingQuality="high";g.drawImage(bgc,0,0,W,H);g.fillStyle="rgba(0,0,0,.38)";g.fillRect(0,0,W,H);
+      const k=Math.min(W/im.width,H/im.height)*sc,dw=im.width*k,dh=im.height*k;g.drawImage(im,(W-dw)/2,(H-dh)/2,dw,dh)};
     const wrap=(t,x,y,mw,lh)=>{const w=t.split(/\s+/);let line="",yy=y;for(const word of w){const test=line?line+" "+word:word;if(g.measureText(test).width>mw&&line){g.fillText(line,x,yy);yy+=lh;line=word}else line=test}g.fillText(line,x,yy)};
     const draw=(s,p0,alpha)=>{
       g.globalAlpha=alpha;
-      if(s.title||s.end){g.fillStyle=s.end?"#0b2a22":"#a65608";g.fillRect(0,0,W,H);g.fillStyle="#fff";g.textAlign="center";g.font='700 84px "Bricolage Grotesque",system-ui,sans-serif';g.fillText(s.title||"Thank you for watching",W/2,H/2);g.font='500 36px "Instrument Sans",system-ui,sans-serif';g.globalAlpha=alpha*.85;g.fillText(s.end?"Newberry House Middle School":"Newberry House Middle School · Production teams",W/2,H/2+70);g.textAlign="left"}
-      else{g.fillStyle="#000";g.fillRect(0,0,W,H);fit(s.im,1+.07*p0);const gr=g.createLinearGradient(0,H-260,0,H);gr.addColorStop(0,"rgba(0,0,0,0)");gr.addColorStop(1,"rgba(0,0,0,.72)");g.fillStyle=gr;g.fillRect(0,H-260,W,260);
-        if(s.cap){g.fillStyle="#fff";g.font='500 40px "Instrument Sans",system-ui,sans-serif';wrap(s.cap.slice(0,160),60,H-120,W-120,52)}}
+      if(s.title||s.end){
+        const bgg=g.createLinearGradient(0,0,0,H);if(s.end){bgg.addColorStop(0,"#0b2a22");bgg.addColorStop(1,"#0b2a22")}else{bgg.addColorStop(0,tcol);bgg.addColorStop(1,"#12161a")}
+        g.fillStyle=bgg;g.fillRect(0,0,W,H);g.fillStyle="#fff";g.textAlign="center";
+        const big=s.title||"Thank you for watching",mw=W-100;let px=W<H?76:84;
+        while(px>34){g.font='700 '+px+'px "Bricolage Grotesque",system-ui,sans-serif';if(g.measureText(big).width<=mw)break;px-=4}
+        const ty=H/2+(lg?(W<H?50:40):-(W<H?10:0));
+        if(lg){const lh=W<H?170:150,lw=lg.width*lh/lg.height;g.drawImage(lg,(W-lw)/2,ty-lh-100,lw,lh)}
+        g.fillText(big,W/2,ty);
+        g.font='500 '+(W<H?34:36)+'px "Instrument Sans",system-ui,sans-serif';g.globalAlpha=alpha*.88;wrap(s.end?"Newberry House Middle School":s.sub,W/2,ty+64,mw,46);g.textAlign="left"}
+      else{g.fillStyle="#000";g.fillRect(0,0,W,H);fit(s.im,.94+.06*p0);const gh=multi?340:260,gr=g.createLinearGradient(0,H-gh,0,H);gr.addColorStop(0,"rgba(0,0,0,0)");gr.addColorStop(1,"rgba(0,0,0,.74)");g.fillStyle=gr;g.fillRect(0,H-gh,W,gh);
+        const capY=s.cap?H-(W<H?150:120):H-70;
+        if(s.cap){g.fillStyle="#fff";g.font='500 '+(W<H?38:40)+'px "Instrument Sans",system-ui,sans-serif';wrap(s.cap.slice(0,160),60,capY,W-120,50)}
+        if(multi&&s.team){g.fillStyle="#ffd9a0";g.font='700 28px "Instrument Sans",system-ui,sans-serif';g.fillText(s.team,60,capY-(s.cap?58:0)-(s.cap?0:0))}}
       g.globalAlpha=1;
     };
+    if(master){await AC.resume();musicPlay(AC,master,MUSIC.find(x=>x.id===musicId),(imgs.length+2)*SL/1000,AC.currentTime+.1)}
     rec.start(250);const t0=performance.now();
     await new Promise(res=>{const tick=()=>{
       if(cancel){res();return}
@@ -2999,17 +3234,21 @@ async function slideshowVideo(items){
       if(idx>0&&loc<FD){/* crossfade from the previous slide */const prevS=slides[idx-1];g.globalAlpha=1-loc/FD;draw(prevS,1,1-loc/FD)}
       root.querySelector("#vx-i").style.width=Math.round(t/total*100)+"%";root.querySelector("#vx-s").textContent="Slide "+(idx+1)+" of "+slides.length;
       requestAnimationFrame(tick)};tick()});
-    rec.stop();await fin;stream.getTracks().forEach(t=>t.stop());
+    rec.stop();await fin;stream.getTracks().forEach(t=>t.stop());if(AC&&AC.close)AC.close().catch(()=>{});
     if(cancel){done();toast("Cancelled.");return}
-    const blob=new Blob(chunks,{type:mime||"video/webm"}),ext=(blob.type.includes("mp4")?"mp4":"webm"),url=URL.createObjectURL(blob),name=(title+" slideshow."+ext).replace(/\s+/g,"-");
+    const blob=new Blob(chunks,{type:mime||"video/webm"}),ext=(blob.type.includes("mp4")?"mp4":"webm"),url=URL.createObjectURL(blob),name=(title+(multi?" week in review.":" slideshow.")+ext).replace(/\s+/g,"-");
     const mp4=blob.type.includes("mp4");
-    root.innerHTML=`<div class="vwx-b"><h2>Your video is ready</h2><video src="${url}" controls playsinline style="width:100%;border-radius:16px;margin:10px 0;background:#000"></video>${mp4?"":`<p class="small muted" style="margin:0 0 8px">This phone or browser made a WebM video. WhatsApp on iPhone often cannot open it. Use Send as photos instead.</p>`}<div class="row wr"><button class="btn ${mp4?"primary":""} grow" id="vx-sh" type="button">${ic("share")}Share video</button><button class="btn ${mp4?"":"primary"} grow" id="vx-ph" type="button">${ic("image")}Send as photos</button></div><div class="row wr" style="margin-top:8px"><button class="btn" id="vx-sv" type="button">${ic("download")}Save</button><button class="btn" id="vx-x" type="button">Close</button></div></div>`;
+    draw(slides[0],.5,1);const poster=c.toDataURL("image/jpeg",.82);
+    const btn=(id,ic_,t,pri)=>`<button class="btn ${pri?"primary block":""}" id="${id}" type="button">${ic(ic_)}${t}</button>`;
+    const opts={sh:["vx-sh","share","Share video"],ph:["vx-ph","image","Send as photos"],sv:["vx-sv","download","Save"]};
+    const first=mp4?"sh":"ph",rest=["sh","ph","sv"].filter(k=>k!==first);
+    root.innerHTML=`<div class="vwx-b vx-ready"><img class="vx-logo" src="icons/productions-96.png" alt="" width="40" height="46"><h2>Your video is ready</h2><p class="small muted vx-sub">${esc(title)} · ${imgs.length} photo${imgs.length===1?"":"s"} · ${Math.round(total/1000)} seconds</p><video class="vx-v" src="${url}" poster="${poster}" controls playsinline preload="metadata"></video>${mp4?"":`<p class="small muted" style="margin:0 0 10px">This phone or browser made a WebM video. WhatsApp on iPhone often cannot open it. Use Send as photos instead.</p>`}${btn(...opts[first],true)}<div class="vx-row">${rest.map(k=>btn(...opts[k])).join("")}</div><button class="vx-close" id="vx-x" type="button">Close</button></div>`;
     const file=new File([blob],name,{type:blob.type});
     root.querySelector("#vx-ph").onclick=()=>sharePhotos(items,title);
     root.querySelector("#vx-sv").onclick=()=>{const a=document.createElement("a");a.href=url;a.download=name;a.click()};
     root.querySelector("#vx-sh").onclick=async()=>{try{if(navigator.canShare&&navigator.canShare({files:[file]}))await navigator.share({files:[file],title});else toast("Sharing isn't available here. Use Save.")}catch{}};
     root.querySelector("#vx-x").onclick=done;
-  }catch(e){console.warn("video",e);done();toast("Couldn't make the video on this device.")}
+  }catch(e){console.warn("video",e);try{AC&&AC.close&&AC.close()}catch{}done();toast("Couldn't make the video on this device.")}
 }
 /* ---------- printable story book ---------- */
 function storyBookHTML(p,imgs){
