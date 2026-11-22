@@ -73,7 +73,7 @@ header.top{display:flex;align-items:center;gap:6px;margin:0 0 14px;padding-top:e
 .fsw{flex:1;min-width:0;display:flex;align-items:center;gap:10px;border:0;background:none;padding:4px 6px 4px 0;text-align:left;cursor:pointer;min-height:52px;border-radius:var(--r-m)}
 .fsw-ic{width:48px;height:48px;display:grid;place-items:center;flex:none}.fsw-ic img{width:48px;height:48px;object-fit:contain;display:block}
 .fsw-ic .i{width:26px;height:26px}
-.fsw b{display:block;font:700 1.3rem/1.1 var(--display);letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.fsw b .fsn{white-space:nowrap}.fsw b{position:relative}.fsw b .fsm{position:absolute;left:0;top:0;display:inline-block;visibility:hidden;white-space:nowrap;pointer-events:none}.fsw b{display:block;font:700 1.3rem/1.1 var(--display);letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 header.top.tight .fsw-ic{display:none}
 header.top.snug .fsw{gap:6px}header.top.snug .fsw-ic,header.top.snug .fsw-ic img{width:36px;height:36px}
 .fsw .cd{color:var(--accent);flex:none;display:grid}.fsw .eyebrow{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1545,7 +1545,7 @@ function go(t){tab=t;curPh=null;pEdit=false;lsSet("nbf-tab",t);render();scrollTo
 
 function headerV(){
   const f=F();
-  return `<button type="button" class="fsw" data-act="fields" aria-label="${esc(f.name)}. Switch field."><span class="fsw-ic"><img src="icons/fields-192.png" alt="" width="48" height="48"></span><span class="grow"><b>${esc(f.name)}</b></span><span class="cd">${ic("cdown")}</span></button><button type="button" class="hb" data-act="search" aria-label="Search">${ic("search")}</button><button type="button" class="hb${tab==="money"?" on":""}" data-act="money" aria-label="Money${moneyOK?"":", locked"}" ${lvl("money")<1?"hidden":""}>${ic("cash")}</button><button type="button" class="hb" data-act="settings" aria-label="Settings">${ic("sliders")}</button>`;
+  return `<button type="button" class="fsw" data-act="fields" aria-label="${esc(f.name)}. Switch field."><span class="fsw-ic"><img src="icons/fields-192.png" alt="" width="48" height="48"></span><span class="grow"><b><span class="fsn">${esc(f.name)}</span><span class="fsm" aria-hidden="true">${esc(f.name)}</span></b></span><span class="cd">${ic("cdown")}</span></button><button type="button" class="hb" data-act="search" aria-label="Search">${ic("search")}</button><button type="button" class="hb${tab==="money"?" on":""}" data-act="money" aria-label="Money${moneyOK?"":", locked"}" ${lvl("money")<1?"hidden":""}>${ic("cash")}</button><button type="button" class="hb" data-act="settings" aria-label="Settings">${ic("sliders")}</button>`;
 }
 
 function taskRow(t,showPh){
@@ -1660,11 +1660,15 @@ function fitSeg(root=document){$$(".segc.four",root).forEach(g=>{g.classList.rem
 /* the field name never splits mid-word: first the small icon goes, then the name shrinks a little */
 /* the field name stays on one line: shrink a little with the logo, then drop the logo, then "…" */
 function fitHeader(){const h=$("#top"),b=$(".fsw b",h);if(!b)return;h.classList.remove("tight","snug");b.style.fontSize="";
-  const over=()=>b.scrollWidth>b.clientWidth+1;if(!over())return;
+  const sp=$(".fsn",b),over=()=>(sp?sp.getBoundingClientRect().width:b.scrollWidth)>b.getBoundingClientRect().width-2;watchHeader($(".fsm",b));
+  try{if(!over())return;
   const base=parseFloat(getComputedStyle(b).fontSize),shrink=min=>{let fz=base;while(over()&&fz>min){fz=Math.max(min,fz-.5);b.style.fontSize=fz+"px"}};
   shrink(Math.max(15,base*.8));if(!over())return;
   h.classList.add("snug");b.style.fontSize="";shrink(Math.max(15,base*.72));if(!over())return;
-  h.classList.remove("snug");h.classList.add("tight");b.style.fontSize="";shrink(Math.max(14,base*.65))}
+  h.classList.remove("snug");h.classList.add("tight");b.style.fontSize="";shrink(Math.max(14,base*.65))}finally{const m=$(".fsm",b);if(m){m.dataset.w=m.getBoundingClientRect().width.toFixed(1);m.dataset.bw=b.clientWidth}}}
+/* re-fit when the name changes width by itself: the real font arriving late, or a text size change */
+let hdrRO=null;function watchHeader(sp){if(!sp||!window.ResizeObserver||sp.dataset.watched)return;sp.dataset.watched="1";
+  hdrRO=hdrRO||new ResizeObserver(()=>{const s=$(".fsw .fsm");if(!s)return;const b=s.parentElement;if(Math.abs(s.getBoundingClientRect().width-(+s.dataset.w||0))>1||Math.abs(b.clientWidth-(+s.dataset.bw||0))>1){clearTimeout(watchHeader.t);watchHeader.t=setTimeout(fitHeader,30)}});hdrRO.observe(sp);hdrRO.observe(sp.parentElement)}
 /* very large text: the bottom bar shows icons only (names are still read out) rather than spilling labels */
 function fitNav(){const n=$("nav.tabs");if(!n)return;n.classList.remove("icons");if(innerWidth>=900)return;
   const wraps=s=>{const r=document.createRange();r.selectNodeContents(s);return r.getClientRects().length>1};
