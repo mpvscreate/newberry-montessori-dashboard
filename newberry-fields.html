@@ -2432,10 +2432,18 @@ document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.tar
 
 /* ============ pull to refresh: a grader rolls across ============ */
 let refreshing=false;
+/* is a newer copy of the app on the website? Compare its code with the code running now */
+async function newerApp(){
+  try{if(!navigator.onLine)return false;const r=await fetch(location.pathname+"?fresh="+Date.now(),{cache:"no-store"});if(!r.ok)return false;
+    const big=d=>[...d.querySelectorAll("script:not([src])")].map(s=>s.textContent).sort((a,b)=>b.length-a.length)[0]||"";
+    const next=big(new DOMParser().parseFromString(await r.text(),"text/html")).replace(/\r/g,"").trim(),now=big(document).replace(/\r/g,"").trim();
+    return next.length>1000&&now.length>1000&&next!==now}catch{return false}}
+try{if(sessionStorage.getItem("nbf-updated")){sessionStorage.removeItem("nbf-updated");setTimeout(()=>toast("Updated to the newest version."),700)}}catch{}
 async function refreshApp(){
   if(refreshing)return;refreshing=true;const el=$("#ptr");el.classList.add("spin");el.style.transform="translate(-50%,10px)";document.body.classList.add("ptr-dim");document.body.style.removeProperty("--ptrdim");el.style.removeProperty("--p");$(".ptr-tx",el).textContent="Building Newberry Fields";
-  const t0=Date.now();await Promise.all([wxLoad(true).catch(()=>{}),syncNow().catch(()=>{})]);render();
+  const t0=Date.now();const[,,newer]=await Promise.all([wxLoad(true).catch(()=>{}),syncNow().catch(()=>{}),newerApp()]);render();
   await new Promise(r=>setTimeout(r,Math.max(0,2150-(Date.now()-t0))));
+  if(newer){try{save();persistSync();sessionStorage.setItem("nbf-updated","1")}catch{}$(".ptr-tx",el).textContent="Loading the new version";location.reload();return}
   el.classList.remove("spin");el.style.transform="";el.style.opacity="";document.body.classList.remove("ptr-dim");$(".ptr-tx",el).textContent="Pull to refresh";refreshing=false;
   toast(wxFail?"Refreshed. The weather could not load.":"Refreshed. The weather is up to date.");
 }
