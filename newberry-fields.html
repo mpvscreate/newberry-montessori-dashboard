@@ -1677,6 +1677,8 @@ function fitPhaseNames(){fitNav();fitHeader();fitSeg();fitTicks();const hs=$$(".
   while(fz>min&&hs.some(h=>h.scrollWidth>h.clientWidth+1)){fz=Math.max(min,fz-.5);hs.forEach(h=>h.style.fontSize=fz+"px")}
   if(hs.some(h=>h.scrollWidth>h.clientWidth+1))hs.forEach(h=>{h.style.overflowWrap="anywhere"})}
 addEventListener("resize",()=>{clearTimeout(fitPhaseNames.t);fitPhaseNames.t=setTimeout(fitPhaseNames,150)});
+/* fit again once the web fonts arrive: the first fit can be measured with the stand-in font */
+try{document.fonts?.ready.then(()=>fitPhaseNames());document.fonts?.addEventListener?.("loadingdone",()=>{clearTimeout(fitPhaseNames.t);fitPhaseNames.t=setTimeout(fitPhaseNames,50)})}catch{}
 /* ============ hold and drag to reorder tasks ============ */
 let dragJustEnded=0;
 function wireDrag(ul){
