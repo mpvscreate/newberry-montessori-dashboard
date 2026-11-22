@@ -73,8 +73,9 @@ header.top{display:flex;align-items:center;gap:6px;margin:0 0 14px;padding-top:e
 .fsw{flex:1;min-width:0;display:flex;align-items:center;gap:10px;border:0;background:none;padding:4px 6px 4px 0;text-align:left;cursor:pointer;min-height:52px;border-radius:var(--r-m)}
 .fsw-ic{width:48px;height:48px;display:grid;place-items:center;flex:none}.fsw-ic img{width:48px;height:48px;object-fit:contain;display:block}
 .fsw-ic .i{width:26px;height:26px}
-.fsw b{display:block;font:700 1.3rem/1.1 var(--display);letter-spacing:-.02em;overflow-wrap:normal;word-break:normal}
+.fsw b{display:block;font:700 1.3rem/1.1 var(--display);letter-spacing:-.02em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 header.top.tight .fsw-ic{display:none}
+header.top.snug .fsw{gap:6px}header.top.snug .fsw-ic,header.top.snug .fsw-ic img{width:36px;height:36px}
 .fsw .cd{color:var(--accent);flex:none;display:grid}.fsw .eyebrow{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hb{width:44px;height:44px;border-radius:50%;border:0;background:none;display:grid;place-items:center;cursor:pointer;color:var(--ink);flex:none}
 .hb .i{width:22px;height:22px}
@@ -1057,7 +1058,8 @@ function boardV(){
   else if(b.wd===null)chase=`<div class="bd-chase">Set the opening date to see the target.</div>`;
   else if(b.wd<=0)chase=`<div class="bd-chase bad">The opening date has passed with ${plural(b.left,"task")} to go.</div>`;
   else chase=`<div class="bd-chase">Need <b>${b.left}</b> more ${b.left===1?"task":"tasks"} in <b>${b.wd}</b> work ${b.wd===1?"day":"days"}</div>`;
-  const rr=b.left&&b.need!=null?`<div class="bd-rr"><span>${soc?"Pace":"Run rate"} <b>${r1(b.rate)}</b> a week</span><span class="${b.rate>=b.need?"ok":"warn"}">Needed <b>${r1(b.need)}</b> · ${b.rate>=b.need?"ahead":"behind"}</span></div>`:"";
+  const wk=n=>n>0&&n<1?"under 1":String(Math.round(n));
+  const rr=b.left&&b.need!=null?`<div class="bd-rr"><span>${soc?"Pace":"Run rate"} <b>${wk(b.rate)}</b> a week</span><span class="${b.rate>=b.need?"ok":"warn"}">Need <b>${wk(b.need)}</b> a week · ${b.rate>=b.need?"ahead":"behind"}</span></div>`:"";
   const say=(chase+(rr?". "+rr:"")).replace(/<\/span><span/g,". <span").replace(/<[^>]+>/g," ").replace(/\s+/g," ").replace(/ ·/g,",").replace(/\s+\./g,".").trim();
   return `<button type="button" class="board tod-${timeOfDay()}" data-act="${cp?"openph":"gophases"}" data-id="${cp?cp.id:""}" aria-label="Scoreboard. ${b.dn} of ${b.all} tasks done, ${b.phDone} of ${f.phases.length} phases done.${cp?" Now: "+esc(cp.name)+", "+st.done+" of "+st.total+" tasks.":""} ${esc(say)}. Open the phase.">
    ${top}
@@ -1125,8 +1127,13 @@ function fieldErr(sh,id,msg){
 /* ============ contractors: the people and companies working on the fields (shared by every field, no money here) ============ */
 const consSorted=()=>(S.cons||[]).slice().sort((a,b)=>a.name.localeCompare(b.name));
 const telOf=p=>String(p||"").replace(/[^\d+]/g,"");
+/* show South African numbers in groups: 082 123 4567, +27 82 123 4567; anything else as typed */
+const fmtTel=p=>{const d=telOf(p);if(/^0\d{9}$/.test(d))return d.replace(/^(\d{3})(\d{3})(\d{4})$/,"$1 $2 $3");if(/^\+27\d{9}$/.test(d))return d.replace(/^\+27(\d{2})(\d{3})(\d{4})$/,"+27 $1 $2 $3");return String(p||"").trim()};
+/* the one contractors list: a money contractor with a new name joins it */
+function joinCons(name,trade){if(!name||lvl("tasks")<2)return null;S.cons=S.cons||[];let k=S.cons.find(x=>x.name.trim().toLowerCase()===name.trim().toLowerCase());
+  if(!k){k={id:uid(),name:name.trim(),trade:trade||"",phone:"",email:"",note:""};S.cons.push(k)}else if(!k.trade&&trade)k.trade=trade;return k}
 function conRow(c){
-  const sub=[c.trade?esc(c.trade):"",c.phone?`<span class="nw">${esc(c.phone)}</span>`:""].filter(Boolean).join(" · ");
+  const sub=[c.trade?esc(c.trade):"",c.phone?`<span class="nw">${esc(fmtTel(c.phone))}</span>`:""].filter(Boolean).join(" · ");
   return `<li class="nxrow"><button type="button" class="rowbtn rowfull" data-act="editcontact" data-id="${c.id}"><span class="row-ic">${ic("hammer")}</span><span class="grow"><span class="lt">${esc(c.name)}</span>${sub?` <span class="ls">${sub}</span>`:""}</span></button>${telOf(c.phone)?`<a class="btn icon call" href="tel:${esc(telOf(c.phone))}" aria-label="Call ${esc(c.name)}">${ic("phone")}</a>`:""}</li>`;
 }
 function consCard(){
@@ -1135,7 +1142,7 @@ function consCard(){
 }
 function contactsSheet(){
   const cs=consSorted();
-  sheet("Contractors",`${cs.length?`<ul class="list">${cs.map(conRow).join("")}</ul><p class="hint">Tap a name to change or remove it. Their names are offered when you choose who is doing a task.</p>`:`<p class="muted">No contractors yet.</p>`}
+  sheet("Contractors",`${cs.length?`<ul class="list">${cs.map(conRow).join("")}</ul><p class="hint">Tap a name to change or remove it. These names are offered when you choose who does a task, and in Money.</p>`:`<p class="muted">No contractors yet.</p>`}
    <div class="foot"><button type="button" class="btn primary block" id="ca">${ic("plus")}Add a contractor</button></div>`,(sh,close)=>{
     $("#ca",sh).onclick=()=>{close();setTimeout(()=>contactSheet(null,true),60)};
     sh.addEventListener("click",e=>{const b=e.target.closest("[data-act=editcontact]");if(b){close();setTimeout(()=>contactSheet(b.dataset.id,true),60)}});
@@ -1274,13 +1281,13 @@ function docSheet(id){
     $$("[data-dt]",sh).forEach(b=>b.onclick=()=>{type=b.dataset.dt;$$("[data-dt]",sh).forEach(x=>x.setAttribute("aria-pressed",x===b))});
     const paint=async()=>{const rows=[];for(const[i,m]of keep.entries()){const b=await mBlob(m);rows.push(`<li><span class="row-ic sky">${ic(b&&/pdf/.test(b.type)?"note":"image")}</span><div class="grow"><div class="lt">${b&&/pdf/.test(b.type)?"PDF":"Page"} ${i+1}</div><div class="ls">${b?Math.max(1,Math.round(b.size/1024))+" KB":"on its way"}</div></div><button type="button" class="btn icon" data-k="${i}" aria-label="Remove file ${i+1}">${ic("x","sm")}</button></li>`)}
       add.forEach((a,i)=>rows.push(`<li><span class="row-ic">${ic(/pdf/.test(a.f.type)?"note":"image")}</span><div class="grow"><div class="lt">${esc(a.f.name||"New file")}</div><div class="ls">${Math.max(1,Math.round(a.f.size/1024))} KB, new</div></div><button type="button" class="btn icon" data-a="${i}" aria-label="Remove ${esc(a.f.name||"file")}">${ic("x","sm")}</button></li>`));
-      $("#dcl",sh).innerHTML=rows.join("")||`<li class="muted small">No files yet.</li>`;
+      $("#dcl",sh).innerHTML=rows.join("")||`<li class="muted small">No files yet.</li>`;if(rows.length){$("#dcf-err",sh)?.remove();$("#dcc",sh).removeAttribute("aria-describedby");$("#dcf",sh).removeAttribute("aria-describedby")}
       $$("#dcl [data-k]",sh).forEach(b=>b.onclick=()=>{keep.splice(+b.dataset.k,1);paint()});$$("#dcl [data-a]",sh).forEach(b=>b.onclick=()=>{add.splice(+b.dataset.a,1);paint()})};
     const pick=cam=>{const i=document.createElement("input");i.type="file";i.accept=cam?"image/*":"image/*,application/pdf";i.multiple=!cam;if(cam)i.setAttribute("capture","environment");i.style.display="none";document.body.append(i);
       i.addEventListener("change",()=>{[...i.files].forEach(fl=>add.push({f:fl}));i.remove();paint()});i.addEventListener("cancel",()=>i.remove());i.click()};
     $("#dcc",sh).onclick=()=>pick(true);$("#dcf",sh).onclick=()=>pick(false);paint();
     $("#dcv",sh).onclick=async()=>{const name=$("#dc1",sh).value.trim();if(!name)return fieldErr(sh,"dc1","Give the document a name.");
-      if(!keep.length&&!add.length){toast("Add at least one photo or PDF file.");return}
+      if(!keep.length&&!add.length){const row=$("#dcc",sh).parentElement;let p=$("#dcf-err",sh);if(!p){p=document.createElement("p");p.className="ferr";p.id="dcf-err";p.setAttribute("role","alert");row.after(p)}p.textContent="Add at least one photo or PDF file.";$("#dcc",sh).setAttribute("aria-describedby","dcf-err");$("#dcf",sh).setAttribute("aria-describedby","dcf-err");$("#dcc",sh).focus();return}
       const big=add.find(a=>a.f.size>50*1048576);if(big){toast(`${big.f.name} is larger than 50 MB. Choose a smaller file.`);return}
       const b=$("#dcv",sh);b.disabled=true;b.textContent="Saving…";const ids=[];
       try{for(const a of add){const blob=/^image\//.test(a.f.type)?await prepPhoto(a.f,2400):a.f,mid="m"+uid();await mPut(mid,blob);ids.push(mid);queueMedia(mid)}}catch{b.disabled=false;b.textContent="Try again";toast("Could not save the files on this phone.");return}
@@ -1296,7 +1303,7 @@ const delivered=m=>F().deliv.reduce((a,d)=>a+(d.items||[]).filter(x=>x.mid===m.i
 function delivListV(){
   const ds=F().deliv.slice().sort((a,b)=>b.date.localeCompare(a.date)||b.t-a.t);if(!ds.length)return "";
   const mats=new Map(F().mats.map(m=>[m.id,m]));
-  return `<section class="card" style="margin-top:12px"><h2>Deliveries</h2><ul class="list">${ds.map(d=>`<li class="nxrow"><button type="button" class="rowbtn rowfull" data-act="editdeliv" data-id="${d.id}"><span class="row-ic sky">${ic("truck")}</span><span class="grow"><span class="lt">${esc(d.sup||"Delivery")}, ${dshort(d.date)}</span> <span class="ls">${esc((d.items||[]).map(x=>{const m=mats.get(x.mid);return m?`${r1(+x.qty)} ${m.unit||""} ${m.name.toLowerCase()}`:""}).filter(Boolean).join(", ")||"No quantities")}${d.media?.length?" · "+plural(d.media.length,"photo"):""}</span></span>${ic("chev","sm")}</button></li>`).join("")}</ul></section>`;
+  return `<section class="card" style="margin-top:12px"><h2>Deliveries</h2><ul class="list">${ds.map(d=>`<li class="nxrow"><button type="button" class="rowbtn rowfull" data-act="editdeliv" data-id="${d.id}"><span class="row-ic sky">${ic("truck")}</span><span class="grow"><span class="lt">${esc(d.sup||"Delivery")}, ${dshort(d.date)}</span> <span class="ls">${esc((d.items||[]).map(x=>{const m=mats.get(x.mid);return m?`${r1(+x.qty)} ${m.unit||""} ${m.name.toLowerCase()}`:""}).filter(Boolean).join(", ")||(d.note||"").slice(0,60)||"No quantities")}${d.media?.length?" · "+plural(d.media.length,"photo"):""}</span></span>${ic("chev","sm")}</button></li>`).join("")}</ul></section>`;
 }
 function delivSheet(id){
   sheetRO=lvl("mats")<2?"mats":null;
@@ -1307,14 +1314,14 @@ function delivSheet(id){
    ${dateField("dv1",d?.date||today(),"Delivered on",[["Today",today()],["Yesterday",addDays(today(),-1)]])}
    <label class="f" for="dv2">Supplier</label><input id="dv2" class="t" list="dvl" value="${esc(d?.sup||"")}" autocomplete="off"><datalist id="dvl">${[...new Set([...f.mats.map(m=>m.sup),...(S.cons||[]).map(c=>c.name)].filter(Boolean))].map(n=>`<option value="${esc(n)}">`).join("")}</datalist>
    <div class="sec">What came</div>
-   ${mats.length?`<ul class="list">${mats.map(m=>`<li><div class="grow"><label class="lt" for="dq-${m.id}">${esc(m.name)}</label><div class="ls">${m.qty?"Need "+esc(m.qty)+" "+esc(m.unit||"")+", ":""}delivered ${r1(delivered(m)-(+q.get(m.id)||0))} so far</div></div><input id="dq-${m.id}" class="t dq" data-mid="${m.id}" inputmode="decimal" value="${esc(q.get(m.id)??"")}" placeholder="0" aria-label="${esc(m.name)} delivered, in ${esc(m.unit||"units")}"><span class="ls dqu">${esc(m.unit||"")}</span></li>`).join("")}</ul>`:`<p class="muted small">Add materials first, then record what is delivered.</p>`}
+   ${mats.length?`<ul class="list">${mats.map(m=>`<li><div class="grow"><label class="lt" for="dq-${m.id}">${esc(m.name)}</label><div class="ls">${m.qty?"Need "+esc(m.qty)+" "+esc(m.unit||"")+", ":""}delivered ${r1(delivered(m)-(+q.get(m.id)||0))} so far</div></div><input id="dq-${m.id}" class="t dq" data-mid="${m.id}" inputmode="decimal" value="${esc(q.get(m.id)??"")}" placeholder="0" aria-label="${esc(m.name)} delivered, in ${esc(m.unit||"units")}"><span class="ls dqu">${esc(m.unit||"")}</span></li>`).join("")}</ul>`:`<p class="muted small">No materials on the list yet. Add a photo of the delivery note or write what came in Notes. Add materials to count deliveries against them.</p>`}
    ${mediaPickerV("Photo of the delivery note")}
    <label class="f" for="dv3">Notes</label><textarea id="dv3" class="t" data-mic placeholder="Short or damaged items, who signed for it">${esc(d?.note||"")}</textarea>
    <div class="foot"><button type="button" class="btn primary block" id="dvv">${d?"Save":"Save the delivery"}</button>${d?`<button type="button" class="btn danger block" id="dvx">${ic("trash","sm")}Delete this delivery</button>`:""}</div>`,(sh,close)=>{
     const mp=mediaPicker(sh,[...(d?.media||[])]);
     $("#dvv",sh).onclick=async()=>{
       const items=$$(".dq",sh).map(i=>({mid:i.dataset.mid,qty:num(i.value)})).filter(x=>x.qty>0);
-      if(!items.length&&!mp.count())return fieldErr(sh,$$(".dq",sh)[0]?.id||"dv2","Enter how much came, or add a photo of the note.");
+      if(!items.length&&!mp.count()&&!$("#dv3",sh).value.trim())return fieldErr(sh,$$(".dq",sh)[0]?.id||"dv3",mats.length?"Enter how much came, add a photo of the note, or write what came in Notes.":"Add a photo of the delivery note, or write what came in Notes.");
       let media;try{media=await mp.save()}catch{toast("Could not save the photo on this phone.");return}
       const vals={date:$("#dv1",sh).value||today(),sup:$("#dv2",sh).value.trim(),items,media,note:$("#dv3",sh).value.trim()};
       const undos=[];let n=null;
@@ -1629,7 +1636,7 @@ function matsV(){
   const list=f.mats.filter(m=>matF==="all"||(matF==="to"?m.toOrd&&m.status==="need":m.status===matF));
   const toOrd=f.mats.filter(m=>m.toOrd&&m.status==="need");
   let html=`<div class="page-h"><h2>Materials</h2>${f.mats.length&&lvl("mats")>=2?`<div class="row wr" style="gap:8px">${toOrd.length?`<button type="button" class="btn small" data-act="sendorder">${ic("share","sm")}Send the order</button>`:""}<button type="button" class="btn small" data-act="adddeliv">${ic("truck","sm")}Delivery</button></div>`:""}</div>`;
-  if(!f.mats.length)return html+`<div class="card empty">${ic("kitbag","xl")}<h3>No materials yet</h3><p>Start with the usual list for a ${f.kind==="soccer"?"soccer":"cricket"} field: topsoil, sand, ${f.kind==="soccer"?"":"clay loam, "}drainage pipe and stone, seed or turf, fertiliser and irrigation parts. You can change it after.</p><button type="button" class="btn primary" data-act="matstarter">${ic("plus")}Add the usual list</button></div>`;
+  if(!f.mats.length)return html+`<div class="card empty">${ic("kitbag","xl")}<h3>No materials yet</h3><p>Start with the usual list for a ${f.kind==="soccer"?"soccer":"cricket"} field: topsoil, sand, ${f.kind==="soccer"?"":"clay loam, "}drainage pipe and stone, seed or turf, fertiliser and irrigation parts. You can change it after.</p><button type="button" class="btn primary" data-act="matstarter">${ic("plus")}Add the usual list</button>${lvl("mats")>=2?`<button type="button" class="btn" data-act="adddeliv" style="margin-top:8px">${ic("truck","sm")}Record a delivery</button>`:""}</div>`+delivListV();
   html+=`<div class="segc four" role="group" aria-label="Show">${seg}</div>`;
   if(!list.length)return html+`<div class="card empty"><p>${matF==="to"?"Nothing is ticked To order.":matF==="ordered"?"Nothing is waiting for delivery.":"Nothing received yet."}</p></div>`;
   return html+`<section class="card"><ul class="list">${list.map(matRow).join("")}</ul></section><p class="hint" style="text-align:center">Tick To order, then Ordered, then Received.</p>`+delivListV();
@@ -1651,10 +1658,13 @@ function render(){
 /* four tabs that never cut a word: when a label does not fit, they become 2 x 2 */
 function fitSeg(root=document){$$(".segc.four",root).forEach(g=>{g.classList.remove("g2");if([...g.children].some(b=>b.scrollWidth>b.clientWidth+1||[...b.childNodes].some(n=>{if(n.nodeType!==3||!n.textContent.trim())return false;const r=document.createRange();r.selectNodeContents(n);return r.getBoundingClientRect().width>b.clientWidth-10})||[...b.childNodes].some(n=>n.nodeType===3&&(()=>{const r=document.createRange();r.selectNodeContents(n);return r.getClientRects().length>1})())))g.classList.add("g2")})}
 /* the field name never splits mid-word: first the small icon goes, then the name shrinks a little */
-function fitHeader(){const h=$("#top"),b=$(".fsw b",h);if(!b)return;h.classList.remove("tight");b.style.fontSize="";b.style.overflowWrap="";
-  const over=()=>b.scrollWidth>b.clientWidth+1;if(!over())return;h.classList.add("tight");
-  let fz=parseFloat(getComputedStyle(b).fontSize);const min=Math.max(14,fz*.5);while(over()&&fz>min){fz=Math.max(min,fz-.5);b.style.fontSize=fz+"px"}
-  if(over())b.style.overflowWrap="anywhere"}
+/* the field name stays on one line: shrink a little with the logo, then drop the logo, then "…" */
+function fitHeader(){const h=$("#top"),b=$(".fsw b",h);if(!b)return;h.classList.remove("tight","snug");b.style.fontSize="";
+  const over=()=>b.scrollWidth>b.clientWidth+1;if(!over())return;
+  const base=parseFloat(getComputedStyle(b).fontSize),shrink=min=>{let fz=base;while(over()&&fz>min){fz=Math.max(min,fz-.5);b.style.fontSize=fz+"px"}};
+  shrink(Math.max(15,base*.8));if(!over())return;
+  h.classList.add("snug");b.style.fontSize="";shrink(Math.max(15,base*.72));if(!over())return;
+  h.classList.remove("snug");h.classList.add("tight");b.style.fontSize="";shrink(Math.max(14,base*.65))}
 /* very large text: the bottom bar shows icons only (names are still read out) rather than spilling labels */
 function fitNav(){const n=$("nav.tabs");if(!n)return;n.classList.remove("icons");if(innerWidth>=900)return;
   const wraps=s=>{const r=document.createRange();r.selectNodeContents(s);return r.getClientRects().length>1};
@@ -1951,12 +1961,28 @@ function addMenu(){
     $$("[data-a]",sh).forEach(b=>b.onclick=()=>{close();setTimeout(()=>({photo:()=>photoStart(ph),log:()=>logSheet(null,{ph}),task:()=>taskSheet(null,ph),mat:()=>matSheet(),rain:()=>logSheet(null,{rainOnly:true,lost:true}),snag:()=>snagSheet(null,ph),diary:()=>diarySheet(null,today()),exp:()=>moneyOK?expSheet():moneyGate(()=>{moneySeg="exps";go("money");setTimeout(expSheet,60)})})[b.dataset.a](),60)});
   });
 }
+/* search: snags, deliveries, documents, the diary and (when unlocked) money */
+function searchMore(f,has){
+  const row=(a,id,icn,t,s,cls="")=>`<li><button type="button" class="rowbtn rowfull" data-act="${a}" data-id="${id}"><span class="row-ic ${cls}">${ic(icn)}</span><span class="grow"><span class="lt">${esc(String(t||"").slice(0,80))}</span>${s?` <span class="ls">${esc(s)}</span>`:""}</span></button></li>`;
+  const grp=(h,xs)=>xs.length?`<div class="sec">${h}</div><ul class="list">${xs.slice(0,20).join("")}</ul>`:"";
+  const mn=new Map(f.mats.map(m=>[m.id,m.name])),mo=moneyOK&&lvl("money")>=1;
+  const sn=f.snags.filter(x=>has(x.text)||has(x.fixer)||has(x.who)).map(x=>row("editsnag",x.id,"alert",x.text||"Snag",[x.st==="open"?"Open":x.st==="fixed"?"Fixed":"Closed",x.fixer,dshort(x.date)].filter(Boolean).join(" · "),"red"));
+  const dv=f.deliv.filter(x=>has(x.sup)||has(x.note)||(x.items||[]).some(i=>has(mn.get(i.mid)))).map(x=>row("editdeliv",x.id,"truck",(x.sup||"Delivery")+", "+dshort(x.date),x.note||(x.items||[]).map(i=>mn.get(i.mid)).filter(Boolean).join(", "),"sky"));
+  const dc=f.docs.filter(x=>(!x.m||mo)&&(has(x.name)||has(x.note))).map(x=>row("opendoc",x.id,"note",x.name,dshort(x.date)));
+  const dy=f.diary.filter(x=>has(x.done)||has(x.issues)||has(x.onsite)||has(x.visitors)||has(x.wx)).map(x=>row("editdiary",x.id,"note","Diary, "+dshort(x.date),x.done||x.issues||x.onsite||""));
+  let money="";if(mo){const m=f.money;
+    money=grp("Money",[...m.cons.filter(x=>has(x.name)||has(x.trade)||has(x.note)).map(x=>row("editcon",x.id,"cash",x.name,[x.trade,x.quote?rand(x.quote)+" quote":""].filter(Boolean).join(" · "))),
+      ...m.sups.filter(x=>has(x.name)||has(x.what)).map(x=>row("editbill",x.id,"cash",x.name,[x.what,rand(x.amount),x.paid?"paid":""].filter(Boolean).join(" · "))),
+      ...m.exps.filter(x=>has(x.what)).map(x=>row("editexp",x.id,"cash",x.what,[rand(x.amount),dshort(x.date)].join(" · "))),
+      ...m.quotes.filter(x=>has(x.from)||has(x.work)||has(x.note)).map(x=>row("editquote",x.id,"cash",x.from,[x.work,rand(x.amount)+" quote"].filter(Boolean).join(" · ")))])}
+  return grp("Snags",sn)+grp("Deliveries",dv)+grp("Plans and documents",dc)+grp("Daily diary",dy)+money;
+}
 function searchSheet(){
-  sheet("Search",`<label class="sr" for="q">Search tasks, materials and the site log</label><input id="q" class="t" type="search" placeholder="Tasks, materials and the site log" data-autofocus autocomplete="off"><div id="qr" style="margin-top:8px"></div>`,(sh,close)=>{
+  sheet("Search",`<label class="sr" for="q">Search everything in this field</label><input id="q" class="t" type="search" placeholder="Tasks, deliveries, snags, people…" data-autofocus autocomplete="off"><div id="qr" style="margin-top:8px"></div>`,(sh,close)=>{
     const q=$("#q",sh),out=$("#qr",sh);
     const run=()=>{const s=q.value.trim().toLowerCase();if(s.length<2){out.innerHTML=`<p class="hint">Type at least two letters.</p>`;return}const f=F(),has=x=>String(x||"").toLowerCase().includes(s);
       const cs=(S.cons||[]).filter(c=>has(c.name)||has(c.trade)||has(c.phone)||has(c.email)||has(c.note)).slice(0,20),ts=f.tasks.filter(t=>has(t.title)||has(t.who)||has(t.note)).slice(0,20),ms=f.mats.filter(m=>has(m.name)||has(m.sup)||has(m.note)).slice(0,20),ls=f.logs.filter(l=>has(l.text)||has(l.who)).slice(0,20);
-      out.innerHTML=(ts.length?`<div class="sec">Tasks</div><ul class="list">${ts.map(t=>taskRow(t,true)).join("")}</ul>`:"")+(ms.length?`<div class="sec">Materials</div><ul class="list">${ms.map(m=>`<li><button type="button" class="rowbtn rowfull" data-act="editmat" data-id="${m.id}"><span class="row-ic">${ic("kitbag")}</span><span class="grow"><span class="lt">${esc(m.name)}</span> <span class="ls">${esc([m.qty&&m.qty+" "+m.unit,m.sup].filter(Boolean).join(" · "))}</span></span></button></li>`).join("")}</ul>`:"")+(ls.length?`<div class="sec">Site log</div><ul class="list">${ls.map(l=>`<li><button type="button" class="rowbtn rowfull" data-act="editlog" data-id="${l.id}"><span class="row-ic sky">${ic("wicket")}</span><span class="grow"><span class="lt">${esc((l.text||"Photo").slice(0,80))}</span> <span class="ls">${dlabel(l.date)}</span></span></button></li>`).join("")}</ul>`:"")+(cs.length?`<div class="sec">Contractors</div><ul class="list">${cs.map(conRow).join("")}</ul>`:"")||`<p class="muted">Nothing found in ${esc(f.name)}.</p>`};
+      out.innerHTML=(ts.length?`<div class="sec">Tasks</div><ul class="list">${ts.map(t=>taskRow(t,true)).join("")}</ul>`:"")+(ms.length?`<div class="sec">Materials</div><ul class="list">${ms.map(m=>`<li><button type="button" class="rowbtn rowfull" data-act="editmat" data-id="${m.id}"><span class="row-ic">${ic("kitbag")}</span><span class="grow"><span class="lt">${esc(m.name)}</span> <span class="ls">${esc([m.qty&&m.qty+" "+m.unit,m.sup].filter(Boolean).join(" · "))}</span></span></button></li>`).join("")}</ul>`:"")+(ls.length?`<div class="sec">Site log</div><ul class="list">${ls.map(l=>`<li><button type="button" class="rowbtn rowfull" data-act="editlog" data-id="${l.id}"><span class="row-ic sky">${ic("wicket")}</span><span class="grow"><span class="lt">${esc((l.text||"Photo").slice(0,80))}</span> <span class="ls">${dlabel(l.date)}</span></span></button></li>`).join("")}</ul>`:"")+(cs.length?`<div class="sec">Contractors</div><ul class="list">${cs.map(conRow).join("")}</ul>`:"")+searchMore(f,has)||`<p class="muted">Nothing found in ${esc(f.name)}.${moneyOK||lvl("money")<1?"":" Money is locked, so it was not searched."}</p>`};
     q.addEventListener("input",run);run();
     out.addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(b){e.stopPropagation();close();setTimeout(()=>act(b.dataset.act,b.dataset.id),60)}});
   });
@@ -2065,7 +2091,7 @@ function consV(){
 }
 function consListV(cs){
   if(!cs.length)return `<div class="card empty">${ic("users","xl")}<h3>No contractors yet</h3><p>The contractors you appoint, their quotes and what you pay them appear here.</p><button type="button" class="btn primary" data-act="addcon">${ic("plus")}Add a contractor</button></div>`;
-  return consCards(cs)+(lvl("money")>=2?`<button type="button" class="btn block" data-act="addcon">${ic("plus")}Add a contractor</button>`:"");
+  return consCards(cs)+(lvl("money")>=2?`<button type="button" class="btn block" data-act="addcon">${ic("plus")}Add a contractor to pay</button>`:"");
 }
 function consCards(cs){
   return cs.map(c=>{const t=conTotal(c),p=conPaid(c),st=(c.stages||[]).slice().sort((a,b)=>(a.paid===b.paid?0:a.paid?-1:1)||(a.due||"9").localeCompare(b.due||"9"));
@@ -2176,14 +2202,20 @@ function budgetSheet(){
 function conSheet(id){
   sheetRO=lvl("money")<2?"money":null;
   const m=M(),c=id?m.cons.find(x=>x.id===id):null;if(id&&!c)return;
-  sheet(c?"Contractor":"New contractor",`
-   <label class="f" for="cn">Name or company</label><input id="cn" class="t" list="cnl" value="${esc(c?.name||"")}" ${c?"":"data-autofocus"} autocomplete="off"><datalist id="cnl">${(S.cons||[]).map(x=>`<option value="${esc(x.name)}">`).join("")}</datalist>
+  const known=consSorted().filter(x=>!m.cons.some(y=>y!==c&&y.name.trim().toLowerCase()===x.name.trim().toLowerCase()));
+  sheet(c?"Contractor's quote":"Pay a contractor",`
+   ${!c&&known.length?`<div class="sec">From your contractors</div><div class="chips" style="margin-bottom:4px">${known.map(x=>`<button type="button" class="chip" data-kn="${x.id}" aria-pressed="false">${esc(x.name)}</button>`).join("")}</div>`:""}
+   <label class="f" for="cn">Name or company</label><input id="cn" class="t" list="cnl" value="${esc(c?.name||"")}" ${c||known.length?"":"data-autofocus"} autocomplete="off"><datalist id="cnl">${known.map(x=>`<option value="${esc(x.name)}">`).join("")}</datalist>
+   <p class="hint">${known.length?"Pick one from the list, or type a new name. ":""}A new name is added to the Contractors list too.</p>
    <label class="f" for="ctr">What they do</label><input id="ctr" class="t" list="ctrl" value="${esc(c?.trade||"")}" placeholder="For example: Earthworks" autocomplete="off"><datalist id="ctrl">${TRADES.map(t=>`<option value="${t}">`).join("")}</datalist>
    ${amtField("cq",c?.quote,"Accepted quote")}
    <label class="f" for="cno">Notes</label><textarea id="cno" class="t" data-mic placeholder="What the quote covers, payment terms">${esc(c?.note||"")}</textarea>
    <div class="foot"><button type="button" class="btn primary block" id="cv">${c?"Save":"Add the contractor"}</button>${c?`<button type="button" class="btn danger block" id="cx">${ic("trash","sm")}Delete this contractor</button>`:""}</div>`,(sh,close)=>{
+    $$("[data-kn]",sh).forEach(b=>b.onclick=()=>{const k=(S.cons||[]).find(x=>x.id===b.dataset.kn);if(!k)return;$("#cn",sh).value=k.name;if(k.trade&&!$("#ctr",sh).value.trim())$("#ctr",sh).value=k.trade;$$("[data-kn]",sh).forEach(x=>x.setAttribute("aria-pressed",x===b));$("#cq",sh).focus()});
+    $("#cn",sh).addEventListener("change",()=>{const k=(S.cons||[]).find(x=>x.name.trim().toLowerCase()===$("#cn",sh).value.trim().toLowerCase());if(k&&k.trade&&!$("#ctr",sh).value.trim())$("#ctr",sh).value=k.trade});
     $("#cv",sh).onclick=()=>{const name=$("#cn",sh).value.trim();if(!name)return fieldErr(sh,"cn","Give the contractor a name.");const q=readAmt(sh,"cq");if(q===null)return;
-      const vals={name,trade:$("#ctr",sh).value.trim(),quote:q,note:$("#cno",sh).value.trim()};
+      {const dup=m.cons.find(y=>y!==c&&y.name.trim().toLowerCase()===name.toLowerCase());if(dup)return fieldErr(sh,"cn",dup.name+" is already in Money. Open their card to change it.")}
+      const vals={name,trade:$("#ctr",sh).value.trim(),quote:q,note:$("#cno",sh).value.trim()};joinCons(name,vals.trade);
       if(c){const u=undoEdit(c,vals);save();close();render();toast("Contractor saved.",u)}
       else{const n={id:uid(),...vals,stages:[]};m.cons.push(n);moneySeg="cons";save();close();render();toast(name+" added. Add their payments next.",()=>m.cons.splice(m.cons.indexOf(n),1))}};
     if(c)$("#cx",sh).onclick=()=>{const i=m.cons.indexOf(c);m.cons.splice(i,1);save();close();render();toast(c.name+" deleted with their payments.",()=>m.cons.splice(i,0,c))};
