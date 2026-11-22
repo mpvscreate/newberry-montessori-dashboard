@@ -1,0 +1,17 @@
+{
+  "name": "Newberry Fields",
+  "short_name": "Fields",
+  "description": "Track the building of Newberry House's sports fields: phases, tasks, site log with photos, materials and the weather.",
+  "start_url": "./newberry-fields.html",
+  "id": "./newberry-fields.html",
+  "scope": "./newberry-fields.html",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f6f3e6",
+  "theme_color": "#1f4d2c",
+  "icons": [
+    {"src": "icons/fields-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icons/fields-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icons/fields-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}
