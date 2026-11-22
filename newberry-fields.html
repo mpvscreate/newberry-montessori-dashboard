@@ -220,6 +220,13 @@ li.trow.drag{transition:none;position:relative;z-index:5;box-shadow:0 8px 26px r
 label.f{display:block;font-weight:600;font-size:var(--fs-m);margin:12px 0 6px}
 .t{width:100%;border:1.5px solid var(--field);background:var(--paper);border-radius:var(--r-m);padding:10px 12px;min-height:48px;font-size:var(--fs-b)}
 textarea.t{min-height:96px;resize:vertical;padding-right:52px}
+/* iPhone Safari: date and time boxes ignore width:100% and push the sheet sideways */
+input.t[type=date],input.t[type=time],input.t[type=datetime-local]{-webkit-appearance:none;appearance:none;display:block;min-width:0;max-width:100%;text-align:left;line-height:1.5}
+input.t::-webkit-date-and-time-value{text-align:left;min-height:1.5em}
+/* sheets and the page only ever move up and down */
+html,body{overflow-x:clip}
+.sheet{overflow-x:hidden;overscroll-behavior-x:none}
+.sheet>*{max-width:100%}
 .micwrap{position:relative}
 .mic{position:absolute;right:4px;bottom:6px;width:44px;height:44px;border-radius:50%;border:0;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;cursor:pointer}
 .mic.on{background:var(--red);color:#fff;animation:pulse 1s infinite alternate}@keyframes pulse{to{box-shadow:0 0 0 8px var(--red-soft)}}
