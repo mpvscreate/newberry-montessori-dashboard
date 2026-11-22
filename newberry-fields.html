@@ -353,7 +353,7 @@ textarea.t{min-height:96px;resize:vertical;padding-right:52px}
 @media (prefers-color-scheme:dark){:root:not([data-theme=light]) .plates i{box-shadow:inset 0 -3px 0 rgba(22,58,34,.18),0 2px 0 #0f2a18,0 0 10px rgba(246,243,230,.15)}}
 
 /* pillow push: everything you can tap sinks softly when pressed and springs back when let go */
-:where(button:not([disabled]),[role=button],li.tap,article[data-act],.tap){--push:.955;transition:transform .42s cubic-bezier(.34,1.7,.5,1),filter .3s ease,box-shadow .25s,background .15s,border-color .2s,color .15s;-webkit-tap-highlight-color:transparent}
+:where(button:not([disabled]),[role=button],li.tap,article[data-act],.tap){--push:.955;transition:transform .42s cubic-bezier(.34,1.7,.5,1),filter .3s ease,box-shadow .25s,background .15s,border-color .2s;-webkit-tap-highlight-color:transparent}
 .board,.card,.lent,.ptile,.stat,.mrow2,.conhd,li.tap,.tap,.attline,.wxc,article[data-act]{--push:.982}
 nav.tabs button,.chip,.mtk,.st,.hb,.x,.fsw{--push:.92}
 nav.tabs .plus{--push:.88}
@@ -407,6 +407,29 @@ li.trow.sw-r.sw-go::before{background:var(--green);color:var(--tick-ink)}li.trow
 :root[data-theme=dark]{--mow1:rgba(168,213,138,.05)}@media (prefers-color-scheme:dark){:root:not([data-theme=light]){--mow1:rgba(168,213,138,.05)}}
 body.on-today .wrap{background:linear-gradient(to bottom,transparent 0,var(--paper) 320px),repeating-linear-gradient(90deg,var(--mow1) 0 34px,var(--mow2) 34px 68px);background-size:100% 320px;background-repeat:no-repeat}
 
+a.btn{text-decoration:none;color:inherit}
+.btn.link{min-width:44px}.nw{white-space:nowrap}
+.list li .call{border-radius:50%;flex:none;margin-left:auto;color:var(--accent)}
+.syncline{display:flex;align-items:center;gap:8px;width:100%;min-height:44px;margin:0 0 10px;padding:6px 12px;border-radius:12px;border:1px solid var(--line);background:var(--amber-soft);color:var(--amber);font:600 .86rem var(--body);text-align:left;cursor:pointer}
+.syncline.error{background:var(--red-soft);color:var(--red)}
+.attline.since{border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.qcmp{display:grid;gap:10px}
+.qcard{border:1px solid var(--line);border-radius:16px;padding:12px 14px;background:var(--paper)}
+.qcard.accepted{border-color:var(--green);box-shadow:0 0 0 2px var(--green-soft)}
+.qcard.declined .lt,.qcard.declined .amt{color:var(--muted)}
+.qcard .amt{font:700 1.15rem var(--display);font-variant-numeric:tabular-nums;white-space:nowrap}
+.dq{width:5.2rem;flex:none;text-align:right;min-height:44px}.dqu{flex:none;min-width:2.2rem}
+.ordtx{white-space:pre-wrap;font:.88rem/1.45 var(--body);margin:6px 0 10px;background:var(--paper);border-radius:12px;padding:10px 12px;overflow-wrap:anywhere}
+#lbx img.lb-in{animation:lbin .6s ease}@keyframes lbin{from{opacity:0;transform:scale(1.02)}}
+@media (prefers-reduced-motion:reduce){#lbx img.lb-in{animation:none}}
+.thumb video{width:100%;height:100%;object-fit:cover;display:block}
+.thumb .play,.ppic .play{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none}
+.thumb .play::after,.ppic .play::after{content:"";width:0;height:0;border-left:16px solid #fff;border-top:10px solid transparent;border-bottom:10px solid transparent;filter:drop-shadow(0 1px 3px rgba(0,0,0,.6));margin-left:4px}
+.ppic video{width:100%;height:100%;object-fit:cover}
+#lbx .lbv{max-width:100vw;max-height:80vh;display:block}
+.vlist li{gap:8px}.vlist audio,.lent audio{width:100%;height:44px;min-width:0;flex:1}
+.lent audio{margin-top:8px}
+#lv1.on{border-color:var(--red);color:var(--red)}
 </style>
 </head>
 <body>
@@ -479,6 +502,14 @@ backspace:'<path d="M21 5H9l-6 7 6 7h12z"/><path d="M13 9l4 6M17 9l-4 6"/>',
 share:'<circle cx="6" cy="12" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="18" cy="18" r="2.5"/><path d="M8.2 10.8l7.6-3.6M8.2 13.2l7.6 3.6"/>',
 print:'<path d="M7 9V4h10v5M7 17H5v-6h14v6h-2M7 14h10v6H7z"/>',
 users:'<circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6s6.5 2.4 6.5 6"/><path d="M16 4.6a3.5 3.5 0 010 6.8"/><path d="M18 14.3c2 .7 3.5 2.6 3.5 5.7"/>',
+phone:'<path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A15 15 0 013 6a2 2 0 012-2z"/>',
+mail:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3.5 6.5l8.5 6.5 8.5-6.5"/>',
+cloudoff:'<path d="M3 3l18 18"/><path d="M7 18a4.5 4.5 0 01-.6-9 6 6 0 011.7-2.7M11 5.2A6 6 0 0118 10.5a3.8 3.8 0 011.8 6.2"/><path d="M10 18h7.5"/>',
+bell:'<path d="M6 17V11a6 6 0 0112 0v6l1.5 2h-15zM10 21h4"/>',
+key:'<circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3"/>',
+play:'<path d="M8 5.5v13l10.5-6.5z"/>',pause:'<path d="M9 6v12M15 6v12"/>',print:'<path d="M7 9V4h10v5M7 17H5v-6h14v6h-2M7 14h10v6H7z"/>',film:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M7 5v14M17 5v14M3 9.5h4M3 14.5h4M17 9.5h4M17 14.5h4"/>',
+chat:'<path d="M4 20l1.4-4.2A8 8 0 1112 20a8 8 0 01-4-1.1z"/>',
+upload:'<path d="M12 16V5M7 9l5-5 5 5M4 20h16"/>',
 pin:'<path d="M12 21s-6.5-6.1-6.5-11a6.5 6.5 0 0113 0c0 4.9-6.5 11-6.5 11z"/><circle cx="12" cy="10" r="2.3"/>'
 };
 document.getElementById("sprite").innerHTML=Object.entries(ICONS).map(([k,v])=>`<symbol id="i-${k}" viewBox="0 0 24 24">${v}</symbol>`).join("");
@@ -542,18 +573,262 @@ function newField(kind,name){
   const f={id:uid(),name,kind,created:today(),set:{size:"",pitches:"",start:"",target:""},phases:[],tasks:[],logs:[],mats:[],money:{budget:0,cons:[],sups:[],exps:[]}};
   PHT.forEach(p=>{const ph={id:p.k+"-"+uid().slice(0,4),k:p.k,name:p.n,ic:p.i,start:"",end:""};f.phases.push(ph);
     ((kind==="soccer"&&p.s)||p.t).forEach((t,i)=>f.tasks.push({id:uid(),ph:ph.id,title:t,due:"",who:"",st:"todo",note:"",ord:i}))});
+  return normField(f);
+}
+
+/* ============ team sharing: one shared copy, people and access (same pattern as Build 3) ============ */
+const SB_URL="https://oikwudpqmbnssttatlhc.supabase.co",SB_KEY="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9pa3d1ZHBxbWJuc3N0dGF0bGhjIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMTMzODEsImV4cCI6MjA5NTY4OTM4MX0.p6I9qlvre5TjF3qOVjAIBus3_PNrbvCF2cMXHe3uiXw";
+const SYNC_KEY="nbfields-sync";
+let sm={};try{sm=JSON.parse(lsGet(SYNC_KEY)||"{}")||{}}catch{sm={}}
+sm.meta=sm.meta||{};sm.pendingMedia=sm.pendingMedia||[];
+const persistSync=()=>{try{localStorage.setItem(SYNC_KEY,JSON.stringify(sm));return true}catch{return false}};
+let sb=null,syncState=sm.code?"syncing":"off",pulling=false,pushing=false,lastErr="",syncFails=0,syncRetryT=0,pushT=0;
+const AREAS=[["tasks","Phases and tasks"],["log","Site log and snags"],["diary","Daily diary"],["mats","Materials and deliveries"],["docs","Plans and documents"],["money","Money"],["upd","Updates"]];
+const shared=()=>!!sm.code;
+const isLead=()=>!shared()||!!(sm.perm&&sm.perm.manage);
+const lvl=a=>{if(!shared())return 2;const p=sm.perm||{};if(p.manage)return 2;return +((p.areas||{})[a]??0)};
+const AREA_MSG=a=>`You can only look at ${(AREAS.find(x=>x[0]===a)||[0,"this"])[1].toLowerCase()}. Ask the Project Lead if something needs changing.`;
+/* records: every list item becomes one row; per-field items carry their field id */
+const PER_FIELD=[["tasks",f=>f.tasks],["logs",f=>f.logs],["mats",f=>f.mats],["snags",f=>f.snags],["diary",f=>f.diary],["docs",f=>f.docs],["deliv",f=>f.deliv],
+  ["mcons",f=>f.money.cons],["msups",f=>f.money.sups],["mexps",f=>f.money.exps],["quotes",f=>f.money.quotes],["slips",f=>f.money.slips]];
+const GLOBAL=[["cons",()=>S.cons],["acts",()=>S.acts],["msgs",()=>S.msgs],["rcpt",()=>S.rcpt]];
+const WRITE_AREA={field:"tasks",tasks:"tasks",cons:"tasks",logs:"log",snags:"log",diary:"diary",mats:"mats",deliv:"mats",docs:"docs",mset:"money",mcons:"money",msups:"money",mexps:"money",quotes:"money",slips:"money",msgs:"upd"};
+const canWriteKind=(k,d)=>{if(!shared())return true;if(k==="field")return isLead();if(k==="acts"||k==="rcpt")return true;if(k==="docs"&&d&&d.m)return lvl("money")===2;const a=WRITE_AREA[k];return a?lvl(a)===2:false};
+const canon=v=>Array.isArray(v)?"["+v.map(canon).join(",")+"]":v&&typeof v==="object"?"{"+Object.keys(v).filter(k=>v[k]!==undefined).sort().map(k=>JSON.stringify(k)+":"+canon(v[k])).join(",")+"}":JSON.stringify(v);
+const hashOf=r=>{const s=canon(r);let h=5381;for(let i=0;i<s.length;i++)h=((h<<5)+h+s.charCodeAt(i))|0;return h+":"+s.length};
+const fieldRec=f=>({name:f.name,kind:f.kind,created:f.created,set:f.set,phases:f.phases});
+function recMap(){
+  const m=new Map();
+  S.fields.forEach(f=>{m.set("field|"+f.id,{r:fieldRec(f)});m.set("mset|"+f.id,{r:{budget:+f.money.budget||0,fid:f.id}});
+    PER_FIELD.forEach(([k,g])=>(g(f)||[]).forEach(x=>m.set(k+"|"+x.id,{r:{...x,fid:f.id}})))});
+  GLOBAL.forEach(([k,g])=>(g()||[]).forEach(x=>m.set(k+"|"+x.id,{r:x})));
+  return m;
+}
+const isDirty=(key,m,cur)=>m.del?m.s!=="x":(cur.has(key)&&m.h!==undefined&&m.s!==m.h);
+function scan(){
+  const cur=recMap(),now=Date.now();
+  for(const[key,{r}]of cur){const h=hashOf(r),m=sm.meta[key]||(sm.meta[key]={});if(m.del)m.del=false;if(m.h!==h){m.h=h;m.u=now}}
+  for(const key of Object.keys(sm.meta)){if(cur.has(key))continue;const m=sm.meta[key];if(m.s===undefined){delete sm.meta[key];continue}if(m.s!=="x"&&!m.del){m.del=true;m.u=now}}
+}
+function normField(f){
+  f.set=f.set||{size:"",pitches:"",start:"",target:""};f.phases=f.phases||[];
+  ["tasks","logs","mats","snags","diary","docs","deliv"].forEach(k=>{if(!Array.isArray(f[k]))f[k]=[]});
+  f.money=Object.assign({budget:0,cons:[],sups:[],exps:[],quotes:[],slips:[]},f.money||{});
+  ["cons","sups","exps","quotes","slips"].forEach(k=>{if(!Array.isArray(f.money[k]))f.money[k]=[]});
   return f;
+}
+function ensureField(fid){let f=S.fields.find(x=>x.id===fid);if(!f){f=normField({id:fid,name:"Field",kind:"cricket",created:today()});S.fields.push(f);if(!S.cur)S.cur=fid}return f}
+function place(row){
+  const{kind,id,data,deleted}=row;
+  if(kind==="field"){const i=S.fields.findIndex(x=>x.id===id);if(deleted){if(i>=0)S.fields.splice(i,1);if(S.cur===id)S.cur=S.fields[0]?.id||null;return}const f=ensureField(id);Object.assign(f,{name:data.name||f.name,kind:data.kind||f.kind,created:data.created||f.created,set:data.set||f.set,phases:Array.isArray(data.phases)&&data.phases.length?data.phases:f.phases});return}
+  if(kind==="mset"){if(!deleted&&data)ensureField(id).money.budget=+data.budget||0;return}
+  const g=GLOBAL.find(x=>x[0]===kind);
+  if(g){const k=kind;S[k]=S[k]||[];const arr=S[k],i=arr.findIndex(x=>x.id===id);if(deleted){if(i>=0)arr.splice(i,1)}else if(i>=0)arr[i]=data;else arr.push(data);return}
+  const p=PER_FIELD.find(x=>x[0]===kind);if(!p)return;
+  if(deleted){S.fields.forEach(f=>{const a=p[1](f),i=a.findIndex(x=>x.id===id);if(i>=0)a.splice(i,1)});return}
+  const item={...data};delete item.fid;
+  S.fields.forEach(f=>{if(f.id!==data.fid){const a=p[1](f),i=a.findIndex(x=>x.id===id);if(i>=0)a.splice(i,1)}});
+  const a=p[1](ensureField(data.fid)),i=a.findIndex(x=>x.id===id);if(i>=0)a[i]=item;else a.push(item);
+}
+function applyRemote(rows){
+  const touched=[];let cur=recMap();
+  for(const row of rows){
+    if(row.kind==="media")continue;
+    const key=row.kind+"|"+row.id,m=sm.meta[key]||(sm.meta[key]={});
+    const dirty=isDirty(key,m,cur),remoteH=row.deleted?"x":hashOf(row.data);
+    if(!row.deleted&&m.h===remoteH&&m.s!==remoteH){m.s=remoteH;continue}
+    if(m.s===remoteH&&!dirty)continue;
+    if(dirty&&row.u<=m.u)continue;
+    place(row);touched.push([key,row]);cur=recMap();
+  }
+  for(const[key,row]of touched){if(row.deleted)sm.meta[key]={s:"x",del:true,u:row.u};else{const h=hashOf(cur.get(key)?.r??row.data);sm.meta[key]={h,u:row.u,s:h}}}
+  return touched.length>0;
+}
+const netErr=e=>/failed to fetch|load failed|networkerror|network error|network connection|timed? ?out|aborted|offline|fetch failed/i.test((e&&e.message)||String(e||""));
+function syncFail(e,where){
+  lastErr=e?.message||String(e);console.warn(where,e);
+  if(/denied/.test(lastErr)){sm.off=true;persistSync();setSync("error");return}
+  if(!navigator.onLine){setSync("offline");return}
+  syncFails++;setSync(netErr(e)&&syncFails<5?"retry":"error");
+  clearTimeout(syncRetryT);syncRetryT=setTimeout(()=>{if(!document.hidden)syncNow()},[4000,10000,20000,30000][Math.min(syncFails-1,3)]);
+}
+const SYNC_L={off:"On this phone only",syncing:"Syncing…",ok:"Shared with the team",offline:"Offline, saved on this phone",retry:"Reconnecting…",error:"Sync problem",unavailable:"Sharing unavailable"};
+function setSync(s){const was=syncState;syncState=s;const el=$("#syncline");if(el)el.outerHTML=syncLineV();else if(was!==s&&["offline","retry","error"].includes(s)&&!closeSheet)render()}
+const syncLineV=()=>shared()&&["offline","retry","error","unavailable"].includes(syncState)?`<button type="button" id="syncline" class="syncline ${syncState}" data-act="syncnow">${ic("cloudoff","sm")}<span class="grow">${SYNC_L[syncState]}${syncState==="error"?". Tap to try again.":syncState==="offline"?". It sends when you are back online.":""}</span></button>`:`<span id="syncline" hidden></span>`;
+function loadSupabase(){return new Promise(res=>{if(window.supabase)return res();const s=document.createElement("script");s.src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2";s.onload=()=>res();s.onerror=()=>res();document.head.append(s)})}
+async function connect(){if(sb)return true;await loadSupabase();if(!window.supabase){setSync(navigator.onLine?"unavailable":"offline");return false}sb=window.supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:false}});return true}
+const queueMedia=id=>{if(!shared())return;if(!sm.pendingMedia.includes(id))sm.pendingMedia.push(id);persistSync()};
+const MONEY_MEDIA=()=>new Set(S.fields.flatMap(f=>[...f.money.slips,...f.money.exps,...f.money.quotes].flatMap(s=>s.media||[]).concat(f.docs.filter(d=>d.m).flatMap(d=>d.media||[]))));
+async function push(){
+  if(!shared()||!sb||pushing)return;pushing=true;setSync("syncing");
+  try{
+    scan();const cur=recMap(),rows=[];
+    for(const[key,m]of Object.entries(sm.meta)){if(!isDirty(key,m,cur))continue;const i=key.indexOf("|"),kind=key.slice(0,i),id=key.slice(i+1);const d=m.del?null:cur.get(key).r;
+      if(!canWriteKind(kind,d)){if(!m.del)m.s=m.h;continue}
+      rows.push(m.del?{kind,id,data:null,deleted:true,u:m.u}:{kind,id,data:d,deleted:false,u:m.u})}
+    for(let i=0;i<rows.length;i+=200){const part=rows.slice(i,i+200),{data:rj,error}=await sb.rpc("fields_upsert",{p_code:sm.code,p_key:sm.key,p_rows:part});if(error)throw error;if(rj&&rj.length)console.warn("not allowed",rj);
+      part.forEach(r=>{const m=sm.meta[r.kind+"|"+r.id];if(m){if(r.deleted)m.s="x";else m.s=m.h}})}
+    const mm=MONEY_MEDIA();
+    for(const mid of[...sm.pendingMedia]){const b=await mGet(mid).catch(()=>null);if(!b||!/^[A-Za-z0-9_-]{1,60}$/.test(mid)){sm.pendingMedia=sm.pendingMedia.filter(x=>x!==mid);continue}
+      const path=sm.code+"/"+mid,ct=b.type||"application/octet-stream",up=await sb.storage.from("fields-media").upload(path,b,{contentType:ct,upsert:false});
+      if(up.error&&!/exist|duplicate|409/i.test((up.error.message||"")+(up.error.statusCode||""))){
+        if(/size|exceed|413|too large|mime|not supported/i.test((up.error.message||"")+(up.error.statusCode||""))){console.warn("media skipped",mid,up.error);sm.pendingMedia=sm.pendingMedia.filter(x=>x!==mid);continue}
+        throw up.error}
+      const{error}=await sb.rpc("fields_upsert",{p_code:sm.code,p_key:sm.key,p_rows:[{kind:"media",id:mid,data:{p:path,t:ct,n:b.size,...(mm.has(mid)?{m:1}:{})},deleted:false,u:Date.now()}]});if(error)throw error;
+      sm.pendingMedia=sm.pendingMedia.filter(x=>x!==mid)}
+    persistSync();setSync("ok");
+  }catch(e){syncFail(e,"sync push")}
+  finally{pushing=false;persistSync()}
+}
+async function loadMe(){
+  const{data,error}=await sb.rpc("fields_me",{p_code:sm.code,p_key:sm.key});if(error)throw error;
+  const changed=canon(data.perm)!==canon(sm.perm||{});sm.pid=data.pid;sm.pname=data.name;sm.prole=data.role;sm.perm=data.perm;
+  if(changed){sm.lastPull=null}persistSync();return changed;
+}
+async function loadPeople(){if(!isLead()||!sb)return;const{data,error}=await sb.rpc("fields_people_list",{p_code:sm.code,p_key:sm.key});if(error)throw error;sm.people=data||[];persistSync()}
+async function pull(){
+  if(!shared()||!sb||pulling)return;pulling=true;
+  try{
+    let changed=await loadMe(),gotMedia=false;await loadPeople();
+    let from=sm.lastPull,max=sm.lastPull;
+    for(;;){
+      const{data,error}=await sb.rpc("fields_pull",{p_code:sm.code,p_key:sm.key,p_since:from||null,p_lim:100});if(error)throw error;
+      if(!data.length)break;
+      if(applyRemote(data))changed=true;
+      for(const r of data)if(r.kind==="media"&&!r.deleted&&r.data?.p){const have=await mGet(r.id).catch(()=>null);if(!have){const res=await fetch(SB_URL+"/storage/v1/object/public/fields-media/"+r.data.p).catch(()=>null);if(res&&res.ok){await mPut(r.id,await res.blob());urls.delete(r.id);gotMedia=true}}}
+      const last=data.at(-1).updated_at;max=last;if(data.length<100||last===from)break;from=last;
+    }
+    if(max)sm.lastPull=max;persistSync();
+    if(changed){if(!S.cur||!S.fields.some(f=>f.id===S.cur))S.cur=S.fields[0]?.id||null;try{localStorage.setItem(KEY,JSON.stringify(S))}catch{}}
+    if((changed||gotMedia)&&!closeSheet)render();
+    if(syncState!=="syncing")setSync("ok");
+  }catch(e){syncFail(e,"sync pull")}
+  finally{pulling=false}
+}
+const syncNow=async()=>{if(!shared()||sm.off)return;if(!sb&&!await connect())return;await push();if(["retry","error","offline"].includes(syncState))return;await pull();if(syncState==="ok"){syncFails=0;clearTimeout(syncRetryT)}};
+const schedulePush=()=>{if(!shared())return;clearTimeout(pushT);pushT=setTimeout(()=>syncNow(),1200)};
+const newCode=()=>[...crypto.getRandomValues(new Uint8Array(28))].map(b=>"abcdefghjkmnpqrstuvwxyz23456789"[b%31]).join("");
+const joinLink=(code,key)=>location.origin+location.pathname+"#join="+code+"&k="+key;
+addEventListener("online",()=>syncNow());
+setInterval(()=>{if(shared()&&!document.hidden)syncNow()},30000);
+
+/* the activity history: who did what, for "Since you last looked" (money lines are kept apart) */
+function logAct(text,money){S.acts=S.acts||[];S.acts.push({id:uid(),t:Date.now(),who:sm.pname||S.me||"",pid:sm.pid||"",fid:S.cur,text,...(money?{m:1}:{})});if(S.acts.length>400)S.acts.splice(0,S.acts.length-400)}
+const SEEN_K="nbf-seen";let seenBase=+lsGet(SEEN_K)||0;
+document.addEventListener("visibilitychange",()=>{if(document.hidden){lsSet(SEEN_K,String(Date.now()))}else{seenBase=+lsGet(SEEN_K)||seenBase;syncNow()}});
+function sinceV(){
+  if(!shared()||!seenBase)return "";
+  const A=(S.acts||[]).filter(a=>a.t>seenBase&&a.pid&&a.pid!==sm.pid&&!a.m);if(!A.length)return "";
+  const who=[...new Set(A.map(a=>a.who).filter(Boolean))];
+  return `<button type="button" class="attline since" data-act="sinceopen">${ic("bell","sm")}<span class="grow"><b>Since you last looked</b><span class="attl">${plural(A.length,"change")} by ${esc(who.slice(0,3).join(", "))}${who.length>3?" and others":""}</span></span>${ic("chev","sm")}</button>`;
+}
+function actsSheet(){
+  const A=(S.acts||[]).filter(a=>!a.m||lvl("money")>=1).slice().sort((a,b)=>b.t-a.t).slice(0,80);
+  sheet("What happened",A.length?`<ul class="list">${A.map(a=>`<li><span class="row-ic">${ic("clock")}</span><div class="grow"><div class="lt">${esc(a.text)}</div><div class="ls">${esc([a.who,new Date(a.t).toLocaleString("en-ZA",{weekday:"short",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}),(S.fields.find(f=>f.id===a.fid)||{}).name].filter(Boolean).join(" · "))}</div></div></li>`).join("")}</ul>`:`<p class="muted">Nothing yet. Changes by you and the team are listed here.</p>`);
+}
+
+/* starting, joining and leaving */
+function teamSheet(){
+  if(!shared()){
+    sheet("Share with the team",`<p class="muted" style="margin:0">Everyone you add sees the same fields, tasks, log and photos on their own phone. You choose what each person can see and change. Money stays hidden unless you allow it.</p>
+     <label class="f" for="tn1">Your name</label><input id="tn1" class="t" value="${esc(S.me||"")}" autocomplete="name" data-autofocus>
+     <p class="hint">You become the Project Lead. This phone's fields become the shared ones.</p>
+     <div class="foot"><button type="button" class="btn primary block" id="ts1">Start sharing</button></div>`,(sh,close)=>{
+      $("#ts1",sh).onclick=async()=>{const name=$("#tn1",sh).value.trim();if(!name)return fieldErr(sh,"tn1","Say your name.");
+        const b=$("#ts1",sh);b.disabled=true;b.textContent="Starting…";
+        try{if(!await connect())throw new Error("offline");const code=newCode(),{data,error}=await sb.rpc("fields_start",{p_code:code,p_name:name,p_phone:""});if(error)throw error;
+          S.me=name;sm={meta:{},pendingMedia:[],code,key:data.key,pid:data.pid,pname:name,prole:"lead",perm:{manage:true},lastPull:null};
+          try{const ks=await new Promise(res=>{db().then(d=>{const r=d.transaction("m").objectStore("m").getAllKeys();r.onsuccess=()=>res(r.result||[]);r.onerror=()=>res([])})});ks.forEach(k=>{if(typeof k==="string")sm.pendingMedia.push(k)})}catch{}
+          persistSync();save();close();render();toast("Sharing started. Add people under Settings, People and access.");await syncNow();
+        }catch(e){b.disabled=false;b.textContent="Start sharing";toast(netErr(e)||!navigator.onLine?"No connection. Try again when you are online.":"Could not start sharing: "+String(e.message||e).slice(0,80))}};
+    });return;
+  }
+  sheet("Team",`<ul class="list"><li><span class="row-ic ${syncState==="ok"?"green":"sky"}">${ic(syncState==="ok"?"cloud":"cloudoff")}</span><div class="grow"><div class="lt">${SYNC_L[syncState]||"Shared"}</div><div class="ls">You are ${esc(sm.pname||"")}${isLead()?", the Project Lead":""}.</div></div></li></ul>
+   <div class="foot">${isLead()?`<button type="button" class="btn primary block" id="tp">${ic("users")}People and access</button>`:""}<button type="button" class="btn block" id="tsync">${ic("cloud")}Sync now</button><button type="button" class="btn block" id="tact">${ic("clock")}What happened</button><button type="button" class="btn danger block" id="tleave">Leave on this phone</button></div>`,(sh,close)=>{
+    $("#tp",sh)?.addEventListener("click",()=>{close();setTimeout(peopleSheet,60)});
+    $("#tsync",sh).onclick=async()=>{close();toast("Syncing…");syncFails=0;await syncNow();toast(syncState==="ok"?"Everything is shared.":SYNC_L[syncState]+(lastErr?": "+String(lastErr).slice(0,80):""))};
+    $("#tact",sh).onclick=()=>{close();setTimeout(actsSheet,60)};
+    $("#tleave",sh).onclick=()=>{close();setTimeout(()=>confirmSheet("Leave on this phone?","This phone stops sharing and its copy is removed. The shared copy stays safe for the team, and you can join again with your link.","Leave",async()=>{sm={meta:{},pendingMedia:[]};persistSync();try{localStorage.removeItem(KEY)}catch{}try{await mClear()}catch{}urls.clear();load();go("today");toast("This phone has left the shared project.")}),60)};
+  });
+}
+async function joinFromHash(){
+  const m=location.hash.match(/join=([a-z0-9]{20,})&k=([a-f0-9]{32,})/);if(!m)return;
+  const code=m[1],key=m[2],clean=()=>history.replaceState(null,"",location.pathname+location.search);
+  if(code===sm.code&&key===sm.key){clean();return}
+  if(!await connect()){toast("Connect to the internet to join.");return}
+  const{data:who,error}=await sb.rpc("fields_me",{p_code:code,p_key:key});
+  if(error||!who){clean();toast("This link is not valid, or your access was switched off. Ask the Project Lead for a new link.");return}
+  const hasData=S.fields.some(f=>f.tasks.some(t=>t.st==="done")||f.logs.length||f.mats.length);
+  sheet("Join Newberry Fields",`<p class="muted" style="margin:0">Hi ${esc(who.name)}. You have been added as <b>${esc(roleName(who.role))}</b>. ${esc(accessText(who.perm))}${hasData?" This phone already has fields of its own. Joining replaces them with the shared ones.":""}</p>
+   <div class="foot"><button type="button" class="btn primary block" id="jy">Join as ${esc(who.name)}</button></div>`,(sh,close)=>{
+    $("#jy",sh).onclick=async()=>{close();setTimeout(clean,300);setTimeout(clean,900);toast("Joining…");
+      S={v:1,cur:null,fields:[],me:who.name,geo:S.geo||null,cons:[],acts:[],msgs:[],rcpt:[]};
+      sm={meta:{},pendingMedia:[],code,key,pid:who.pid,pname:who.name,prole:who.role,perm:who.perm,lastPull:null};persistSync();
+      try{await mClear()}catch{}urls.clear();save();render();await syncNow();render();toast("You are in. Welcome, "+who.name+".")};
+  });
+}
+
+/* people and access (Project Lead) */
+const ROLES=[["contractor","Contractor"],["staff","School staff or coach"],["board","Board or sponsor"],["other","Other"]];
+const roleName=r=>r==="lead"?"Project Lead":(ROLES.find(x=>x[0]===r)||ROLES[3])[1];
+const ROLE_AREAS={contractor:{tasks:2,log:2,diary:2,mats:2,docs:1,money:0,upd:1},staff:{tasks:1,log:1,diary:0,mats:0,docs:1,money:0,upd:1},board:{tasks:1,log:1,diary:0,mats:0,docs:1,money:1,upd:1},other:{tasks:1,log:1,diary:0,mats:0,docs:0,money:0,upd:1}};
+function accessText(p){if(p&&p.manage)return "You can see and change everything.";const a=(p&&p.areas)||{},ch=AREAS.filter(x=>a[x[0]]===2&&x[0]!=="upd").map(x=>x[1].toLowerCase()),see=AREAS.filter(x=>a[x[0]]===1&&x[0]!=="upd").map(x=>x[1].toLowerCase());
+  return [ch.length?"You can change "+ch.join(", ")+".":"",see.length?"You can see "+see.join(", ")+".":""].filter(Boolean).join(" ")}
+async function peopleSet(p){if(!sb&&!await connect())throw new Error("offline");const{data,error}=await sb.rpc("fields_people_set",{p_code:sm.code,p_key:sm.key,p});if(error)throw error;await loadPeople();return data}
+function peopleSheet(){
+  const ps=(sm.people||[]).filter(p=>p.pid!==sm.pid);
+  sheet("People and access",`${ps.length?`<ul class="list">${ps.map(p=>`<li><button type="button" class="rowbtn rowfull" data-pid="${p.pid}"><span class="row-ic ${p.active?"":"sky"}">${ic("user")}</span><span class="grow"><span class="lt">${esc(p.name)}${p.active?"":" (switched off)"}</span> <span class="ls">${esc(roleName(p.role))}${p.seen?" · last seen "+dlabel(iso(new Date(p.seen))).toLowerCase():" · not joined yet"}</span></span>${ic("chev","sm")}</button></li>`).join("")}</ul>`:`<p class="muted">No one else yet. Add the contractors, staff and sponsors who should see the fields.</p>`}
+   <div class="foot"><button type="button" class="btn primary block" id="pa">${ic("plus")}Add a person</button></div>`,(sh,close)=>{
+    $("#pa",sh).onclick=()=>{close();setTimeout(()=>personSheet(),60)};
+    $$("[data-pid]",sh).forEach(b=>b.onclick=()=>{close();setTimeout(()=>personSheet(b.dataset.pid),60)});
+  });
+  loadPeople().then(()=>{}).catch(()=>{});
+}
+function personSheet(pid){
+  const p=pid?(sm.people||[]).find(x=>x.pid===pid):null;let role=p?.role||"contractor",areas={...(p?.perm?.areas||ROLE_AREAS[role])};
+  const seg=(a,opts)=>`<div class="segc" role="group" aria-label="${esc((AREAS.find(x=>x[0]===a)||[])[1])}">${opts.map(([v,l])=>`<button type="button" data-a="${a}" data-v="${v}" aria-pressed="${areas[a]===v}">${l}</button>`).join("")}</div>`;
+  const body=()=>AREAS.map(([a,l])=>`<label class="f">${l}</label>`+seg(a,a==="tasks"?[[1,"See"],[2,"Change"]]:a==="upd"?[[1,"Receive"],[2,"Send"]]:[[0,"Hide"],[1,"See"],[2,"Change"]])).join("");
+  sheet(p?p.name:"Add a person",`
+   <label class="f" for="pn1">Name</label><input id="pn1" class="t" value="${esc(p?.name||"")}" ${p?"":"data-autofocus"} autocomplete="off" list="pnl"><datalist id="pnl">${(S.cons||[]).map(c=>`<option value="${esc(c.name)}">`).join("")}</datalist>
+   <label class="f" for="pp1">Phone (for sending the link)</label><input id="pp1" class="t" type="tel" value="${esc(p?.phone||"")}" autocomplete="off">
+   <label class="f">Role</label><div class="chips">${ROLES.map(([k,l])=>`<button type="button" class="chip" data-role="${k}" aria-pressed="${role===k}">${l}</button>`).join("")}</div>
+   <div class="sec">What they can see and change</div><div id="pareas">${body()}</div>
+   ${p?`<label class="tick" style="margin-top:8px"><input type="checkbox" id="pon" ${p.active?"checked":""}>Access switched on</label>`:""}
+   <div class="foot"><button type="button" class="btn primary block" id="pv1">${p?"Save":"Add and get their link"}</button>${p?`<button type="button" class="btn block" id="pl1">${ic("share","sm")}Send their link</button><button type="button" class="btn block" id="pr1">${ic("key","sm")}Make a new link (the old one stops)</button>`:""}</div>`,(sh,close)=>{
+    const wire=()=>$$("[data-a]",sh).forEach(b=>b.onclick=()=>{areas[b.dataset.a]=+b.dataset.v;$$(`[data-a="${b.dataset.a}"]`,sh).forEach(x=>x.setAttribute("aria-pressed",x===b))});wire();
+    $$("[data-role]",sh).forEach(b=>b.onclick=()=>{role=b.dataset.role;areas={...ROLE_AREAS[role]};$$("[data-role]",sh).forEach(x=>x.setAttribute("aria-pressed",x===b));$("#pareas",sh).innerHTML=body();wire();fitSeg(sh)});
+    const send=(name,key,phone)=>{const link=joinLink(sm.code,key),msg=`Hi ${name}, here is your link to Newberry Fields, where we track the work on the sports fields. Open it on your phone and add it to your home screen:\n${link}\nPlease keep it to yourself: it is your own link.`;
+      if(navigator.share)navigator.share({text:msg}).catch(()=>{});else window.open((phone?"https://wa.me/"+telOf(phone).replace(/^0/,"27")+"?text=":"https://wa.me/?text=")+encodeURIComponent(msg),"_blank","noopener")};
+    $("#pv1",sh).onclick=async()=>{const name=$("#pn1",sh).value.trim();if(!name)return fieldErr(sh,"pn1","Give the person a name.");const b=$("#pv1",sh);b.disabled=true;
+      try{const r=await peopleSet({pid:p?.pid||"",name,phone:$("#pp1",sh).value.trim(),role,perm:{areas},...(p?{active:$("#pon",sh).checked}:{})});
+        logAct(p?`Changed access for ${name}`:`Added ${name} as ${roleName(role)}`);save();close();
+        if(!p){toast(name+" added. Send them their link.");setTimeout(()=>send(name,r.key,$("#pp1",sh)?.value||""),300)}else toast("Access for "+name+" saved.")}
+      catch(e){b.disabled=false;toast(netErr(e)||!navigator.onLine?"No connection. Try again when you are online.":"Could not save: "+String(e.message||e).slice(0,80))}};
+    $("#pl1",sh)?.addEventListener("click",()=>send(p.name,p.key,p.phone));
+    $("#pr1",sh)?.addEventListener("click",()=>{close();setTimeout(()=>confirmSheet("Make a new link?",`${p.name}'s old link stops working. Send them the new one.`,"Make a new link",async()=>{try{const r=await peopleSet({pid:p.pid,regen:true});toast("New link made.");send(p.name,r.key,p.phone)}catch(e){toast("Could not make a new link. Try again when you are online.")}}),60)});
+  });
+}
+/* read-only parts for people who may only see */
+function roSheet(sh,area){
+  $$("input,select,textarea",sh).forEach(e=>{e.disabled=true});
+  $$(".foot .btn,.mic,[data-dc],[data-st],[data-l],[data-c],#lc,#lg,#tu,#tdn,.ppic button",sh).forEach(e=>e.hidden=true);
+  const p=document.createElement("p");p.className="hint";p.textContent=AREA_MSG(area);sh.querySelector(".hd").after(p);
 }
 
 /* ============ state, saved on this phone ============ */
 const KEY="nbfields-v1";
 let S;
 function load(){try{S=JSON.parse(lsGet(KEY)||"null")}catch{S=null}
-  if(!S||!Array.isArray(S.fields)||!S.fields.length){const f=newField("cricket","Cricket field");S={v:1,cur:f.id,fields:[f],me:"",geo:null}}
-  if(!S.fields.some(f=>f.id===S.cur))S.cur=S.fields[0].id;
-  S.fields.forEach(f=>{f.money=Object.assign({budget:0,cons:[],sups:[],exps:[]},f.money||{})});
+  if(!S||!Array.isArray(S.fields))S=null;
+  /* a phone that has joined a shared project waits for the team's fields instead of making its own */
+  if(!S||(!S.fields.length&&!shared())){const f=newField("cricket","Cricket field");S={v:1,cur:f.id,fields:[f],me:S?.me||"",geo:S?.geo||null}}
+  S.fields.forEach(normField);
+  if(S.fields.length&&!S.fields.some(f=>f.id===S.cur))S.cur=S.fields[0].id;
+  ["cons","acts","msgs","rcpt"].forEach(k=>{if(!Array.isArray(S[k]))S[k]=[]});
 }
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch{toast("This phone is full. Some changes may not be saved.")}}
+/* tidy a restored or undone state the same way as on start */
+function load2(){S.fields.forEach(normField);if(S.fields.length&&!S.fields.some(f=>f.id===S.cur))S.cur=S.fields[0].id;["cons","acts","msgs","rcpt"].forEach(k=>{if(!Array.isArray(S[k]))S[k]=[]})}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch{toast("This phone is full. Some changes may not be saved.")}schedulePush()}
 load();
 const F=()=>S.fields.find(f=>f.id===S.cur)||S.fields[0];
 const phase=id=>F().phases.find(p=>p.id===id);
@@ -561,7 +836,7 @@ const phName=id=>phase(id)?.name||"";
 const phTasks=id=>F().tasks.filter(t=>t.ph===id).sort((a,b)=>a.ord-b.ord);
 function phStats(p){const ts=F().tasks.filter(t=>t.ph===p.id),dn=ts.filter(t=>t.st==="done").length;return{total:ts.length,done:dn,open:ts.length-dn,complete:ts.length>0&&dn===ts.length}}
 const curPhase=()=>F().phases.find(p=>!phStats(p).complete)||null;
-const names=()=>[...new Set([S.me,...S.fields.flatMap(f=>f.tasks.map(t=>t.who))].filter(Boolean))].sort();
+const names=()=>[...new Set([S.me,...(S.cons||[]).map(c=>c.name),...S.fields.flatMap(f=>f.tasks.map(t=>t.who))].filter(Boolean))].sort();
 
 /* ============ photos in IndexedDB ============ */
 let dbp=null;
@@ -570,7 +845,9 @@ const mPut=async(id,blob)=>{const d=await db();return new Promise((res,rej)=>{co
 const mGet=async id=>{const d=await db();return new Promise((res,rej)=>{const r=d.transaction("m").objectStore("m").get(id);r.onsuccess=()=>res(r.result);r.onerror=()=>rej(r.error)})};
 const mClear=async()=>{const d=await db();return new Promise(res=>{const t=d.transaction("m","readwrite");t.objectStore("m").clear();t.oncomplete=res;t.onerror=res})};
 const urls=new Map();
-async function mUrl(id){if(urls.has(id))return urls.get(id);const b=await mGet(id).catch(()=>null);if(!b)return null;const u=URL.createObjectURL(b);urls.set(id,u);return u}
+async function mUrl(id){if(urls.has(id))return urls.get(id);const b=await mGet(id).catch(()=>null);if(!b)return null;mtype.set(id,b.type||"");const u=URL.createObjectURL(b);urls.set(id,u);return u}
+const isVid=id=>/^video\//.test(mtype.get(id)||"");
+const prevTag=a=>/^video\//.test(a.f.type)?`<video src="${a.u}#t=0.1" muted playsinline preload="metadata"></video><span class="play" aria-hidden="true"></span>`:`<img src="${a.u}" alt="New photo">`;
 async function prepPhoto(file,maxPx=1600){
   const bmp=await createImageBitmap(file,{imageOrientation:"from-image"}).catch(()=>null);
   if(!bmp)return file;
@@ -578,11 +855,15 @@ async function prepPhoto(file,maxPx=1600){
   const c=document.createElement("canvas");c.width=w;c.height=h;c.getContext("2d").drawImage(bmp,0,0,w,h);bmp.close?.();
   return new Promise(r=>c.toBlob(b=>r(b||file),"image/jpeg",.8));
 }
-async function hydrate(root=document){for(const el of $$("[data-m]",root)){if(el.querySelector("img"))continue;const u=await mUrl(el.dataset.m);if(u)el.insertAdjacentHTML("afterbegin",`<img src="${u}" alt="${esc(el.dataset.alt||"Site photo")}" loading="lazy">`)}}
+async function hydrate(root=document){
+  for(const el of $$("[data-m]",root)){if(el.querySelector("img,video"))continue;const u=await mUrl(el.dataset.m);if(!u)continue;
+    el.insertAdjacentHTML("afterbegin",isVid(el.dataset.m)?`<video src="${u}#t=0.1" muted playsinline preload="metadata" aria-label="Video"></video><span class="play" aria-hidden="true"></span>`:`<img src="${u}" alt="${esc(el.dataset.alt||"Site photo")}" loading="lazy">`)}
+  for(const a of $$("audio[data-audio]",root)){if(a.src)continue;const u=await mUrl(a.dataset.audio);if(u)a.src=u}
+}
 const allPhotos=()=>F().logs.filter(l=>l.media?.length).sort((a,b)=>b.date.localeCompare(a.date)||b.t-a.t).flatMap(l=>l.media.map(m=>({m,l})));
 
 /* ============ sheets, toasts with Undo ============ */
-let toastT=0,closeSheet=null,navPushed=false,backIgnore=0;
+let toastT=0,closeSheet=null,navPushed=false,backIgnore=0,sheetRO=null;
 function toast(msg,undo){
   clearTimeout(toastT);const t=document.createElement("div");t.className="toast";
   t.innerHTML=`<span>${esc(msg)}</span>${undo?'<button type="button">Undo</button>':""}`;
@@ -608,6 +889,7 @@ function sheet(title,html,onMount){
   sh.addEventListener("keydown",e=>{if(e.key==="Escape")close()});
   wireMics(sh);wireDates(sh);
   onMount?.(sh,close);fitSeg(sh);
+  if(sheetRO){roSheet(sh,sheetRO);sheetRO=null}
   if(!sh.querySelector(".foot")&&!sh.querySelector("[data-choices]")){const d=document.createElement("div");d.className="foot";d.innerHTML='<button type="button" class="btn primary block">Done</button>';sh.append(d);d.firstChild.onclick=()=>close()}
   (sh.querySelector("[data-autofocus]")||sh).focus({preventScroll:true});return close;
 }
@@ -689,7 +971,12 @@ function attentionItems(){
   if(od)out.push(["clock","red",`${plural(od,"task")} ${od===1?"is":"are"} overdue`,"overdue"]);
   if(stuck)out.push(["alert","red",`${plural(stuck,"task")} ${stuck===1?"is":"are"} stuck`,"stuck"]);
   if(week)out.push(["calendar","",`${plural(week,"task")} due in the next 7 days`,"week"]);
-  {const ds=dueList().filter(x=>x.due&&x.due<=addDays(td,7)),ov=ds.some(x=>x.due<td);if(ds.length)out.push(["cash",ov?"red":"",`${plural(ds.length,"payment")} ${ov?"overdue or ":""}due this week`,"money"])}
+  if(lvl("money")>=1){const ds=dueList().filter(x=>x.due&&x.due<=addDays(td,7)),ov=ds.some(x=>x.due<td);if(ds.length)out.push(["cash",ov?"red":"",`${plural(ds.length,"payment")} ${ov?"overdue or ":""}due this week`,"money"])}
+  if(lvl("log")>=1){const os=f.snags.filter(s=>s.st==="open").length,fx=f.snags.filter(s=>s.st==="fixed").length;
+    if(os)out.push(["alert","red",`${plural(os,"snag")} to fix`,"snags"]);
+    if(fx&&isLead())out.push(["check","",`${plural(fx,"snag")} fixed, waiting for your check`,"snags"])}
+  if(lvl("diary")>=2){const hr=new Date().getHours();if(hr>=14&&isWork(td)&&(!f.set.start||f.set.start<=td)&&!f.diary.some(e=>e.date===td))out.push(["note","","No daily diary entry yet today","diary"])}
+  {const un=unreadMsgs().length;if(un)out.push(["bell","",`${plural(un,"new update")} from the team`,"updates"])}
   const ord=f.mats.filter(m=>m.toOrd&&m.status==="need").length;if(ord)out.push(["kitbag","",`${plural(ord,"material")} to order`,"toorder"]);
   [addDays(td,-1),td].forEach(dt=>{const x=wxDay(dt);if(x&&x.rain>=2&&isWork(dt)&&!f.logs.some(l=>l.date===dt&&(l.rain||l.lost)))out.push(["rain","",`${dt===td?"Rain today":"Rain yesterday"} (${r0(x.rain)} mm) is not in the log`,"rainlog",dt+"|"+r0(x.rain)])});
   return out;
@@ -703,6 +990,9 @@ function attGo(a,id){
   else if(a==="week")taskListSheet("Due in the next 7 days",t=>t.st!=="done"&&t.due&&t.due>=today()&&t.due<=addDays(today(),7));
   else if(a==="toorder"){matF="to";go("mats")}
   else if(a==="money")openMoney("overview");
+  else if(a==="updates")updatesSheet();
+  else if(a==="snags"){logMode="snags";go("log")}
+  else if(a==="diary")diarySheet(null,today());
   else if(a==="rainlog"){const[d,mm]=id.split("|");logSheet(null,{date:d,rain:mm,lost:true})}
 }
 function attSheet(){
@@ -765,7 +1055,7 @@ function animPlates(){
   if(any)buzz(12);
 }
 /* swipe a task row: right ticks it (or unticks), left moves it to the next work day; Undo as always */
-function moveNext(id){const t=F().tasks.find(x=>x.id===id);if(!t||t.st==="done")return;const base=t.due&&t.due>=today()?t.due:today(),nd=addWork(base,1),u=undoEdit(t,{due:nd});save();render();toast(`${t.title}: moved to ${dlabel(nd)}.`,u)}
+function moveNext(id){if(lvl("tasks")<2){toast(AREA_MSG("tasks"));return}const t=F().tasks.find(x=>x.id===id);if(!t||t.st==="done")return;const base=t.due&&t.due>=today()?t.due:today(),nd=addWork(base,1),u=undoEdit(t,{due:nd});save();render();toast(`${t.title}: moved to ${dlabel(nd)}.`,u)}
 (()=>{
   let st=null;
   const reset=li=>{li.classList.remove("sw-r","sw-l","sw-go","swiping");li.style.removeProperty("--sx");li.style.removeProperty("--sw")};
@@ -807,14 +1097,423 @@ function fieldErr(sh,id,msg){
   const clr=()=>{p.remove();el.removeAttribute("aria-invalid");el.removeAttribute("aria-describedby");el.removeEventListener("input",clr);el.removeEventListener("change",clr)};
   el.addEventListener("input",clr);el.addEventListener("change",clr);
 }
+/* ============ contractors: the people and companies working on the fields (shared by every field, no money here) ============ */
+const consSorted=()=>(S.cons||[]).slice().sort((a,b)=>a.name.localeCompare(b.name));
+const telOf=p=>String(p||"").replace(/[^\d+]/g,"");
+function conRow(c){
+  const sub=[c.trade?esc(c.trade):"",c.phone?`<span class="nw">${esc(c.phone)}</span>`:""].filter(Boolean).join(" · ");
+  return `<li class="nxrow"><button type="button" class="rowbtn rowfull" data-act="editcontact" data-id="${c.id}"><span class="row-ic">${ic("hammer")}</span><span class="grow"><span class="lt">${esc(c.name)}</span>${sub?` <span class="ls">${sub}</span>`:""}</span></button>${telOf(c.phone)?`<a class="btn icon call" href="tel:${esc(telOf(c.phone))}" aria-label="Call ${esc(c.name)}">${ic("phone")}</a>`:""}</li>`;
+}
+function consCard(){
+  const cs=consSorted();
+  return `<section class="card"><div class="row" style="justify-content:space-between"><h2>Contractors</h2>${cs.length?`<button type="button" class="btn link small" data-act="contacts">${cs.length>3?"All "+cs.length:"Edit the list"}</button>`:""}</div>${cs.length?`<ul class="list">${cs.slice(0,3).map(conRow).join("")}</ul>`:`<div class="empty" style="padding:10px 4px"><p>Add the people and companies working on the fields, with their phone numbers.</p><button type="button" class="btn" data-act="addcontact">${ic("plus")}Add a contractor</button></div>`}</section>`;
+}
+function contactsSheet(){
+  const cs=consSorted();
+  sheet("Contractors",`${cs.length?`<ul class="list">${cs.map(conRow).join("")}</ul><p class="hint">Tap a name to change or remove it. Their names are offered when you choose who is doing a task.</p>`:`<p class="muted">No contractors yet.</p>`}
+   <div class="foot"><button type="button" class="btn primary block" id="ca">${ic("plus")}Add a contractor</button></div>`,(sh,close)=>{
+    $("#ca",sh).onclick=()=>{close();setTimeout(()=>contactSheet(null,true),60)};
+    sh.addEventListener("click",e=>{const b=e.target.closest("[data-act=editcontact]");if(b){close();setTimeout(()=>contactSheet(b.dataset.id,true),60)}});
+  });
+}
+function contactSheet(id,back){
+  sheetRO=lvl("tasks")<2?"tasks":null;
+  S.cons=S.cons||[];const c=id?S.cons.find(x=>x.id===id):null;if(id&&!c)return;
+  const again=()=>{if(back)setTimeout(contactsSheet,60)};
+  sheet(c?"Contractor":"New contractor",`
+   <label class="f" for="kn">Name or company</label><input id="kn" class="t" value="${esc(c?.name||"")}" ${c?"":"data-autofocus"} autocomplete="off">
+   <label class="f" for="kt">What they do</label><input id="kt" class="t" list="ktl" value="${esc(c?.trade||"")}" placeholder="For example: Earthworks" autocomplete="off"><datalist id="ktl">${TRADES.map(t=>`<option value="${t}">`).join("")}</datalist>
+   <label class="f" for="kp">Phone</label><input id="kp" class="t" type="tel" inputmode="tel" value="${esc(c?.phone||"")}" placeholder="For example: 082 123 4567" autocomplete="off">
+   <label class="f" for="ke">Email</label><input id="ke" class="t" type="email" inputmode="email" value="${esc(c?.email||"")}" autocomplete="off">
+   <label class="f" for="ko">Notes</label><textarea id="ko" class="t" data-mic placeholder="Contact person, hours on site, what they are working on">${esc(c?.note||"")}</textarea>
+   ${c&&(telOf(c.phone)||c.email)?`<div class="row wr" style="gap:8px;margin-top:12px">${telOf(c.phone)?`<a class="btn small grow" href="tel:${esc(telOf(c.phone))}">${ic("phone","sm")}Call</a>`:""}${c.email?`<a class="btn small grow" href="mailto:${esc(c.email)}">${ic("mail","sm")}Email</a>`:""}</div>`:""}
+   <div class="foot"><button type="button" class="btn primary block" id="kv">${c?"Save":"Add the contractor"}</button>${c?`<button type="button" class="btn danger block" id="kx">${ic("trash","sm")}Remove from the list</button>`:""}</div>`,(sh,close)=>{
+    $("#kv",sh).onclick=()=>{
+      const name=$("#kn",sh).value.trim();if(!name)return fieldErr(sh,"kn","Give the contractor a name.");
+      const email=$("#ke",sh).value.trim();if(email&&!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email))return fieldErr(sh,"ke","That email address does not look right.");
+      const vals={name,trade:$("#kt",sh).value.trim(),phone:$("#kp",sh).value.trim(),email,note:$("#ko",sh).value.trim()};
+      if(c){const u=undoEdit(c,vals);save();close();render();toast(name+" saved.",u)}
+      else{const n={id:uid(),...vals};S.cons.push(n);save();close();render();toast(name+" added to the contractors.",()=>S.cons.splice(S.cons.indexOf(n),1))}
+      again();
+    };
+    if(c)$("#kx",sh).onclick=()=>{const i=S.cons.indexOf(c);S.cons.splice(i,1);save();close();render();toast(c.name+" removed from the list.",()=>{S.cons.splice(i,0,c);if($("#sh-t")?.textContent==="Contractors")setTimeout(contactsSheet,30)});again()};
+  });
+}
+/* ============ photos in a form: camera or gallery, with remove ============ */
+function mediaPicker(sh,keep){
+  const add=[],box=$("#mp",sh);
+  const paint=()=>{box.innerHTML=[...keep.map((m,i)=>`<div class="ppic" data-m="${m}"><button type="button" data-k="${i}" aria-label="Remove this photo"><span>${ic("x","sm")}</span></button></div>`),...add.map((a,i)=>`<div class="ppic"><img src="${a.u}" alt="New photo"><button type="button" data-a="${i}" aria-label="Remove this photo"><span>${ic("x","sm")}</span></button></div>`)].join("");
+    box.hidden=!keep.length&&!add.length;hydrate(box);
+    $$("[data-k]",box).forEach(b=>b.onclick=()=>{keep.splice(+b.dataset.k,1);paint()});$$("[data-a]",box).forEach(b=>b.onclick=()=>{URL.revokeObjectURL(add[+b.dataset.a].u);add.splice(+b.dataset.a,1);paint()})};
+  const pick=cam=>{const i=document.createElement("input");i.type="file";i.accept="image/*";i.multiple=!cam;if(cam)i.setAttribute("capture","environment");i.style.display="none";document.body.append(i);
+    i.addEventListener("change",()=>{[...i.files].forEach(fl=>add.push({f:fl,u:URL.createObjectURL(fl)}));i.remove();paint()});i.addEventListener("cancel",()=>i.remove());i.click()};
+  $("#mpc",sh).onclick=()=>pick(true);$("#mpg",sh).onclick=()=>pick(false);paint();
+  return{count:()=>keep.length+add.length,async save(){const ids=[];for(const a of add){const b=await prepPhoto(a.f),mid="m"+uid();await mPut(mid,b);ids.push(mid);queueMedia(mid);URL.revokeObjectURL(a.u)}return[...keep,...ids]}};
+}
+const mediaPickerV=label=>`<label class="f">${label}</label><div class="ppics" id="mp"></div><div class="row" style="gap:8px"><button type="button" class="btn grow" id="mpc">${ic("camera")}Camera</button><button type="button" class="btn grow" id="mpg">${ic("image")}Gallery</button></div>`;
+
+/* ============ snags: report, fix, check and close ============ */
+const dWord=d=>d===today()?"today":d===addDays(today(),-1)?"yesterday":dshort(d);
+const SNAG_ST={open:["Open","bad"],fixed:["Fixed, waiting for a check","sky"],closed:["Closed",""]};
+function snagCard(s,start){
+  const pics=(s.media||[]).map(m=>({m,l:s}));
+  const btn=s.st==="open"?(lvl("log")>=2?`<button type="button" class="btn small good" data-act="snagfix" data-id="${s.id}">${ic("check","sm")}Mark fixed</button>`:"")
+    :s.st==="fixed"?(isLead()?`<button type="button" class="btn small good" data-act="snagclose" data-id="${s.id}">${ic("check","sm")}Checked, close it</button>`:"")+(lvl("log")>=2?`<button type="button" class="btn small" data-act="snagreopen" data-id="${s.id}">Not fixed</button>`:"")
+    :(lvl("log")>=2?`<button type="button" class="btn small" data-act="snagreopen" data-id="${s.id}">Reopen</button>`:"");
+  return `<article class="card lent"><button type="button" class="rowbtn" data-act="editsnag" data-id="${s.id}"><span class="tags"><span class="pill ${SNAG_ST[s.st][1]}">${SNAG_ST[s.st][0]}</span>${s.ph?`<span class="pill grey">${esc(phName(s.ph))}</span>`:""}</span><span class="ltx">${esc(s.text)}</span><span class="ls">${esc(["Reported "+dWord(s.date),s.who?"by "+s.who:"",s.fixer?"for "+s.fixer:"",s.st==="fixed"&&s.fixedOn?"fixed "+dshort(s.fixedOn):"",s.st==="closed"&&s.closedOn?"closed "+dshort(s.closedOn):""].filter(Boolean).join(" · "))}</span></button>${pics.length?`<div class="thumbs" style="margin-top:6px">${pics.slice(0,4).map((p,i)=>`<button type="button" class="thumb" data-m="${p.m}" data-act="lb" data-id="${start+i}" aria-label="Open photo">${i===3&&pics.length>4?`<span class="more">+${pics.length-3}</span>`:""}</button>`).join("")}</div>`:""}${btn?`<div class="row wr" style="gap:8px;margin-top:8px">${btn}</div>`:""}</article>`;
+}
+function snagsV(){
+  const f=F(),g={open:[],fixed:[],closed:[]};f.snags.slice().sort((a,b)=>b.date.localeCompare(a.date)||b.t-a.t).forEach(s=>g[s.st||"open"].push(s));
+  lbList=[...g.open,...g.fixed,...g.closed].flatMap(s=>(s.media||[]).map(m=>({m,l:s})));
+  if(!f.snags.length)return `<div class="card empty">${ic("alert","xl")}<h3>No snags</h3><p>Report anything that is wrong or not finished, with a photo. The contractor marks it fixed and the Project Lead closes it after a check.</p>${lvl("log")>=2?`<button type="button" class="btn primary" data-act="addsnag">${ic("plus")}Report a snag</button>`:""}</div>`;
+  let n=0,html=lvl("log")>=2?`<button type="button" class="btn block" style="margin-bottom:12px" data-act="addsnag">${ic("plus")}Report a snag</button>`:"";
+  [["open","To fix"],["fixed","Fixed, waiting for a check"],["closed","Closed"]].forEach(([k,l])=>{if(!g[k].length)return;html+=`<div class="lday">${l} (${g[k].length})</div>`;g[k].forEach(s=>{html+=snagCard(s,n);n+=(s.media||[]).length})});
+  return html;
+}
+function snagStep(id,st){
+  const s=F().snags.find(x=>x.id===id);if(!s)return;
+  const vals=st==="fixed"?{st,fixedOn:today()}:st==="closed"?{st,closedOn:today()}:{st:"open",fixedOn:"",closedOn:""};
+  const u=undoEdit(s,vals);logAct(st==="fixed"?`Marked a snag fixed: ${s.text.slice(0,60)}`:st==="closed"?`Closed a snag: ${s.text.slice(0,60)}`:`Reopened a snag: ${s.text.slice(0,60)}`);save();render();
+  toast(st==="fixed"?"Marked fixed. The Project Lead checks and closes it.":st==="closed"?"Snag closed.":"Snag reopened.",u);
+}
+function snagSheet(id,ph){
+  sheetRO=lvl("log")<2?"log":null;
+  const f=F(),s=id?f.snags.find(x=>x.id===id):null;if(id&&!s)return;
+  sheet(s?"Snag":"Report a snag",`
+   <label class="f" for="sx1">What is wrong</label><textarea id="sx1" class="t" data-mic placeholder="For example: water pooling at the north-east corner after rain">${esc(s?.text||"")}</textarea>
+   ${mediaPickerV("Photos")}
+   <label class="f" for="sx2">Phase</label><select id="sx2" class="t">${phOptions(s?.ph||ph||curPhase()?.id||"")}</select>
+   <label class="f" for="sx3">Who should fix it</label><input id="sx3" class="t" list="sxl" value="${esc(s?.fixer||"")}" autocomplete="off"><datalist id="sxl">${names().map(n=>`<option value="${esc(n)}">`).join("")}</datalist>
+   ${dateField("sx4",s?.date||today(),"Reported on",[["Today",today()],["Yesterday",addDays(today(),-1)]])}
+   <div class="foot"><button type="button" class="btn primary block" id="sxv">${s?"Save":"Report the snag"}</button>${s?`<button type="button" class="btn danger block" id="sxx">${ic("trash","sm")}Delete this snag</button>`:""}</div>`,(sh,close)=>{
+    const mp=mediaPicker(sh,[...(s?.media||[])]);
+    $("#sxv",sh).onclick=async()=>{const text=$("#sx1",sh).value.trim();if(!text)return fieldErr(sh,"sx1","Say what is wrong.");
+      const b=$("#sxv",sh);b.disabled=true;let media;try{media=await mp.save()}catch{b.disabled=false;toast("Could not save the photos on this phone.");return}
+      const vals={text,media,ph:$("#sx2",sh).value,fixer:$("#sx3",sh).value.trim(),date:$("#sx4",sh).value||today()};
+      if(s){const u=undoEdit(s,vals);save();close();render();toast("Snag saved.",u)}
+      else{const n={id:uid(),t:Date.now(),who:sm.pname||S.me||"",st:"open",fixedOn:"",closedOn:"",...vals};f.snags.push(n);logAct(`Reported a snag: ${text.slice(0,60)}`);save();close();logMode="snags";if(tab!=="log")go("log");else render();toast("Snag reported.",()=>f.snags.splice(f.snags.indexOf(n),1))}};
+    if(s)$("#sxx",sh).onclick=()=>{const i=f.snags.indexOf(s);f.snags.splice(i,1);save();close();render();toast("Snag deleted.",()=>f.snags.splice(i,0,s))};
+  });
+}
+
+/* ============ plans and documents: drawings, surveys, soil tests, approvals and (behind money) quotes, contracts and invoices ============ */
+const DOC_T=[["drawing","Drawing"],["survey","Survey"],["soil","Soil test"],["approval","Approval"],["photo","Photo or sketch"],["other","Other"],["quote","Quote",1],["contract","Contract",1],["invoice","Invoice",1]];
+const docT=k=>DOC_T.find(x=>x[0]===k)||DOC_T[5];
+const docVisible=d=>lvl("docs")>=1&&(!d.m||lvl("money")>=1);
+const fileKind=id=>/^application\/pdf/.test(mtype.get(id)||"")?"pdf":"image";
+const mtype=new Map();
+async function mBlob(id){const b=await mGet(id).catch(()=>null);if(b)mtype.set(id,b.type||"");return b}
+function docsV(){
+  const f=F(),all=f.docs.filter(docVisible).sort((a,b)=>(b.date||"").localeCompare(a.date||"")),types=[...new Set(all.map(d=>d.type))];
+  if(docF!=="all"&&!types.includes(docF))docF="all";
+  const list=all.filter(d=>docF==="all"||d.type===docF);
+  let html=`<div class="phead"><button type="button" class="back" data-act="gophases">${ic("left","sm")}All phases</button></div><div class="page-h"><h2>Plans and documents</h2></div>`;
+  if(!all.length)return html+`<div class="card empty">${ic("map","xl")}<h3>No plans yet</h3><p>Keep the drawings, surveys, soil test reports and approvals here, as photos or PDF files. Open, share or print them from the site.</p>${lvl("docs")>=2?`<button type="button" class="btn primary" data-act="adddoc">${ic("plus")}Add a plan or document</button>`:""}</div>`;
+  if(types.length>1)html+=`<div class="chips" role="group" aria-label="Show" style="margin-bottom:10px">${[["all","All"],...DOC_T.filter(t=>types.includes(t[0]))].map(([k,l])=>`<button type="button" class="chip" data-act="docf" data-id="${k}" aria-pressed="${docF===k}">${l}</button>`).join("")}</div>`;
+  if(lvl("docs")>=2)html+=`<button type="button" class="btn block" style="margin-bottom:12px" data-act="adddoc">${ic("plus")}Add a plan or document</button>`;
+  return html+`<section class="card"><ul class="list">${list.map(d=>`<li class="nxrow"><button type="button" class="rowbtn rowfull" data-act="opendoc" data-id="${d.id}"><span class="row-ic${d.m?"":" sky"}">${ic(d.m?"cash":d.type==="drawing"||d.type==="survey"?"map":"note")}</span><span class="grow"><span class="lt">${esc(d.name)}</span> <span class="ls">${esc([docT(d.type)[1],d.date?dshort(d.date):"",d.ph?phName(d.ph):"",plural((d.media||[]).length,"file")].filter(Boolean).join(" · "))}</span></span>${ic("chev","sm")}</button></li>`).join("")}</ul></section>`;
+}
+async function docView(id){
+  const d=F().docs.find(x=>x.id===id);if(!d||!docVisible(d))return;
+  const files=[];for(const m of d.media||[]){const b=await mBlob(m);files.push({m,b,kind:b&&/pdf/.test(b.type)?"pdf":"image"})}
+  const imgs=files.filter(x=>x.kind==="image");
+  sheet(d.name,`<p class="muted small" style="margin:0 0 8px">${esc([docT(d.type)[1],d.date?dlong(d.date):"",d.ph?phName(d.ph):""].filter(Boolean).join(" · "))}</p>
+   ${d.note?`<p style="margin:0 0 10px;white-space:pre-wrap">${esc(d.note)}</p>`:""}
+   ${imgs.length?`<div class="thumbs" style="margin-bottom:10px">${imgs.map((x,i)=>`<button type="button" class="thumb" data-m="${x.m}" data-i="${i}" aria-label="Open page ${i+1}"></button>`).join("")}</div>`:""}
+   ${files.filter(x=>x.kind==="pdf").map((x,i)=>`<button type="button" class="btn block" style="margin-bottom:8px" data-pdf="${x.m}">${ic("note")}Open the PDF${files.filter(y=>y.kind==="pdf").length>1?" "+(i+1):""}</button>`).join("")}
+   ${files.some(x=>!x.b)?`<p class="hint">Some files are still on their way from the team.</p>`:""}
+   <div class="foot"><button type="button" class="btn primary block" id="dsh">${ic("share")}${isIOS()?"Share or print":"Share or download"}</button>${lvl(d.m?"money":"docs")>=2?`<button type="button" class="btn block" id="ded">${ic("pencil")}Change</button>`:""}</div>`,(sh,close)=>{
+    hydrate(sh);
+    $$("[data-i]",sh).forEach(b=>b.onclick=()=>{close();lightbox(imgs.map(x=>({m:x.m,l:{date:d.date||today(),text:d.name,ph:d.ph,media:d.media}})),+b.dataset.i)});
+    $$("[data-pdf]",sh).forEach(b=>b.onclick=()=>{const x=files.find(y=>y.m===b.dataset.pdf);if(!x?.b)return;const u=URL.createObjectURL(x.b);window.open(u,"_blank","noopener");setTimeout(()=>URL.revokeObjectURL(u),60000)});
+    $("#dsh",sh).onclick=async()=>{const fs=files.filter(x=>x.b).map((x,i)=>new File([x.b],exSafe(d.name)+(files.length>1?" "+(i+1):"")+(x.kind==="pdf"?".pdf":".jpg"),{type:x.b.type}));if(!fs.length){toast("The files are not on this phone yet.");return}
+      if(navigator.canShare&&navigator.canShare({files:fs})){try{await navigator.share({files:fs,title:d.name})}catch{}}else fs.forEach(fl=>{const a=document.createElement("a");a.href=URL.createObjectURL(fl);a.download=fl.name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),60000)})};
+    $("#ded",sh)?.addEventListener("click",()=>{close();setTimeout(()=>docSheet(id),60)});
+  });
+}
+function docSheet(id){
+  const f=F(),d=id?f.docs.find(x=>x.id===id):null;if(id&&!d)return;
+  sheetRO=lvl(d?.m?"money":"docs")<2?(d?.m?"money":"docs"):null;
+  let type=d?.type||"drawing";const keep=[...(d?.media||[])],add=[];
+  const types=DOC_T.filter(t=>!t[2]||lvl("money")>=2);
+  sheet(d?"Change the document":"Add a plan or document",`
+   <label class="f" for="dc1">Name</label><input id="dc1" class="t" value="${esc(d?.name||"")}" placeholder="For example: Site layout, revision B" ${d?"":"data-autofocus"} autocomplete="off">
+   <label class="f">Type</label><div class="chips">${types.map(([k,l])=>`<button type="button" class="chip" data-dt="${k}" aria-pressed="${type===k}">${l}</button>`).join("")}</div>
+   <label class="f">Files</label><ul class="list" id="dcl"></ul>
+   <div class="row" style="gap:8px"><button type="button" class="btn grow" id="dcc">${ic("camera")}Photo of a page</button><button type="button" class="btn grow" id="dcf">${ic("download")}Choose files</button></div>
+   <p class="hint">Photos or PDF files. Several pages are fine.</p>
+   <label class="f" for="dc2">Phase</label><select id="dc2" class="t">${phOptions(d?.ph||"")}</select>
+   ${dateField("dc3",d?.date||today(),"Date",[["Today",today()]])}
+   <label class="f" for="dc4">Notes</label><textarea id="dc4" class="t" data-mic placeholder="What changed in this revision, who sent it">${esc(d?.note||"")}</textarea>
+   <div class="foot"><button type="button" class="btn primary block" id="dcv">${d?"Save":"Add the document"}</button>${d?`<button type="button" class="btn danger block" id="dcx">${ic("trash","sm")}Delete this document</button>`:""}</div>`,(sh,close)=>{
+    $$("[data-dt]",sh).forEach(b=>b.onclick=()=>{type=b.dataset.dt;$$("[data-dt]",sh).forEach(x=>x.setAttribute("aria-pressed",x===b))});
+    const paint=async()=>{const rows=[];for(const[i,m]of keep.entries()){const b=await mBlob(m);rows.push(`<li><span class="row-ic sky">${ic(b&&/pdf/.test(b.type)?"note":"image")}</span><div class="grow"><div class="lt">${b&&/pdf/.test(b.type)?"PDF":"Page"} ${i+1}</div><div class="ls">${b?Math.max(1,Math.round(b.size/1024))+" KB":"on its way"}</div></div><button type="button" class="btn icon" data-k="${i}" aria-label="Remove file ${i+1}">${ic("x","sm")}</button></li>`)}
+      add.forEach((a,i)=>rows.push(`<li><span class="row-ic">${ic(/pdf/.test(a.f.type)?"note":"image")}</span><div class="grow"><div class="lt">${esc(a.f.name||"New file")}</div><div class="ls">${Math.max(1,Math.round(a.f.size/1024))} KB, new</div></div><button type="button" class="btn icon" data-a="${i}" aria-label="Remove ${esc(a.f.name||"file")}">${ic("x","sm")}</button></li>`));
+      $("#dcl",sh).innerHTML=rows.join("")||`<li class="muted small">No files yet.</li>`;
+      $$("#dcl [data-k]",sh).forEach(b=>b.onclick=()=>{keep.splice(+b.dataset.k,1);paint()});$$("#dcl [data-a]",sh).forEach(b=>b.onclick=()=>{add.splice(+b.dataset.a,1);paint()})};
+    const pick=cam=>{const i=document.createElement("input");i.type="file";i.accept=cam?"image/*":"image/*,application/pdf";i.multiple=!cam;if(cam)i.setAttribute("capture","environment");i.style.display="none";document.body.append(i);
+      i.addEventListener("change",()=>{[...i.files].forEach(fl=>add.push({f:fl}));i.remove();paint()});i.addEventListener("cancel",()=>i.remove());i.click()};
+    $("#dcc",sh).onclick=()=>pick(true);$("#dcf",sh).onclick=()=>pick(false);paint();
+    $("#dcv",sh).onclick=async()=>{const name=$("#dc1",sh).value.trim();if(!name)return fieldErr(sh,"dc1","Give the document a name.");
+      if(!keep.length&&!add.length){toast("Add at least one photo or PDF file.");return}
+      const big=add.find(a=>a.f.size>50*1048576);if(big){toast(`${big.f.name} is larger than 50 MB. Choose a smaller file.`);return}
+      const b=$("#dcv",sh);b.disabled=true;b.textContent="Saving…";const ids=[];
+      try{for(const a of add){const blob=/^image\//.test(a.f.type)?await prepPhoto(a.f,2400):a.f,mid="m"+uid();await mPut(mid,blob);ids.push(mid);queueMedia(mid)}}catch{b.disabled=false;b.textContent="Try again";toast("Could not save the files on this phone.");return}
+      const money=!!docT(type)[2],vals={name,type,ph:$("#dc2",sh).value,date:$("#dc3",sh).value,note:$("#dc4",sh).value.trim(),media:[...keep,...ids],...(money?{m:1}:{m:0})};
+      if(d){const u=undoEdit(d,vals);save();close();render();toast("Document saved.",u)}
+      else{const n={id:uid(),t:Date.now(),who:sm.pname||S.me||"",...vals};f.docs.push(n);logAct(`Added ${docT(type)[1].toLowerCase()}: ${name}`,money);save();close();if(tab!=="docs")go("docs");else render();toast(name+" added.",()=>f.docs.splice(f.docs.indexOf(n),1))}};
+    if(d)$("#dcx",sh).onclick=()=>{const i=f.docs.indexOf(d);f.docs.splice(i,1);save();close();render();toast("Document deleted.",()=>f.docs.splice(i,0,d))};
+  });
+}
+
+/* ============ deliveries and orders ============ */
+const delivered=m=>F().deliv.reduce((a,d)=>a+(d.items||[]).filter(x=>x.mid===m.id).reduce((b,x)=>b+(+x.qty||0),0),0);
+function delivListV(){
+  const ds=F().deliv.slice().sort((a,b)=>b.date.localeCompare(a.date)||b.t-a.t);if(!ds.length)return "";
+  const mats=new Map(F().mats.map(m=>[m.id,m]));
+  return `<section class="card" style="margin-top:12px"><h2>Deliveries</h2><ul class="list">${ds.map(d=>`<li class="nxrow"><button type="button" class="rowbtn rowfull" data-act="editdeliv" data-id="${d.id}"><span class="row-ic sky">${ic("truck")}</span><span class="grow"><span class="lt">${esc(d.sup||"Delivery")}, ${dshort(d.date)}</span> <span class="ls">${esc((d.items||[]).map(x=>{const m=mats.get(x.mid);return m?`${r1(+x.qty)} ${m.unit||""} ${m.name.toLowerCase()}`:""}).filter(Boolean).join(", ")||"No quantities")}${d.media?.length?" · "+plural(d.media.length,"photo"):""}</span></span>${ic("chev","sm")}</button></li>`).join("")}</ul></section>`;
+}
+function delivSheet(id){
+  sheetRO=lvl("mats")<2?"mats":null;
+  const f=F(),d=id?f.deliv.find(x=>x.id===id):null;if(id&&!d)return;
+  const q=new Map((d?.items||[]).map(x=>[x.mid,x.qty]));
+  const mats=f.mats.slice().sort((a,b)=>(a.status==="got")-(b.status==="got")||a.name.localeCompare(b.name));
+  sheet(d?"Delivery note":"New delivery",`
+   ${dateField("dv1",d?.date||today(),"Delivered on",[["Today",today()],["Yesterday",addDays(today(),-1)]])}
+   <label class="f" for="dv2">Supplier</label><input id="dv2" class="t" list="dvl" value="${esc(d?.sup||"")}" autocomplete="off"><datalist id="dvl">${[...new Set([...f.mats.map(m=>m.sup),...(S.cons||[]).map(c=>c.name)].filter(Boolean))].map(n=>`<option value="${esc(n)}">`).join("")}</datalist>
+   <div class="sec">What came</div>
+   ${mats.length?`<ul class="list">${mats.map(m=>`<li><div class="grow"><label class="lt" for="dq-${m.id}">${esc(m.name)}</label><div class="ls">${m.qty?"Need "+esc(m.qty)+" "+esc(m.unit||"")+", ":""}delivered ${r1(delivered(m)-(+q.get(m.id)||0))} so far</div></div><input id="dq-${m.id}" class="t dq" data-mid="${m.id}" inputmode="decimal" value="${esc(q.get(m.id)??"")}" placeholder="0" aria-label="${esc(m.name)} delivered, in ${esc(m.unit||"units")}"><span class="ls dqu">${esc(m.unit||"")}</span></li>`).join("")}</ul>`:`<p class="muted small">Add materials first, then record what is delivered.</p>`}
+   ${mediaPickerV("Photo of the delivery note")}
+   <label class="f" for="dv3">Notes</label><textarea id="dv3" class="t" data-mic placeholder="Short or damaged items, who signed for it">${esc(d?.note||"")}</textarea>
+   <div class="foot"><button type="button" class="btn primary block" id="dvv">${d?"Save":"Save the delivery"}</button>${d?`<button type="button" class="btn danger block" id="dvx">${ic("trash","sm")}Delete this delivery</button>`:""}</div>`,(sh,close)=>{
+    const mp=mediaPicker(sh,[...(d?.media||[])]);
+    $("#dvv",sh).onclick=async()=>{
+      const items=$$(".dq",sh).map(i=>({mid:i.dataset.mid,qty:num(i.value)})).filter(x=>x.qty>0);
+      if(!items.length&&!mp.count())return fieldErr(sh,$$(".dq",sh)[0]?.id||"dv2","Enter how much came, or add a photo of the note.");
+      let media;try{media=await mp.save()}catch{toast("Could not save the photo on this phone.");return}
+      const vals={date:$("#dv1",sh).value||today(),sup:$("#dv2",sh).value.trim(),items,media,note:$("#dv3",sh).value.trim()};
+      const undos=[];let n=null;
+      if(d)undos.push(undoEdit(d,vals));else{n={id:uid(),t:Date.now(),who:sm.pname||S.me||"",...vals};f.deliv.push(n)}
+      /* a material whose full amount has now come is ticked Received */
+      const done=[];items.forEach(x=>{const m=f.mats.find(y=>y.id===x.mid);if(m&&+m.qty>0&&m.status!=="got"&&delivered(m)>=+String(m.qty).replace(",",".")){undos.push(undoEdit(m,{status:"got",recOn:vals.date,ordOn:m.ordOn||vals.date,toOrd:false}));done.push(m.name)}});
+      logAct(`Delivery from ${vals.sup||"a supplier"}: ${items.length?plural(items.length,"material"):"photo of the note"}`);save();close();render();
+      toast((d?"Delivery saved.":"Delivery recorded.")+(done.length?` ${done.join(", ")} now received.`:""),()=>{undos.forEach(u=>u());if(n)f.deliv.splice(f.deliv.indexOf(n),1)});
+    };
+    if(d)$("#dvx",sh).onclick=()=>{const i=f.deliv.indexOf(d);f.deliv.splice(i,1);save();close();render();toast("Delivery deleted.",()=>f.deliv.splice(i,0,d))};
+  });
+}
+/* the order list, ready to send to each supplier on WhatsApp */
+function orderSheet(){
+  const f=F(),list=f.mats.filter(m=>m.toOrd&&m.status==="need");if(!list.length){toast("Nothing is ticked To order.");return}
+  const g={};list.forEach(m=>(g[m.sup||"Any supplier"]=g[m.sup||"Any supplier"]||[]).push(m));
+  const text=(sup,ms)=>[`*Order for Newberry House, ${f.name}*`,dlong(today()),"",...ms.map(m=>`- ${m.name}${m.qty?": "+m.qty+" "+(m.unit||""):""}${m.due?" (needed by "+dshort(m.due)+")":""}`),"",`Please confirm the price and the delivery date. Thank you.`].join("\n");
+  sheet("Send the order",`<p class="muted small" style="margin:0 0 8px">${plural(list.length,"material")} ticked To order, by supplier. Each one opens WhatsApp with the message ready.</p>
+   ${Object.entries(g).map(([sup,ms],i)=>`<section class="card" style="margin-bottom:10px"><h2>${esc(sup)}</h2><pre class="ordtx">${esc(text(sup,ms))}</pre><div class="row wr" style="gap:8px"><button type="button" class="btn small primary" data-send="${i}">${ic("share","sm")}Send</button><button type="button" class="btn small" data-ord="${i}">Mark ordered</button></div></section>`).join("")}`,(sh,close)=>{
+    const groups=Object.entries(g);
+    $$("[data-send]",sh).forEach(b=>b.onclick=()=>{const[sup,ms]=groups[+b.dataset.send];const c=(S.cons||[]).find(x=>x.name===sup);const t=text(sup,ms);if(c&&telOf(c.phone)&&!navigator.share)window.open("https://wa.me/"+telOf(c.phone).replace(/^0/,"27")+"?text="+encodeURIComponent(t),"_blank","noopener");else shareText(t)});
+    $$("[data-ord]",sh).forEach(b=>b.onclick=()=>{const[,ms]=groups[+b.dataset.ord];const us=ms.map(m=>undoEdit(m,{status:"ordered",ordOn:today(),toOrd:false}));logAct(`Ordered ${ms.map(m=>m.name.toLowerCase()).join(", ")}`);save();close();render();toast(`${plural(ms.length,"material")} marked ordered.`,()=>us.forEach(u=>u()))});
+  });
+}
+
+/* ============ reports and sharing: the weekly update, slideshow, video and a printed report ============ */
+function shareCardV(){
+  return `<section class="card"><h2>Share and show</h2><div class="addgrid" style="margin-top:8px"><button type="button" data-act="weekly">${ic("share")}Weekly update</button><button type="button" data-act="slides">${ic("play")}Slideshow</button><button type="button" data-act="video">${ic("film")}Video for WhatsApp</button><button type="button" data-act="printrep">${ic("print")}${isIOS()?"Report as a picture":"Print a report"}</button></div></section>`;
+}
+function weekFacts(){
+  const f=F(),td=today(),from=addDays(td,-6),b=boardFacts(f),cp=curPhase();
+  const done=f.tasks.filter(t=>t.st==="done"&&t.doneOn&&t.doneOn>=from&&t.doneOn<=td);
+  const next=f.tasks.filter(t=>t.st!=="done"&&t.due&&t.due>td&&t.due<=addDays(td,7)).sort((a,b)=>a.due.localeCompare(b.due));
+  const wk=f.logs.filter(l=>l.date>=from&&l.date<=td),rain=new Set(wk.filter(l=>l.rain).map(l=>l.date)).size,lost=new Set(wk.filter(l=>l.lost).map(l=>l.date)).size;
+  const dh=f.diary.filter(e=>e.date>=from&&e.date<=td),hrs=dh.reduce((a,e)=>a+(+e.hrs||0),0),lh=dh.reduce((a,e)=>a+(+e.lost||0),0);
+  const snags=f.snags.filter(s=>s.st!=="closed").length;
+  const pics=f.logs.filter(l=>l.date>=from&&l.date<=td&&l.media?.length).sort((a,b)=>a.date.localeCompare(b.date)).flatMap(l=>l.media.map(m=>({m,l})));
+  return{f,b,cp,from,td,done,next,rain,lost,hrs,lh,snags,pics};
+}
+function weekText(){
+  const{f,b,cp,from,td,done,next,rain,lost,hrs,lh,snags}=weekFacts();
+  const L=[`*Newberry Fields: ${f.name}*`,`Week of ${dshort(from)} to ${dshort(td)}`,"",`*Scoreboard:* ${b.dn} of ${b.all} tasks done, ${b.phDone} of ${f.phases.length} phases done.`];
+  if(cp)L.push(`*Now:* ${cp.name} (${phStats(cp).done} of ${phStats(cp).total}).`);
+  if(b.wd>0&&b.left)L.push(`*Target:* ${b.left} more tasks in ${b.wd} work days to the opening${f.set.target?" on "+dlong(f.set.target):""}.`);
+  L.push("",`*Done this week (${done.length})*`);done.slice(0,12).forEach(t=>L.push("- "+t.title));if(!done.length)L.push("- Nothing ticked off this week.");
+  if(next.length){L.push("","*Coming up*");next.slice(0,8).forEach(t=>L.push(`- ${dshort(t.due)}: ${t.title}${t.who?" ("+t.who+")":""}`))}
+  const wx=[rain?plural(rain,"rain day"):"",lost?plural(lost,"lost work day"):"",hrs?r1(hrs)+" hours worked":"",lh?r1(lh)+" hours lost":""].filter(Boolean);
+  if(wx.length)L.push("",`*On site:* ${wx.join(", ")}.`);
+  if(snags)L.push(`*Snags open:* ${snags}.`);
+  return L.join("\n");
+}
+function weeklySheet(){
+  const w=weekFacts(),text=weekText(),pics=w.pics.slice(-6);
+  sheet("Weekly update",`<p class="muted small" style="margin:0 0 8px">For the board, sponsors, staff and coaches. Check it, then send it on WhatsApp${pics.length?` with ${plural(pics.length,"photo")} from this week`:""}.</p>
+   <textarea id="wk" class="t" data-mic style="min-height:260px">${esc(text)}</textarea>
+   ${pics.length?`<label class="tick"><input type="checkbox" id="wkp" checked>Send ${plural(pics.length,"photo")} with it</label>`:""}
+   <div class="foot"><button type="button" class="btn primary block" id="wks">${ic("share")}Send the update</button></div>`,(sh,close)=>{
+    $("#wks",sh).onclick=async()=>{const tx=$("#wk",sh).value;if($("#wkp",sh)?.checked){const files=[];for(const p of pics){const b=await mGet(p.m).catch(()=>null);if(b)files.push(new File([b],"field-"+(files.length+1)+".jpg",{type:b.type||"image/jpeg"}))}
+        if(files.length&&navigator.canShare&&navigator.canShare({files})){try{await navigator.share({files,text:tx});close();return}catch(e){if(e?.name==="AbortError")return}}}
+      close();shareText(tx)};
+  });
+}
+/* slideshow: oldest first, whole field, one phase or one month */
+function fieldSlides(max,flt){
+  const all=F().logs.filter(l=>l.media?.length&&(!flt||(flt.ph?l.ph===flt.ph:(l.date||"").startsWith(flt.month)))).sort((a,b)=>a.date.localeCompare(b.date)||a.t-b.t).flatMap(l=>l.media.map(m=>({m,l})));
+  if(all.length<=max)return all;const out=[];for(let k=0;k<max;k++)out.push(all[Math.round(k*(all.length-1)/(max-1))]);return out;
+}
+const slideLabel=flt=>!flt?F().name:flt.ph?phName(flt.ph):new Date(flt.month+"-15T12:00").toLocaleDateString("en-ZA",{month:"long",year:"numeric"});
+function slidePickSheet(forVideo){
+  const all=fieldSlides(1e6);if(!all.length){toast("No photos in the site log yet.");return}
+  const cnt=k=>{const m=new Map();all.forEach(x=>{const v=k(x);if(v)m.set(v,(m.get(v)||0)+1)});return m};
+  const ph=cnt(x=>x.l.ph||""),mo=cnt(x=>(x.l.date||"").slice(0,7)),phs=F().phases.filter(p=>ph.has(p.id)),months=[...mo.keys()].sort();
+  let pick=null;const key=x=>!x?"all":x.ph?"p:"+x.ph:"m:"+x.month;
+  const chip=(x,l,n)=>`<button type="button" class="chip" data-k="${key(x)}" aria-pressed="${key(x)===key(pick)}">${esc(l)}<span class="sr">,</span> ${n}</button>`;
+  sheet(forVideo?"Video for WhatsApp":"Slideshow",`<p class="muted small" style="margin:0 0 8px">Show the whole field, or one phase or one month. The number is how many photos.</p>
+   <div class="chips">${chip(null,"Whole field",all.length)}</div>
+   ${phs.length>1?`<div class="sec">Phase</div><div class="chips">${phs.map(p=>chip({ph:p.id},p.name,ph.get(p.id))).join("")}</div>`:""}
+   ${months.length>1?`<div class="sec">Month</div><div class="chips">${months.map(m=>chip({month:m},slideLabel({month:m}),mo.get(m))).join("")}</div>`:""}
+   <div class="foot"><button type="button" class="btn primary block" id="slgo">${ic(forVideo?"film":"play")}${forVideo?"Next":"Play"}</button></div>`,(sh,close)=>{
+    const map=new Map([["all",null],...phs.map(p=>["p:"+p.id,{ph:p.id}]),...months.map(m=>["m:"+m,{month:m}])]);
+    $$("[data-k]",sh).forEach(b=>b.onclick=()=>{pick=map.get(b.dataset.k);$$("[data-k]",sh).forEach(x=>x.setAttribute("aria-pressed",x===b))});
+    $("#slgo",sh).onclick=()=>{close();setTimeout(()=>forVideo?slideShareSheet(pick,true):lightbox(fieldSlides(80,pick),0,{play:true}),60)};
+  });
+}
+/* the WhatsApp video: title card, 2 seconds a photo with a cross-fade and slow zoom, before and after at the end */
+const SV_W=720,SV_H=900,SV_SEC=2,SV_FADE=0.7;
+const svType=()=>{for(const t of["video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9","video/webm"])try{if(window.MediaRecorder&&MediaRecorder.isTypeSupported(t))return t}catch{}return ""};
+function svWrap(x,text,maxW,maxLines){const words=String(text||"").split(/\s+/).filter(Boolean),lines=[];let cur="";for(const w of words){const t=cur?cur+" "+w:w;if(x.measureText(t).width>maxW&&cur){lines.push(cur);cur=w;if(lines.length===maxLines)break}else cur=t}if(lines.length<maxLines&&cur)lines.push(cur);return lines}
+function svDraw(x,s,p){
+  x.fillStyle="#163a22";x.fillRect(0,0,SV_W,SV_H);
+  if(s.ba){const boxH=(SV_H-140)/2-30;x.textAlign="center";x.fillStyle="#f2c230";x.font="700 26px system-ui,sans-serif";x.fillText("BEFORE AND AFTER",SV_W/2,52);[[s.ba[0],"Before · "+dshort(s.ba[0].date),80],[s.ba[1],"Now · "+dshort(s.ba[1].date),80+boxH+50]].forEach(([q,lab,y])=>{const im=q.img,r=Math.min((SV_W-60)/im.width,boxH/im.height),w=im.width*r,h=im.height*r;x.drawImage(im,(SV_W-w)/2,y+(boxH-h)/2,w,h);x.fillStyle="#fff";x.font="600 26px system-ui,sans-serif";x.fillText(lab,SV_W/2,y+boxH+32)});return}
+  if(s.title){for(let k=0;k<SV_W;k+=60){x.fillStyle="rgba(255,255,255,.04)";x.fillRect(k,0,30,SV_H)}x.fillStyle="#f2c230";x.font="700 30px system-ui,sans-serif";x.textAlign="center";x.fillText("NEWBERRY FIELDS",SV_W/2,SV_H/2-70);x.fillStyle="#fff";x.font="700 52px system-ui,sans-serif";svWrap(x,s.title,SV_W-120,2).forEach((t,i)=>x.fillText(t,SV_W/2,SV_H/2+i*62));x.font="400 30px system-ui,sans-serif";x.fillStyle="rgba(255,255,255,.85)";x.fillText(s.sub,SV_W/2,SV_H/2+150);return}
+  const im=s.img,z=1+0.06*(p||0),r=Math.min(SV_W/im.width,(SV_H-150)/im.height),w=im.width*r*z,h=im.height*r*z;x.save();x.beginPath();x.rect(0,0,SV_W,SV_H-150);x.clip();x.drawImage(im,(SV_W-w)/2,(SV_H-150-h)/2,w,h);x.restore();
+  x.fillStyle="rgba(10,30,16,.85)";x.fillRect(0,SV_H-150,SV_W,150);x.textAlign="left";x.fillStyle="#f2c230";x.font="700 24px system-ui,sans-serif";x.fillText(s.head,30,SV_H-112);
+  x.fillStyle="#fff";x.font="500 28px system-ui,sans-serif";svWrap(x,s.text,SV_W-60,2).forEach((t,i)=>x.fillText(t,30,SV_H-72+i*36));if(s.frac!=null){x.fillStyle="rgba(255,255,255,.25)";x.fillRect(30,SV_H-16,SV_W-60,5);x.fillStyle="#8cc152";x.fillRect(30,SV_H-16,(SV_W-60)*s.frac,5)}
+}
+function slideShareSheet(flt,picked){
+  if(!picked){slidePickSheet(true);return}
+  const list=fieldSlides(30,flt);if(!list.length){toast("No photos in the site log yet.");return}
+  const t=svType(),canVid=!!(t&&HTMLCanvasElement.prototype.captureStream),first=list[0].l.date,last=list.at(-1).l.date,secs=Math.round((list.length+1)*SV_SEC+(list.length>=3?3.5:0));
+  const name=slideLabel(flt),sub=dshort(first)+" to "+dshort(last),text=`Newberry Fields, ${name}: progress ${sub}`;
+  const shareFiles=async(files,tx)=>{if(navigator.canShare&&navigator.canShare({files})){try{await navigator.share({files,text:tx});return true}catch(e){if(e?.name==="AbortError")return true}}return false};
+  sheet("Video for WhatsApp",`<p class="muted" style="margin:0 0 10px">${canVid?`A short video, oldest photo first, ending with before and after: ${plural(list.length,"photo")}, about ${secs} seconds. Keep this screen open while it is made.`:"This phone cannot make a video here. Send the photos with a short message instead."}</p><p class="hint" id="svs" role="status"></p>
+   <div class="foot">${canVid?`<button type="button" class="btn primary block" id="svgo">${ic("film")}Make the video</button>`:""}<button type="button" class="btn block" id="svph">${ic("image")}Send photos instead</button></div>`,(sh,close)=>{
+    const say=m=>$("#svs",sh).textContent=m;
+    $("#svph",sh).onclick=async()=>{say("Getting the photos ready…");const files=[];for(const q of list.slice(-10)){const b=await mGet(q.m).catch(()=>null);if(b)files.push(new File([b],"field-"+(files.length+1)+".jpg",{type:b.type||"image/jpeg"}))}if(!await shareFiles(files,text)){shareText(text)}say("")};
+    $("#svgo",sh)?.addEventListener("click",async e=>{const b=e.currentTarget;b.disabled=true;
+      try{say("Loading the photos…");const slides=[{title:name,sub}];
+        for(const q of list){const bl=await mGet(q.m).catch(()=>null);if(!bl)continue;try{slides.push({img:await createImageBitmap(bl),head:((q.l.ph?phName(q.l.ph):"Site")+" · "+dshort(q.l.date)).toUpperCase(),text:q.l.text||"",date:q.l.date})}catch{}}
+        const phs=slides.filter(x=>x.img);if(!phs.length){say("The photos are still on their way. Try again in a minute.");return}phs.forEach((x,k)=>x.frac=(k+1)/phs.length);if(phs.length>=3&&phs[0].date!==phs.at(-1).date)slides.push({ba:[phs[0],phs.at(-1)]});
+        const cv=document.createElement("canvas");cv.width=SV_W;cv.height=SV_H;const x=cv.getContext("2d");svDraw(x,slides[0]);
+        const stream=cv.captureStream(30),rec=new MediaRecorder(stream,{mimeType:t,videoBitsPerSecond:1200000}),chunks=[];rec.ondataavailable=ev=>{if(ev.data&&ev.data.size)chunks.push(ev.data)};
+        const done=new Promise(r=>rec.onstop=r);rec.start(1000);
+        const dur=slides.map(s=>(s.ba?3.5:SV_SEC)*1000),st=[];dur.reduce((a,d,k)=>(st[k]=a,a+d),0);const t0=Date.now(),total=st.at(-1)+dur.at(-1);let cur=-1;
+        await new Promise(res=>{const tick=setInterval(()=>{if(!sh.isConnected){clearInterval(tick);res();return}const el=Date.now()-t0;let k=0;while(k<slides.length-1&&el>=st[k+1])k++;if(k!==cur){cur=k;say(`Making the video… ${k} of ${slides.length-1}`)}const p=Math.min(1,(el-st[k])/dur[k]),fd=(el-st[k])/(SV_FADE*1000);if(k>0&&fd<1){svDraw(x,slides[k-1],1);x.globalAlpha=Math.max(0,fd*fd*(3-2*fd));svDraw(x,slides[k],p);x.globalAlpha=1}else svDraw(x,slides[k],p);if(el>=total){clearInterval(tick);res()}},33)});
+        rec.stop();await done;stream.getTracks().forEach(s=>s.stop());slides.forEach(s=>s.img?.close?.());if(!sh.isConnected)return;
+        const type=t.split(";")[0],blob=new Blob(chunks,{type}),file=new File([blob],"newberry-fields"+(type.includes("mp4")?".mp4":".webm"),{type});
+        say(`Video ready (${(blob.size/1048576).toFixed(1).replace(".",",")} MB).`);
+        if(!await shareFiles([file],text)){const a=document.createElement("a");a.href=URL.createObjectURL(file);a.download=file.name;document.body.append(a);a.click();a.remove();say("The video was saved. Send it from your files on WhatsApp.")}
+      }catch(err){console.warn(err);say("Could not make the video on this phone. Try Send photos instead.")}finally{b.disabled=false}});
+  });
+}
+/* a printed report (on iPhone: a picture that the share screen can print) */
+function reportPrint(){
+  const w=weekFacts(),{f,b}=w;
+  const rows=f.phases.map((p,i)=>{const s=phStats(p);return[i+1+". "+p.name,`${s.done} of ${s.total}`,p.end?dshort(p.end):"",s.complete?"Done":curPhase()?.id===p.id?"Now":""]});
+  if(isIOS()){
+    const W=1080,pad=60,rh=58,H=pad*2+260+rows.length*rh+180,cv=document.createElement("canvas");cv.width=W;cv.height=H;const x=cv.getContext("2d");
+    x.fillStyle="#fffdf6";x.fillRect(0,0,W,H);x.fillStyle="#163a22";x.fillRect(0,0,W,210);x.fillStyle="#f2c230";x.font="700 28px system-ui,sans-serif";x.fillText("NEWBERRY FIELDS",pad,70);x.fillStyle="#fff";x.font="700 50px system-ui,sans-serif";x.fillText(f.name,pad,130);x.font="400 28px system-ui,sans-serif";x.fillText(`${b.dn} of ${b.all} tasks · ${b.phDone} of ${f.phases.length} phases · ${dlong(today())}`,pad,180);
+    let y=270;rows.forEach(r=>{x.fillStyle="#1d2618";x.font="600 28px system-ui,sans-serif";x.fillText(r[0],pad,y);x.textAlign="right";x.fillText(r[1]+(r[3]?" · "+r[3]:""),W-pad,y);x.textAlign="left";x.fillStyle="#e3dcc4";x.fillRect(pad,y+16,W-pad*2,2);y+=rh});
+    x.fillStyle="#5f6650";x.font="400 26px system-ui,sans-serif";x.fillText(`Snags open: ${w.snags} · Rain days this week: ${w.rain} · Hours worked: ${r1(w.hrs)}`,pad,y+40);
+    cv.toBlob(async bl=>{if(bl)toast(await slipSave(bl,exSafe(f.name)+" report "+today()+".png")||"Done.")},"image/png");return;
+  }
+  const area=document.createElement("div");area.id="printarea";
+  const tr=c=>`<tr>${c.map((v,i)=>`<td style="padding:5px 6px;border-bottom:1px solid #bbb;${i?"text-align:right;":""}font:12px sans-serif">${esc(v)}</td>`).join("")}</tr>`;
+  area.innerHTML=`<div class="pa-h">Newberry Fields: ${esc(f.name)}</div><div class="pa-cap">${esc(dlong(today()))} · ${b.dn} of ${b.all} tasks done · ${b.phDone} of ${f.phases.length} phases done${f.set.target?" · opening "+esc(dlong(f.set.target)):""}</div>
+   <table style="border-collapse:collapse;width:100%;max-width:17cm;margin:8px 0 14px"><tr><th style="text-align:left;font:700 12px sans-serif;border-bottom:2px solid #000">Phase</th><th style="text-align:right;font:700 12px sans-serif;border-bottom:2px solid #000">Tasks</th><th style="text-align:right;font:700 12px sans-serif;border-bottom:2px solid #000">Ends</th><th style="text-align:right;font:700 12px sans-serif;border-bottom:2px solid #000"></th></tr>${rows.map(tr).join("")}</table>
+   <div class="pa-cap"><b>This week</b>: ${w.done.length} tasks done, ${w.rain} rain days, ${r1(w.hrs)} hours worked, ${r1(w.lh)} hours lost, ${w.snags} snags open.</div>
+   ${w.next.length?`<div class="pa-cap"><b>Coming up</b></div>${w.next.slice(0,10).map(t=>`<div class="pa-cap">${esc(dshort(t.due))}: ${esc(t.title)}${t.who?" ("+esc(t.who)+")":""}</div>`).join("")}`:""}`;
+  printNode(area);
+}
+
+/* ============ updates to everyone (shared projects only), with read receipts ============ */
+const msgsFor=()=>(S.msgs||[]).filter(m=>!m.to||m.to.includes("all")||m.to.includes(sm.pid)||m.from===sm.pid).sort((a,b)=>b.t-a.t);
+const isRead=m=>m.from===sm.pid||(S.rcpt||[]).some(r=>r.mid===m.id&&r.p===sm.pid);
+const unreadMsgs=()=>shared()?msgsFor().filter(m=>!isRead(m)):[];
+function markRead(list){S.rcpt=S.rcpt||[];let n=0;list.forEach(m=>{if(!isRead(m)){S.rcpt.push({id:m.id+"_"+sm.pid,mid:m.id,p:sm.pid,from:m.from,t:Date.now()});n++}});if(n)save()}
+const ago=t=>{const s=(Date.now()-t)/1000;return s<90?"just now":s<3600?Math.round(s/60)+" min ago":s<86400?Math.round(s/3600)+" h ago":new Date(t).toLocaleDateString("en-ZA",{day:"numeric",month:"short"})};
+function msgV(m,full){
+  const reads=m.from===sm.pid?(S.rcpt||[]).filter(r=>r.mid===m.id).length:0;
+  return `<li><span class="row-ic ${isRead(m)?"":"green"}">${ic(isRead(m)?"chat":"bell")}</span><div class="grow"><div class="lt">${esc(m.fromName||"Someone")}${isRead(m)?"":`<span class="sr">, new</span> <span class="pill">New</span>`}</div><div class="ls">${esc(ago(m.t))}${m.to&&!m.to.includes("all")?" · to "+plural(m.to.length,"person","people"):""}${m.from===sm.pid&&reads?" · read by "+reads:""}</div><div class="${full?"ltx":"ls"}" style="margin-top:4px">${esc(full?m.text:m.text.slice(0,120)+(m.text.length>120?"…":""))}</div>${full&&m.media?.length?`<div class="thumbs" style="margin-top:6px">${m.media.map((x,i)=>`<button type="button" class="thumb" data-m="${x}" data-mlb="${m.id}|${i}" aria-label="Open photo"></button>`).join("")}</div>`:""}</div></li>`;
+}
+function updatesCardV(){
+  if(!shared())return "";const ms=msgsFor(),un=unreadMsgs().length;
+  return `<section class="card"><div class="row" style="justify-content:space-between"><h2>Updates${un?` <span class="pill">${un} new</span>`:""}</h2>${lvl("upd")>=2?`<button type="button" class="btn small" data-act="writeupd">${ic("chat","sm")}Write</button>`:""}</div>${ms.length?`<ul class="list">${ms.slice(0,2).map(m=>msgV(m)).join("")}</ul>${ms.length>2||un?`<button type="button" class="btn link small" data-act="updates">All updates</button>`:`<button type="button" class="btn link small" data-act="updates">Open</button>`}`:`<p class="muted small" style="margin:6px 0 0">Messages to the whole team appear here, for example "Grader on site Monday".</p>`}</section>`;
+}
+function updatesSheet(){
+  const ms=msgsFor();
+  sheet("Updates",ms.length?`<ul class="list">${ms.map(m=>msgV(m,true)).join("")}</ul>`:`<p class="muted">No updates yet.</p>`+(lvl("upd")>=2?"":""),(sh,close)=>{
+    hydrate(sh);
+    $$("[data-mlb]",sh).forEach(b=>b.onclick=()=>{const[mid,i]=b.dataset.mlb.split("|"),m=ms.find(x=>x.id===mid);close();lightbox(m.media.map(x=>({m:x,l:{date:iso(new Date(m.t)),text:m.fromName+": "+m.text,media:m.media}})),+i)});
+    if(lvl("upd")>=2){const d=document.createElement("div");d.className="foot";d.innerHTML=`<button type="button" class="btn primary block">${ic("chat")}Write an update</button>`;sh.append(d);d.firstChild.onclick=()=>{close();setTimeout(writeUpdate,60)}}
+  });
+  markRead(ms);render();
+}
+function writeUpdate(){
+  const people=(sm.people||[]).filter(p=>p.pid!==sm.pid&&p.active);let to=["all"];
+  sheet("Update everyone",`<label class="f" for="up1">Message</label><textarea id="up1" class="t" data-mic data-autofocus placeholder="For example: The grader is on site on Monday from 7:00. Keep the gate open."></textarea>
+   ${mediaPickerV("Photos (optional)")}
+   ${people.length?`<label class="f">Send to</label><div class="chips"><button type="button" class="chip" data-to="all" aria-pressed="true">Everyone</button>${people.map(p=>`<button type="button" class="chip" data-to="${p.pid}" aria-pressed="false">${esc(p.name)}</button>`).join("")}</div>`:""}
+   <div class="foot"><button type="button" class="btn primary block" id="ups">${ic("chat")}Send the update</button></div>`,(sh,close)=>{
+    const mp=mediaPicker(sh,[]);
+    $$("[data-to]",sh).forEach(b=>b.onclick=()=>{const k=b.dataset.to;if(k==="all")to=["all"];else{to=to.filter(x=>x!=="all");to=to.includes(k)?to.filter(x=>x!==k):[...to,k];if(!to.length)to=["all"]}$$("[data-to]",sh).forEach(x=>x.setAttribute("aria-pressed",to.includes(x.dataset.to)))});
+    $("#ups",sh).onclick=async()=>{const text=$("#up1",sh).value.trim();if(!text)return fieldErr(sh,"up1","Write the message first.");let media;try{media=await mp.save()}catch{toast("Could not save the photos on this phone.");return}
+      const m={id:uid(),from:sm.pid||"me",fromName:sm.pname||S.me||"Project Lead",to,text,media,t:Date.now()};S.msgs=S.msgs||[];S.msgs.push(m);save();close();render();toast(to.includes("all")?"Update sent to everyone.":"Update sent.",()=>S.msgs.splice(S.msgs.indexOf(m),1))};
+  });
+}
+
+/* ============ daily diary: one entry a day ============ */
+const LOST_WHY=["Rain","Waiting for materials","Machine breakdown","Waiting for a decision","Other"];
+const wxLine=d=>{const x=wxDay(d);if(!x)return "";return `${wxInfo(x.code)[0]}, ${r0(x.hi)}°/${r0(x.lo)}°${x.rain>=1?", "+r0(x.rain)+" mm rain":""}`};
+const num=v=>{const n=parseFloat(String(v||"").replace(",","."));return isNaN(n)?"":n};
+function diaryLine(e){return [e.crew?plural(+e.crew,"person","people")+" on site":"",e.hrs?r1(+e.hrs)+" h worked":"",e.lost?r1(+e.lost)+" h lost"+(e.why?" ("+e.why.toLowerCase()+")":""):""].filter(Boolean).join(" · ")}
+function diaryV(){
+  const f=F(),list=f.diary.slice().sort((a,b)=>b.date.localeCompare(a.date)),td=today(),has=list.some(e=>e.date===td);
+  const lost=list.filter(e=>e.date.slice(0,7)===td.slice(0,7)).reduce((a,e)=>a+(+e.lost||0),0);
+  let html=`<p class="muted small" style="margin:-4px 0 10px">This month: ${plural(list.filter(e=>e.date.slice(0,7)===td.slice(0,7)).length,"day")} written · ${r1(lost)} hours lost</p>`;
+  if(lvl("diary")>=2)html+=`<button type="button" class="btn ${has?"":"primary "}block" style="margin-bottom:12px" data-act="${has?"editdiary":"adddiary"}" data-id="${has?list.find(e=>e.date===td).id:""}">${ic("note")}${has?"Open today's diary":"Write today's diary"}</button>`;
+  if(!list.length)return html+`<div class="card empty">${ic("note","xl")}<h3>No diary entries yet</h3><p>One short entry a day: who was on site, the hours worked and lost, what was done and any problems. The weather is filled in for you.</p></div>`;
+  list.forEach(e=>{html+=`<article class="card lent"><button type="button" class="rowbtn" data-act="editdiary" data-id="${e.id}"><span class="tags"><span class="pill grey">${dlabel(e.date)}${buildDay(f,e.date)?" · Day "+buildDay(f,e.date):""}</span>${e.wx?`<span class="pill sky">${esc(e.wx)}</span>`:""}</span>${diaryLine(e)?`<span class="lt">${esc(diaryLine(e))}</span>`:""}${e.done?`<span class="ltx" style="margin-top:4px">${esc(e.done)}</span>`:""}${e.issues?`<span class="ls">Problems: ${esc(e.issues)}</span>`:""}${e.onsite?`<span class="ls">On site: ${esc(e.onsite)}</span>`:""}</button></article>`});
+  return html;
+}
+function diarySheet(id,date){
+  sheetRO=lvl("diary")<2?"diary":null;
+  const f=F();let e=id?f.diary.find(x=>x.id===id):f.diary.find(x=>x.date===date);
+  const d=e?.date||date||today();
+  sheet(e?"Diary, "+dWord(d):"Daily diary",`
+   ${dateField("dy1",d,"Date",[["Today",today()],["Yesterday",addDays(today(),-1)]])}
+   <label class="f" for="dy2">Weather</label><input id="dy2" class="t" value="${esc(e?.wx??wxLine(d))}" placeholder="For example: Sunny, 24°/12°">
+   <div class="two"><div><label class="f" for="dy3">People on site</label><input id="dy3" class="t" inputmode="numeric" value="${esc(e?.crew??"")}"></div><div><label class="f" for="dy4">Hours worked</label><input id="dy4" class="t" inputmode="decimal" value="${esc(e?.hrs??"")}"></div></div>
+   <label class="f" for="dy5">Who was on site</label><input id="dy5" class="t" list="dyl" value="${esc(e?.onsite||"")}" placeholder="Companies or names" autocomplete="off"><datalist id="dyl">${names().map(n=>`<option value="${esc(n)}">`).join("")}</datalist>
+   <label class="f" for="dy6">Work done</label><textarea id="dy6" class="t" data-mic placeholder="For example: cut and fill on the western half, 40 loads moved">${esc(e?.done||"")}</textarea>
+   <div class="two"><div><label class="f" for="dy7">Hours lost</label><input id="dy7" class="t" inputmode="decimal" value="${esc(e?.lost??"")}"></div><div><label class="f" for="dy8">Because of</label><select id="dy8" class="t"><option value="">—</option>${LOST_WHY.map(w=>`<option ${e?.why===w?"selected":""}>${w}</option>`).join("")}</select></div></div>
+   <label class="f" for="dy9">Problems or delays</label><textarea id="dy9" class="t" data-mic>${esc(e?.issues||"")}</textarea>
+   <label class="f" for="dy10">Visitors and inspections</label><input id="dy10" class="t" value="${esc(e?.visitors||"")}" autocomplete="off">
+   <div class="foot"><button type="button" class="btn primary block" id="dyv">${e?"Save":"Save today's diary"}</button>${e?`<button type="button" class="btn danger block" id="dyx">${ic("trash","sm")}Delete this entry</button>`:""}</div>`,(sh,close)=>{
+    $("#dy1",sh).addEventListener("change",()=>{const nd=$("#dy1",sh).value;if(!e&&nd&&!$("#dy2",sh).dataset.typed)$("#dy2",sh).value=wxLine(nd)});
+    $("#dy2",sh).addEventListener("input",()=>{$("#dy2",sh).dataset.typed=1});
+    $("#dyv",sh).onclick=()=>{
+      const date=$("#dy1",sh).value||today(),other=f.diary.find(x=>x.date===date&&x!==e);if(other)return fieldErr(sh,"dy1","There is already a diary entry for that day. Open it from the Diary list.");
+      const vals={date,wx:$("#dy2",sh).value.trim(),crew:num($("#dy3",sh).value),hrs:num($("#dy4",sh).value),onsite:$("#dy5",sh).value.trim(),done:$("#dy6",sh).value.trim(),lost:num($("#dy7",sh).value),why:$("#dy8",sh).value,issues:$("#dy9",sh).value.trim(),visitors:$("#dy10",sh).value.trim()};
+      if(e){const u=undoEdit(e,vals);save();close();render();toast("Diary saved.",u)}
+      else{const n={id:uid(),t:Date.now(),who:sm.pname||S.me||"",...vals};f.diary.push(n);logAct(`Wrote the daily diary for ${dshort(date)}`);save();close();logMode="diary";if(tab!=="log")go("log");else render();toast("Diary saved.",()=>f.diary.splice(f.diary.indexOf(n),1))}};
+    if(e)$("#dyx",sh).onclick=()=>{const i=f.diary.indexOf(e);f.diary.splice(i,1);save();close();render();toast("Diary entry deleted.",()=>f.diary.splice(i,0,e))};
+  });
+}
 /* ============ views ============ */
-let tab=lsGet("nbf-tab")||"today",curPh=null,pEdit=false,matF="all",logF="all";
+let tab=lsGet("nbf-tab")||"today",curPh=null,pEdit=false,matF="all",logF="all",logMode="log",docF="all";
 if(!["today","phases","log","mats"].includes(tab))tab="today";
 function go(t){tab=t;curPh=null;pEdit=false;lsSet("nbf-tab",t);render();scrollTo(0,0);$("#view").focus({preventScroll:true})}
 
 function headerV(){
   const f=F();
-  return `<button type="button" class="fsw" data-act="fields" aria-label="${esc(f.name)}. Switch field."><span class="fsw-ic"><img src="icons/fields-192.png" alt="" width="48" height="48"></span><span class="grow"><b>${esc(f.name)}</b></span><span class="cd">${ic("cdown")}</span></button><button type="button" class="hb" data-act="search" aria-label="Search">${ic("search")}</button><button type="button" class="hb${tab==="money"?" on":""}" data-act="money" aria-label="Money${moneyOK?"":", locked"}">${ic("cash")}</button><button type="button" class="hb" data-act="settings" aria-label="Settings">${ic("sliders")}</button>`;
+  return `<button type="button" class="fsw" data-act="fields" aria-label="${esc(f.name)}. Switch field."><span class="fsw-ic"><img src="icons/fields-192.png" alt="" width="48" height="48"></span><span class="grow"><b>${esc(f.name)}</b></span><span class="cd">${ic("cdown")}</span></button><button type="button" class="hb" data-act="search" aria-label="Search">${ic("search")}</button><button type="button" class="hb${tab==="money"?" on":""}" data-act="money" aria-label="Money${moneyOK?"":", locked"}" ${lvl("money")<1?"hidden":""}>${ic("cash")}</button><button type="button" class="hb" data-act="settings" aria-label="Settings">${ic("sliders")}</button>`;
 }
 
 function taskRow(t,showPh){
@@ -834,11 +1533,11 @@ function todayV(){
   const mo=today().slice(0,7),ml=f.logs.filter(l=>l.date.slice(0,7)===mo),rd=new Set(ml.filter(l=>l.rain).map(l=>l.date)).size,ld=new Set(ml.filter(l=>l.lost).map(l=>l.date)).size;
   const pics=allPhotos();lbList=pics;
   /* order: how we are doing, what needs you, what to do next, then the weather and the photos */
-  return hero+attentionV()+
+  return hero+sinceV()+attentionV()+updatesCardV()+
    `<section class="card"><div class="row" style="justify-content:space-between"><h2>Next up</h2><button type="button" class="btn link small" data-act="gophases">All phases</button></div>${next.length?`<ul class="list">${next.map(t=>taskRow(t,true)).join("")}</ul>`:`<p class="muted small">No open tasks. Well done.</p>`}</section>`+
    wxCard()+
    `<button type="button" class="attline rainline" data-act="lograin">${ic("rain","sm")}<span class="grow">This month: ${plural(rd,"rain day")} · ${plural(ld,"lost work day")}</span>${ic("chev","sm")}</button>`+
-   `<section class="card"><div class="row" style="justify-content:space-between"><h2>Latest photos</h2>${pics.length?`<button type="button" class="btn link small" data-go="log">Site log</button>`:""}</div>${pics.length?thumbsV(pics,8):`<div class="empty" style="padding:10px 4px"><p>Photos from the site log appear here.</p><button type="button" class="btn" data-act="photo">${ic("camera")}Add a photo</button></div>`}</section>`;
+   `<section class="card"><div class="row" style="justify-content:space-between"><h2>Latest photos</h2>${pics.length?`<button type="button" class="btn link small" data-go="log">Site log</button>`:""}</div>${pics.length?thumbsV(pics,8):`<div class="empty" style="padding:10px 4px"><p>Photos from the site log appear here.</p><button type="button" class="btn" data-act="photo">${ic("camera")}Add a photo</button></div>`}</section>`+shareCardV()+consCard();
 }
 
 function phTile(p,i){
@@ -853,7 +1552,7 @@ function phTile(p,i){
 function phasesV(){
   if(curPh&&phase(curPh))return phaseV(phase(curPh));
   const f=F();
-  return `<div class="page-h"><h2>Phases</h2><button type="button" class="btn small" data-act="pedit" aria-pressed="${pEdit}">${pEdit?ic("check","sm")+"Done":ic("pencil","sm")+"Edit phases"}</button></div>${pEdit?`<p class="hint" style="margin:-4px 0 10px">Rename, move or remove phases. Removing a phase also removes its tasks; you can undo it.</p>`:""}<div class="ptiles">${f.phases.map(phTile).join("")}</div>${pEdit?`<button type="button" class="btn block" data-act="padd">${ic("plus")}Add a phase</button>`:""}`;
+  return `<div class="page-h"><h2>Phases</h2><div class="row wr" style="gap:8px">${lvl("docs")>=1?`<button type="button" class="btn small" data-act="godocs">${ic("map","sm")}Plans</button>`:""}${isLead()?`<button type="button" class="btn small" data-act="pedit" aria-pressed="${pEdit}">${pEdit?ic("check","sm")+"Done":ic("pencil","sm")+"Edit phases"}</button>`:""}</div></div>${pEdit?`<p class="hint" style="margin:-4px 0 10px">Rename, move or remove phases. Removing a phase also removes its tasks; you can undo it.</p>`:""}<div class="ptiles">${f.phases.map(phTile).join("")}</div>${pEdit?`<button type="button" class="btn block" data-act="padd">${ic("plus")}Add a phase</button>`:""}`;
 }
 function phaseV(p){
   const s=phStats(p),i=F().phases.indexOf(p),ts=phTasks(p.id),td=today();
@@ -866,20 +1565,27 @@ function phaseV(p){
    <section class="card"><div class="row" style="justify-content:space-between"><h2>Photos</h2><button type="button" class="btn small" data-act="photo" data-id="${p.id}">${ic("camera","sm")}Add</button></div>${pics.length?thumbsV(pics,8):`<p class="muted small">Photos you log for this phase appear here.</p>`}</section>`;
 }
 
+/* the site log has three parts: the log itself, snags, and the daily diary */
 function logV(){
+  const f=F(),open=f.snags.filter(s=>s.st!=="closed").length,showDiary=lvl("diary")>=1;
+  if(logMode==="diary"&&!showDiary)logMode="log";
+  const parts=[["log","Log",f.logs.length],["snags","Snags",open],...(showDiary?[["diary","Diary",f.diary.length]]:[])];
+  return `<div class="page-h"><h2>Site log</h2></div><div class="segc" role="group" aria-label="Site log part">${parts.map(([k,l,n])=>`<button type="button" data-act="logmode" data-id="${k}" aria-pressed="${logMode===k}">${l}<small><span class="sr">, </span>${n}${k==="snags"?" open":""}</small></button>`).join("")}</div>`+(logMode==="snags"?snagsV():logMode==="diary"?diaryV():logListV());
+}
+function logListV(){
   const f=F(),mo=today().slice(0,7),ml=f.logs.filter(l=>l.date.slice(0,7)===mo),rd=new Set(ml.filter(l=>l.rain).map(l=>l.date)).size,ld=new Set(ml.filter(l=>l.lost).map(l=>l.date)).size;
   const tot={all:f.logs.length,photos:f.logs.filter(l=>l.media?.length).length,rain:f.logs.filter(l=>l.rain||l.lost).length};
   const list=f.logs.filter(l=>logF==="all"||(logF==="photos"?l.media?.length:(l.rain||l.lost))).sort((a,b)=>b.date.localeCompare(a.date)||b.t-a.t);
   lbList=allPhotos();
-  const seg=[["all","All"],["photos","Photos"],["rain","Rain"]].map(([k,l])=>`<button type="button" data-act="logf" data-id="${k}" aria-pressed="${logF===k}">${l}<small><span class="sr">, </span>${tot[k]}</small></button>`).join("");
-  let html=`<div class="page-h"><h2>Site log</h2></div><p class="muted small" style="margin:-6px 0 10px">This month: ${plural(rd,"rain day")} · ${plural(ld,"lost work day")}</p><div class="segc" role="group" aria-label="Show">${seg}</div>`;
+  const seg=[["all","All"],["photos","Photos"],["rain","Rain"]].map(([k,l])=>`<button type="button" class="chip" data-act="logf" data-id="${k}" aria-pressed="${logF===k}">${l}<span class="sr">,</span> ${tot[k]}</button>`).join("");
+  let html=`<p class="muted small" style="margin:-4px 0 8px">This month: ${plural(rd,"rain day")} · ${plural(ld,"lost work day")}</p><div class="chips" role="group" aria-label="Show" style="margin-bottom:10px">${seg}</div>`;
   if(!list.length)return html+`<div class="card empty">${ic("wicket","xl")}<h3>${logF==="all"?"Nothing in the log yet":logF==="photos"?"No photos yet":"No rain days logged"}</h3><p>${logF==="rain"?"Rain days and lost work days you log appear here.":"Notes and photos from the site appear here, newest first."}</p><button type="button" class="btn primary" data-act="${logF==="rain"?"rainday":"addlog"}">${ic(logF==="rain"?"rain":"plus")}${logF==="rain"?"Log a rain day":"Add to the log"}</button></div>`;
   let last="";
   list.forEach(l=>{
     if(l.date!==last){html+=`<div class="lday">${dlabel(l.date)}${buildDay(f,l.date)?" · Day "+buildDay(f,l.date):""}</div>`;last=l.date}
     const tags=[l.rain?`<span class="pill sky">${ic("rain","sm")}Rain${typeof l.rain==="string"&&+l.rain>0?" "+esc(l.rain)+" mm":""}</span>`:"",l.lost?`<span class="pill bad">${l.rain?"Rain stopped play":"Lost work day"}</span>`:"",l.lesson?'<span class="pill warm">Lesson</span>':"",l.ph?`<span class="pill grey">${esc(phName(l.ph))}</span>`:""].filter(Boolean).join("");
     const pics=(l.media||[]).map(m=>({m,l})),start=lbList.findIndex(x=>x.l===l);
-    html+=`<article class="card lent"><button type="button" class="rowbtn" data-act="editlog" data-id="${l.id}">${tags?`<span class="tags">${tags}</span>`:""}${l.text?`<span class="ltx">${esc(l.text)}</span>`:`<span class="sr">Entry from ${dlabel(l.date)}${pics.length?" with "+plural(pics.length,"photo"):""}</span>`}${l.who?`<span class="ls">${esc(l.who)}</span>`:""}</button>${pics.length?`<div class="thumbs">${pics.slice(0,8).map((p,i)=>`<button type="button" class="thumb" data-m="${p.m}" data-act="lb" data-id="${start+i}" aria-label="Open photo">${i===7&&pics.length>8?`<span class="more">+${pics.length-7}</span>`:""}</button>`).join("")}</div>`:""}</article>`;
+    html+=`<article class="card lent"><button type="button" class="rowbtn" data-act="editlog" data-id="${l.id}">${tags?`<span class="tags">${tags}</span>`:""}${l.text?`<span class="ltx">${esc(l.text)}</span>`:`<span class="sr">Entry from ${dlabel(l.date)}${pics.length?" with "+plural(pics.length,"photo"):""}</span>`}${l.who?`<span class="ls">${esc(l.who)}</span>`:""}</button>${pics.length?`<div class="thumbs">${pics.slice(0,8).map((p,i)=>`<button type="button" class="thumb" data-m="${p.m}" data-act="lb" data-id="${start+i}" aria-label="Open photo">${i===7&&pics.length>8?`<span class="more">+${pics.length-7}</span>`:""}</button>`).join("")}</div>`:""}${(l.voice||[]).map(v=>`<audio class="lvoice" controls preload="metadata" data-audio="${v}" aria-label="Voice note"></audio>`).join("")}</article>`;
   });
   return html;
 }
@@ -887,7 +1593,8 @@ function logV(){
 function matCounts(){const m=F().mats;return{all:m.length,to:m.filter(x=>x.toOrd&&x.status==="need").length,ordered:m.filter(x=>x.status==="ordered").length,got:m.filter(x=>x.status==="got").length}}
 function matRow(m){
   const ord=m.status==="ordered"||m.status==="got",rec=m.status==="got";
-  const meta=[m.qty?esc(m.qty)+" "+esc(m.unit||""):"",m.ph?esc(phName(m.ph)):"",m.sup?esc(m.sup):"",m.due&&!rec?"need by "+dshort(m.due):"",rec&&m.recOn?"received "+dshort(m.recOn):ord&&m.ordOn?"ordered "+dshort(m.ordOn):""].filter(Boolean).join(" · ");
+  const dv=delivered(m),used=+m.used||0;
+  const meta=[m.qty?(dv?`delivered ${r1(dv)} of ${esc(m.qty)} ${esc(m.unit||"")}`:esc(m.qty)+" "+esc(m.unit||"")):dv?`delivered ${r1(dv)} ${esc(m.unit||"")}`:"",used?`used ${r1(used)}, ${r1(Math.max(0,dv-used))} left on site`:"",m.ph?esc(phName(m.ph)):"",m.sup?esc(m.sup):"",m.due&&!rec?"need by "+dshort(m.due):"",rec&&m.recOn?"received "+dshort(m.recOn):ord&&m.ordOn?"ordered "+dshort(m.ordOn):""].filter(Boolean).join(" · ");
   const tk=(k,on,l)=>`<button type="button" class="mtk" data-act="mattick" data-id="${m.id}|${k}" aria-pressed="${on}" aria-label="${esc(m.name)}: ${l}${on?", ticked":", not ticked"}"><span class="mtc">${on?ic("check","sm"):""}</span>${l}</button>`;
   return `<li class="mrow"><button type="button" class="rowbtn" data-act="editmat" data-id="${m.id}"><span class="lt">${esc(m.name)}</span>${meta?` <span class="ls">${meta}</span>`:""}</button><div class="mtks">${rec?'<span aria-hidden="true"></span>':tk("t",!!m.toOrd&&!ord,"To order")}${tk("o",ord,"Ordered")}${tk("r",rec,"Received")}</div></li>`;
 }
@@ -895,20 +1602,22 @@ function matsV(){
   const f=F(),c=matCounts();
   const seg=[["all","All"],["to","To order"],["ordered","Ordered"],["got","Received"]].map(([k,l])=>`<button type="button" data-act="matf" data-id="${k}" aria-pressed="${matF===k}">${l}<small><span class="sr">, </span>${c[k]}</small></button>`).join("");
   const list=f.mats.filter(m=>matF==="all"||(matF==="to"?m.toOrd&&m.status==="need":m.status===matF));
-  let html=`<div class="page-h"><h2>Materials</h2></div>`;
+  const toOrd=f.mats.filter(m=>m.toOrd&&m.status==="need");
+  let html=`<div class="page-h"><h2>Materials</h2>${f.mats.length&&lvl("mats")>=2?`<div class="row wr" style="gap:8px">${toOrd.length?`<button type="button" class="btn small" data-act="sendorder">${ic("share","sm")}Send the order</button>`:""}<button type="button" class="btn small" data-act="adddeliv">${ic("truck","sm")}Delivery</button></div>`:""}</div>`;
   if(!f.mats.length)return html+`<div class="card empty">${ic("kitbag","xl")}<h3>No materials yet</h3><p>Start with the usual list for a ${f.kind==="soccer"?"soccer":"cricket"} field: topsoil, sand, ${f.kind==="soccer"?"":"clay loam, "}drainage pipe and stone, seed or turf, fertiliser and irrigation parts. You can change it after.</p><button type="button" class="btn primary" data-act="matstarter">${ic("plus")}Add the usual list</button></div>`;
   html+=`<div class="segc four" role="group" aria-label="Show">${seg}</div>`;
   if(!list.length)return html+`<div class="card empty"><p>${matF==="to"?"Nothing is ticked To order.":matF==="ordered"?"Nothing is waiting for delivery.":"Nothing received yet."}</p></div>`;
-  return html+`<section class="card"><ul class="list">${list.map(matRow).join("")}</ul></section><p class="hint" style="text-align:center">Tick To order, then Ordered, then Received.</p>`;
+  return html+`<section class="card"><ul class="list">${list.map(matRow).join("")}</ul></section><p class="hint" style="text-align:center">Tick To order, then Ordered, then Received.</p>`+delivListV();
 }
 
 function render(){
   const v=$("#view");
+  if(!S.fields.length){$("#top").innerHTML="";v.innerHTML=`<div class="card empty" style="margin-top:40px">${ic("cloud","xl")}<h3>Loading the shared fields</h3><p>${syncState==="offline"?"Connect to the internet to get the team's fields.":"This takes a moment the first time."}</p><button type="button" class="btn" data-act="syncnow">${ic("cloud")}Try again</button></div>`;return}
   $("#top").innerHTML=headerV();
-  const scr={today:"Today",phases:curPh&&phase(curPh)?phName(curPh):"Phases",log:"Site log",mats:"Materials",money:"Money"}[tab]||"Today";
-  v.innerHTML=`<h1 class="sr">${esc(scr)}, ${esc(F().name)}</h1>`+(tab==="money"?moneyV():tab==="phases"?phasesV():tab==="log"?logV():tab==="mats"?matsV():todayV());
+  const scr={today:"Today",phases:curPh&&phase(curPh)?phName(curPh):"Phases",log:"Site log",mats:"Materials",money:"Money",docs:"Plans and documents"}[tab]||"Today";
+  v.innerHTML=`<h1 class="sr">${esc(scr)}, ${esc(F().name)}</h1>`+syncLineV()+(tab==="docs"?docsV():tab==="money"?moneyV():tab==="phases"?phasesV():tab==="log"?logV():tab==="mats"?matsV():todayV());
   document.body.classList.toggle("on-today",tab==="today");
-  $$("nav.tabs [data-go]").forEach(b=>{if(b.dataset.go===tab)b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
+  $$("nav.tabs [data-go]").forEach(b=>{if(b.dataset.go===tab||(tab==="docs"&&b.dataset.go==="phases"))b.setAttribute("aria-current","page");else b.removeAttribute("aria-current")});
   hydrate(v);const tl=$("#tlist");if(tl)wireDrag(tl);fitPhaseNames();animPlates();
   badgeSet();
 }
@@ -944,7 +1653,7 @@ function wireDrag(ul){
     let to=0;dr.items.forEach((x,i)=>{if(i!==dr.idx&&dr.rects[i].top+dr.rects[i].height/2<cy)to++});dr.to=to;
     dr.items.forEach((x,i)=>{if(i===dr.idx)return;x.style.transform=dr.idx<i&&i<=to?`translateY(${-h}px)`:to<=i&&i<dr.idx?`translateY(${h}px)`:""})};
   const end=()=>{clearTimeout(tm);if(dr){const{idx,to,items}=dr;dr.items.forEach(x=>x.style.transform="");dr.li.classList.remove("drag");ul.classList.remove("ul-drag");dragJustEnded=Date.now();
-      if(to!==idx){const ids=items.map(x=>x.dataset.tid),[m]=ids.splice(idx,1);ids.splice(to,0,m);const ts=F().tasks,old=new Map(ts.map(t=>[t.id,t.ord]));ids.forEach((id,i)=>{const t=ts.find(x=>x.id===id);if(t)t.ord=i});save();render();toast("Order changed.",()=>ts.forEach(t=>{if(old.has(t.id))t.ord=old.get(t.id)}))}}
+      if(to!==idx&&lvl("tasks")<2){toast(AREA_MSG("tasks"));render()}else if(to!==idx){const ids=items.map(x=>x.dataset.tid),[m]=ids.splice(idx,1);ids.splice(to,0,m);const ts=F().tasks,old=new Map(ts.map(t=>[t.id,t.ord]));ids.forEach((id,i)=>{const t=ts.find(x=>x.id===id);if(t)t.ord=i});save();render();toast("Order changed.",()=>ts.forEach(t=>{if(old.has(t.id))t.ord=old.get(t.id)}))}}
     dr=null;st=null};
   ul.addEventListener("pointerdown",e=>{const li=e.target.closest("li.trow");if(!li||e.target.closest(".st")||e.button>0)return;st={li,x:e.clientX,y:e.clientY};tm=setTimeout(begin,450)});
   ul.addEventListener("pointermove",e=>{if(!st)return;if(!dr){if(Math.hypot(e.clientX-st.x,e.clientY-st.y)>8)cancel();return}if(e.pointerType==="mouse")move(e.clientY)});
@@ -956,6 +1665,7 @@ function wireDrag(ul){
 
 /* ============ forms ============ */
 function taskSheet(id,ph){
+  sheetRO=lvl("tasks")<2?"tasks":null;
   const f=F(),t=id?f.tasks.find(x=>x.id===id):null;if(id&&!t)return;
   const st=t?.st||"todo";
   sheet(t?"Task":"New task",`
@@ -980,9 +1690,10 @@ function taskSheet(id,ph){
   });
 }
 function toggleDone(id){
+  if(lvl("tasks")<2){toast(AREA_MSG("tasks"));return}
   const f=F(),t=f.tasks.find(x=>x.id===id);if(!t)return;const p=phase(t.ph),was=p&&phStats(p).complete;
   const on=t.st!=="done",u=undoEdit(t,{st:on?"done":"todo",doneOn:on?today():""});save();render();
-  if(on)buzz(20);
+  if(on){buzz(20);logAct(`Marked "${t.title}" done`);save()}
   const nowDone=p&&phStats(p).complete,dn=f.tasks.filter(x=>x.st==="done").length,soc=isSoc(f);
   toast(on?(nowDone&&!was?`${p.name} is done.`:`Done: ${t.title}`):`Not done: ${t.title}`,u);
   if(!on)return;
@@ -1029,6 +1740,7 @@ function phaseMove(id,d){const ps=F().phases,i=ps.findIndex(p=>p.id===id),j=i+d;
 
 /* site log entry: photos, words, rain day and lost work day */
 function logSheet(id,pre={}){
+  sheetRO=lvl("log")<2?"log":null;
   const f=F(),l=id?f.logs.find(x=>x.id===id):null;if(id&&!l)return;
   const keep=[...(l?.media||[])],add=[];
   const rain=l?l.rain:pre.rain||"",isRain=l?!!l.rain||l.rain===0:!!pre.rain||!!pre.rainOnly;
@@ -1036,6 +1748,8 @@ function logSheet(id,pre={}){
    ${dateField("ld",l?.date||pre.date||today(),"Date",[["Today",today()],["Yesterday",addDays(today(),-1)]])}
    <label class="f">Photos</label><div class="ppics" id="pp"></div>
    <div class="row" style="gap:8px"><button type="button" class="btn grow" id="lc">${ic("camera")}Camera</button><button type="button" class="btn grow" id="lg">${ic("image")}Gallery</button></div>
+   <button type="button" class="btn block" id="lv1" style="margin-top:8px">${ic("mic")}Record a voice note</button>
+   <ul class="list vlist" id="lvl" hidden></ul>
    <label class="f" for="lt">What happened</label><textarea id="lt" class="t" data-mic placeholder="${pre.rainOnly||pre.rain?"For example: Too wet for the grader, work stopped at 10:00":"For example: Main drains laid on the western side"}">${esc(l?.text||"")}</textarea>
    <label class="f" for="lp">Phase</label><select id="lp" class="t">${phOptions(l?l.ph:pre.ph||"")}</select>
    <div class="sec">Weather on site</div>
@@ -1044,23 +1758,40 @@ function logSheet(id,pre={}){
    <label class="tick"><input type="checkbox" id="ll" ${(l?l.lost:pre.lost)?"checked":""}>Work stopped: a lost work day</label>
    <label class="tick"><input type="checkbox" id="ls" ${l?.lesson?"checked":""}>A lesson for the next field</label>
    <div class="foot"><button type="button" class="btn primary block" id="lv">${l?"Save":"Add to the log"}</button>${l?`<button type="button" class="btn danger block" id="lx">${ic("trash","sm")}Delete this entry</button>`:""}</div>`,(sh,close)=>{
-    const paint=async()=>{const box=$("#pp",sh);box.innerHTML=[...keep.map((m,i)=>`<div class="ppic" data-m="${m}"><button type="button" data-k="${i}" aria-label="Remove this photo"><span>${ic("x","sm")}</span></button></div>`),...add.map((a,i)=>`<div class="ppic"><img src="${a.u}" alt="New photo"><button type="button" data-a="${i}" aria-label="Remove this photo"><span>${ic("x","sm")}</span></button></div>`)].join("");
+    const paint=async()=>{const box=$("#pp",sh);box.innerHTML=[...keep.map((m,i)=>`<div class="ppic" data-m="${m}"><button type="button" data-k="${i}" aria-label="Remove this photo"><span>${ic("x","sm")}</span></button></div>`),...add.map((a,i)=>`<div class="ppic">${prevTag(a)}<button type="button" data-a="${i}" aria-label="Remove this photo"><span>${ic("x","sm")}</span></button></div>`)].join("");
       box.hidden=!keep.length&&!add.length;hydrate(box);
       $$("[data-k]",box).forEach(b=>b.onclick=()=>{keep.splice(+b.dataset.k,1);paint()});$$("[data-a]",box).forEach(b=>b.onclick=()=>{URL.revokeObjectURL(add[+b.dataset.a].u);add.splice(+b.dataset.a,1);paint()})};
-    const pick=cam=>{const i=document.createElement("input");i.type="file";i.accept="image/*";i.multiple=!cam;if(cam)i.setAttribute("capture","environment");i.style.display="none";document.body.append(i);
-      i.addEventListener("change",()=>{[...i.files].forEach(fl=>add.push({f:fl,u:URL.createObjectURL(fl)}));i.remove();paint()});i.addEventListener("cancel",()=>i.remove());i.click()};
+    const pick=cam=>{const i=document.createElement("input");i.type="file";i.accept=cam?"image/*":"image/*,video/*";i.multiple=!cam;if(cam)i.setAttribute("capture","environment");i.style.display="none";document.body.append(i);
+      i.addEventListener("change",()=>{[...i.files].forEach(fl=>{if(fl.size>50*1048576){toast(`${fl.name||"That video"} is larger than 50 MB. Choose a shorter one.`);return}add.push({f:fl,u:URL.createObjectURL(fl)})});i.remove();paint()});i.addEventListener("cancel",()=>i.remove());i.click()};
     $("#lc",sh).onclick=()=>pick(true);$("#lg",sh).onclick=()=>pick(false);
+    /* voice notes */
+    const voice=[...(l?.voice||[])],newVoice=[];let rec=null,chunks=[],vT=0,vS=0;
+    const vPaint=async()=>{const box=$("#lvl",sh);const rows=[];for(const[i,v]of voice.entries())rows.push(`<li><audio controls preload="metadata" data-audio="${v}"></audio><button type="button" class="btn icon" data-vk="${i}" aria-label="Remove voice note ${i+1}">${ic("x","sm")}</button></li>`);
+      newVoice.forEach((v,i)=>rows.push(`<li><audio controls preload="metadata" src="${v.u}"></audio><button type="button" class="btn icon" data-vn="${i}" aria-label="Remove the new voice note">${ic("x","sm")}</button></li>`));
+      box.innerHTML=rows.join("");box.hidden=!rows.length;hydrate(box);
+      $$("[data-vk]",box).forEach(b=>b.onclick=()=>{voice.splice(+b.dataset.vk,1);vPaint()});$$("[data-vn]",box).forEach(b=>b.onclick=()=>{newVoice.splice(+b.dataset.vn,1);vPaint()})};
+    const vBtn=$("#lv1",sh);
+    vBtn.onclick=async()=>{
+      if(rec){rec.stop();return}
+      if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){toast("This phone cannot record voice notes here.");return}
+      let stream;try{stream=await navigator.mediaDevices.getUserMedia({audio:true})}catch{toast("Allow the microphone to record a voice note.");return}
+      const t=["audio/mp4","audio/webm;codecs=opus","audio/webm"].find(x=>{try{return MediaRecorder.isTypeSupported(x)}catch{return false}})||"";
+      rec=new MediaRecorder(stream,t?{mimeType:t}:{});chunks=[];rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+      rec.onstop=()=>{stream.getTracks().forEach(x=>x.stop());clearInterval(vT);const type=(rec.mimeType||t||"audio/webm").split(";")[0],b=new Blob(chunks,{type});rec=null;vBtn.classList.remove("on");vBtn.innerHTML=ic("mic")+"Record a voice note";if(b.size)newVoice.push({b,u:URL.createObjectURL(b)});vPaint()};
+      rec.start();vS=Date.now();vBtn.classList.add("on");const tick=()=>{const s=Math.round((Date.now()-vS)/1000);vBtn.innerHTML=ic("pause")+`Stop recording (${Math.floor(s/60)}:${String(s%60).padStart(2,"0")})`;if(s>=180)rec?.stop()};tick();vT=setInterval(tick,500)};
+    vPaint();
     if(pre.files)pre.files.forEach(fl=>add.push({f:fl,u:URL.createObjectURL(fl)}));
     paint();
     $("#lr",sh).onchange=()=>{$("#lrw",sh).hidden=!$("#lr",sh).checked};
     $("#lv",sh).onclick=async()=>{
       const txt=$("#lt",sh).value.trim(),rn=$("#lr",sh).checked,lost=$("#ll",sh).checked;
-      if(!txt&&!add.length&&!keep.length&&!rn&&!lost)return fieldErr(sh,"lt","Add a photo or a few words.");
+      if(!txt&&!add.length&&!keep.length&&!rn&&!lost&&!voice.length&&!newVoice.length)return fieldErr(sh,"lt","Add a photo, a voice note or a few words.");
       const btn=$("#lv",sh);btn.disabled=true;btn.textContent=add.length?"Saving photos…":"Saving…";
-      const ids=[];try{for(const a of add){const b=await prepPhoto(a.f),mid="m"+uid();await mPut(mid,b);ids.push(mid);URL.revokeObjectURL(a.u)}}catch{btn.disabled=false;btn.textContent="Try again";toast("Could not save the photos on this phone.");return}
-      const mm=$("#lmm",sh).value.trim().replace(",","."),vals={date:$("#ld",sh).value||today(),text:txt,ph:$("#lp",sh).value,rain:rn?(mm&&!isNaN(+mm)?String(+mm):true):"",lost,lesson:$("#ls",sh).checked,media:[...keep,...ids]};
+      if(rec){rec.stop();await new Promise(r=>setTimeout(r,300))}
+      const ids=[],vids=[];try{for(const a of add){const b=/^video\//.test(a.f.type)?a.f:await prepPhoto(a.f),mid="m"+uid();await mPut(mid,b);ids.push(mid);queueMedia(mid);URL.revokeObjectURL(a.u)}for(const v of newVoice){const mid="v"+uid();await mPut(mid,v.b);vids.push(mid);queueMedia(mid);URL.revokeObjectURL(v.u)}}catch{btn.disabled=false;btn.textContent="Try again";toast("Could not save the photos on this phone.");return}
+      const mm=$("#lmm",sh).value.trim().replace(",","."),vals={date:$("#ld",sh).value||today(),text:txt,ph:$("#lp",sh).value,rain:rn?(mm&&!isNaN(+mm)?String(+mm):true):"",lost,lesson:$("#ls",sh).checked,media:[...keep,...ids],voice:[...voice,...vids]};
       if(l){const u=undoEdit(l,vals);save();close();render();toast("Entry saved.",u)}
-      else{const n={id:uid(),t:Date.now(),who:S.me||"",...vals};f.logs.push(n);save();close();if(tab!=="log"&&tab!=="phases"&&tab!=="today")go("log");else render();toast(ids.length?`${plural(ids.length,"photo")} added to the log.`:"Added to the log.",()=>f.logs.splice(f.logs.indexOf(n),1))}
+      else{const n={id:uid(),t:Date.now(),who:S.me||"",...vals};f.logs.push(n);logAct(ids.length?`Added ${plural(ids.length,"photo")} to the site log`:vals.rain||vals.lost?"Logged a rain day":"Added a site log note");save();close();if(tab!=="log"&&tab!=="phases"&&tab!=="today")go("log");else render();toast(ids.length?`${plural(ids.length,"photo")} added to the log.`:"Added to the log.",()=>f.logs.splice(f.logs.indexOf(n),1))}
     };
     if(l)$("#lx",sh).onclick=()=>{const i=f.logs.indexOf(l);f.logs.splice(i,1);save();close();render();toast("Entry deleted.",()=>f.logs.splice(i,0,l))};
   });
@@ -1074,6 +1805,7 @@ function photoStart(ph){
 }
 
 function matSheet(id){
+  sheetRO=lvl("mats")<2?"mats":null;
   const f=F(),m=id?f.mats.find(x=>x.id===id):null;if(id&&!m)return;
   sheet(m?"Material":"New material",`
    <label class="f" for="mn">What</label><input id="mn" class="t" value="${esc(m?.name||"")}" ${m?"":"data-autofocus"} placeholder="For example: Topsoil" autocomplete="off">
@@ -1081,10 +1813,11 @@ function matSheet(id){
    <label class="f" for="mp">For which phase</label><select id="mp" class="t">${phOptions(m?.ph||"")}</select>
    <label class="f" for="ms">Supplier</label><input id="ms" class="t" value="${esc(m?.sup||"")}" autocomplete="off">
    ${dateField("mdd",m?.due||"","Needed on site by",[["Next work day",addWork(today(),1)],["In a week",addDays(today(),7)]])}
+   <label class="f" for="mus">Used so far</label><input id="mus" class="t" inputmode="decimal" value="${esc(m?.used||"")}" placeholder="How much has gone into the field" style="max-width:12rem">
    <label class="f" for="mt">Notes</label><textarea id="mt" class="t" data-mic placeholder="Spec, grade or delivery notes">${esc(m?.note||"")}</textarea>
    <div class="foot"><button type="button" class="btn primary block" id="mv">${m?"Save":"Add the material"}</button>${m?`<button type="button" class="btn danger block" id="mx">${ic("trash","sm")}Delete this material</button>`:""}</div>`,(sh,close)=>{
     $("#mv",sh).onclick=()=>{const name=$("#mn",sh).value.trim();if(!name)return fieldErr(sh,"mn","Say what the material is.");
-      const vals={name,qty:$("#mq",sh).value.trim(),unit:$("#mu",sh).value.trim(),ph:$("#mp",sh).value,sup:$("#ms",sh).value.trim(),due:$("#mdd",sh).value,note:$("#mt",sh).value.trim()};
+      const vals={name,qty:$("#mq",sh).value.trim(),unit:$("#mu",sh).value.trim(),ph:$("#mp",sh).value,sup:$("#ms",sh).value.trim(),due:$("#mdd",sh).value,note:$("#mt",sh).value.trim(),used:num($("#mus",sh).value)};
       if(m){const u=undoEdit(m,vals);save();close();render();toast("Material saved.",u)}
       else{const n={id:uid(),...vals,toOrd:false,status:"need",ordOn:"",recOn:""};f.mats.push(n);save();close();if(tab!=="mats")go("mats");else render();toast(name+" added.",()=>f.mats.splice(f.mats.indexOf(n),1))}};
     if(m)$("#mx",sh).onclick=()=>{const i=f.mats.indexOf(m);f.mats.splice(i,1);save();close();render();toast("Material deleted.",()=>f.mats.splice(i,0,m))};
@@ -1096,7 +1829,7 @@ function matTick(id){
   if(k==="t"){vals={toOrd:!m.toOrd};msg=vals.toOrd?"added to the order list":"taken off the order list"}
   else if(k==="o"){vals=ord?{status:"need",ordOn:"",recOn:""}:{status:"ordered",ordOn:today(),toOrd:false};msg=ord?"not ordered":"ordered"}
   else{vals=rec?{status:"ordered",recOn:""}:{status:"got",recOn:today(),ordOn:m.ordOn||today(),toOrd:false};msg=rec?"not received":"received"}
-  const u=undoEdit(m,vals);save();render();toast(`${m.name}: ${msg}.`,u);
+  const u=undoEdit(m,vals);save();render();if(k==="r"&&vals.status==="got")logAct(`${m.name} received`);toast(`${m.name}: ${msg}.`,u);
 }
 function matStarter(){const f=F(),add=MAT_T.filter(x=>!x[3]||x[3]===f.kind).map(([n,u,k])=>({id:uid(),name:n,qty:"",unit:u,ph:f.phases.find(p=>p.k===k)?.id||"",sup:"",due:"",note:"",toOrd:false,status:"need",ordOn:"",recOn:""}));
   f.mats.push(...add);save();render();toast(plural(add.length,"material")+" added. Tap one to set how much.",()=>add.forEach(m=>f.mats.splice(f.mats.indexOf(m),1)))}
@@ -1113,6 +1846,7 @@ function fieldsSheet(){
   });
 }
 function addFieldSheet(kind){
+  if(!isLead()&&lvl("tasks")<2){toast("Only the Project Lead can add a field.");return}
   const src=S.fields.find(f=>f.kind==="cricket");const lessons=src?src.logs.filter(l=>l.lesson).length+src.tasks.filter(t=>t.note).length:0;
   sheet(kind==="soccer"?"Add the soccer field":"Add a field",`
    <label class="f" for="fn">Name</label><input id="fn" class="t" value="${kind==="soccer"?"Soccer field":""}" ${kind?"":"data-autofocus"} autocomplete="off">
@@ -1146,12 +1880,25 @@ function settingsSheet(){
    <div class="two"><div><label class="f" for="gla">Latitude</label><input id="gla" class="t" inputmode="decimal" value="${g.lat}"></div><div><label class="f" for="glo">Longitude</label><input id="glo" class="t" inputmode="decimal" value="${g.lon}"></div></div>
    <button type="button" class="btn small" id="gme" style="margin-top:8px">${ic("pin","sm")}Use where I am now</button>
    <div class="sec">Look</div><div class="segc" role="group" aria-label="Look">${[["auto","Auto"],["light","Light"],["dark","Dark"]].map(([k,l])=>`<button type="button" data-th="${k}" aria-pressed="${th===k}">${l}</button>`).join("")}</div>
+   <div class="sec">Team</div>
+   <p class="hint" style="margin:0 0 8px">${shared()?`Shared with the team. You are ${esc(sm.pname||"")}${isLead()?", the Project Lead":""}.`:"Only on this phone so far."}</p>
+   <button type="button" class="btn small" id="tm">${ic("users","sm")}${shared()?(isLead()?"Team, people and access":"Team and sharing"):"Share with the team"}</button>
    <div class="sec">This phone</div>
-   <p class="hint" style="margin:0 0 8px">Version 1 keeps everything on this phone. Sharing with the team comes next.</p>
-   <div class="row wr" style="gap:8px"><button type="button" class="btn small" id="bk">${ic("download","sm")}Download a backup</button>${S.fields.length>1?`<button type="button" class="btn small danger" id="fd">${ic("trash","sm")}Remove ${esc(f.name)}</button>`:""}<button type="button" class="btn small danger" id="er">Erase this phone</button></div>
+   <p class="hint" style="margin:0 0 8px">A backup keeps a copy of this phone's fields. Photos are not in it.</p>
+   <div class="row wr" style="gap:8px"><button type="button" class="btn small" id="bk">${ic("download","sm")}Download a backup</button>${isLead()?`<button type="button" class="btn small" id="brs">${ic("upload","sm")}Restore a backup</button>`:""}<button type="button" class="btn small" id="bhist">${ic("clock","sm")}What happened</button>${S.fields.length>1?`<button type="button" class="btn small danger" id="fd">${ic("trash","sm")}Remove ${esc(f.name)}</button>`:""}<button type="button" class="btn small danger" id="er">Erase this phone</button></div>
    <div class="foot"><button type="button" class="btn primary block" id="sv">Save</button></div>`,(sh,close)=>{
     $$("[data-th]",sh).forEach(b=>b.onclick=()=>{$$("[data-th]",sh).forEach(x=>x.setAttribute("aria-pressed",x===b));setTheme(b.dataset.th)});
+    if(!isLead()){["#sn","#sz","#sp","#sst","#stg"].forEach(q=>{const e=$(q,sh);if(e)e.disabled=true});$$("[data-for=sst],[data-for=stg]",sh).forEach(b=>b.hidden=true);const p=document.createElement("p");p.className="hint";p.textContent="The field name, size and dates are set by the Project Lead.";$("#sn",sh).before(p)}
+    $("#tm",sh).onclick=()=>{close();setTimeout(teamSheet,60)};
     $("#gme",sh).onclick=()=>{if(!navigator.geolocation){toast("This phone cannot share its location.");return}navigator.geolocation.getCurrentPosition(p=>{$("#gla",sh).value=p.coords.latitude.toFixed(4);$("#glo",sh).value=p.coords.longitude.toFixed(4);$("#gn",sh).value="The field";toast("Location filled in. Tap Save.")},()=>toast("Could not get your location."),{timeout:10000})};
+    $("#bhist",sh).onclick=()=>{close();setTimeout(actsSheet,60)};
+    $("#brs",sh)?.addEventListener("click",()=>{const i=document.createElement("input");i.type="file";i.accept="application/json,.json";i.style.display="none";document.body.append(i);
+      i.addEventListener("change",async()=>{const fl=i.files[0];i.remove();if(!fl)return;let d;try{d=JSON.parse(await fl.text())}catch{toast("That file is not a Newberry Fields backup.");return}
+        if(!d||!Array.isArray(d.fields)||!d.fields.length||!d.fields.every(x=>x&&x.id&&Array.isArray(x.tasks))){toast("That file is not a Newberry Fields backup.");return}
+        const tasks=d.fields.reduce((a,x)=>a+x.tasks.length,0);close();
+        setTimeout(()=>confirmSheet("Restore this backup?",`${plural(d.fields.length,"field")} with ${plural(tasks,"task")}. This replaces the fields on this phone${shared()?" and, because you share with the team, for everyone":""}. Photos stay as they are. You can undo it right after.`,"Restore",()=>{
+          const old=JSON.stringify(S);S={...S,...d,me:S.me,geo:S.geo};load2();save();go("today");logAct("Restored a backup");save();toast("Backup restored.",()=>{S=JSON.parse(old);load2()})}),60)});
+      i.addEventListener("cancel",()=>i.remove());i.click()});
     $("#bk",sh).onclick=()=>{const b=new Blob([JSON.stringify(S,null,1)],{type:"application/json"}),a=document.createElement("a");a.href=URL.createObjectURL(b);a.download=`newberry-fields-${today()}.json`;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),4000);toast("Backup downloaded. Photos are not in it.")};
     $("#fd",sh)?.addEventListener("click",()=>{close();const i=S.fields.indexOf(f);S.fields.splice(i,1);S.cur=S.fields[0].id;save();go("today");toast(f.name+" removed.",()=>{S.fields.splice(i,0,f);S.cur=f.id})});
     $("#er",sh).onclick=()=>{close();setTimeout(()=>confirmSheet("Erase everything?","This removes every field, task, log entry and photo from this phone. It cannot be undone. Download a backup first if you may need it.","Erase",async()=>{try{localStorage.removeItem(KEY);localStorage.removeItem("nbf-tab")}catch{}try{await mClear()}catch{}urls.clear();load();go("today");toast("Erased. A fresh cricket field is ready.")}),60)};
@@ -1171,16 +1918,18 @@ function setTheme(k){if(k==="auto")document.documentElement.removeAttribute("dat
 
 function addMenu(){
   const ph=tab==="phases"&&curPh?curPh:"";
-  sheet("Add",`<div class="addgrid" data-choices><button type="button" class="main" data-a="photo">${ic("camera")}Photo</button><button type="button" data-a="log">${ic("wicket")}Log note</button><button type="button" data-a="task">${ic("check")}Task</button><button type="button" data-a="mat">${ic("kitbag")}Material</button><button type="button" data-a="rain">${ic("rain")}Rain day</button><button type="button" data-a="exp">${ic("cash")}Expense</button></div>`,(sh,close)=>{
-    $$("[data-a]",sh).forEach(b=>b.onclick=()=>{close();setTimeout(()=>({photo:()=>photoStart(ph),log:()=>logSheet(null,{ph}),task:()=>taskSheet(null,ph),mat:()=>matSheet(),rain:()=>logSheet(null,{rainOnly:true,lost:true}),exp:()=>moneyOK?expSheet():moneyGate(()=>{moneySeg="exps";go("money");setTimeout(expSheet,60)})})[b.dataset.a](),60)});
+  const lg=lvl("log")>=2,tk=lvl("tasks")>=2,mt=lvl("mats")>=2,mo=lvl("money")>=2;
+  if(!lg&&!tk&&!mt&&!mo&&lvl("diary")<2){toast("You can look around, but adding is for the Project Lead and the team.");return}
+  sheet("Add",`<div class="addgrid" data-choices>${lg?`<button type="button" class="main" data-a="photo">${ic("camera")}Photo</button><button type="button" data-a="log">${ic("wicket")}Log note</button>`:""}${tk?`<button type="button" data-a="task">${ic("check")}Task</button>`:""}${mt?`<button type="button" data-a="mat">${ic("kitbag")}Material</button>`:""}${lg?`<button type="button" data-a="rain">${ic("rain")}Rain day</button><button type="button" data-a="snag">${ic("alert")}Snag</button>`:""}${lvl("diary")>=2?`<button type="button" data-a="diary">${ic("note")}Daily diary</button>`:""}${mo?`<button type="button" data-a="exp">${ic("cash")}Expense</button>`:""}</div>`,(sh,close)=>{
+    $$("[data-a]",sh).forEach(b=>b.onclick=()=>{close();setTimeout(()=>({photo:()=>photoStart(ph),log:()=>logSheet(null,{ph}),task:()=>taskSheet(null,ph),mat:()=>matSheet(),rain:()=>logSheet(null,{rainOnly:true,lost:true}),snag:()=>snagSheet(null,ph),diary:()=>diarySheet(null,today()),exp:()=>moneyOK?expSheet():moneyGate(()=>{moneySeg="exps";go("money");setTimeout(expSheet,60)})})[b.dataset.a](),60)});
   });
 }
 function searchSheet(){
   sheet("Search",`<label class="sr" for="q">Search tasks, materials and the site log</label><input id="q" class="t" type="search" placeholder="Tasks, materials and the site log" data-autofocus autocomplete="off"><div id="qr" style="margin-top:8px"></div>`,(sh,close)=>{
     const q=$("#q",sh),out=$("#qr",sh);
     const run=()=>{const s=q.value.trim().toLowerCase();if(s.length<2){out.innerHTML=`<p class="hint">Type at least two letters.</p>`;return}const f=F(),has=x=>String(x||"").toLowerCase().includes(s);
-      const ts=f.tasks.filter(t=>has(t.title)||has(t.who)||has(t.note)).slice(0,20),ms=f.mats.filter(m=>has(m.name)||has(m.sup)||has(m.note)).slice(0,20),ls=f.logs.filter(l=>has(l.text)||has(l.who)).slice(0,20);
-      out.innerHTML=(ts.length?`<div class="sec">Tasks</div><ul class="list">${ts.map(t=>taskRow(t,true)).join("")}</ul>`:"")+(ms.length?`<div class="sec">Materials</div><ul class="list">${ms.map(m=>`<li><button type="button" class="rowbtn rowfull" data-act="editmat" data-id="${m.id}"><span class="row-ic">${ic("kitbag")}</span><span class="grow"><span class="lt">${esc(m.name)}</span> <span class="ls">${esc([m.qty&&m.qty+" "+m.unit,m.sup].filter(Boolean).join(" · "))}</span></span></button></li>`).join("")}</ul>`:"")+(ls.length?`<div class="sec">Site log</div><ul class="list">${ls.map(l=>`<li><button type="button" class="rowbtn rowfull" data-act="editlog" data-id="${l.id}"><span class="row-ic sky">${ic("wicket")}</span><span class="grow"><span class="lt">${esc((l.text||"Photo").slice(0,80))}</span> <span class="ls">${dlabel(l.date)}</span></span></button></li>`).join("")}</ul>`:"")||`<p class="muted">Nothing found in ${esc(f.name)}.</p>`};
+      const cs=(S.cons||[]).filter(c=>has(c.name)||has(c.trade)||has(c.phone)||has(c.email)||has(c.note)).slice(0,20),ts=f.tasks.filter(t=>has(t.title)||has(t.who)||has(t.note)).slice(0,20),ms=f.mats.filter(m=>has(m.name)||has(m.sup)||has(m.note)).slice(0,20),ls=f.logs.filter(l=>has(l.text)||has(l.who)).slice(0,20);
+      out.innerHTML=(ts.length?`<div class="sec">Tasks</div><ul class="list">${ts.map(t=>taskRow(t,true)).join("")}</ul>`:"")+(ms.length?`<div class="sec">Materials</div><ul class="list">${ms.map(m=>`<li><button type="button" class="rowbtn rowfull" data-act="editmat" data-id="${m.id}"><span class="row-ic">${ic("kitbag")}</span><span class="grow"><span class="lt">${esc(m.name)}</span> <span class="ls">${esc([m.qty&&m.qty+" "+m.unit,m.sup].filter(Boolean).join(" · "))}</span></span></button></li>`).join("")}</ul>`:"")+(ls.length?`<div class="sec">Site log</div><ul class="list">${ls.map(l=>`<li><button type="button" class="rowbtn rowfull" data-act="editlog" data-id="${l.id}"><span class="row-ic sky">${ic("wicket")}</span><span class="grow"><span class="lt">${esc((l.text||"Photo").slice(0,80))}</span> <span class="ls">${dlabel(l.date)}</span></span></button></li>`).join("")}</ul>`:"")+(cs.length?`<div class="sec">Contractors</div><ul class="list">${cs.map(conRow).join("")}</ul>`:"")||`<p class="muted">Nothing found in ${esc(f.name)}.</p>`};
     q.addEventListener("input",run);run();
     out.addEventListener("click",e=>{const b=e.target.closest("[data-act]");if(b){e.stopPropagation();close();setTimeout(()=>act(b.dataset.act,b.dataset.id),60)}});
   });
@@ -1285,6 +2034,9 @@ function stageRow(c,s){
 }
 function consV(){
   const cs=M().cons;
+  return quotesCardV()+consListV(cs);
+}
+function consListV(cs){
   if(!cs.length)return `<div class="card empty">${ic("users","xl")}<h3>No contractors yet</h3><p>The contractors you appoint, their quotes and what you pay them appear here.</p><button type="button" class="btn primary" data-act="addcon">${ic("plus")}Add a contractor</button></div>`;
   return cs.map(c=>{const t=conTotal(c),p=conPaid(c),st=(c.stages||[]).slice().sort((a,b)=>(a.paid===b.paid?0:a.paid?-1:1)||(a.due||"9").localeCompare(b.due||"9"));
     return `<section class="card"><button type="button" class="conhd" data-act="editcon" data-id="${c.id}"><span class="grow"><span class="lt" style="font-size:1.08rem">${esc(c.name)}</span> <span class="ls" style="display:block">${esc([c.trade,c.quote?"quote "+money0(c.quote):""].filter(Boolean).join(" · "))}</span></span><b>${money0(t)}</b></button>${mbar(p,t)}<p class="ls" style="margin:4px 0 0">Paid ${money0(p)} · to pay ${money0(t-p)}</p>
@@ -1304,9 +2056,84 @@ function supsV(){
 function expsV(){
   const es=M().exps.slice().sort((a,b)=>(b.date||"").localeCompare(a.date||""));
   if(!es.length)return `<div class="card empty">${ic("cash","xl")}<h3>No expenses yet</h3><p>Machine hire, fees, tests, transport and anything else you pay for appear here.</p><button type="button" class="btn primary" data-act="addexp">${ic("plus")}Add an expense</button></div>`;
-  return `<section class="card"><ul class="list">${es.map(e=>`<li class="nxrow"><button type="button" class="rowbtn rowfull" data-act="editexp" data-id="${e.id}"><span class="row-ic">${ic(ecat(e.cat)[2])}</span><span class="grow"><span class="lt">${esc(e.what||"Expense")}</span> <span class="ls">${esc(ecat(e.cat)[1])}${e.date?" · "+dshort(e.date):""}</span> <span class="amt">${rand(e.amount)}</span></span></button>${e.paid?`<span class="pill">${ic("check","sm")}Paid</span>`:`<button type="button" class="btn good icon" data-act="mpay" data-id="exp|${e.id}" aria-label="Mark ${esc(e.what||"expense")} of ${rand(e.amount)} as paid">${ic("check")}</button>`}</li>`).join("")}</ul></section>`;
+  const tot=sum(es,x=>x.amount),vat=sum(es,x=>x.vat),slips=es.filter(x=>x.media?.length).length;
+  return `<div class="row wr" style="justify-content:space-between;gap:8px;margin:0 2px 10px"><span class="muted small">${rand(tot)} in total · VAT ${rand(vat)} · ${plural(slips,"slip")} photographed</span><button type="button" class="btn small" data-act="slipexport">${ic("download","sm")}Export</button></div><section class="card"><ul class="list">${es.map(e=>`<li class="nxrow"><button type="button" class="rowbtn rowfull" data-act="editexp" data-id="${e.id}"><span class="row-ic">${ic(e.media?.length?"image":ecat(e.cat)[2])}</span><span class="grow"><span class="lt">${esc(e.what||"Expense")}</span> <span class="ls">${esc(ecat(e.cat)[1])}${e.date?" · "+dshort(e.date):""}${e.vat?" · VAT "+rand(e.vat):""}${e.media?.length?" · slip":""}</span> <span class="amt">${rand(e.amount)}</span></span></button>${e.paid?`<span class="pill">${ic("check","sm")}Paid</span>`:`<button type="button" class="btn good icon" data-act="mpay" data-id="exp|${e.id}" aria-label="Mark ${esc(e.what||"expense")} of ${rand(e.amount)} as paid">${ic("check")}</button>`}</li>`).join("")}</ul></section>`;
 }
 
+/* ---------- export the expenses: a spreadsheet, and the slip photos to share ---------- */
+function slipExportSheet(){
+  const es=M().exps.slice().sort((a,b)=>(a.date||"").localeCompare(b.date||""));if(!es.length){toast("No expenses to export.");return}
+  const base=exSafe(F().name)+" expenses "+today(),months=[...new Set(es.map(e=>(e.date||"").slice(0,7)))].filter(Boolean).sort().reverse();let mo="all";
+  const pick=()=>es.filter(e=>mo==="all"||(e.date||"").startsWith(mo));
+  const fname=(e,i)=>String(i+1).padStart(3,"0")+" "+exSafe((e.date||"")+" "+(e.what||"slip")+" "+(+e.amount||0).toFixed(2))+".jpg";
+  const csv=list=>"﻿"+[["Date","What","Type","Paid","Amount","VAT","Slip photo"],...list.map((e,i)=>[e.date||"",e.what||"",ecat(e.cat)[1],e.paid?"Yes":"No",(+e.amount||0).toFixed(2),e.vat?(+e.vat).toFixed(2):"",e.media?.length?fname(e,i):""]),[],["","","","Total",sum(list,x=>x.amount).toFixed(2),sum(list,x=>x.vat).toFixed(2),""]].map(r=>r.map(csvQ).join(",")).join("\r\n");
+  sheet("Export expenses",`<label class="f">Which month</label><div class="chips">${[["all","All"],...months.map(m=>[m,new Date(m+"-01T12:00").toLocaleDateString("en-ZA",{month:"long",year:"numeric"})])].map(([k,l])=>`<button type="button" class="chip" data-mo="${k}" aria-pressed="${k==="all"}">${l}</button>`).join("")}</div>
+   <p class="muted small" id="xsum" style="margin:10px 0"></p>
+   <div style="display:grid;gap:8px"><button type="button" class="btn block" id="xc">${ic("download")}Spreadsheet (CSV)</button><button type="button" class="btn block" id="xp">${ic("image")}Share the slip photos</button></div><p class="hint" id="xs" role="status"></p>`,(sh,close)=>{
+    const upd=()=>{const l=pick();$("#xsum",sh).textContent=`${plural(l.length,"expense")}, ${rand(sum(l,x=>x.amount))} in total, VAT ${rand(sum(l,x=>x.vat))}, ${plural(l.filter(x=>x.media?.length).length,"slip photo")}.`};upd();
+    $$("[data-mo]",sh).forEach(b=>b.onclick=()=>{mo=b.dataset.mo;$$("[data-mo]",sh).forEach(x=>x.setAttribute("aria-pressed",x===b));upd()});
+    $("#xc",sh).onclick=async()=>{$("#xs",sh).textContent=await slipSave(new Blob([csv(pick())],{type:"text/csv"}),base+(mo==="all"?"":" "+mo)+".csv")};
+    $("#xp",sh).onclick=async()=>{const l=pick(),files=[];for(const[i,e]of l.entries())for(const m of e.media||[]){const b=await mGet(m).catch(()=>null);if(b)files.push(new File([b],fname(e,i),{type:b.type||"image/jpeg"}))}
+      if(!files.length){$("#xs",sh).textContent="There are no slip photos for this choice.";return}
+      if(navigator.canShare&&navigator.canShare({files})){try{await navigator.share({files,title:"Slips"});$("#xs",sh).textContent="Done."}catch{}}
+      else{files.forEach(fl=>{const a=document.createElement("a");a.href=URL.createObjectURL(fl);a.download=fl.name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),60000)});$("#xs",sh).textContent=plural(files.length,"photo")+" saved to this device."}};
+  });
+}
+/* ---------- quotes: collect, compare side by side, accept one ---------- */
+const qWork=q=>(q.work||"Other").trim();
+function quotesCardV(){
+  const qs=M().quotes;if(!qs.length)return `<section class="card"><div class="row" style="justify-content:space-between"><h2>Quotes</h2>${lvl("money")>=2?`<button type="button" class="btn small" data-act="addquote">${ic("plus","sm")}Add a quote</button>`:""}</div><p class="muted small" style="margin:6px 0 0">Collect quotes for each job, compare them side by side and accept one. The accepted one becomes a contractor below, ready for payments.</p></section>`;
+  const g={};qs.forEach(q=>(g[qWork(q)]=g[qWork(q)]||[]).push(q));
+  return `<section class="card"><div class="row" style="justify-content:space-between"><h2>Quotes</h2>${lvl("money")>=2?`<button type="button" class="btn small" data-act="addquote">${ic("plus","sm")}Add</button>`:""}</div><ul class="list">${Object.entries(g).sort((a,b)=>a[0].localeCompare(b[0])).map(([w,l])=>{const acc=l.find(q=>q.st==="accepted"),low=Math.min(...l.map(q=>+q.amount||0));
+    return `<li class="nxrow"><button type="button" class="rowbtn rowfull" data-act="quotework" data-id="${esc(w)}"><span class="row-ic ${acc?"green":""}">${ic(acc?"check":"hammer")}</span><span class="grow"><span class="lt">${esc(w)}</span> <span class="ls">${acc?"Accepted: "+esc(acc.from)+", "+rand(acc.amount):plural(l.length,"quote")+(l.length>1?", lowest "+rand(low):"")+" · waiting for a decision"}</span></span>${ic("chev","sm")}</button></li>`}).join("")}</ul></section>`;
+}
+function quoteCompare(work){
+  const qs=M().quotes.filter(q=>qWork(q)===work).sort((a,b)=>(+a.amount||0)-(+b.amount||0));if(!qs.length)return;
+  const low=+qs[0].amount||0,acc=qs.find(q=>q.st==="accepted");
+  sheet(work,`<p class="muted small" style="margin:0 0 8px">${plural(qs.length,"quote")}, cheapest first.${acc?" Accepted: "+esc(acc.from)+".":""}</p>
+   <div class="qcmp">${qs.map(q=>`<div class="qcard ${q.st}">
+     <div class="row" style="justify-content:space-between;align-items:flex-start;gap:8px"><b class="lt">${esc(q.from)}</b><span class="amt">${rand(q.amount)}</span></div>
+     <div class="ls">${esc([q.st==="accepted"?"Accepted":q.st==="declined"?"Not chosen":"",+q.amount>low?"+"+rand(+q.amount-low)+" more than the cheapest":qs.length>1?"Cheapest":"",q.valid?"valid to "+dshort(q.valid):"",q.days?q.days+" work days":""].filter(Boolean).join(" · "))}</div>
+     ${q.note?`<div class="ls" style="margin-top:4px;white-space:pre-wrap">${esc(q.note)}</div>`:""}
+     <div class="row wr" style="gap:8px;margin-top:8px">${q.media?.length?`<button type="button" class="btn small" data-qview="${q.id}">${ic("note","sm")}See the quote</button>`:""}${lvl("money")>=2&&q.st!=="accepted"?`<button type="button" class="btn small good" data-qacc="${q.id}">${ic("check","sm")}Accept</button>`:""}${lvl("money")>=2?`<button type="button" class="btn small" data-qed="${q.id}">${ic("pencil","sm")}Change</button>`:""}</div>
+   </div>`).join("")}</div>`,(sh,close)=>{
+    $$("[data-qed]",sh).forEach(b=>b.onclick=()=>{close();setTimeout(()=>quoteSheet(b.dataset.qed),60)});
+    $$("[data-qview]",sh).forEach(b=>b.onclick=async()=>{const q=qs.find(x=>x.id===b.dataset.qview);const list=[];for(const m of q.media){const bl=await mBlob(m);if(bl&&/pdf/.test(bl.type)){const u=URL.createObjectURL(bl);window.open(u,"_blank","noopener");setTimeout(()=>URL.revokeObjectURL(u),60000);return}list.push({m,l:{date:q.date||today(),text:q.from+", "+rand(q.amount),media:q.media}})}close();lightbox(list,0)});
+    $$("[data-qacc]",sh).forEach(b=>b.onclick=()=>{const q=qs.find(x=>x.id===b.dataset.qacc);close();setTimeout(()=>acceptQuote(q),60)});
+  });
+}
+function acceptQuote(q){
+  const m=M(),others=m.quotes.filter(x=>qWork(x)===qWork(q)&&x!==q);
+  confirmSheet("Accept this quote?",`${q.from}, ${rand(q.amount)} for ${qWork(q).toLowerCase()}. They are added as a contractor with this quote, and the other ${others.length?plural(others.length,"quote")+" are":"quotes are"} marked not chosen.`,"Yes, accept",()=>{
+    const us=[undoEdit(q,{st:"accepted"}),...others.map(x=>undoEdit(x,{st:"declined"}))];
+    let c=m.cons.find(x=>x.name.toLowerCase()===q.from.toLowerCase()&&(x.trade||"")===qWork(q)),made=null;
+    if(c)us.push(undoEdit(c,{quote:+q.amount||0}));else{made={id:uid(),name:q.from,trade:qWork(q),quote:+q.amount||0,note:q.note||"",stages:[]};m.cons.push(made)}
+    let contact=null;if(!(S.cons||[]).some(x=>x.name.toLowerCase()===q.from.toLowerCase())){contact={id:uid(),name:q.from,trade:qWork(q),phone:q.phone||"",email:"",note:""};S.cons.push(contact)}
+    logAct(`Accepted the ${qWork(q).toLowerCase()} quote from ${q.from}: ${rand(q.amount)}`,1);save();moneySeg="cons";render();
+    toast(`${q.from} accepted. Add their payments under Contractors.`,()=>{us.forEach(u=>u());if(made)m.cons.splice(m.cons.indexOf(made),1);if(contact)S.cons.splice(S.cons.indexOf(contact),1)});
+  },true);
+}
+function quoteSheet(id){
+  sheetRO=lvl("money")<2?"money":null;
+  const m=M(),q=id?m.quotes.find(x=>x.id===id):null;if(id&&!q)return;
+  const works=[...new Set([...m.quotes.map(qWork),...TRADES])];
+  sheet(q?"Quote":"New quote",`
+   <label class="f" for="qw">For which job</label><input id="qw" class="t" list="qwl" value="${esc(q?.work||"")}" placeholder="For example: Drainage" ${q?"":"data-autofocus"} autocomplete="off"><datalist id="qwl">${works.map(w=>`<option value="${esc(w)}">`).join("")}</datalist>
+   <label class="f" for="qf">From</label><input id="qf" class="t" list="qfl" value="${esc(q?.from||"")}" placeholder="Company or person" autocomplete="off"><datalist id="qfl">${(S.cons||[]).map(c=>`<option value="${esc(c.name)}">`).join("")}</datalist>
+   ${amtField("qa",q?.amount,"Amount")}
+   <div class="two"><div>${dateField("qv",q?.valid||"","Valid until",[["In 30 days",addDays(today(),30)]])}</div><div><label class="f" for="qd">Work days</label><input id="qd" class="t" inputmode="numeric" value="${esc(q?.days||"")}"></div></div>
+   <label class="f" for="qn">What is included</label><textarea id="qn" class="t" data-mic placeholder="For example: 8 laterals, 2 outlets, test after rain">${esc(q?.note||"")}</textarea>
+   ${mediaPickerV("Photo of the quote")}
+   <div class="foot"><button type="button" class="btn primary block" id="qsv">${q?"Save":"Add the quote"}</button>${q?`<button type="button" class="btn danger block" id="qx">${ic("trash","sm")}Delete this quote</button>`:""}</div>`,(sh,close)=>{
+    const mp=mediaPicker(sh,[...(q?.media||[])]);
+    $("#qsv",sh).onclick=async()=>{const work=$("#qw",sh).value.trim();if(!work)return fieldErr(sh,"qw","Say which job the quote is for.");const from=$("#qf",sh).value.trim();if(!from)return fieldErr(sh,"qf","Say who the quote is from.");
+      const a=readAmt(sh,"qa",true);if(a===null)return;let media;try{media=await mp.save()}catch{toast("Could not save the photo on this phone.");return}
+      const vals={work,from,amount:a,valid:$("#qv",sh).value,days:num($("#qd",sh).value),note:$("#qn",sh).value.trim(),media};
+      if(q){const u=undoEdit(q,vals);save();close();render();toast("Quote saved.",u)}
+      else{const n={id:uid(),t:Date.now(),date:today(),st:"received",...vals};m.quotes.push(n);logAct(`Added a ${work.toLowerCase()} quote from ${from}`,1);save();close();moneySeg="cons";render();toast(`Quote from ${from} added.`,()=>m.quotes.splice(m.quotes.indexOf(n),1))}};
+    if(q)$("#qx",sh).onclick=()=>{const i=m.quotes.indexOf(q);m.quotes.splice(i,1);save();close();render();toast("Quote deleted.",()=>m.quotes.splice(i,0,q))};
+  });
+}
 /* ---------- money forms ---------- */
 const amtField=(id,val,label)=>`<label class="f" for="${id}">${label}</label><div class="amtin"><b>R</b><input id="${id}" inputmode="decimal" placeholder="0" value="${val?String(val).replace(".",","):""}" autocomplete="off"></div>`;
 function readAmt(sh,id,need){const raw=$("#"+id,sh).value.trim(),v=parseAmt(raw);if((need&&!(v>0))||isNaN(v)||v<0){fieldErr(sh,id,need?"Enter the amount, for example 12 500.":"Enter a number, or leave it empty.");return null}return v}
@@ -1317,9 +2144,10 @@ function budgetSheet(){
   });
 }
 function conSheet(id){
+  sheetRO=lvl("money")<2?"money":null;
   const m=M(),c=id?m.cons.find(x=>x.id===id):null;if(id&&!c)return;
   sheet(c?"Contractor":"New contractor",`
-   <label class="f" for="cn">Name or company</label><input id="cn" class="t" value="${esc(c?.name||"")}" ${c?"":"data-autofocus"} autocomplete="off">
+   <label class="f" for="cn">Name or company</label><input id="cn" class="t" list="cnl" value="${esc(c?.name||"")}" ${c?"":"data-autofocus"} autocomplete="off"><datalist id="cnl">${(S.cons||[]).map(x=>`<option value="${esc(x.name)}">`).join("")}</datalist>
    <label class="f" for="ctr">What they do</label><input id="ctr" class="t" list="ctrl" value="${esc(c?.trade||"")}" placeholder="For example: Earthworks" autocomplete="off"><datalist id="ctrl">${TRADES.map(t=>`<option value="${t}">`).join("")}</datalist>
    ${amtField("cq",c?.quote,"Accepted quote")}
    <label class="f" for="cno">Notes</label><textarea id="cno" class="t" data-mic placeholder="What the quote covers, payment terms">${esc(c?.note||"")}</textarea>
@@ -1332,6 +2160,7 @@ function conSheet(id){
   });
 }
 function stageSheet(cid,sid){
+  sheetRO=lvl("money")<2?"money":null;
   const c=M().cons.find(x=>x.id===cid);if(!c)return;c.stages=c.stages||[];const s=sid?c.stages.find(x=>x.id===sid):null;if(sid&&!s)return;
   sheet(s?"Payment":"New payment to "+c.name,`
    <label class="f" for="sl">What for</label><div class="chips" style="margin-bottom:8px">${["Deposit","Progress payment","Final payment","Retention"].map(l=>`<button type="button" class="chip" data-l="${l}" aria-pressed="${s?.label===l}">${l}</button>`).join("")}</div><input id="sl" class="t" value="${esc(s?.label||"")}" autocomplete="off">
@@ -1348,6 +2177,7 @@ function stageSheet(cid,sid){
   });
 }
 function billSheet(id){
+  sheetRO=lvl("money")<2?"money":null;
   const m=M(),b=id?m.sups.find(x=>x.id===id):null;if(id&&!b)return;
   sheet(b?"Supplier bill":"New supplier bill",`
    <label class="f" for="bn">Supplier</label><input id="bn" class="t" list="bnl" value="${esc(b?.name||"")}" ${b?"":"data-autofocus"} autocomplete="off"><datalist id="bnl">${supNames().map(n=>`<option value="${esc(n)}">`).join("")}</datalist>
@@ -1364,17 +2194,25 @@ function billSheet(id){
   });
 }
 function expSheet(id){
+  sheetRO=lvl("money")<2?"money":null;
   const m=M(),e=id?m.exps.find(x=>x.id===id):null;if(id&&!e)return;let k=e?.cat||"machine";
   sheet(e?"Expense":"New expense",`
    <label class="f">Type</label><div class="segc four" role="group" aria-label="Type">${ECAT.map(([c,l])=>`<button type="button" data-c="${c}" aria-pressed="${k===c}">${l}</button>`).join("")}</div>
    <label class="f" for="ew" style="margin-top:0">What</label><input id="ew" class="t" value="${esc(e?.what||"")}" placeholder="For example: Grader, 2 days" autocomplete="off">
    ${amtField("ea",e?.amount,"Amount")}
    ${dateField("ed",e?.date||today(),"Date",[["Today",today()],["Yesterday",addDays(today(),-1)]])}
+   ${amtField("evat",e?.vat,"VAT on the slip")}
+   <button type="button" class="btn small" id="evq" style="margin-top:8px">Fill in VAT at 15%</button>
+   ${mediaPickerV("Photo of the slip")}
    <label class="tick" style="margin-top:8px"><input type="checkbox" id="ep" ${!e||e.paid?"checked":""}>Paid</label>
    <div class="foot"><button type="button" class="btn primary block" id="ev">${e?"Save":"Add the expense"}</button>${e?`<button type="button" class="btn danger block" id="ex">${ic("trash","sm")}Delete this expense</button>`:""}</div>`,(sh,close)=>{
     $$("[data-c]",sh).forEach(b=>b.onclick=()=>{k=b.dataset.c;$$("[data-c]",sh).forEach(x=>x.setAttribute("aria-pressed",x===b))});
-    $("#ev",sh).onclick=()=>{const what=$("#ew",sh).value.trim();if(!what)return fieldErr(sh,"ew","Say what the expense is.");const a=readAmt(sh,"ea",true);if(a===null)return;
-      const vals={cat:k,what,amount:a,date:$("#ed",sh).value||today(),paid:$("#ep",sh).checked};
+    const mp=mediaPicker(sh,[...(e?.media||[])]);
+    $("#evq",sh).onclick=()=>{const a=parseAmt($("#ea",sh).value);if(!(a>0))return fieldErr(sh,"ea","Enter the amount first.");$("#evat",sh).value=String(Math.round(a*15/115*100)/100).replace(".",",")};
+    $("#ev",sh).onclick=async()=>{const what=$("#ew",sh).value.trim();if(!what)return fieldErr(sh,"ew","Say what the expense is.");const a=readAmt(sh,"ea",true);if(a===null)return;const vat=readAmt(sh,"evat");if(vat===null)return;
+      if(vat>a)return fieldErr(sh,"evat","The VAT cannot be more than the amount.");
+      let media;try{media=await mp.save()}catch{toast("Could not save the photo on this phone.");return}
+      const vals={cat:k,what,amount:a,vat,media,date:$("#ed",sh).value||today(),paid:$("#ep",sh).checked};
       if(e){const u=undoEdit(e,vals);save();close();render();toast("Expense saved.",u)}
       else{const n={id:uid(),...vals};m.exps.push(n);moneySeg="exps";save();close();render();toast(`${rand(a)} expense added.`,()=>m.exps.splice(m.exps.indexOf(n),1))}};
     if(e)$("#ex",sh).onclick=()=>{const i=m.exps.indexOf(e);m.exps.splice(i,1);save();close();render();toast("Expense deleted.",()=>m.exps.splice(i,0,e))};
@@ -1477,37 +2315,45 @@ function moneyExportSheet(){
 
 /* ============ photo viewer ============ */
 let lbClose=null;
-function lightbox(list,start){
-  if(!list.length)return;let i=Math.max(0,Math.min(start,list.length-1)),arm=false;
+function lightbox(list,start,opt={}){
+  if(!list.length)return;let i=Math.max(0,Math.min(start,list.length-1)),arm=false,playT=0,playing=false;
   const el=document.createElement("div");el.id="lbx";el.setAttribute("role","dialog");el.setAttribute("aria-label","Photo");
-  el.innerHTML=`<img alt=""><button type="button" class="lb-b lb-x" aria-label="Close">${ic("x")}</button><button type="button" class="lb-b lb-del" aria-label="Delete this photo">${ic("trash")}</button><button type="button" class="lb-b prev" aria-label="Previous photo">${ic("left")}</button><button type="button" class="lb-b next" aria-label="Next photo">${ic("chev")}</button><div class="lb-cap"></div>`;
+  el.innerHTML=`<img alt=""><video class="lbv" controls playsinline hidden></video><button type="button" class="lb-b lb-x" aria-label="Close">${ic("x")}</button>${opt.play?`<button type="button" class="lb-b lb-del lb-pp" aria-label="Pause the slideshow">${ic("pause")}</button>`:lvl("log")>=2?`<button type="button" class="lb-b lb-del" aria-label="Delete this photo">${ic("trash")}</button>`:""}<button type="button" class="lb-b prev" aria-label="Previous photo">${ic("left")}</button><button type="button" class="lb-b next" aria-label="Next photo">${ic("chev")}</button><div class="lb-cap"></div>`;
   document.body.append(el);document.body.classList.add("lock");
-  const img=$("img",el),cap=$(".lb-cap",el),del=$(".lb-del",el);
-  const show=async()=>{const p=list[i];arm=false;del.classList.remove("arm");img.src=await mUrl(p.m)||"";img.alt=p.l.text||"Site photo";
+  const img=$("img",el),cap=$(".lb-cap",el),del=opt.play?null:$(".lb-del",el),pp=$(".lb-pp",el);
+  const show=async()=>{const p=list[i];arm=false;del?.classList.remove("arm");const u=await mUrl(p.m)||"";if(opt.play){img.classList.remove("lb-in");void img.offsetWidth;img.classList.add("lb-in")}
+    const vid=$(".lbv",el),v=isVid(p.m);vid.hidden=!v;img.hidden=v;if(v){vid.src=u;img.removeAttribute("src")}else{vid.pause?.();vid.removeAttribute("src");img.src=u}img.alt=p.l.text||"Site photo";
     cap.innerHTML=`<b>${i+1} of ${list.length} · ${esc(dlabel(p.l.date))}${p.l.ph?" · "+esc(phName(p.l.ph)):""}</b>${esc((p.l.text||"").slice(0,160))}`;
     $(".prev",el).hidden=i===0;$(".next",el).hidden=i===list.length-1};
-  const close=()=>{el.remove();document.body.classList.remove("lock");lbClose=null;document.removeEventListener("keydown",key)};
+  const close=()=>{clearInterval(playT);el.remove();document.body.classList.remove("lock");lbClose=null;document.removeEventListener("keydown",key)};
+  const play=on=>{playing=on;clearInterval(playT);if(!pp)return;pp.innerHTML=ic(on?"pause":"play");pp.setAttribute("aria-label",on?"Pause the slideshow":"Play the slideshow");if(on)playT=setInterval(()=>{if(i<list.length-1){i++;show()}else{play(false)}},2600)};
+  if(pp)pp.onclick=()=>play(!playing);
   const key=e=>{if(e.key==="Escape")close();if(e.key==="ArrowLeft"&&i>0){i--;show()}if(e.key==="ArrowRight"&&i<list.length-1){i++;show()}};
   lbClose=close;document.addEventListener("keydown",key);
   $(".lb-x",el).onclick=close;$(".prev",el).onclick=()=>{if(i>0){i--;show()}};$(".next",el).onclick=()=>{if(i<list.length-1){i++;show()}};
-  del.onclick=()=>{if(!arm){arm=true;del.classList.add("arm");return}const p=list[i],l=p.l,k=l.media.indexOf(p.m);if(k<0)return;l.media.splice(k,1);save();close();render();toast("Photo deleted.",()=>l.media.splice(k,0,p.m))};
+  if(del)del.onclick=()=>{if(!arm){arm=true;del.classList.add("arm");return}const p=list[i],l=p.l,k=l.media.indexOf(p.m);if(k<0)return;l.media.splice(k,1);save();close();render();toast("Photo deleted.",()=>l.media.splice(k,0,p.m))};
   let x0=null;el.addEventListener("touchstart",e=>{x0=e.touches.length===1?e.touches[0].clientX:null},{passive:true});
   el.addEventListener("touchend",e=>{if(x0==null)return;const dx=e.changedTouches[0].clientX-x0;x0=null;if(Math.abs(dx)>50){if(dx<0&&i<list.length-1)i++;else if(dx>0&&i>0)i--;else return;show()}});
-  show();$(".lb-x",el).focus();
+  show();$(".lb-x",el).focus();if(opt.play)play(true);
 }
 
 /* ============ the one action switch ============ */
-const MONEY_ACTS=["lockmoney","mseg","budget","addcon","editcon","addstage","editstage","addbill","editbill","addexp","editexp","mpay","mexport"];
+const MONEY_ACTS=["slipexport","addquote","editquote","quotework","qaccept","lockmoney","mseg","budget","addcon","editcon","addstage","editstage","addbill","editbill","addexp","editexp","mpay","mexport"];
+const ACT_AREA={writeupd:"upd",adddeliv:"mats",sendorder:"mats",addquote:"money",qaccept:"money",adddoc:"docs",addsnag:"log",snagfix:"log",snagreopen:"log",snagclose:"lead",adddiary:"diary",addtask:"tasks",phdates:"tasks",pedit:"lead",padd:"lead",pren:"lead",pdel:"lead",pmv:"lead",photo:"log",addlog:"log",rainday:"log",mattick:"mats",matstarter:"mats",addcontact:"tasks",budget:"money",addcon:"money",addstage:"money",addbill:"money",addexp:"money",mpay:"money"};
 function act(a,id){
+  if((MONEY_ACTS.includes(a)||a==="money")&&lvl("money")<1){toast("Money is hidden for you.");return}
+  {const ar=ACT_AREA[a];if(ar==="lead"&&!isLead()){toast("Only the Project Lead can change the phases.");return}if(ar&&ar!=="lead"&&lvl(ar)<2){toast(AREA_MSG(ar));return}}
+  if(a==="syncnow"){syncFails=0;toast("Syncing…");syncNow().then(()=>toast(syncState==="ok"?"Everything is shared.":SYNC_L[syncState]||"Could not sync."));return}
+  if(a==="sinceopen"){seenBase=Date.now();lsSet(SEEN_K,String(seenBase));actsSheet();render();return}
   if(MONEY_ACTS.includes(a)&&!moneyOK){if(a!=="lockmoney")moneyGate(()=>go("money"));return}
   ({
    money:()=>openMoney(),lockmoney:()=>{lockMoney();toast("Money is locked.")},mseg:()=>{moneySeg=id;if(tab!=="money")go("money");else{render();scrollTo(0,0)}},budget:()=>budgetSheet(),
-   addcon:()=>conSheet(),editcon:()=>conSheet(id),addstage:()=>stageSheet(id),editstage:()=>{const[c,st]=id.split("|");stageSheet(c,st)},addbill:()=>billSheet(),editbill:()=>billSheet(id),addexp:()=>expSheet(),editexp:()=>expSheet(id),mpay:()=>markPaid(id),mexport:()=>moneyExportSheet(),
+   addcon:()=>conSheet(),editcon:()=>conSheet(id),addstage:()=>stageSheet(id),editstage:()=>{const[c,st]=id.split("|");stageSheet(c,st)},addbill:()=>billSheet(),editbill:()=>billSheet(id),addexp:()=>expSheet(),contacts:()=>contactsSheet(),addcontact:()=>contactSheet(),editcontact:()=>contactSheet(id),editexp:()=>expSheet(id),mpay:()=>markPaid(id),mexport:()=>moneyExportSheet(),
    add:()=>addMenu(),fields:()=>fieldsSheet(),search:()=>searchSheet(),settings:()=>settingsSheet(),weather:()=>{if(!wx||Date.now()-wx.t>30*6e4)wxLoad(true).then(render);weatherSheet()},
    attsheet:()=>attSheet(),gophases:()=>{curPh=null;go("phases")},openph:()=>{tab="phases";lsSet("nbf-tab","phases");curPh=id;pEdit=false;render();scrollTo(0,0)},
    task:()=>taskSheet(id),addtask:()=>taskSheet(null,id),tdone:()=>toggleDone(id),
    phdates:()=>phDatesSheet(id),pedit:()=>{pEdit=!pEdit;render()},pren:()=>phaseNameSheet(id),padd:()=>phaseNameSheet(),pdel:()=>phaseDel(id),pmv:()=>{const[k,d]=id.split("|");phaseMove(k,+d)},
-   photo:()=>photoStart(id||""),addlog:()=>logSheet(null),rainday:()=>logSheet(null,{rainOnly:true,lost:true}),editlog:()=>logSheet(id),logf:()=>{logF=id;render()},lograin:()=>{logF="rain";go("log")},
+   photo:()=>photoStart(id||""),addlog:()=>logSheet(null),rainday:()=>logSheet(null,{rainOnly:true,lost:true}),editlog:()=>logSheet(id),logf:()=>{logF=id;render()},logmode:()=>{logMode=id;render()},updates:()=>updatesSheet(),writeupd:()=>writeUpdate(),weekly:()=>weeklySheet(),slides:()=>slidePickSheet(),video:()=>slideShareSheet(null),printrep:()=>reportPrint(),slipexport:()=>slipExportSheet(),adddeliv:()=>delivSheet(),editdeliv:()=>delivSheet(id),sendorder:()=>orderSheet(),addquote:()=>quoteSheet(),editquote:()=>quoteSheet(id),quotework:()=>quoteCompare(id),godocs:()=>{go("docs")},docf:()=>{docF=id;render()},adddoc:()=>docSheet(),editdoc:()=>docSheet(id),opendoc:()=>docView(id),addsnag:()=>snagSheet(),editsnag:()=>snagSheet(id),snagfix:()=>snagStep(id,"fixed"),snagclose:()=>snagStep(id,"closed"),snagreopen:()=>snagStep(id,"open"),adddiary:()=>diarySheet(null,today()),editdiary:()=>diarySheet(id),lograin:()=>{logF="rain";go("log")},
    lb:()=>lightbox(lbList,+id),
    matf:()=>{matF=id;render()},mattick:()=>matTick(id),editmat:()=>matSheet(id),matstarter:()=>matStarter()
   })[a]?.();
@@ -1524,7 +2370,7 @@ document.addEventListener("keydown",e=>{if((e.key==="Enter"||e.key===" ")&&e.tar
 let refreshing=false;
 async function refreshApp(){
   if(refreshing)return;refreshing=true;const el=$("#ptr");el.classList.add("spin");el.style.transform="translate(-50%,10px)";document.body.classList.add("ptr-dim");document.body.style.removeProperty("--ptrdim");el.style.removeProperty("--p");$(".ptr-tx",el).textContent="Building Newberry Fields";
-  const t0=Date.now();await wxLoad(true).catch(()=>{});render();
+  const t0=Date.now();await Promise.all([wxLoad(true).catch(()=>{}),syncNow().catch(()=>{})]);render();
   await new Promise(r=>setTimeout(r,Math.max(0,2150-(Date.now()-t0))));
   el.classList.remove("spin");el.style.transform="";el.style.opacity="";document.body.classList.remove("ptr-dim");$(".ptr-tx",el).textContent="Pull to refresh";refreshing=false;
   toast(wxFail?"Refreshed. The weather could not load.":"Refreshed. The weather is up to date.");
@@ -1546,6 +2392,7 @@ async function refreshApp(){
 /* ============ start ============ */
 document.addEventListener("touchstart",()=>{},{passive:true});
 render();
+joinFromHash();if(shared())syncNow();
 wxLoad().then(render);
 document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="visible"){if(!wx||Date.now()-wx.t>30*6e4)wxLoad().then(render);else badgeSet()}});
 if("serviceWorker" in navigator&&/^https?:/.test(location.protocol)){navigator.serviceWorker.register("sw-fields.js",{scope:"./newberry-fields.html"}).catch(()=>{})}
